@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1e2e, #2a2a3c);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff1a66;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-align: left;
+        }
+        .modal input, .modal textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        .modal button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>This Page is Under Maintenance</h1>
+        <p>We're making some updates. Please check back later!</p>
+        <button onclick="openRequestModal()">Request OTT Voucher Mod</button>
+    </div><div class="modal" id="requestModal">
+    <h2>Request OTT Voucher Mod</h2>
+    <input type="email" id="userEmail" placeholder="Your Email">
+    <textarea id="userMessage" placeholder="Your Message"></textarea>
+    <button onclick="sendRequest()">Send Request</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+        authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+        databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+        projectId: "itzhoyoo-f9f7e",
+        storageBucket: "itzhoyoo-f9f7e.appspot.com",
+        messagingSenderId: "1094792075584",
+        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+        measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    
+    window.openRequestModal = function() {
+        document.getElementById("requestModal").style.display = "block";
+    }
+
+    window.sendRequest = function() {
+        const email = document.getElementById("userEmail").value;
+        const message = document.getElementById("userMessage").value;
+        if (email && message) {
+            push(ref(database, "requestMessages"), {
+                email: email,
+                message: message,
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                document.getElementById("requestModal").style.display = "none";
+                alert("Your request has been sent successfully!");
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
