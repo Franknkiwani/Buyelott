@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Ad System</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0d0d0d;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .ad-container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(10, 10, 10, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            text-align: center;
+        }
+        h2 {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 3px solid cyan;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .countdown-button {
+            background: white;
+            color: black;
+            padding: 10px;
+            border: none;
+            cursor: not-allowed;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+        .visit-button {
+            background: lightgreen;
+            color: black;
+            padding: 10px;
+            border: 2px solid white;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .skip-button {
+            background: red;
+            color: black;
+            padding: 10px;
+            border: 2px solid white;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            display: none;
+        }
+        .description {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ad-container">
+        <h2>Sponsored Ad</h2>
+        <h3 id="ad-title">Loading...</h3>
+        <iframe id="ad-frame"></iframe>
+        <p class="description" id="ad-description">Loading...</p>
+        <div class="buttons">
+            <button id="countdown-btn" class="countdown-button">Loading...</button>
+            <button id="visit-btn" class="visit-button">Visit Ad</button>
+            <button id="skip-btn" class="skip-button">Skip Ad</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+        authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+        databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+        projectId: "itzhoyoo-f9f7e",
+        storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+        messagingSenderId: "1094792075584",
+        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+        measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    async function loadBestAd() {
+        const dbRef = ref(db, 'ads');
+        const snapshot = await get(child(dbRef, '/'));
+        
+        if (snapshot.exists()) {
+            const ads = Object.entries(snapshot.val()).filter(([id, ad]) => ad.views > 0);
+            if (ads.length === 0) {
+                document.getElementById("ad-title").innerText = "No Ads Available";
+                return;
+            }
+
+            // AI-based Ad Selection: Prioritize ads with most views left
+            ads.sort((a, b) => b[1].views - a[1].views);
+            const [adId, bestAd] = ads[0]; 
+
+            document.getElementById("ad-title").innerText = bestAd.title || "Sponsored Ad";
+            document.getElementById("ad-frame").src = bestAd.url;
+            document.getElementById("ad-description").innerText = bestAd.description || "Check out this ad!";
+            document.getElementById("visit-btn").onclick = () => window.open(bestAd.url, "_blank");
+
+            // Deduct a view from Firebase
+            update(ref(db, `ads/${adId}`), { views: bestAd.views - 1 });
+        } else {
+            document.getElementById("ad-title").innerText = "No Ads Available";
+        }
+    }
+
+    loadBestAd();
+
+    let countdown = 10;
+    const countdownBtn = document.getElementById("countdown-btn");
+    const skipBtn = document.getElementById("skip-btn");
+    countdownBtn.innerText = "Loading...";
+    
+    setTimeout(() => {
+        countdownBtn.innerText = countdown;
+        const interval = setInterval(() => {
+            countdown--;
+            countdownBtn.innerText = countdown;
+            if (countdown <= 0) {
+                clearInterval(interval);
+                countdownBtn.style.display = "none";
+                skipBtn.style.display = "block";
+            }
+        }, 1000);
+    }, 3000);
+
+    skipBtn.onclick = () => window.location.href = "index.html";
+</script>
+</body>
+</html>
