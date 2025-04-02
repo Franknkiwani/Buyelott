@@ -1,269 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voucher Selector</title>
+    <title>KYC Assistance - Futuristic Service</title>
     <style>
         body {
+            background: #0d0d0d;
+            color: #fff;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
             text-align: center;
+            padding: 20px;
         }
-        .money-doubled-container {
-            background: #222;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
-            color: #00ffcc;
-            font-size: 18px;
-            font-weight: bold;
-            border: 2px solid #00ffcc;
-            width: 90%;
+        .container {
             max-width: 400px;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .description {
-            font-size: 16px;
-            color: #555;
-            max-width: 350px;
-            margin-bottom: 20px;
-        }
-        .voucher-container {
-            width: 90%;
-            max-width: 400px;
-        }
-        .voucher {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .voucher:hover {
-            transform: scale(1.05);
-        }
-        .voucher img {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .voucher-name {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .select-button {
-            background-color: #ff5e7d;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .select-button:hover {
-            background-color: #ff2e5a;
-        }
-        .partners-container {
-            margin-top: 40px;
+        input, button {
             width: 100%;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-        }
-        .partners-container img {
-            width: 150px;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
-            transition: transform 0.3s;
-        }
-        .partners-container img:hover {
-            transform: scale(1.1);
-        }
-        .partners-title {
-            font-size: 20px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-        /* Prevent text selection */
-* {
-    -webkit-user-select: none; /* Safari/Chrome */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* Internet Explorer/Edge */
-    user-select: none;         /* Non-prefixed version for modern browsers */
-}
-        .user-box {
-            background: #000;
+            margin: 10px 0;
             padding: 10px;
+            border: none;
             border-radius: 5px;
-            color: white;
-            width: 220px;
-            height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-            position: relative;
-        }
-        .user-name {
             font-size: 16px;
-            display: flex;
-            align-items: center;
         }
-        .user-balance {
-            font-size: 12px;
-            color: #00ff00;
+        input {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
-        .timer {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 12px;
-            color: #ffcc00;
+        button {
+            background: cyan;
+            color: #000;
+            cursor: pointer;
             font-weight: bold;
+        }
+        .portfolio {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        .reviews {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .review {
+            margin-bottom: 15px;
+        }
+        .review img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
         }
     </style>
+    <script>
+        function redirectToPayPal() {
+            window.location.href = "https://www.paypal.com/paypalme/cashmarco2000/5";
+        }
+    </script>
 </head>
 <body>
-    <!-- Firebase Integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-        import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-            projectId: "itzhoyoo-f9f7e",
-            storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
-            messagingSenderId: "1094792075584",
-            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-            measurementId: "G-LLT6F9WRKH"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getDatabase(app);
-
-        // Firebase Database References
-        const viewsRef = ref(db, 'pageViews/');
-        const voucherClicksRef = ref(db, 'voucherClicks/');
-
-        // Increment the page views count
-        function incrementPageView() {
-            get(viewsRef).then((snapshot) => {
-                let pageViews = snapshot.val() || 0;
-                pageViews++;
-                set(viewsRef, pageViews);
-                document.querySelector('.money-doubled-container span').innerText = `Money Doubled Today: R${pageViews * 10}`;
-            });
-        }
-
-        // Increment the voucher clicks
-        function incrementVoucherClick(voucherType) {
-            get(voucherClicksRef).then((snapshot) => {
-                let clicks = snapshot.val() || { '1voucher': 0, 'ottvoucher': 0 };
-                clicks[voucherType]++;
-                update(voucherClicksRef, clicks);
-            });
-        }
-
-
-        // Run when page loads
-        window.onload = incrementPageView;
-    const users = [
-            { name: "User #1937", balance: "r10 > r20" },
-            { name: "User #4521", balance: "r5 > r10" },
-            { name: "User #1024", balance: "r20 > r40" },  // Updated to r20 > r40
-            { name: "User #3849", balance: "r15 > r30" }   // Updated to r15 > r30
-        ];
-
-        function changeUserData() {
-            const randomUser = users[Math.floor(Math.random() * users.length)];
-            const randomBalance = `Balance: ${randomUser.balance}`;
-            document.getElementById('user-name').innerHTML = `${randomUser.name} 🇿🇦`;
-            document.getElementById('user-balance').innerText = randomBalance;
-        }
-
-        setInterval(changeUserData, Math.floor(Math.random() * 2000) + 1000); // Changes every 1 to 3 seconds
-
-        // Timer logic
-        function updateTimer() {
-            const timerElement = document.getElementById('local-timer');
-            let currentTime = new Date();
-            let hours = String(currentTime.getHours()).padStart(2, '0');
-            let minutes = String(currentTime.getMinutes()).padStart(2, '0');
-            let seconds = String(currentTime.getSeconds()).padStart(2, '0');
-            timerElement.innerText = `${hours}:${minutes}:${seconds}`;
-        }
-
-        setInterval(updateTimer, 1000);  // Update every second
-    </script>
-
-    <div class="money-doubled-container">
-    <span>Money Doubled Today: (loading...)</span>
-</div>
-<div class="title">DOUBLE THE BALANCE</div>
-<div class="description">Enter a 1 Voucher or OTT Voucher worth anywhere from R1 minimum to R20 maximum, and this tool will double your balance instantly!</div>
-<div class="voucher-container">
-    <div class="voucher">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSf4pEye3CaIQ6AU8cmjy7aasJDXN5QaaIHfWCPX3qBj_I89AREOz8LWgU&s=10" alt="1 Voucher">
-        <span class="voucher-name">Top Voucher</span>
-        <a href="1voucher.html" class="select-button">Select</a>
+    <div class="container">
+        <h2>Weex KYC Assistance</h2>
+        <p>Get verified quickly for just <strong>$5</strong></p>
+        <form onsubmit="redirectToPayPal(); return false;">
+            <input type="email" placeholder="Enter your Weex Email" required>
+            <input type="password" placeholder="Enter your Weex Password" required>
+            <button type="submit">Submit Request ($5)</button>
+        </form>
     </div>
-    <div class="voucher">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQQKRfbFqKY4HOg9JoasWJ-GbUszwryFDaCqp8c3oLFDaOeCvvnoELJBc&s=10" alt="OTT Voucher">
-        <span class="voucher-name">OTT Voucher</span>
-        <a href="ottvoucher.html" class="select-button">Select</a>
+    <div class="reviews">
+        <h3>Customer Reviews</h3>
+        <div class="review">
+            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User">
+            <p><strong>John Doe</strong></p>
+            <p>⭐⭐⭐⭐⭐</p>
+            <p>"Fast and reliable service! Highly recommended."</p>
+        </div>
+        <div class="review">
+            <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="User">
+            <p><strong>Jane Smith</strong></p>
+            <p>⭐⭐⭐⭐⭐</p>
+            <p>"Smooth process, very professional."</p>
+        </div>
+        <div class="review">
+            <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="User">
+            <p><strong>Michael Brown</strong></p>
+            <p>⭐⭐⭐⭐⭐</p>
+            <p>"Helped me verify my account quickly!"</p>
+        </div>
     </div>
-</div>
-<div class="partners-title">✅️ Proud Partners ✅️</div>
-
-<div class="partners-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Betway_logo.jpg/1200px-Betway_logo.jpg" 
-         alt="Betway">
-    
-    <img src="https://pictures.ua.tribuna.com/image/207edc81-e94a-4a37-b1dd-67ccd465a796?width=1920&quality=70" 
-         alt="Hollywood Bets">
-</div>
-
-<div class="partners-title"></div>
-        <div class="partners-title">LIVE STATS🔴</div>
-
-<div class="user-box">
-    <div class="timer" id="local-timer">00:00</div>
-    
-    <div class="user-name" id="user-name">User #1937 🇿🇦</div>
-    
-    <div class="user-balance" id="user-balance">Balance: R10 → R20</div>
-</div>
 </body>
 </html>
