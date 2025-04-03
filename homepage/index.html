@@ -233,6 +233,58 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+  /* Full-Screen Overlay */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  /* Cyberpunk Popup Box */
+  .popup-content {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    text-align: center;
+    border: 2px solid cyan;
+    border-radius: 12px;
+    box-shadow: 0 0 15px cyan;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* Neon Button */
+  #login-btn {
+    background: cyan;
+    color: black;
+    border: none;
+    padding: 12px 24px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 15px;
+    box-shadow: 0 0 10px cyan, 0 0 40px cyan inset;
+    transition: all 0.3s ease;
+  }
+
+  #login-btn:hover {
+    background: white;
+    box-shadow: 0 0 20px cyan, 0 0 50px cyan inset;
+  }
+
+  /* Hide overlay when user is logged in */
+  .hidden {
+    display: none !important;
+  }
     </style>
 </head>
 <body>
@@ -261,12 +313,33 @@
         <!-- Spinner -->
         <div class="spinner"></div>
     </div>
+    
 <!-- Full-screen Loading Overlay (Hidden by Default) -->
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
 </div>
+<!-- Full-Screen Login Popup -->
+<div id="login-popup" class="overlay">
+  <div class="popup-content">
+    <h2>Access Denied</h2>
+    <p>You must be logged in to continue.</p>
+    <button id="login-btn">Login Now</button>
+  </div>
+</div>
+
+<!-- Profile Section -->
+<div id="profile">
+  <img id="profile-pic" alt="Profile Picture">
+  <h2 id="username">Loading...</h2>
+  <p id="balance">$0.00</p>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="loading-text">Loading...</div>
+</div>
     <!-- Firebase Configuration -->
-    <script type="module">
+  <script type="module">
   // Import Firebase SDKs
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -289,11 +362,13 @@
   const auth = getAuth(app);
   const db = getDatabase(app);
 
-  // Profile UI Elements
+  // UI Elements
   const profilePic = document.getElementById("profile-pic");
   const usernameDisplay = document.getElementById("username");
   const balanceDisplay = document.getElementById("balance");
   const loadingOverlay = document.getElementById("loading-overlay");
+  const loginPopup = document.getElementById("login-popup");
+  const loginBtn = document.getElementById("login-btn");
 
   // Set Default Profile Image
   profilePic.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwuD4JRpKGvduEMueIPikqvRVIFcY_B1SbraQ3rIhIa8miaqF4Jh7_LCto&s=10";
@@ -301,6 +376,7 @@
   // Check authentication state
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      loginPopup.style.display = "none"; // Hide login popup
       const userId = user.uid;
 
       // Fetch user data from Firebase Database
@@ -316,8 +392,13 @@
         console.error("Error fetching user data:", error);
       });
     } else {
-      console.error("No user logged in.");
+      loginPopup.style.display = "flex"; // Show login popup if not logged in
     }
+  });
+
+  // Redirect to Login Page when "Login Now" is clicked
+  loginBtn.addEventListener("click", () => {
+    window.location.href = "login.html";
   });
 
   // Add Click Event to Profile Picture (With Loading Screen)
@@ -325,10 +406,10 @@
     // Show the loading overlay
     loadingOverlay.classList.add("active");
 
-    // Wait 5 seconds, then redirect
+    // Wait 3 seconds, then redirect
     setTimeout(() => {
       window.location.href = "profile.html";
-    }, 5000);
+    }, 3000);
   });
 </script>
   </body>
