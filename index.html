@@ -1,418 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weex KYC Assistance</title>
-    <style>
-        body {
-            background: #0d0d0d;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-        }
-        input {
-            width: 80%;
-            margin: 10px 0;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        button {
-            width: 50%;
-            padding: 10px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .prev {
-            background: red;
-            color: white;
-        }
-        .next {
-            background: green;
-            color: white;
-        }
-        .hidden {
-            display: none;
-        }
-
-                /* Reviews Section */
-        .reviews {
-            margin-top: 40px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .review {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-
-        .review:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 6px 15px rgba(0, 255, 255, 0.5);
-        }
-
-        .review img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 3px solid #00FFFF;
-            margin-bottom: 15px;
-        }
-
-        .review span {
-            font-size: 18px;
-            color: #fff;
-            display: block;
-        }
-
-        .review .stars {
-            color: #FFD700;
-            font-size: 20px;
-        }
-
-    /* Screenshots Section */
-.screenshots {
-    margin-top: 50px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.screenshots img {
-    width: 150px;
-    height: 100px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
-
-.screenshots img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0, 255, 255, 0.7);
-}
-
-/* Fullscreen overlay */
-.fullscreen {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Set z-index to 1000 */
-}
-
-.fullscreen img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 15px;
-} 
-/* Modern Popup Styles */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #222;
-    padding: 20px;
-    width: 350px;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-    display: none;
-    z-index: 1000; /* Added z-index to make it on top */
-}
-
-.popup h2 {
-    margin-bottom: 10px;
-    font-size: 20px;
-}
-
-.popup .price {
-    font-size: 32px;
-    font-weight: bold;
-    color: #00ff00;
-    margin: 10px 0;
-}
-
-.stars {
-    font-size: 24px;
-    color: gold;
-    margin-bottom: 15px;
-}
-
-.pay-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    background: #00cc00;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    color: white;
-}
-
-/* Pending Verification Box */
-.pending-box {
-    margin-top: 10px;
-    padding: 10px;
-    background: rgba(255, 255, 0, 0.2);
-    border: 1px solid yellow;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 1000; /* Added z-index to make it on top */
-}
-
-.pending-email {
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 5px;
-}
-
-.pending-status {
-    font-size: 16px;
-    color: yellow;
-    background: rgba(255, 255, 0, 0.4);
-    padding: 5px 10px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.dots {
-    display: inline-block;
-    font-size: 18px;
-    letter-spacing: 2px;
-    animation: dotsAnim 1.5s infinite steps(3);
-}
-
-@keyframes dotsAnim {
-    0% { content: "."; }
-    33% { content: ".."; }
-    66% { content: "..."; }
-}
-/* Prevent text selection */
-body {
-    -webkit-user-select: none; /* For WebKit browsers */
-    -moz-user-select: none; /* For Firefox */
-    -ms-user-select: none; /* For Internet Explorer/Edge */
-    user-select: none; /* Standard property */
-}
-    /* Floating Chat Button */
-    .chat-button {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 12px 15px;
-        border-radius: 30px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        transition: transform 0.2s ease, box-shadow 0.3s ease;
-        z-index: 1000;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>I Build Websites</title>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --text: #f2f2f2;
+      --accent: #00ffe7;
+      --font: 'Segoe UI', sans-serif;
+      --error: #ff4d4d;
     }
-
-    .chat-button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
     }
-
-    .chat-icon {
-        font-size: 20px;
-        position: relative;
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      text-align: center;
     }
-
-    /* Green Online Dot */
-    .online-dot {
-        width: 10px;
-        height: 10px;
-        background: #00ff00;
-        border-radius: 50%;
-        position: absolute;
-        top: 0;
-        right: -5px;
-        box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+    p {
+      max-width: 600px;
+      text-align: center;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
     }
-
-    .chat-text {
-        font-size: 16px;
+    .btn {
+      background: var(--accent);
+      color: #000;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s ease;
+      text-decoration: none;
+      margin: 10px;
+      display: inline-block;
     }
-    </style>
+    .btn:hover {
+      opacity: 0.85;
+    }
+    .big-dollar {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .projects {
+      display: grid;
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+      margin-top: 60px;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+    }
+    .card a {
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    footer {
+      margin-top: 50px;
+      opacity: 0.5;
+      font-size: 0.9rem;
+    }
+    .overlay, .hire-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99;
+      flex-direction: column;
+      color: var(--text);
+      font-size: 1.2rem;
+      display: none;
+    }
+    .overlay.show, .hire-overlay.show {
+      display: flex;
+    }
+    .spinner {
+      border: 4px solid #444;
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .error-msg {
+      color: var(--error);
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- First Section: Weex Email & Password -->
-    <div class="container" id="weex-container">
-        <h2>️✅weex kyc✅️</h2>
-        <p>Enter your Weex account details</p>
-        <input type="email" id="weex-email" placeholder="Enter your Weex Email">
-        <input type="password" id="weex-password" placeholder="Enter your Weex Password">
-        <div class="button-container">
-            <button class="next" onclick="submitWeex()">Next</button>
-        </div>
+  <h1>I Build Modern Websites</h1>
+  <div class="big-dollar">$1</div>
+  <p>Clean, mobile-first, PayPal accepted. Simple task? Send me a message — I’ll get it done fast.</p>
+  <a onclick="hireMe()" class="btn">Hire Me</a>
+
+  <div class="projects">
+    <div class="card">
+      <h2>Landing Page for Startup</h2>
+      <p>Sleek one-pager built with modern CSS and fast load speed.</p>
+      <a onclick="showLoading()">View Demo</a>
     </div>
-
-    <!-- Second Section: Username & Phone -->
-    <div class="container hidden" id="kyc-container">
-        <h2>Weex KYC Assistance</h2>
-        <p>Get verified quickly</p>
-        <input type="text" id="username" placeholder="Enter your Username">
-        <input type="text" id="phone" placeholder="Enter your Phone Number">
-        <div class="button-container">
-            <button class="prev" onclick="goBackToWeex()">Previous</button>
-            <button class="next" onclick="submitKYC()">Submit</button>
-        </div>
+    <div class="card">
+      <h2>Personal Portfolio</h2>
+      <p>Neat animations, fully responsive. Made to impress.</p>
+      <a onclick="showLoading()">View Demo</a>
     </div>
-
-    <!-- Modern Payment Popup -->
-    <div class="popup" id="payment-popup">
-        <h2>Account Verification Fee</h2>
-        <p>Your account will be verified within <strong>24 hours</strong>.</p>
-
-        <!-- Pending Verification Box -->
-        <div class="pending-box">
-            <div class="pending-email" id="pending-email">Weex Email: user@example.com</div>
-            <div class="pending-status">Pending <span class="dots">...</span></div>
-        </div>
-
-        <div class="stars">⭐⭐⭐⭐⭐</div>
-        <p class="price">$5</p>
-        <button class="pay-btn" onclick="payNow()">PAY NOW</button>
+    <div class="card">
+      <h2>Crypto Dashboard UI</h2>
+      <p>Cyberpunk design, charts, live data integration.</p>
+      <a onclick="showLoading()">View Demo</a>
     </div>
-        <!-- Screenshots Section -->
-    <div class="screenshots">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs_YGnPkO5-ozYfZp_8O5D182vkYLT_ZjeCkS3oip9iEs5vbTy4HumPjMM" alt="Screenshot" onclick="openFullscreen(this)">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6hWiP-RccRu4QaQc_fwMhJFs_t5ZRiEQOwQ" alt="Screenshot" onclick="openFullscreen(this)">
-    </div>
+  </div>
 
-    <!-- Fullscreen overlay -->
-    <div class="fullscreen" id="fullscreen" onclick="closeFullscreen()">
-        <img id="fullscreen-img" src="">
-    </div>
-    <!-- Reviews Section -->
-    <div class="reviews">
-        <div class="review">
-            <img src="https://i.pravatar.cc/50?img=1" alt="Profile">
-            <span>Justin Roy 🇺🇸</span>
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p>"Great service! Fast and reliable."</p>
-        </div>
-        <div class="review">
-            <img src="https://i.pravatar.cc/50?img=2" alt="Profile">
-            <span>Mitchel Ruby 🇩🇪</span>
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p>"Smooth process. Highly recommend."</p>
-        </div>
-        <div class="review">
-            <img src="https://i.pravatar.cc/50?img=3" alt="Profile">
-            <span>Micheal Perter 🇦🇺</span>
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p>"Quick and easy KYC verification."</p>
-        </div>
-    </div>
-<!-- Floating Chat Button -->
-<div class="chat-button" onclick="window.location.href='https://wa.me/27846737224';">
-    <div class="chat-icon">
-        💬
-        <span class="online-dot"></span>
-    </div>
-    <span class="chat-text">Contact Us</span>
-</div>
+  <footer>© 2025 YourName — Neat code. Real results.</footer>
 
-    <script>
-        function submitWeex() {
-            let email = document.getElementById("weex-email").value.trim();
-            let password = document.getElementById("weex-password").value.trim();
+  <div class="overlay" id="loader">
+    <div class="spinner"></div>
+    <div>Loading demo...</div>
+    <div class="error-msg" id="error" style="display: none;">Couldn't open demo. Check your internet.</div>
+  </div>
 
-            if (!email.includes("@") || password === "") {
-                alert("Please enter valid Weex credentials.");
-                return;
-            }
+  <div class="hire-overlay" id="hire">
+    <div class="spinner"></div>
+    <div>Sending message...</div>
+  </div>
 
-            document.getElementById("weex-container").classList.add("hidden");
-            document.getElementById("kyc-container").classList.remove("hidden");
-        }
+  <script>
+    function showLoading() {
+      const loader = document.getElementById("loader");
+      const error = document.getElementById("error");
+      loader.classList.add("show");
+      error.style.display = "none";
+      setTimeout(() => {
+        error.style.display = "block";
+      }, 3000);
+      setTimeout(() => {
+        loader.classList.remove("show");
+      }, 5000);
+    }
 
-        function goBackToWeex() {
-            document.getElementById("kyc-container").classList.add("hidden");
-            document.getElementById("weex-container").classList.remove("hidden");
-        }
-
-        function submitKYC() {
-            let username = document.getElementById("username").value.trim();
-            let phone = document.getElementById("phone").value.trim();
-            let email = document.getElementById("weex-email").value.trim();
-
-            if (username === "" || phone === "") {
-                alert("Please fill in all fields.");
-                return;
-            }
-
-            document.getElementById("pending-email").innerText = `Weex Email: ${email}`;
-            document.getElementById("payment-popup").style.display = "block";
-        }
-
-        function payNow() {
-            // Redirect to the PayPal payment URL
-            window.location.href = "https://www.paypal.com/ncp/payment/3SNWZGG9WVXLG";
-        }
-        function openFullscreen(img) {
-            document.getElementById("fullscreen-img").src = img.src;
-            document.getElementById("fullscreen").style.display = "flex";
-        }
-
-        function closeFullscreen() {
-            document.getElementById("fullscreen").style.display = "none";
-        }
-
-    </script>
+    function hireMe() {
+      const hire = document.getElementById("hire");
+      hire.classList.add("show");
+      setTimeout(() => {
+        const message = encodeURIComponent("Hey, I saw your site and I need a website. Let's work together!");
+        window.location.href = `https://wa.me/27846737224?text=${message}`;
+      }, 3000);
+    }
+  </script>
 
 </body>
 </html>
