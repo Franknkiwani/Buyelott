@@ -3,184 +3,366 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>I Build Websites</title>
+  <title>Presley AI</title>
   <style>
     :root {
-      --bg: #0d0d0d;
-      --text: #f2f2f2;
-      --accent: #00ffe7;
-      --font: 'Segoe UI', sans-serif;
-      --error: #ff4d4d;
+      --bg: #000;
+      --card: #111;
+      --text: #fff;
+      --accent: #1f1f1f;
+      --border: #2a2a2a;
+      --neon: #0ff;
+      --neon-red: #ff0040;
+      --green: #00ff00;
     }
-    body {
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
       background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      min-height: 100vh;
     }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: var(--accent);
-      text-align: center;
-    }
-    p {
-      max-width: 600px;
-      text-align: center;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      margin-bottom: 30px;
-    }
-    .btn {
-      background: var(--accent);
-      color: #000;
-      padding: 12px 28px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: 0.2s ease;
-      text-decoration: none;
-      margin: 10px;
-      display: inline-block;
-    }
-    .btn:hover {
-      opacity: 0.85;
-    }
-    .big-dollar {
-      font-size: 4rem;
-      font-weight: bold;
-      color: #fff;
-      margin-bottom: 20px;
-    }
-    .projects {
-      display: grid;
-      gap: 20px;
-      max-width: 900px;
+
+    .container {
+      flex: 1;
       width: 100%;
-      margin-top: 60px;
     }
-    .card {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid var(--accent);
-    }
-    .card h2 {
-      margin: 0 0 10px;
-    }
-    .card a {
-      color: var(--accent);
-      text-decoration: none;
-      cursor: pointer;
-    }
-    footer {
-      margin-top: 50px;
-      opacity: 0.5;
-      font-size: 0.9rem;
-    }
-    .overlay, .hire-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
+
+    .neon-header {
+      width: 90%;
+      margin: 2rem auto 1rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(145deg, #0a0a0a, #111);
+      border-radius: 20px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      z-index: 99;
-      flex-direction: column;
-      color: var(--text);
-      font-size: 1.2rem;
-      display: none;
+      box-shadow:
+        0 0 10px var(--neon),
+        0 0 20px var(--neon),
+        0 0 30px var(--neon),
+        0 0 40px var(--neon);
+      border: 1px solid var(--neon);
     }
-    .overlay.show, .hire-overlay.show {
-      display: flex;
+
+    .header-label {
+      font-size: 0.9rem;
+      color: var(--neon);
+      font-weight: 500;
     }
-    .spinner {
-      border: 4px solid #444;
-      border-top: 4px solid var(--accent);
+
+    .profile-icon {
+      width: 35px;
+      height: 35px;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+      background: url('https://i.imgur.com/3GvwNBf.png') center/cover no-repeat;
+      box-shadow:
+        0 0 8px var(--neon-red),
+        0 0 15px var(--neon-red),
+        inset 0 0 5px var(--neon-red);
+      border: 1px solid var(--neon-red);
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-    .error-msg {
-      color: var(--error);
-      font-weight: bold;
-      margin-top: 10px;
-    }
+
+    /* Slideshow styles */
+    .slideshow-container {
+  width: 80%;
+  margin: 10rem auto 2rem auto; /* Top margin increased */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slide {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 1500;
+  object-fit: cover;
+  border-radius: 20px;
+  transition: opacity 1s ease-in-out;
+}
+
+.active {
+  display: block;
+}
+
+/* Hidden utility class */
+.hidden {
+  display: none !important;
+}
+
+/* Upload section */
+.upload-section {
+  width: 80%;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.upload-btn {
+  background: var(--neon);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  box-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
+  font-size: 1.2rem;
+  color: black;
+}
+
+.upload-btn:hover {
+  background: var(--neon-red);
+}
+
+/* General popup container style (for both popups) */
+.popup-info,
+.popup-upload {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Info Popup content (How it works popup) */
+.popup-content {
+  background: #111;
+  color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 0 20px rgba(0, 255, 213, 0.4);
+  font-family: 'Segoe UI', sans-serif;
+  position: relative;
+  text-align: left;
+}
+
+.popup-content h2 {
+  margin-top: 0;
+  text-align: center;
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  color: #00ffd5;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Steps inside info popup */
+.step {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.icon {
+  font-size: 24px;
+  margin-right: 12px;
+  margin-top: 4px;
+}
+
+/* Upload confirmation popup box */
+.popup-box {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 0 30px rgba(255,255,255,0.1);
+  width: 90%;
+  max-width: 350px;
+  text-align: center;
+}
+
+.popup-box h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.cost {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--green);
+}
+.text strong {
+  font-size: 1rem;
+  display: block;
+  color: #fff;
+  margin-bottom: 4px;
+}
   </style>
 </head>
 <body>
 
-  <h1>I Build Modern Websites</h1>
-  <div class="big-dollar">$1</div>
-  <p>i will build you clean modern website or app of your choice and get it done same day pay after you see the results.</p>
-  <a onclick="hireMe()" class="btn">Hire Me</a>
+<!-- Header -->
+<div class="neon-header">
+  <span class="header-label">PRESLEY AI</span>
+  <div class="profile-icon" onclick="document.getElementById('profile-popup').style.display = 'block';"></div>
+</div>
 
-  <div class="projects">
-    <div class="card">
-      <h2>Landing Page for Startup</h2>
-      <p>Sleek one-pager built with modern CSS and fast load speed.</p>
-      <a onclick="showLoading()">View Demo</a>
+<!-- Info Popup -->
+<div id="profile-popup" class="popup-info">
+  <div class="popup-content">
+    <span class="close-btn" onclick="document.getElementById('profile-popup').style.display = 'none';">&times;</span>
+    <h2>How It Works</h2>
+
+    <div class="step">
+      <span class="icon">📤</span>
+      <div class="text">
+        <strong>UPLOAD YOUR PIC</strong>
+        <p>Select a photo you want cartooned.</p>
+      </div>
     </div>
-    <div class="card">
-      <h2>Personal Portfolio</h2>
-      <p>Neat animations, fully responsive. Made to impress.</p>
-      <a onclick="showLoading()">View Demo</a>
+
+    <div class="step">
+      <span class="icon">🎨</span>
+      <div class="text">
+        <strong>CARTOON SENT TO EMAIL/WHATSAPP</strong>
+        <p>You get your cartoon version delivered directly to your inbox or WhatsApp.</p>
+      </div>
     </div>
-    <div class="card">
-      <h2>Crypto Dashboard UI</h2>
-      <p>Cyberpunk design, charts, live data integration.</p>
-      <a onclick="showLoading()">View Demo</a>
+
+    <div class="step">
+      <span class="icon">💸</span>
+      <div class="text">
+        <strong>R2 PER PIC</strong>
+        <p>Each cartoon costs only R2, paid after it's created.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="icon">🤔</span>
+      <div class="text">
+        <strong>HOW TO PAY</strong>
+        <p>Pay using 1Voucher or Betway Voucher.</p>
+      </div>
     </div>
   </div>
+</div>
 
-  <footer>© 2025 WEBMASTERS — HTML WEBSITES. Real results.</footer>
+<!-- Upload Section -->
+<div class="upload-section">
+  <h2>Upload Your Photo</h2>
+  <button class="upload-btn" id="uploadBtn" aria-label="Upload your photo to be cartooned">Cartoon Me Now</button>
+</div>
 
-  <div class="overlay" id="loader">
-    <div class="spinner"></div>
-    <div>Loading demo...</div>
-    <div class="error-msg" id="error" style="display: none;">Couldn't open demo. Check your internet.</div>
+<!-- Slideshow of robot images -->
+<div class="slideshow-container">
+  <img class="slide active" src="https://i.ibb.co/jvdNNJS8/In-Shot-20250406-230739434.jpg" alt="Robot 1">
+  <img class="slide" src="https://i.ibb.co/fGM6GX8F/In-Shot-20250406-230835206.jpg" alt="Robot 2">
+</div>
+
+<!-- Upload Confirmation Popup -->
+<div class="popup-upload hidden" id="popup">
+  <div class="popup-box">
+    <h2>Uploaded!</h2>
+    <p>Your photo is being cartooned.</p>
+    <p>It will be sent to your WhatsApp or email.</p>
+    <p class="cost">Cost: R2 per image</p>
   </div>
+</div>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  <div class="hire-overlay" id="hire">
-    <div class="spinner"></div>
-    <div>Sending message...</div>
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
 
-  <script>
-    function showLoading() {
-      const loader = document.getElementById("loader");
-      const error = document.getElementById("error");
-      loader.classList.add("show");
-      error.style.display = "none";
-      setTimeout(() => {
-        error.style.display = "block";
-      }, 3000);
-      setTimeout(() => {
-        loader.classList.remove("show");
-      }, 5000);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Slideshow logic
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlides() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === slideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      slideIndex = (slideIndex + 1) % slides.length;
     }
 
-    function hireMe() {
-      const hire = document.getElementById("hire");
-      hire.classList.add("show");
-      setTimeout(() => {
-        const message = encodeURIComponent("Hey, I saw your site and I need a website. Let's work together!");
-        window.location.href = `https://wa.me/27846737224?text=${message}`;
-      }, 3000);
-    }
+    setInterval(showSlides, 3000); // Change every 3 seconds
+
+    // Upload Button Logic
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.addEventListener('click', async () => {
+      // Open Bytescale Upload Widget
+      const options = {
+        apiKey: "public_G22nhfV9sQDzsAtqBZZQJ32uUigV", // Your API key
+        maxFileCount: 1
+      };
+
+      Bytescale.UploadWidget.open(options).then(
+        async (files) => {
+          const fileUrls = files.map(x => x.fileUrl).join("\n");
+          if (fileUrls) {
+            try {
+              const userRef = push(ref(db, "PresleyAI"));
+              await set(userRef, {
+                email: "user@example.com", // Replace with actual user email
+                phone: "1234567890", // Replace with actual phone number
+                imageUrl: fileUrls,
+                uploadedAt: new Date().toISOString(),
+              });
+
+              // Show upload popup
+              const popup = document.getElementById('popup');
+              popup.classList.remove('hidden');
+
+              // Simulate a cartoon transformation process
+              setTimeout(() => {
+                alert("YOUR CARTOONED IMAGE WILL BE READY AND SENT AFTER YOU SUBMIT THE 1 VOUCHER CODE.");
+                popup.classList.add('hidden');
+              }, 5000); // Simulate processing time (5 seconds)
+            } catch (error) {
+              alert("Error: " + error.message);
+            }
+          } else {
+            alert("No file selected.");
+          }
+        },
+        (error) => {
+          alert("Error: " + error.message);
+        }
+      );
+    });
   </script>
 
+  <!-- Bytescale SDK -->
+  <script src="https://js.bytescale.com/upload-widget/v4"></script>
 </body>
 </html>
