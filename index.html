@@ -1,368 +1,672 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Presley AI</title>
+  <meta charset="UTF-8">
+  <title>DLS Champions League</title>
   <style>
-    :root {
-      --bg: #000;
-      --card: #111;
-      --text: #fff;
-      --accent: #1f1f1f;
-      --border: #2a2a2a;
-      --neon: #0ff;
-      --neon-red: #ff0040;
-      --green: #00ff00;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      color: var(--text);
-      font-family: 'Segoe UI', sans-serif;
-    }
-
     body {
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: Arial, sans-serif;
     }
 
-    .container {
-      flex: 1;
+          header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 15px;
+  background-color: #000;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, blue, cyan) 1;
+
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .circle {
+      background-color: yellow;
+      color: black;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 5px;
+      font-size: 14px;
+    }
+
+    .league-text {
+      font-size: 16px;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .glass-btn {
+      backdrop-filter: blur(6px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      padding: 5px 10px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    #fixtureContainer,
+    #tableContainer {
+      margin: 15px auto;
+      max-width: 300px;
+      background-color: #111;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+
+    #staticPrevBtn {
+      display: block;
+      margin: 0 auto 15px;
+      max-width: 300px;
+    }
+
+    #fixtureContainer span {
+      font-size: 14px;
+    }
+
+    .match-team {
+      color: white;
+      font-weight: bold;
+    }
+
+    .match-vs {
+      color: cyan;
+    }
+
+    .match-status {
+      color: lime;
+    }
+
+    .match-score {
+      color: gray;
+    }
+
+    .match-info {
+      text-align: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background-color: #222;
+    }
+
+    .match-info .score {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .winning-team {
+      color: green;
+    }
+
+    .losing-team {
+      color: red;
+    }
+
+    .team-owner {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .time-ago {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 16px;
+      color: white;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 6px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .leaderboard-table th {
+      border-bottom: 1px solid #444;
+      color: cyan;
+    }
+
+    .leaderboard-table td {
+      border-bottom: 1px solid #222;
+    }
+
+    .username {
+      color: gray;
+      font-size: 12px;
+    }
+
+    .points {
+      text-align: right;
+      color: yellow;
+    }
+
+    .prev-fixtures-btn {
+      background: linear-gradient(90deg, #007cf0, #00dfd8);
+      color: black;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
       width: 100%;
     }
 
-    .neon-header {
-      width: 90%;
-      margin: 2rem auto 1rem;
-      padding: 1rem 2rem;
-      background: linear-gradient(145deg, #0a0a0a, #111);
-      border-radius: 20px;
-      display: flex;
-      justify-content: space-between;
+    .prev-fixtures-btn:hover {
+      opacity: 0.85;
+    }
+
+    #popupOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
       align-items: center;
-      box-shadow:
-        0 0 10px var(--neon),
-        0 0 20px var(--neon),
-        0 0 30px var(--neon),
-        0 0 40px var(--neon);
-      border: 1px solid var(--neon);
+      justify-content: center;
+      z-index: 1000;
     }
 
-    .header-label {
-      font-size: 0.9rem;
-      color: var(--neon);
-      font-weight: 500;
+    #popupContent {
+      background-color: #111;
+      padding: 15px;
+      border-radius: 8px;
+      width: 90%;
+      height: 90%;
+      overflow-y: auto;
+      border: 1px solid #333;
+      box-sizing: border-box;
     }
 
-    .profile-icon {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background: url('https://i.imgur.com/3GvwNBf.png') center/cover no-repeat;
-      box-shadow:
-        0 0 8px var(--neon-red),
-        0 0 15px var(--neon-red),
-        inset 0 0 5px var(--neon-red);
-      border: 1px solid var(--neon-red);
+    #popupContent h3 {
+      text-align: center;
+      color: cyan;
+      margin-top: 0;
     }
 
-    /* Slideshow styles */
-    .slideshow-container {
-  width: 80%;
-  margin: 10rem auto 2rem auto; /* Top margin increased */
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.slide {
-  display: none;
-  position: absolute;
-  width: 100%;
-  height: 1500;
-  object-fit: cover;
-  border-radius: 20px;
-  transition: opacity 1s ease-in-out;
-}
-
-.active {
-  display: block;
-}
-
-/* Hidden utility class */
-.hidden {
-  display: none !important;
-}
-
-/* Upload section */
-.upload-section {
-  width: 80%;
-  margin-top: 3rem;
+    .closePopup {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      float: right;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .section-title {
   text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #fff;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, blue, cyan) 1;
+  padding-bottom: 5px;
 }
 
-.upload-btn {
-  background: var(--neon);
-  border: none;
-  padding: 1rem 2rem;
+.leaderboard-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  background-color: #111;
+  color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.leaderboard-table thead {
+  background: linear-gradient(to right, #0d47a1, #1976d2);
+}
+
+.leaderboard-table th {
+  padding: 10px;
+  text-align: left;
+  color: #fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.leaderboard-table tbody tr {
+  background-color: #222;
   border-radius: 8px;
-  cursor: pointer;
-  margin-top: 1rem;
-  box-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
-  font-size: 1.2rem;
-  color: black;
+  transition: transform 0.2s ease;
 }
 
-.upload-btn:hover {
-  background: var(--neon-red);
+.leaderboard-table tbody tr:hover {
+  transform: translateY(-2px);
+  background-color: #333;
 }
 
-/* General popup container style (for both popups) */
-.popup-info,
-.popup-upload {
+.leaderboard-table td {
+  padding: 12px 10px;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+/* Highlight positions cleanly */
+.leaderboard-table td:first-child {
+  font-weight: bold;
+}
+
+/* Colors for top 3 */
+.leaderboard-table tbody tr:first-child td:first-child {
+  color: gold;
+}
+
+.leaderboard-table tbody tr:nth-child(2) td:first-child {
+  color: silver;
+}
+
+.leaderboard-table tbody tr:nth-child(3) td:first-child {
+  color: #cd7f32; /* Bronze */
+}
+
+.leaderboard-table ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  list-style: disc;
+}
+
+.leaderboard-table ul li {
+  margin-bottom: 3px;
+}
+
+/* Fullscreen loading screen */
+#loadingScreen {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
 
-/* Info Popup content (How it works popup) */
-.popup-content {
-  background: #111;
-  color: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 0 20px rgba(0, 255, 213, 0.4);
-  font-family: 'Segoe UI', sans-serif;
-  position: relative;
-  text-align: left;
-}
-
-.popup-content h2 {
-  margin-top: 0;
-  text-align: center;
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  color: #00ffd5;
-}
-
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  color: #888;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-/* Steps inside info popup */
-.step {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.icon {
-  font-size: 24px;
-  margin-right: 12px;
-  margin-top: 4px;
-}
-
-/* Upload confirmation popup box */
-.popup-box {
-  background: var(--card);
-  padding: 2rem;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: 0 0 30px rgba(255,255,255,0.1);
-  width: 90%;
-  max-width: 350px;
+/* Loader container */
+.loader-container {
   text-align: center;
 }
 
-.popup-box h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+/* Soccer ball spinner */
+.soccer-ball {
+  width: 80px;
+  height: 80px;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
+  background-size: cover;
+  animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
+  border-radius: 50%;
 }
 
-.cost {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--green);
+/* Spin animation */
+@keyframes spinBall {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-.text strong {
-  font-size: 1rem;
-  display: block;
-  color: #fff;
-  margin-bottom: 4px;
+
+/* Glow pulse animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff007f, 0 0 30px #ff9900;
+  }
+  50% {
+    box-shadow: 0 0 20px #ff007f, 0 0 30px #00ffff, 0 0 40px #00ff00;
+  }
+}
+
+/* Loading text */
+.loading-text {
+  margin-top: 12px;
+  color: white;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+}
+
+/* Hide animation */
+#loadingScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Disable text selection on the entire page */
+* {
+  user-select: none;
 }
   </style>
 </head>
 <body>
+  <header>
+    <div class="logo">
+      <div class="circle">DLS</div>
+      <div class="league-text">CHAMPIONS LEAGUE</div>
+    </div>
+    <div class="header-buttons">
+      <a href="myteam.html">
+    <button class="glass-btn">My Team</button>
+</a>
+  </header>
+  
+  <div class="section-title">Upcoming Fixtures</div>
+  <div id="fixtureContainer"></div>
+  <button id="staticPrevBtn" class="prev-fixtures-btn">Previous Fixtures</button>
 
-<!-- Header -->
-<div class="neon-header">
-  <span class="header-label">PRESLEY AI</span>
-  <div class="profile-icon" onclick="document.getElementById('profile-popup').style.display = 'block';"></div>
+  <!-- Container for countdown + title -->
+<div style="text-align: center; margin-bottom: 15px;">
+  <div id="seasonCountdown" style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">
+    Season ends in: <span id="countdownTimer">Loading...</span>
+  </div>
+  <div class="section-title">League Table (Top 10)</div>
 </div>
+  <div id="tableContainer"></div>
 
-<!-- Info Popup -->
-<div id="profile-popup" class="popup-info">
-  <div class="popup-content">
-    <span class="close-btn" onclick="document.getElementById('profile-popup').style.display = 'none';">&times;</span>
-    <h2>How It Works</h2>
-
-    <div class="step">
-      <span class="icon">📤</span>
-      <div class="text">
-        <strong>UPLOAD YOUR PIC</strong>
-        <p>Select a photo you want cartooned.</p>
-      </div>
+  <div id="popupOverlay">
+    <div id="popupContent">
+      <button class="closePopup">Close</button>
+      <h3>Previous Fixtures</h3>
+      <div id="previousFixturesContent" style="margin-top:10px;"></div>
     </div>
-
-    <div class="step">
-      <span class="icon">🎨</span>
-      <div class="text">
-        <strong>CARTOON SENT TO EMAIL/WHATSAPP</strong>
-        <p>You get your cartoon version delivered directly to your inbox or WhatsApp.</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <span class="icon">💸</span>
-      <div class="text">
-        <strong>R2 PER PIC</strong>
-        <p>Each cartoon costs only R2, paid after it's created.</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <span class="icon">🤔</span>
-      <div class="text">
-        <strong>HOW TO PAY</strong>
-        <p>Pay using 1Voucher or Betway Voucher.</p>
-      </div>
-    </div>
+  </div>
+<div style="text-align: center; margin-top: 25px;">
+  <div class="section-title">Prizes for Top 3 Winners</div>
+  <table style="margin: 0 auto; border-collapse: collapse; width: 90%; max-width: 400px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background-color: #222;">
+        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Position</th>
+        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Reward</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 8px; color: yellow;">1st Place</td>
+        <td style="padding: 8px; color: white;">Season Trophy + Shoutout + 1 Year DLS Champions League Premium</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; color: silver;">2nd Place</td>
+        <td style="padding: 8px; color: white;">Silver Trophy + Shoutout</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; color: #cd7f32;">3rd Place</td>
+        <td style="padding: 8px; color: white;">Shoutout</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="loader-container">
+    <div class="soccer-ball"></div>
+    <div class="loading-text">Loading season...</div>
   </div>
 </div>
 
-<!-- Upload Section -->
-<div class="upload-section">
-  <h2>Upload Your Photo</h2>
-  <button class="upload-btn" id="uploadBtn" aria-label="Upload your photo to be cartooned">Cartoon Me Now</button>
-</div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-<!-- Slideshow of robot images -->
-<div class="slideshow-container">
-  <img class="slide active" src="https://i.ibb.co/jvdNNJS8/In-Shot-20250406-230739434.jpg" alt="Robot 1">
-  <img class="slide" src="https://i.ibb.co/fGM6GX8F/In-Shot-20250406-230835206.jpg" alt="Robot 2">
-</div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-<!-- Upload Confirmation Popup -->
-<div class="popup-upload hidden" id="popup">
-  <div class="popup-box">
-    <h2>Uploaded!</h2>
-    <p>Your photo is being cartooned.</p>
-    <p>It will be sent to your WhatsApp or email.</p>
-    <p class="cost">Cost: R2 per image</p>
-  </div>
-</div>
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  const fixtureContainer = document.getElementById('fixtureContainer');
+  const popupOverlay = document.getElementById('popupOverlay');
+  const popupContent = document.getElementById('previousFixturesContent');
+  const closePopupBtn = document.querySelector('.closePopup');
+  const staticPrevBtn = document.getElementById('staticPrevBtn');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  staticPrevBtn.addEventListener('click', openPreviousFixtures);
+  closePopupBtn.addEventListener('click', () => {
+    popupOverlay.style.display = 'none';
+  });
 
-    // Slideshow logic
-    let slideIndex = 0;
-    const slides = document.querySelectorAll('.slide');
+  // === SEASON COUNTDOWN ===
+  const countdownContainer = document.getElementById('seasonCountdown');
+  let countdownInterval;
 
-    function showSlides() {
-      slides.forEach((slide, index) => {
-        slide.classList.remove('active');
-        if (index === slideIndex) {
-          slide.classList.add('active');
-        }
-      });
-      slideIndex = (slideIndex + 1) % slides.length;
+  onValue(ref(db, 'seasonends'), (snapshot) => {
+    const endTime = snapshot.val();
+    if (!endTime) {
+      countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
+      clearInterval(countdownInterval);
+      return;
     }
 
-    setInterval(showSlides, 3000); // Change every 3 seconds
+    const endDate = new Date(endTime);
 
-    // Upload Button Logic
-    const uploadBtn = document.getElementById('uploadBtn');
-    uploadBtn.addEventListener('click', async () => {
-      // Open Bytescale Upload Widget
-      const options = {
-        apiKey: "public_G22nhfV9sQDzsAtqBZZQJ32uUigV", // Your API key
-        maxFileCount: 1
-      };
+    clearInterval(countdownInterval);
+    updateCountdown(endDate); // Initial call
+    countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
+  });
 
-      Bytescale.UploadWidget.open(options).then(
-        async (files) => {
-          const fileUrls = files.map(x => x.fileUrl).join("\n");
-          if (fileUrls) {
-            try {
-              const userRef = push(ref(db, "PresleyAI"));
-              await set(userRef, {
-                email: "user@example.com", // Replace with actual user email
-                phone: "1234567890", // Replace with actual phone number
-                imageUrl: fileUrls,
-                uploadedAt: new Date().toISOString(),
-              });
+  function updateCountdown(endDate) {
+    const now = new Date();
+    const diff = endDate - now;
+    if (diff <= 0) {
+      countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
+      clearInterval(countdownInterval);
+      return;
+    }
 
-              // Show upload popup
-              const popup = document.getElementById('popup');
-              popup.classList.remove('hidden');
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
 
-              // Simulate a cartoon transformation process
-              setTimeout(() => {
-                alert("YOUR CARTOONED IMAGE WILL BE READY AND SENT AFTER YOU SUBMIT THE 1 VOUCHER CODE.");
-                popup.classList.add('hidden');
-              }, 5000); // Simulate processing time (5 seconds)
-            } catch (error) {
-              alert("Error: " + error.message);
-            }
-          } else {
-            alert("No file selected.");
-          }
-        },
-        (error) => {
-          alert("Error: " + error.message);
-        }
-      );
+    countdownContainer.innerHTML = `
+      Season ends in <span style="color:#007bff;">
+      ${days}d ${hours}h ${minutes}m ${seconds}s
+      </span>
+    `;
+  }
+
+  // === Load previous fixtures ===
+  onValue(ref(db, 'previousfixtures'), (snapshot) => {
+    const previousFixtures = snapshot.val();
+    if (!previousFixtures) {
+      popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
+      return;
+    }
+    let content = '';
+    Object.values(previousFixtures).forEach(match => {
+      const matchDate = new Date(match.date);
+      const timeAgo = getTimeAgo(matchDate);
+
+      content += `
+        <div class="match-info">
+          <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
+          <div class="match-vs">VS</div>
+          <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
+          <div class="score">
+            <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
+            <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
+          </div>
+          <div class="time-ago">Ended ${timeAgo}</div>
+        </div>
+      `;
     });
-  </script>
+    popupContent.innerHTML = content;
+  });
 
-  <!-- Bytescale SDK -->
-  <script src="https://js.bytescale.com/upload-widget/v4"></script>
+  // === Load upcoming fixture ===
+  onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
+    const upcomingFixtures = snapshot.val();
+    if (!upcomingFixtures) {
+      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+      return;
+    }
+
+    const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
+      key,
+      ...fixture
+    }));
+
+    const now = new Date();
+    const validFixtures = [];
+
+    fixtureList.forEach(fixture => {
+      const fixtureDate = new Date(fixture.date);
+      if (fixtureDate >= now) {
+        validFixtures.push(fixture);
+      } else {
+        // Delete expired fixture
+        remove(ref(db, `upcomingfixtures/${fixture.key}`));
+      }
+    });
+
+    if (validFixtures.length === 0) {
+      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+      return;
+    }
+
+    validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const nextFixture = validFixtures[0];
+
+    const fixtureContent = `
+      <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px;">
+        <div class="match-team">${nextFixture.teamA} <span class="team-owner">@${nextFixture.ownerA}</span></div>
+        <div class="match-vs">VS</div>
+        <div class="match-team">${nextFixture.teamB} <span class="team-owner">@${nextFixture.ownerB}</span></div>
+        <div class="time-ago">Match starts ${getTimeUntil(new Date(nextFixture.date))}</div>
+      </div>
+    `;
+    fixtureContainer.innerHTML = fixtureContent;
+  });
+
+  // === Leaderboard ===
+  onValue(ref(db, 'leaderboard'), (snapshot) => {
+    const leaderboardData = snapshot.val();
+    if (!leaderboardData) {
+      document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
+      return;
+    }
+
+    const teams = Object.values(leaderboardData);
+    teams.sort((a, b) => b.points - a.points);
+
+    let leaderboardContent = `
+      <table class="leaderboard-table">
+        <tr>
+          <th>#</th>
+          <th>Team Name</th>
+          <th>Owner</th>
+          <th>Points</th>
+        </tr>
+    `;
+    teams.slice(0, 10).forEach((team, index) => {
+      leaderboardContent += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${team.name}</td>
+          <td>${team.owner}</td>
+          <td class="points">${team.points}</td>
+        </tr>
+      `;
+    });
+    leaderboardContent += `</table>`;
+
+    document.getElementById('tableContainer').innerHTML = leaderboardContent;
+  });
+
+  function openPreviousFixtures() {
+    popupOverlay.style.display = 'flex';
+  }
+
+  function getTimeAgo(date) {
+    const now = new Date();
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+  }
+
+  function getTimeUntil(date) {
+    const now = new Date();
+    const diff = date - now;
+    if (diff <= 0) return "Match has started";
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
+    if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
+    if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    return `in ${seconds} second${seconds > 1 ? 's' : ''}`;
+  }
+  window.addEventListener('load', () => {
+    // After 5 seconds hide loading screen
+    setTimeout(() => {
+      const loader = document.getElementById('loadingScreen');
+      loader.classList.add('hidden');
+
+      // Remove fully after fade out
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 500);
+    }, 5000);
+  });
+</script>
 </body>
 </html>
