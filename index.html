@@ -1,456 +1,159 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DLS Champions League</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soccer Login & Sign Up</title>
   <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-
-         header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 15px;
-  background-color: #000;
-  border-bottom: 2px solid;
-  border-image: linear-gradient(to right, blue, cyan) 1;
-
-  position: sticky;
-  top: 0;
-  z-index: 999;
-} 
-
-    .logo {
-      display: flex;
-      align-items: center;
-    }
-
-    .circle {
-      background-color: yellow;
-      color: black;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 5px;
-      font-size: 14px;
-    }
-
-    .league-text {
-      font-size: 16px;
-    }
-
-    .header-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .glass-btn {
-      backdrop-filter: blur(6px);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      padding: 5px 10px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    #fixtureContainer,
-    #tableContainer {
-      margin: 15px auto;
-      max-width: 300px;
-      background-color: #111;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #333;
-    }
-
-    #staticPrevBtn {
-      display: block;
-      margin: 0 auto 15px;
-      max-width: 300px;
-    }
-
-    #fixtureContainer span {
-      font-size: 14px;
-    }
-
-    .match-team {
-      color: white;
-      font-weight: bold;
-    }
-
-    .match-vs {
-      color: cyan;
-    }
-
-    .match-status {
-      color: lime;
-    }
-
-    .match-score {
-      color: gray;
-    }
-
-    .match-info {
-      text-align: center;
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      background-color: #222;
-    }
-
-    .match-info .score {
-      font-size: 16px;
-      margin-top: 10px;
-    }
-
-    .winning-team {
-      color: green;
-    }
-
-    .losing-team {
-      color: red;
-    }
-
-    .team-owner {
-      font-size: 12px;
-      color: gray;
-    }
-
-    .time-ago {
-      font-size: 12px;
-      color: #888;
-    }
-
-    .section-title {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 16px;
-      color: white;
-    }
-
-    .leaderboard-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .leaderboard-table th,
-    .leaderboard-table td {
-      padding: 6px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .leaderboard-table th {
-      border-bottom: 1px solid #444;
-      color: cyan;
-    }
-
-    .leaderboard-table td {
-      border-bottom: 1px solid #222;
-    }
-
-    .username {
-      color: gray;
-      font-size: 12px;
-    }
-
-    .points {
-      text-align: right;
-      color: yellow;
-    }
-
-    .prev-fixtures-btn {
-      background: linear-gradient(90deg, #007cf0, #00dfd8);
-      color: black;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .prev-fixtures-btn:hover {
-      opacity: 0.85;
-    }
-
-    #popupOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    #popupContent {
-      background-color: #111;
-      padding: 15px;
-      border-radius: 8px;
-      width: 90%;
-      height: 90%;
-      overflow-y: auto;
-      border: 1px solid #333;
+    * {
       box-sizing: border-box;
     }
-
-    #popupContent h3 {
-      text-align: center;
-      color: cyan;
-      margin-top: 0;
-    }
-
-    .closePopup {
-      background: red;
-      color: white;
-      border: none;
-      padding: 5px 8px;
-      float: right;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .section-title {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #fff;
-  border-bottom: 2px solid;
-  border-image: linear-gradient(to right, blue, cyan) 1;
-  padding-bottom: 5px;
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.leaderboard-table {
+.container {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 10px;
-  background-color: #111;
-  color: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.leaderboard-table thead {
-  background: linear-gradient(to right, #0d47a1, #1976d2);
-}
-
-.leaderboard-table th {
-  padding: 10px;
-  text-align: left;
+  max-width: 400px;
+  border: 3px solid #fff;
   color: #fff;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
 }
-
-.leaderboard-table tbody tr {
-  background-color: #222;
+h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 0 0 8px #00ffe7;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 16px;
+  border: none;
   border-radius: 8px;
-  transition: transform 0.2s ease;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
-
-.leaderboard-table tbody tr:hover {
-  transform: translateY(-2px);
-  background-color: #333;
+input::placeholder {
+  color: #ddd;
 }
-
-.leaderboard-table td {
-  padding: 12px 10px;
-  vertical-align: top;
-  font-size: 13px;
-}
-
-/* Highlight positions cleanly */
-.leaderboard-table td:first-child {
-  font-weight: bold;
-}
-
-/* Colors for top 3 */
-.leaderboard-table tbody tr:first-child td:first-child {
-  color: gold;
-}
-
-.leaderboard-table tbody tr:nth-child(2) td:first-child {
-  color: silver;
-}
-
-.leaderboard-table tbody tr:nth-child(3) td:first-child {
-  color: #cd7f32; /* Bronze */
-}
-
-.leaderboard-table ul {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 12px;
-  list-style: disc;
-}
-
-.leaderboard-table ul li {
-  margin-bottom: 3px;
-}
-
-/* Fullscreen loading screen */
-#loadingScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
+button {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #000000, #1a1a1a);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  opacity: 1;
-  transition: opacity 0.5s ease;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ff4e50;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
-
-/* Loader container */
-.loader-container {
+button:hover {
+  background-color: #ff0066;
+}
+.toggle {
   text-align: center;
+  margin-top: 12px;
 }
-
-/* Soccer ball spinner */
+.toggle a {
+  color: #00ffe7;
+  text-decoration: none;
+  cursor: pointer;
+}
+.logo {
+  text-align: center;
+  margin-bottom: 15px;
+}
 .soccer-ball {
-  width: 80px;
-  height: 80px;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
-  background-size: cover;
-  animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
-  border-radius: 50%;
+  font-size: 50px;
+  display: inline-block;
+  animation: spin 4s linear infinite;
+  filter: drop-shadow(0 0 6px #fff);
 }
-
-/* Spin animation */
-@keyframes spinBall {
+@keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* Glow pulse animation */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff007f, 0 0 30px #ff9900;
-  }
-  50% {
-    box-shadow: 0 0 20px #ff007f, 0 0 30px #00ffff, 0 0 40px #00ff00;
-  }
+.special-input {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid #00ffe7;
+  box-shadow: 0 0 10px #00ffe7;
 }
 
-/* Loading text */
-.loading-text {
-  margin-top: 12px;
-  color: white;
-  font-size: 16px;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 1px;
-  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
-}
-
-/* Hide animation */
-#loadingScreen.hidden {
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
   opacity: 0;
-  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 9999;
 }
-/* Disable text selection on the entire page */
-* {
-  user-select: none;
+.notification.show {
+  opacity: 1;
 }
+
   </style>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <header>
+  <div class="container" id="loginForm">
     <div class="logo">
-      <div class="circle">DLS</div>
-      <div class="league-text">CHAMPIONS LEAGUE</div>
+      <span class="soccer-ball">⚽</span>
     </div>
-    <div class="header-buttons">
-      <a href="myteam.html">
-        <button class="glass-btn">My Team</button>
-      </a>
+    <h2>Soccer Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email" required>
+    <input id="loginPassword" type="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    <div class="toggle">
+      <p><a onclick="forgotPassword()">Forgot Password?</a></p>
+      <p>Don't have an account? <a onclick="showSignup()">Sign up</a></p>
     </div>
-  </header>
-</body>
-  <div class="section-title">Upcoming Fixtures</div>
-  <div id="fixtureContainer"></div>
-  <button id="staticPrevBtn" class="prev-fixtures-btn">Previous Fixtures</button>
+  </div>  <div class="container" id="signupForm" style="display:none">
+    <div class="logo">
+      <span class="soccer-ball">⚽</span>
+    </div>
+    <h2>Join Soccer Club</h2>
+    <input id="signupEmail" type="email" placeholder="Email" required>
+    <input id="signupPassword" type="password" placeholder="Password" required>
+    <input id="signupUsername" class="special-input" type="text" placeholder="@Username" required><select id="signupFlag">
+  <option value="🇦🇷">🇦🇷 Argentina</option>
+  <option value="🇧🇷">🇧🇷 Brazil</option>
+  <option value="🇵🇹">🇵🇹 Portugal</option>
+  <option value="🇮🇹">🇮🇹 Italy</option>
+</select>
 
-  <!-- Container for countdown + title -->
-<div style="text-align: center; margin-bottom: 15px;">
-  <div id="seasonCountdown" style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">
-    Season ends in: <span id="countdownTimer">Loading...</span>
-  </div>
-  <div class="section-title">League Table (Top 10)</div>
-</div>
-  <div id="tableContainer"></div>
+<input id="signupTeam" class="special-input" type="text" placeholder="Team Name" required>
 
-  <div id="popupOverlay">
-    <div id="popupContent">
-      <button class="closePopup">Close</button>
-      <h3>Previous Fixtures</h3>
-      <div id="previousFixturesContent" style="margin-top:10px;"></div>
-    </div>
-  </div>
-<div style="text-align: center; margin-top: 25px;">
-  <div class="section-title">Prizes for Top 3 Winners</div>
-  <table style="margin: 0 auto; border-collapse: collapse; width: 90%; max-width: 400px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
-    <thead>
-      <tr style="background-color: #222;">
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Position</th>
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Reward</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 8px; color: yellow;">1st Place</td>
-        <td style="padding: 8px; color: white;">Season Trophy + Shoutout + 1 Year DLS Champions League Premium</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: silver;">2nd Place</td>
-        <td style="padding: 8px; color: white;">Silver Trophy + Shoutout</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: #cd7f32;">3rd Place</td>
-        <td style="padding: 8px; color: white;">Shoutout</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-<!-- Loading Screen -->
-<div id="loadingScreen">
-  <div class="loader-container">
-    <div class="soccer-ball"></div>
-    <div class="loading-text">Loading season...</div>
-  </div>
+<button onclick="signup()">Sign Up</button>
+<div class="toggle">
+  <p>Already have an account? <a onclick="showLogin()">Login</a></p>
 </div>
 
-<script type="module">
+  </div>  <div id="notification" class="notification"></div>
+     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, set, get, child, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -464,133 +167,151 @@
   };
 
   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
   const db = getDatabase(app);
 
-  const fixtureContainer = document.getElementById('fixtureContainer');
-  const popupOverlay = document.getElementById('popupOverlay');
-  const popupContent = document.getElementById('previousFixturesContent');
-  const closePopupBtn = document.querySelector('.closePopup');
-  const staticPrevBtn = document.getElementById('staticPrevBtn');
-
-  staticPrevBtn.addEventListener('click', openPreviousFixtures);
-  closePopupBtn.addEventListener('click', () => {
-    popupOverlay.style.display = 'none';
-  });
-
-  // === SEASON COUNTDOWN ===
-  const countdownContainer = document.getElementById('seasonCountdown');
-  let countdownInterval;
-
-  onValue(ref(db, 'seasonends'), (snapshot) => {
-    const endTime = snapshot.val();
-    if (!endTime) {
-      countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const endDate = new Date(endTime);
-
-    clearInterval(countdownInterval);
-    updateCountdown(endDate); // Initial call
-    countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
-  });
-
-  function updateCountdown(endDate) {
-    const now = new Date();
-    const diff = endDate - now;
-    if (diff <= 0) {
-      countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-
-    countdownContainer.innerHTML = `
-      Season ends in <span style="color:#007bff;">
-      ${days}d ${hours}h ${minutes}m ${seconds}s
-      </span>
-    `;
+  function notify(message) {
+    const note = document.getElementById('notification');
+    note.textContent = message;
+    note.classList.add('show');
+    setTimeout(() => note.classList.remove('show'), 3000);
   }
 
-  // === Load previous fixtures ===
-  onValue(ref(db, 'previousfixtures'), (snapshot) => {
-    const previousFixtures = snapshot.val();
-    if (!previousFixtures) {
-      popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
-      return;
-    }
-    let content = '';
-    Object.values(previousFixtures).forEach(match => {
-      const matchDate = new Date(match.date);
-      const timeAgo = getTimeAgo(matchDate);
+  window.showSignup = function() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+  }
 
-      content += `
-        <div class="match-info">
-          <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
-          <div class="match-vs">VS</div>
-          <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
-          <div class="score">
-            <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
-            <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
-          </div>
-          <div class="time-ago">Ended ${timeAgo}</div>
-        </div>
-      `;
-    });
-    popupContent.innerHTML = content;
-  });
+  window.showLogin = function() {
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+  }
 
-  // === Load upcoming fixture ===
-  onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
-    const upcomingFixtures = snapshot.val();
-    if (!upcomingFixtures) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+  window.signup = async function() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value.trim();
+    const username = document.getElementById('signupUsername').value.trim();
+    const team = document.getElementById('signupTeam').value.trim();
+    const flag = document.getElementById('signupFlag').value;
+
+    if (!email || !password || !username || !team) {
+      notify("Please fill out all fields.");
       return;
     }
 
-    const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
-      key,
-      ...fixture
-    }));
+    const fullTeamName = flag + ' ' + team;
 
-    const now = new Date();
-    const validFixtures = [];
+    const dbRef = ref(db);
+    const usersRef = child(dbRef, 'users');
+    const teamsRef = child(dbRef, 'teams');
 
-    fixtureList.forEach(fixture => {
-      const fixtureDate = new Date(fixture.date);
-      if (fixtureDate >= now) {
-        validFixtures.push(fixture);
-      } else {
-        // Delete expired fixture
-        remove(ref(db, `upcomingfixtures/${fixture.key}`));
+    try {
+      const snapshot = await get(usersRef);
+      let usernameTaken = false;
+      let teamTaken = false;
+
+      snapshot.forEach(userSnap => {
+        const userData = userSnap.val();
+        if (userData.username === username) usernameTaken = true;
+        if (userData.team === fullTeamName) teamTaken = true;
+      });
+
+      if (usernameTaken) {
+        notify("Username is already taken.");
+        return;
       }
-    });
+      if (teamTaken) {
+        notify("Team name is already taken.");
+        return;
+      }
 
-    if (validFixtures.length === 0) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
+
+      // Save user data under 'users'
+      await set(ref(db, 'users/' + userId), {
+        name: username,
+        username: username,
+        team: fullTeamName,
+        stats: {
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          gamesPlayed: 0,
+          points: 0
+        }
+      });
+
+      // Save team data under 'teams' (team name, username, and stats)
+      await set(ref(db, 'teams/' + fullTeamName), {
+        username: username,
+        stats: {
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          gamesPlayed: 0,
+          points: 0
+        }
+      });
+
+      // Update leaderboard with the new team
+      const teamsSnapshot = await get(teamsRef);
+      let leaderboardData = {};
+
+      teamsSnapshot.forEach(teamSnap => {
+        const teamData = teamSnap.val();
+        leaderboardData[teamSnap.key] = {
+          name: teamSnap.key,
+          owner: teamData.username,
+          points: teamData.stats.points
+        };
+      });
+
+      // Save leaderboard as structured data
+      await set(ref(db, 'leaderboard'), leaderboardData);
+
+      notify("Sign up successful! You can now log in.");
+      showLogin();
+
+    } catch (error) {
+      console.error(error);
+      notify(error.message);
+    }
+  }
+
+  window.login = function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        notify("Login successful!");
+        window.location.href = "homepage.index.html";  // Redirect to homepage after successful login
+      })
+      .catch(error => {
+        console.error(error);
+        notify(error.message);
+      });
+  }
+
+  window.forgotPassword = function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) {
+      notify("Enter your email to reset password.");
       return;
     }
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        notify("Password reset email sent.");
+      })
+      .catch(error => {
+        console.error(error);
+        notify(error.message);
+      });
+  }
 
-    validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    const nextFixture = validFixtures[0];
-
-    const fixtureContent = `
-      <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px;">
-        <div class="match-team">${nextFixture.teamA} <span class="team-owner">@${nextFixture.ownerA}</span></div>
-        <div class="match-vs">VS</div>
-        <div class="match-team">${nextFixture.teamB} <span class="team-owner">@${nextFixture.ownerB}</span></div>
-        <div class="time-ago">Match starts ${getTimeUntil(new Date(nextFixture.date))}</div>
-      </div>
-    `;
-    fixtureContainer.innerHTML = fixtureContent;
-  });
-
-  // === Leaderboard ===
+  // --- Leaderboard Rendering ---
   onValue(ref(db, 'leaderboard'), (snapshot) => {
     const leaderboardData = snapshot.val();
     if (!leaderboardData) {
@@ -624,52 +345,6 @@
 
     document.getElementById('tableContainer').innerHTML = leaderboardContent;
   });
-
-  function openPreviousFixtures() {
-    popupOverlay.style.display = 'flex';
-  }
-
-  function getTimeAgo(date) {
-    const now = new Date();
-    const diff = now - date;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
-  }
-
-  function getTimeUntil(date) {
-    const now = new Date();
-    const diff = date - now;
-    if (diff <= 0) return "Match has started";
-
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
-    if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
-    if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
-    return `in ${seconds} second${seconds > 1 ? 's' : ''}`;
-  }
-  window.addEventListener('load', () => {
-    // After 5 seconds hide loading screen
-    setTimeout(() => {
-      const loader = document.getElementById('loadingScreen');
-      loader.classList.add('hidden');
-
-      // Remove fully after fade out
-      setTimeout(() => {
-        loader.style.display = 'none';
-      }, 500);
-    }, 5000);
-  });
-</script>
-</body>
+</script> 
+  </body>
 </html>
