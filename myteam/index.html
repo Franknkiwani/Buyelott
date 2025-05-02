@@ -11,13 +11,53 @@
       color: #e0e0e0;
     }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background-color: #1f1f1f;
-      border-bottom: 1px solid #333;
-    }
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1f1f1f;
+  border-bottom: 1px solid #333;
+
+  /* Disable text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  position: sticky;
+}
+
+/* Neon animated centered 80% width lines */
+header::before,
+header::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  width: 80%;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(270deg, #ff00ff, #00ffff, #ff00ff);
+  background-size: 600% 600%;
+  animation: neonGlow 4s ease infinite;
+  border-radius: 3px;
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+}
+
+@keyframes neonGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
     header h1 {
       margin: 0;
       font-size: 1rem;
@@ -114,6 +154,69 @@
       display: block;
       margin-bottom: 3px;
     }
+    .stat {
+  padding: 10px;
+  margin: 5px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+}
+/* Neon Glow effect */
+.champions-premium {
+  border: 2px solid gold;
+  box-shadow: 0 0 15px gold, 0 0 30px gold inset;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
+  50% { box-shadow: 0 0 20px gold, 0 0 40px gold inset; }
+  100% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.champions-premium.shimmer {
+  background: linear-gradient(120deg, #f8d7b4, #f8f9fa, #f8d7b4);
+  background-size: 400% 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Gold Badge Icon */
+.champions-premium .badge {
+  display: inline-block;
+  background-color: gold;
+  color: black;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 12px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Confetti animation */
+@keyframes confetti {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(0, 100px); opacity: 0; }
+}
+
+.confetti {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: gold;
+  opacity: 0;
+  animation: confetti 1s forwards;
+}
   </style>
 </head>
 <body>
@@ -194,7 +297,6 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     const userInLeague = teamsData.some(t => t.teamName === userTeam);
 
     championsCard.querySelector('.stats-grid').innerHTML = `
-      <div><strong>Stage</strong><br><span style='color:red;' id='stageText'>Loading...</span></div>
       <div><strong>Prize Pool</strong><br>$1000</div>
       <div><strong>Teams</strong><br>${totalTeams}</div>
       <div><strong>Spots Left</strong><br>${spotsLeft}</div>
@@ -293,11 +395,20 @@ onAuthStateChanged(auth, user => {
           if (userInLeague) {
             await remove(ref(db, 'championsleague/teams/' + userTeam));
             localStorage.removeItem('inChampionsLeague');
+            championsCard.classList.remove('champions-premium', 'shimmer');
+            const badge = document.querySelector('.champions-premium .badge');
+            if (badge) badge.remove();
           } else {
             const totalTeams = Object.keys(teamsObj).length;
             if (totalTeams < 10) {
               await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
               localStorage.setItem('inChampionsLeague', 'true');
+              championsCard.classList.add('champions-premium', 'shimmer');
+              const badge = document.createElement('span');
+              badge.classList.add('badge');
+              badge.textContent = 'Champions League Member';
+              championsCard.appendChild(badge);
+              triggerConfetti();
             } else {
               alert('Champions League is full (10 teams max)');
               return;
@@ -369,6 +480,19 @@ onAuthStateChanged(auth, user => {
     });
   }
 });
+
+function triggerConfetti() {
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.left = `${Math.random() * 100}%`;
+    confetti.style.animationDelay = `${Math.random() * 2}s`;
+    document.body.appendChild(confetti);
+    setTimeout(() => {
+      confetti.remove();
+    }, 1000);
+  }
+}
 </script>
 </body>
 </html>
