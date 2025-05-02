@@ -120,6 +120,11 @@
 <header>
   <h1>DLS DASHBOARD</h1>
   <div class="team-name" id="teamName">Team: Loading...</div>
+
+  <!-- Champions League Badge -->
+  <span id="championBadge" style="display:none; background:gold; padding:4px 8px; border-radius:4px; color:black; font-weight:bold; margin-left:8px;">
+    Champions League
+  </span>
 </header>
 
 <div class="stats-grid" id="statsGrid">
@@ -142,6 +147,15 @@
   <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by hoyoo Esports | Powered by DLS 25</p>
 </div>
 
+<!-- Champions League Exclusive Extras Card -->
+<div class="card" id="championsLeagueExtras" style="display:none; border:2px solid gold;">
+  <h3 style="color:gold;">Champions League Exclusive</h3>
+  <ul>
+    <li>Earn bonus points in matches</li>
+    <li>Compete for $1000 prize pool</li>
+    <li>Special leaderboard ranking</li>
+  </ul>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
