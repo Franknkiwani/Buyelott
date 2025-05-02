@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>DLS Dashboard</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');body {
@@ -36,13 +36,49 @@ header {
   text-shadow: 0 0 5px #0ff;
 }
 
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background-color: #151530;
+  box-shadow: inset 0 0 10px #0ff33f30;
+  border-radius: 12px;
+  margin: 16px;
+}
+
+.stat-card {
+  background-color: #1e1e3a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 0 8px #0ff33f40;
+}
+
+.stat-title {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff;
+}
+
   </style>
 </head>
 <body>
   <header>
     <div class="header-text">DLS DASHBOARD</div>
     <div class="team-name" id="teamName">Loading team...</div>
-  </header>  <script type="module">
+  </header>  <div class="stats-container" id="statsContainer">
+    <!-- Stats will load here -->
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -62,17 +98,48 @@ header {
     const auth = getAuth(app);
     const database = getDatabase(app);
 
+    const statNames = ['wins', 'losses', 'draws', 'gamesPlayed', 'points'];
+
+    function renderStats(stats) {
+      const container = document.getElementById('statsContainer');
+      container.innerHTML = '';
+      statNames.forEach(stat => {
+        const value = stats[stat] ?? 0;
+        container.innerHTML += `
+          <div class="stat-card">
+            <div class="stat-title">${stat}</div>
+            <div class="stat-value">${value}</div>
+          </div>
+        `;
+      });
+    }
+
     onAuthStateChanged(auth, (user) => {
       const teamNameElem = document.getElementById('teamName');
       if (user) {
         const userId = user.uid;
+        const userRef = ref(database, 'users/' + userId);
+
+        // Fetch team name
         const teamRef = ref(database, 'users/' + userId + '/team');
         onValue(teamRef, (snapshot) => {
           const teamName = snapshot.val();
           teamNameElem.textContent = teamName ? teamName : 'No team';
         });
+
+        // Fetch stats
+        const statsRef = ref(database, 'users/' + userId + '/stats');
+        onValue(statsRef, (snapshot) => {
+          const stats = snapshot.val();
+          if (stats) {
+            renderStats(stats);
+          } else {
+            renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 });
+          }
+        });
       } else {
         teamNameElem.textContent = 'Not logged in';
+        renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 });
       }
     });
   </script></body>
