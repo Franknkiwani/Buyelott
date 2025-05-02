@@ -428,9 +428,9 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     }
 
     if (userInLeague) {
-      requestMatchBtn.style.display = 'block';
+      requestMatchBtn.style.display = 'block'; // Match request button visible for in-league players
     } else {
-      requestMatchBtn.style.display = 'none';
+      requestMatchBtn.style.display = 'none'; // Hide match request button for non-league players
     }
   });
 }
@@ -517,11 +517,7 @@ onAuthStateChanged(auth, user => {
           const statusSnap = await get(statusRef);
           const isSeasonOpen = statusSnap.exists() && statusSnap.val().open === true;
 
-          if (!isSeasonOpen) {
-            showSeasonClosedPopup();
-            return;
-          }
-
+          // Allow users to exit even if the season is closed
           if (userInLeague) {  
             showConfirmExitPopup(async (confirmed) => {  
               if (confirmed) {  
