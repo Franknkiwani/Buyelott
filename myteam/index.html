@@ -2,123 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DLS Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DLS 25 Dashboard</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d1117;
+      color: #ffffff;
     }
-
-    /* Header Styling */
     .header {
-      background-color: #1A2637; /* Dark navy blue */
-      color: white;
-      padding: 20px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: relative;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      animation: neonGlowHeader 1.5s ease-in-out infinite alternate;
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #1e293b, #0f172a);
+      border-bottom: 2px solid #2563eb;
+      box-shadow: 0 0 10px #2563eb;
     }
-
-    .header .left {
-      font-size: 16px;
-      font-weight: bold;
+    .header-title {
+      font-size: 1rem;
       text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .header .right {
-      font-size: 18px;
-      font-weight: normal;
-    }
-
-    @keyframes neonGlowHeader {
-      0% {
-        box-shadow: 0 0 10px #3498db, 0 0 20px #3498db, 0 0 30px #2980b9;
-      }
-      100% {
-        box-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff;
-      }
-    }
-
-    /* Dashboard Content */
-    .dashboard-content {
-      padding: 30px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    /* Stats Card Styling */
-    .stats-card {
-      background-color: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 20px;
-      width: 180px;
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stats-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .stats-card .stat-title {
-      font-size: 16px;
-      color: #333;
+      color: #60a5fa;
       font-weight: bold;
-      margin-bottom: 10px;
     }
-
-    .stats-card .stat-value {
-      font-size: 22px;
-      color: #3498db;
+    .team-name {
+      font-size: 1rem;
+      color: #22d3ee;
     }
-
-    .stats-card .stat-value.win {
-      color: #2ecc71;
+    .stats-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #2563eb;
+      border: 1px solid #2563eb;
     }
-
-    .stats-card .stat-value.loss {
-      color: #e74c3c;
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #334155;
     }
-
-    .stats-card .stat-value.draw {
-      color: #f39c12;
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    .stat-label {
+      color: #93c5fd;
+    }
+    .stat-value {
+      font-weight: bold;
+      color: #22d3ee;
     }
   </style>
 </head>
 <body>
-
-  <!-- Header -->
   <div class="header">
-    <div class="left">DLS Dashboard</div>
-    <div class="right" id="teamName">Loading...</div>
+    <div class="header-title">DLS Dashboard</div>
+    <div class="team-name" id="teamName">Loading...</div>
+  </div>
+  <div class="stats-container">
+    <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-value" id="wins">0</span></div>
+    <div class="stat-row"><span class="stat-label">Losses</span><span class="stat-value" id="losses">0</span></div>
+    <div class="stat-row"><span class="stat-label">Draws</span><span class="stat-value" id="draws">0</span></div>
+    <div class="stat-row"><span class="stat-label">Games Played</span><span class="stat-value" id="gamesPlayed">0</span></div>
+    <div class="stat-row"><span class="stat-label">Points</span><span class="stat-value" id="points">0</span></div>
   </div>
 
-  <!-- Stats Container -->
-  <div class="dashboard-content" id="userStats">
-    <!-- Stats will be inserted here -->
-  </div>
-
-  <!-- Firebase SDKs -->
   <script type="module">
-    // Import Firebase libraries
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -130,40 +86,10 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    // Function to render stats
-    function renderStats(stats) {
-      const statsContainer = document.getElementById('userStats');
-      statsContainer.innerHTML = `
-        <div class="stats-card">
-          <div class="stat-title">Wins</div>
-          <div class="stat-value win">${stats.wins || 0}</div>
-        </div>
-        <div class="stats-card">
-          <div class="stat-title">Losses</div>
-          <div class="stat-value loss">${stats.losses || 0}</div>
-        </div>
-        <div class="stats-card">
-          <div class="stat-title">Draws</div>
-          <div class="stat-value draw">${stats.draws || 0}</div>
-        </div>
-        <div class="stats-card">
-          <div class="stat-title">Games Played</div>
-          <div class="stat-value">${stats.gamesPlayed || 0}</div>
-        </div>
-        <div class="stats-card">
-          <div class="stat-title">Points</div>
-          <div class="stat-value">${stats.points || 0}</div>
-        </div>
-      `;
-    }
-
-    // Listen for auth state and fetch data
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
@@ -171,32 +97,47 @@
 
         get(userRef).then((snapshot) => {
           if (snapshot.exists()) {
+            // Data exists — just display it
             const userData = snapshot.val();
-            const teamName = userData.teamName || 'No Team Assigned';
-            const stats = userData.stats || {};
+            console.log("User data fetched:", userData);
 
-            // Set team name
-            document.getElementById('teamName').innerText = teamName;
+            document.getElementById('teamName').textContent = userData.teamName || "No Team";
+            document.getElementById('wins').textContent = userData.stats?.wins ?? 0;
+            document.getElementById('losses').textContent = userData.stats?.losses ?? 0;
+            document.getElementById('draws').textContent = userData.stats?.draws ?? 0;
+            document.getElementById('gamesPlayed').textContent = userData.stats?.gamesPlayed ?? 0;
+            document.getElementById('points').textContent = userData.stats?.points ?? 0;
 
-            // Render stats
-            renderStats(stats);
           } else {
-            document.getElementById('teamName').innerText = 'User not found';
-            document.getElementById('userStats').innerHTML = 'No stats available';
+            // Data does not exist — initialize default
+            const defaultData = {
+              teamName: "Team Example",
+              stats: {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                gamesPlayed: 0,
+                points: 0
+              }
+            };
+            set(userRef, defaultData).then(() => {
+              console.log("Initialized new user data");
+
+              document.getElementById('teamName').textContent = defaultData.teamName;
+              document.getElementById('wins').textContent = defaultData.stats.wins;
+              document.getElementById('losses').textContent = defaultData.stats.losses;
+              document.getElementById('draws').textContent = defaultData.stats.draws;
+              document.getElementById('gamesPlayed').textContent = defaultData.stats.gamesPlayed;
+              document.getElementById('points').textContent = defaultData.stats.points;
+            });
           }
         }).catch((error) => {
-          console.error(error);
-          document.getElementById('teamName').innerText = 'Error fetching data';
-          document.getElementById('userStats').innerHTML = 'Error fetching stats';
+          console.error("Error fetching user data:", error);
         });
-
       } else {
-        document.getElementById('teamName').innerText = 'Not logged in';
-        document.getElementById('userStats').innerHTML = 'Please log in to view stats';
+        console.log("No user is signed in");
       }
     });
-
   </script>
-
 </body>
 </html>
