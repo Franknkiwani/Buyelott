@@ -1,166 +1,233 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>DLS Dashboard</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');body {
-  margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background-color: #1a1a2e;
-  color: #ffffff;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLS Dashboard</title>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 50px;
-  background-color: #23234d;
-  padding: 0 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid #444;
-}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
 
-.header-text {
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: bold;
-}
+        header {
+            background-color: #333;
+            padding: 20px 10px;
+            text-align: center;
+        }
 
-.team-name {
-  color: #ff8c00;
-  font-size: 14px;
-  font-weight: 600;
-}
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  padding: 20px;
-  background-color: #2c2c52;
-  border-radius: 12px;
-  margin: 20px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
-}
+        #dlsHeader {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
 
-.stat-card {
-  background-color: #34344d;
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-}
+        #teamName {
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
 
-.stat-title {
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
+        .stats-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #222;
+            border-radius: 8px;
+        }
 
-.stat-value {
-  font-size: 20px;
-  font-weight: bold;
-  color: #ff8c00;
-}
+        h2 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            color: #e0e0e0;
+        }
 
-.stat-position {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ff8c00;
-}
+        .stat-card {
+            background-color: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
 
-  </style>
+        .stat-title {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            margin-top: 5px;
+        }
+
+        .stat-position {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #5ce1e6;
+        }
+
+        footer {
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        /* Mobile View */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            #dlsHeader {
+                font-size: 1.2rem;
+            }
+
+            #teamName {
+                font-size: 1rem;
+            }
+
+            .stats-container {
+                padding: 15px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-title {
+                font-size: 0.9rem;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <header>
-    <div class="header-text">DLS DASHBOARD</div>
-    <div class="team-name" id="teamName">Loading team...</div>
-  </header>  <div class="stats-container" id="statsContainer">
-    <!-- Stats will load here -->
-  </div>  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-
-    const statNames = ['wins', 'losses', 'draws', 'gamesPlayed', 'points'];
-
-    function renderStats(stats, position) {
-      const container = document.getElementById('statsContainer');
-      container.innerHTML = '';
-      statNames.forEach(stat => {
-        const value = stats[stat] ?? 0;
-        container.innerHTML += `
-          <div class="stat-card">
-            <div class="stat-title">${stat}</div>
-            <div class="stat-value">${value}</div>
-          </div>
-        `;
-      });
-      container.innerHTML += `
-        <div class="stat-card">
-          <div class="stat-title">Position</div>
-          <div class="stat-position">#${position}</div>
+    <header>
+        <div class="header-content">
+            <div id="dlsHeader">DLS Dashboard</div>
+            <div id="teamName">Loading...</div>
         </div>
-      `;
-    }
+    </header>
 
-    onAuthStateChanged(auth, (user) => {
-      const teamNameElem = document.getElementById('teamName');
-      if (user) {
-        const userId = user.uid;
-        const userRef = ref(database, 'users/' + userId);
+    <div class="stats-container">
+        <h2>Your Stats</h2>
+        <div id="statsContainer">
+            <!-- Stats will be injected here -->
+        </div>
+    </div>
 
-        // Fetch team name
-        const teamRef = ref(database, 'users/' + userId + '/team');
-        onValue(teamRef, (snapshot) => {
-          const teamName = snapshot.val();
-          teamNameElem.textContent = teamName ? teamName : 'No team';
-        });
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 DLS Dashboard</p>
+        </div>
+    </footer>
 
-        // Fetch stats
-        const statsRef = ref(database, 'users/' + userId + '/stats');
-        onValue(statsRef, (snapshot) => {
-          const stats = snapshot.val();
-          if (stats) {
-            // Fetch leaderboard for position
-            const leaderboardRef = ref(database, 'leaderboard');
-            onValue(leaderboardRef, (snapshot) => {
-              const leaderboard = snapshot.val();
-              const position = getPosition(stats.points, leaderboard);
-              renderStats(stats, position);
+    <script type="module">
+        // Firebase setup
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            storageBucket: "itzhoyoo-f9f7e.appspot.com",
+            messagingSenderId: "1094792075584",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+            measurementId: "G-LLT6F9WRKH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        const statNames = ['wins', 'losses', 'draws', 'gamesPlayed', 'points'];
+
+        function renderStats(stats, position) {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = '';
+            statNames.forEach(stat => {
+                const value = stats[stat] ?? 0;
+                container.innerHTML += `
+                    <div class="stat-card">
+                        <div class="stat-title">${stat}</div>
+                        <div class="stat-value">${value}</div>
+                    </div>
+                `;
             });
-          } else {
-            renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
-          }
-        });
-      } else {
-        teamNameElem.textContent = 'Not logged in';
-        renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
-      }
-    });
+            container.innerHTML += `
+                <div class="stat-card">
+                    <div class="stat-title">Position</div>
+                    <div class="stat-position">#${position}</div>
+                </div>
+            `;
+        }
 
-    function getPosition(userPoints, leaderboard) {
-      const sortedTeams = Object.values(leaderboard).sort((a, b) => b.stats.points - a.stats.points);
-      const position = sortedTeams.findIndex(team => team.stats.points === userPoints) + 1;
-      return position;
-    }
-  </script></body>
+        onAuthStateChanged(auth, (user) => {
+            const teamNameElem = document.getElementById('teamName');
+            if (user) {
+                const userId = user.uid;
+                const userRef = ref(database, 'users/' + userId);
+
+                // Fetch team name
+                const teamRef = ref(database, 'users/' + userId + '/team');
+                onValue(teamRef, (snapshot) => {
+                    const teamName = snapshot.val();
+                    teamNameElem.textContent = teamName ? teamName : 'No team';
+                });
+
+                // Fetch stats
+                const statsRef = ref(database, 'users/' + userId + '/stats');
+                onValue(statsRef, (snapshot) => {
+                    const stats = snapshot.val();
+                    if (stats) {
+                        // Fetch leaderboard for position
+                        const leaderboardRef = ref(database, 'leaderboard');
+                        onValue(leaderboardRef, (snapshot) => {
+                            const leaderboard = snapshot.val();
+                            const position = getPosition(stats.points, leaderboard);
+                            renderStats(stats, position);
+                        });
+                    } else {
+                        renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
+                    }
+                });
+            } else {
+                teamNameElem.textContent = 'Not logged in';
+                renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
+            }
+        });
+
+        function getPosition(userPoints, leaderboard) {
+            const sortedTeams = Object.values(leaderboard).sort((a, b) => b.stats.points - a.stats.points);
+            const position = sortedTeams.findIndex(team => team.stats.points === userPoints) + 1;
+            return position;
+        }
+    </script>
+</body>
+
 </html>
