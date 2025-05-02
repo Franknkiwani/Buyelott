@@ -259,24 +259,11 @@ header::after {
     <li>Special leaderboard ranking</li>
   </ul>
 </div>
-<div id="championsBadge" style="
-  display: none;
-  background-color: gold;
-  color: black;
-  text-align: center;
-  padding: 8px;
-  border-radius: 6px;
-  font-weight: bold;
-  margin-top: 10px;
-">
-  Champions League Member
-</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -288,13 +275,13 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
 const joinBtn = document.getElementById('joinChampionsLeagueBtn');
 const championsCard = document.getElementById('championsLeagueCard');
+const champBadge = document.getElementById('championsBadge');
 
 function refreshChampionsLeagueCard(userTeam, userUsername) {
   const champTeamsRef = ref(db, 'championsleague/teams');
@@ -321,11 +308,17 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
       joinBtn.classList.remove('enabled');
       joinBtn.style.backgroundColor = 'red';
       joinBtn.disabled = false;
+
+      champBadge.style.display = 'block';
+      champBadge.style.width = '100%';
+      champBadge.textContent = 'Champions League Member';
     } else {
       joinBtn.textContent = 'Join Champions League';
       joinBtn.classList.add('enabled');
       joinBtn.style.backgroundColor = '#007bff';
       joinBtn.disabled = totalTeams >= 10;
+
+      champBadge.style.display = 'none';
     }
   });
 }
@@ -358,7 +351,6 @@ function setupChampionsLeagueMeta() {
   });
 }
 
-// Handle user authentication and team data
 onAuthStateChanged(auth, user => {
   if (user) {
     const userRef = ref(db, 'users/' + user.uid);
@@ -401,35 +393,20 @@ onAuthStateChanged(auth, user => {
         refreshChampionsLeagueCard(userTeam, userUsername);
         setupChampionsLeagueMeta();
 
-        // Handle join button functionality
         joinBtn.onclick = async () => {
-          console.log('Join button clicked');
           const champTeamsRef = ref(db, 'championsleague/teams');
           const champTeamsSnap = await get(champTeamsRef);
           const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
           const userInLeague = teamsObj[userTeam] !== undefined;
 
-          console.log('User in League:', userInLeague);
-
           if (userInLeague) {
-            console.log('Exiting Champions League...');
             await remove(ref(db, 'championsleague/teams/' + userTeam));
-            localStorage.removeItem('inChampionsLeague'); // Remove state from localStorage
-            championsCard.classList.remove('champions-premium', 'shimmer');
-            const badge = document.querySelector('.champions-premium .badge');
-            if (badge) badge.remove();
+            localStorage.removeItem('inChampionsLeague');
           } else {
             const totalTeams = Object.keys(teamsObj).length;
             if (totalTeams < 10) {
-              console.log('Joining Champions League...');
               await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
-              localStorage.setItem('inChampionsLeague', 'true'); // Store state in localStorage
-              championsCard.classList.add('champions-premium', 'shimmer');
-              const badge = document.createElement('span');
-              badge.classList.add('badge');
-              badge.textContent = 'Champions League Member';
-              championsCard.appendChild(badge);
-              triggerConfetti();
+              localStorage.setItem('inChampionsLeague', 'true');
             } else {
               alert('Champions League is full (10 teams max)');
               return;
@@ -460,45 +437,47 @@ onAuthStateChanged(auth, user => {
             const updateMatchCard = (timeDiff) => {
               const hours = Math.floor(timeDiff / (1000 * 60 * 60));
               const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);matchContainer.innerHTML = `
-                <div><strong>Opponent</strong><br>${opponent}</div>
-                <div><strong>Position</strong><br>Our Team: ${userPosText} | Opponent: ${oppPosText}</div>
-                <div><strong>Match Time</strong><br>${matchTime.toLocaleString()}</div>
-                <div><strong>Match Code</strong><br>${matchCode}</div>
-                <div><strong>Owner</strong><br>${opponentOwner}</div>
-                <div><strong>Time Remaining</strong><br>${hours}h ${minutes}m ${seconds}s</div>
+              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+              matchContainer.innerHTML = `
+                <h3>Matchmaking</h3>
+                <div class="match-line">
+                  <span class="team-name">${userTeam}</span>
+                  <span class="vs">VS</span>
+                  <span class="team-name">${opponent}</span>
+                </div>
+                <div class="user-line">
+                  <span>${userPosText} @${userUsername}</span>
+                  <span>${oppPosText} @${opponentOwner}</span>
+                </div>
+                <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
+                <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
               `;
+
+              if (timeDiff <= 0) {
+                const connectBtn = document.getElementById('connectButton');
+                connectBtn.onclick = () => {
+                  const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
+                  window.open(waLink, '_blank');
+                };
+              }
             };
 
-            const timeDiff = matchTime - new Date();
-            updateMatchCard(timeDiff);
-            const matchInterval = setInterval(() => {
-              const timeDiff = matchTime - new Date();
-              if (timeDiff <= 0) {
-                clearInterval(matchInterval);
-                matchContainer.innerHTML = 'Match has started!';
-              } else {
-                updateMatchCard(timeDiff);
-              }
+            const interval = setInterval(() => {
+              const now = new Date();
+              const timeDiff = matchTime - now;
+              updateMatchCard(timeDiff);
+              if (timeDiff <= 0) clearInterval(interval);
             }, 1000);
           } else {
-            matchContainer.innerHTML = 'No match scheduled.';
+            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
           }
         });
+
       });
     });
-  } else {
-    // If user is not logged in, handle accordingly
-    joinBtn.disabled = true;
-    joinBtn.textContent = 'Login to Join';
-    joinBtn.classList.remove('enabled');
   }
 });
-
-function triggerConfetti() {
-  // Add your confetti logic here if needed, or you can use an external library like Confetti.js
-  console.log('Confetti triggered!');
-}
 </script>
 </body>
 </html>
