@@ -1,675 +1,374 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DLS Champions League</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DLS Dashboard</title>
   <style>
     body {
       margin: 0;
-      background-color: #000;
-      color: white;
       font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
     }
-
-         header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 15px;
-  background-color: #000;
-  border-bottom: 2px solid;
-  border-image: linear-gradient(to right, blue, cyan) 1;
-
-  position: sticky;
-  top: 0;
-  z-index: 999;
-} 
-
-    .logo {
+    header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
+      padding: 10px 20px;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
     }
-
-    .circle {
-      background-color: yellow;
-      color: black;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 5px;
-      font-size: 14px;
+    header h1 {
+      margin: 0;
+      font-size: 1rem;
+      color: #ffffff;
     }
-
-    .league-text {
-      font-size: 16px;
+    header .team-name {
+      font-size: 0.9rem;
+      color: #aaa;
     }
-
-    .header-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .glass-btn {
-      backdrop-filter: blur(6px);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      padding: 5px 10px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    #fixtureContainer,
-    #tableContainer {
-      margin: 15px auto;
-      max-width: 300px;
-      background-color: #111;
-      padding: 10px;
+    .stats-grid, .card {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #1e1e1e;
       border-radius: 8px;
-      border: 1px solid #333;
-    }
-
-    #staticPrevBtn {
-      display: block;
-      margin: 0 auto 15px;
-      max-width: 300px;
-    }
-
-    #fixtureContainer span {
-      font-size: 14px;
-    }
-
-    .match-team {
-      color: white;
-      font-weight: bold;
-    }
-
-    .match-vs {
-      color: cyan;
-    }
-
-    .match-status {
-      color: lime;
-    }
-
-    .match-score {
-      color: gray;
-    }
-
-    .match-info {
-      text-align: center;
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      background-color: #222;
-    }
-
-    .match-info .score {
-      font-size: 16px;
-      margin-top: 10px;
-    }
-
-    .winning-team {
-      color: green;
-    }
-
-    .losing-team {
-      color: red;
-    }
-
-    .team-owner {
-      font-size: 12px;
-      color: gray;
-    }
-
-    .time-ago {
-      font-size: 12px;
-      color: #888;
-    }
-
-    .section-title {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 16px;
-      color: white;
-    }
-
-    .leaderboard-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .leaderboard-table th,
-    .leaderboard-table td {
-      padding: 6px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .leaderboard-table th {
-      border-bottom: 1px solid #444;
-      color: cyan;
-    }
-
-    .leaderboard-table td {
-      border-bottom: 1px solid #222;
-    }
-
-    .username {
-      color: gray;
-      font-size: 12px;
-    }
-
-    .points {
-      text-align: right;
-      color: yellow;
-    }
-
-    .prev-fixtures-btn {
-      background: linear-gradient(90deg, #007cf0, #00dfd8);
-      color: black;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .prev-fixtures-btn:hover {
-      opacity: 0.85;
-    }
-
-    #popupOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    #popupContent {
-      background-color: #111;
       padding: 15px;
-      border-radius: 8px;
-      width: 90%;
-      height: 90%;
-      overflow-y: auto;
-      border: 1px solid #333;
-      box-sizing: border-box;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
-
-    #popupContent h3 {
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+    }
+    .stats-grid div {
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 5px;
       text-align: center;
-      color: cyan;
-      margin-top: 0;
     }
-
-    .closePopup {
-      background: red;
+    .card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+      text-align: center;
+    }
+    .match-line {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .match-line .team-name {
+      background: #2a2a2a;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .match-line .vs {
+      color: #ccc;
+    }
+    .user-line {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 10px;
+    }
+    .timer {
+      font-weight: bold;
+      color: #90ee90;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: grey;
       color: white;
       border: none;
-      padding: 5px 8px;
-      float: right;
-      border-radius: 4px;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: not-allowed;
+    }
+    button.enabled {
+      background: #007bff;
       cursor: pointer;
     }
-    .section-title {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #fff;
-  border-bottom: 2px solid;
-  border-image: linear-gradient(to right, blue, cyan) 1;
-  padding-bottom: 5px;
-}
-
-.leaderboard-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 10px;
-  background-color: #111;
-  color: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.leaderboard-table thead {
-  background: linear-gradient(to right, #0d47a1, #1976d2);
-}
-
-.leaderboard-table th {
-  padding: 10px;
-  text-align: left;
-  color: #fff;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.leaderboard-table tbody tr {
-  background-color: #222;
-  border-radius: 8px;
-  transition: transform 0.2s ease;
-}
-
-.leaderboard-table tbody tr:hover {
-  transform: translateY(-2px);
-  background-color: #333;
-}
-
-.leaderboard-table td {
-  padding: 12px 10px;
-  vertical-align: top;
-  font-size: 13px;
-}
-
-/* Highlight positions cleanly */
-.leaderboard-table td:first-child {
-  font-weight: bold;
-}
-
-/* Colors for top 3 */
-.leaderboard-table tbody tr:first-child td:first-child {
-  color: gold;
-}
-
-.leaderboard-table tbody tr:nth-child(2) td:first-child {
-  color: silver;
-}
-
-.leaderboard-table tbody tr:nth-child(3) td:first-child {
-  color: #cd7f32; /* Bronze */
-}
-
-.leaderboard-table ul {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 12px;
-  list-style: disc;
-}
-
-.leaderboard-table ul li {
-  margin-bottom: 3px;
-}
-
-/* Fullscreen loading screen */
-#loadingScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #000000, #1a1a1a);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-/* Loader container */
-.loader-container {
-  text-align: center;
-}
-
-/* Soccer ball spinner */
-.soccer-ball {
-  width: 80px;
-  height: 80px;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
-  background-size: cover;
-  animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
-  border-radius: 50%;
-}
-
-/* Spin animation */
-@keyframes spinBall {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Glow pulse animation */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff007f, 0 0 30px #ff9900;
-  }
-  50% {
-    box-shadow: 0 0 20px #ff007f, 0 0 30px #00ffff, 0 0 40px #00ff00;
-  }
-}
-
-/* Loading text */
-.loading-text {
-  margin-top: 12px;
-  color: white;
-  font-size: 16px;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 1px;
-  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
-}
-
-/* Hide animation */
-#loadingScreen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-/* Disable text selection on the entire page */
-* {
-  user-select: none;
-}
+    .match-teams {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .team-box {
+      background: #2a2a2a;
+      border-radius: 5px;
+      padding: 8px 12px;
+      text-align: center;
+      width: 120px;
+    }
+    .team-box strong {
+      display: block;
+      margin-bottom: 3px;
+    }
   </style>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <div class="circle">DLS</div>
-      <div class="league-text">CHAMPIONS LEAGUE</div>
-    </div>
-    <div class="header-buttons">
-      <a href="myteam/">
-        <button class="glass-btn">My Team</button>
-      </a>
-    </div>
-  </header>
-</body>
-  <div class="section-title">Upcoming Fixtures</div>
-  <div id="fixtureContainer"></div>
-  <button id="staticPrevBtn" class="prev-fixtures-btn">Previous Fixtures</button>
+<header>
+  <h1>DLS DASHBOARD</h1>
+  <div class="team-name" id="teamName">Team: Loading...</div>
 
-  <!-- Container for countdown + title -->
-<div style="text-align: center; margin-bottom: 15px;">
-  <div id="seasonCountdown" style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">
-    Season ends in: <span id="countdownTimer">Loading...</span>
-  </div>
-  <div class="section-title">League Table (Top 10)</div>
-</div>
-  <div id="tableContainer"></div>
+  <!-- Champions League Badge -->
+  <span id="championBadge" style="display:none; background:gold; padding:4px 8px; border-radius:4px; color:black; font-weight:bold; margin-left:8px;">
+    Champions League
+  </span>
+</header>
 
-  <div id="popupOverlay">
-    <div id="popupContent">
-      <button class="closePopup">Close</button>
-      <h3>Previous Fixtures</h3>
-      <div id="previousFixturesContent" style="margin-top:10px;"></div>
-    </div>
-  </div>
-<div style="text-align: center; margin-top: 25px;">
-  <div class="section-title">Prizes for Top 3 Winners</div>
-  <table style="margin: 0 auto; border-collapse: collapse; width: 90%; max-width: 400px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
-    <thead>
-      <tr style="background-color: #222;">
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Position</th>
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Reward</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 8px; color: yellow;">1st Place</td>
-        <td style="padding: 8px; color: white;">Season Trophy + Shoutout + 1 Year DLS Champions League Premium</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: silver;">2nd Place</td>
-        <td style="padding: 8px; color: white;">Silver Trophy + Shoutout</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: #cd7f32;">3rd Place</td>
-        <td style="padding: 8px; color: white;">Shoutout</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-<!-- Loading Screen -->
-<div id="loadingScreen">
-  <div class="loader-container">
-    <div class="soccer-ball"></div>
-    <div class="loading-text">Loading season...</div>
-  </div>
+<div class="stats-grid" id="statsGrid">
+  <!-- Stats will load here -->
 </div>
 
+<div class="card" id="matchmakingCard">
+  <h3>Matchmaking</h3>
+  <p style="text-align:center;">Loading match info...</p>
+</div>
+
+<div class="card" id="championsLeagueCard">
+  <h3>Champions League</h3>
+  <p style="text-align:center; color: #90ee90; font-weight:bold;">Season 1 - Free Entry!</p>
+  <p id="stageText" style="text-align:center; font-weight:bold; color:red; margin-top:5px;">Group Stage</p>
+  <p id="seasonCountdown" style="text-align:center; color:#aaa; font-size:0.85rem; margin-top:5px;">Loading season end...</p>
+  <div class="match-teams"></div>
+  <div class="stats-grid"></div>
+  <button id="joinChampionsLeagueBtn" class="enabled">Join Champions League</button>
+  <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by hoyoo Esports | Powered by DLS 25</p>
+</div>
+
+<!-- Champions League Exclusive Extras Card -->
+<div class="card" id="championsLeagueExtras" style="display:none; border:2px solid gold;">
+  <h3 style="color:gold;">Champions League Exclusive</h3>
+  <ul>
+    <li>Earn bonus points in matches</li>
+    <li>Compete for $1000 prize pool</li>
+    <li>Special leaderboard ranking</li>
+  </ul>
+</div>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-  const fixtureContainer = document.getElementById('fixtureContainer');
-  const popupOverlay = document.getElementById('popupOverlay');
-  const popupContent = document.getElementById('previousFixturesContent');
-  const closePopupBtn = document.querySelector('.closePopup');
-  const staticPrevBtn = document.getElementById('staticPrevBtn');
+const joinBtn = document.getElementById('joinChampionsLeagueBtn');
+const championsCard = document.getElementById('championsLeagueCard');
 
-  staticPrevBtn.addEventListener('click', openPreviousFixtures);
-  closePopupBtn.addEventListener('click', () => {
-    popupOverlay.style.display = 'none';
-  });
-
-  // === SEASON COUNTDOWN ===
-  const countdownContainer = document.getElementById('seasonCountdown');
-  let countdownInterval;
-
-  onValue(ref(db, 'seasonends'), (snapshot) => {
-    const endTime = snapshot.val();
-    if (!endTime) {
-      countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const endDate = new Date(endTime);
-
-    clearInterval(countdownInterval);
-    updateCountdown(endDate); // Initial call
-    countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
-  });
-
-  function updateCountdown(endDate) {
-    const now = new Date();
-    const diff = endDate - now;
-    if (diff <= 0) {
-      countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-
-    countdownContainer.innerHTML = `
-      Season ends in <span style="color:#007bff;">
-      ${days}d ${hours}h ${minutes}m ${seconds}s
-      </span>
-    `;
-  }
-
-  // === Load previous fixtures ===
-  onValue(ref(db, 'previousfixtures'), (snapshot) => {
-    const previousFixtures = snapshot.val();
-    if (!previousFixtures) {
-      popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
-      return;
-    }
-    let content = '';
-    Object.values(previousFixtures).forEach(match => {
-      const matchDate = new Date(match.date);
-      const timeAgo = getTimeAgo(matchDate);
-
-      content += `
-        <div class="match-info">
-          <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
-          <div class="match-vs">VS</div>
-          <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
-          <div class="score">
-            <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
-            <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
-          </div>
-          <div class="time-ago">Ended ${timeAgo}</div>
-        </div>
-      `;
+function refreshChampionsLeagueCard(userTeam, userUsername) {
+  const champTeamsRef = ref(db, 'championsleague/teams');
+  onValue(champTeamsRef, snapshot => {
+    const teamsData = [];
+    snapshot.forEach(teamSnap => {
+      const teamName = teamSnap.key;
+      const username = teamSnap.val().username || 'Unknown';
+      teamsData.push({ teamName, username });
     });
-    popupContent.innerHTML = content;
-  });
 
-  // === Load upcoming fixture ===
-  onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
-    const upcomingFixtures = snapshot.val();
-    if (!upcomingFixtures) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
-      return;
+    const totalTeams = teamsData.length;
+    const spotsLeft = 10 - totalTeams;
+    const userInLeague = teamsData.some(t => t.teamName === userTeam);
+
+    championsCard.querySelector('.stats-grid').innerHTML = `
+      <div><strong>Stage</strong><br><span style='color:red;' id='stageText'>Loading...</span></div>
+      <div><strong>Prize Pool</strong><br>$1000</div>
+      <div><strong>Teams</strong><br>${totalTeams}</div>
+      <div><strong>Spots Left</strong><br>${spotsLeft}</div>
+    `;
+
+    if (userInLeague) {
+      joinBtn.textContent = 'Exit Champions League';
+      joinBtn.classList.remove('enabled');
+      joinBtn.style.backgroundColor = 'red';
+      joinBtn.disabled = false;
+    } else {
+      joinBtn.textContent = 'Join Champions League';
+      joinBtn.classList.add('enabled');
+      joinBtn.style.backgroundColor = '#007bff';
+      joinBtn.disabled = totalTeams >= 10;
     }
+  });
+}
 
-    const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
-      key,
-      ...fixture
-    }));
+function setupChampionsLeagueMeta() {
+  const champMetaRef = ref(db, 'championsleague/meta');
+  const stageEl = document.getElementById('stageText');
+  const countdownEl = document.getElementById('seasonCountdown');
 
-    const now = new Date();
-    const validFixtures = [];
+  onValue(champMetaRef, snapshot => {
+    const meta = snapshot.val();
+    stageEl.textContent = meta?.stage || 'Unknown Stage';
 
-    fixtureList.forEach(fixture => {
-      const fixtureDate = new Date(fixture.date);
-      if (fixtureDate >= now) {
-        validFixtures.push(fixture);
-      } else {
-        // Delete expired fixture
-        remove(ref(db, `upcomingfixtures/${fixture.key}`));
+    const endTime = new Date(meta?.seasonEnd);
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = endTime - now;
+      if (diff <= 0) {
+        countdownEl.textContent = 'Season ended';
+        clearInterval(timer);
+        return;
       }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      countdownEl.textContent = `Ends in ${days}d ${hours}h`;
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 60000);
+  });
+}
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    const userRef = ref(db, 'users/' + user.uid);
+    onValue(userRef, snapshot => {
+      const userData = snapshot.val();
+      if (!userData) return;
+
+      const userTeam = userData.team;
+      const userUsername = userData.username;
+      document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
+
+      const stats = userData.stats || {};
+
+      const teamsRef = ref(db, 'teams');
+      onValue(teamsRef, teamSnap => {
+        let allTeams = [];
+        teamSnap.forEach(team => {
+          const teamData = team.val();
+          allTeams.push({
+            name: team.key,
+            points: teamData.stats?.points || 0,
+            username: teamData.username || 'Unknown'
+          });
+        });
+
+        allTeams.sort((a, b) => b.points - a.points);
+
+        let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
+        if (userPos === 0) userPos = 'N/A';
+
+        document.getElementById('statsGrid').innerHTML = `
+          <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
+          <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
+          <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
+          <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
+          <div><strong>Points</strong><br>${stats.points ?? 0}</div>
+          <div><strong>Position</strong><br>${userPos}</div>
+        `;
+
+        refreshChampionsLeagueCard(userTeam, userUsername);
+        setupChampionsLeagueMeta();
+
+        joinBtn.onclick = async () => {
+          const champTeamsRef = ref(db, 'championsleague/teams');
+          const champTeamsSnap = await get(champTeamsRef);
+          const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
+          const userInLeague = teamsObj[userTeam] !== undefined;
+
+          if (userInLeague) {
+            await remove(ref(db, 'championsleague/teams/' + userTeam));
+            localStorage.removeItem('inChampionsLeague');
+          } else {
+            const totalTeams = Object.keys(teamsObj).length;
+            if (totalTeams < 10) {
+              await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
+              localStorage.setItem('inChampionsLeague', 'true');
+            } else {
+              alert('Champions League is full (10 teams max)');
+              return;
+            }
+          }
+          refreshChampionsLeagueCard(userTeam, userUsername);
+        };
+
+        const matchRef = ref(db, 'matches/' + userTeam);
+        const matchContainer = document.getElementById('matchmakingCard');
+
+        onValue(matchRef, snapshot => {
+          const matchData = snapshot.val();
+
+          if (matchData) {
+            const opponent = matchData.opponentTeam;
+            const matchTime = new Date(matchData.matchTime);
+            const matchCode = matchData.matchCode;
+
+            const userTeamData = allTeams.find(t => t.name === userTeam);
+            const opponentTeamData = allTeams.find(t => t.name === opponent);
+
+            const userPosText = userTeamData ? `#${allTeams.findIndex(t => t.name === userTeam) + 1}` : 'N/A';
+            const oppPosText = opponentTeamData ? `#${allTeams.findIndex(t => t.name === opponent) + 1}` : 'N/A';
+
+            const opponentOwner = opponentTeamData?.username || 'Unknown';
+
+            const updateMatchCard = (timeDiff) => {
+              const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+              const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+              matchContainer.innerHTML = `
+                <h3>Matchmaking</h3>
+                <div class="match-line">
+                  <span class="team-name">${userTeam}</span>
+                  <span class="vs">VS</span>
+                  <span class="team-name">${opponent}</span>
+                </div>
+                <div class="user-line">
+                  <span>${userPosText} @${userUsername}</span>
+                  <span>${oppPosText} @${opponentOwner}</span>
+                </div>
+                <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
+                <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
+              `;
+
+              if (timeDiff <= 0) {
+                const connectBtn = document.getElementById('connectButton');
+                connectBtn.onclick = () => {
+                  const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
+                  window.open(waLink, '_blank');
+                };
+              }
+            };
+
+            const interval = setInterval(() => {
+              const now = new Date();
+              const timeDiff = matchTime - now;
+              updateMatchCard(timeDiff);
+              if (timeDiff <= 0) clearInterval(interval);
+            }, 1000);
+          } else {
+            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+          }
+        });
+
+      });
     });
-
-    if (validFixtures.length === 0) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
-      return;
-    }
-
-    validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    const nextFixture = validFixtures[0];
-
-    const fixtureContent = `
-      <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px;">
-        <div class="match-team">${nextFixture.teamA} <span class="team-owner">@${nextFixture.ownerA}</span></div>
-        <div class="match-vs">VS</div>
-        <div class="match-team">${nextFixture.teamB} <span class="team-owner">@${nextFixture.ownerB}</span></div>
-        <div class="time-ago">Match starts ${getTimeUntil(new Date(nextFixture.date))}</div>
-      </div>
-    `;
-    fixtureContainer.innerHTML = fixtureContent;
-  });
-
-  // === Leaderboard ===
-  onValue(ref(db, 'leaderboard'), (snapshot) => {
-    const leaderboardData = snapshot.val();
-    if (!leaderboardData) {
-      document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
-      return;
-    }
-
-    const teams = Object.values(leaderboardData);
-    teams.sort((a, b) => b.points - a.points);
-
-    let leaderboardContent = `
-      <table class="leaderboard-table">
-        <tr>
-          <th>#</th>
-          <th>Team Name</th>
-          <th>Owner</th>
-          <th>Points</th>
-        </tr>
-    `;
-    teams.slice(0, 10).forEach((team, index) => {
-      leaderboardContent += `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${team.name}</td>
-          <td>${team.owner}</td>
-          <td class="points">${team.points}</td>
-        </tr>
-      `;
-    });
-    leaderboardContent += `</table>`;
-
-    document.getElementById('tableContainer').innerHTML = leaderboardContent;
-  });
-
-  function openPreviousFixtures() {
-    popupOverlay.style.display = 'flex';
   }
-
-  function getTimeAgo(date) {
-    const now = new Date();
-    const diff = now - date;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
-  }
-
-  function getTimeUntil(date) {
-    const now = new Date();
-    const diff = date - now;
-    if (diff <= 0) return "Match has started";
-
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
-    if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
-    if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
-    return `in ${seconds} second${seconds > 1 ? 's' : ''}`;
-  }
-  window.addEventListener('load', () => {
-    // After 5 seconds hide loading screen
-    setTimeout(() => {
-      const loader = document.getElementById('loadingScreen');
-      loader.classList.add('hidden');
-
-      // Remove fully after fade out
-      setTimeout(() => {
-        loader.style.display = 'none';
-      }, 500);
-    }, 5000);
-  });
+});
 </script>
 </body>
 </html>
