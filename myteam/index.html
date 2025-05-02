@@ -101,17 +101,18 @@
             const userData = snapshot.val();
             console.log("User data fetched:", userData);
 
-            document.getElementById('teamName').textContent = userData.teamName || "No Team";
+            // Access team from 'teams' path
+            const teamName = userData.teams || "No Team";  // Defaults to "No Team" if empty
+            document.getElementById('teamName').textContent = teamName;
             document.getElementById('wins').textContent = userData.stats?.wins ?? 0;
             document.getElementById('losses').textContent = userData.stats?.losses ?? 0;
             document.getElementById('draws').textContent = userData.stats?.draws ?? 0;
             document.getElementById('gamesPlayed').textContent = userData.stats?.gamesPlayed ?? 0;
             document.getElementById('points').textContent = userData.stats?.points ?? 0;
-
           } else {
             // Data does not exist — initialize default
             const defaultData = {
-              teamName: "Team Example",
+              teams: "No Team",  // Default value for missing team
               stats: {
                 wins: 0,
                 losses: 0,
@@ -123,7 +124,7 @@
             set(userRef, defaultData).then(() => {
               console.log("Initialized new user data");
 
-              document.getElementById('teamName').textContent = defaultData.teamName;
+              document.getElementById('teamName').textContent = defaultData.teams;
               document.getElementById('wins').textContent = defaultData.stats.wins;
               document.getElementById('losses').textContent = defaultData.stats.losses;
               document.getElementById('draws').textContent = defaultData.stats.draws;
