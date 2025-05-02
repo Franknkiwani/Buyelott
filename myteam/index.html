@@ -72,7 +72,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -95,42 +95,46 @@
         const userId = user.uid;
         const userRef = ref(db, 'users/' + userId);
 
+        // Fetch the user data
         get(userRef).then((snapshot) => {
           if (snapshot.exists()) {
-            // Data exists — just display it
             const userData = snapshot.val();
-            console.log("User data fetched:", userData);
 
-            // Access team from 'teams' path
-            const teamName = userData.teams || "No Team";  // Defaults to "No Team" if empty
-            document.getElementById('teamName').textContent = teamName;
-            document.getElementById('wins').textContent = userData.stats?.wins ?? 0;
-            document.getElementById('losses').textContent = userData.stats?.losses ?? 0;
-            document.getElementById('draws').textContent = userData.stats?.draws ?? 0;
-            document.getElementById('gamesPlayed').textContent = userData.stats?.gamesPlayed ?? 0;
-            document.getElementById('points').textContent = userData.stats?.points ?? 0;
-          } else {
-            // Data does not exist — initialize default
-            const defaultData = {
-              teams: "No Team",  // Default value for missing team
-              stats: {
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                gamesPlayed: 0,
-                points: 0
+            // Get the username of the logged-in user
+            const userUsername = userData.username;
+
+            // Reference the teams node and search for the team with the same username as the owner
+            const teamsRef = ref(db, 'teams');
+            get(teamsRef).then((teamsSnapshot) => {
+              if (teamsSnapshot.exists()) {
+                const teams = teamsSnapshot.val();
+                let userTeam = null;
+
+                // Loop through the teams and find the one where username matches
+                for (let teamId in teams) {
+                  if (teams[teamId].username === userUsername) {
+                    userTeam = teams[teamId];
+                    break;
+                  }
+                }
+
+                if (userTeam) {
+                  // Display the stats for the user's team
+                  document.getElementById('teamName').textContent = userTeam.teamName;
+                  document.getElementById('wins').textContent = userTeam.stats?.wins ?? 0;
+                  document.getElementById('losses').textContent = userTeam.stats?.losses ?? 0;
+                  document.getElementById('draws').textContent = userTeam.stats?.draws ?? 0;
+                  document.getElementById('gamesPlayed').textContent = userTeam.stats?.gamesPlayed ?? 0;
+                  document.getElementById('points').textContent = userTeam.stats?.points ?? 0;
+                } else {
+                  document.getElementById('teamName').textContent = "No team found";
+                }
+              } else {
+                console.log("No teams data available");
               }
-            };
-            set(userRef, defaultData).then(() => {
-              console.log("Initialized new user data");
-
-              document.getElementById('teamName').textContent = defaultData.teams;
-              document.getElementById('wins').textContent = defaultData.stats.wins;
-              document.getElementById('losses').textContent = defaultData.stats.losses;
-              document.getElementById('draws').textContent = defaultData.stats.draws;
-              document.getElementById('gamesPlayed').textContent = defaultData.stats.gamesPlayed;
-              document.getElementById('points').textContent = defaultData.stats.points;
             });
+          } else {
+            console.log("User data not found");
           }
         }).catch((error) => {
           console.error("Error fetching user data:", error);
