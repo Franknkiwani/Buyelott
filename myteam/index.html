@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DLS Dashboard</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f1f4f7; /* Light gray background */
+    }
+
+    /* Header Styling */
+    .header {
+      background-color: #1A2637; /* Dark navy blue */
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      animation: neonGlowHeader 1.5s ease-in-out infinite alternate;
+    }
+
+    .header .left {
+      font-size: 18px; /* Smaller size for 'DLS Dashboard' */
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .header .right {
+      font-size: 18px;
+      font-weight: normal;
+    }
+
+    /* Neon Glow Effect for the Header's Edges */
+    @keyframes neonGlowHeader {
+      0% {
+        box-shadow: 0 0 10px #3498db, 0 0 20px #3498db, 0 0 30px #2980b9;
+      }
+      100% {
+        box-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff;
+      }
+    }
+
+    /* Main Content Area */
+    .dashboard-content {
+      padding: 20px;
+    }
+
+    /* Title Styling */
+    h3 {
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    /* Glassy Table Design */
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1); /* Transparent background */
+      backdrop-filter: blur(10px); /* Glass effect */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    th {
+      background: linear-gradient(135deg, #3498db, #8e44ad);
+      color: white;
+      font-weight: bold;
+    }
+
+    td {
+      background-color: rgba(255, 255, 255, 0.2); /* Light background */
+    }
+
+    tr:nth-child(even) td {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Button Styling */
+    .btn {
+      background-color: #3498db; /* Blue */
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #2980b9; /* Darker blue */
+    }
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="left">DLS Dashboard</div>
+    <div class="right" id="teamName">Loading...</div>
+  </div>
+
+  <div class="dashboard-content">
+    <h3>User Stats</h3>
+    <table id="userStatsTable">
+      <thead>
+        <tr>
+          <th>Wins</th>
+          <th>Losses</th>
+          <th>Draws</th>
+          <th>Played</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+    // Initialize Firestore
+    const db = getFirestore(app);
+
+    // Function to fetch and display user stats from Firestore
+    async function displayUserStats() {
+      const usersRef = collection(db, "users");
+      const querySnapshot = await getDocs(usersRef);
+      
+      let tableBody = document.getElementById('userStatsTable').getElementsByTagName('tbody')[0];
+
+      querySnapshot.forEach(doc => {
+        const data = doc.data().stats;  // Get the stats from the document
+        
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+          <td>${data.wins}</td>
+          <td>${data.losses}</td>
+          <td>${data.draws}</td>
+          <td>${data.gamesPlayed}</td>
+          <td>${data.points}</td>
+        `;
+      });
+    }
+
+    // Fetch and display user stats when the page loads
+    window.onload = function() {
+      displayUserStats();
+    };
+  </script>
+</body>
+</html>
