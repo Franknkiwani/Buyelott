@@ -321,6 +321,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebas
 import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -332,6 +333,7 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
@@ -401,6 +403,7 @@ function setupChampionsLeagueMeta() {
   });
 }
 
+// Handle user authentication and team data
 onAuthStateChanged(auth, user => {
   if (user) {
     const userRef = ref(db, 'users/' + user.uid);
@@ -443,28 +446,28 @@ onAuthStateChanged(auth, user => {
         refreshChampionsLeagueCard(userTeam, userUsername);
         setupChampionsLeagueMeta();
 
+        // Handle join button functionality
         joinBtn.onclick = async () => {
+          console.log('Join button clicked');
           const champTeamsRef = ref(db, 'championsleague/teams');
           const champTeamsSnap = await get(champTeamsRef);
           const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
           const userInLeague = teamsObj[userTeam] !== undefined;
 
+          console.log('User in League:', userInLeague);
+
           if (userInLeague) {
+            console.log('Exiting Champions League...');
             await remove(ref(db, 'championsleague/teams/' + userTeam));
-            localStorage.removeItem('inChampionsLeague');
+            localStorage.removeItem('inChampionsLeague'); // Remove state from localStorage
             championsCard.classList.remove('champions-premium', 'shimmer');
-            const badge = document.querySelector('.champions-premium .badge');
-            if (badge) badge.remove();
           } else {
             const totalTeams = Object.keys(teamsObj).length;
             if (totalTeams < 10) {
+              console.log('Joining Champions League...');
               await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
-              localStorage.setItem('inChampionsLeague', 'true');
+              localStorage.setItem('inChampionsLeague', 'true'); // Store state in localStorage
               championsCard.classList.add('champions-premium', 'shimmer');
-              const badge = document.createElement('span');
-              badge.classList.add('badge');
-              badge.textContent = 'Champions League Member';
-              championsCard.appendChild(badge);
               triggerConfetti();
             } else {
               alert('Champions League is full (10 teams max)');
@@ -538,18 +541,13 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-function triggerConfetti() {
-  for (let i = 0; i < 30; i++) {
-    const confetti = document.createElement('div');
-    confetti.classList.add('confetti');
-    confetti.style.left = `${Math.random() * 100}%`;
-    confetti.style.animationDelay = `${Math.random() * 2}s`;
-    document.body.appendChild(confetti);
-    setTimeout(() => {
-      confetti.remove();
-    }, 1000);
+// Check if user is in Champions League on page load and reapply state
+window.onload = () => {
+  const isInChampionsLeague = localStorage.getItem('inChampionsLeague');
+  if (isInChampionsLeague) {
+    championsCard.classList.add('champions-premium', 'shimmer');
   }
-}
+};
 </script>
 </body>
 </html>
