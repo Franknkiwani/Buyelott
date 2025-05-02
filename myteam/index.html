@@ -3,95 +3,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DLS Dashboard</title>
-  <style>
+ <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #121212;
       color: #e0e0e0;
     }
+
     header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #1f1f1f;
-  border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
 
-  /* Disable text selection */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+    /* Neon animated centered 80% width lines */
+    header::before,
+    header::after {
+      content: "";
+      position: absolute;
+      height: 3px;
+      width: 80%;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(270deg, #ff00ff, #00ffff, #ff00ff);
+      background-size: 600% 600%;
+      animation: neonGlow 4s ease infinite;
+      border-radius: 3px;
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    }
 
-  position: sticky;
-}
+    @keyframes neonGlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
 
-/* Neon animated centered 80% width lines */
-header::before,
-header::after {
-  content: "";
-  position: absolute;
-  height: 3px;
-  width: 80%;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(270deg, #ff00ff, #00ffff, #ff00ff);
-  background-size: 600% 600%;
-  animation: neonGlow 4s ease infinite;
-  border-radius: 3px;
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff;
-}
-
-@keyframes neonGlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
     header h1 {
       margin: 0;
       font-size: 1rem;
       color: #ffffff;
     }
+
     header .team-name {
       font-size: 0.9rem;
       color: #aaa;
     }
-    .stats-grid, .card {
+
+    .stats-grid,
+    .card {
       max-width: 800px;
       margin: 20px auto;
       background: #1e1e1e;
       border-radius: 8px;
       padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     }
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       gap: 10px;
     }
+
     .stats-grid div {
       background: #2a2a2a;
       padding: 10px;
       border-radius: 5px;
       text-align: center;
     }
+
     .card h3 {
       margin-top: 0;
       border-bottom: 1px solid #333;
       padding-bottom: 5px;
       text-align: center;
     }
+
     .match-line {
       display: flex;
       justify-content: center;
@@ -101,14 +106,17 @@ header::after {
       font-weight: bold;
       margin-bottom: 5px;
     }
+
     .match-line .team-name {
       background: #2a2a2a;
       padding: 5px 10px;
       border-radius: 5px;
     }
+
     .match-line .vs {
       color: #ccc;
     }
+
     .user-line {
       display: flex;
       justify-content: center;
@@ -117,12 +125,14 @@ header::after {
       color: #aaa;
       margin-bottom: 10px;
     }
+
     .timer {
       font-weight: bold;
       color: #90ee90;
       text-align: center;
       margin-bottom: 10px;
     }
+
     button {
       width: 100%;
       padding: 10px;
@@ -133,16 +143,19 @@ header::after {
       margin-top: 10px;
       cursor: not-allowed;
     }
+
     button.enabled {
       background: #007bff;
       cursor: pointer;
     }
+
     .match-teams {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin: 15px 0;
     }
+
     .team-box {
       background: #2a2a2a;
       border-radius: 5px;
@@ -150,74 +163,105 @@ header::after {
       text-align: center;
       width: 120px;
     }
+
     .team-box strong {
       display: block;
       margin-bottom: 3px;
     }
+
     .stat {
-  padding: 10px;
-  margin: 5px;
-  border: 2px solid transparent;
-  border-radius: 5px;
-}
-/* Neon Glow effect */
-.champions-premium {
-  border: 2px solid gold;
-  box-shadow: 0 0 15px gold, 0 0 30px gold inset;
-  animation: pulse 2s infinite;
-}
+      padding: 10px;
+      margin: 5px;
+      border: 2px solid transparent;
+      border-radius: 5px;
+    }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
-  50% { box-shadow: 0 0 20px gold, 0 0 40px gold inset; }
-  100% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
-}
+    /* Neon Glow effect */
+    .champions-premium {
+      border: 2px solid gold;
+      box-shadow: 0 0 15px gold, 0 0 30px gold inset;
+      animation: pulse 2s infinite;
+    }
 
-/* Shimmer effect */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 10px gold, 0 0 20px gold inset;
+      }
+      50% {
+        box-shadow: 0 0 20px gold, 0 0 40px gold inset;
+      }
+      100% {
+        box-shadow: 0 0 10px gold, 0 0 20px gold inset;
+      }
+    }
 
-.champions-premium.shimmer {
-  background: linear-gradient(120deg, #f8d7b4, #f8f9fa, #f8d7b4);
-  background-size: 400% 100%;
-  animation: shimmer 3s infinite;
-}
+    /* Shimmer effect */
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
 
-/* Gold Badge Icon */
-.champions-premium .badge {
-  display: inline-block;
-  background-color: gold;
-  color: black;
-  font-weight: bold;
-  padding: 5px 10px;
-  border-radius: 12px;
-  margin-top: 10px;
-  font-size: 14px;
-}
+    .champions-premium.shimmer {
+      background: linear-gradient(120deg, #f8d7b4, #f8f9fa, #f8d7b4);
+      background-size: 400% 100%;
+      animation: shimmer 3s infinite;
+    }
 
-/* Confetti animation */
-@keyframes confetti {
-  0% { transform: translate(0, 0); opacity: 1; }
-  100% { transform: translate(0, 100px); opacity: 0; }
-}
+    /* Gold Badge Icon */
+    .champions-premium .badge {
+      display: inline-block;
+      background-color: gold;
+      color: black;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 12px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
 
-.confetti {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  width: 10px;
-  height: 10px;
-  background-color: gold;
-  opacity: 0;
-  animation: confetti 1s forwards;
-}
-  </style>
+    /* Confetti animation */
+    @keyframes confetti {
+      0% {
+        transform: translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(0, 100px);
+        opacity: 0;
+      }
+    }
+
+    .confetti {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background-color: gold;
+      opacity: 0;
+      animation: confetti 1s forwards;
+    }
+
+    /* New text colors */
+    #seasonCountdown {
+      color: #000000; /* Dark black for countdown text */
+    }
+
+    #stageText {
+      color: darkgreen; /* Dark green for the "Season 1 Free Entry" text */
+    }
+
+    /* Full width for Champions League Member badge */
+    .champions-premium .badge {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+</style>
 </head>
 <body>
 <header>
@@ -448,59 +492,45 @@ onAuthStateChanged(auth, user => {
             const updateMatchCard = (timeDiff) => {
               const hours = Math.floor(timeDiff / (1000 * 60 * 60));
               const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-              matchContainer.innerHTML = `
-                <h3>Matchmaking</h3>
-                <div class="match-line">
-                  <span class="team-name">${userTeam}</span>
-                  <span class="vs">VS</span>
-                  <span class="team-name">${opponent}</span>
-                </div>
-                <div class="user-line">
-                  <span>${userPosText} @${userUsername}</span>
-                  <span>${oppPosText} @${opponentOwner}</span>
-                </div>
-                <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
-                <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
+              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);matchContainer.innerHTML = `
+                <div><strong>Opponent</strong><br>${opponent}</div>
+                <div><strong>Position</strong><br>Our Team: ${userPosText} | Opponent: ${oppPosText}</div>
+                <div><strong>Match Time</strong><br>${matchTime.toLocaleString()}</div>
+                <div><strong>Match Code</strong><br>${matchCode}</div>
+                <div><strong>Owner</strong><br>${opponentOwner}</div>
+                <div><strong>Time Remaining</strong><br>${hours}h ${minutes}m ${seconds}s</div>
               `;
-
-              if (timeDiff <= 0) {
-                const connectBtn = document.getElementById('connectButton');
-                connectBtn.onclick = () => {
-                  const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
-                  window.open(waLink, '_blank');
-                };
-              }
             };
 
-            const interval = setInterval(() => {
-              const now = new Date();
-              const timeDiff = matchTime - now;
-              updateMatchCard(timeDiff);
-              if (timeDiff <= 0) clearInterval(interval);
+            const timeDiff = matchTime - new Date();
+            updateMatchCard(timeDiff);
+            const matchInterval = setInterval(() => {
+              const timeDiff = matchTime - new Date();
+              if (timeDiff <= 0) {
+                clearInterval(matchInterval);
+                matchContainer.innerHTML = 'Match has started!';
+              } else {
+                updateMatchCard(timeDiff);
+              }
             }, 1000);
           } else {
-            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+            matchContainer.innerHTML = 'No match scheduled.';
           }
         });
-
       });
     });
+  } else {
+    // If user is not logged in, handle accordingly
+    joinBtn.disabled = true;
+    joinBtn.textContent = 'Login to Join';
+    joinBtn.classList.remove('enabled');
   }
 });
 
-// Check if user is in Champions League on page load and reapply state
-window.onload = () => {
-  const isInChampionsLeague = localStorage.getItem('inChampionsLeague');
-  if (isInChampionsLeague) {
-    championsCard.classList.add('champions-premium', 'shimmer');
-    const badge = document.createElement('span');
-    badge.classList.add('badge');
-    badge.textContent = 'Champions League Member';
-    championsCard.appendChild(badge);
-  }
-};
+function triggerConfetti() {
+  // Add your confetti logic here if needed, or you can use an external library like Confetti.js
+  console.log('Confetti triggered!');
+}
 </script>
 </body>
 </html>
