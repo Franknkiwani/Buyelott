@@ -128,11 +128,16 @@
 </div><div class="card" id="championsLeagueCard">
   <h3>Champions League</h3>
   <p style="text-align:center; color: #90ee90; font-weight:bold;">Season 1 - Free Entry!</p>
+  <p id="stageText" style="text-align:center; font-weight:bold; color:red; margin-top:5px;">Group Stage</p>
+<p id="seasonCountdown" style="text-align:center; color:#aaa; font-size:0.85rem; margin-top:5px;">Loading season end...</p>
   <div class="match-teams"></div>
   <div class="stats-grid"></div>
   <button id="joinChampionsLeagueBtn" class="enabled">Join Champions League</button>
   <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by Hoyoo Esports | Powered by DLS 25</p>
-</div><script type="module">
+</div>
+<style id="themeStyle"></style>
+<canvas id="fireworksCanvas" style="position:fixed;top:0;left:0;pointer-events:none;width:100%;height:100%;display:none;z-index:9999;"></canvas>
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -168,13 +173,6 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     const totalTeams = teamsData.length;
     const spotsLeft = 10 - totalTeams;
     const userInLeague = teamsData.some(t => t.teamName === userTeam);
-
-    const displayedTeams = teamsData.slice(0, 3);
-    championsCard.querySelector('.match-teams').innerHTML = displayedTeams.map(t => `
-      <div class="team-box">
-        <strong>${t.teamName}</strong><br>@${t.username}
-      </div>
-    `).join('') || `<p style='text-align:center;'>No teams yet.</p>`;
 
     championsCard.querySelector('.stats-grid').innerHTML = `
       <div><strong>Stage</strong><br><span style='color:red;'>Group Stage</span></div>
@@ -259,7 +257,17 @@ onAuthStateChanged(auth, user => {
           }
           refreshChampionsLeagueCard(userTeam, userUsername);
         };
+        // Apply theme and UI changes based on membership
+applyChampionsTheme(userInLeague);
 
+// Update Matchmaking title and Prize Pool
+document.getElementById('matchmakingCard').querySelector('h3').textContent = userInLeague ? 'Champions League Match' : 'Friendly Match';
+championsCard.querySelector('.stats-grid').innerHTML = `
+  <div><strong>Stage</strong><br><span style='color:red;'>Group Stage</span></div>
+  <div><strong>Prize Pool</strong><br>${userInLeague ? '$1000' : 'R500'}</div>
+  <div><strong>Teams</strong><br>${totalTeams}</div>
+  <div><strong>Spots Left</strong><br>${spotsLeft}</div>
+`;
         // Matchmaking fetch
         const matchRef = ref(db, 'matches/' + userTeam);
         const matchContainer = document.getElementById('matchmakingCard');
@@ -324,5 +332,73 @@ onAuthStateChanged(auth, user => {
     });
   }
 });
-</script></body>
+const themeStyle = document.getElementById('themeStyle');
+const fireworksCanvas = document.getElementById('fireworksCanvas');
+
+function applyChampionsTheme(enable) {
+  if (enable) {
+    // Change theme styles
+    themeStyle.textContent = `
+      body { background-color: #0b0c10; color: white; transition: all 0.3s; }
+      .card { border: 2px solid gold; box-shadow: 0 0 15px gold; }
+      button.enabled { background-color: gold; color: black; }
+    `;
+    // Start fireworks
+    startFireworks();
+  } else {
+    // Revert theme
+    themeStyle.textContent = '';
+    stopFireworks();
+  }
+}
+
+function startFireworks() {
+  fireworksCanvas.style.display = 'block';
+  const ctx = fireworksCanvas.getContext('2d');
+  fireworksCanvas.width = window.innerWidth;
+  fireworksCanvas.height = window.innerHeight;
+
+  let particles = [];
+
+  function createFirework() {
+    const x = Math.random() * fireworksCanvas.width;
+    const y = Math.random() * fireworksCanvas.height / 2;
+    const count = 50;
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = Math.random() * 5 + 2;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1
+      });
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+    particles.forEach(p => {
+      ctx.fillStyle = `rgba(255,215,0,${p.alpha})`; // gold
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= 0.02;
+    });
+    particles = particles.filter(p => p.alpha > 0);
+    if (Math.random() < 0.05) createFirework();
+    fireworksCanvas._anim = requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+function stopFireworks() {
+  fireworksCanvas.style.display = 'none';
+  cancelAnimationFrame(fireworksCanvas._anim);
+}
+</script>
+</body>
 </html>
