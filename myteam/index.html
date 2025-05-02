@@ -1,250 +1,304 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DLS Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background-color: #1f1f1f;
-      border-bottom: 1px solid #333;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1rem;
-      color: #ffffff;
-    }
-    header .team-name {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-    .stats-grid, .card {
-      max-width: 800px;
-      margin: 20px auto;
-      background: #1e1e1e;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 10px;
-    }
-    .stats-grid div {
-      background: #2a2a2a;
-      padding: 10px;
-      border-radius: 5px;
-      text-align: center;
-    }
-    .card h3 {
-      margin-top: 0;
-      border-bottom: 1px solid #333;
-      padding-bottom: 5px;
-      text-align: center;
-    }
-    .match-line {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .match-line .team-name {
-      background: #2a2a2a;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-    .match-line .vs {
-      color: #ccc;
-    }
-    .user-line {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      font-size: 0.9rem;
-      color: #aaa;
-      margin-bottom: 10px;
-    }
-    .timer {
-      font-weight: bold;
-      color: #90ee90;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: grey;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-top: 10px;
-      cursor: not-allowed;
-    }
-    button.enabled {
-      background: #007bff;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLS Dashboard</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #333;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1rem;
+    color: #ffffff;
+  }
+  header .team-name {
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  .stats-grid, .card {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  .stats-grid div {
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+    text-align: center;
+  }
+  .match-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .match-line .team-name {
+    background: #2a2a2a;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  .match-line .vs {
+    color: #ccc;
+  }
+  .user-line {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+  .timer {
+    font-weight: bold;
+    color: #90ee90;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    background: grey;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: not-allowed;
+  }
+  button.enabled {
+    background: #007bff;
+    cursor: pointer;
+  }
+  button.exit {
+    background: #dc3545;
+  }
+  .match-teams {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  .team-box {
+    background: #2a2a2a;
+    border-radius: 5px;
+    padding: 8px 12px;
+    text-align: center;
+    width: 120px;
+  }
+  .team-box strong {
+    display: block;
+    margin-bottom: 3px;
+  }
+</style>
 </head>
 <body>
 <header>
   <h1>DLS DASHBOARD</h1>
   <div class="team-name" id="teamName">Team: Loading...</div>
-</header>
+</header><div class="stats-grid" id="statsGrid"></div>
+<div class="card" id="matchmakingCard"></div>
+<div class="card" id="championsLeagueCard"></div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-<div class="stats-grid" id="statsGrid">
-  <!-- Stats will load here -->
-</div>
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-<div class="card" id="matchmakingCard">
-  <h3>Matchmaking</h3>
-  <p style="text-align:center;">Loading match info...</p>
-</div>
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+onAuthStateChanged(auth, user => {
+if (user) {
+  const userRef = ref(db, 'users/' + user.uid);
+  onValue(userRef, snapshot => {
+    const userData = snapshot.val();
+    if (!userData) return;
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+    const userTeam = userData.team;
+    const userUsername = userData.username;
+    document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+    const stats = userData.stats || {};
+    const teamsRef = ref(db, 'teams');
+    onValue(teamsRef, teamSnap => {
+      let allTeams = [];
+      teamSnap.forEach(team => {
+        const teamData = team.val();
+        allTeams.push({ name: team.key, points: teamData.stats?.points || 0, username: teamData.username || 'Unknown' });
+      });
+      allTeams.sort((a, b) => b.points - a.points);
+      let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
+      if (userPos === 0) userPos = 'N/A';
+      document.getElementById('statsGrid').innerHTML = `
+        <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
+        <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
+        <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
+        <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
+        <div><strong>Points</strong><br>${stats.points ?? 0}</div>
+        <div><strong>Position</strong><br>${userPos}</div>
+      `;
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      const userRef = ref(db, 'users/' + user.uid);
-      onValue(userRef, snapshot => {
-        const userData = snapshot.val();
-        if (!userData) return;
+      const matchRef = ref(db, 'matches/' + userTeam);
+      const matchContainer = document.getElementById('matchmakingCard');
 
-        const userTeam = userData.team;
-        const userUsername = userData.username;
-        document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
+      onValue(matchRef, snapshot => {
+        const matchData = snapshot.val();
+        if (matchData) {
+          const opponent = matchData.opponentTeam;
+          const matchTime = new Date(matchData.matchTime);
+          const matchCode = matchData.matchCode;
+          const userTeamData = allTeams.find(t => t.name === userTeam);
+          const opponentTeamData = allTeams.find(t => t.name === opponent);
+          const userPosText = userTeamData ? `#${allTeams.findIndex(t => t.name === userTeam) + 1}` : 'N/A';
+          const oppPosText = opponentTeamData ? `#${allTeams.findIndex(t => t.name === opponent) + 1}` : 'N/A';
+          const opponentOwner = opponentTeamData?.username || 'Unknown';
 
-        const stats = userData.stats || {};
+          const updateMatchCard = (timeDiff) => {
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
-        const teamsRef = ref(db, 'teams');
-        onValue(teamsRef, teamSnap => {
-          let allTeams = [];
-          teamSnap.forEach(team => {
-            const teamData = team.val();
-            allTeams.push({
-              name: team.key,
-              points: teamData.stats?.points || 0,
-              username: teamData.username || 'Unknown'
-            });
-          });
+            matchContainer.innerHTML = `
+              <h3>Matchmaking</h3>
+              <div class="match-line">
+                <span class="team-name">${userTeam}</span>
+                <span class="vs">VS</span>
+                <span class="team-name">${opponent}</span>
+              </div>
+              <div class="user-line">
+                <span>${userPosText} @${userUsername}</span>
+                <span>${oppPosText} @${opponentOwner}</span>
+              </div>
+              <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
+              <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
+            `;
 
-          // Sort for leaderboard
-          allTeams.sort((a, b) => b.points - a.points);
+            if (timeDiff <= 0) {
+              const connectBtn = document.getElementById('connectButton');
+              connectBtn.onclick = () => {
+                const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
+                window.open(waLink, '_blank');
+              };
+            }
+          };
 
-          // Get user position
-          let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
-          if (userPos === 0) userPos = 'N/A';
+          const interval = setInterval(() => {
+            const now = new Date();
+            const timeDiff = matchTime - now;
+            updateMatchCard(timeDiff);
+            if (timeDiff <= 0) clearInterval(interval);
+          }, 1000);
+        } else {
+          matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+        }
+      });
 
-          document.getElementById('statsGrid').innerHTML = `
-            <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
-            <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
-            <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
-            <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
-            <div><strong>Points</strong><br>${stats.points ?? 0}</div>
-            <div><strong>Position</strong><br>${userPos}</div>
+      // Champions League
+      const championsLeagueCard = document.getElementById('championsLeagueCard');
+      const championsLeagueRef = ref(db, 'championsleague');
+      const championsLeagueTeamsRef = ref(db, 'championsleague/teams');
+      let hasJoinedChampionsLeague = (localStorage.getItem('inChampionsLeague') === 'true');
+
+      onValue(championsLeagueRef, snap => {
+        const data = snap.val() || {};
+        const stage = data.stage || 'Group Stage';
+        const prizePool = data.prizePool || 500;
+        const season = data.season || 'Season 1';
+        const entryStatus = data.entryStatus || 'Free Entry';
+
+        onValue(championsLeagueTeamsRef, teamsSnap => {
+          let teams = [];
+          teamsSnap.forEach(team => teams.push(team.val()));
+          const shownTeams = teams.slice(0, 3);
+          const totalTeams = teams.length;
+          const spotsLeft = Math.max(10 - totalTeams, 0);
+
+          const teamsHTML = shownTeams.map(team => `
+            <div class="team-box">
+              <strong>${team.name}</strong><br>@${team.username}
+            </div>
+          `).join('');
+
+          championsLeagueCard.innerHTML = `
+            <h3>Champions League</h3>
+            <p style="text-align:center; color: #90ee90; font-weight:bold;">${season} - ${entryStatus}</p>
+            <div class="match-teams">${teamsHTML}</div>
+            <div class="stats-grid">
+              <div><strong>Stage</strong><br>${stage}</div>
+              <div><strong>Prize Pool</strong><br>R${prizePool}</div>
+              <div><strong>Teams</strong><br>${totalTeams}</div>
+              <div><strong>Spots Left</strong><br>${spotsLeft}</div>
+            </div>
+            <button id="championsLeagueBtn" class="${hasJoinedChampionsLeague ? 'exit' : 'enabled'}">
+              ${hasJoinedChampionsLeague ? 'Exit Champions League' : 'Join Champions League'}
+            </button>
+            <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by Hoyoo Esports | Powered by DLS 25</p>
           `;
 
-          // Matchmaking fetch
-          const matchRef = ref(db, 'matches/' + userTeam);
-          const matchContainer = document.getElementById('matchmakingCard');
-
-          onValue(matchRef, snapshot => {
-            const matchData = snapshot.val();
-
-            if (matchData) {
-              const opponent = matchData.opponentTeam;
-              const matchTime = new Date(matchData.matchTime);
-              const matchCode = matchData.matchCode;
-
-              // Get both teams' info
-              const userTeamData = allTeams.find(t => t.name === userTeam);
-              const opponentTeamData = allTeams.find(t => t.name === opponent);
-
-              const userPosText = userTeamData ? `#${allTeams.findIndex(t => t.name === userTeam) + 1}` : 'N/A';
-              const oppPosText = opponentTeamData ? `#${allTeams.findIndex(t => t.name === opponent) + 1}` : 'N/A';
-
-              const opponentOwner = opponentTeamData?.username || 'Unknown';
-
-              const updateMatchCard = (timeDiff) => {
-                const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-                matchContainer.innerHTML = `
-                  <h3>Matchmaking</h3>
-                  <div class="match-line">
-                    <span class="team-name">${userTeam}</span>
-                    <span class="vs">VS</span>
-                    <span class="team-name">${opponent}</span>
-                  </div>
-                  <div class="user-line">
-                    <span>${userPosText} @${userUsername}</span>
-                    <span>${oppPosText} @${opponentOwner}</span>
-                  </div>
-                  <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
-                  <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
-                `;
-
-                if (timeDiff <= 0) {
-                  const connectBtn = document.getElementById('connectButton');
-                  connectBtn.onclick = () => {
-                    const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
-                    window.open(waLink, '_blank');
-                  };
-                }
-              };
-
-              const interval = setInterval(() => {
-                const now = new Date();
-                const timeDiff = matchTime - now;
-
-                updateMatchCard(timeDiff);
-
-                if (timeDiff <= 0) clearInterval(interval);
-              }, 1000);
-
+          const btn = document.getElementById('championsLeagueBtn');
+          btn.onclick = () => {
+            if (!hasJoinedChampionsLeague) {
+              if (totalTeams >= 10) {
+                alert('Champions League is full (Max 10 teams)');
+                return;
+              }
+              const userTeamData = { name: userTeam, username: userUsername, joinedAt: Date.now() };
+              const teamSlotRef = ref(db, `championsleague/teams/${userTeam}`);
+              teamSlotRef.set(userTeamData).then(() => {
+                hasJoinedChampionsLeague = true;
+                localStorage.setItem('inChampionsLeague', 'true');
+              });
             } else {
-              matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+              const teamSlotRef = ref(db, `championsleague/teams/${userTeam}`);
+              teamSlotRef.remove().then(() => {
+                hasJoinedChampionsLeague = false;
+                localStorage.removeItem('inChampionsLeague');
+              });
             }
-          });
-
+          };
         });
       });
-    }
+    });
   });
-</script>
-
-</body>
+}
+});
+</script></body>
 </html>
