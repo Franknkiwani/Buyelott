@@ -493,34 +493,20 @@ onAuthStateChanged(auth, user => {
         setupChampionsLeagueMeta();
 
         joinBtn.onclick = async () => {
-  console.log('Join button clicked');
-  const champTeamsRef = ref(db, 'championsleague/teams');
-  const champTeamsSnap = await get(champTeamsRef);
-  const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
-  const userInLeague = teamsObj[userTeam] !== undefined;
+          const champTeamsRef = ref(db, 'championsleague/teams');
+          const champTeamsSnap = await get(champTeamsRef);
+          const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
+          const userEntry = teamsObj[userTeam];
+          const userInLeague = userEntry !== undefined && userEntry.knockedOut !== true;
+          const isKnockedOut = userEntry?.knockedOut === true;
 
-  console.log('User in League:', userInLeague);
-
-  if (userInLeague) {
-    console.log('Exiting Champions League...');
-    await remove(ref(db, 'championsleague/teams/' + userTeam));
-    localStorage.removeItem('inChampionsLeague');
-    championsCard.classList.remove('champions-premium', 'shimmer');
-  } else {
-    const totalTeams = Object.keys(teamsObj).length;
-    if (totalTeams < 10) {
-      console.log('Joining Champions League...');
-      await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
-      localStorage.setItem('inChampionsLeague', 'true');
-      championsCard.classList.add('champions-premium', 'shimmer');
-      triggerConfetti();
-    } else {
-      alert('Champions League is full (10 teams max)');
-      return;
-    }
-  }
-  refreshChampionsLeagueCard(userTeam, userUsername);
-};
+          if (userInLeague) {
+            showConfirmExitPopup(async (confirmed) => {
+              if (confirmed) {
+                await set(ref(db, 'championsleague/teams/' + userTeam), {
+                  username: userUsername,
+                  knockedOut: true
+                });
                 localStorage.removeItem('inChampionsLeague');
                 championsCard.classList.remove('champions-premium', 'shimmer');
                 refreshChampionsLeagueCard(userTeam, userUsername);
@@ -623,29 +609,6 @@ window.onload = () => {
 // Dummy confetti trigger
 function triggerConfetti() {
   console.log('Confetti animation triggered!');
-}
-function showKnockedOutPopup() {
-  const popup = document.createElement('div');
-  popup.innerHTML = `
-    <div style="
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.5);display:flex;
-      align-items:center;justify-content:center;z-index:9999;">
-      <div style="
-        background:white;padding:20px;border-radius:10px;max-width:90%;width:400px;
-        box-shadow:0 0 20px rgba(0,0,0,0.2);text-align:center;">
-        <h3 style="color:#ff3b3b;">You've been knocked out</h3>
-        <p>You can't join again until next season. Please try again then!</p>
-        <button style="
-          background:#007bff;color:white;padding:10px 20px;
-          border:none;border-radius:5px;margin-top:15px;">Okay</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(popup);
-  popup.querySelector('button').onclick = () => {
-    document.body.removeChild(popup);
-  };
 }
 </script>
 </body>
