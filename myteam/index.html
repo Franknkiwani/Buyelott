@@ -338,7 +338,6 @@ const auth = getAuth(app);
 
 const joinBtn = document.getElementById('joinChampionsLeagueBtn');
 const championsCard = document.getElementById('championsLeagueCard');
-const champBadge = document.getElementById('championsBadge');
 
 function refreshChampionsLeagueCard(userTeam, userUsername) {
   const champTeamsRef = ref(db, 'championsleague/teams');
@@ -365,17 +364,11 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
       joinBtn.classList.remove('enabled');
       joinBtn.style.backgroundColor = 'red';
       joinBtn.disabled = false;
-
-      champBadge.style.display = 'block';
-      champBadge.style.width = '100%';
-      champBadge.textContent = 'Champions League Member';
     } else {
       joinBtn.textContent = 'Join Champions League';
       joinBtn.classList.add('enabled');
       joinBtn.style.backgroundColor = '#007bff';
       joinBtn.disabled = totalTeams >= 10;
-
-      champBadge.style.display = 'none';
     }
   });
 }
@@ -459,11 +452,20 @@ onAuthStateChanged(auth, user => {
           if (userInLeague) {
             await remove(ref(db, 'championsleague/teams/' + userTeam));
             localStorage.removeItem('inChampionsLeague');
+            championsCard.classList.remove('champions-premium', 'shimmer');
+            const badge = document.querySelector('.champions-premium .badge');
+            if (badge) badge.remove();
           } else {
             const totalTeams = Object.keys(teamsObj).length;
             if (totalTeams < 10) {
               await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
               localStorage.setItem('inChampionsLeague', 'true');
+              championsCard.classList.add('champions-premium', 'shimmer');
+              const badge = document.createElement('span');
+              badge.classList.add('badge');
+              badge.textContent = 'Champions League Member';
+              championsCard.appendChild(badge);
+              triggerConfetti();
             } else {
               alert('Champions League is full (10 teams max)');
               return;
@@ -535,6 +537,19 @@ onAuthStateChanged(auth, user => {
     });
   }
 });
+
+function triggerConfetti() {
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.left = `${Math.random() * 100}%`;
+    confetti.style.animationDelay = `${Math.random() * 2}s`;
+    document.body.appendChild(confetti);
+    setTimeout(() => {
+      confetti.remove();
+    }, 1000);
+  }
+}
 </script>
 </body>
 </html>
