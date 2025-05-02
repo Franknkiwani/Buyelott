@@ -98,7 +98,9 @@
 </div><div class="card" id="matchmakingCard">
   <h3>Matchmaking</h3>
   <p style="text-align:center;">Loading match info...</p>
-</div><script type="module">
+</div>
+
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -123,9 +125,13 @@
       const userRef = ref(db, 'users/' + user.uid);
       onValue(userRef, snapshot => {
         const userData = snapshot.val();
-        document.getElementById('teamName').textContent = 'Team: ' + (userData?.team || 'N/A');
+        if (!userData) return;
 
-        const stats = userData?.stats || {};
+        const userTeam = userData.team;
+        const userUsername = userData.username;
+        document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
+
+        const stats = userData.stats || {};
 
         // Fetch all teams to calculate position
         const teamsRef = ref(db, 'teams');
@@ -141,7 +147,7 @@
 
           allTeams.sort((a, b) => b.points - a.points);
 
-          let position = allTeams.findIndex(t => t.name === userData.team) + 1;
+          let position = allTeams.findIndex(t => t.name === userTeam) + 1;
           if (position === 0) position = 'N/A';
 
           document.getElementById('statsGrid').innerHTML = `
@@ -153,74 +159,72 @@
             <div><strong>Position</strong><br>${position}</div>
           `;
         });
-      });
 
-      // Matchmaking fetch
-      const matchRef = ref(db, 'matches/' + user.uid);
-      onValue(matchRef, snapshot => {
-        const matchData = snapshot.val();
+        // Matchmaking fetch (corrected)
+        const matchRef = ref(db, 'matches/' + userTeam);
         const matchContainer = document.getElementById('matchmakingCard');
 
-        if (matchData) {
-          const opponent = matchData.opponentTeam;
-          const matchTime = new Date(matchData.matchTime);
-          const matchCode = matchData.matchCode;
+        onValue(matchRef, snapshot => {
+          const matchData = snapshot.val();
 
-          // Fetch opponent owner username
-          const opponentRef = ref(db, 'teams/' + opponent);
-          onValue(opponentRef, oppSnap => {
-            const opponentData = oppSnap.val();
-            const opponentOwner = opponentData?.username || 'Unknown';
+          if (matchData) {
+            const opponent = matchData.opponentTeam;
+            const matchTime = new Date(matchData.matchTime);
+            const matchCode = matchData.matchCode;
 
-            const interval = setInterval(() => {
-              const now = new Date();
-              const timeDiff = matchTime - now;
+            // Fetch opponent owner username
+            const opponentRef = ref(db, 'teams/' + opponent);
+            onValue(opponentRef, oppSnap => {
+              const opponentData = oppSnap.val();
+              const opponentOwner = opponentData?.username || 'Unknown';
 
-              const connectBtnHTML = `<button id=\"connectButton\" disabled>Connect</button>`;
+              const interval = setInterval(() => {
+                const now = new Date();
+                const timeDiff = matchTime - now;
 
-              if (timeDiff <= 0) {
+                if (timeDiff <= 0) {
+                  matchContainer.innerHTML = `
+                    <h3>Matchmaking</h3>
+                    <div class="match-teams">
+                      <div class="team-box"><strong>${userTeam}</strong>${userUsername}</div>
+                      <div class="team-box"><strong>${opponent}</strong>${opponentOwner}</div>
+                    </div>
+                    <div class="timer">Match Started!</div>
+                    <button id="connectButton" class="enabled">Connect</button>
+                  `;
+                  const connectBtn = document.getElementById('connectButton');
+                  connectBtn.onclick = () => {
+                    const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
+                    window.open(waLink, '_blank');
+                  };
+                  clearInterval(interval);
+                  return;
+                }
+
+                const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
                 matchContainer.innerHTML = `
                   <h3>Matchmaking</h3>
-                  <div class=\"match-teams\">
-                    <div class=\"team-box\"><strong>${userData.team}</strong>${userData.username}</div>
-                    <div class=\"team-box\"><strong>${opponent}</strong>${opponentOwner}</div>
+                  <div class="match-teams">
+                    <div class="team-box"><strong>${userTeam}</strong>${userUsername}</div>
+                    <div class="team-box"><strong>${opponent}</strong>${opponentOwner}</div>
                   </div>
-                  <div class=\"timer\">Match Started!</div>
-                  <button id=\"connectButton\">Connect</button>
+                  <div class="timer">Starts in: ${hours}h ${minutes}m ${seconds}s</div>
+                  <button disabled>Connect</button>
                 `;
-                const connectBtn = document.getElementById('connectButton');
-                connectBtn.classList.add('enabled');
-                connectBtn.disabled = false;
-                connectBtn.onclick = () => {
-                  const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
-                  window.open(waLink, '_blank');
-                };
-                clearInterval(interval);
-                return;
-              }
+              }, 1000);
+            });
 
-              const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-              const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+          } else {
+            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+          }
+        });
 
-              matchContainer.innerHTML = `
-                <h3>Matchmaking</h3>
-                <div class=\"match-teams\">
-                  <div class=\"team-box\"><strong>${userData.team}</strong>${userData.username}</div>
-                  <div class=\"team-box\"><strong>${opponent}</strong>${opponentOwner}</div>
-                </div>
-                <div class=\"timer\">Starts in: ${hours}h ${minutes}m ${seconds}s</div>
-                ${connectBtnHTML}
-              `;
-            }, 1000);
-
-          });
-
-        } else {
-          matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
-        }
       });
     }
   });
-</script></body>
+</script>
+</body>
 </html>
