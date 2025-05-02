@@ -1,3 +1,4 @@
+
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -280,7 +281,30 @@ header::after {
   -ms-user-select: none;     /* Internet Explorer / Edge */
   user-select: none;         /* Standard */
 }
-  </style>
+#notificationToast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  min-width: 220px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 9999;
+  font-family: sans-serif;
+}
+#notificationToast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+#notificationToast.success { background-color: #28a745; }
+#notificationToast.error { background-color: #dc3545; }
+#notificationToast.info { background-color: #007bff; }
+#notificationToast.warning { background-color: #fd7e14; }
+</style>
 </head>
 <body>
 <header>
@@ -510,11 +534,12 @@ onAuthStateChanged(auth, user => {
                 localStorage.removeItem('inChampionsLeague');
                 championsCard.classList.remove('champions-premium', 'shimmer');
                 refreshChampionsLeagueCard(userTeam, userUsername);
+                showNotification('You exited the Champions League.', 'info');
               }
             });
           } else {
             if (isKnockedOut) {
-              alert('You have been knocked out. You can rejoin next season.');
+              showNotification('You have been knocked out. You can rejoin next season.', 'error');
               return;
             }
 
@@ -528,8 +553,9 @@ onAuthStateChanged(auth, user => {
               championsCard.classList.add('champions-premium', 'shimmer');
               triggerConfetti();
               refreshChampionsLeagueCard(userTeam, userUsername);
+              showNotification('You joined the Champions League!', 'success');
             } else {
-              alert('Champions League is full (16 teams max)');
+              showNotification('Champions League is full (16 teams max)', 'warning');
             }
           }
         };
@@ -609,6 +635,24 @@ window.onload = () => {
 // Dummy confetti trigger
 function triggerConfetti() {
   console.log('Confetti animation triggered!');
+}
+
+// Modern Notification Function
+function showNotification(message, type = 'info') {
+  let notif = document.getElementById('notificationToast');
+  if (!notif) {
+    notif = document.createElement('div');
+    notif.id = 'notificationToast';
+    document.body.appendChild(notif);
+  }
+  notif.className = '';
+  notif.classList.add('show', type);
+  notif.textContent = message;
+
+  clearTimeout(notif._hideTimer);
+  notif._hideTimer = setTimeout(() => {
+    notif.classList.remove('show');
+  }, 4000);
 }
 </script>
 </body>
