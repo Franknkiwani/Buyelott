@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,21 +53,30 @@
       padding-bottom: 5px;
       text-align: center;
     }
-    .match-teams {
+    .match-line {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 15px 0;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
-    .team-box {
+    .match-line .team-name {
       background: #2a2a2a;
+      padding: 5px 10px;
       border-radius: 5px;
-      padding: 8px 12px;
-      text-align: center;
     }
-    .team-box strong {
-      display: block;
-      margin-bottom: 3px;
+    .match-line .vs {
+      color: #ccc;
+    }
+    .user-line {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 10px;
     }
     .timer {
       font-weight: bold;
@@ -90,12 +100,17 @@
     }
   </style>
 </head>
-<body><header>
+<body>
+<header>
   <h1>DLS DASHBOARD</h1>
   <div class="team-name" id="teamName">Team: Loading...</div>
-</header><div class="stats-grid" id="statsGrid">
+</header>
+
+<div class="stats-grid" id="statsGrid">
   <!-- Stats will load here -->
-</div><div class="card" id="matchmakingCard">
+</div>
+
+<div class="card" id="matchmakingCard">
   <h3>Matchmaking</h3>
   <p style="text-align:center;">Loading match info...</p>
 </div>
@@ -133,7 +148,6 @@
 
         const stats = userData.stats || {};
 
-        // Fetch all teams to calculate position
         const teamsRef = ref(db, 'teams');
         onValue(teamsRef, teamSnap => {
           let allTeams = [];
@@ -141,14 +155,17 @@
             const teamData = team.val();
             allTeams.push({
               name: team.key,
-              points: teamData.stats.points || 0
+              points: teamData.stats?.points || 0,
+              username: teamData.username || 'Unknown'
             });
           });
 
+          // Sort for leaderboard
           allTeams.sort((a, b) => b.points - a.points);
 
-          let position = allTeams.findIndex(t => t.name === userTeam) + 1;
-          if (position === 0) position = 'N/A';
+          // Get user position
+          let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
+          if (userPos === 0) userPos = 'N/A';
 
           document.getElementById('statsGrid').innerHTML = `
             <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
@@ -156,75 +173,78 @@
             <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
             <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
             <div><strong>Points</strong><br>${stats.points ?? 0}</div>
-            <div><strong>Position</strong><br>${position}</div>
+            <div><strong>Position</strong><br>${userPos}</div>
           `;
-        });
 
-        // Matchmaking fetch (corrected)
-        const matchRef = ref(db, 'matches/' + userTeam);
-        const matchContainer = document.getElementById('matchmakingCard');
+          // Matchmaking fetch
+          const matchRef = ref(db, 'matches/' + userTeam);
+          const matchContainer = document.getElementById('matchmakingCard');
 
-        onValue(matchRef, snapshot => {
-          const matchData = snapshot.val();
+          onValue(matchRef, snapshot => {
+            const matchData = snapshot.val();
 
-          if (matchData) {
-            const opponent = matchData.opponentTeam;
-            const matchTime = new Date(matchData.matchTime);
-            const matchCode = matchData.matchCode;
+            if (matchData) {
+              const opponent = matchData.opponentTeam;
+              const matchTime = new Date(matchData.matchTime);
+              const matchCode = matchData.matchCode;
 
-            // Fetch opponent owner username
-            const opponentRef = ref(db, 'teams/' + opponent);
-            onValue(opponentRef, oppSnap => {
-              const opponentData = oppSnap.val();
-              const opponentOwner = opponentData?.username || 'Unknown';
+              // Get both teams' info
+              const userTeamData = allTeams.find(t => t.name === userTeam);
+              const opponentTeamData = allTeams.find(t => t.name === opponent);
 
-              const interval = setInterval(() => {
-                const now = new Date();
-                const timeDiff = matchTime - now;
+              const userPosText = userTeamData ? `#${allTeams.findIndex(t => t.name === userTeam) + 1}` : 'N/A';
+              const oppPosText = opponentTeamData ? `#${allTeams.findIndex(t => t.name === opponent) + 1}` : 'N/A';
 
-                if (timeDiff <= 0) {
-                  matchContainer.innerHTML = `
-                    <h3>Matchmaking</h3>
-                    <div class="match-teams">
-                      <div class="team-box"><strong>${userTeam}</strong>${userUsername}</div>
-                      <div class="team-box"><strong>${opponent}</strong>${opponentOwner}</div>
-                    </div>
-                    <div class="timer">Match Started!</div>
-                    <button id="connectButton" class="enabled">Connect</button>
-                  `;
-                  const connectBtn = document.getElementById('connectButton');
-                  connectBtn.onclick = () => {
-                    const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
-                    window.open(waLink, '_blank');
-                  };
-                  clearInterval(interval);
-                  return;
-                }
+              const opponentOwner = opponentTeamData?.username || 'Unknown';
 
+              const updateMatchCard = (timeDiff) => {
                 const hours = Math.floor(timeDiff / (1000 * 60 * 60));
                 const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
                 matchContainer.innerHTML = `
                   <h3>Matchmaking</h3>
-                  <div class="match-teams">
-                    <div class="team-box"><strong>${userTeam}</strong>${userUsername}</div>
-                    <div class="team-box"><strong>${opponent}</strong>${opponentOwner}</div>
+                  <div class="match-line">
+                    <span class="team-name">${userTeam}</span>
+                    <span class="vs">VS</span>
+                    <span class="team-name">${opponent}</span>
                   </div>
-                  <div class="timer">Starts in: ${hours}h ${minutes}m ${seconds}s</div>
-                  <button disabled>Connect</button>
+                  <div class="user-line">
+                    <span>${userPosText} @${userUsername}</span>
+                    <span>${oppPosText} @${opponentOwner}</span>
+                  </div>
+                  <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
+                  <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
                 `;
+
+                if (timeDiff <= 0) {
+                  const connectBtn = document.getElementById('connectButton');
+                  connectBtn.onclick = () => {
+                    const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
+                    window.open(waLink, '_blank');
+                  };
+                }
+              };
+
+              const interval = setInterval(() => {
+                const now = new Date();
+                const timeDiff = matchTime - now;
+
+                updateMatchCard(timeDiff);
+
+                if (timeDiff <= 0) clearInterval(interval);
               }, 1000);
-            });
 
-          } else {
-            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
-          }
+            } else {
+              matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
+            }
+          });
+
         });
-
       });
     }
   });
 </script>
+
 </body>
 </html>
