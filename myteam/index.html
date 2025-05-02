@@ -4,9 +4,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>DLS Dashboard</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');body {
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');body {
   margin: 0;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Inter', sans-serif;
   background-color: #1e1e2f;
   color: #fff;
 }
@@ -34,41 +34,77 @@ header {
   font-weight: 600;
 }
 
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  padding: 20px;
+.section {
   background-color: #25273c;
   border-radius: 10px;
   margin: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
 }
 
 .stat-card {
   background-color: #2b2f44;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 12px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .stat-title {
   font-size: 12px;
   color: #888;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   text-transform: uppercase;
 }
 
 .stat-value {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   color: #66c7ff;
 }
 
 .position {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   color: #ffb74d;
+}
+
+.match-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.countdown {
+  font-size: 14px;
+  margin: 8px 0;
+  color: #ccc;
+}
+
+.connect-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #66c7ff;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+@media(max-width: 500px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
 }
 
   </style>
@@ -77,8 +113,14 @@ header {
   <header>
     <div class="header-text">DLS DASHBOARD</div>
     <div class="team-name" id="teamName">Loading team...</div>
-  </header>  <div class="stats-container" id="statsContainer">
-    <!-- Stats will load here -->
+  </header>  <div class="section">
+    <div class="stats-grid" id="statsContainer">
+      <!-- Stats will load here -->
+    </div>
+  </div>  <div class="section" id="matchContainer">
+    <div class="match-title" id="matchTitle">No match found</div>
+    <div class="countdown" id="matchCountdown"></div>
+    <a href="#" id="connectBtn" class="connect-btn" style="display:none;">Connect to Opponent</a>
   </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -121,42 +163,83 @@ header {
       `;
     }
 
+    function startCountdown(targetTimestamp, countdownElem) {
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetTimestamp - now;
+
+        if (distance < 0) {
+          countdownElem.textContent = "Match time reached!";
+          clearInterval(timerInterval);
+          return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdownElem.textContent = `${hours}h ${minutes}m ${seconds}s remaining`;
+      }
+
+      updateCountdown();
+      const timerInterval = setInterval(updateCountdown, 1000);
+    }
+
     onAuthStateChanged(auth, (user) => {
       const teamNameElem = document.getElementById('teamName');
+      const matchTitle = document.getElementById('matchTitle');
+      const matchCountdown = document.getElementById('matchCountdown');
+      const connectBtn = document.getElementById('connectBtn');
+
       if (user) {
         const userId = user.uid;
         const userRef = ref(database, 'users/' + userId);
 
         // Fetch team name
         const teamRef = ref(database, 'users/' + userId + '/team');
+        let userTeamName = '';
         onValue(teamRef, (snapshot) => {
           const teamName = snapshot.val();
           teamNameElem.textContent = teamName ? teamName : 'No team';
+          userTeamName = teamName;
         });
 
         // Fetch stats
         const statsRef = ref(database, 'users/' + userId + '/stats');
         onValue(statsRef, (snapshot) => {
-          const stats = snapshot.val();
-          if (stats) {
-            // Fetch leaderboard to determine position
-            const leaderboardRef = ref(database, 'leaderboard');
-            onValue(leaderboardRef, (leaderboardSnapshot) => {
-              const leaderboard = leaderboardSnapshot.val();
-              const sortedTeams = Object.values(leaderboard)
-                .sort((a, b) => b.points - a.points);
+          const stats = snapshot.val() ?? { wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 };
 
-              const userTeamName = stats.team;
-              const userPosition = sortedTeams.findIndex(team => team.name === userTeamName) + 1;
-              renderStats(stats, userPosition);
-            });
+          const leaderboardRef = ref(database, 'leaderboard');
+          onValue(leaderboardRef, (leaderboardSnapshot) => {
+            const leaderboard = leaderboardSnapshot.val();
+            const sortedTeams = Object.values(leaderboard).sort((a, b) => b.points - a.points);
+
+            const position = sortedTeams.findIndex(team => team.name === userTeamName) + 1;
+            renderStats(stats, position);
+          });
+        });
+
+        // Fetch match info (admin assigned)
+        const matchRef = ref(database, 'matches/' + userTeamName);
+        onValue(matchRef, (snapshot) => {
+          const matchData = snapshot.val();
+          if (matchData && matchData.opponent && matchData.time && matchData.code) {
+            matchTitle.textContent = `${userTeamName} VS ${matchData.opponent}`;
+
+            const matchTime = new Date(matchData.time).getTime();
+            startCountdown(matchTime, matchCountdown);
+
+            connectBtn.style.display = 'block';
+            connectBtn.href = `https://wa.me/27846737224?text=Match%20make%20code:%20${matchData.code}`;
           } else {
-            renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
+            matchTitle.textContent = "No match found";
+            matchCountdown.textContent = "";
+            connectBtn.style.display = 'none';
           }
         });
+
       } else {
         teamNameElem.textContent = 'Not logged in';
-        renderStats({ wins: 0, losses: 0, draws: 0, gamesPlayed: 0, points: 0 }, 0);
       }
     });
   </script></body>
