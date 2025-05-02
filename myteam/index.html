@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,6 +115,20 @@
       display: block;
       margin-bottom: 3px;
     }
+    /* Champions League Styling */
+    #matchmakingCard.champions-league {
+      border: 2px solid gold;
+      background-color: #2a2a2a;
+    }
+
+    #matchmakingCard.champions-league h3 {
+      color: gold;
+    }
+
+    #matchmakingCard.champions-league .timer {
+      color: gold;
+    }
+
   </style>
 </head>
 <body>
@@ -156,250 +171,194 @@
     <li>Special leaderboard ranking</li>
   </ul>
 </div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.appspot.com",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-const joinBtn = document.getElementById('joinChampionsLeagueBtn');
-const championsCard = document.getElementById('championsLeagueCard');
+  const joinBtn = document.getElementById('joinChampionsLeagueBtn');
+  const championsCard = document.getElementById('championsLeagueCard');
 
-function showToast(message, color = '#007bff') {
-  const toast = document.createElement('div');
-  toast.textContent = message;
-  toast.style.position = 'fixed';
-  toast.style.bottom = '20px';
-  toast.style.left = '50%';
-  toast.style.transform = 'translateX(-50%)';
-  toast.style.backgroundColor = color;
-  toast.style.color = 'white';
-  toast.style.padding = '10px 20px';
-  toast.style.borderRadius = '5px';
-  toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-  toast.style.zIndex = 9999;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
+  function showToast(message, color = '#333') {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.background = color;
+    toast.style.color = 'white';
+    toast.style.padding = '8px 16px';
+    toast.style.borderRadius = '5px';
+    toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+    toast.style.zIndex = 9999;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }
 
-function refreshChampionsLeagueCard(userTeam, userUsername) {
-  const champTeamsRef = ref(db, 'championsleague/teams');
-  onValue(champTeamsRef, snapshot => {
-    const teamsData = [];
-    snapshot.forEach(teamSnap => {
-      const teamName = teamSnap.key;
-      const username = teamSnap.val().username || 'Unknown';
-      teamsData.push({ teamName, username });
+  function refreshChampionsLeagueCard(userTeam, userUsername) {
+    const champTeamsRef = ref(db, 'championsleague/teams');
+    const championBadge = document.getElementById('championBadge');
+    const extrasCard = document.getElementById('championsLeagueExtras');
+
+    onValue(champTeamsRef, snapshot => {
+      const teamsData = [];
+      snapshot.forEach(teamSnap => {
+        const teamName = teamSnap.key;
+        const username = teamSnap.val().username || 'Unknown';
+        teamsData.push({ teamName, username });
+      });
+
+      const totalTeams = teamsData.length;
+      const spotsLeft = 10 - totalTeams;
+      const userInLeague = teamsData.some(t => t.teamName === userTeam);
+
+      championsCard.querySelector('.stats-grid').innerHTML = `
+        <div><strong>Stage</strong><br><span style='color:red;' id='stageText'>Loading...</span></div>
+        <div><strong>Prize Pool</strong><br>$1000</div>
+        <div><strong>Teams</strong><br>${totalTeams}</div>
+        <div><strong>Spots Left</strong><br>${spotsLeft}</div>
+      `;
+
+      const teamNameEl = document.getElementById('teamName');
+
+      if (userInLeague) {
+        joinBtn.textContent = 'Exit Champions League';
+        joinBtn.classList.remove('enabled');
+        joinBtn.style.backgroundColor = 'red';
+        joinBtn.disabled = false;
+
+        // Add gold star + color to team name
+        teamNameEl.innerHTML = `Team: <span style="color:gold;">${userTeam} ★</span>`;
+
+        // Show badge + extras
+        championBadge.style.display = 'inline-block';
+        extrasCard.style.display = 'block';
+
+        showToast('You are in the Champions League!', '#d4af37');
+
+      } else {
+        joinBtn.textContent = 'Join Champions League';
+        joinBtn.classList.add('enabled');
+        joinBtn.style.backgroundColor = '#007bff';
+        joinBtn.disabled = totalTeams >= 10;
+
+        // Reset team name plain
+        teamNameEl.textContent = 'Team: ' + (userTeam || 'N/A');
+
+        // Hide badge + extras
+        championBadge.style.display = 'none';
+        extrasCard.style.display = 'none';
+      }
     });
+  }
 
-    const totalTeams = teamsData.length;
-    const spotsLeft = 10 - totalTeams;
-    const userInLeague = teamsData.some(t => t.teamName === userTeam);
+  function setupChampionsLeagueMeta() {
+    const champMetaRef = ref(db, 'championsleague/meta');
+    const stageEl = document.getElementById('stageText');
+    const countdownEl = document.getElementById('seasonCountdown');
 
-    championsCard.querySelector('.stats-grid').innerHTML = `
-      <div><strong>Stage</strong><br><span style='color:red;' id='stageText'>Loading...</span></div>
-      <div><strong>Prize Pool</strong><br>$1000</div>
-      <div><strong>Teams</strong><br>${totalTeams}</div>
-      <div><strong>Spots Left</strong><br>${spotsLeft}</div>
-    `;
+    onValue(champMetaRef, snapshot => {
+      const meta = snapshot.val();
+      stageEl.textContent = meta?.stage || 'Unknown Stage';
 
-    if (userInLeague) {
-      joinBtn.textContent = 'Exit Champions League';
-      joinBtn.classList.remove('enabled');
-      joinBtn.style.backgroundColor = 'red';
-      joinBtn.disabled = false;
+      const endTime = new Date(meta?.seasonEnd);
+      const updateCountdown = () => {
+        const now = new Date();
+        const diff = endTime - now;
+        if (diff <= 0) {
+          countdownEl.textContent = 'Season ended';
+          clearInterval(timer);
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        countdownEl.textContent = `Ends in ${days}d ${hours}h`;
+      };
 
-      // Add gold badge to team name
-      const teamNameEl = document.getElementById('teamName');
-      teamNameEl.innerHTML = `Team: <span style="color:gold;">${userTeam} ★</span>`;
+      updateCountdown();
+      const timer = setInterval(updateCountdown, 60000);
+    });
+  }
 
-      // Optional toast alert
-      showToast('You are in the Champions League!', '#d4af37');
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      const userRef = ref(db, 'users/' + user.uid);
+      onValue(userRef, snapshot => {
+        const userData = snapshot.val();
+        if (!userData) return;
 
+        const userTeam = userData.team;
+        const userUsername = userData.username;
+        document.getElementById('teamName').textContent = `Team: ${userTeam || 'Loading...'}`;
+
+        // Refresh the Champions League card with the user's team data
+        refreshChampionsLeagueCard(userTeam, userUsername);
+      });
     } else {
-      joinBtn.textContent = 'Join Champions League';
-      joinBtn.classList.add('enabled');
-      joinBtn.style.backgroundColor = '#007bff';
-      joinBtn.disabled = totalTeams >= 10;
-
-      // Remove gold badge if previously added
-      const teamNameEl = document.getElementById('teamName');
-      teamNameEl.textContent = 'Team: ' + (userTeam || 'N/A');
+      // If user is not authenticated
+      document.getElementById('teamName').textContent = 'Team: Not logged in';
     }
   });
-}
 
-function setupChampionsLeagueMeta() {
-  const champMetaRef = ref(db, 'championsleague/meta');
-  const stageEl = document.getElementById('stageText');
-  const countdownEl = document.getElementById('seasonCountdown');
+  // Handle join/exit Champions League button click
+  joinBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (!user) {
+      showToast('Please log in first.', 'red');
+      return;
+    }
 
-  onValue(champMetaRef, snapshot => {
-    const meta = snapshot.val();
-    stageEl.textContent = meta?.stage || 'Unknown Stage';
-
-    const endTime = new Date(meta?.seasonEnd);
-    const updateCountdown = () => {
-      const now = new Date();
-      const diff = endTime - now;
-      if (diff <= 0) {
-        countdownEl.textContent = 'Season ended';
-        clearInterval(timer);
-        return;
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      countdownEl.textContent = `Ends in ${days}d ${hours}h`;
-    };
-
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 60000);
-  });
-}
-
-onAuthStateChanged(auth, user => {
-  if (user) {
     const userRef = ref(db, 'users/' + user.uid);
     onValue(userRef, snapshot => {
       const userData = snapshot.val();
-      if (!userData) return;
+      const userTeam = userData?.team;
+      if (!userTeam) {
+        showToast('You don\'t have a team assigned yet.', 'red');
+        return;
+      }
 
-      const userTeam = userData.team;
-      const userUsername = userData.username;
-      document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
+      const champTeamsRef = ref(db, 'championsleague/teams/' + userTeam);
 
-      const stats = userData.stats || {};
-
-      const teamsRef = ref(db, 'teams');
-      onValue(teamsRef, teamSnap => {
-        let allTeams = [];
-        teamSnap.forEach(team => {
-          const teamData = team.val();
-          allTeams.push({
-            name: team.key,
-            points: teamData.stats?.points || 0,
-            username: teamData.username || 'Unknown'
+      onValue(champTeamsRef, (snap) => {
+        if (snap.exists()) {
+          // User is currently in the Champions League, so remove them
+          remove(champTeamsRef);
+          showToast('You have exited the Champions League.', 'red');
+        } else {
+          // User is not in the Champions League, so add them
+          set(champTeamsRef, {
+            username: userData.username,
+            teamName: userTeam,
           });
-        });
+          showToast('You have joined the Champions League!', '#4CAF50');
+        }
 
-        allTeams.sort((a, b) => b.points - a.points);
-
-        let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
-        if (userPos === 0) userPos = 'N/A';
-
-        document.getElementById('statsGrid').innerHTML = `
-          <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
-          <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
-          <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
-          <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
-          <div><strong>Points</strong><br>${stats.points ?? 0}</div>
-          <div><strong>Position</strong><br>${userPos}</div>
-        `;
-
-        refreshChampionsLeagueCard(userTeam, userUsername);
-        setupChampionsLeagueMeta();
-
-        joinBtn.onclick = async () => {
-          const champTeamsRef = ref(db, 'championsleague/teams');
-          const champTeamsSnap = await get(champTeamsRef);
-          const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
-          const userInLeague = teamsObj[userTeam] !== undefined;
-
-          if (userInLeague) {
-            await remove(ref(db, 'championsleague/teams/' + userTeam));
-            localStorage.removeItem('inChampionsLeague');
-            showToast('You exited Champions League', 'red');
-          } else {
-            const totalTeams = Object.keys(teamsObj).length;
-            if (totalTeams < 10) {
-              await set(ref(db, 'championsleague/teams/' + userTeam), { username: userUsername });
-              localStorage.setItem('inChampionsLeague', 'true');
-              showToast('You joined Champions League!', '#007bff');
-            } else {
-              alert('Champions League is full (10 teams max)');
-              return;
-            }
-          }
-          refreshChampionsLeagueCard(userTeam, userUsername);
-        };
-
-        const matchRef = ref(db, 'matches/' + userTeam);
-        const matchContainer = document.getElementById('matchmakingCard');
-
-        onValue(matchRef, snapshot => {
-          const matchData = snapshot.val();
-
-          if (matchData) {
-            const opponent = matchData.opponentTeam;
-            const matchTime = new Date(matchData.matchTime);
-            const matchCode = matchData.matchCode;
-
-            const userTeamData = allTeams.find(t => t.name === userTeam);
-            const opponentTeamData = allTeams.find(t => t.name === opponent);
-
-            const userPosText = userTeamData ? `#${allTeams.findIndex(t => t.name === userTeam) + 1}` : 'N/A';
-            const oppPosText = opponentTeamData ? `#${allTeams.findIndex(t => t.name === opponent) + 1}` : 'N/A';
-
-            const opponentOwner = opponentTeamData?.username || 'Unknown';
-
-            const updateMatchCard = (timeDiff) => {
-              const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-              const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-              matchContainer.innerHTML = `
-                <h3>Matchmaking</h3>
-                <div class="match-line">
-                  <span class="team-name">${userTeam}</span>
-                  <span class="vs">VS</span>
-                  <span class="team-name">${opponent}</span>
-                </div>
-                <div class="user-line">
-                  <span>${userPosText} @${userUsername}</span>
-                  <span>${oppPosText} @${opponentOwner}</span>
-                </div>
-                <div class="timer">${timeDiff <= 0 ? 'Match Started!' : `Starts in: ${hours}h ${minutes}m ${seconds}s`}</div>
-                <button id="connectButton" ${timeDiff <= 0 ? 'class="enabled"' : 'disabled'}>${timeDiff <= 0 ? 'Connect' : 'Connect'}</button>
-              `;
-
-              if (timeDiff <= 0) {
-                const connectBtn = document.getElementById('connectButton');
-                connectBtn.onclick = () => {
-                  const waLink = `https://wa.me/27846737224?text=Match%20Make%20Code:%20${matchCode}`;
-                  window.open(waLink, '_blank');
-                };
-              }
-            };
-
-            const interval = setInterval(() => {
-              const now = new Date();
-              const timeDiff = matchTime - now;
-              updateMatchCard(timeDiff);
-              if (timeDiff <= 0) clearInterval(interval);
-            }, 1000);
-          } else {
-            matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
-          }
-        });
-
+        // Refresh the Champions League status after action
+        refreshChampionsLeagueCard(userTeam, userData.username);
       });
     });
-  }
-});
+  });
+
+  // Initialize Champions League meta (stage, countdown, etc.)
+  setupChampionsLeagueMeta();
 </script>
+
 </body>
 </html>
