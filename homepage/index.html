@@ -11,7 +11,7 @@
       font-family: Arial, sans-serif;
     }
 
-          header {
+         header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,7 +23,7 @@
   position: sticky;
   top: 0;
   z-index: 999;
-}
+} 
 
     .logo {
       display: flex;
@@ -311,7 +311,76 @@
 .leaderboard-table ul li {
   margin-bottom: 3px;
 }
+
+/* Fullscreen loading screen */
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* Loader container */
+.loader-container {
+  text-align: center;
+}
+
+/* Soccer ball spinner */
+.soccer-ball {
+  width: 80px;
+  height: 80px;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
+  background-size: cover;
+  animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+/* Spin animation */
+@keyframes spinBall {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Glow pulse animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff007f, 0 0 30px #ff9900;
+  }
+  50% {
+    box-shadow: 0 0 20px #ff007f, 0 0 30px #00ffff, 0 0 40px #00ff00;
+  }
+}
+
+/* Loading text */
+.loading-text {
+  margin-top: 12px;
+  color: white;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+}
+
+/* Hide animation */
+#loadingScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Disable text selection on the entire page */
+* {
+  user-select: none;
+}
   </style>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
   <header>
@@ -320,10 +389,12 @@
       <div class="league-text">CHAMPIONS LEAGUE</div>
     </div>
     <div class="header-buttons">
-      <button class="glass-btn">My Team</button>
+      <a href="myteam.html">
+        <button class="glass-btn">My Team</button>
+      </a>
     </div>
   </header>
-  
+</body>
   <div class="section-title">Upcoming Fixtures</div>
   <div id="fixtureContainer"></div>
   <button id="staticPrevBtn" class="prev-fixtures-btn">Previous Fixtures</button>
@@ -369,6 +440,14 @@
     </tbody>
   </table>
 </div>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="loader-container">
+    <div class="soccer-ball"></div>
+    <div class="loading-text">Loading season...</div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -579,6 +658,18 @@
     if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
     return `in ${seconds} second${seconds > 1 ? 's' : ''}`;
   }
+  window.addEventListener('load', () => {
+    // After 5 seconds hide loading screen
+    setTimeout(() => {
+      const loader = document.getElementById('loadingScreen');
+      loader.classList.add('hidden');
+
+      // Remove fully after fade out
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 500);
+    }, 5000);
+  });
 </script>
 </body>
 </html>
