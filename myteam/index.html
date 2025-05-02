@@ -120,21 +120,28 @@
 <header>
   <h1>DLS DASHBOARD</h1>
   <div class="team-name" id="teamName">Team: Loading...</div>
-</header><div class="stats-grid" id="statsGrid">
+</header>
+
+<div class="stats-grid" id="statsGrid">
   <!-- Stats will load here -->
-</div><div class="card" id="matchmakingCard">
+</div>
+
+<div class="card" id="matchmakingCard">
   <h3>Matchmaking</h3>
   <p style="text-align:center;">Loading match info...</p>
-</div><div class="card" id="championsLeagueCard">
+</div>
+
+<div class="card" id="championsLeagueCard">
   <h3>Champions League</h3>
   <p style="text-align:center; color: #90ee90; font-weight:bold;">Season 1 - Free Entry!</p>
   <p id="stageText" style="text-align:center; font-weight:bold; color:red; margin-top:5px;">Group Stage</p>
-<p id="seasonCountdown" style="text-align:center; color:#aaa; font-size:0.85rem; margin-top:5px;">Loading season end...</p>
+  <p id="seasonCountdown" style="text-align:center; color:#aaa; font-size:0.85rem; margin-top:5px;">Loading season end...</p>
   <div class="match-teams"></div>
   <div class="stats-grid"></div>
   <button id="joinChampionsLeagueBtn" class="enabled">Join Champions League</button>
-  <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by Hoyoo Esports | Powered by DLS 25</p>
+  <p style="text-align:center; font-size:0.8rem; color:#777;">Hosted by hoyoo Esports | Powered by DLS 25</p>
 </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -173,8 +180,8 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     const userInLeague = teamsData.some(t => t.teamName === userTeam);
 
     championsCard.querySelector('.stats-grid').innerHTML = `
-      <div><strong>Stage</strong><br><span style='color:red;'>Group Stage</span></div>
-      <div><strong>Prize Pool</strong><br>R500</div>
+      <div><strong>Stage</strong><br><span style='color:red;' id='stageText'>Loading...</span></div>
+      <div><strong>Prize Pool</strong><br>$1000</div>
       <div><strong>Teams</strong><br>${totalTeams}</div>
       <div><strong>Spots Left</strong><br>${spotsLeft}</div>
     `;
@@ -190,6 +197,34 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
       joinBtn.style.backgroundColor = '#007bff';
       joinBtn.disabled = totalTeams >= 10;
     }
+  });
+}
+
+function setupChampionsLeagueMeta() {
+  const champMetaRef = ref(db, 'championsleague/meta');
+  const stageEl = document.getElementById('stageText');
+  const countdownEl = document.getElementById('seasonCountdown');
+
+  onValue(champMetaRef, snapshot => {
+    const meta = snapshot.val();
+    stageEl.textContent = meta?.stage || 'Unknown Stage';
+
+    const endTime = new Date(meta?.seasonEnd);
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = endTime - now;
+      if (diff <= 0) {
+        countdownEl.textContent = 'Season ended';
+        clearInterval(timer);
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      countdownEl.textContent = `Ends in ${days}d ${hours}h`;
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 60000);
   });
 }
 
@@ -233,6 +268,7 @@ onAuthStateChanged(auth, user => {
         `;
 
         refreshChampionsLeagueCard(userTeam, userUsername);
+        setupChampionsLeagueMeta();
 
         joinBtn.onclick = async () => {
           const champTeamsRef = ref(db, 'championsleague/teams');
@@ -256,7 +292,6 @@ onAuthStateChanged(auth, user => {
           refreshChampionsLeagueCard(userTeam, userUsername);
         };
 
-        // Matchmaking fetch
         const matchRef = ref(db, 'matches/' + userTeam);
         const matchContainer = document.getElementById('matchmakingCard');
 
