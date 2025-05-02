@@ -178,6 +178,8 @@ const auth = getAuth(app);
 
 const joinBtn = document.getElementById('joinChampionsLeagueBtn');
 const championsCard = document.getElementById('championsLeagueCard');
+const championBadge = document.getElementById('championBadge');
+const championsLeagueExtras = document.getElementById('championsLeagueExtras');
 
 function refreshChampionsLeagueCard(userTeam, userUsername) {
   const champTeamsRef = ref(db, 'championsleague/teams');
@@ -205,11 +207,22 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
       joinBtn.classList.remove('enabled');
       joinBtn.style.backgroundColor = 'red';
       joinBtn.disabled = false;
+
+      championBadge.style.display = 'inline';
+      championsLeagueExtras.style.display = 'block';
+      championsCard.style.border = '2px solid gold';
+      championsCard.style.boxShadow = '0 0 10px gold';
+
     } else {
       joinBtn.textContent = 'Join Champions League';
       joinBtn.classList.add('enabled');
       joinBtn.style.backgroundColor = '#007bff';
       joinBtn.disabled = totalTeams >= 10;
+
+      championBadge.style.display = 'none';
+      championsLeagueExtras.style.display = 'none';
+      championsCard.style.border = '';
+      championsCard.style.boxShadow = '';
     }
   });
 }
@@ -360,6 +373,7 @@ onAuthStateChanged(auth, user => {
               updateMatchCard(timeDiff);
               if (timeDiff <= 0) clearInterval(interval);
             }, 1000);
+
           } else {
             matchContainer.innerHTML = `<h3>Matchmaking</h3><p style='text-align:center;'>No match found.</p>`;
           }
