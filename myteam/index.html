@@ -217,6 +217,63 @@ header::after {
   opacity: 0;
   animation: confetti 1s forwards;
 }
+/* Neon Glow effect */
+.champions-premium {
+  border: 2px solid gold;
+  box-shadow: 0 0 15px gold, 0 0 30px gold inset;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
+  50% { box-shadow: 0 0 20px gold, 0 0 40px gold inset; }
+  100% { box-shadow: 0 0 10px gold, 0 0 20px gold inset; }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.champions-premium.shimmer {
+  background: linear-gradient(120deg, #f8d7b4, #f8f9fa, #f8d7b4);
+  background-size: 400% 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Gold Badge Icon */
+.champions-premium .badge {
+  display: inline-block;
+  background-color: gold;
+  color: black;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 12px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Confetti animation */
+@keyframes confetti {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(0, 100px); opacity: 0; }
+}
+
+.confetti {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: gold;
+  opacity: 0;
+  animation: confetti 1s forwards;
+}
   </style>
 </head>
 <body>
