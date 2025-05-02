@@ -372,7 +372,40 @@ const joinBtn = document.getElementById('joinChampionsLeagueBtn');
 const championsCard = document.getElementById('championsLeagueCard');
 const MAX_TEAMS = 16;
 
-// Refresh Champions League Card
+// Notification Function - Force reflow for repeated triggers
+function showNotification(message, type = 'info') {
+  let notif = document.getElementById('notificationToast');
+  if (!notif) {
+    notif = document.createElement('div');
+    notif.id = 'notificationToast';
+    notif.style.position = 'fixed';
+    notif.style.bottom = '20px';
+    notif.style.left = '50%';
+    notif.style.transform = 'translateX(-50%)';
+    notif.style.background = '#333';
+    notif.style.color = 'white';
+    notif.style.padding = '10px 20px';
+    notif.style.borderRadius = '5px';
+    notif.style.zIndex = '9999';
+    notif.style.transition = 'opacity 0.3s';
+    document.body.appendChild(notif);
+  }
+
+  notif.textContent = message;
+  notif.className = type; // set type class if you want different colors (optional)
+
+  // Force reflow to reset animation
+  notif.style.opacity = '0';
+  void notif.offsetWidth; // trigger reflow
+  notif.style.opacity = '1';
+
+  clearTimeout(notif._hideTimer);
+  notif._hideTimer = setTimeout(() => {
+    notif.style.opacity = '0';
+  }, 4000);
+}
+
+// Refresh Champions League Card with Knocked-Out status
 function refreshChampionsLeagueCard(userTeam, userUsername) {
   const champTeamsRef = ref(db, 'championsleague/teams');
   onValue(champTeamsRef, snapshot => {
@@ -390,6 +423,7 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     const activeTeams = teamsData.filter(t => !t.knockedOut).length;
     const userEntry = teamsData.find(t => t.teamName === userTeam);
     const userInLeague = userEntry !== undefined && !userEntry.knockedOut;
+    const userIsKnockedOut = userEntry?.knockedOut === true;
 
     championsCard.querySelector('.stats-grid').innerHTML = `
       <div><strong>Teams (REMAINING)</strong><br>${activeTeams}</div>
@@ -397,16 +431,31 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     `;
 
     if (userInLeague) {
+      // User is active in league
       joinBtn.textContent = 'Exit Champions League';
-      joinBtn.classList.remove('enabled');
-      joinBtn.style.backgroundColor = 'red';
       joinBtn.disabled = false;
+      joinBtn.classList.remove('disabled');
+      joinBtn.style.backgroundColor = 'red';
+      championsCard.classList.add('champions-premium', 'shimmer');
+
+    } else if (userIsKnockedOut) {
+      // User is knocked out
+      joinBtn.textContent = 'Knocked Out';
+      joinBtn.disabled = true;
+      joinBtn.classList.add('disabled');
+      joinBtn.style.backgroundColor = 'grey';
+      championsCard.classList.remove('champions-premium', 'shimmer');
+
     } else {
+      // User is not in league and not knocked out
       joinBtn.textContent = 'Join Champions League';
-      joinBtn.classList.add('enabled');
-      joinBtn.style.backgroundColor = '#007bff';
       joinBtn.disabled = activeTeams >= MAX_TEAMS;
+      joinBtn.classList.toggle('disabled', joinBtn.disabled);
+      joinBtn.style.backgroundColor = joinBtn.disabled ? 'grey' : '#007bff';
+      championsCard.classList.remove('champions-premium', 'shimmer');
     }
+
+    joinBtn.style.opacity = joinBtn.disabled ? '0.6' : '1';
   });
 }
 
@@ -581,24 +630,6 @@ window.onload = () => {
 // Confetti (dummy)
 function triggerConfetti() {
   console.log('Confetti animation triggered!');
-}
-
-// Notification Function
-function showNotification(message, type = 'info') {
-  let notif = document.getElementById('notificationToast');
-  if (!notif) {
-    notif = document.createElement('div');
-    notif.id = 'notificationToast';
-    document.body.appendChild(notif);
-  }
-  notif.className = '';
-  notif.classList.add('show', type);
-  notif.textContent = message;
-
-  clearTimeout(notif._hideTimer);
-  notif._hideTimer = setTimeout(() => {
-    notif.classList.remove('show');
-  }, 4000);
 }
 </script>
 </body>
