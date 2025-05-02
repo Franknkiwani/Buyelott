@@ -1,79 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DLS 25 Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DLS Dashboard</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d1117;
-      color: #ffffff;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background: linear-gradient(90deg, #1e293b, #0f172a);
-      border-bottom: 2px solid #2563eb;
-      box-shadow: 0 0 10px #2563eb;
-    }
-    .header-title {
-      font-size: 1rem;
-      text-transform: uppercase;
-      color: #60a5fa;
-      font-weight: bold;
-    }
-    .team-name {
-      font-size: 1rem;
-      color: #22d3ee;
-    }
-    .stats-container {
-      max-width: 600px;
-      margin: 2rem auto;
-      background: #1e293b;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #2563eb;
-      border: 1px solid #2563eb;
-    }
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #334155;
-    }
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-    .stat-label {
-      color: #93c5fd;
-    }
-    .stat-value {
-      font-weight: bold;
-      color: #22d3ee;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #0f0f1a;
+  color: #ffffff;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  background-color: #121232;
+  padding: 0 16px;
+  box-shadow: 0 0 10px #0ff, 0 0 20px #f0f;
+  border-bottom: 1px solid #333;
+}
+
+.header-text {
+  color: #ffffff;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.team-name {
+  color: #0ff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 0 5px #0ff;
+}
+
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-title">DLS Dashboard</div>
-    <div class="team-name" id="teamName">Loading...</div>
-  </div>
-  <div class="stats-container">
-    <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-value" id="wins">0</span></div>
-    <div class="stat-row"><span class="stat-label">Losses</span><span class="stat-value" id="losses">0</span></div>
-    <div class="stat-row"><span class="stat-label">Draws</span><span class="stat-value" id="draws">0</span></div>
-    <div class="stat-row"><span class="stat-label">Games Played</span><span class="stat-value" id="gamesPlayed">0</span></div>
-    <div class="stat-row"><span class="stat-label">Points</span><span class="stat-value" id="points">0</span></div>
-  </div>
-
-  <script type="module">
+  <header>
+    <div class="header-text">DLS DASHBOARD</div>
+    <div class="team-name" id="teamName">Loading team...</div>
+  </header>  <script type="module">
+    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -86,63 +58,17 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+    const database = getDatabase(app);
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userId = user.uid;
-        const userRef = ref(db, 'users/' + userId);
+    // Replace 'currentUserId' with your actual logic to get current user ID
+    const currentUserId = 'REPLACE_WITH_USER_ID';
 
-        // Fetch the user data
-        get(userRef).then((snapshot) => {
-          if (snapshot.exists()) {
-            const userData = snapshot.val();
-
-            // Get the username of the logged-in user
-            const userUsername = userData.username;
-
-            // Reference the teams node and search for the team with the same username as the owner
-            const teamsRef = ref(db, 'teams');
-            get(teamsRef).then((teamsSnapshot) => {
-              if (teamsSnapshot.exists()) {
-                const teams = teamsSnapshot.val();
-                let userTeam = null;
-
-                // Loop through the teams and find the one where username matches
-                for (let teamId in teams) {
-                  if (teams[teamId].username === userUsername) {
-                    userTeam = teams[teamId];
-                    break;
-                  }
-                }
-
-                if (userTeam) {
-                  // Display the stats for the user's team
-                  document.getElementById('teamName').textContent = userTeam.teamName;
-                  document.getElementById('wins').textContent = userTeam.stats?.wins ?? 0;
-                  document.getElementById('losses').textContent = userTeam.stats?.losses ?? 0;
-                  document.getElementById('draws').textContent = userTeam.stats?.draws ?? 0;
-                  document.getElementById('gamesPlayed').textContent = userTeam.stats?.gamesPlayed ?? 0;
-                  document.getElementById('points').textContent = userTeam.stats?.points ?? 0;
-                } else {
-                  document.getElementById('teamName').textContent = "No team found";
-                }
-              } else {
-                console.log("No teams data available");
-              }
-            });
-          } else {
-            console.log("User data not found");
-          }
-        }).catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
-      } else {
-        console.log("No user is signed in");
-      }
+    const teamRef = ref(database, 'users/' + currentUserId + '/team');
+    onValue(teamRef, (snapshot) => {
+      const teamName = snapshot.val();
+      document.getElementById('teamName').textContent = teamName ? teamName : 'No team';
     });
-  </script>
-</body>
+  </script></body>
 </html>
