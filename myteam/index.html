@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DLS Dashboard</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f1f4f7; /* Light gray background */
+      background-color: #f5f7fa;
     }
 
     /* Header Styling */
@@ -27,7 +27,7 @@
     }
 
     .header .left {
-      font-size: 18px; /* Smaller size for 'DLS Dashboard' */
+      font-size: 16px;
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -38,7 +38,6 @@
       font-weight: normal;
     }
 
-    /* Neon Glow Effect for the Header's Edges */
     @keyframes neonGlowHeader {
       0% {
         box-shadow: 0 0 10px #3498db, 0 0 20px #3498db, 0 0 30px #2980b9;
@@ -48,112 +47,84 @@
       }
     }
 
-    /* Main Content Area */
+    /* Dashboard Content */
     .dashboard-content {
-      padding: 20px;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    /* Title Styling */
-    h3 {
-      text-align: center;
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-    /* Glassy Table Design */
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
+    /* Stats Card Styling */
+    .stats-card {
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.1); /* Transparent background */
-      backdrop-filter: blur(10px); /* Glass effect */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    th, td {
-      padding: 12px;
+      padding: 20px;
+      width: 180px;
       text-align: center;
-      border: 1px solid #ddd;
-      color: #fff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .stats-card .stat-title {
       font-size: 16px;
-    }
-
-    th {
-      background: linear-gradient(135deg, #3498db, #8e44ad);
-      color: white;
+      color: #333;
       font-weight: bold;
+      margin-bottom: 10px;
     }
 
-    td {
-      background-color: rgba(255, 255, 255, 0.2); /* Light background */
+    .stats-card .stat-value {
+      font-size: 22px;
+      color: #3498db;
     }
 
-    tr:nth-child(even) td {
-      background-color: rgba(255, 255, 255, 0.3);
+    .stats-card .stat-value.win {
+      color: #2ecc71;
     }
 
-    tr:hover td {
-      background-color: rgba(255, 255, 255, 0.4);
+    .stats-card .stat-value.loss {
+      color: #e74c3c;
     }
 
-    /* Button Styling */
-    .btn {
-      background-color: #3498db; /* Blue */
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    .stats-card .stat-value.draw {
+      color: #f39c12;
     }
-
-    .btn:hover {
-      background-color: #2980b9; /* Darker blue */
-    }
-
   </style>
 </head>
 <body>
+
+  <!-- Header -->
   <div class="header">
     <div class="left">DLS Dashboard</div>
     <div class="right" id="teamName">Loading...</div>
   </div>
 
-  <div class="dashboard-content">
-    <h3>User Stats</h3>
-    <table id="userStatsTable">
-      <thead>
-        <tr>
-          <th>Wins</th>
-          <th>Losses</th>
-          <th>Draws</th>
-          <th>Played</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data will be populated dynamically -->
-      </tbody>
-    </table>
+  <!-- Stats Container -->
+  <div class="dashboard-content" id="userStats">
+    <!-- Stats will be inserted here -->
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
+    // Import Firebase libraries
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // Your web app's Firebase configuration
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
       databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
       measurementId: "G-LLT6F9WRKH"
@@ -162,35 +133,70 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    // Initialize Firestore
-    const db = getFirestore(app);
-
-    // Function to fetch and display user stats from Firestore
-    async function displayUserStats() {
-      const usersRef = collection(db, "users");
-      const querySnapshot = await getDocs(usersRef);
-      
-      let tableBody = document.getElementById('userStatsTable').getElementsByTagName('tbody')[0];
-
-      querySnapshot.forEach(doc => {
-        const data = doc.data().stats;  // Get the stats from the document
-        
-        const row = tableBody.insertRow();
-        row.innerHTML = `
-          <td>${data.wins}</td>
-          <td>${data.losses}</td>
-          <td>${data.draws}</td>
-          <td>${data.gamesPlayed}</td>
-          <td>${data.points}</td>
-        `;
-      });
+    // Function to render stats
+    function renderStats(stats) {
+      const statsContainer = document.getElementById('userStats');
+      statsContainer.innerHTML = `
+        <div class="stats-card">
+          <div class="stat-title">Wins</div>
+          <div class="stat-value win">${stats.wins || 0}</div>
+        </div>
+        <div class="stats-card">
+          <div class="stat-title">Losses</div>
+          <div class="stat-value loss">${stats.losses || 0}</div>
+        </div>
+        <div class="stats-card">
+          <div class="stat-title">Draws</div>
+          <div class="stat-value draw">${stats.draws || 0}</div>
+        </div>
+        <div class="stats-card">
+          <div class="stat-title">Games Played</div>
+          <div class="stat-value">${stats.gamesPlayed || 0}</div>
+        </div>
+        <div class="stats-card">
+          <div class="stat-title">Points</div>
+          <div class="stat-value">${stats.points || 0}</div>
+        </div>
+      `;
     }
 
-    // Fetch and display user stats when the page loads
-    window.onload = function() {
-      displayUserStats();
-    };
+    // Listen for auth state and fetch data
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userId = user.uid;
+        const userRef = ref(db, 'users/' + userId);
+
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            const teamName = userData.teamName || 'No Team Assigned';
+            const stats = userData.stats || {};
+
+            // Set team name
+            document.getElementById('teamName').innerText = teamName;
+
+            // Render stats
+            renderStats(stats);
+          } else {
+            document.getElementById('teamName').innerText = 'User not found';
+            document.getElementById('userStats').innerHTML = 'No stats available';
+          }
+        }).catch((error) => {
+          console.error(error);
+          document.getElementById('teamName').innerText = 'Error fetching data';
+          document.getElementById('userStats').innerHTML = 'Error fetching stats';
+        });
+
+      } else {
+        document.getElementById('teamName').innerText = 'Not logged in';
+        document.getElementById('userStats').innerHTML = 'Please log in to view stats';
+      }
+    });
+
   </script>
+
 </body>
 </html>
