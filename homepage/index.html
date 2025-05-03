@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>DLS Champions League</title>
-  <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+<style>
+  body {
+  margin: 0;
+  background-color: #000;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-         header {
+header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -19,219 +19,126 @@
   background-color: #000;
   border-bottom: 2px solid;
   border-image: linear-gradient(to right, blue, cyan) 1;
-
   position: sticky;
   top: 0;
   z-index: 999;
-} 
+}
 
-    .logo {
-      display: flex;
-      align-items: center;
-    }
+.logo {
+  display: flex;
+  align-items: center;
+}
 
-    .circle {
-      background-color: yellow;
-      color: black;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 5px;
-      font-size: 14px;
-    }
+.circle {
+  background-color: yellow;
+  color: black;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 5px;
+  font-size: 14px;
+}
 
-    .league-text {
-      font-size: 16px;
-    }
+.league-text {
+  font-size: 16px;
+}
 
-    .header-buttons {
-      display: flex;
-      gap: 8px;
-    }
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
 
-    .glass-btn {
-      backdrop-filter: blur(6px);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      padding: 5px 10px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+.glass-btn {
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
 
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 
-    #fixtureContainer,
-    #tableContainer {
-      margin: 15px auto;
-      max-width: 300px;
-      background-color: #111;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #333;
-    }
+#fixtureContainer,
+#tableContainer {
+  margin: 15px auto;
+  max-width: 300px;
+  background-color: #111;
+  padding: 10px;
+  border-radius: 15px; /* Curved corners */
+  border: 1px solid #333;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional: Adds shadow for depth */
+}
 
-    #staticPrevBtn {
-      display: block;
-      margin: 0 auto 15px;
-      max-width: 300px;
-    }
+#staticPrevBtn {
+  display: block;
+  margin: 0 auto 15px;
+  max-width: 300px;
+}
 
-    #fixtureContainer span {
-      font-size: 14px;
-    }
+#fixtureContainer span {
+  font-size: 14px;
+}
 
-    .match-team {
-      color: white;
-      font-weight: bold;
-    }
+.match-team {
+  color: white;
+  font-weight: bold;
+}
 
-    .match-vs {
-      color: cyan;
-    }
+.match-vs {
+  color: cyan;
+}
 
-    .match-status {
-      color: lime;
-    }
+.match-status {
+  color: lime;
+}
 
-    .match-score {
-      color: gray;
-    }
+.match-score {
+  color: gray;
+}
 
-    .match-info {
-      text-align: center;
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      background-color: #222;
-    }
+.match-info {
+  text-align: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+}
 
-    .match-info .score {
-      font-size: 16px;
-      margin-top: 10px;
-    }
+.match-info .score {
+  font-size: 16px;
+  margin-top: 10px;
+}
 
-    .winning-team {
-      color: green;
-    }
+.winning-team {
+  color: green;
+}
 
-    .losing-team {
-      color: red;
-    }
+.losing-team {
+  color: red;
+}
 
-    .team-owner {
-      font-size: 12px;
-      color: gray;
-    }
+.team-owner {
+  font-size: 12px;
+  color: gray;
+}
 
-    .time-ago {
-      font-size: 12px;
-      color: #888;
-    }
+.time-ago {
+  font-size: 12px;
+  color: #888;
+}
 
-    .section-title {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 16px;
-      color: white;
-    }
-
-    .leaderboard-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .leaderboard-table th,
-    .leaderboard-table td {
-      padding: 6px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .leaderboard-table th {
-      border-bottom: 1px solid #444;
-      color: cyan;
-    }
-
-    .leaderboard-table td {
-      border-bottom: 1px solid #222;
-    }
-
-    .username {
-      color: gray;
-      font-size: 12px;
-    }
-
-    .points {
-      text-align: right;
-      color: yellow;
-    }
-
-    .prev-fixtures-btn {
-      background: linear-gradient(90deg, #007cf0, #00dfd8);
-      color: black;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .prev-fixtures-btn:hover {
-      opacity: 0.85;
-    }
-
-    #popupOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    #popupContent {
-      background-color: #111;
-      padding: 15px;
-      border-radius: 8px;
-      width: 90%;
-      height: 90%;
-      overflow-y: auto;
-      border: 1px solid #333;
-      box-sizing: border-box;
-    }
-
-    #popupContent h3 {
-      text-align: center;
-      color: cyan;
-      margin-top: 0;
-    }
-
-    .closePopup {
-      background: red;
-      color: white;
-      border: none;
-      padding: 5px 8px;
-      float: right;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .section-title {
+.section-title {
   text-align: center;
   font-size: 1.5rem;
   font-weight: bold;
@@ -248,13 +155,15 @@
   border-spacing: 0 10px;
   background-color: #111;
   color: white;
-  border-radius: 10px;
+  border-radius: 15px; /* Curved corners */
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Optional: Adds shadow for depth */
 }
 
 .leaderboard-table thead {
   background: linear-gradient(to right, #0d47a1, #1976d2);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
 .leaderboard-table th {
@@ -268,8 +177,8 @@
 
 .leaderboard-table tbody tr {
   background-color: #222;
-  border-radius: 8px;
-  transition: transform 0.2s ease;
+  border-radius: 8px; /* Curved row edges */
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .leaderboard-table tbody tr:hover {
@@ -281,44 +190,108 @@
   padding: 12px 10px;
   vertical-align: top;
   font-size: 13px;
+  border-radius: 8px; /* Curved corners for individual cells */
 }
 
-/* Highlight positions cleanly */
-.leaderboard-table td:first-child {
-  font-weight: bold;
-}
-
-/* Colors for top 3 */
+/* Optional: Curved corners for the first and last row cells */
 .leaderboard-table tbody tr:first-child td:first-child {
-  color: gold;
+  border-top-left-radius: 8px;
 }
 
-.leaderboard-table tbody tr:nth-child(2) td:first-child {
-  color: silver;
+.leaderboard-table tbody tr:first-child td:last-child {
+  border-top-right-radius: 8px;
 }
 
-.leaderboard-table tbody tr:nth-child(3) td:first-child {
-  color: #cd7f32; /* Bronze */
+.leaderboard-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
 }
 
-.leaderboard-table ul {
-  margin: 0;
-  padding-left: 18px;
+.leaderboard-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+/* Add light edges around the leaderboard table */
+.leaderboard-table thead, .leaderboard-table tbody tr td {
+  border: 1px solid #444; /* Light border for visibility */
+}
+
+.leaderboard-table tbody tr:first-child td {
+  border-top: 2px solid #00c8ff; /* Highlight top row */
+}
+
+.leaderboard-table tbody tr:last-child td {
+  border-bottom: 2px solid #ffcc00; /* Highlight bottom row */
+}
+
+.username {
+  color: gray;
   font-size: 12px;
-  list-style: disc;
 }
 
-.leaderboard-table ul li {
-  margin-bottom: 3px;
+.points {
+  text-align: right;
+  color: yellow;
 }
 
-/* Fullscreen loading screen */
-#loadingScreen {
+.prev-fixtures-btn {
+  background: linear-gradient(90deg, #007cf0, #00dfd8);
+  color: black;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.prev-fixtures-btn:hover {
+  opacity: 0.85;
+}
+
+#popupOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#popupContent {
+  background-color: #111;
+  padding: 15px;
+  border-radius: 8px;
+  width: 90%;
+  height: 90%;
+  overflow-y: auto;
+  border: 1px solid #333;
+  box-sizing: border-box;
+}
+
+#popupContent h3 {
+  text-align: center;
+  color: cyan;
+  margin-top: 0;
+}
+
+.closePopup {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  float: right;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Fullscreen loading screen */
+#loadingScreen {
+  position: fixed;
+  inset: 0;
   background: linear-gradient(135deg, #000000, #1a1a1a);
   display: flex;
   justify-content: center;
@@ -328,57 +301,80 @@
   transition: opacity 0.5s ease;
 }
 
-/* Loader container */
 .loader-container {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Soccer ball spinner */
 .soccer-ball {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
   border-radius: 50%;
+  margin-bottom: 15px;
 }
 
-/* Spin animation */
 @keyframes spinBall {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Glow pulse animation */
 @keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff007f, 0 0 30px #ff9900;
+  0%,
+  100% {
+    box-shadow: 0 0 15px #00ffff, 0 0 25px #ff007f, 0 0 35px #ff9900;
   }
+
   50% {
-    box-shadow: 0 0 20px #ff007f, 0 0 30px #00ffff, 0 0 40px #00ff00;
+    box-shadow: 0 0 25px #ff007f, 0 0 35px #00ffff, 0 0 45px #00ff00;
   }
 }
 
-/* Loading text */
 .loading-text {
-  margin-top: 12px;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-family: 'Poppins', sans-serif;
   letter-spacing: 1px;
   text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+  text-align: center;
 }
 
-/* Hide animation */
 #loadingScreen.hidden {
   opacity: 0;
   pointer-events: none;
 }
-/* Disable text selection on the entire page */
+
+/* Disable text selection globally */
 * {
   user-select: none;
 }
-  </style>
+
+/* Focus outlines for accessibility */
+.glass-btn:focus,
+.prev-fixtures-btn:focus,
+.closePopup:focus {
+  outline: 2px solid cyan;
+  outline-offset: 2px;
+}
+
+.glass-btn.active {
+  background: linear-gradient(90deg, #00dfd8, #007cf0);
+  color: black;
+  border: 1px solid cyan;
+  box-shadow: 0 0 8px cyan, 0 0 15px #00dfd8;
+  font-weight: bold;
+}
+</style>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -390,7 +386,7 @@
     </div>
     <div class="header-buttons">
       <a href="myteam/">
-        <button class="glass-btn">My Team</button>
+        <button class="glass-btn active">My Team</button>
       </a>
     </div>
   </header>
