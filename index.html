@@ -1,170 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Soccer Login & Sign Up</title>
+<meta charset="UTF-8">
+<title>Soccer Login & Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-* {
-  box-sizing: border-box;
-  user-select: none;
-}
+* { box-sizing: border-box; }
 body {
+  margin: 0; height: 100vh;
   font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
 }
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-.container {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  width: 100%;
-  max-width: 400px;
-  min-height: 520px;
-  border: 3px solid #fff;
-  color: #fff;
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 0;
 }
-h2 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: #ffffff;
-  text-shadow: 0 0 8px #00ffe7;
+.page {
+  position: fixed; inset: 0;
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  padding: 40px 20px; z-index: 1;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
+.page.active { opacity: 1; transform: translateY(0); }
+h2 { color: black; margin-bottom: 20px; }
 input, select {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0 16px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  width: 100%; padding: 12px; margin: 8px 0 16px;
+  border: 2px solid black; border-radius: 8px;
+  background: rgba(255,255,255,0.9); color: black; font-size: 16px;
 }
-input::placeholder {
-  color: #ddd;
-}
+input::placeholder { color: #444; }
 button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background-color: #ff4e50;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  width: 100%; padding: 12px;
+  border: 2px solid black; border-radius: 8px;
+  background: linear-gradient(90deg, #ffde59, #ffa31a);
+  color: black; font-weight: bold; font-size: 16px;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
 }
-button:hover {
-  background-color: #ff0066;
-}
-.toggle {
-  text-align: center;
-  margin-top: 12px;
-}
-.toggle a {
-  color: #00ffe7;
-  text-decoration: none;
-  cursor: pointer;
-}
-.logo {
-  text-align: center;
-  margin-bottom: 15px;
-}
+button:hover { background: linear-gradient(90deg, #ffd000, #ff8c00); }
+.toggle { text-align: center; margin-top: 12px; }
+.toggle a { color: black; cursor: pointer; text-decoration: underline; }
+.logo { text-align: center; margin-bottom: 15px; }
 .soccer-ball {
-  font-size: 50px;
-  display: inline-block;
+  font-size: 50px; display: inline-block;
   animation: spin 4s linear infinite;
-  filter: drop-shadow(0 0 6px #fff);
+  filter: drop-shadow(0 0 6px white);
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.special-input {
-  background: rgba(255,255,255,0.2);
-  border: 2px solid #00ffe7;
-  box-shadow: 0 0 10px #00ffe7;
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
 }
 .notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #333;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.5);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 9999;
-  pointer-events: none;
+  position: fixed; top: 20px; right: 20px;
+  background: black; color: white; padding: 12px 20px;
+  border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  opacity: 0; transition: opacity 0.5s ease; z-index: 9999;
 }
-.notification.show {
-  opacity: 1;
+.notification.show { opacity: 1; }
+#loadingScreen {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  color: white; font-size: 24px; z-index: 9998; display: none;
 }
-
-/* Flower animation */
 .flower {
-  position: fixed;
-  top: -50px;
-  font-size: 24px;
-  animation: fall 4s linear forwards;
-  pointer-events: none;
+  position: absolute; font-size: 24px;
+  animation: fall 3s linear forwards;
 }
 @keyframes fall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-}
-
-/* Loading screen */
-#loadingScreen {
-  position: fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.85);
-  color: #fff;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 10000;
-}
-#loadingScreen h1 {
-  margin-bottom: 20px;
-}
-.loader {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #ff4e50;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spinLoader 1s linear infinite;
-}
-@keyframes spinLoader {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { transform: translateY(0) rotate(0deg);}
+  100% { transform: translateY(100vh) rotate(360deg);}
 }
 </style>
 </head>
 <body>
 
-<div class="container" id="loginForm">
+<div class="overlay"></div>
+
+<div class="page" id="loginForm">
   <div class="logo"><span class="soccer-ball">⚽</span></div>
   <h2>Soccer Login</h2>
-  <input id="loginEmail" type="email" placeholder="Email" required autocomplete="off">
-  <input id="loginPassword" type="password" placeholder="Password" required autocomplete="new-password">
+  <input id="loginEmail" type="email" placeholder="Email" required>
+  <input id="loginPassword" type="password" placeholder="Password" required>
   <button onclick="login()">Login</button>
   <div class="toggle">
     <p><a onclick="forgotPassword()">Forgot Password?</a></p>
@@ -172,19 +99,19 @@ button:hover {
   </div>
 </div>
 
-<div class="container" id="signupForm" style="display:none">
+<div class="page" id="signupForm">
   <div class="logo"><span class="soccer-ball">⚽</span></div>
   <h2>Join Soccer Club</h2>
-  <input id="signupEmail" type="email" placeholder="Email" required autocomplete="off">
-  <input id="signupPassword" type="password" placeholder="Password" required autocomplete="new-password">
-  <input id="signupUsername" class="special-input" type="text" placeholder="@Username" maxlength="8" required>
+  <input id="signupEmail" type="email" placeholder="Email" required>
+  <input id="signupPassword" type="password" placeholder="Password" required>
+  <input id="signupUsername" type="text" placeholder="@Username" maxlength="8" required>
   <select id="signupFlag">
     <option value="🇦🇷">🇦🇷 Argentina</option>
     <option value="🇧🇷">🇧🇷 Brazil</option>
     <option value="🇵🇹">🇵🇹 Portugal</option>
     <option value="🇮🇹">🇮🇹 Italy</option>
   </select>
-  <input id="signupTeam" class="special-input" type="text" placeholder="Team Name" maxlength="12" required>
+  <input id="signupTeam" type="text" placeholder="Team Name" maxlength="12" required>
   <button onclick="signup()">Sign Up</button>
   <div class="toggle">
     <p>Already have an account? <a onclick="showLogin()">Login</a></p>
@@ -192,17 +119,16 @@ button:hover {
 </div>
 
 <div id="notification" class="notification"></div>
-<div id="loadingScreen">
-  <h1>Preparing your team...</h1>
-  <div class="loader"></div>
-</div>
+<div id="loadingScreen">Loading... Please wait</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
+<script>
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -213,11 +139,10 @@ const firebaseConfig = {
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
   measurementId: "G-LLT6F9WRKH"
 };
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
+const auth = firebase.auth();
+const db = firebase.database();
 
 function notify(message) {
   const note = document.getElementById('notification');
@@ -226,113 +151,107 @@ function notify(message) {
   setTimeout(() => note.classList.remove('show'), 3000);
 }
 
-window.showSignup = function() {
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('signupForm').style.display = 'block';
-}
-window.showLogin = function() {
-  document.getElementById('signupForm').style.display = 'none';
-  document.getElementById('loginForm').style.display = 'block';
-}
+function showSignup() { switchPage('loginForm', 'signupForm'); }
+function showLogin() { switchPage('signupForm', 'loginForm'); }
 
-// Enforce input limits even on paste
-document.getElementById('signupUsername').addEventListener('input', function() {
-  if (this.value.length > 8) this.value = this.value.slice(0, 8);
-});
-document.getElementById('signupTeam').addEventListener('input', function() {
-  if (this.value.length > 12) this.value = this.value.slice(0, 12);
-});
-
-function showFlowers() {
-  for (let i = 0; i < 20; i++) {
-    const flower = document.createElement('div');
-    flower.classList.add('flower');
-    flower.style.left = Math.random() * 100 + 'vw';
-    flower.style.animationDuration = (2 + Math.random() * 2) + 's';
-    flower.textContent = '🌸';
-    document.body.appendChild(flower);
-    setTimeout(() => flower.remove(), 4000);
-  }
+function switchPage(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  from.classList.remove('active');
+  setTimeout(() => {
+    from.style.display='none';
+    to.style.display='flex';
+    requestAnimationFrame(()=>to.classList.add('active'));
+  }, 300);
 }
 
-window.signup = async function() {
+function signup() {
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value.trim();
   const username = document.getElementById('signupUsername').value.trim();
   const team = document.getElementById('signupTeam').value.trim();
   const flag = document.getElementById('signupFlag').value;
+  const fullTeamName = flag + ' ' + team;
+
   if (!email || !password || !username || !team) {
     notify("Please fill out all fields.");
     return;
   }
-  const fullTeamName = flag + ' ' + team;
-  const dbRef = ref(db);
-  const usersRef = child(dbRef, 'users');
-  const teamsRef = child(dbRef, 'teams');
 
-  try {
-    const snapshot = await get(usersRef);
-    let usernameTaken = false, teamTaken = false;
+  const usersRef = db.ref('users');
+  usersRef.once('value', snapshot => {
+    let usernameTaken = false;
+    let teamTaken = false;
     snapshot.forEach(userSnap => {
-      const userData = userSnap.val();
-      if (userData.username === username) usernameTaken = true;
-      if (userData.team === fullTeamName) teamTaken = true;
-    });
-    if (usernameTaken) { notify("Username is already taken."); return; }
-    if (teamTaken) { notify("Team name is already taken."); return; }
-
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const userId = userCredential.user.uid;
-
-    await set(ref(db, 'users/' + userId), {
-      name: username,
-      username: username,
-      team: fullTeamName,
-      stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
+      const data = userSnap.val();
+      if (data.username === username) usernameTaken = true;
+      if (data.team === fullTeamName) teamTaken = true;
     });
 
-    await set(ref(db, 'teams/' + fullTeamName), {
-      username: username,
-      stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
-    });
+    if (usernameTaken) { notify("Username is taken."); return; }
+    if (teamTaken) { notify("Team name is taken."); return; }
 
-    showFlowers();
-    document.getElementById('loadingScreen').style.display = 'flex';
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const userId = userCredential.user.uid;
+      db.ref('users/' + userId).set({
+        name: username,
+        username: username,
+        team: fullTeamName,
+        stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
+      });
+      db.ref('teams/' + fullTeamName).set({
+        username: username,
+        stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
+      });
+      showFlowers();
+      document.getElementById('loadingScreen').style.display='flex';
+      setTimeout(()=> window.location.href='homepage/', 3000);
+    })
+    .catch(e=> {console.error(e); notify(e.message);});
+  });
+}
 
-    setTimeout(() => {
-      window.location.href = "homepage/";
-    }, 3000);
+function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  auth.signInWithEmailAndPassword(email, password)
+  .then(()=> {
+    notify("Login successful!");
+    window.location.href='homepage/';
+  }).catch(e=>{
+    console.error(e);
+    notify(e.message);
+  });
+}
 
-  } catch (error) {
-    console.error(error);
-    notify(error.message);
+function forgotPassword() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { notify("Enter your email."); return; }
+  auth.sendPasswordResetEmail(email)
+  .then(()=> notify("Password reset email sent."))
+  .catch(e=> {console.error(e); notify(e.message);});
+}
+
+function showFlowers() {
+  for (let i=0; i<30; i++) {
+    const flower = document.createElement('div');
+    flower.className='flower';
+    flower.style.left = Math.random()*100 + 'vw';
+    flower.style.top = '-30px';
+    flower.textContent = '🌸';
+    document.body.appendChild(flower);
+    setTimeout(()=> flower.remove(), 3000);
   }
 }
 
-window.login = function() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      notify("Login successful!");
-      window.location.href = "homepage/";
-    })
-    .catch(error => {
-      console.error(error);
-      notify(error.message);
-    });
-}
-
-window.forgotPassword = function() {
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email) { notify("Enter your email to reset password."); return; }
-  sendPasswordResetEmail(auth, email)
-    .then(() => notify("Password reset email sent."))
-    .catch(error => {
-      console.error(error);
-      notify(error.message);
-    });
-}
+// On load show login
+document.addEventListener('DOMContentLoaded', ()=>{
+  const login = document.getElementById('loginForm');
+  login.style.display='flex';
+  requestAnimationFrame(()=> login.classList.add('active'));
+});
 </script>
+
 </body>
 </html>
