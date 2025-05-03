@@ -577,10 +577,14 @@ onAuthStateChanged(auth, user => {
           });
         });
 
+        // Sort teams based on points in descending order
         allTeams.sort((a, b) => b.points - a.points);
+
+        // Find user position based on their team
         let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
         if (userPos === 0) userPos = 'N/A';
 
+        // Update stats grid for the user
         document.getElementById('statsGrid').innerHTML = `
           <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
           <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
@@ -590,11 +594,12 @@ onAuthStateChanged(auth, user => {
           <div><strong>Position</strong><br>${userPos}</div>
         `;
 
+        // Refresh the Champions League card and matchmaking
         refreshChampionsLeagueCard(userTeam, userUsername);
-        refreshMatchmakingCard(userTeam); // <--- CALL ADDED HERE
+        refreshMatchmakingCard(userTeam); // Ensure this is set up as expected
         setupChampionsLeagueMeta();
 
-        // Join/Exit Button Handling (Champions League)
+        // Handle Join/Exit Button for the Champions League
         joinBtn.onclick = async () => {
           const champTeamsRef = ref(db, 'championsleague/teams');
           const champTeamsSnap = await get(champTeamsRef);
