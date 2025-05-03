@@ -564,26 +564,28 @@ onAuthStateChanged(auth, user => {
       document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
       const stats = userData.stats || {};
 
-      const teamsRef = ref(db, 'teams');
-      onValue(teamsRef, teamSnap => {
-        let allTeams = [];
-        teamSnap.forEach(team => {
-          const teamData = team.val();
-          allTeams.push({
-            name: team.key,  // Team name
-            points: teamData.stats?.points || 0,  // Points for each team
-            username: teamData.username || 'Unknown'
+      // NEW: Fetch ALL users to calculate correct position
+      const usersRef = ref(db, 'users');
+      onValue(usersRef, usersSnap => {
+        let allUsers = [];
+        usersSnap.forEach(userNode => {
+          const data = userNode.val();
+          allUsers.push({
+            uid: userNode.key,
+            team: data.team || 'Unknown',
+            username: data.username || 'Unknown',
+            points: data.stats?.points || 0
           });
         });
 
-        // Sort all teams based on points (highest points first)
-        allTeams.sort((a, b) => b.points - a.points);
+        // Sort all users by points descending
+        allUsers.sort((a, b) => b.points - a.points);
 
-        // Find the position of the user's team in the sorted array
-        let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
-        if (userPos === 0) userPos = 'N/A';  // In case the user’s team isn't found
+        // Find logged-in user position
+        let userPos = allUsers.findIndex(u => u.uid === user.uid) + 1;
+        if (userPos === 0) userPos = 'N/A';
 
-        // Update stats grid with the user's stats and position
+        // Update stats grid with user's stats + position
         document.getElementById('statsGrid').innerHTML = `
           <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
           <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
@@ -593,12 +595,11 @@ onAuthStateChanged(auth, user => {
           <div><strong>Position</strong><br>${userPos}</div>
         `;
 
-        // Refresh the Champions League card and matchmaking as necessary
+        // Continue with rest of your logic
         refreshChampionsLeagueCard(userTeam, userUsername);
-        refreshMatchmakingCard(userTeam); // Ensure this is set up correctly
+        refreshMatchmakingCard(userTeam);
         setupChampionsLeagueMeta();
 
-        // Handle Join/Exit Button for the Champions League
         joinBtn.onclick = async () => {
           const champTeamsRef = ref(db, 'championsleague/teams');
           const champTeamsSnap = await get(champTeamsRef);
