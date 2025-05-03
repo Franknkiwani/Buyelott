@@ -346,6 +346,7 @@ header::after {
     <li>Special leaderboard ranking</li>
   </ul>
 </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -454,9 +455,10 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
   });
 }
 
-// Refresh Matchmaking Card (NEW FUNCTION)
+// === ENHANCED refreshMatchmakingCard ===
 function refreshMatchmakingCard(userTeam) {
   const matchmakingRef = ref(db, 'matchmaking/matches');
+  const champMetaRef = ref(db, 'championsleague/meta');
 
   onValue(matchmakingRef, snapshot => {
     let userMatch = null;
@@ -467,23 +469,71 @@ function refreshMatchmakingCard(userTeam) {
       const teamB = matchData.teamB;
 
       if (teamA === userTeam || teamB === userTeam) {
-        userMatch = { teamA, teamB, scheduledTime: matchData.scheduledTime || null };
+        userMatch = { ...matchData }; // include matchCode + scheduledTime + teams
       }
     });
 
     if (userMatch) {
       const opponent = userMatch.teamA === userTeam ? userMatch.teamB : userMatch.teamA;
-      const timeText = userMatch.scheduledTime ? `<br><small style="color:#aaa;">Scheduled: ${new Date(userMatch.scheduledTime).toLocaleString()}</small>` : '';
+      const scheduledTime = new Date(userMatch.scheduledTime);
+      const matchCode = userMatch.matchCode;
+      const whatsappNumber = '27846737224'; // +27 84 673 7224 without +
 
-      matchmakingCard.innerHTML = `
-        <h3>Matchmaking</h3>
-        <div class="match-line">
-          <div class="team-name">${userMatch.teamA}</div>
-          <span class="vs">VS</span>
-          <div class="team-name">${userMatch.teamB}</div>
-        </div>
-        <p style="text-align:center;">Your opponent: <strong>${opponent}</strong>${timeText}</p>
-      `;
+      // Fetch stage (championsleague/meta)
+      get(champMetaRef).then(metaSnap => {
+        const meta = metaSnap.val();
+        const stage = meta?.stage || 'Unknown Stage';
+
+        matchmakingCard.innerHTML = `
+          <h3>Matchmaking</h3>
+          <div class="match-line">
+            <div class="team-name">${userMatch.teamA}</div>
+            <span class="vs">VS</span>
+            <div class="team-name">${userMatch.teamB}</div>
+          </div>
+          <p style="text-align:center;">Your opponent: <strong>${opponent}</strong><br>
+            <small style="color:#aaa;">Scheduled: ${scheduledTime.toLocaleString()}</small>
+          </p>
+          <div style="text-align:center;margin-top:10px;">
+            <strong>Stage:</strong> ${stage}
+          </div>
+          <div style="text-align:center;margin-top:10px;">
+            <button id="connectBtn" style="background:grey;color:white;padding:10px 20px;border:none;border-radius:5px;opacity:0.6;" disabled>Connect in <span id="connectCountdown">--:--:--</span></button>
+          </div>
+        `;
+
+        // Countdown + Button Logic
+        const countdownEl = document.getElementById('connectCountdown');
+        const connectBtn = document.getElementById('connectBtn');
+
+        function updateCountdown() {
+          const now = new Date();
+          const diff = scheduledTime - now;
+
+          if (diff <= 0) {
+            countdownEl.textContent = "00:00:00";
+            connectBtn.disabled = false;
+            connectBtn.style.backgroundColor = "green";
+            connectBtn.style.opacity = "1";
+            connectBtn.textContent = "Connect";
+            clearInterval(timer);
+
+            connectBtn.onclick = () => {
+              const message = `Connect match ${matchCode}`;
+              window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+            };
+          } else {
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            countdownEl.textContent = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+          }
+        }
+
+        updateCountdown();
+        const timer = setInterval(updateCountdown, 1000);
+
+      });
     } else {
       matchmakingCard.innerHTML = `
         <h3>Matchmaking</h3>
@@ -492,7 +542,6 @@ function refreshMatchmakingCard(userTeam) {
     }
   });
 }
-
 // Confirm Exit Popup
 function showConfirmExitPopup(callback) {
   const popup = document.createElement('div');
