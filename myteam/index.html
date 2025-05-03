@@ -552,7 +552,6 @@ function setupChampionsLeagueMeta() {
   });
 }
 
-// Auth + Data Handling
 onAuthStateChanged(auth, user => {
   if (user) {
     const userRef = ref(db, 'users/' + user.uid);
@@ -571,20 +570,20 @@ onAuthStateChanged(auth, user => {
         teamSnap.forEach(team => {
           const teamData = team.val();
           allTeams.push({
-            name: team.key,
-            points: teamData.stats?.points || 0,
+            name: team.key,  // Team name
+            points: teamData.stats?.points || 0,  // Points for each team
             username: teamData.username || 'Unknown'
           });
         });
 
-        // Sort teams based on points in descending order
+        // Sort all teams based on points (highest points first)
         allTeams.sort((a, b) => b.points - a.points);
 
-        // Find user position based on their team
+        // Find the position of the user's team in the sorted array
         let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
-        if (userPos === 0) userPos = 'N/A';
+        if (userPos === 0) userPos = 'N/A';  // In case the user’s team isn't found
 
-        // Update stats grid for the user
+        // Update stats grid with the user's stats and position
         document.getElementById('statsGrid').innerHTML = `
           <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
           <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
@@ -594,9 +593,9 @@ onAuthStateChanged(auth, user => {
           <div><strong>Position</strong><br>${userPos}</div>
         `;
 
-        // Refresh the Champions League card and matchmaking
+        // Refresh the Champions League card and matchmaking as necessary
         refreshChampionsLeagueCard(userTeam, userUsername);
-        refreshMatchmakingCard(userTeam); // Ensure this is set up as expected
+        refreshMatchmakingCard(userTeam); // Ensure this is set up correctly
         setupChampionsLeagueMeta();
 
         // Handle Join/Exit Button for the Champions League
@@ -656,19 +655,6 @@ onAuthStateChanged(auth, user => {
     });
   }
 });
-
-// On page load, restore visual effect
-window.onload = () => {
-  const isInChampionsLeague = localStorage.getItem('inChampionsLeague');
-  if (isInChampionsLeague) {
-    championsCard.classList.add('champions-premium', 'shimmer');
-  }
-};
-
-// Confetti (dummy)
-function triggerConfetti() {
-  console.log('Confetti animation triggered!');
-}
 </script>
 </body>
 </html>
