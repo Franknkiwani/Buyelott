@@ -461,21 +461,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// === DOM Elements ===
 const fixtureContainer = document.getElementById('fixtureContainer');
 const popupOverlay = document.getElementById('popupOverlay');
 const popupContent = document.getElementById('previousFixturesContent');
 const closePopupBtn = document.querySelector('.closePopup');
 const staticPrevBtn = document.getElementById('staticPrevBtn');
-
-staticPrevBtn.addEventListener('click', openPreviousFixtures);
-closePopupBtn.addEventListener('click', () => {
-  popupOverlay.style.display = 'none';
-});
-
-// === SEASON COUNTDOWN ===
 const countdownContainer = document.getElementById('seasonCountdown');
+
 let countdownInterval;
 
+// === SEASON COUNTDOWN ===
 onValue(ref(db, 'seasonends'), (snapshot) => {
   const endTime = snapshot.val();
   if (!endTime) {
@@ -511,13 +507,17 @@ function updateCountdown(endDate) {
   `;
 }
 
-// === Load previous fixtures ===
+// === PREVIOUS FIXTURES POPUP ===
+staticPrevBtn.addEventListener('click', () => popupOverlay.style.display = 'flex');
+closePopupBtn.addEventListener('click', () => popupOverlay.style.display = 'none');
+
 onValue(ref(db, 'previousfixtures'), (snapshot) => {
   const previousFixtures = snapshot.val();
   if (!previousFixtures) {
     popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
     return;
   }
+
   let content = '';
   Object.values(previousFixtures).forEach(match => {
     const matchDate = new Date(match.date);
@@ -539,7 +539,35 @@ onValue(ref(db, 'previousfixtures'), (snapshot) => {
   popupContent.innerHTML = content;
 });
 
-// === Load upcoming fixture (with countdown, starting soon & live states) ===
+// === LEADERBOARD ===
+onValue(ref(db, 'leaderboard'), (snapshot) => {
+  const leaderboardData = snapshot.val();
+  const container = document.getElementById('tableContainer');
+  if (!leaderboardData) {
+    container.innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
+    return;
+  }
+
+  const teams = Object.values(leaderboardData).sort((a, b) => b.points - a.points);
+  let leaderboardContent = `
+    <table class="leaderboard-table">
+      <tr><th>#</th><th>Team Name</th><th>Owner</th><th>Points</th></tr>
+  `;
+  teams.slice(0, 10).forEach((team, index) => {
+    leaderboardContent += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${team.name}</td>
+        <td>${team.owner}</td>
+        <td class="points">${team.points}</td>
+      </tr>
+    `;
+  });
+  leaderboardContent += `</table>`;
+  container.innerHTML = leaderboardContent;
+});
+
+// === UPCOMING FIXTURE ADVANCED (with countdowns/live/ended/auto-load) ===
 onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
   const upcomingFixtures = snapshot.val();
   if (!upcomingFixtures) {
@@ -572,55 +600,10 @@ onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
   validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
   const nextFixture = validFixtures[0];
 
-  if (window.upcomingCountdownInterval) {
-    clearInterval(window.upcomingCountdownInterval);
-  }
-
-  renderFixtureBox(nextFixture);
-  window.upcomingCountdownInterval = setInterval(() => {
-    renderFixtureBox(nextFixture);
-  }, 1000);
+  if (window.upcomingCountdownInterval) clearInterval(window.upcomingCountdownInterval);
+  renderFixtureBox(nextFixture, validFixtures);
+  window.upcomingCountdownInterval = setInterval(() => renderFixtureBox(nextFixture, validFixtures), 1000);
 });
-
-// === Leaderboard ===
-onValue(ref(db, 'leaderboard'), (snapshot) => {
-  const leaderboardData = snapshot.val();
-  if (!leaderboardData) {
-    document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
-    return;
-  }
-
-  const teams = Object.values(leaderboardData);
-  teams.sort((a, b) => b.points - a.points);
-
-  let leaderboardContent = `
-    <table class="leaderboard-table">
-      <tr>
-        <th>#</th>
-        <th>Team Name</th>
-        <th>Owner</th>
-        <th>Points</th>
-      </tr>
-  `;
-  teams.slice(0, 10).forEach((team, index) => {
-    leaderboardContent += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${team.name}</td>
-        <td>${team.owner}</td>
-        <td class="points">${team.points}</td>
-      </tr>
-    `;
-  });
-  leaderboardContent += `</table>`;
-
-  document.getElementById('tableContainer').innerHTML = leaderboardContent;
-});
-
-// === Helpers ===
-function openPreviousFixtures() {
-  popupOverlay.style.display = 'flex';
-}
 
 function getTimeAgo(date) {
   const now = new Date();
@@ -649,7 +632,7 @@ function getCountdownText(prefix, date) {
   return `${prefix} <span style="color:#007bff;">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
 }
 
-function renderFixtureBox(fixture) {
+function renderFixtureBox(fixture, allFixtures) {
   const fixtureDate = new Date(fixture.date);
   const now = new Date();
   const timeUntil = fixtureDate - now;
@@ -675,10 +658,11 @@ function renderFixtureBox(fixture) {
       </div>
       <div class="score" style="font-size: 1.5em; font-weight:bold;">0 - 0</div>
       <div class="time-ago">${getCountdownText('Match ends in', timeLeft)}</div>
+      <div style="font-size: 0.85em; margin-top:4px; color:gray;">Scores are updated after match ends</div>
     `;
   } else {
     clearInterval(window.upcomingCountdownInterval);
-    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    showEndedAndLoadNext(fixture.key, allFixtures);
     return;
   }
 
@@ -686,14 +670,30 @@ function renderFixtureBox(fixture) {
   fixtureContainer.innerHTML = content;
 }
 
-// === Loader ===
+function showEndedAndLoadNext(currentKey, allFixtures) {
+  fixtureContainer.innerHTML = `
+    <div class="match-ended animate-ended" style="color: red; font-weight:bold; text-align:center; font-size: 1.2em;">
+      Match Ended
+    </div>
+  `;
+  setTimeout(() => {
+    const remainingFixtures = allFixtures.filter(f => f.key !== currentKey);
+    if (remainingFixtures.length > 0) {
+      const nextFixture = remainingFixtures[0];
+      renderFixtureBox(nextFixture, remainingFixtures);
+      window.upcomingCountdownInterval = setInterval(() => renderFixtureBox(nextFixture, remainingFixtures), 1000);
+    } else {
+      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    }
+  }, 5000);
+}
+
+// === LOADING SCREEN ===
 window.addEventListener('load', () => {
   setTimeout(() => {
     const loader = document.getElementById('loadingScreen');
     loader.classList.add('hidden');
-    setTimeout(() => {
-      loader.style.display = 'none';
-    }, 500);
+    setTimeout(() => loader.style.display = 'none', 500);
   }, 5000);
 });
 </script>
@@ -703,6 +703,16 @@ window.addEventListener('load', () => {
   0% { opacity: 1; }
   50% { opacity: 0.4; }
   100% { opacity: 1; }
+}
+@keyframes twitch {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+  100% { transform: rotate(0deg); }
+}
+.animate-ended {
+  animation: twitch 0.15s infinite;
 }
 </style>
 </body>
