@@ -7,11 +7,17 @@
 <style>
 * { box-sizing: border-box; }
 body {
-  margin: 0; height: 100vh;
+  margin: 0; 
+  height: 100vh;
   font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
+
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+/Edge */
+  user-select: none;         /* Standard */
 }
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
