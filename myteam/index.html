@@ -372,7 +372,7 @@ const joinBtn = document.getElementById('joinChampionsLeagueBtn');
 const championsCard = document.getElementById('championsLeagueCard');
 const MAX_TEAMS = 16;
 
-// Notification Function - Force reflow for repeated triggers
+// Notification Function
 function showNotification(message, type = 'info') {
   let notif = document.getElementById('notificationToast');
   if (!notif) {
@@ -392,11 +392,10 @@ function showNotification(message, type = 'info') {
   }
 
   notif.textContent = message;
-  notif.className = type; // set type class if you want different colors (optional)
+  notif.className = type;
 
-  // Force reflow to reset animation
   notif.style.opacity = '0';
-  void notif.offsetWidth; // trigger reflow
+  void notif.offsetWidth;
   notif.style.opacity = '1';
 
   clearTimeout(notif._hideTimer);
@@ -405,7 +404,7 @@ function showNotification(message, type = 'info') {
   }, 4000);
 }
 
-// Refresh Champions League Card with Knocked-Out status
+// Refresh Champions League Card
 function refreshChampionsLeagueCard(userTeam, userUsername) {
   const champTeamsRef = ref(db, 'championsleague/teams');
   onValue(champTeamsRef, snapshot => {
@@ -431,23 +430,18 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     `;
 
     if (userInLeague) {
-      // User is active in league
       joinBtn.textContent = 'Exit Champions League';
       joinBtn.disabled = false;
       joinBtn.classList.remove('disabled');
       joinBtn.style.backgroundColor = 'red';
       championsCard.classList.add('champions-premium', 'shimmer');
-
     } else if (userIsKnockedOut) {
-      // User is knocked out
       joinBtn.textContent = 'Knocked Out';
       joinBtn.disabled = true;
       joinBtn.classList.add('disabled');
       joinBtn.style.backgroundColor = 'grey';
       championsCard.classList.remove('champions-premium', 'shimmer');
-
     } else {
-      // User is not in league and not knocked out
       joinBtn.textContent = 'Join Champions League';
       joinBtn.disabled = activeTeams >= MAX_TEAMS;
       joinBtn.classList.toggle('disabled', joinBtn.disabled);
@@ -459,37 +453,40 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
   });
 }
 
-// Confirm Exit Popup
-function showConfirmExitPopup(callback) {
-  const popup = document.createElement('div');
-  popup.innerHTML = `
-    <div style="position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
-      <div style="background:white;padding:20px;border-radius:10px;max-width:90%;width:400px;
-        box-shadow:0 0 20px rgba(0,0,0,0.2);text-align:center;">
-        <h3>Are you sure you want to exit?</h3>
-        <p>If you exit this season, you can't join again until next season. You will be knocked out.</p>
-        <div style="margin-top:20px;">
-          <button id="confirmYes" style="background:green;color:white;padding:10px 20px;
-            border:none;border-radius:5px;margin:5px;">Yes</button>
-          <button id="confirmNo" style="background:red;color:white;padding:10px 20px;
-            border:none;border-radius:5px;margin:5px;">No</button>
-        </div>
-      </div>
-    </div>`;
-  document.body.appendChild(popup);
-
-  popup.querySelector('#confirmYes').onclick = () => {
-    document.body.removeChild(popup);
-    callback(true);
-  };
-  popup.querySelector('#confirmNo').onclick = () => {
-    document.body.removeChild(popup);
-    callback(false);
-  };
+// Fetch and display match info for the user
+function fetchUserMatchData(userTeam) {
+  const matchRef = ref(db, 'championsleaguematches/');
+  
+  onValue(matchRef, snapshot => {
+    const matches = snapshot.val();
+    for (const stage in matches) {
+      for (const matchId in matches[stage]) {
+        const match = matches[stage][matchId];
+        if (match.team1Id === userTeam || match.team2Id === userTeam) {
+          displayMatchInfo(match);
+          return;
+        }
+      }
+    }
+  });
 }
 
-// Setup Meta Info
+function displayMatchInfo(match) {
+  const matchmakingCard = document.getElementById('matchmakingCard');
+  const matchmakingContent = matchmakingCard.querySelector('p');
+
+  matchmakingContent.innerHTML = `
+    <div class="match-line">
+      <span class="team-name">${match.team1Name}</span>
+      <span class="vs">vs</span>
+      <span class="team-name">${match.team2Name}</span>
+    </div>
+    <div class="stage">Stage: ${match.stage}</div>
+    <div class="timer">${match.timer}</div>
+  `;
+}
+
+// Setup Meta Info for Champions League
 function setupChampionsLeagueMeta() {
   const champMetaRef = ref(db, 'championsleague/meta');
   const stageEl = document.getElementById('stageText');
@@ -559,7 +556,8 @@ onAuthStateChanged(auth, user => {
         refreshChampionsLeagueCard(userTeam, userUsername);
         setupChampionsLeagueMeta();
 
-        // Join/Exit Button Handling
+        fetchUserMatchData(userTeam); // Fetch and display the match
+
         joinBtn.onclick = async () => {
           const champTeamsRef = ref(db, 'championsleague/teams');
           const champTeamsSnap = await get(champTeamsRef);
@@ -569,7 +567,6 @@ onAuthStateChanged(auth, user => {
           const isKnockedOut = userEntry?.knockedOut === true;
 
           if (userInLeague) {
-            // EXIT (no status check)
             showConfirmExitPopup(async (confirmed) => {
               if (confirmed) {
                 await set(ref(db, 'championsleague/teams/' + userTeam), {
@@ -583,7 +580,6 @@ onAuthStateChanged(auth, user => {
               }
             });
           } else {
-            // JOIN (check season status)
             const champMetaRef = ref(db, 'championsleague/meta');
             const champMetaSnap = await get(champMetaRef);
             const meta = champMetaSnap.val();
@@ -606,9 +602,8 @@ onAuthStateChanged(auth, user => {
               });
               localStorage.setItem('inChampionsLeague', 'true');
               championsCard.classList.add('champions-premium', 'shimmer');
-              triggerConfetti();
-              refreshChampionsLeagueCard(userTeam, userUsername);
               showNotification('You joined the Champions League!', 'success');
+              refreshChampionsLeagueCard(userTeam, userUsername);
             } else {
               showNotification('Champions League is full (16 teams max)', 'warning');
             }
