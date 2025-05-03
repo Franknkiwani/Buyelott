@@ -1,28 +1,30 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soccer Login & Sign Up</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }@keyframes gradientBG {
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Soccer Login & Sign Up</title>
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+@keyframes gradientBG {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 .container {
   background: rgba(0, 0, 0, 0.7);
   padding: 30px;
@@ -30,6 +32,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.6);
   width: 100%;
   max-width: 400px;
+  min-height: 520px;
   border: 3px solid #fff;
   color: #fff;
 }
@@ -88,13 +91,11 @@ button:hover {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 .special-input {
   background: rgba(255,255,255,0.2);
   border: 2px solid #00ffe7;
   box-shadow: 0 0 10px #00ffe7;
 }
-
 .notification {
   position: fixed;
   top: 20px;
@@ -107,244 +108,231 @@ button:hover {
   opacity: 0;
   transition: opacity 0.5s ease;
   z-index: 9999;
+  pointer-events: none;
 }
 .notification.show {
   opacity: 1;
 }
 
-  </style>
+/* Flower animation */
+.flower {
+  position: fixed;
+  top: -50px;
+  font-size: 24px;
+  animation: fall 4s linear forwards;
+  pointer-events: none;
+}
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Loading screen */
+#loadingScreen {
+  position: fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 10000;
+}
+#loadingScreen h1 {
+  margin-bottom: 20px;
+}
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #ff4e50;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spinLoader 1s linear infinite;
+}
+@keyframes spinLoader {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
 </head>
 <body>
-  <div class="container" id="loginForm">
-    <div class="logo">
-      <span class="soccer-ball">⚽</span>
-    </div>
-    <h2>Soccer Login</h2>
-    <input id="loginEmail" type="email" placeholder="Email" required>
-    <input id="loginPassword" type="password" placeholder="Password" required>
-    <button onclick="login()">Login</button>
-    <div class="toggle">
-      <p><a onclick="forgotPassword()">Forgot Password?</a></p>
-      <p>Don't have an account? <a onclick="showSignup()">Sign up</a></p>
-    </div>
-  </div>  <div class="container" id="signupForm" style="display:none">
-    <div class="logo">
-      <span class="soccer-ball">⚽</span>
-    </div>
-    <h2>Join Soccer Club</h2>
-    <input id="signupEmail" type="email" placeholder="Email" required>
-    <input id="signupPassword" type="password" placeholder="Password" required>
-    <input id="signupUsername" class="special-input" type="text" placeholder="@Username" required><select id="signupFlag">
-  <option value="🇦🇷">🇦🇷 Argentina</option>
-  <option value="🇧🇷">🇧🇷 Brazil</option>
-  <option value="🇵🇹">🇵🇹 Portugal</option>
-  <option value="🇮🇹">🇮🇹 Italy</option>
-</select>
 
-<input id="signupTeam" class="special-input" type="text" placeholder="Team Name" required>
-
-<button onclick="signup()">Sign Up</button>
-<div class="toggle">
-  <p>Already have an account? <a onclick="showLogin()">Login</a></p>
+<div class="container" id="loginForm">
+  <div class="logo"><span class="soccer-ball">⚽</span></div>
+  <h2>Soccer Login</h2>
+  <input id="loginEmail" type="email" placeholder="Email" required autocomplete="off">
+  <input id="loginPassword" type="password" placeholder="Password" required autocomplete="new-password">
+  <button onclick="login()">Login</button>
+  <div class="toggle">
+    <p><a onclick="forgotPassword()">Forgot Password?</a></p>
+    <p>Don't have an account? <a onclick="showSignup()">Sign up</a></p>
+  </div>
 </div>
 
-  </div>  <div id="notification" class="notification"></div>
-     <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, set, get, child, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<div class="container" id="signupForm" style="display:none">
+  <div class="logo"><span class="soccer-ball">⚽</span></div>
+  <h2>Join Soccer Club</h2>
+  <input id="signupEmail" type="email" placeholder="Email" required autocomplete="off">
+  <input id="signupPassword" type="password" placeholder="Password" required autocomplete="new-password">
+  <input id="signupUsername" class="special-input" type="text" placeholder="@Username" maxlength="8" required>
+  <select id="signupFlag">
+    <option value="🇦🇷">🇦🇷 Argentina</option>
+    <option value="🇧🇷">🇧🇷 Brazil</option>
+    <option value="🇵🇹">🇵🇹 Portugal</option>
+    <option value="🇮🇹">🇮🇹 Italy</option>
+  </select>
+  <input id="signupTeam" class="special-input" type="text" placeholder="Team Name" maxlength="12" required>
+  <button onclick="signup()">Sign Up</button>
+  <div class="toggle">
+    <p>Already have an account? <a onclick="showLogin()">Login</a></p>
+  </div>
+</div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+<div id="notification" class="notification"></div>
+<div id="loadingScreen">
+  <h1>Preparing your team...</h1>
+  <div class="loader"></div>
+</div>
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  function notify(message) {
-    const note = document.getElementById('notification');
-    note.textContent = message;
-    note.classList.add('show');
-    setTimeout(() => note.classList.remove('show'), 3000);
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+function notify(message) {
+  const note = document.getElementById('notification');
+  note.textContent = message;
+  note.classList.add('show');
+  setTimeout(() => note.classList.remove('show'), 3000);
+}
+
+window.showSignup = function() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('signupForm').style.display = 'block';
+}
+window.showLogin = function() {
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+}
+
+// Enforce input limits even on paste
+document.getElementById('signupUsername').addEventListener('input', function() {
+  if (this.value.length > 8) this.value = this.value.slice(0, 8);
+});
+document.getElementById('signupTeam').addEventListener('input', function() {
+  if (this.value.length > 12) this.value = this.value.slice(0, 12);
+});
+
+function showFlowers() {
+  for (let i = 0; i < 20; i++) {
+    const flower = document.createElement('div');
+    flower.classList.add('flower');
+    flower.style.left = Math.random() * 100 + 'vw';
+    flower.style.animationDuration = (2 + Math.random() * 2) + 's';
+    flower.textContent = '🌸';
+    document.body.appendChild(flower);
+    setTimeout(() => flower.remove(), 4000);
   }
+}
 
-  window.showSignup = function() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('signupForm').style.display = 'block';
+window.signup = async function() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value.trim();
+  const username = document.getElementById('signupUsername').value.trim();
+  const team = document.getElementById('signupTeam').value.trim();
+  const flag = document.getElementById('signupFlag').value;
+  if (!email || !password || !username || !team) {
+    notify("Please fill out all fields.");
+    return;
   }
+  const fullTeamName = flag + ' ' + team;
+  const dbRef = ref(db);
+  const usersRef = child(dbRef, 'users');
+  const teamsRef = child(dbRef, 'teams');
 
-  window.showLogin = function() {
-    document.getElementById('signupForm').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
+  try {
+    const snapshot = await get(usersRef);
+    let usernameTaken = false, teamTaken = false;
+    snapshot.forEach(userSnap => {
+      const userData = userSnap.val();
+      if (userData.username === username) usernameTaken = true;
+      if (userData.team === fullTeamName) teamTaken = true;
+    });
+    if (usernameTaken) { notify("Username is already taken."); return; }
+    if (teamTaken) { notify("Team name is already taken."); return; }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
+
+    await set(ref(db, 'users/' + userId), {
+      name: username,
+      username: username,
+      team: fullTeamName,
+      stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
+    });
+
+    await set(ref(db, 'teams/' + fullTeamName), {
+      username: username,
+      stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
+    });
+
+    showFlowers();
+    document.getElementById('loadingScreen').style.display = 'flex';
+
+    setTimeout(() => {
+      window.location.href = "homepage/";
+    }, 3000);
+
+  } catch (error) {
+    console.error(error);
+    notify(error.message);
   }
+}
 
-  window.signup = async function() {
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value.trim();
-    const username = document.getElementById('signupUsername').value.trim();
-    const team = document.getElementById('signupTeam').value.trim();
-    const flag = document.getElementById('signupFlag').value;
-
-    if (!email || !password || !username || !team) {
-      notify("Please fill out all fields.");
-      return;
-    }
-
-    const fullTeamName = flag + ' ' + team;
-
-    const dbRef = ref(db);
-    const usersRef = child(dbRef, 'users');
-    const teamsRef = child(dbRef, 'teams');
-
-    try {
-      const snapshot = await get(usersRef);
-      let usernameTaken = false;
-      let teamTaken = false;
-
-      snapshot.forEach(userSnap => {
-        const userData = userSnap.val();
-        if (userData.username === username) usernameTaken = true;
-        if (userData.team === fullTeamName) teamTaken = true;
-      });
-
-      if (usernameTaken) {
-        notify("Username is already taken.");
-        return;
-      }
-      if (teamTaken) {
-        notify("Team name is already taken.");
-        return;
-      }
-
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid;
-
-      // Save user data under 'users'
-      await set(ref(db, 'users/' + userId), {
-        name: username,
-        username: username,
-        team: fullTeamName,
-        stats: {
-          wins: 0,
-          losses: 0,
-          draws: 0,
-          gamesPlayed: 0,
-          points: 0
-        }
-      });
-
-      // Save team data under 'teams' (team name, username, and stats)
-      await set(ref(db, 'teams/' + fullTeamName), {
-        username: username,
-        stats: {
-          wins: 0,
-          losses: 0,
-          draws: 0,
-          gamesPlayed: 0,
-          points: 0
-        }
-      });
-
-      // Update leaderboard with the new team
-      const teamsSnapshot = await get(teamsRef);
-      let leaderboardData = {};
-
-      teamsSnapshot.forEach(teamSnap => {
-        const teamData = teamSnap.val();
-        leaderboardData[teamSnap.key] = {
-          name: teamSnap.key,
-          owner: teamData.username,
-          points: teamData.stats.points
-        };
-      });
-
-      // Save leaderboard as structured data
-      await set(ref(db, 'leaderboard'), leaderboardData);
-
-      notify("Sign up successful! You can now log in.");
-      showLogin();
-
-    } catch (error) {
+window.login = function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      notify("Login successful!");
+      window.location.href = "homepage/";
+    })
+    .catch(error => {
       console.error(error);
       notify(error.message);
-    }
-  }
-
-  window.login = function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        notify("Login successful!");
-        window.location.href = "homepage/";  // Redirect to homepage after successful login
-      })
-      .catch(error => {
-        console.error(error);
-        notify(error.message);
-      });
-  }
-
-  window.forgotPassword = function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    if (!email) {
-      notify("Enter your email to reset password.");
-      return;
-    }
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        notify("Password reset email sent.");
-      })
-      .catch(error => {
-        console.error(error);
-        notify(error.message);
-      });
-  }
-
-  // --- Leaderboard Rendering ---
-  onValue(ref(db, 'leaderboard'), (snapshot) => {
-    const leaderboardData = snapshot.val();
-    if (!leaderboardData) {
-      document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
-      return;
-    }
-
-    const teams = Object.values(leaderboardData);
-    teams.sort((a, b) => b.points - a.points);
-
-    let leaderboardContent = `
-      <table class="leaderboard-table">
-        <tr>
-          <th>#</th>
-          <th>Team Name</th>
-          <th>Owner</th>
-          <th>Points</th>
-        </tr>
-    `;
-    teams.slice(0, 10).forEach((team, index) => {
-      leaderboardContent += `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${team.name}</td>
-          <td>${team.owner}</td>
-          <td class="points">${team.points}</td>
-        </tr>
-      `;
     });
-    leaderboardContent += `</table>`;
+}
 
-    document.getElementById('tableContainer').innerHTML = leaderboardContent;
-  });
-</script> 
-  </body>
+window.forgotPassword = function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { notify("Enter your email to reset password."); return; }
+  sendPasswordResetEmail(auth, email)
+    .then(() => notify("Password reset email sent."))
+    .catch(error => {
+      console.error(error);
+      notify(error.message);
+    });
+}
+</script>
+</body>
 </html>
