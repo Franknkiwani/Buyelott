@@ -443,229 +443,267 @@ header {
     <div class="loading-text">Loading season...</div>
   </div>
 </div>
-
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const fixtureContainer = document.getElementById('fixtureContainer');
-  const popupOverlay = document.getElementById('popupOverlay');
-  const popupContent = document.getElementById('previousFixturesContent');
-  const closePopupBtn = document.querySelector('.closePopup');
-  const staticPrevBtn = document.getElementById('staticPrevBtn');
+const fixtureContainer = document.getElementById('fixtureContainer');
+const popupOverlay = document.getElementById('popupOverlay');
+const popupContent = document.getElementById('previousFixturesContent');
+const closePopupBtn = document.querySelector('.closePopup');
+const staticPrevBtn = document.getElementById('staticPrevBtn');
 
-  staticPrevBtn.addEventListener('click', openPreviousFixtures);
-  closePopupBtn.addEventListener('click', () => {
-    popupOverlay.style.display = 'none';
-  });
+staticPrevBtn.addEventListener('click', openPreviousFixtures);
+closePopupBtn.addEventListener('click', () => {
+  popupOverlay.style.display = 'none';
+});
 
-  // === SEASON COUNTDOWN ===
-  const countdownContainer = document.getElementById('seasonCountdown');
-  let countdownInterval;
+// === SEASON COUNTDOWN ===
+const countdownContainer = document.getElementById('seasonCountdown');
+let countdownInterval;
 
-  onValue(ref(db, 'seasonends'), (snapshot) => {
-    const endTime = snapshot.val();
-    if (!endTime) {
-      countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const endDate = new Date(endTime);
-
+onValue(ref(db, 'seasonends'), (snapshot) => {
+  const endTime = snapshot.val();
+  if (!endTime) {
+    countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
     clearInterval(countdownInterval);
-    updateCountdown(endDate); // Initial call
-    countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
-  });
-
-  function updateCountdown(endDate) {
-    const now = new Date();
-    const diff = endDate - now;
-    if (diff <= 0) {
-      countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-
-    countdownContainer.innerHTML = `
-      Season ends in <span style="color:#007bff;">
-      ${days}d ${hours}h ${minutes}m ${seconds}s
-      </span>
-    `;
+    return;
   }
 
-  // === Load previous fixtures ===
-  onValue(ref(db, 'previousfixtures'), (snapshot) => {
-    const previousFixtures = snapshot.val();
-    if (!previousFixtures) {
-      popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
-      return;
-    }
-    let content = '';
-    Object.values(previousFixtures).forEach(match => {
-      const matchDate = new Date(match.date);
-      const timeAgo = getTimeAgo(matchDate);
+  const endDate = new Date(endTime);
+  clearInterval(countdownInterval);
+  updateCountdown(endDate);
+  countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
+});
 
-      content += `
-        <div class="match-info">
-          <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
-          <div class="match-vs">VS</div>
-          <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
-          <div class="score">
-            <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
-            <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
-          </div>
-          <div class="time-ago">Ended ${timeAgo}</div>
-        </div>
-      `;
-    });
-    popupContent.innerHTML = content;
-  });
+function updateCountdown(endDate) {
+  const now = new Date();
+  const diff = endDate - now;
+  if (diff <= 0) {
+    countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
+    clearInterval(countdownInterval);
+    return;
+  }
 
-  // === Load upcoming fixture ===
-  onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
-    const upcomingFixtures = snapshot.val();
-    if (!upcomingFixtures) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
-      return;
-    }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
 
-    const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
-      key,
-      ...fixture
-    }));
+  countdownContainer.innerHTML = `
+    Season ends in <span style="color:#007bff;">
+    ${days}d ${hours}h ${minutes}m ${seconds}s
+    </span>
+  `;
+}
 
-    const now = new Date();
-    const validFixtures = [];
+// === Load previous fixtures ===
+onValue(ref(db, 'previousfixtures'), (snapshot) => {
+  const previousFixtures = snapshot.val();
+  if (!previousFixtures) {
+    popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
+    return;
+  }
+  let content = '';
+  Object.values(previousFixtures).forEach(match => {
+    const matchDate = new Date(match.date);
+    const timeAgo = getTimeAgo(matchDate);
 
-    fixtureList.forEach(fixture => {
-      const fixtureDate = new Date(fixture.date);
-      if (fixtureDate >= now) {
-        validFixtures.push(fixture);
-      } else {
-        // Delete expired fixture
-        remove(ref(db, `upcomingfixtures/${fixture.key}`));
-      }
-    });
-
-    if (validFixtures.length === 0) {
-      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
-      return;
-    }
-
-    validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    const nextFixture = validFixtures[0];
-
-    const fixtureContent = `
-      <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px;">
-        <div class="match-team">${nextFixture.teamA} <span class="team-owner">@${nextFixture.ownerA}</span></div>
+    content += `
+      <div class="match-info">
+        <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
         <div class="match-vs">VS</div>
-        <div class="match-team">${nextFixture.teamB} <span class="team-owner">@${nextFixture.ownerB}</span></div>
-        <div class="time-ago">Match starts ${getTimeUntil(new Date(nextFixture.date))}</div>
+        <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
+        <div class="score">
+          <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
+          <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
+        </div>
+        <div class="time-ago">Ended ${timeAgo}</div>
       </div>
     `;
-    fixtureContainer.innerHTML = fixtureContent;
   });
+  popupContent.innerHTML = content;
+});
 
-  // === Leaderboard ===
-  onValue(ref(db, 'leaderboard'), (snapshot) => {
-    const leaderboardData = snapshot.val();
-    if (!leaderboardData) {
-      document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
-      return;
+// === Load upcoming fixture (with countdown, starting soon & live states) ===
+onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
+  const upcomingFixtures = snapshot.val();
+  if (!upcomingFixtures) {
+    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    return;
+  }
+
+  const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
+    key,
+    ...fixture
+  }));
+
+  const now = new Date();
+  const validFixtures = [];
+
+  fixtureList.forEach(fixture => {
+    const fixtureDate = new Date(fixture.date);
+    if (fixtureDate >= now || (now - fixtureDate <= 15 * 60 * 1000)) {
+      validFixtures.push(fixture);
+    } else {
+      remove(ref(db, `upcomingfixtures/${fixture.key}`));
     }
+  });
 
-    const teams = Object.values(leaderboardData);
-    teams.sort((a, b) => b.points - a.points);
+  if (validFixtures.length === 0) {
+    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    return;
+  }
 
-    let leaderboardContent = `
-      <table class="leaderboard-table">
-        <tr>
-          <th>#</th>
-          <th>Team Name</th>
-          <th>Owner</th>
-          <th>Points</th>
-        </tr>
+  validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const nextFixture = validFixtures[0];
+
+  if (window.upcomingCountdownInterval) {
+    clearInterval(window.upcomingCountdownInterval);
+  }
+
+  renderFixtureBox(nextFixture);
+  window.upcomingCountdownInterval = setInterval(() => {
+    renderFixtureBox(nextFixture);
+  }, 1000);
+});
+
+// === Leaderboard ===
+onValue(ref(db, 'leaderboard'), (snapshot) => {
+  const leaderboardData = snapshot.val();
+  if (!leaderboardData) {
+    document.getElementById('tableContainer').innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
+    return;
+  }
+
+  const teams = Object.values(leaderboardData);
+  teams.sort((a, b) => b.points - a.points);
+
+  let leaderboardContent = `
+    <table class="leaderboard-table">
+      <tr>
+        <th>#</th>
+        <th>Team Name</th>
+        <th>Owner</th>
+        <th>Points</th>
+      </tr>
+  `;
+  teams.slice(0, 10).forEach((team, index) => {
+    leaderboardContent += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${team.name}</td>
+        <td>${team.owner}</td>
+        <td class="points">${team.points}</td>
+      </tr>
     `;
-    teams.slice(0, 10).forEach((team, index) => {
-      leaderboardContent += `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${team.name}</td>
-          <td>${team.owner}</td>
-          <td class="points">${team.points}</td>
-        </tr>
-      `;
-    });
-    leaderboardContent += `</table>`;
-
-    document.getElementById('tableContainer').innerHTML = leaderboardContent;
   });
+  leaderboardContent += `</table>`;
 
-  function openPreviousFixtures() {
-    popupOverlay.style.display = 'flex';
+  document.getElementById('tableContainer').innerHTML = leaderboardContent;
+});
+
+// === Helpers ===
+function openPreviousFixtures() {
+  popupOverlay.style.display = 'flex';
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+}
+
+function getCountdownText(prefix, date) {
+  const now = new Date();
+  const diff = date - now;
+  if (diff <= 0) return '';
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  return `${prefix} <span style="color:#007bff;">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
+}
+
+function renderFixtureBox(fixture) {
+  const fixtureDate = new Date(fixture.date);
+  const now = new Date();
+  const timeUntil = fixtureDate - now;
+  const timeSinceStart = now - fixtureDate;
+  const fifteenMinutes = 15 * 60 * 1000;
+
+  let content = `
+    <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px; text-align:center;">
+      <div class="match-team">${fixture.teamA} <span class="team-owner">@${fixture.ownerA}</span></div>
+      <div class="match-vs">VS</div>
+      <div class="match-team">${fixture.teamB} <span class="team-owner">@${fixture.ownerB}</span></div>
+  `;
+
+  if (timeUntil > 60 * 1000) {
+    content += `<div class="time-ago">${getCountdownText('Match starts in', fixtureDate)}</div>`;
+  } else if (timeUntil > 0) {
+    content += `<div class="starting-soon" style="color: orange; font-weight:bold; animation: pulse 1s infinite;">Starting soon...</div>`;
+  } else if (timeSinceStart <= fifteenMinutes) {
+    const timeLeft = new Date(fixtureDate.getTime() + fifteenMinutes);
+    content += `
+      <div style="margin: 5px 0;">
+        <span style="color: green; font-weight:bold; border: 1px solid green; padding: 2px 6px; border-radius: 4px;">LIVE</span>
+      </div>
+      <div class="score" style="font-size: 1.5em; font-weight:bold;">0 - 0</div>
+      <div class="time-ago">${getCountdownText('Match ends in', timeLeft)}</div>
+    `;
+  } else {
+    clearInterval(window.upcomingCountdownInterval);
+    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    return;
   }
 
-  function getTimeAgo(date) {
-    const now = new Date();
-    const diff = now - date;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+  content += `</div>`;
+  fixtureContainer.innerHTML = content;
+}
 
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
-  }
-
-  function getTimeUntil(date) {
-    const now = new Date();
-    const diff = date - now;
-    if (diff <= 0) return "Match has started";
-
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
-    if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
-    if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
-    return `in ${seconds} second${seconds > 1 ? 's' : ''}`;
-  }
-  window.addEventListener('load', () => {
-    // After 5 seconds hide loading screen
+// === Loader ===
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loadingScreen');
+    loader.classList.add('hidden');
     setTimeout(() => {
-      const loader = document.getElementById('loadingScreen');
-      loader.classList.add('hidden');
-
-      // Remove fully after fade out
-      setTimeout(() => {
-        loader.style.display = 'none';
-      }, 500);
-    }, 5000);
-  });
+      loader.style.display = 'none';
+    }, 500);
+  }, 5000);
+});
 </script>
+
+<style>
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+</style>
 </body>
 </html>
