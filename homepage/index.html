@@ -469,9 +469,8 @@ const closePopupBtn = document.querySelector('.closePopup');
 const staticPrevBtn = document.getElementById('staticPrevBtn');
 const countdownContainer = document.getElementById('seasonCountdown');
 
-let countdownInterval;
-
 // === SEASON COUNTDOWN ===
+let countdownInterval;
 onValue(ref(db, 'seasonends'), (snapshot) => {
   const endTime = snapshot.val();
   if (!endTime) {
@@ -539,16 +538,23 @@ onValue(ref(db, 'previousfixtures'), (snapshot) => {
   popupContent.innerHTML = content;
 });
 
-// === LEADERBOARD ===
-onValue(ref(db, 'leaderboard'), (snapshot) => {
-  const leaderboardData = snapshot.val();
+// === LEADERBOARD (Pull from users) ===
+onValue(ref(db, 'users'), (snapshot) => {
+  const usersData = snapshot.val();
   const container = document.getElementById('tableContainer');
-  if (!leaderboardData) {
+  if (!usersData) {
     container.innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
     return;
   }
 
-  const teams = Object.values(leaderboardData).sort((a, b) => b.points - a.points);
+  const teams = Object.values(usersData).map(user => ({
+    team: user.team,
+    owner: user.username,
+    points: user.stats?.points || 0
+  }));
+
+  teams.sort((a, b) => b.points - a.points);
+
   let leaderboardContent = `
     <table class="leaderboard-table">
       <tr><th>#</th><th>Team Name</th><th>Owner</th><th>Points</th></tr>
@@ -557,8 +563,8 @@ onValue(ref(db, 'leaderboard'), (snapshot) => {
     leaderboardContent += `
       <tr>
         <td>${index + 1}</td>
-        <td>${team.name}</td>
-        <td>${team.owner}</td>
+        <td>${team.team}</td>
+        <td>@${team.owner}</td>
         <td class="points">${team.points}</td>
       </tr>
     `;
@@ -567,7 +573,7 @@ onValue(ref(db, 'leaderboard'), (snapshot) => {
   container.innerHTML = leaderboardContent;
 });
 
-// === UPCOMING FIXTURE ADVANCED (with countdowns/live/ended/auto-load) ===
+// === UPCOMING FIXTURE ADVANCED ===
 onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
   const upcomingFixtures = snapshot.val();
   if (!upcomingFixtures) {
