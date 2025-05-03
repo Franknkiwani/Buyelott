@@ -347,6 +347,7 @@ header::after {
   </ul>
 </div>
 
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -614,6 +615,7 @@ onAuthStateChanged(auth, user => {
       document.getElementById('teamName').textContent = 'Team: ' + (userTeam || 'N/A');
       const stats = userData.stats || {};
 
+      // Get all teams and their points
       const teamsRef = ref(db, 'teams');
       onValue(teamsRef, teamSnap => {
         let allTeams = [];
@@ -626,10 +628,14 @@ onAuthStateChanged(auth, user => {
           });
         });
 
+        // Sort teams by points (highest first)
         allTeams.sort((a, b) => b.points - a.points);
-        let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
-        if (userPos === 0) userPos = 'N/A';
 
+        // Find user's position based on their team
+        let userPos = allTeams.findIndex(t => t.name === userTeam) + 1;
+        if (userPos === 0) userPos = 'N/A'; // Handle case if team is not found
+
+        // Update stats grid with position
         document.getElementById('statsGrid').innerHTML = `
           <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
           <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
@@ -639,10 +645,14 @@ onAuthStateChanged(auth, user => {
           <div><strong>Position</strong><br>${userPos}</div>
         `;
 
+        // Refresh the relevant cards
         refreshChampionsLeagueCard(userTeam, userUsername);
-        refreshMatchmakingCard(userTeam); // <--- CALL ADDED HERE
+        refreshMatchmakingCard(userTeam);
         setupChampionsLeagueMeta();
-
+      });
+    });
+  }
+});
         // Join/Exit Button Handling (Champions League)
         joinBtn.onclick = async () => {
           const champTeamsRef = ref(db, 'championsleague/teams');
