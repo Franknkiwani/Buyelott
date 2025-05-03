@@ -392,10 +392,11 @@ function showNotification(message, type = 'info') {
   }
 
   notif.textContent = message;
-  notif.className = type;
+  notif.className = type; // set type class if you want different colors (optional)
 
+  // Force reflow to reset animation
   notif.style.opacity = '0';
-  void notif.offsetWidth;
+  void notif.offsetWidth; // trigger reflow
   notif.style.opacity = '1';
 
   clearTimeout(notif._hideTimer);
@@ -430,18 +431,23 @@ function refreshChampionsLeagueCard(userTeam, userUsername) {
     `;
 
     if (userInLeague) {
+      // User is active in league
       joinBtn.textContent = 'Exit Champions League';
       joinBtn.disabled = false;
       joinBtn.classList.remove('disabled');
       joinBtn.style.backgroundColor = 'red';
       championsCard.classList.add('champions-premium', 'shimmer');
+
     } else if (userIsKnockedOut) {
+      // User is knocked out
       joinBtn.textContent = 'Knocked Out';
       joinBtn.disabled = true;
       joinBtn.classList.add('disabled');
       joinBtn.style.backgroundColor = 'grey';
       championsCard.classList.remove('champions-premium', 'shimmer');
+
     } else {
+      // User is not in league and not knocked out
       joinBtn.textContent = 'Join Champions League';
       joinBtn.disabled = activeTeams >= MAX_TEAMS;
       joinBtn.classList.toggle('disabled', joinBtn.disabled);
@@ -594,38 +600,15 @@ onAuthStateChanged(auth, user => {
 
             const activeTeams = Object.values(teamsObj).filter(t => !t.knockedOut).length;
             if (activeTeams < MAX_TEAMS) {
-              // Add the user to the league
               await set(ref(db, 'championsleague/teams/' + userTeam), {
                 username: userUsername,
                 knockedOut: false
               });
-
-              // Matchmaking: Find a random opponent who is also in the Champions League
-              let matchFound = false;
-              const availablePlayers = Object.keys(teamsObj).filter(team => !teamsObj[team].knockedOut && team !== userTeam);
-
-              if (availablePlayers.length > 0) {
-                const randomOpponent = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                await set(ref(db, 'matches/' + userTeam), {
-                  opponent: randomOpponent
-                });
-                await set(ref(db, 'matches/' + randomOpponent), {
-                  opponent: userTeam
-                });
-
-                matchFound = true;
-                showNotification('You have been matched with ' + randomOpponent + '!', 'success');
-              }
-
-              // Finalizing the Join Action
               localStorage.setItem('inChampionsLeague', 'true');
               championsCard.classList.add('champions-premium', 'shimmer');
               triggerConfetti();
               refreshChampionsLeagueCard(userTeam, userUsername);
-
-              if (!matchFound) {
-                showNotification('You joined the Champions League! Waiting for a match.', 'info');
-              }
+              showNotification('You joined the Champions League!', 'success');
             } else {
               showNotification('Champions League is full (16 teams max)', 'warning');
             }
