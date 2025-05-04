@@ -1,294 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Match & View Matches</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 80%;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: #121212;
-      color: white;
-      border-radius: 10px;
-    }
-    h2, h3 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #444;
-      background-color: #333;
-      color: white;
-    }
-    button {
-      background-color: #6200ea;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3700b3;
-    }
-    #matches {
-      margin-top: 40px;
-    }
-    .match-item {
-      border: 1px solid #444;
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #1f1f1f;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .match-details {
-      color: #bbb;
-    }
-    .delete-btn {
-      background-color: #d32f2f;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      color: white;
-      border-radius: 5px;
-    }
-    .delete-btn:hover {
-      background-color: #b71c1c;
-    }
-    .timer {
-      font-weight: bold;
-      color: #f57c00;
-    }
+<meta charset="UTF-8">
+<title>Soccer Login & Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; 
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #ff4e50, #f9d423, #1fa2ff, #12d8fa, #a6ffcb);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 
-    /* Mobile styling */
-    @media (max-width: 600px) {
-      body {
-        max-width: 95%;
-        margin: 20px auto;
-        padding: 15px;
-      }
-      select, input, button {
-        width: 100%;
-      }
-    }
-  </style>
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+/Edge */
+  user-select: none;         /* Standard */
+}
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 0;
+}
+.page {
+  position: fixed; inset: 0;
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  padding: 40px 20px; z-index: 1;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.page.active { opacity: 1; transform: translateY(0); }
+h2 { color: black; margin-bottom: 20px; }
+input, select {
+  width: 100%; padding: 12px; margin: 8px 0 16px;
+  border: 2px solid black; border-radius: 8px;
+  background: rgba(255,255,255,0.9); color: black; font-size: 16px;
+}
+input::placeholder { color: #444; }
+button {
+  width: 100%; padding: 12px;
+  border: 2px solid black; border-radius: 8px;
+  background: linear-gradient(90deg, #ffde59, #ffa31a);
+  color: black; font-weight: bold; font-size: 16px;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+button:hover { background: linear-gradient(90deg, #ffd000, #ff8c00); }
+.toggle { text-align: center; margin-top: 12px; }
+.toggle a { color: black; cursor: pointer; text-decoration: underline; }
+.logo { text-align: center; margin-bottom: 15px; }
+.soccer-ball {
+  font-size: 50px; display: inline-block;
+  animation: spin 4s linear infinite;
+  filter: drop-shadow(0 0 6px white);
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+.notification {
+  position: fixed; top: 20px; right: 20px;
+  background: black; color: white; padding: 12px 20px;
+  border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  opacity: 0; transition: opacity 0.5s ease; z-index: 9999;
+}
+.notification.show { opacity: 1; }
+#loadingScreen {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  color: white; font-size: 24px; z-index: 9998; display: none;
+}
+.flower {
+  position: absolute; font-size: 24px;
+  animation: fall 3s linear forwards;
+}
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg);}
+  100% { transform: translateY(100vh) rotate(360deg);}
+}
+</style>
 </head>
 <body>
 
-<h2>Create Match</h2>
+<div class="overlay"></div>
 
-<form id="matchForm">
-  <label for="teamA">Select Team A:</label>
-  <select id="teamA" required>
-    <option value="">Select Team</option>
-  </select>
-
-  <label for="teamB">Select Team B:</label>
-  <select id="teamB" required>
-    <option value="">Select Team</option>
-  </select>
-
-  <label for="scheduledTime">Scheduled Time (optional):</label>
-  <input type="datetime-local" id="scheduledTime">
-
-  <button type="submit">Create Match</button>
-</form>
-
-<p id="status"></p>
-
-<div id="matches">
-  <h3>All Matches</h3>
-  <div id="matchList"></div>
+<div class="page" id="loginForm">
+  <div class="logo"><span class="soccer-ball">⚽</span></div>
+  <h2>Soccer Login</h2>
+  <input id="loginEmail" type="email" placeholder="Email" required>
+  <input id="loginPassword" type="password" placeholder="Password" required>
+  <button onclick="login()">Login</button>
+  <div class="toggle">
+    <p><a onclick="forgotPassword()">Forgot Password?</a></p>
+    <p>Don't have an account? <a onclick="showSignup()">Sign up</a></p>
+  </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+<div class="page" id="signupForm">
+  <div class="logo"><span class="soccer-ball">⚽</span></div>
+  <h2>Join Soccer Club</h2>
+  <input id="signupEmail" type="email" placeholder="Email" required>
+  <input id="signupPassword" type="password" placeholder="Password" required>
+  <input id="signupUsername" type="text" placeholder="@Username" maxlength="8" required>
+  <select id="signupFlag">
+    <option value="🇦🇷">🇦🇷 Argentina</option>
+    <option value="🇧🇷">🇧🇷 Brazil</option>
+    <option value="🇵🇹">🇵🇹 Portugal</option>
+    <option value="🇮🇹">🇮🇹 Italy</option>
+  </select>
+  <input id="signupTeam" type="text" placeholder="Team Name" maxlength="12" required>
+  <button onclick="signup()">Sign Up</button>
+  <div class="toggle">
+    <p>Already have an account? <a onclick="showLogin()">Login</a></p>
+  </div>
+</div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+<div id="notification" class="notification"></div>
+<div id="loadingScreen">Loading... Please wait</div>
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-  getAnalytics(app);
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
-  const form = document.getElementById('matchForm');
-  const statusText = document.getElementById('status');
-  const matchList = document.getElementById('matchList');
-  const teamASelect = document.getElementById('teamA');
-  const teamBSelect = document.getElementById('teamB');
+<script>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
+const auth = firebase.auth();
+const db = firebase.database();
 
-  function fetchTeams() {
-    const teamsRef = ref(database, 'users/teams');
-    onValue(teamsRef, (snapshot) => {
-      const teams = snapshot.val();
-      if (teams) {
-        populateTeams(teams);
-      }
-    });
+function notify(message) {
+  const note = document.getElementById('notification');
+  note.textContent = message;
+  note.classList.add('show');
+  setTimeout(() => note.classList.remove('show'), 3000);
+}
+
+function showSignup() { switchPage('loginForm', 'signupForm'); }
+function showLogin() { switchPage('signupForm', 'loginForm'); }
+
+function switchPage(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  from.classList.remove('active');
+  setTimeout(() => {
+    from.style.display='none';
+    to.style.display='flex';
+    requestAnimationFrame(()=>to.classList.add('active'));
+  }, 300);
+}
+
+function signup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value.trim();
+  const username = document.getElementById('signupUsername').value.trim();
+  const team = document.getElementById('signupTeam').value.trim();
+  const flag = document.getElementById('signupFlag').value;
+  const fullTeamName = flag + ' ' + team;
+
+  if (!email || !password || !username || !team) {
+    notify("Please fill out all fields.");
+    return;
   }
 
-  function populateTeams(teams) {
-    const matchesRef = ref(database, 'matchmaking/matches');
-    onValue(matchesRef, (snapshot) => {
-      const usedTeams = new Set();
-      snapshot.forEach(matchSnap => {
-        const match = matchSnap.val();
-        usedTeams.add(match.teamA);
-        usedTeams.add(match.teamB);
+  const usersRef = db.ref('users');
+  usersRef.once('value', snapshot => {
+    let usernameTaken = false;
+    let teamTaken = false;
+    snapshot.forEach(userSnap => {
+      const data = userSnap.val();
+      if (data.username === username) usernameTaken = true;
+      if (data.team === fullTeamName) teamTaken = true;
+    });
+
+    if (usernameTaken) { notify("Username is taken."); return; }
+    if (teamTaken) { notify("Team name is taken."); return; }
+
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const userId = userCredential.user.uid;
+      db.ref('users/' + userId).set({
+        name: username,
+        username: username,
+        team: fullTeamName,
+        stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
       });
-
-      teamASelect.innerHTML = '<option value="">Select Team</option>';
-      teamBSelect.innerHTML = '<option value="">Select Team</option>';
-
-      for (const teamName in teams) {
-        if (!usedTeams.has(teamName)) {
-          const optionA = document.createElement('option');
-          optionA.value = teamName;
-          optionA.textContent = teamName;
-          teamASelect.appendChild(optionA);
-
-          const optionB = document.createElement('option');
-          optionB.value = teamName;
-          optionB.textContent = teamName;
-          teamBSelect.appendChild(optionB);
-        }
-      }
-    });
-  }
-
-  function fetchMatches() {
-    const matchesRef = ref(database, 'matchmaking/matches');
-    onValue(matchesRef, (snapshot) => {
-      matchList.innerHTML = '';
-      if (snapshot.exists()) {
-        snapshot.forEach(matchSnap => {
-          const match = matchSnap.val();
-          const matchId = matchSnap.key;
-          renderMatch(match, matchId);
-        });
-      } else {
-        matchList.innerHTML = '<p>No matches found.</p>';
-      }
-    });
-  }
-
-  function renderMatch(match, matchId) {
-    const div = document.createElement('div');
-    div.className = 'match-item';
-
-    const scheduledTime = match.scheduledTime ? new Date(match.scheduledTime).getTime() : null;
-
-    const detailsDiv = document.createElement('div');
-    detailsDiv.className = 'match-details';
-    detailsDiv.innerHTML = `
-      <strong>${match.teamA}</strong> vs <strong>${match.teamB}</strong><br>
-      <span class="small-text">Scheduled: ${scheduledTime ? new Date(scheduledTime).toLocaleString() : 'Not scheduled'}</span><br>
-    `;
-
-    const timerSpan = document.createElement('span');
-    timerSpan.className = 'timer';
-    detailsDiv.appendChild(timerSpan);
-
-    if (scheduledTime) {
-      updateTimer(timerSpan, scheduledTime);
-      setInterval(() => updateTimer(timerSpan, scheduledTime), 1000);
-    }
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-btn';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', () => deleteMatch(matchId));
-
-    div.appendChild(detailsDiv);
-    div.appendChild(deleteBtn);
-    matchList.appendChild(div);
-  }
-
-  function updateTimer(element, scheduledTime) {
-    const timeLeft = Math.max(0, scheduledTime - Date.now());
-    const minutes = Math.floor(timeLeft / 60000);
-    const seconds = Math.floor((timeLeft % 60000) / 1000);
-    element.textContent = timeLeft > 0 ? `${minutes}:${seconds < 10 ? '0' : ''}${seconds}` : '00:00';
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const teamA = teamASelect.value.trim();
-    const teamB = teamBSelect.value.trim();
-    const scheduledInput = document.getElementById('scheduledTime').value.trim();
-
-    if (!teamA || !teamB) {
-      statusText.textContent = 'Both teams are required.';
-      return;
-    }
-
-    if (teamA === teamB) {
-      statusText.textContent = 'Teams cannot be the same.';
-      return;
-    }
-
-    let scheduledTime = null;
-    if (scheduledInput) {
-      const parsedTime = new Date(scheduledInput).getTime();
-      if (isNaN(parsedTime)) {
-        statusText.textContent = 'Invalid scheduled time.';
-        return;
-      }
-      scheduledTime = parsedTime;
-    }
-
-    const matchData = { teamA, teamB };
-    if (scheduledTime) {
-      matchData.scheduledTime = scheduledTime;
-    }
-
-    const matchesRef = ref(database, 'matchmaking/matches');
-    const newMatchRef = push(matchesRef);
-    set(newMatchRef, matchData)
-      .then(() => {
-        statusText.textContent = 'Match created successfully!';
-        form.reset();
-      })
-      .catch(error => {
-        console.error('Error saving match:', error);
-        statusText.textContent = 'Error saving match.';
+      db.ref('teams/' + fullTeamName).set({
+        username: username,
+        stats: { wins:0, losses:0, draws:0, gamesPlayed:0, points:0 }
       });
+      showFlowers();
+      document.getElementById('loadingScreen').style.display='flex';
+      setTimeout(()=> window.location.href='homepage/', 3000);
+    })
+    .catch(e=> {console.error(e); notify(e.message);});
   });
+}
 
-  function deleteMatch(matchId) {
-    const matchRef = ref(database, 'matchmaking/matches/' + matchId);
-    remove(matchRef)
-      .then(() => {
-        console.log("Match deleted successfully.");
-      })
-      .catch(error => {
-        console.error("Error deleting match:", error);
-      });
+function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  auth.signInWithEmailAndPassword(email, password)
+  .then(()=> {
+    notify("Login successful!");
+    window.location.href='homepage/';
+  }).catch(e=>{
+    console.error(e);
+    notify(e.message);
+  });
+}
+
+function forgotPassword() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { notify("Enter your email."); return; }
+  auth.sendPasswordResetEmail(email)
+  .then(()=> notify("Password reset email sent."))
+  .catch(e=> {console.error(e); notify(e.message);});
+}
+
+function showFlowers() {
+  for (let i=0; i<30; i++) {
+    const flower = document.createElement('div');
+    flower.className='flower';
+    flower.style.left = Math.random()*100 + 'vw';
+    flower.style.top = '-30px';
+    flower.textContent = '🌸';
+    document.body.appendChild(flower);
+    setTimeout(()=> flower.remove(), 3000);
   }
+}
 
-  fetchTeams();
-  fetchMatches();
+// On load show login
+document.addEventListener('DOMContentLoaded', ()=>{
+  const login = document.getElementById('loginForm');
+  login.style.display='flex';
+  requestAnimationFrame(()=> login.classList.add('active'));
+});
 </script>
 
 </body>
