@@ -467,7 +467,7 @@ function refreshMatchmakingCard(userTeam) {
       const teamB = matchData.teamB;
 
       if (teamA === userTeam || teamB === userTeam) {
-        userMatch = { teamA, teamB, scheduledTime: matchData.scheduledTime || null };
+        userMatch = { teamA, teamB, scheduledTime: matchData.scheduledTime || null, matchcode: matchSnap.key };
       }
     });
 
@@ -483,7 +483,14 @@ function refreshMatchmakingCard(userTeam) {
           <div class="team-name">${userMatch.teamB}</div>
         </div>
         <p style="text-align:center;">Your opponent: <strong>${opponent}</strong>${timeText}</p>
+        <div id="connectButtonContainer" style="text-align:center;"></div>
       `;
+
+      // Append Connect button if scheduledTime exists
+      if (userMatch.scheduledTime) {
+        const connectButton = createConnectButton(userMatch.matchcode, userMatch.scheduledTime);
+        document.getElementById('connectButtonContainer').appendChild(connectButton);
+      }
     } else {
       matchmakingCard.innerHTML = `
         <h3>Matchmaking</h3>
@@ -491,6 +498,67 @@ function refreshMatchmakingCard(userTeam) {
       `;
     }
   });
+}
+
+// === Connect Button + Countdown Functions ===
+
+// Your WhatsApp number (remove + and spaces for wa.me link)
+const whatsappNumber = '27846737224';
+
+// Create Connect Button Element (Reusable)
+function createConnectButton(matchCode, scheduledTime) {
+  const button = document.createElement('button');
+  button.className = 'connect-button';
+  button.textContent = 'Connect';
+  button.dataset.matchCode = matchCode;
+  button.disabled = true; // Initially disabled
+  button.style.backgroundColor = 'grey';
+  button.style.color = 'white';
+  button.style.padding = '10px 20px';
+  button.style.border = 'none';
+  button.style.borderRadius = '5px';
+  button.style.marginTop = '10px';
+  button.style.opacity = '0.6';
+  button.style.cursor = 'not-allowed';
+
+  // Attach click event to open WhatsApp
+  button.addEventListener('click', () => {
+    const matchCode = button.dataset.matchCode;
+    const message = `Hi, I'm here to connect for our match. My match code is ${matchCode}.`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+  });
+
+  // Start countdown to enable button
+  startConnectCountdown(button, scheduledTime);
+
+  return button;
+}
+
+// Countdown Logic to Enable Connect Button
+function startConnectCountdown(button, scheduledTime) {
+  const targetTime = new Date(scheduledTime).getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const diff = targetTime - now;
+
+    if (diff <= 0) {
+      button.disabled = false;
+      button.style.backgroundColor = 'green';
+      button.style.cursor = 'pointer';
+      button.style.opacity = '1';
+      return clearInterval(timer);
+    }
+
+    // Optional: Show countdown text on button (minutes:seconds)
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    button.textContent = `Connect (${minutes}:${seconds.toString().padStart(2, '0')})`;
+  };
+
+  updateCountdown();
+  const timer = setInterval(updateCountdown, 1000);
 }
 
 // Confirm Exit Popup
@@ -587,75 +655,110 @@ onAuthStateChanged(auth, user => {
 
         // Update stats grid with user's stats + position
         document.getElementById('statsGrid').innerHTML = `
-          <div><strong>Wins</strong><br>${stats.wins ?? 0}</div>
-          <div><strong>Losses</strong><br>${stats.losses ?? 0}</div>
-          <div><strong>Draws</strong><br>${stats.draws ?? 0}</div>
-          <div><strong>Games</strong><br>${stats.gamesPlayed ?? 0}</div>
-          <div><strong>Points</strong><br>${stats.points ?? 0}</div>
+          <div><strong>Points</strong><br>${stats.points || 0}</div>
           <div><strong>Position</strong><br>${userPos}</div>
+          <div><strong>Games Played</strong><br>${stats.gamesPlayed || 0}</div>
+          <div><strong>Wins</strong><br>${stats.wins || 0}</div>
         `;
 
-        // Continue with rest of your logic
+        // Refresh the Champions League and Matchmaking cards
         refreshChampionsLeagueCard(userTeam, userUsername);
         refreshMatchmakingCard(userTeam);
-        setupChampionsLeagueMeta();
-
-        joinBtn.onclick = async () => {
-          const champTeamsRef = ref(db, 'championsleague/teams');
-          const champTeamsSnap = await get(champTeamsRef);
-          const teamsObj = champTeamsSnap.exists() ? champTeamsSnap.val() : {};
-          const userEntry = teamsObj[userTeam];
-          const userInLeague = userEntry !== undefined && userEntry.knockedOut !== true;
-          const isKnockedOut = userEntry?.knockedOut === true;
-
-          if (userInLeague) {
-            showConfirmExitPopup(async (confirmed) => {
-              if (confirmed) {
-                await set(ref(db, 'championsleague/teams/' + userTeam), {
-                  username: userUsername,
-                  knockedOut: true
-                });
-                localStorage.removeItem('inChampionsLeague');
-                championsCard.classList.remove('champions-premium', 'shimmer');
-                refreshChampionsLeagueCard(userTeam, userUsername);
-                showNotification('You exited the Champions League.', 'info');
-              }
-            });
-          } else {
-            const champMetaRef = ref(db, 'championsleague/meta');
-            const champMetaSnap = await get(champMetaRef);
-            const meta = champMetaSnap.val();
-
-            if (meta?.status !== 'open') {
-              showNotification('The Champions League season is closed. You can join next season.', 'error');
-              return;
-            }
-
-            if (isKnockedOut) {
-              showNotification('You have been knocked out. You can rejoin next season.', 'error');
-              return;
-            }
-
-            const activeTeams = Object.values(teamsObj).filter(t => !t.knockedOut).length;
-            if (activeTeams < MAX_TEAMS) {
-              await set(ref(db, 'championsleague/teams/' + userTeam), {
-                username: userUsername,
-                knockedOut: false
-              });
-              localStorage.setItem('inChampionsLeague', 'true');
-              championsCard.classList.add('champions-premium', 'shimmer');
-              triggerConfetti();
-              refreshChampionsLeagueCard(userTeam, userUsername);
-              showNotification('You joined the Champions League!', 'success');
-            } else {
-              showNotification('Champions League is full (16 teams max)', 'warning');
-            }
-          }
-        };
       });
+
+      // Set up the Champions League meta data
+      setupChampionsLeagueMeta();
     });
   }
 });
+
+// Handle the Join/Exit Champions League button
+joinBtn.addEventListener('click', () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userRef = ref(db, 'users/' + user.uid);
+  onValue(userRef, snapshot => {
+    const userData = snapshot.val();
+    const userTeam = userData.team;
+
+    // If user is already in the Champions League, confirm exit
+    const champTeamsRef = ref(db, 'championsleague/teams/' + userTeam);
+    onValue(champTeamsRef, snap => {
+      if (snap.exists()) {
+        showConfirmExitPopup((confirmExit) => {
+          if (confirmExit) {
+            set(champTeamsRef, null);  // Remove from Champions League
+            showNotification('You have exited the Champions League.', 'info');
+            joinBtn.textContent = 'Join Champions League';
+            joinBtn.disabled = false;
+            joinBtn.classList.remove('disabled');
+            joinBtn.style.backgroundColor = '#007bff';
+            refreshChampionsLeagueCard(userTeam, userData.username);
+          }
+        });
+      } else {
+        // Join Champions League logic
+        const champTeamsRef = ref(db, 'championsleague/teams');
+        onValue(champTeamsRef, snapshot => {
+          const teamCount = snapshot.size;
+          if (teamCount < MAX_TEAMS) {
+            set(ref(db, 'championsleague/teams/' + userTeam), {
+              knockedOut: false
+            });
+            showNotification('You have successfully joined the Champions League!', 'info');
+            joinBtn.textContent = 'Exit Champions League';
+            joinBtn.disabled = false;
+            joinBtn.style.backgroundColor = 'red';
+            refreshChampionsLeagueCard(userTeam, userData.username);
+          } else {
+            showNotification('The Champions League is already full.', 'warning');
+          }
+        });
+      }
+    });
+  });
+});
+</script>
+
+<style>
+  /* Add styles for the connect button */
+  .connect-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: not-allowed;
+    color: white;
+    background-color: grey;
+    border: none;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+  }
+
+  .connect-button:hover {
+    background-color: #45a049;
+  }
+
+  .disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .champions-premium {
+    background-color: #f7f7f7;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+</style>
 </script>
 </body>
 </html>
