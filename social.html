@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ItzHoyoo Marketplace</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: white;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+header {
+  background: #222;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #333;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+}
+.hamburger {
+  width: 30px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-right: 15px;
+}
+.hamburger div {
+  background: #0ff;
+  height: 3px;
+  border-radius: 2px;
+}
+.logo-text {
+  font-size: 22px;
+  font-weight: bold;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+}
+.profile-box {
+  display: flex;
+  align-items: center;
+  background: #333;
+  padding: 5px 10px;
+  border-radius: 25px;
+  box-shadow: 0 0 5px #0ff;
+}
+.profile-box img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-left: 5px;
+}
+
+.search-container {
+  width: 80%;
+  margin: 20px auto 10px;
+  display: flex;
+  justify-content: center;
+}
+.search-container input {
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  box-shadow: 0 0 5px #0ff;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  border-bottom: 2px solid #333;
+}
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+.tab.active {
+  color: #0ff;
+}
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 3px;
+  background: #0ff;
+  border-radius: 2px;
+}
+
+#postsContainer {
+  width: 80%;
+  margin: 20px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 15px;
+}
+.post-card {
+  background: #222;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 5px #000;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.post-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px #0ff;
+}
+.post-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+.post-info {
+  padding: 10px;
+}
+.post-channel {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+.post-channel img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.follow-btn {
+  margin-left: auto;
+  padding: 5px 10px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: #0ff;
+  color: black;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.follow-btn.following {
+  background: red;
+  color: white;
+}
+.follower-count {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #ccc;
+}
+.views-container {
+  margin-top: 8px;
+  background: #333;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: inline-block;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="hamburger" onclick="alert('Menu opened')">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="logo-text">ItzHoyoo</div>
+  </div>
+  <div class="header-right">
+    <div class="profile-box">
+      <span>My Profile</span>
+      <img id="profilePic" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMVM4ss1IUhi5TkN6fumDCVv_ZyfSfkXm6B0nJPnuNbP0UyqlgQn6B2Nc&s=10">
+    </div>
+  </div>
+</header>
+
+<div class="search-container">
+  <input type="text" placeholder="Search...">
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('homepage')">Homepage</div>
+  <div class="tab" onclick="switchTab('messages')">Messages</div>
+  <div class="tab" onclick="switchTab('marketplace')">Marketplace</div>
+</div>
+
+<div id="postsContainer"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, update, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// Load posts and user follows
+let currentUserId = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUserId = user.uid;
+    loadPosts();
+  } else {
+    alert("Please log in first to interact.");
+  }
+});
+
+async function loadPosts() {
+  const postsRef = ref(db, 'posts');
+  const postsContainer = document.getElementById('postsContainer');
+
+  try {
+    const snapshot = await get(postsRef);
+    const posts = snapshot.val();
+    if (!posts) {
+      postsContainer.innerHTML = 'No posts available.';
+      return;
+    }
+
+    Object.keys(posts).forEach(async (postId) => {
+      const post = posts[postId];
+      const title = post.title || 'Untitled';
+      const channelName = post.username || '@Unknown';
+      const views = post.views || 0;
+      const followers = post.followers || 0;
+      const profilePic = post.profilePic || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMVM4ss1IUhi5TkN6fumDCVv_ZyfSfkXm6B0nJPnuNbP0UyqlgQn6B2Nc&s=10';
+      const postImg = post.image || profilePic;
+
+      // Increment views +1 on load
+      const newViews = views + 1;
+      const postRef = ref(db, `posts/${postId}`);
+      await update(postRef, { views: newViews });
+
+      const card = document.createElement('div');
+      card.classList.add('post-card');
+      card.innerHTML = `
+        <img src="${postImg}" alt="${title}">
+        <div class="post-info">
+          <div><strong>${title}</strong></div>
+          <div class="post-channel">
+            <img src="${profilePic}" alt="${channelName}">
+            <span>${channelName}</span>
+            <button class="follow-btn">Follow</button>
+            <span class="follower-count">${followers} followers</span>
+          </div>
+          <div class="views-container">${newViews} views</div>
+        </div>
+      `;
+      postsContainer.appendChild(card);
+
+      // Follow button logic
+      const followBtn = card.querySelector('.follow-btn');
+      const followerCount = card.querySelector('.follower-count');
+
+      const userFollowRef = ref(db, `userFollows/${currentUserId}/${postId}`);
+      const userFollowSnap = await get(userFollowRef);
+      const hasFollowed = userFollowSnap.exists();
+
+      if (hasFollowed) {
+        followBtn.textContent = 'Unfollow';
+        followBtn.classList.add('following');
+      }
+
+      followBtn.addEventListener('click', async () => {
+        if (!currentUserId) return alert('Login first.');
+
+        let updatedFollowers = followers;
+
+        if (!followBtn.classList.contains('following')) {
+          // Follow once
+          await update(userFollowRef, { followed: true });
+          updatedFollowers += 1;
+          followBtn.textContent = 'Unfollow';
+          followBtn.classList.add('following');
+        } else {
+          // Unfollow (remove)
+          await update(userFollowRef, null);
+          updatedFollowers = Math.max(followers, updatedFollowers - 1);
+          followBtn.textContent = 'Follow';
+          followBtn.classList.remove('following');
+        }
+
+        await update(postRef, { followers: updatedFollowers });
+        followerCount.textContent = `${updatedFollowers} followers`;
+      });
+    });
+  } catch (error) {
+    console.error('Error loading posts:', error);
+  }
+}
+
+// Tabs
+const tabs = document.querySelectorAll('.tab');
+function switchTab(tabName) {
+  tabs.forEach(tab => tab.classList.remove('active'));
+  const clickedTab = [...tabs].find(t => t.textContent.toLowerCase() === tabName);
+  if (clickedTab) clickedTab.classList.add('active');
+}
+</script>
+
+</body>
+</html>
