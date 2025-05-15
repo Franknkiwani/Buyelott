@@ -2,15 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Post Details</title>
+</head>
+<body>
+  <div id="post-container">
+    <h1>Loading post...</h1>
+  </div>
+
   <script type="module">
-    // Import the functions you need from the SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -22,48 +26,48 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
-    const database = getDatabase(app);
+    const db = getDatabase(app);
 
-    // Get the post ID from the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('id');
+    // Extract post ID from URL path (e.g., post.html/1743767063714)
+    const pathSegments = window.location.pathname.split('/');
+    const postId = pathSegments[pathSegments.length - 1];
 
-    // Fetch post data from Firebase using the post ID
     const fetchPost = async () => {
-      const postRef = ref(database, 'posts/' + postId);  // Adjust 'posts' based on your Firebase structure
+      const postRef = ref(db, `posts/${postId}`);
       try {
         const snapshot = await get(postRef);
         if (snapshot.exists()) {
           const postData = snapshot.val();
           displayPost(postData);
+          incrementViewCount(postId);
         } else {
-          console.log('No data available');
+          document.getElementById('post-container').innerHTML = `<h2>Post not found</h2>`;
         }
       } catch (error) {
-        console.error("Error fetching post data:", error);
+        console.error('Error fetching post:', error);
       }
     };
 
-    // Display post data
-    const displayPost = (postData) => {
+    const displayPost = (data) => {
       const postContainer = document.getElementById('post-container');
       postContainer.innerHTML = `
-        <h2>${postData.title}</h2>
-        <p>${postData.description}</p>
-        <p><strong>Posted on:</strong> ${postData.date}</p>
+        <h2>${data.title || "Untitled Post"}</h2>
+        <p>${data.description || "No description provided."}</p>
+        <p><strong>Posted on:</strong> ${data.date || "Unknown date"}</p>
+        <p><strong>Views:</strong> ${data.views || 0}</p>
       `;
     };
 
-    // Fetch and display post when the page loads
-    window.onload = fetchPost;
+    const incrementViewCount = (id) => {
+      const viewsRef = ref(db, `posts/${id}/views`);
+      runTransaction(viewsRef, (current) => {
+        return (current || 0) + 1;
+      });
+    };
+
+    fetchPost();
   </script>
-</head>
-<body>
-  <div id="post-container">
-    <h1>Loading post...</h1>
-  </div>
 </body>
 </html>
