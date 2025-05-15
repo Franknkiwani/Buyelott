@@ -1,259 +1,273 @@
+
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Video Post - Fullscreen</title>
+  <title>Post Details - Image View</title>
   <style>
-    /* Reset & base */
+    /* Reset and base */
     * {
       box-sizing: border-box;
     }
     body, html {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #121212;
       color: #eee;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
+    }
+
+    #post-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      background: #1e1e1e;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      border-radius: 8px;
       overflow: hidden;
     }
 
-    /* Video container full width, fixed aspect ratio */
-    #video-container {
-      flex-shrink: 0;
-      position: relative;
+    /* Image area */
+    #post-image {
       width: 100%;
-      padding-top: 56.25%; /* 16:9 aspect ratio */
-      background: black;
+      max-height: 60vh;
+      object-fit: cover;
+      background: #333;
+      user-select: none;
     }
 
-    #video-container video {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      outline: none;
-    }
-
-    /* Content below video scrolls */
-    #content {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 1rem 2rem;
-      background: #181818;
+    /* Content area below image */
+    .post-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Title */
-    #content h1 {
-      margin: 0 0 0.5rem 0;
+    h2.post-title {
+      margin: 0 0 10px;
       font-weight: 700;
       font-size: 1.8rem;
+      line-height: 1.2;
       color: #fff;
     }
 
-    /* Like / dislike and uploader info container */
-    #actions {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    /* Like & dislike buttons */
-    .btn-like, .btn-dislike {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #222;
-      border-radius: 30px;
-      padding: 0.4rem 1rem;
-      color: #aaa;
-      user-select: none;
-      transition: background 0.2s ease, color 0.2s ease;
-      font-weight: 600;
-    }
-
-    .btn-like:hover {
-      background: #2e7d32;
-      color: #b9f6ca;
-    }
-    .btn-dislike:hover {
-      background: #c62828;
-      color: #ff8a80;
-    }
-
-    .btn-like.active {
-      background: #43a047;
-      color: white;
-    }
-
-    .btn-dislike.active {
-      background: #d32f2f;
-      color: white;
-    }
-
-    /* Uploader info */
-    #uploader-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: #ddd;
-      flex-wrap: wrap;
-    }
-
-    #uploader-info img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #43a047;
-    }
-
-    #uploader-info .uploader-name {
-      font-weight: 700;
+    /* Description */
+    p.post-description {
+      margin: 0 0 20px;
       font-size: 1rem;
-      color: #fff;
-    }
-    #uploader-info .followers {
-      font-size: 0.9rem;
-      color: #bbb;
-    }
-
-    /* Comments section */
-    #comments-section {
-      margin-top: 2rem;
-    }
-    #comments-section h2 {
-      margin-bottom: 1rem;
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: #fff;
-    }
-    #comments-list {
-      max-height: 250px;
-      overflow-y: auto;
-      border-top: 1px solid #333;
-      border-bottom: 1px solid #333;
-      padding: 0.5rem 0;
-      margin-bottom: 1rem;
-    }
-
-    .comment {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #2c2c2c;
-    }
-    .comment:last-child {
-      border-bottom: none;
-    }
-
-    .comment .author {
-      font-weight: 700;
-      color: #43a047;
-      font-size: 0.9rem;
-    }
-    .comment .text {
-      margin: 0.2rem 0 0 0;
       color: #ccc;
-      font-size: 0.9rem;
+      line-height: 1.4;
       white-space: pre-wrap;
     }
 
-    /* Add comment form */
-    #comment-form {
+    /* Uploader info and stats row */
+    .post-info {
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+      padding: 15px 0;
+      margin-bottom: 20px;
     }
-    #comment-input {
-      flex-grow: 1;
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+
+    /* Uploader details */
+    .uploader {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .uploader img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #0f9d58;
+    }
+    .uploader .name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #0f9d58;
+    }
+    .uploader .followers {
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* Like/dislike buttons */
+    .post-actions {
+      display: flex;
+      gap: 15px;
+    }
+    button.like-btn, button.dislike-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border: none;
+      background: #2a2a2a;
+      color: #eee;
+      font-size: 1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button.like-btn.active {
+      background: #0f9d58;
+      color: #fff;
+      font-weight: 700;
+    }
+    button.dislike-btn.active {
+      background: #db4437;
+      color: #fff;
+      font-weight: 700;
+    }
+    button.like-btn:hover:not(.active) {
+      background: #116644;
+    }
+    button.dislike-btn:hover:not(.active) {
+      background: #a33a2d;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .comments-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+      margin-bottom: 10px;
+    }
+    .comment {
+      background: #2a2a2a;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      word-wrap: break-word;
+    }
+    .comment .author {
+      font-weight: 600;
+      color: #0f9d58;
+      margin-bottom: 4px;
+    }
+    .comment .text {
+      color: #ddd;
+      font-size: 0.95rem;
+    }
+
+    /* Comment form */
+    form#comment-form {
+      display: flex;
+      gap: 10px;
+    }
+    form#comment-form input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      border-radius: 50px;
       border: none;
       outline: none;
       font-size: 1rem;
       background: #222;
       color: #eee;
+      transition: background-color 0.3s ease;
     }
-    #comment-submit {
-      background: #43a047;
+    form#comment-form input[type="text"]:focus {
+      background: #333;
+    }
+    form#comment-form button {
+      background: #0f9d58;
       border: none;
+      padding: 0 20px;
+      border-radius: 50px;
       color: white;
       font-weight: 700;
-      padding: 0 1.5rem;
-      border-radius: 25px;
       cursor: pointer;
-      transition: background 0.2s ease;
-      flex-shrink: 0;
+      transition: background-color 0.3s ease;
+      user-select: none;
     }
-    #comment-submit:disabled {
-      background: #2c6b2c;
+    form#comment-form button:disabled {
+      background: #555;
       cursor: not-allowed;
     }
-    #comment-submit:hover:not(:disabled) {
-      background: #66bb6a;
+    form#comment-form button:hover:not(:disabled) {
+      background: #0b7a44;
     }
 
     /* Scrollbar styling for comments */
-    #comments-list::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
+    .comments-list::-webkit-scrollbar {
+      width: 8px;
     }
-    #comments-list::-webkit-scrollbar-thumb {
-      background: #555;
-      border-radius: 3px;
+    .comments-list::-webkit-scrollbar-thumb {
+      background: #0f9d58;
+      border-radius: 4px;
     }
 
     /* Responsive */
     @media (max-width: 600px) {
-      #content {
-        padding: 1rem 1rem;
+      #post-container {
+        border-radius: 0;
+        box-shadow: none;
       }
-      #actions {
-        gap: 1rem;
+      h2.post-title {
+        font-size: 1.5rem;
       }
-      #uploader-info img {
-        width: 40px;
-        height: 40px;
+      button.like-btn, button.dislike-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+      .uploader img {
+        width: 44px;
+        height: 44px;
+      }
+      .uploader .name {
+        font-size: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div id="video-container">
-    <video id="video-player" controls preload="metadata" playsinline>
-      Sorry, your browser doesn't support embedded videos.
-    </video>
-  </div>
-
-  <div id="content">
-    <h1 id="post-title">Loading...</h1>
-
-    <div id="actions">
-      <div class="btn-like" id="btn-like">👍 <span id="like-count">0</span></div>
-      <div class="btn-dislike" id="btn-dislike">👎 <span id="dislike-count">0</span></div>
-
-      <div id="uploader-info">
-        <img id="uploader-pic" src="" alt="Uploader profile" />
-        <div>
-          <div class="uploader-name" id="uploader-name">Uploader Name</div>
-          <div class="followers" id="follower-count">0 followers</div>
+  <div id="post-container">
+    <img id="post-image" src="" alt="Post image" />
+    <div class="post-content">
+      <h2 class="post-title">Loading...</h2>
+      <p class="post-description"></p>
+      <div class="post-info">
+        <div class="uploader">
+          <img id="uploader-pic" src="" alt="Uploader picture" />
+          <div>
+            <div class="name" id="uploader-name">Uploader Name</div>
+            <div class="followers" id="uploader-followers">0 followers</div>
+          </div>
+        </div>
+        <div class="post-actions">
+          <button class="like-btn" id="like-btn">👍 <span id="like-count">0</span></button>
+          <button class="dislike-btn" id="dislike-btn">👎 <span id="dislike-count">0</span></button>
         </div>
       </div>
-    </div>
 
-    <div id="comments-section">
-      <h2>Comments</h2>
-      <div id="comments-list"></div>
-
-      <form id="comment-form">
-        <input type="text" id="comment-input" placeholder="Add a comment..." required />
-        <button type="submit" id="comment-submit" disabled>Post</button>
-      </form>
+      <div class="comments-section">
+        <div class="comments-list" id="comments-list">
+          <!-- Comments will go here -->
+        </div>
+        <form id="comment-form">
+          <input type="text" id="comment-input" placeholder="Add a comment..." autocomplete="off" />
+          <button type="submit" id="comment-submit" disabled>Post</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -263,214 +277,203 @@
       getDatabase,
       ref,
       get,
-      runTransaction,
       onValue,
+      runTransaction,
       push,
-      serverTimestamp,
       query,
-      limitToLast
+      limitToLast,
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // Firebase config
+    // Firebase config - replace with your own
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
       databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
+      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      measurementId: "G-LLT6F9WRKH",
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Get post ID from query param ?id=...
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('id');
-
-    if (!postId) {
-      alert('Invalid post ID!');
-      throw new Error('No post ID in URL');
-    }
+    // Parse postId from URL (last segment)
+    const pathSegments = window.location.pathname.split("/");
+    const postId = pathSegments[pathSegments.length - 1] || "default-post-id";
 
     // Elements
-    const videoPlayer = document.getElementById('video-player');
-    const postTitle = document.getElementById('post-title');
-    const likeBtn = document.getElementById('btn-like');
-    const dislikeBtn = document.getElementById('btn-dislike');
-    const likeCountEl = document.getElementById('like-count');
-    const dislikeCountEl = document.getElementById('dislike-count');
-    const uploaderPic = document.getElementById('uploader-pic');
-    const uploaderName = document.getElementById('uploader-name');
-    const followerCount = document.getElementById('follower-count');
-    const commentsList = document.getElementById('comments-list');
-    const commentForm = document.getElementById('comment-form');
-    const commentInput = document.getElementById('comment-input');
-    const commentSubmit = document.getElementById('comment-submit');
+    const postImage = document.getElementById("post-image");
+    const postTitle = document.querySelector(".post-title");
+    const postDescription = document.querySelector(".post-description");
+    const uploaderPic = document.getElementById("uploader-pic");
+    const uploaderName = document.getElementById("uploader-name");
+    const uploaderFollowers = document.getElementById("uploader-followers");
+    const likeBtn = document.getElementById("like-btn");
+    const dislikeBtn = document.getElementById("dislike-btn");
+    const likeCountEl = document.getElementById("like-count");
+    const dislikeCountEl = document.getElementById("dislike-count");
+    const commentsList = document.getElementById("comments-list");
+    const commentForm = document.getElementById("comment-form");
+    const commentInput = document.getElementById("comment-input");
+    const commentSubmit = document.getElementById("comment-submit");
 
-    // Assume a userID for demo (in production you'd get from auth)
-    const currentUserId = 'guest_user_123';
-    const currentUserName = 'Guest User';
+    // You can replace this with actual user data or Firebase Authentication user
+    const currentUserId = "anonymousUser";
+    const currentUserName = "Anonymous";
 
-    // Track like/dislike state locally (could come from user data in real app)
-    let userLiked = null; // null, 'like', or 'dislike'
+    // State to track user's like/dislike (for demo stored locally only)
+    let userLiked = null; // 'like' | 'dislike' | null
 
-    // Helper to escape HTML for comment text
+    // Helper to escape HTML (for comments)
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, function (m) {
-        return ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        })[m];
+        return (
+          {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          }[m] || m
+        );
       });
     }
 
-    // Fetch post info
+    // Load post data from Firebase
     async function loadPost() {
       const postRef = ref(db, `posts/${postId}`);
-      const snap = await get(postRef);
-      if (!snap.exists()) {
-        alert('Post not found');
-        postTitle.textContent = 'Post not found';
-        return;
+      try {
+        const snapshot = await get(postRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          postImage.src = data.imageURL || "";
+          postImage.alt = data.title || "Post Image";
+
+          postTitle.textContent = data.title || "Untitled Post";
+          postDescription.textContent = data.description || "No description provided.";
+
+          uploaderPic.src = data.uploaderPicURL || "";
+          uploaderPic.alt = data.uploaderName || "Uploader Picture";
+          uploaderName.textContent = data.uploaderName || "Uploader";
+          uploaderFollowers.textContent = `${data.followers || 0} followers`;
+
+          likeCountEl.textContent = data.likes || 0;
+          dislikeCountEl.textContent = data.dislikes || 0;
+
+          // Increment view count on load
+          incrementViewCount();
+
+        } else {
+          postTitle.textContent = "Post not found";
+          postDescription.textContent = "";
+          postImage.style.display = "none";
+        }
+      } catch (error) {
+        console.error("Error loading post:", error);
       }
-
-      const data = snap.val();
-
-      postTitle.textContent = data.title || 'Untitled Post';
-      videoPlayer.src = data.videoURL || '';
-
-      // uploader info
-      uploaderName.textContent = data.uploaderName || 'Uploader';
-      followerCount.textContent = `${data.followers || 0} follower${data.followers === 1 ? '' : 's'}`;
-      uploaderPic.src = data.uploaderPicURL || 'https://via.placeholder.com/48?text=User';
-
-      // Set likes/dislikes counts
-      likeCountEl.textContent = data.likes || 0;
-      dislikeCountEl.textContent = data.dislikes || 0;
-
-      // You can load user's like/dislike status here if you have user auth
-
-      // Increment view count on load
-      incrementCounter('views');
     }
 
-    // Increment a numeric counter on the post (views, likes, dislikes)
-    function incrementCounter(counterName) {
-      const counterRef = ref(db, `posts/${postId}/${counterName}`);
-      runTransaction(counterRef, (current) => (current || 0) + 1);
+    // Increment views atomically
+    function incrementViewCount() {
+      const viewsRef = ref(db, `posts/${postId}/views`);
+      runTransaction(viewsRef, (current) => (current || 0) + 1);
     }
 
-    // Update like/dislike count from db live
+    // Listen to likes/dislikes realtime
     function watchCounters() {
       const likesRef = ref(db, `posts/${postId}/likes`);
       const dislikesRef = ref(db, `posts/${postId}/dislikes`);
 
-      onValue(likesRef, (snapshot) => {
-        likeCountEl.textContent = snapshot.val() || 0;
+      onValue(likesRef, (snap) => {
+        likeCountEl.textContent = snap.val() || 0;
       });
 
-      onValue(dislikesRef, (snapshot) => {
-        dislikeCountEl.textContent = snapshot.val() || 0;
+      onValue(dislikesRef, (snap) => {
+        dislikeCountEl.textContent = snap.val() || 0;
       });
     }
 
-    // Handle like button click
-    likeBtn.addEventListener('click', () => {
-      if (userLiked === 'like') {
-        // Remove like
+    // Like/dislike button handlers
+    likeBtn.addEventListener("click", () => {
+      if (userLiked === "like") {
         updateLikeDislike(null);
       } else {
-        updateLikeDislike('like');
+        updateLikeDislike("like");
       }
     });
 
-    // Handle dislike button click
-    dislikeBtn.addEventListener('click', () => {
-      if (userLiked === 'dislike') {
-        // Remove dislike
+    dislikeBtn.addEventListener("click", () => {
+      if (userLiked === "dislike") {
         updateLikeDislike(null);
       } else {
-        updateLikeDislike('dislike');
+        updateLikeDislike("dislike");
       }
     });
 
-    // Update likes/dislikes counters in DB based on user action
+    // Update likes/dislikes counts atomically
     function updateLikeDislike(action) {
       const postLikesRef = ref(db, `posts/${postId}/likes`);
       const postDislikesRef = ref(db, `posts/${postId}/dislikes`);
 
-      // Transaction to adjust counters atomically
-      // First remove old like/dislike if any, then add new
+      if (userLiked === action) return;
 
-      // We will do two transactions in series for simplicity
-
-      if (userLiked === action) return; // no change
-
-      if (userLiked === 'like') {
-        // Decrement likes by 1
-        runTransaction(postLikesRef, (current) => (current || 1) - 1);
-      } else if (userLiked === 'dislike') {
-        // Decrement dislikes by 1
-        runTransaction(postDislikesRef, (current) => (current || 1) - 1);
+      if (userLiked === "like") {
+        runTransaction(postLikesRef, (c) => (c || 1) - 1);
+      } else if (userLiked === "dislike") {
+        runTransaction(postDislikesRef, (c) => (c || 1) - 1);
       }
 
-      if (action === 'like') {
-        runTransaction(postLikesRef, (current) => (current || 0) + 1);
-        userLiked = 'like';
-      } else if (action === 'dislike') {
-        runTransaction(postDislikesRef, (current) => (current || 0) + 1);
-        userLiked = 'dislike';
+      if (action === "like") {
+        runTransaction(postLikesRef, (c) => (c || 0) + 1);
+        userLiked = "like";
+      } else if (action === "dislike") {
+        runTransaction(postDislikesRef, (c) => (c || 0) + 1);
+        userLiked = "dislike";
       } else {
         userLiked = null;
       }
+
       updateLikeDislikeUI();
     }
 
-    // Update button styles based on userLiked
     function updateLikeDislikeUI() {
-      likeBtn.classList.toggle('active', userLiked === 'like');
-      dislikeBtn.classList.toggle('active', userLiked === 'dislike');
+      likeBtn.classList.toggle("active", userLiked === "like");
+      dislikeBtn.classList.toggle("active", userLiked === "dislike");
     }
 
     // Comments logic
-
-    // Listen for new comments (last 50)
     function watchComments() {
       const commentsRef = query(ref(db, `posts/${postId}/comments`), limitToLast(50));
-
       onValue(commentsRef, (snapshot) => {
-        commentsList.innerHTML = '';
+        commentsList.innerHTML = "";
         const comments = snapshot.val() || {};
-        // Sort by timestamp ascending
-        const sortedComments = Object.entries(comments).sort((a, b) => a[1].timestamp - b[1].timestamp);
+        const sortedComments = Object.entries(comments).sort(
+          (a, b) => a[1].timestamp - b[1].timestamp
+        );
 
-        for (const [key, comment] of sortedComments) {
-          const cDiv = document.createElement('div');
-          cDiv.className = 'comment';
+        for (const [, comment] of sortedComments) {
+          const cDiv = document.createElement("div");
+          cDiv.className = "comment";
           cDiv.innerHTML = `
             <div class="author">${escapeHTML(comment.authorName)}</div>
             <div class="text">${escapeHTML(comment.text)}</div>
           `;
           commentsList.appendChild(cDiv);
         }
-
-        commentsList.scrollTop = commentsList.scrollHeight; // Scroll to bottom
+        commentsList.scrollTop = commentsList.scrollHeight;
       });
     }
 
-    // Enable/disable comment submit button
-    commentInput.addEventListener('input', () => {
-      commentSubmit.disabled = commentInput.value.trim() === '';
+    // Enable/disable comment button
+    commentInput.addEventListener("input", () => {
+      commentSubmit.disabled = commentInput.value.trim() === "";
     });
 
     // Submit new comment
-    commentForm.addEventListener('submit', async (e) => {
+    commentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const text = commentInput.value.trim();
       if (!text) return;
@@ -480,14 +483,14 @@
         authorId: currentUserId,
         authorName: currentUserName,
         text,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
-      commentInput.value = '';
+      commentInput.value = "";
       commentSubmit.disabled = true;
     });
 
-    // Initialize
+    // Init
     (async () => {
       await loadPost();
       watchCounters();
