@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Post Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video Post - Fullscreen</title>
   <style>
     /* Reset & base */
     * {
@@ -12,106 +12,266 @@
     body, html {
       margin: 0; padding: 0; height: 100%;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #e0e0e0;
+      background: #121212;
+      color: #eee;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 1rem;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    #post-container {
-      background: #1f2937;
-      border-radius: 12px;
-      max-width: 700px;
+    /* Video container full width, fixed aspect ratio */
+    #video-container {
+      flex-shrink: 0;
+      position: relative;
       width: 100%;
-      padding: 2rem 2.5rem;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-      backdrop-filter: saturate(180%) blur(12px);
-      -webkit-backdrop-filter: saturate(180%) blur(12px);
-      transition: all 0.3s ease;
+      padding-top: 56.25%; /* 16:9 aspect ratio */
+      background: black;
     }
 
-    h1, h2 {
+    #video-container video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      outline: none;
+    }
+
+    /* Content below video scrolls */
+    #content {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem 2rem;
+      background: #181818;
+    }
+
+    /* Title */
+    #content h1 {
+      margin: 0 0 0.5rem 0;
       font-weight: 700;
-      margin: 0 0 1rem 0;
-      color: #00e676;
-      text-shadow: 0 0 6px #00e676aa;
+      font-size: 1.8rem;
+      color: #fff;
     }
 
-    p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      margin: 0.5rem 0 1.5rem 0;
-      color: #cfd8dc;
+    /* Like / dislike and uploader info container */
+    #actions {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
     }
 
-    p strong {
-      color: #80deea;
-    }
-
-    /* Views count styling */
-    .views {
-      font-size: 0.9rem;
-      background: #004d40;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      display: inline-block;
-      color: #a7ffeb;
-      font-weight: 600;
+    /* Like & dislike buttons */
+    .btn-like, .btn-dislike {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #222;
+      border-radius: 30px;
+      padding: 0.4rem 1rem;
+      color: #aaa;
       user-select: none;
+      transition: background 0.2s ease, color 0.2s ease;
+      font-weight: 600;
     }
 
-    /* Loading / error states */
-    #post-container h1 {
-      font-size: 2rem;
-      color: #90caf9;
-      text-align: center;
-      text-shadow: 0 0 8px #90caf9cc;
+    .btn-like:hover {
+      background: #2e7d32;
+      color: #b9f6ca;
+    }
+    .btn-dislike:hover {
+      background: #c62828;
+      color: #ff8a80;
     }
 
-    #post-container h2 {
-      text-align: center;
-      color: #ef5350;
-      text-shadow: 0 0 6px #ef5350cc;
+    .btn-like.active {
+      background: #43a047;
+      color: white;
+    }
+
+    .btn-dislike.active {
+      background: #d32f2f;
+      color: white;
+    }
+
+    /* Uploader info */
+    #uploader-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: #ddd;
+      flex-wrap: wrap;
+    }
+
+    #uploader-info img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #43a047;
+    }
+
+    #uploader-info .uploader-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+    #uploader-info .followers {
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+
+    /* Comments section */
+    #comments-section {
+      margin-top: 2rem;
+    }
+    #comments-section h2 {
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #fff;
+    }
+    #comments-list {
+      max-height: 250px;
+      overflow-y: auto;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
+    }
+
+    .comment {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #2c2c2c;
+    }
+    .comment:last-child {
+      border-bottom: none;
+    }
+
+    .comment .author {
+      font-weight: 700;
+      color: #43a047;
+      font-size: 0.9rem;
+    }
+    .comment .text {
+      margin: 0.2rem 0 0 0;
+      color: #ccc;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+
+    /* Add comment form */
+    #comment-form {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    #comment-input {
+      flex-grow: 1;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      background: #222;
+      color: #eee;
+    }
+    #comment-submit {
+      background: #43a047;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 0 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+    #comment-submit:disabled {
+      background: #2c6b2c;
+      cursor: not-allowed;
+    }
+    #comment-submit:hover:not(:disabled) {
+      background: #66bb6a;
+    }
+
+    /* Scrollbar styling for comments */
+    #comments-list::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    #comments-list::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 3px;
     }
 
     /* Responsive */
-    @media (max-width: 768px) {
-      #post-container {
-        padding: 1.5rem 1.8rem;
-        max-width: 95vw;
+    @media (max-width: 600px) {
+      #content {
+        padding: 1rem 1rem;
       }
-
-      p {
-        font-size: 1rem;
+      #actions {
+        gap: 1rem;
       }
-    }
-
-    @media (max-width: 400px) {
-      #post-container {
-        padding: 1rem 1.2rem;
-      }
-      h2 {
-        font-size: 1.4rem;
-      }
-      p {
-        font-size: 0.9rem;
+      #uploader-info img {
+        width: 40px;
+        height: 40px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="post-container">
-    <h1>Loading post...</h1>
+  <div id="video-container">
+    <video id="video-player" controls preload="metadata" playsinline>
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+  </div>
+
+  <div id="content">
+    <h1 id="post-title">Loading...</h1>
+
+    <div id="actions">
+      <div class="btn-like" id="btn-like">👍 <span id="like-count">0</span></div>
+      <div class="btn-dislike" id="btn-dislike">👎 <span id="dislike-count">0</span></div>
+
+      <div id="uploader-info">
+        <img id="uploader-pic" src="" alt="Uploader profile" />
+        <div>
+          <div class="uploader-name" id="uploader-name">Uploader Name</div>
+          <div class="followers" id="follower-count">0 followers</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="comments-section">
+      <h2>Comments</h2>
+      <div id="comments-list"></div>
+
+      <form id="comment-form">
+        <input type="text" id="comment-input" placeholder="Add a comment..." required />
+        <button type="submit" id="comment-submit" disabled>Post</button>
+      </form>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      runTransaction,
+      onValue,
+      push,
+      serverTimestamp,
+      query,
+      limitToLast
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -124,65 +284,216 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
+    // Get post ID from query param ?id=...
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('id');
 
-    const fetchPost = async () => {
-      if (!postId) {
-        document.getElementById('post-container').innerHTML = `<h2>Invalid post ID</h2>`;
-        return;
-      }
+    if (!postId) {
+      alert('Invalid post ID!');
+      throw new Error('No post ID in URL');
+    }
 
-      const postRef = ref(db, `posts/${postId}`);
-      try {
-        const snapshot = await get(postRef);
-        if (snapshot.exists()) {
-          const postData = snapshot.val();
-          displayPost(postData);
-          incrementViewCount(postId);
-        } else {
-          document.getElementById('post-container').innerHTML = `<h2>Post not found</h2>`;
-        }
-      } catch (error) {
-        console.error('Error fetching post:', error);
-        document.getElementById('post-container').innerHTML = `<h2>Error loading post</h2>`;
-      }
-    };
+    // Elements
+    const videoPlayer = document.getElementById('video-player');
+    const postTitle = document.getElementById('post-title');
+    const likeBtn = document.getElementById('btn-like');
+    const dislikeBtn = document.getElementById('btn-dislike');
+    const likeCountEl = document.getElementById('like-count');
+    const dislikeCountEl = document.getElementById('dislike-count');
+    const uploaderPic = document.getElementById('uploader-pic');
+    const uploaderName = document.getElementById('uploader-name');
+    const followerCount = document.getElementById('follower-count');
+    const commentsList = document.getElementById('comments-list');
+    const commentForm = document.getElementById('comment-form');
+    const commentInput = document.getElementById('comment-input');
+    const commentSubmit = document.getElementById('comment-submit');
 
-    const displayPost = (data) => {
-      const postContainer = document.getElementById('post-container');
-      postContainer.innerHTML = `
-        <h2>${escapeHTML(data.title || "Untitled Post")}</h2>
-        <p>${escapeHTML(data.description || "No description provided.")}</p>
-        <p><strong>Posted on:</strong> ${escapeHTML(data.date || "Unknown date")}</p>
-        <p><strong>Views:</strong> <span class="views">${data.views || 0}</span></p>
-      `;
-    };
+    // Assume a userID for demo (in production you'd get from auth)
+    const currentUserId = 'guest_user_123';
+    const currentUserName = 'Guest User';
 
-    const incrementViewCount = (id) => {
-      const viewsRef = ref(db, `posts/${id}/views`);
-      runTransaction(viewsRef, (current) => {
-        return (current || 0) + 1;
-      });
-    };
+    // Track like/dislike state locally (could come from user data in real app)
+    let userLiked = null; // null, 'like', or 'dislike'
 
-    // Basic escape for text to avoid XSS
+    // Helper to escape HTML for comment text
     function escapeHTML(str) {
-      return str.replace(/[&<>"']/g, function (match) {
+      return str.replace(/[&<>"']/g, function (m) {
         return ({
           '&': '&amp;',
           '<': '&lt;',
           '>': '&gt;',
           '"': '&quot;',
           "'": '&#39;'
-        })[match];
+        })[m];
       });
     }
 
-    fetchPost();
+    // Fetch post info
+    async function loadPost() {
+      const postRef = ref(db, `posts/${postId}`);
+      const snap = await get(postRef);
+      if (!snap.exists()) {
+        alert('Post not found');
+        postTitle.textContent = 'Post not found';
+        return;
+      }
+
+      const data = snap.val();
+
+      postTitle.textContent = data.title || 'Untitled Post';
+      videoPlayer.src = data.videoURL || '';
+
+      // uploader info
+      uploaderName.textContent = data.uploaderName || 'Uploader';
+      followerCount.textContent = `${data.followers || 0} follower${data.followers === 1 ? '' : 's'}`;
+      uploaderPic.src = data.uploaderPicURL || 'https://via.placeholder.com/48?text=User';
+
+      // Set likes/dislikes counts
+      likeCountEl.textContent = data.likes || 0;
+      dislikeCountEl.textContent = data.dislikes || 0;
+
+      // You can load user's like/dislike status here if you have user auth
+
+      // Increment view count on load
+      incrementCounter('views');
+    }
+
+    // Increment a numeric counter on the post (views, likes, dislikes)
+    function incrementCounter(counterName) {
+      const counterRef = ref(db, `posts/${postId}/${counterName}`);
+      runTransaction(counterRef, (current) => (current || 0) + 1);
+    }
+
+    // Update like/dislike count from db live
+    function watchCounters() {
+      const likesRef = ref(db, `posts/${postId}/likes`);
+      const dislikesRef = ref(db, `posts/${postId}/dislikes`);
+
+      onValue(likesRef, (snapshot) => {
+        likeCountEl.textContent = snapshot.val() || 0;
+      });
+
+      onValue(dislikesRef, (snapshot) => {
+        dislikeCountEl.textContent = snapshot.val() || 0;
+      });
+    }
+
+    // Handle like button click
+    likeBtn.addEventListener('click', () => {
+      if (userLiked === 'like') {
+        // Remove like
+        updateLikeDislike(null);
+      } else {
+        updateLikeDislike('like');
+      }
+    });
+
+    // Handle dislike button click
+    dislikeBtn.addEventListener('click', () => {
+      if (userLiked === 'dislike') {
+        // Remove dislike
+        updateLikeDislike(null);
+      } else {
+        updateLikeDislike('dislike');
+      }
+    });
+
+    // Update likes/dislikes counters in DB based on user action
+    function updateLikeDislike(action) {
+      const postLikesRef = ref(db, `posts/${postId}/likes`);
+      const postDislikesRef = ref(db, `posts/${postId}/dislikes`);
+
+      // Transaction to adjust counters atomically
+      // First remove old like/dislike if any, then add new
+
+      // We will do two transactions in series for simplicity
+
+      if (userLiked === action) return; // no change
+
+      if (userLiked === 'like') {
+        // Decrement likes by 1
+        runTransaction(postLikesRef, (current) => (current || 1) - 1);
+      } else if (userLiked === 'dislike') {
+        // Decrement dislikes by 1
+        runTransaction(postDislikesRef, (current) => (current || 1) - 1);
+      }
+
+      if (action === 'like') {
+        runTransaction(postLikesRef, (current) => (current || 0) + 1);
+        userLiked = 'like';
+      } else if (action === 'dislike') {
+        runTransaction(postDislikesRef, (current) => (current || 0) + 1);
+        userLiked = 'dislike';
+      } else {
+        userLiked = null;
+      }
+      updateLikeDislikeUI();
+    }
+
+    // Update button styles based on userLiked
+    function updateLikeDislikeUI() {
+      likeBtn.classList.toggle('active', userLiked === 'like');
+      dislikeBtn.classList.toggle('active', userLiked === 'dislike');
+    }
+
+    // Comments logic
+
+    // Listen for new comments (last 50)
+    function watchComments() {
+      const commentsRef = query(ref(db, `posts/${postId}/comments`), limitToLast(50));
+
+      onValue(commentsRef, (snapshot) => {
+        commentsList.innerHTML = '';
+        const comments = snapshot.val() || {};
+        // Sort by timestamp ascending
+        const sortedComments = Object.entries(comments).sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+        for (const [key, comment] of sortedComments) {
+          const cDiv = document.createElement('div');
+          cDiv.className = 'comment';
+          cDiv.innerHTML = `
+            <div class="author">${escapeHTML(comment.authorName)}</div>
+            <div class="text">${escapeHTML(comment.text)}</div>
+          `;
+          commentsList.appendChild(cDiv);
+        }
+
+        commentsList.scrollTop = commentsList.scrollHeight; // Scroll to bottom
+      });
+    }
+
+    // Enable/disable comment submit button
+    commentInput.addEventListener('input', () => {
+      commentSubmit.disabled = commentInput.value.trim() === '';
+    });
+
+    // Submit new comment
+    commentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = commentInput.value.trim();
+      if (!text) return;
+
+      const commentsRef = ref(db, `posts/${postId}/comments`);
+      await push(commentsRef, {
+        authorId: currentUserId,
+        authorName: currentUserName,
+        text,
+        timestamp: Date.now()
+      });
+
+      commentInput.value = '';
+      commentSubmit.disabled = true;
+    });
+
+    // Initialize
+    (async () => {
+      await loadPost();
+      watchCounters();
+      watchComments();
+      updateLikeDislikeUI();
+    })();
   </script>
 </body>
 </html>
