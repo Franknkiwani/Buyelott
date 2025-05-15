@@ -328,7 +328,7 @@
         loadUserProfile(user.uid);
         loadWallet(user.uid);
       } else {
-        profileImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG9X0uIaradd16EdwJJwj_WTjXTe2FsEza_VVdOD_lbP6N_3BKG1why9M&s=10';
+        profileImg.src = defaultProfile();
         profileLink.href = '#';
         walletDisplay.textContent = '$0.000';
       }
@@ -368,7 +368,10 @@
           allUsers = usersSnap.val();
           postTitles = [];
 
-          let postsArray = Object.entries(allPosts).map(([key, post]) => ({ key, post }));
+          let postsArray = Object.entries(allPosts)
+            // filter out posts with no title or no image
+            .filter(([key, post]) => post.title && post.image)
+            .map(([key, post]) => ({ key, post }));
 
           if (currentUser) {
             const followsSnap = await get(ref(db, `followers/${currentUser.uid}`));
@@ -383,7 +386,8 @@
           postsArray.forEach(({ key, post }) => {
             postTitles.push({ titleLower: post.title.toLowerCase(), key });
             const uploader = allUsers[post.userId] || { username: 'Unknown', profileurl: defaultProfile() };
-            postWrapper.appendChild(createPostCard(post, key, uploader));
+            const card = createPostCard(post, key, uploader);
+            if (card) postWrapper.appendChild(card);
           });
 
           if (postsArray.length === 0) {
@@ -422,7 +426,7 @@
         for (let user in data) {
           if (data[user][uid]) count++;
         }
-        set(ref(db, `followersCount/${uid}`), count);
+        await set(ref(db, `followersCount/${uid}`), count);
         return count;
       } catch {
         return 0;
@@ -446,6 +450,8 @@
     }
 
     function createPostCard(post, postId, uploader) {
+      if (!post.title || !post.image) return null;
+
       const card = document.createElement('div');
       card.className = 'post-card';
 
@@ -498,53 +504,180 @@
 
       const img = document.createElement('img');
       img.className = 'post-image';
-      img.src = post.image || '';
+      img.src = post.image;
       img.alt = post.title;
 
       const title = document.createElement('div');
       title.className = 'post-title';
-      title.textContent = post.title || 'No title';
+      title.style.textAlign = 'center';
+      title.textContent = post.title;
 
       const desc = document.createElement('div');
       desc.className = 'post-description';
       desc.textContent = post.description || '';
 
-      card.append(header, img, title, desc);
+      const footer = document.createElement('div');
+      footer.className = 'post-footer';
+      footer.style.display = 'flex';
+      footer.style.justifyContent = 'space-between';
+      footer.style.alignItems = 'center';
+      footer.style.padding = '5px';
+
+      const date = document.createElement('span');
+      date.className = 'post-date';
+      const d = new Date(post.timestamp || Date.now());
+      date.textContent = d.toLocaleDateString();
+
+      const viewBtn = document.createElement('button');
+      viewBtn.className = 'view-count-btn';
+      viewBtn.textContent = `Views: ${post.views || 0}`;
+      viewBtn.disabled = true;
+      viewBtn.style.opacity = '0.7';
+      viewBtn.style.fontSize = '12px';
+
+      footer.append(date, viewBtn);
+
+      const viewPost = document.createElement('button');
+      viewPost.className = 'view-post-btn';
+      viewPost.textContent = 'View Post';
+      viewPost.onclick = () => location.href
+viewPost.onclick = async () => {
+        // Increment views count atomically
+        try {
+          const postRef = ref(db, `posts/${postId}/views`);
+          const snap = await get(postRef);
+          const currentViews = snap.exists() ? snap.val() : 0;
+          await set(postRef, currentViews + 1);
+          viewBtn.textContent = `Views: ${currentViews + 1}`;
+        } catch (e) {
+          console.error('Failed to increment views:', e);
+        }
+        // Redirect to post details page
+        location.href = `post.html/${postId}`;
+      };
+      footer.appendChild(viewPost);
+
+      card.append(header, img, title, desc, footer);
       return card;
     }
 
+    // Helper for default profile pic URL
     function defaultProfile() {
-      return 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG9X0uIaradd16EdwJJwj_WTjXTe2FsEza_VVdOD_lbP6N_3BKG1why9M&s=10';
+      return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     }
 
-    function filterPosts(term) {
-      const search = term.toLowerCase().trim();
+    // Search filtering with fallback message
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        loadAllPosts();
+        return;
+      }
+
+      const filteredKeys = postTitles
+        .filter(({ titleLower }) => titleLower.includes(query))
+        .map(({ key }) => key);
+
       postWrapper.innerHTML = '';
-      if (!search) {
-        for (const [key, post] of Object.entries(allPosts)) {
-          const uploader = allUsers[post.userId] || { username: 'Unknown', profileurl: defaultProfile() };
-          postWrapper.appendChild(createPostCard(post, key, uploader));
-        }
-        if (Object.keys(allPosts).length === 0) {
-          postWrapper.innerHTML = '<div class="no-results">No posts available.</div>';
-        }
+      if (filteredKeys.length === 0) {
+        postWrapper.innerHTML = `<div class="no-results">No posts found for "${query}".</div>`;
         return;
       }
 
-      const matched = postTitles.filter(p => p.titleLower.includes(search));
-      if (!matched.length) {
-        postWrapper.innerHTML = `<div class="no-results">No posts found for "<strong>${term}</strong>".</div>`;
-        return;
-      }
-
-      matched.forEach(({ key }) => {
+      filteredKeys.forEach(key => {
         const post = allPosts[key];
         const uploader = allUsers[post.userId] || { username: 'Unknown', profileurl: defaultProfile() };
-        postWrapper.appendChild(createPostCard(post, key, uploader));
+        const card = createPostCard(post, key, uploader);
+        if (card) postWrapper.appendChild(card);
+      });
+    });
+
+    // Optional: Use IntersectionObserver to increment views on scroll into view
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(async entry => {
+        if (entry.isIntersecting) {
+          const card = entry.target;
+          const postId = card.getAttribute('data-post-id');
+          const viewBtn = card.querySelector('.view-count-btn');
+
+          if (card.getAttribute('data-viewed')) return; // already viewed
+          card.setAttribute('data-viewed', 'true');
+
+          try {
+            const postRef = ref(db, `posts/${postId}/views`);
+            const snap = await get(postRef);
+            const currentViews = snap.exists() ? snap.val() : 0;
+            await set(postRef, currentViews + 1);
+            viewBtn.textContent = `Views: ${currentViews + 1}`;
+          } catch (e) {
+            console.error('Failed to increment views on scroll:', e);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    // After posts load, observe them
+    function observePosts() {
+      document.querySelectorAll('.post-card').forEach(card => {
+        observer.observe(card);
       });
     }
 
-    searchInput.addEventListener('input', e => filterPosts(e.target.value));
+    // Modify createPostCard to add data-post-id attribute and call observePosts after loadAllPosts
+    // We'll do this by calling observePosts at the end of loadAllPosts:
+    // Just add this after appending posts:
+    // observePosts();
+
+    // Modify loadAllPosts to add observePosts call:
+    async function loadAllPosts() {
+      showLoading();
+      postWrapper.innerHTML = '';
+      try {
+        const postsSnap = await get(ref(db, 'posts'));
+        const usersSnap = await get(ref(db, 'users'));
+        if (postsSnap.exists() && usersSnap.exists()) {
+          allPosts = postsSnap.val();
+          allUsers = usersSnap.val();
+          postTitles = [];
+
+          let postsArray = Object.entries(allPosts)
+            .filter(([key, post]) => post.title && post.image)
+            .map(([key, post]) => ({ key, post }));
+
+          if (currentUser) {
+            const followsSnap = await get(ref(db, `followers/${currentUser.uid}`));
+            const follows = followsSnap.exists() ? followsSnap.val() : {};
+            postsArray.sort((a, b) => {
+              const aF = a.post.userId in follows;
+              const bF = b.post.userId in follows;
+              return bF - aF;
+            });
+          }
+
+          postsArray.forEach(({ key, post }) => {
+            postTitles.push({ titleLower: post.title.toLowerCase(), key });
+            const uploader = allUsers[post.userId] || { username: 'Unknown', profileurl: defaultProfile() };
+            const card = createPostCard(post, key, uploader);
+            if (card) {
+              card.setAttribute('data-post-id', key);
+              postWrapper.appendChild(card);
+            }
+          });
+
+          if (postsArray.length === 0) {
+            postWrapper.innerHTML = '<div class="no-results">No posts available.</div>';
+          }
+          observePosts();
+        } else {
+          postWrapper.innerHTML = '<div class="no-results">No posts or user data found.</div>';
+        }
+      } catch (e) {
+        console.error(e);
+        postWrapper.innerHTML = `<div class="no-results">Failed to load posts: ${e.message}</div>`;
+      }
+      hideLoading();
+    }
+
   });
 </script>
 </body>
