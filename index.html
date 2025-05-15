@@ -1,246 +1,324 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login/Register - Make Money App</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, * {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-    * {
-      outline: none !important;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
-    .container { padding: 20px; max-width: 400px; margin: 60px auto; }
-    header { text-align: center; margin-bottom: 30px; }
-    h1 { font-size: 2rem; color: #2b8a3e; }
-    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; }
-    .btn { display: block; width: 100%; padding: 14px; background: #2b8a3e; color: #fff; border: none; border-radius: 12px; text-align: center; font-size: 1rem; cursor: pointer; margin-top: 10px; text-decoration: none; }
-    .btn-google { background: #4285F4; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 10px; }
-    .separator { text-align: center; margin: 15px 0; color: #666; font-weight: 600; }
-    img.google-icon { height: 20px; width: 20px; }
-    .toggle-text { text-align: center; margin: 20px 0 0; color: #555; cursor: pointer; }
-    .toggle-text span { color: #2b8a3e; text-decoration: underline; }
-    .forgot-password { text-align: right; margin-top: 8px; font-size: 0.9rem; }
-    .forgot-password a {
-      color: #2b8a3e;
-      text-decoration: underline;
-      cursor: pointer;
-      user-select: text;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-    }
-    /* Message area styles */
-    #message-area {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      display: none;
-    }
-    #message-area.error {
-      background-color: #ffe6e6;
-      color: #cc0000;
-      border: 1px solid #cc0000;
-    }
-    #message-area.success {
-      background-color: #e6ffe6;
-      color: #006600;
-      border: 1px solid #006600;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login & Register App</title>
+<style>
+  /* Basic resets */
+  * {
+    user-select: none; /* disable text selection */
+    -webkit-tap-highlight-color: transparent; /* no tap highlight on mobile */
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  #container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    width: 320px;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  h2 {
+    margin: 0 0 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  input {
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    outline-offset: 0;
+    outline-color: transparent;
+    transition: outline-color 0.3s ease;
+  }
+  input:focus {
+    outline-color: #4a90e2;
+  }
+  button {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 0;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 16px;
+    user-select: none;
+  }
+  button:active {
+    background-color: #357ABD;
+  }
+  #toggle-link {
+    text-align: center;
+    color: #4a90e2;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 24px;
+  }
+  #toggle-link:hover {
+    text-decoration: underline;
+  }
+  #google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #ccc;
+    color: #444;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 10px 0;
+  }
+  #google-login-btn:hover {
+    background: #f0f0f0;
+  }
+  #google-login-btn img.google-icon {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+  }
+  #forgot-password-link {
+    color: #4a90e2;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: right;
+    margin-bottom: 12px;
+    user-select: none;
+  }
+  #forgot-password-link:hover {
+    text-decoration: underline;
+  }
+  #message {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 8px;
+    min-height: 24px;
+  }
+  #message.error {
+    color: #e74c3c;
+  }
+  #message.success {
+    color: #27ae60;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Make Money</h1>
-      <p id="subtitle">Login or Register to start earning</p>
-    </header>
+<div id="container">
+  <h2 id="form-title">Login</h2>
 
-    <div class="card" id="form-container">
+  <!-- Login Form -->
+  <form id="login-form">
+    <input type="email" id="login-email" placeholder="Email" required autocomplete="username" />
+    <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password" />
+    <div id="forgot-password-link">Forgot password?</div>
+    <button type="submit">Login</button>
+  </form>
 
-      <!-- Login Form -->
-      <form id="login-form">
-        <h2>Login</h2>
-        <input type="email" id="login-email" placeholder="Email" required />
-        <input type="password" id="login-password" placeholder="Password" required />
-        <div class="forgot-password"><a href="#" id="forgot-password-link">Forgot Password?</a></div>
-        <button type="submit" class="btn">Login</button>
+  <!-- Register Form -->
+  <form id="register-form" style="display:none;">
+    <input type="text" id="register-name" placeholder="Name" required autocomplete="name" />
+    <input type="email" id="register-email" placeholder="Email" required autocomplete="email" />
+    <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password" />
+    <button type="submit">Register</button>
+  </form>
 
-        <div class="separator">or</div>
+  <div id="toggle-link">Don't have an account? Register</div>
 
-        <button type="button" id="google-login-btn" class="btn btn-google">
-          <img class="google-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPbae_HqhX9hAdb4v-sMse53Uw6mvG7x0kXWT6TlmxpjheUWk-4FHHdLf_&s=10" alt="Google logo" />
-          Continue with Google
-        </button>
-      </form>
+  <button id="google-login-btn">
+    <img class="google-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPbae_HqhX9hAdb4v-sMse53Uw6mvG7x0kXWT6TlmxpjheUWk-4FHHdLf_&s=10" alt="Google" />
+    Continue with Google
+  </button>
 
-      <!-- Register Form -->
-      <form id="register-form" style="display:none;">
-        <h2>Register</h2>
-        <input type="text" id="register-name" placeholder="Full Name" required />
-        <input type="email" id="register-email" placeholder="Email" required />
-        <input type="password" id="register-password" placeholder="Password" required />
-        <button type="submit" class="btn">Register</button>
-      </form>
+  <div id="message"></div>
+</div>
 
-      <p class="toggle-text" id="toggle-link">
-        Don't have an account? <span id="toggle-action">Register</span>
-      </p>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    set,
+    get,
+    child
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-      <div id="message-area"></div>
-    </div>
-  </div>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+  const googleProvider = new GoogleAuthProvider();
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  // Elements
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const toggleLink = document.getElementById('toggle-link');
+  const formTitle = document.getElementById('form-title');
+  const messageBox = document.getElementById('message');
+  const googleLoginBtn = document.getElementById('google-login-btn');
+  const forgotPasswordLink = document.getElementById('forgot-password-link');
 
-    const app = initializeApp(firebaseConfig);
-    getAnalytics(app);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-    const googleProvider = new GoogleAuthProvider();
+  // Helper functions
+  function showMessage(msg, type = 'error') {
+    messageBox.textContent = msg;
+    messageBox.className = type;
+  }
+  function clearMessage() {
+    messageBox.textContent = '';
+    messageBox.className = '';
+  }
 
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const toggleLink = document.getElementById('toggle-link');
-    const subtitle = document.getElementById('subtitle');
-    const messageArea = document.getElementById('message-area');
-
-    function showMessage(message, type = 'error') {
-      messageArea.textContent = message;
-      messageArea.className = '';
-      messageArea.classList.add(type);
-      messageArea.style.display = 'block';
+  // Toggle between login and register forms
+  toggleLink.addEventListener('click', () => {
+    clearMessage();
+    if (loginForm.style.display !== 'none') {
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'flex';
+      formTitle.textContent = 'Register';
+      toggleLink.textContent = 'Already have an account? Login';
+    } else {
+      registerForm.style.display = 'none';
+      loginForm.style.display = 'flex';
+      formTitle.textContent = 'Login';
+      toggleLink.textContent = "Don't have an account? Register";
     }
-    function clearMessage() {
-      messageArea.textContent = '';
-      messageArea.style.display = 'none';
-      messageArea.className = '';
+  });
+
+  // LOGIN
+  loginForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    clearMessage();
+
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showMessage('Login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = 'homepage.html';
+      }, 1500);
+    } catch (error) {
+      showMessage('Login failed: ' + error.message);
     }
+  });
 
-    toggleLink.addEventListener('click', () => {
-      clearMessage();
-      if (loginForm.style.display === 'none') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-        toggleLink.innerHTML = `Don't have an account? <span id="toggle-action">Register</span>`;
-        subtitle.textContent = 'Login or Register to start earning';
-      } else {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-        toggleLink.innerHTML = `Already have an account? <span id="toggle-action">Login</span>`;
-        subtitle.textContent = 'Register to start earning';
-      }
-    });
+  // REGISTER
+  registerForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    clearMessage();
 
-    loginForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      clearMessage();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessage('Login successful! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
-      } catch (error) {
-        showMessage('Login failed: ' + error.message, 'error');
-      }
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    registerForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      clearMessage();
-      const name = document.getElementById('register-name').value.trim();
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
+      // Save user info in Realtime Database
+      const userRef = ref(database, 'users/' + user.uid);
+      await set(userRef, {
+        name,
+        email,
+        createdAt: Date.now()
+      });
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await set(ref(database, 'users/' + userCredential.user.uid), {
-          name: name,
-          email: email,
+      showMessage('Registration successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = 'homepage.html';
+      }, 1500);
+    } catch (error) {
+      showMessage('Registration failed: ' + error.message);
+    }
+  });
+
+  // GOOGLE LOGIN
+  googleLoginBtn.addEventListener('click', async () => {
+    clearMessage();
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user exists in Realtime Database
+      const dbRef = ref(database);
+      const userPath = 'users/' + user.uid;
+
+      const snapshot = await get(child(dbRef, userPath));
+      if (!snapshot.exists()) {
+        await set(ref(database, userPath), {
+          name: user.displayName || '',
+          email: user.email,
           createdAt: Date.now()
         });
-        showMessage('Registration successful! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
-      } catch (error) {
-        showMessage('Registration failed: ' + error.message, 'error');
       }
-    });
 
-    // Google login button
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-      clearMessage();
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        // Save user info to Realtime DB if first time login
-        const userRef = ref(database, 'users/' + user.uid);
-        // Simple check if user exists, if not write basic info
-        userRef.get().then(snapshot => {
-          if (!snapshot.exists()) {
-            set(userRef, {
-              name: user.displayName || '',
-              email: user.email,
-              createdAt: Date.now()
-            });
-          }
-        }).catch(() => {
-          // Ignore DB errors here, continue anyway
-        });
-        showMessage('Google login successful! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
-      } catch (error) {
-        showMessage('Google login failed: ' + error.message, 'error');
-      }
-    });
+      showMessage('Google login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = 'homepage.html';
+      }, 1500);
 
-    // Forgot password
-    document.getElementById('forgot-password-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      clearMessage();
-      const email = document.getElementById('login-email').value;
-      if (!email) {
-        showMessage('Please enter your email in the login field to reset password.', 'error');
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showMessage('Password reset email sent! Check your inbox.', 'success');
-      } catch (error) {
-        showMessage('Failed to send reset email: ' + error.message, 'error');
-      }
-    });
-  </script>
+    } catch (error) {
+      showMessage('Google login failed: ' + error.message);
+    }
+  });
+
+  // FORGOT PASSWORD
+  forgotPasswordLink.addEventListener('click', async () => {
+    clearMessage();
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      showMessage('Please enter your email in the login field to reset password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMessage('Password reset email sent! Check your inbox.', 'success');
+    } catch (error) {
+      showMessage('Failed to send reset email: ' + error.message);
+    }
+  });
+</script>
 </body>
 </html>
