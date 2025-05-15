@@ -1,123 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login/Register - Make Money App</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, * {
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
+    }
+    * {
       outline: none !important;
       -webkit-tap-highlight-color: transparent;
     }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f2f5;
-      color: #333;
-    }
-    .container {
-      max-width: 400px;
-      margin: 60px auto;
-      padding: 20px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    h1 {
-      font-size: 2rem;
-      color: #2b8a3e;
-    }
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-    button.btn {
-      background: #2b8a3e;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button.btn:hover {
-      background: #25672c;
-    }
-    .btn-google {
-      background: #4285F4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-google:hover {
-      background: #357ae8;
-    }
-    .google-icon {
-      height: 24px;
-      width: 24px;
-      border-radius: 50%;
-      background: white;
-      padding: 2px;
-    }
-    .separator {
-      text-align: center;
-      margin: 10px 0;
-      color: #666;
-      font-weight: 600;
-    }
-    .toggle-text {
-      text-align: center;
-      margin-top: 10px;
-      color: #555;
-      cursor: pointer;
-      user-select: text;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-    }
-    .toggle-text span {
-      color: #2b8a3e;
-      text-decoration: underline;
-    }
-    .forgot-password {
-      text-align: right;
-      font-size: 0.9rem;
-      user-select: text;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+    .container { padding: 20px; max-width: 400px; margin: 60px auto; }
+    header { text-align: center; margin-bottom: 30px; }
+    h1 { font-size: 2rem; color: #2b8a3e; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; }
+    .btn { display: block; width: 100%; padding: 14px; background: #2b8a3e; color: #fff; border: none; border-radius: 12px; text-align: center; font-size: 1rem; cursor: pointer; margin-top: 10px; text-decoration: none; }
+    .btn-google { background: #4285F4; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 50px; }
+    .btn-google img.google-icon { border-radius: 50%; height: 20px; width: 20px; }
+    input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 10px; }
+    .separator { text-align: center; margin: 15px 0; color: #666; font-weight: 600; }
+    .toggle-text { text-align: center; margin: 20px 0 0; color: #555; cursor: pointer; }
+    .toggle-text span { color: #2b8a3e; text-decoration: underline; }
+    .forgot-password { text-align: right; margin-top: 8px; font-size: 0.9rem; }
     .forgot-password a {
       color: #2b8a3e;
       text-decoration: underline;
       cursor: pointer;
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
     }
+    /* Message area styles */
     #message-area {
       margin-top: 15px;
       padding: 12px;
@@ -135,6 +56,31 @@
       color: #006600;
       border: 1px solid #006600;
     }
+    #loading-spinner {
+      margin: 10px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2b8a3e;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    label.remember-me {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: text;
+    }
+    label.remember-me input {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -147,12 +93,17 @@
     <div class="card" id="form-container">
 
       <!-- Login Form -->
-      <form id="login-form" autocomplete="off">
-        <h2>Login</h2>
+      <form id="login-form" style="display:flex; flex-direction: column;">
+        <h2 id="form-title">Login</h2>
         <input type="email" id="login-email" placeholder="Email" required autocomplete="email" />
         <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password" />
+        
+        <label class="remember-me"><input type="checkbox" id="remember-me" /> Remember me</label>
+        
         <div class="forgot-password"><a href="#" id="forgot-password-link">Forgot Password?</a></div>
         <button type="submit" class="btn">Login</button>
+
+        <div id="loading-spinner"></div>
 
         <div class="separator">or</div>
 
@@ -163,19 +114,22 @@
       </form>
 
       <!-- Register Form -->
-      <form id="register-form" style="display:none;" autocomplete="off">
+      <form id="register-form" style="display:none; flex-direction: column;">
         <h2>Register</h2>
         <input type="text" id="register-name" placeholder="Full Name" required autocomplete="name" />
         <input type="email" id="register-email" placeholder="Email" required autocomplete="email" />
         <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password" />
+        <small id="password-strength" style="color:#666; margin-top: 5px;"></small>
         <button type="submit" class="btn">Register</button>
+
+        <div id="loading-spinner-register"></div>
       </form>
 
-      <p class="toggle-text" id="toggle-link">
-        Don't have an account? <span id="toggle-action">Register</span>
+      <p class="toggle-text" id="toggle-link" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle between login and register">
+        Don't have an account? <span id="toggle-action" style="user-select:none;">Register</span>
       </p>
 
-      <div id="message-area"></div>
+      <div id="message-area" role="alert"></div>
     </div>
   </div>
 
@@ -188,7 +142,13 @@
       createUserWithEmailAndPassword,
       signInWithPopup,
       GoogleAuthProvider,
-      sendPasswordResetEmail
+      sendPasswordResetEmail,
+      sendEmailVerification,
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence,
+      browserSessionPersistence,
+      signOut
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import {
       getDatabase,
@@ -225,6 +185,11 @@
     const messageArea = document.getElementById('message-area');
     const googleLoginBtn = document.getElementById('google-login-btn');
     const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const loadingSpinnerRegister = document.getElementById('loading-spinner-register');
+    const rememberMeCheckbox = document.getElementById('remember-me');
+    const passwordInput = document.getElementById('register-password');
+    const passwordStrengthText = document.getElementById('password-strength');
 
     // Helper functions
     function showMessage(msg, type = 'error') {
@@ -237,112 +202,188 @@
       messageArea.className = '';
       messageArea.style.display = 'none';
     }
+    function showLoading(spinner, show = true) {
+      spinner.style.display = show ? 'block' : 'none';
+    }
 
-    // Toggle forms
+    // Password strength check simple version
+    passwordInput.addEventListener('input', () => {
+      // Password strength check
+      const val = passwordInput.value;
+      let strength = 'Weak';
+      let color = '#cc0000';
+
+      if(val.length >= 12 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[\W_]/.test(val)) {
+        strength = 'Strong';
+        color = '#2b8a3e';
+      } else if(val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
+        strength = 'Medium';
+        color = '#d18e0f';
+      }
+
+      passwordStrengthText.textContent = `Password strength: ${strength}`;
+      passwordStrengthText.style.color = color;
+      if(val.length === 0) passwordStrengthText.textContent = '';
+    });
+
+    // Toggle between login and register forms
     toggleLink.addEventListener('click', () => {
       clearMessage();
       if (loginForm.style.display !== 'none') {
         loginForm.style.display = 'none';
         registerForm.style.display = 'flex';
-        toggleLink.innerHTML = 'Already have an account? <span id="toggle-action">Login</span>';
+        toggleAction.textContent = 'Login';
+        toggleLink.setAttribute('aria-pressed', 'true');
       } else {
         registerForm.style.display = 'none';
         loginForm.style.display = 'flex';
-        toggleLink.innerHTML = 'Don\'t have an account? <span id="toggle-action">Register</span>';
+        toggleAction.textContent = 'Register';
+        toggleLink.setAttribute('aria-pressed', 'false');
       }
     });
 
-    // LOGIN
-    loginForm.addEventListener('submit', async e => {
+    // Login submit
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMessage();
-
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-
+      showLoading(loadingSpinner);
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        // Persistence setting based on remember me checkbox
+        await setPersistence(auth, rememberMeCheckbox.checked ? browserLocalPersistence : browserSessionPersistence);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+        if (!userCredential.user.emailVerified) {
+          showMessage('Please verify your email before logging in. Check your inbox.', 'error');
+          await auth.signOut();
+          showLoading(loadingSpinner, false);
+          return;
+        }
+
         showMessage('Login successful! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
+        showLoading(loadingSpinner, false);
+        // Redirect to homepage or app main page:
+        window.location.href = 'homepage.html';
+
       } catch (error) {
-        showMessage('Login failed: ' + error.message);
+        showLoading(loadingSpinner, false);
+        if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password'){
+          showMessage('Invalid email or password.', 'error');
+        } else if(error.code === 'auth/too-many-requests'){
+          showMessage('Too many failed attempts. Please try again later.', 'error');
+        } else {
+          showMessage('Error logging in: ' + error.message, 'error');
+        }
       }
     });
 
-    // REGISTER
-    registerForm.addEventListener('submit', async e => {
+    // Register submit
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMessage();
-
-      const name = document.getElementById('register-name').value.trim();
-      const email = document.getElementById('register-email').value.trim();
-      const password = document.getElementById('register-password').value;
-
+      showLoading(loadingSpinnerRegister);
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const name = document.getElementById('register-name').value.trim();
+        const email = document.getElementById('register-email').value.trim();
+        const password = document.getElementById('register-password').value;
 
-        // Save user info in Realtime Database
-        await set(ref(database, 'users/' + user.uid), {
-          name,
-          email,
+        if(password.length < 8){
+          showMessage('Password must be at least 8 characters.', 'error');
+          showLoading(loadingSpinnerRegister, false);
+          return;
+        }
+
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Save additional user info to realtime database
+        await set(ref(database, 'users/' + userCredential.user.uid), {
+          name: name,
+          email: email,
           createdAt: Date.now()
         });
 
-        showMessage('Registration successful! Redirecting...', 'success');
+        // Send verification email
+        await sendEmailVerification(userCredential.user);
+
+        showMessage('Registration successful! A verification email has been sent to your email address. Please verify before logging in.', 'success');
+        registerForm.reset();
+        showLoading(loadingSpinnerRegister, false);
+
+        // Switch back to login form automatically after 5 seconds
         setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
+          toggleLink.click();
+        }, 5000);
+
       } catch (error) {
-        showMessage('Registration failed: ' + error.message);
+        showLoading(loadingSpinnerRegister, false);
+        if(error.code === 'auth/email-already-in-use'){
+          showMessage('This email is already registered. Please login or use a different email.', 'error');
+        } else if(error.code === 'auth/invalid-email'){
+          showMessage('Please enter a valid email address.', 'error');
+        } else if(error.code === 'auth/weak-password'){
+          showMessage('Password is too weak.', 'error');
+        } else {
+          showMessage('Error registering: ' + error.message, 'error');
+        }
       }
     });
 
-    // GOOGLE LOGIN
+    // Google login button
     googleLoginBtn.addEventListener('click', async () => {
       clearMessage();
+      showLoading(loadingSpinner);
       try {
+        await setPersistence(auth, browserLocalPersistence);
         const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
 
-        // Check if user exists in Realtime Database
-        const dbRef = ref(database);
-        const userPath = 'users/' + user.uid;
-
-        const snapshot = await get(child(dbRef, userPath));
+        // Save user info on first sign in to database
+        const userRef = ref(database, 'users/' + result.user.uid);
+        const snapshot = await get(userRef);
         if (!snapshot.exists()) {
-          await set(ref(database, userPath), {
-            name: user.displayName || '',
-            email: user.email,
+          await set(userRef, {
+            name: result.user.displayName,
+            email: result.user.email,
             createdAt: Date.now()
           });
         }
 
         showMessage('Google login successful! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = 'homepage.html';
-        }, 1500);
+        showLoading(loadingSpinner, false);
+        window.location.href = 'homepage.html';
+
       } catch (error) {
-        showMessage('Google login failed: ' + error.message);
+        showLoading(loadingSpinner, false);
+        showMessage('Google login failed: ' + error.message, 'error');
       }
     });
 
-    // FORGOT PASSWORD
+    // Forgot password link
     forgotPasswordLink.addEventListener('click', async (e) => {
       e.preventDefault();
       clearMessage();
       const email = document.getElementById('login-email').value.trim();
-      if (!email) {
-        showMessage('Please enter your email in the login field to reset password.');
+      if(!email) {
+        showMessage('Please enter your email in the email field to reset password.', 'error');
         return;
       }
       try {
         await sendPasswordResetEmail(auth, email);
-        showMessage('Password reset email sent! Check your inbox.', 'success');
+        showMessage('Password reset email sent. Please check your inbox.', 'success');
       } catch (error) {
-        showMessage('Failed to send reset email: ' + error.message);
+        if(error.code === 'auth/user-not-found'){
+          showMessage('No user found with that email.', 'error');
+        } else {
+          showMessage('Error sending reset email: ' + error.message, 'error');
+        }
+      }
+    });
+
+    // Optional: detect auth state and redirect if already logged in & verified
+    onAuthStateChanged(auth, user => {
+      if(user && user.emailVerified) {
+        // User logged in & verified, redirect to homepage
+        window.location.href = 'homepage.html';
       }
     });
   </script>
