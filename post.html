@@ -2,8 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Post Details</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    #post-container {
+      background: #1f2937;
+      border-radius: 12px;
+      max-width: 700px;
+      width: 100%;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    h1, h2 {
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      color: #00e676;
+      text-shadow: 0 0 6px #00e676aa;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin: 0.5rem 0 1.5rem 0;
+      color: #cfd8dc;
+    }
+
+    p strong {
+      color: #80deea;
+    }
+
+    /* Views count styling */
+    .views {
+      font-size: 0.9rem;
+      background: #004d40;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      display: inline-block;
+      color: #a7ffeb;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    /* Loading / error states */
+    #post-container h1 {
+      font-size: 2rem;
+      color: #90caf9;
+      text-align: center;
+      text-shadow: 0 0 8px #90caf9cc;
+    }
+
+    #post-container h2 {
+      text-align: center;
+      color: #ef5350;
+      text-shadow: 0 0 6px #ef5350cc;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      #post-container {
+        padding: 1.5rem 1.8rem;
+        max-width: 95vw;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #post-container {
+        padding: 1rem 1.2rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+      }
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="post-container">
@@ -15,7 +112,6 @@
     import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -27,12 +123,10 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    // Get post ID from URL query (e.g., post.html?id=123456)
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('id');
 
@@ -61,10 +155,10 @@
     const displayPost = (data) => {
       const postContainer = document.getElementById('post-container');
       postContainer.innerHTML = `
-        <h2>${data.title || "Untitled Post"}</h2>
-        <p>${data.description || "No description provided."}</p>
-        <p><strong>Posted on:</strong> ${data.date || "Unknown date"}</p>
-        <p><strong>Views:</strong> ${data.views || 0}</p>
+        <h2>${escapeHTML(data.title || "Untitled Post")}</h2>
+        <p>${escapeHTML(data.description || "No description provided.")}</p>
+        <p><strong>Posted on:</strong> ${escapeHTML(data.date || "Unknown date")}</p>
+        <p><strong>Views:</strong> <span class="views">${data.views || 0}</span></p>
       `;
     };
 
@@ -74,6 +168,19 @@
         return (current || 0) + 1;
       });
     };
+
+    // Basic escape for text to avoid XSS
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, function (match) {
+        return ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[match];
+      });
+    }
 
     fetchPost();
   </script>
