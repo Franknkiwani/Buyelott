@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Post Details</title>
 </head>
 <body>
@@ -15,26 +15,33 @@
     import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
       databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
       measurementId: "G-LLT6F9WRKH"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    // Extract post ID from URL path (e.g., post.html/1743767063714)
-    const pathSegments = window.location.pathname.split('/');
-    const postId = pathSegments[pathSegments.length - 1];
+    // Get post ID from URL query (e.g., post.html?id=123456)
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('id');
 
     const fetchPost = async () => {
+      if (!postId) {
+        document.getElementById('post-container').innerHTML = `<h2>Invalid post ID</h2>`;
+        return;
+      }
+
       const postRef = ref(db, `posts/${postId}`);
       try {
         const snapshot = await get(postRef);
@@ -47,6 +54,7 @@
         }
       } catch (error) {
         console.error('Error fetching post:', error);
+        document.getElementById('post-container').innerHTML = `<h2>Error loading post</h2>`;
       }
     };
 
