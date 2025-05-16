@@ -5,82 +5,219 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login/Register - Make Money App</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, * {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
     * {
-      outline: none !important;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
-    .container { padding: 20px; max-width: 400px; margin: 60px auto; }
-    header { text-align: center; margin-bottom: 30px; }
-    h1 { font-size: 2rem; color: #2b8a3e; }
-    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; }
-    .btn { display: block; width: 100%; padding: 14px; background: #2b8a3e; color: #fff; border: none; border-radius: 12px; text-align: center; font-size: 1rem; cursor: pointer; margin-top: 10px; text-decoration: none; }
-    .btn-google { background: #4285F4; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 50px; }
-    .btn-google img.google-icon { border-radius: 50%; height: 20px; width: 20px; }
-    input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 10px; }
-    .separator { text-align: center; margin: 15px 0; color: #666; font-weight: 600; }
-    .toggle-text { text-align: center; margin: 20px 0 0; color: #555; cursor: pointer; }
-    .toggle-text span { color: #2b8a3e; text-decoration: underline; }
-    .forgot-password { text-align: right; margin-top: 8px; font-size: 0.9rem; }
-    .forgot-password a {
-      color: #2b8a3e;
-      text-decoration: underline;
-      cursor: pointer;
-      user-select: text;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-    }
-    /* Message area styles */
-    #message-area {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      display: none;
-    }
-    #message-area.error {
-      background-color: #ffe6e6;
-      color: #cc0000;
-      border: 1px solid #cc0000;
-    }
-    #message-area.success {
-      background-color: #e6ffe6;
-      color: #006600;
-      border: 1px solid #006600;
-    }
-    #loading-spinner {
-      margin: 10px auto;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #2b8a3e;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-    label.remember-me {
-      display: flex;
-      align-items: center;
-      margin-top: 10px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      user-select: text;
-    }
-    label.remember-me input {
-      margin-right: 8px;
-    }
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body, * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0d0d0d;
+  color: #e0e0e0;
+}
+
+.container {
+  padding: 24px;
+  max-width: 400px;
+  margin: 60px auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #00ffaa;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px #00ffaa88;
+}
+
+.card {
+  background: #1a1a1a;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0, 255, 170, 0.1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(4px);
+  border: 1px solid #222;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+  border-color: #00ffaa;
+  box-shadow: 0 0 8px #00ffaa55;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #00ffaa;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+  background-color: #00dd99;
+  box-shadow: 0 0 12px #00ffaa88;
+}
+
+.btn-google {
+  background: #222;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 50px;
+  transition: background-color 0.3s;
+}
+
+.btn-google:hover {
+  background-color: #333;
+}
+
+.btn-google img.google-icon {
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+}
+
+.separator {
+  text-align: center;
+  margin: 20px 0;
+  color: #aaa;
+  font-weight: 600;
+  position: relative;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #333;
+}
+
+.separator::before {
+  left: 0;
+}
+
+.separator::after {
+  right: 0;
+}
+
+.toggle-text {
+  text-align: center;
+  margin: 20px 0 0;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.toggle-text span {
+  color: #00ffaa;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.toggle-text span:hover {
+  color: #00dd99;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.forgot-password a {
+  color: #00ffaa;
+  text-decoration: underline;
+  cursor: pointer;
+  user-select: text;
+}
+
+#message-area {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: none;
+}
+
+#message-area.error {
+  background-color: #330000;
+  color: #ff6666;
+  border: 1px solid #ff6666;
+}
+
+#message-area.success {
+  background-color: #003300;
+  color: #66ff66;
+  border: 1px solid #66ff66;
+}
+
+#loading-spinner {
+  margin: 12px auto;
+  border: 4px solid #222;
+  border-top: 4px solid #00ffaa;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+label.remember-me {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: text;
+}
+
+label.remember-me input {
+  margin-right: 8px;
+  accent-color: #00ffaa;
+}
   </style>
 </head>
 <body>
