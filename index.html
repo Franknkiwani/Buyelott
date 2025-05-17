@@ -13,41 +13,48 @@
       overflow-x: hidden;
       user-select: none;
     }
+
     .wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem;
+      padding: 2rem 1rem;
       max-width: 600px;
       margin: auto;
       text-align: center;
       position: relative;
     }
+
     img {
       width: 100%;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(255,255,255,0.1);
       margin-bottom: 1.5rem;
     }
+
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       margin-bottom: 0.5rem;
     }
+
     p {
       color: #ccc;
       font-size: 1rem;
       margin-bottom: 1.5rem;
     }
+
     .countdown {
       font-size: 2rem;
       color: #00ffcc;
       margin-bottom: 1.5rem;
       animation: pulse 1s infinite;
     }
+
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.1); opacity: 0.7; }
     }
+
     .cta-btn {
       padding: 1rem 2rem;
       background: linear-gradient(to right, #4e00ff, #8e2de2);
@@ -58,26 +65,37 @@
       cursor: pointer;
       transition: all 0.3s;
     }
-    .cta-btn:hover {
+
+    .cta-btn:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
+    .cta-btn:hover:not(:disabled) {
       transform: scale(1.05);
     }
+
     .blur {
       filter: blur(8px);
       pointer-events: none;
     }
+
     .modal {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.8);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      display: none;
     }
+
     .modal.active {
       display: flex;
     }
+
     .modal-box {
       background: #1a1a1a;
       padding: 2rem;
@@ -85,10 +103,12 @@
       max-width: 90%;
       text-align: center;
     }
+
     .modal-box p {
       margin-bottom: 1rem;
       font-size: 1.2rem;
     }
+
     .close-btn {
       padding: 0.5rem 1rem;
       border: none;
@@ -117,18 +137,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      set,
-      get,
-      runTransaction,
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import {
-      getAuth,
-      signInAnonymously,
-      onAuthStateChanged,
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -138,7 +148,7 @@
       storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH",
+      measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -146,51 +156,12 @@
     const auth = getAuth();
 
     let uid = null;
+    let expired = false;
     const countdownElement = document.getElementById("countdown");
     const modal = document.getElementById("modal");
     const modalText = document.getElementById("modalText");
     const mainContent = document.getElementById("mainContent");
     const claimBtn = document.getElementById("claimBtn");
-
-    function incrementStat(path) {
-      const statRef = ref(db, `giveawaystats/${path}`);
-      runTransaction(statRef, (current) => (current || 0) + 1);
-    }
-
-    signInAnonymously(auth).then(() => {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          uid = user.uid;
-          const userRef = ref(db, `ps5Countdown/${uid}`);
-          const snapshot = await get(userRef);
-          let startTime = snapshot.exists() ? snapshot.val() : Date.now();
-          if (!snapshot.exists()) await set(userRef, startTime);
-
-          startCountdown(startTime);
-          incrementStat("views");
-        }
-      });
-    });
-
-    function startCountdown(startTime) {
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = 180000 - elapsed;
-
-        if (remaining <= 0) {
-          clearInterval(interval);
-          showModal("Offer expired. You missed your chance.");
-          mainContent.classList.add("blur");
-          claimBtn.disabled = true;
-          countdownElement.textContent = "00:00";
-          incrementStat("errors");
-        } else {
-          const minutes = Math.floor(remaining / 60000).toString().padStart(1, "0");
-          const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, "0");
-          countdownElement.textContent = `${minutes}:${seconds}`;
-        }
-      }, 1000);
-    }
 
     function showModal(message) {
       modalText.textContent = message;
@@ -202,26 +173,86 @@
       mainContent.classList.remove("blur");
     }
 
-    window.closeModal = closeModal;
+    function trackStat(path) {
+      const statRef = ref(db, `giveawaystats/${path}`);
+      update(statRef, { count: increment(1) });
+    }
 
-    claimBtn.addEventListener("click", async () => {
-      incrementStat("clicks");
-      await set(ref(db, `ps5Claims/${uid}`), { claimedAt: Date.now() });
+    function disableClaim() {
+      expired = true;
+      claimBtn.disabled = true;
+      countdownElement.textContent = "00:00";
+      showModal("Offer expired. You missed your chance.");
+      mainContent.classList.add("blur");
+      trackStat("errors");
+    }
+
+    function startCountdown(startTime) {
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = 180000 - elapsed;
+
+        if (remaining <= 0) {
+          clearInterval(interval);
+          disableClaim();
+        } else {
+          const minutes = Math.floor(remaining / 60000).toString();
+          const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+          countdownElement.textContent = `${minutes}:${seconds}`;
+        }
+      }, 1000);
+    }
+
+    signInAnonymously(auth).then(() => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          uid = user.uid;
+          const viewRef = ref(db, `giveawaystats/views`);
+          update(viewRef, { count: increment(1) });
+
+          const userRef = ref(db, `ps5Countdown/${uid}`);
+          const snapshot = await get(userRef);
+          let startTime;
+
+          if (snapshot.exists()) {
+            startTime = snapshot.val();
+          } else {
+            startTime = Date.now();
+            await set(userRef, startTime);
+          }
+
+          startCountdown(startTime);
+        }
+      });
+    });
+
+    claimBtn.addEventListener("click", () => {
+      if (expired) return;
+
+      set(ref(db, `ps5Claims/${uid}`), {
+        claimedAt: Date.now()
+      });
+
+      update(ref(db, `giveawaystats/clicks`), { count: increment(1) });
+
       localStorage.setItem("ps5-claim-status", "pending");
-      localStorage.setItem("ps5-claim-time", Date.now().toString());
+      localStorage.setItem("ps5-claim-time", Date.now());
       window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
     });
 
     window.addEventListener("load", () => {
       const status = localStorage.getItem("ps5-claim-status");
-      const claimedTime = parseInt(localStorage.getItem("ps5-claim-time") || "0");
+      const claimedTime = localStorage.getItem("ps5-claim-time");
 
       if (status === "pending") {
-        if (Date.now() - claimedTime > 20000) {
+        const passed = Date.now() - parseInt(claimedTime || "0");
+        if (passed >= 20000) {
           showModal("Successfully claimed your PS5! We’ll be in touch.");
-          incrementStat("success");
           localStorage.removeItem("ps5-claim-status");
-          localStorage.removeItem("ps5-claim-time");
+          trackStat("successes");
+        } else {
+          showModal("You must stay on the next page for at least 20 seconds.");
+          trackStat("errors");
         }
       }
     });
