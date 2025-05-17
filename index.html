@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gamer Auth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     * {
       user-select: none;
@@ -18,16 +18,19 @@
       background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
       color: #f2f2f2;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      /* no flex here since wrapper is fixed */
     }
 
     .wrapper {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 100%;
       max-width: 400px;
       padding: 20px;
       box-sizing: border-box;
+      z-index: 9999;
     }
 
     form {
@@ -39,7 +42,6 @@
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 0 10px #000000aa;
-      position: relative;
     }
 
     label {
@@ -59,7 +61,7 @@
     }
 
     input::placeholder {
-      color: #666;
+      color: #888;
       font-style: italic;
     }
 
@@ -103,7 +105,7 @@
     .error {
       color: #ff4c4c;
       font-size: 0.85rem;
-      min-height: 18px;
+      min-height: 1.1em;
     }
 
     p {
@@ -123,44 +125,21 @@
     }
 
     #forgotPassword {
-      color: #00ffe1;
       text-align: right;
-      font-size: 0.9rem;
       margin-top: -12px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      user-select: text; /* Allow selecting email to copy */
+      margin-bottom: 8px;
+      font-size: 0.85rem;
     }
 
-    #formMessage {
-      position: absolute;
-      bottom: -28px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #00ff9f;
-      min-height: 22px;
-      user-select: none;
-    }
-
-    #formError {
-      position: absolute;
-      bottom: -28px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #ff4c4c;
-      min-height: 22px;
-      user-select: none;
+    #forgotPassword a {
+      color: #00ffe1;
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <button id="googleLoginBtn" class="btn google" type="button">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" />
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
       Sign in with Google
     </button>
 
@@ -172,19 +151,19 @@
       </div>
 
       <label for="email">Email</label>
-      <input type="email" id="email" required placeholder="myemail@gmail.com" autocomplete="email" />
+      <input type="email" id="email" name="email" placeholder="myemail@gmail.com" autocomplete="email" required />
       <div id="emailError" class="error"></div>
 
       <label for="password">Password</label>
-      <input type="password" id="password" required placeholder="password124$" autocomplete="current-password" />
+      <input type="password" id="password" name="password" placeholder="password124$" autocomplete="current-password" required />
       <div id="passwordError" class="error"></div>
 
-      <div id="forgotPassword" style="display:none;">Forgot password?</div>
+      <div id="forgotPassword" style="display:none;">
+        <a href="#" id="forgotPasswordLink">Forgot password?</a>
+      </div>
 
       <button type="submit" class="btn">Continue</button>
-
-      <div id="formMessage"></div>
-      <div id="formError"></div>
+      <div id="formMessage" class="error" style="margin-top:10px; min-height:1.2em;"></div>
     </form>
 
     <p id="toggleText">
@@ -195,7 +174,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -220,21 +199,14 @@
     const usernameGroup = document.getElementById("usernameGroup");
     const authForm = document.getElementById("authForm");
     const usernameInput = document.getElementById("username");
-    const forgotPassword = document.getElementById("forgotPassword");
     const emailInput = document.getElementById("email");
-    const formMessage = document.getElementById("formMessage");
-    const formError = document.getElementById("formError");
+    const passwordInput = document.getElementById("password");
     const usernameError = document.getElementById("usernameError");
     const emailError = document.getElementById("emailError");
     const passwordError = document.getElementById("passwordError");
-
-    function clearErrors() {
-      usernameError.textContent = "";
-      emailError.textContent = "";
-      passwordError.textContent = "";
-      formError.textContent = "";
-      formMessage.textContent = "";
-    }
+    const formMessage = document.getElementById("formMessage");
+    const forgotPasswordDiv = document.getElementById("forgotPassword");
+    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 
     toggleLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -242,35 +214,18 @@
       toggleLink.textContent = isRegistering ? "Login" : "Register";
       toggleText.firstChild.textContent = isRegistering ? "Already have an account? " : "Don't have an account? ";
       usernameGroup.style.display = isRegistering ? "block" : "none";
-      forgotPassword.style.display = isRegistering ? "none" : "block";
-      clearErrors();
+      forgotPasswordDiv.style.display = isRegistering ? "none" : "block";
+      clearErrorsAndMessages();
     });
 
     usernameInput?.addEventListener("input", () => {
       if (!usernameInput.value.startsWith("@")) {
         usernameInput.value = "@" + usernameInput.value.replace(/^@*/, "");
       }
-      usernameError.textContent = "";
-    });
-
-    forgotPassword.addEventListener("click", async () => {
-      clearErrors();
-      const email = emailInput.value.trim();
-      if (!email) {
-        formError.textContent = "Please enter your email to reset password.";
-        emailInput.focus();
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        formMessage.textContent = "Password reset email sent! Check your inbox.";
-      } catch (error) {
-        formError.textContent = "Error: " + error.message;
-      }
     });
 
     document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-      clearErrors();
+      clearErrorsAndMessages();
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
@@ -281,10 +236,90 @@
           balance: 0,
           joined: new Date().toISOString()
         });
+        formMessage.style.color = "#00ffcc";
         formMessage.textContent = "Signed in with Google!";
       } catch (error) {
-        formError.textContent = error.message;
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = error.message;
       }
     });
 
-    authForm.addEventListener("submit",
+    forgotPasswordLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      clearErrorsAndMessages();
+      const email = emailInput.value.trim();
+      if (!email) {
+        emailError.textContent = "Please enter your email to reset password";
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        formMessage.style.color = "#00ffcc";
+        formMessage.textContent = "Password reset email sent!";
+      } catch (error) {
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = error.message;
+      }
+    });
+
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErrorsAndMessages();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const username = usernameInput?.value.trim();
+
+      let hasError = false;
+
+      if (!email) {
+        emailError.textContent = "Email is required";
+        hasError = true;
+      }
+
+      if (!password) {
+        passwordError.textContent = "Password is required";
+        hasError = true;
+      }
+
+      if (isRegistering) {
+        if (!username || !username.startsWith("@")) {
+          usernameError.textContent = "Username must start with @";
+          hasError = true;
+        }
+      }
+
+      if (hasError) return;
+
+      try {
+        if (isRegistering) {
+          const { user } = await createUserWithEmailAndPassword(auth, email, password);
+          await set(ref(db, "users/" + user.uid), {
+            email,
+            username,
+            balance: 0,
+            joined: new Date().toISOString()
+          });
+          formMessage.style.color = "#00ffcc";
+          formMessage.textContent = "Registered and logged in!";
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+          formMessage.style.color = "#00ffcc";
+          formMessage.textContent = "Logged in!";
+        }
+      } catch (err) {
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = err.message;
+      }
+    });
+
+    function clearErrorsAndMessages() {
+      usernameError.textContent = "";
+      emailError.textContent = "";
+      passwordError.textContent = "";
+      formMessage.textContent = "";
+      formMessage.style.color = "#ff4c4c";
+    }
+  </script>
+</body>
+</html>
