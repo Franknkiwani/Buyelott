@@ -2,352 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>PS5 Giveaway</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Google & Facebook Login</title>
   <style>
-    * {
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: #0e0e0e;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
-      overflow-x: hidden;
-      user-select: none;
-    }
-    .wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      max-width: 600px;
-      margin: auto;
-      text-align: center;
-      position: relative;
-    }
-    img {
-      width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-      margin-bottom: 1.5rem;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    p {
-      color: #ccc;
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .countdown {
-      font-size: 2rem;
-      color: #00ffcc;
-      margin-bottom: 1.5rem;
-      animation: pulse 1s infinite;
-      user-select: none;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-    }
-    .cta-btn {
-      padding: 1rem 2rem;
-      background: linear-gradient(to right, #4e00ff, #8e2de2);
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s;
-      user-select: none;
-      outline: none;
-    }
-    .cta-btn:hover {
-      transform: scale(1.05);
-    }
-    .cta-btn:focus {
-      outline: none;
-      box-shadow: none;
-    }
-    .cta-btn:active {
-      outline: none;
-      box-shadow: none;
-    }
-    .cta-btn:disabled {
-      background: #555;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .blur {
-      filter: blur(8px);
-      pointer-events: none;
-    }
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.8);
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      display: none;
-      padding: 1rem;
-      box-sizing: border-box;
+      overflow: hidden;
+      color: #fff;
     }
-    .modal.active {
-      display: flex;
+    .glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, #00ffc3 0%, transparent 70%);
+      filter: blur(120px);
+      animation: pulse 6s ease-in-out infinite;
+      top: -100px;
+      right: -100px;
+      z-index: 0;
+      opacity: 0.2;
     }
-    .modal-box {
-      background: #1a1a1a;
+    @keyframes pulse {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
+    .login-box {
+      position: relative;
+      background: #1e1e1e;
       padding: 2rem;
-      border-radius: 16px;
-      max-width: 90%;
+      border-radius: 24px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 380px;
+      z-index: 1;
       text-align: center;
-      color: white;
     }
-    .modal-box p {
+    .login-box h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #f0f0f0;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background-color: #fff;
+      color: #000;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      width: 100%;
       margin-bottom: 1rem;
-      font-size: 1.2rem;
     }
-    .close-btn {
-      padding: 0.5rem 1rem;
-      border: none;
-      background: #ff3c3c;
+    .btn:hover {
+      background-color: #e4e4e4;
+      transform: scale(1.02);
+    }
+    .btn img {
+      width: 20px;
+    }
+    .btn.facebook {
+      background-color: #1877f2;
       color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-right: 0.5rem;
-      outline: none;
-      user-select: none;
     }
-    .close-btn:focus, .close-btn:active {
-      outline: none;
-      box-shadow: none;
+    .btn.facebook:hover {
+      background-color: #145dbf;
     }
-    /* Share button style matches */
-    .share-btn {
-      padding: 0.5rem 1rem;
-      border: none;
-      background: #00c853;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      outline: none;
-      user-select: none;
-    }
-    .share-btn:focus, .share-btn:active {
-      outline: none;
-      box-shadow: none;
-    }
-
-    /* Responsive font sizes */
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-      .countdown {
-        font-size: 1.5rem;
-      }
-      .cta-btn {
-        font-size: 1rem;
-        padding: 0.75rem 1.5rem;
-      }
+    .footer {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalText">
-    <div class="modal-box">
-      <p id="modalText"></p>
-      <button class="close-btn" id="closeBtn">Close</button>
-      <button class="share-btn" id="shareBtn">Share on WhatsApp to Reset Timer</button>
-    </div>
-  </div>
+  <div class="glow"></div>
 
-  <div class="wrapper" id="mainContent">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlD6Q7aP97ffVoXf0Le_ezYEem5slumQTY4tz35qhjOzf-AzHmvbOkyz0&s=10" alt="PS5 Giveaway"/>
-    <h1>Win a PlayStation 5</h1>
-    <p>Only 1 per person! Complete the form on the next page to claim your PS5 before the timer runs out.</p>
-    <div class="countdown" id="countdown">LOADING</div>
-    <button class="cta-btn" id="claimBtn" disabled>Claim Now</button>
+  <div class="login-box">
+    <h1>Welcome Back</h1>
+
+    <button id="googleLoginBtn" class="btn google">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
+      Sign in with Google
+    </button>
+
+    <button id="facebookLoginBtn" class="btn facebook">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_(2019).png" alt="Facebook logo" />
+      Sign in with Facebook
+    </button>
+
+    <div class="footer">Secure login with Google or Facebook</div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      FacebookAuthProvider,
+      signInWithPopup,
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      child,
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      databaseURL:
+        "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
+      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      measurementId: "G-LLT6F9WRKH",
     };
 
     const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const auth = getAuth(app);
     const db = getDatabase(app);
-    const auth = getAuth();
 
-    let uid = null;
-    const countdownElement = document.getElementById("countdown");
-    const modal = document.getElementById("modal");
-    const modalText = document.getElementById("modalText");
-    const mainContent = document.getElementById("mainContent");
-    const claimBtn = document.getElementById("claimBtn");
-    const closeBtn = document.getElementById("closeBtn");
-    const shareBtn = document.getElementById("shareBtn");
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
 
-    let countdownInterval = null;
-    let expired = false;
-
-    // Increment views stat once per page load per user/session (use localStorage to prevent multiple)
-    const incrementViews = async () => {
-      if (!localStorage.getItem("ps5-viewed")) {
-        await runTransaction(ref(db, "giveawaystats/views"), current => (current || 0) + 1);
-        localStorage.setItem("ps5-viewed", "true");
-      }
-    };
-
-    // Track clicks, success, errors
-    const trackStat = async (stat) => {
-      await runTransaction(ref(db, `giveawaystats/${stat}`), current => (current || 0) + 1);
-    };
-
-    // Show modal helper
-    function showModal(message) {
-      modalText.textContent = message;
-      modal.classList.add("active");
-      mainContent.classList.add("blur");
-    }
-
-    // Close modal and redirect
-    closeBtn.onclick = () => {
-      closeModal();
-    };
-
-    function closeModal() {
-      modal.classList.remove("active");
-      mainContent.classList.remove("blur");
-      window.location.href = "https://otieu.com/4/7950037";
-    }
-
-    // Share button logic
-    shareBtn.onclick = async () => {
-      if (localStorage.getItem("ps5-shared")) {
-        alert("You can only share once to reset the timer.");
-        return;
-      }
-
-      const shareText = encodeURIComponent(
-        "Hey! Check out this awesome PS5 Giveaway! Don't miss your chance to win. Click the link: https://cyberchat.online/"
-      );
-      const whatsappUrl = `https://wa.me/?text=${shareText}`;
-
-      window.open(whatsappUrl, "_blank");
-
-      localStorage.setItem("ps5-shared", "true");
-
-      const newStartTime = Date.now();
-      await set(ref(db, `ps5Countdown/${uid}`), newStartTime);
-      startCountdown(newStartTime);
-
-      closeModal();
-    };
-
-    // Start countdown function
-    function startCountdown(startTime) {
-      if (countdownInterval) clearInterval(countdownInterval);
-      expired = false;
-      claimBtn.disabled = false;
-
-      countdownInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = 180000 - elapsed; // 3 minutes = 180000 ms
-
-        if (remaining <= 0) {
-          clearInterval(countdownInterval);
-          expired = true;
-          claimBtn.disabled = true;
-          countdownElement.textContent = "00:00";
-          showModal("Offer expired. You missed your chance.");
-          trackStat("errors");
-        } else {
-          const minutes = Math.floor(remaining / 60000).toString().padStart(1, '0');
-          const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
-          countdownElement.textContent = `${minutes}:${seconds}`;
-        }
-      }, 1000);
-    }
-
-    // Firebase auth and initialization
-    signInAnonymously(auth).then(() => {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          uid = user.uid;
-
-          await incrementViews();
-
-          const userRef = ref(db, `ps5Countdown/${uid}`);
-          const snapshot = await get(userRef);
-          let startTime;
-
-          if (snapshot.exists()) {
-            startTime = snapshot.val();
-          } else {
-            startTime = Date.now();
-            await set(userRef, startTime);
-          }
-
-          startCountdown(startTime);
-        }
-      });
-    });
-
-    // Claim button click
-    claimBtn.addEventListener("click", async () => {
-      if (expired) return; // no action if expired
-
-      await trackStat("clicks");
-
+    async function handleLogin(provider) {
       try {
-        await set(ref(db, `ps5Claims/${uid}`), {
-          claimedAt: Date.now()
-        });
-        localStorage.setItem("ps5-claim-status", "pending");
-        localStorage.setItem("ps5-claim-time", Date.now().toString());
-        window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
-      } catch {
-        showModal("Error while processing your claim. Please try again.");
-      }
-    });
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const userRef = ref(db, "users/" + user.uid);
 
-    // On page load, check claim status & show success modal if >20s passed
-    window.addEventListener("load", () => {
-      const status = localStorage.getItem("ps5-claim-status");
-      if (status === "pending") {
-        const claimedTimeStr = localStorage.getItem("ps5-claim-time");
-        if (claimedTimeStr) {
-          const claimedTime = parseInt(claimedTimeStr, 10);
-          if (Date.now() - claimedTime > 20000) {
-            showModal("Successfully claimed your PS5! We’ll be in touch.");
-            trackStat("success");
-            localStorage.removeItem("ps5-claim-status");
-            localStorage.removeItem("ps5-claim-time");
-          } else {
-            // Reset claim time so user waits full 20s from now
-            localStorage.setItem("ps5-claim-time", Date.now().toString());
-          }
+        // Check if user exists in DB
+        const snapshot = await get(child(ref(db), `users/${user.uid}`));
+        if (!snapshot.exists()) {
+          await set(userRef, {
+            uid: user.uid,
+            displayName: user.displayName || "",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            createdAt: new Date().toISOString(),
+            providerId: provider.providerId,
+          });
         }
+
+        alert(`Welcome, ${user.displayName || "User"}!`);
+
+        // Optional redirect or UI update here
+
+      } catch (error) {
+        alert("Login failed: " + error.message);
+        console.error(error);
       }
-    });
+    }
+
+    document
+      .getElementById("googleLoginBtn")
+      .addEventListener("click", () => handleLogin(googleProvider));
+
+    document
+      .getElementById("facebookLoginBtn")
+      .addEventListener("click", () => handleLogin(facebookProvider));
   </script>
 </body>
 </html>
