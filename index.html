@@ -343,6 +343,13 @@ window.addEventListener('load', () => {
     msg.remove();
   }, 3000);
 });
+window.addEventListener('load', () => {
+  // Force layout recalculation by toggling a style
+  document.body.style.display = 'none';
+  requestAnimationFrame(() => {
+    document.body.style.display = 'flex';
+  });
+});
   </script>
 </body>
 </html>
