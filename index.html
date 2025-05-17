@@ -1,368 +1,474 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gamer Auth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      user-select: none;
-      outline: none !important;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color: #f2f2f2;
-      height: 100vh;
-      /* no flex here since wrapper is fixed */
-    }
-
-    .wrapper {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      max-width: 400px;
-      padding: 20px;
-      box-sizing: border-box;
-      z-index: 9999;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      background: #121212;
-      border: 1px solid #2c2c2c;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #000000aa;
-    }
-
-    label {
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-    }
-
-    input {
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      background: #1c1c1c;
-      color: #fff;
-      font-size: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    input::placeholder {
-      color: #888;
-      font-style: italic;
-    }
-
-    input:focus {
-      box-shadow: 0 0 4px #00ffe1;
-    }
-
-    .btn {
-      padding: 12px;
-      background: #00ffe1;
-      color: #000;
-      font-weight: bold;
-      font-size: 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-      width: 100%;
-    }
-
-    .btn:hover {
-      background: #00e6cc;
-      transform: translateY(-1px);
-    }
-
-    .btn.google {
-      background: #222;
-      color: #fff;
-      border: 1px solid #444;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn.google img {
-      width: 18px;
-      height: 18px;
-    }
-
-    .error {
-      color: #ff4c4c;
-      font-size: 0.85rem;
-      min-height: 1.1em;
-    }
-
-    p {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
-    }
-
-    a {
-      color: #00ffe1;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    #usernameGroup {
-      display: none;
-    }
-
-    #forgotPassword {
-      text-align: right;
-      margin-top: -12px;
-      margin-bottom: 8px;
-      font-size: 0.85rem;
-    }
-
-    #forgotPassword a {
-      color: #00ffe1;
-    }
-html, body {
-  height: 100%;
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CyberChat - Posts</title>
+<style>
+  body {
   margin: 0;
-  padding: 0;
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #ddd;
 }
-
-body {
-  min-height: 100vh; /* ensures minimum viewport height */
+header {
+  background-color: #0a0a0a;
+  padding: 0.8rem 1.2rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+}
+.timer {
+  font-size: 1.2rem;
+  font-weight: normal;
+  color: #0af;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  font-family: monospace, 'Segoe UI', sans-serif;
+}
+.header-line {
+  height: 2px;
+  background-color: #0af;
+  width: 100%;
+  margin: 0;
+}
+.search-container {
+  background-color: #0a0a0a;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px solid #111;
+  position: sticky;
+  top: 54px; /* height of header */
+  z-index: 999;
+}
+input[type="search"] {
+  background-color: #121212;
+  border: 2.5px solid #0af;
+  border-radius: 10px;
+  color: #eee;
+  padding: 0.6rem 1rem;
+  font-size: 1.1rem;
+  width: 320px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input[type="search"]::placeholder {
+  color: #55aaff99;
+}
+input[type="search"]:focus {
+  border-color: #0af;
+  box-shadow: 0 0 12px #0af88;
+  background-color: #1c1c1c;
+}
+.posts-container {
+  padding: 1rem 1.5rem;
+  max-width: 900px;
+  margin: auto;
+}
+.post {
+  position: relative;
+  background-color: #121212;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 10px #0af6;
+  display: flex;
+  gap: 1rem;
+  color: #ccc;
+}
+.views-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: cyan;
+  color: black;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  user-select: none;
+  pointer-events: none;
+  font-family: monospace, sans-serif;
+}
+.post img {
+  width: 160px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px #0af6;
+}
+.post-content {
+  flex: 1;
+  display: flex;
   flex-direction: column;
 }
-  </style>
+.post-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #0af;
+  margin: 0 0 0.3rem 0;
+}
+.post-description {
+  font-style: italic;
+  color: #66cceeaa;
+  margin: 0 0 0.6rem 0;
+}
+.post-fullcontent {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #ddd;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin-bottom: 0.5rem;
+}
+.view-post-btn {
+  align-self: flex-start;
+  padding: 0.35rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #0af;
+  color: #000;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+.view-post-btn:hover {
+  background-color: #07c;
+  color: #e0e0e0;
+}
+.no-posts {
+  color: #555;
+  text-align: center;
+  padding: 2rem;
+}
+button {
+  user-select: none;       /* Prevent text selection */
+  -webkit-tap-highlight-color: transparent;  /* Remove blue highlight on mobile */
+  outline: none;           /* Remove focus outline (optional) */
+}
+.view-post-btn {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+button, .view-post-btn {
+  -webkit-user-select: none;  /* Safari and Chrome */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE/Edge */
+  user-select: none;          /* Standard */
+
+  -webkit-tap-highlight-color: transparent; /* Remove blue highlight on iOS/Android */
+
+  outline: none; /* Optional: removes focus outline */
+}
+/* Disable text selection on elements */
+.some-selector {
+  -webkit-user-select: none; /* Chrome, Safari, newer Edge */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+  user-select: none;         /* Standard */
+}
+/* Disable text selection on the whole page */
+body {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <button id="googleLoginBtn" class="btn google" type="button">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
-      Sign in with Google
-    </button>
+  <header>
+    <div class="logo">CYBERCHAT</div>
+    <div class="timer" id="timer">--:--:--</div>
+  </header>
+  <hr class="header-line" />
 
-    <form id="authForm" novalidate>
-      <div id="usernameGroup">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="@gamer123" autocomplete="username" />
-        <div id="usernameError" class="error"></div>
-      </div>
-
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="myemail@gmail.com" autocomplete="email" required />
-      <div id="emailError" class="error"></div>
-
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" placeholder="password124$" autocomplete="current-password" required />
-      <div id="passwordError" class="error"></div>
-
-      <div id="forgotPassword" style="display:none;">
-        <a href="#" id="forgotPasswordLink">Forgot password?</a>
-      </div>
-
-      <button type="submit" class="btn">Continue</button>
-      <div id="formMessage" class="error" style="margin-top:10px; min-height:1.2em;"></div>
-    </form>
-
-    <p id="toggleText">
-      Don't have an account?
-      <a href="#" id="toggleLink">Register</a>
-    </p>
+  <div class="search-container">
+    <input type="search" id="searchInput" placeholder="Search posts by title..." autocomplete="off" />
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  <div class="posts-container" id="postsContainer">
+    Loading posts...
+  </div>
+</div>
+<script type="module">    
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";    
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";    
+  import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";    
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";    
+    
+  const firebaseConfig = {    
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",    
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",    
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",    
+    projectId: "itzhoyoo-f9f7e",    
+    storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",    
+    messagingSenderId: "1094792075584",    
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",    
+    measurementId: "G-LLT6F9WRKH"    
+  };    
+    
+  const app = initializeApp(firebaseConfig);    
+  getAnalytics(app);    
+  const db = getDatabase(app);    
+  const auth = getAuth(app);    
+    
+  const timerEl = document.getElementById('timer');    
+  function updateTime() {    
+    const now = new Date();    
+    const h = now.getHours().toString().padStart(2, '0');    
+    const m = now.getMinutes().toString().padStart(2, '0');    
+    const s = now.getSeconds().toString().padStart(2, '0');    
+    timerEl.textContent = `${h}:${m}:${s}`;    
+  }    
+  updateTime();    
+  setInterval(updateTime, 1000);    
+    
+  const postsContainer = document.getElementById('postsContainer');    
+  const searchInput = document.getElementById('searchInput');    
+    
+  let posts = [];    
+    
+  function sanitize(text) {    
+    const div = document.createElement('div');    
+    div.textContent = text;    
+    return div.innerHTML;    
+  }    
+  function truncateText(text, maxLen) {    
+    if (!text) return "";    
+    return text.length > maxLen ? text.slice(0, maxLen) + "..." : text;    
+  }    
+  function shuffleArray(arr) {    
+    for (let i = arr.length - 1; i > 0; i--) {    
+      const j = Math.floor(Math.random() * (i + 1));    
+      [arr[i], arr[j]] = [arr[j], arr[i]];    
+    }    
+  }    
+    
+  function renderPosts(list) {    
+    if (list.length === 0) {    
+      postsContainer.innerHTML = `<div class="no-posts">No posts found.</div>`;    
+      return;    
+    }    
+    postsContainer.innerHTML = list.map(post => `    
+      <article class="post" data-id="${sanitize(post.id)}">    
+        <button class="views-button" id="views-${sanitize(post.id)}">views: 0</button>    
+        <img src="${sanitize(post.image || '')}" alt="${sanitize(post.title)}" />    
+        <div class="post-content">    
+          <h2 class="post-title">${sanitize(truncateText(post.title, 7))}</h2>    
+          <p class="post-description">${sanitize(truncateText(post.description, 15))}</p>    
+          <div class="post-fullcontent" style="display:none;">${sanitize(post.content || '')}</div>    
+          <button class="view-post-btn" type="button">View Post</button>    
+        </div>    
+      </article>    
+    `).join('');    
+  }    
+    
+  const viewListeners = new Map();    
+  function subscribeViews(postsList) {    
+    for (const [postId, unsubscribe] of viewListeners) {    
+      unsubscribe();    
+    }    
+    viewListeners.clear();    
+    
+    postsList.forEach(post => {    
+      const viewsRef = ref(db, `posts/${post.id}/views`);    
+      const unsubscribe = onValue(viewsRef, (snapshot) => {    
+        const views = snapshot.val() || 0;    
+        const btn = document.getElementById(`views-${post.id}`);    
+        if (btn) btn.textContent = `views: ${views}`;    
+      });    
+      viewListeners.set(post.id, unsubscribe);    
+    });    
+  }    
+    
+  // This will increment views ON EACH PAGE LOAD for all posts (no sessionStorage guard)    
+  async function incrementViews(postsList) {    
+    const promises = postsList.map(post => {    
+      const viewsRef = ref(db, `posts/${post.id}/views`);    
+      return get(viewsRef).then(snapshot => {    
+        const current = snapshot.val() || 0;    
+        return update(ref(db, `posts/${post.id}`), { views: current + 1 });    
+      });    
+    });    
+    await Promise.all(promises);    
+  }    
+    
+  async function loadPosts(userId) {    
+    postsContainer.textContent = 'Loading posts...';    
+    const postsRef = ref(db, 'posts');    
+    try {    
+      const snapshot = await get(postsRef);    
+      if (!snapshot.exists()) {    
+        posts = [];    
+        postsContainer.innerHTML = `<div class="no-posts">No posts available.</div>`;    
+        return;    
+      }    
+      const data = snapshot.val();    
+      posts = Object.entries(data).map(([id, post]) => ({    
+        id,    
+        title: post.title || "Untitled",    
+        image: post.image || "",    
+        description: post.description || "",    
+        content: post.content || ""    
+      }));    
+      shuffleArray(posts);    
+      renderPosts(posts);    
+      subscribeViews(posts);    
+      await incrementViews(posts);    
+      attachViewPostHandlers();    
+    } catch (err) {    
+      postsContainer.innerHTML = `<div class="no-posts">Error loading posts: ${sanitize(err.message)}</div>`;    
+    }    
+  }    
+    
+  searchInput.addEventListener('input', () => {    
+    const term = searchInput.value.trim();    
+    if (!term) {    
+      renderPosts(posts);    
+      subscribeViews(posts);    
+      attachViewPostHandlers();    
+      return;    
+    }    
+    const lowerTerm = term.toLowerCase();    
+    const filtered = posts.filter(post => post.title.toLowerCase().includes(lowerTerm));    
+    renderPosts(filtered);    
+    subscribeViews(filtered);    
+    attachViewPostHandlers();    
+  });    
+    
+  signInAnonymously(auth)    
+    .then(() => {    
+      const user = auth.currentUser;    
+      if (user) {    
+        loadPosts(user.uid);    
+      }    
+    })    
+    .catch(err => {    
+      postsContainer.innerHTML = `<div class="no-posts">Authentication error: ${sanitize(err.message)}</div>`;    
+    });    
+    
+  // Rewarded ad modal elements    
+  const modalHTML = `    
+    <div id="rewardedAdModal" style="    
+      position: fixed; top:0; left:0; right:0; bottom:0;    
+      background: rgba(0,0,0,0.85);    
+      display: flex;    
+      justify-content: center;    
+      align-items: center;    
+      z-index: 9999;    
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;    
+      color: #0ff;    
+    ">    
+      <div style="background:#111; border: 3px solid #0ff; border-radius: 16px; padding: 2rem; max-width: 320px; text-align:center; box-shadow: 0 0 20px #0ff;">    
+        <h2 style="margin-top:0; margin-bottom:1rem; font-weight: 700;">Watch Ad to View Post</h2>    
+        <p style="margin-bottom:1.5rem; font-size: 1.1rem; color:#66ffffcc;">Please watch a short ad to unlock the full content.</p>    
+        <button id="watchAdBtn" style="    
+          background:#0ff; color:#000; font-weight: bold; border:none;    
+          padding: 0.7rem 1.5rem; border-radius: 12px; cursor: pointer;    
+          font-size: 1rem; margin-bottom: 1rem;    
+        ">Watch Ad</button><br/>    
+        <button id="cancelAdBtn" style="    
+          background:#222; color:#0ff; font-weight: bold; border: 2px solid #0ff;    
+          padding: 0.5rem 1.2rem; border-radius: 12px; cursor: pointer;    
+          font-size: 0.9rem;    
+        ">Cancel</button>    
+        <div id="adCountdown" style="font-size: 1.3rem; margin-top: 1rem; display:none;">3</div>    
+      </div>    
+    </div>    
+  `;    
+    
+  // Append modal to body, initially hidden      
+  const modalContainer = document.createElement('div');      
+  modalContainer.innerHTML = modalHTML;      
+  document.body.appendChild(modalContainer);      
+  const modal = document.getElementById('rewardedAdModal');      
+  const watchAdBtn = document.getElementById('watchAdBtn');      
+  const cancelAdBtn = document.getElementById('cancelAdBtn');      
+  const adCountdown = document.getElementById('adCountdown');      
+      
+  modal.style.display = 'none';      
+      
+  let currentPostContentDiv = null;      
+      
+  function showModal(postContentDiv) {      
+  currentPostContentDiv = postContentDiv;      
+  modal.style.display = 'flex';      
+  adCountdown.style.display = 'none';      
+  watchAdBtn.style.display = 'inline-block';      
+  cancelAdBtn.style.display = 'inline-block';      
+  watchAdBtn.disabled = false;      
+  cancelAdBtn.disabled = false;      
+}      
+      
+function hideModal() {      
+  modal.style.display = 'none';      
+  currentPostContentDiv = null;      
+}      
+      
+watchAdBtn.onclick = () => {      
+  watchAdBtn.disabled = true;      
+  cancelAdBtn.disabled = true;      
+  let countdown = 3;      
+  adCountdown.textContent = countdown;      
+  adCountdown.style.display = 'block';      
+      
+  const interval = setInterval(() => {      
+    countdown--;      
+    adCountdown.textContent = countdown;      
+    if (countdown <= 0) {      
+      clearInterval(interval);      
+      hideModal();      
+      // Show full post content      
+      if (currentPostContentDiv) {      
+        currentPostContentDiv.style.display = 'block';      
+        // Optionally scroll to content      
+        currentPostContentDiv.scrollIntoView({behavior: 'smooth', block: 'center'});      
+      }      
+    }      
+  }, 1000);      
+};      
+      
+cancelAdBtn.onclick = () => {      
+  hideModal();      
+};      
+    
+function attachViewPostHandlers() {      
+  document.querySelectorAll('.view-post-btn').forEach(button => {      
+    button.onclick = (e) => {      
+      const postEl = e.target.closest('.post');      
+      if (!postEl) return;      
+      const fullContentDiv = postEl.querySelector('.post-fullcontent');      
+      if (!fullContentDiv) return;      
+      
+      if (fullContentDiv.style.display === 'block') {      
+        // Already visible, maybe collapse or do nothing      
+        fullContentDiv.style.display = 'none';      
+        button.textContent = 'View Post';      
+      } else {      
+        // Show rewarded ad confirmation first      
+        showModal(fullContentDiv);      
+        button.textContent = 'Hide Post';      
+      }      
+    };      
+  });      
+}    
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let isRegistering = false;
-
-    const toggleLink = document.getElementById("toggleLink");
-    const toggleText = document.getElementById("toggleText");
-    const usernameGroup = document.getElementById("usernameGroup");
-    const authForm = document.getElementById("authForm");
-    const usernameInput = document.getElementById("username");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const usernameError = document.getElementById("usernameError");
-    const emailError = document.getElementById("emailError");
-    const passwordError = document.getElementById("passwordError");
-    const formMessage = document.getElementById("formMessage");
-    const forgotPasswordDiv = document.getElementById("forgotPassword");
-    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-
-    toggleLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      isRegistering = !isRegistering;
-      toggleLink.textContent = isRegistering ? "Login" : "Register";
-      toggleText.firstChild.textContent = isRegistering ? "Already have an account? " : "Don't have an account? ";
-      usernameGroup.style.display = isRegistering ? "block" : "none";
-      forgotPasswordDiv.style.display = isRegistering ? "none" : "block";
-      clearErrorsAndMessages();
-    });
-
-    usernameInput?.addEventListener("input", () => {
-      if (!usernameInput.value.startsWith("@")) {
-        usernameInput.value = "@" + usernameInput.value.replace(/^@*/, "");
-      }
-    });
-
-    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-      clearErrorsAndMessages();
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        await set(ref(db, "users/" + user.uid), {
-          email: user.email,
-          name: user.displayName,
-          balance: 0,
-          joined: new Date().toISOString()
-        });
-        formMessage.style.color = "#00ffcc";
-        formMessage.textContent = "Signed in with Google!";
-      } catch (error) {
-        formMessage.style.color = "#ff4c4c";
-        formMessage.textContent = error.message;
-      }
-    });
-
-    forgotPasswordLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      clearErrorsAndMessages();
-      const email = emailInput.value.trim();
-      if (!email) {
-        emailError.textContent = "Please enter your email to reset password";
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        formMessage.style.color = "#00ffcc";
-        formMessage.textContent = "Password reset email sent!";
-      } catch (error) {
-        formMessage.style.color = "#ff4c4c";
-        formMessage.textContent = error.message;
-      }
-    });
-
-    authForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearErrorsAndMessages();
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const username = usernameInput?.value.trim();
-
-      let hasError = false;
-
-      if (!email) {
-        emailError.textContent = "Email is required";
-        hasError = true;
-      }
-
-      if (!password) {
-        passwordError.textContent = "Password is required";
-        hasError = true;
-      }
-
-      if (isRegistering) {
-        if (!username || !username.startsWith("@")) {
-          usernameError.textContent = "Username must start with @";
-          hasError = true;
-        }
-      }
-
-      if (hasError) return;
-
-      try {
-        if (isRegistering) {
-          const { user } = await createUserWithEmailAndPassword(auth, email, password);
-          await set(ref(db, "users/" + user.uid), {
-            email,
-            username,
-            balance: 0,
-            joined: new Date().toISOString()
-          });
-          formMessage.style.color = "#00ffcc";
-          formMessage.textContent = "Registered and logged in!";
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-          formMessage.style.color = "#00ffcc";
-          formMessage.textContent = "Logged in!";
-        }
-      } catch (err) {
-        formMessage.style.color = "#ff4c4c";
-        formMessage.textContent = err.message;
-      }
-    });
-
-    function clearErrorsAndMessages() {
-      usernameError.textContent = "";
-      emailError.textContent = "";
-      passwordError.textContent = "";
-      formMessage.textContent = "";
-      formMessage.style.color = "#ff4c4c";
-    }
-window.addEventListener('load', () => {
-  // Simulate click on body
-  document.body.click();
-
-  // Create message element
-  const msg = document.createElement('div');
-  msg.textContent = 'Done';
-  msg.style.position = 'fixed';
-  msg.style.top = '20px';
-  msg.style.right = '20px';
-  msg.style.padding = '10px 20px';
-  msg.style.background = '#00ffe1';
-  msg.style.color = '#000';
-  msg.style.fontWeight = 'bold';
-  msg.style.borderRadius = '8px';
-  msg.style.zIndex = '9999';
-  document.body.appendChild(msg);
-
-  // Remove message after 3 seconds
-  setTimeout(() => {
-    msg.remove();
-  }, 3000);
-});
-window.addEventListener('load', () => {
-  // Force layout recalculation by toggling a style
-  document.body.style.display = 'none';
-  requestAnimationFrame(() => {
-    document.body.style.display = 'flex';
-  });
-});
-  </script>
+</script>  
 </body>
 </html>
