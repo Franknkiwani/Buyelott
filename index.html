@@ -2,38 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>PS5 Giveaway</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0e0e0e;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
       overflow-x: hidden;
       user-select: none;
+      padding: 1rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem;
       max-width: 600px;
       margin: auto;
       text-align: center;
       position: relative;
+      padding: 2rem 1rem;
     }
 
     img {
       width: 100%;
+      max-width: 350px;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(255,255,255,0.1);
       margin-bottom: 1.5rem;
+      user-select: none;
+      pointer-events: none;
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: 2rem;
       margin-bottom: 0.5rem;
     }
 
@@ -41,6 +47,7 @@
       color: #ccc;
       font-size: 1rem;
       margin-bottom: 1.5rem;
+      padding: 0 1rem;
     }
 
     .countdown {
@@ -48,6 +55,7 @@
       color: #00ffcc;
       margin-bottom: 1.5rem;
       animation: pulse 1s infinite;
+      min-width: 80px;
     }
 
     @keyframes pulse {
@@ -64,6 +72,8 @@
       color: white;
       cursor: pointer;
       transition: all 0.3s;
+      width: 100%;
+      max-width: 300px;
     }
 
     .cta-btn:disabled {
@@ -90,6 +100,7 @@
       justify-content: center;
       z-index: 1000;
       display: none;
+      padding: 1rem;
     }
 
     .modal.active {
@@ -98,15 +109,17 @@
 
     .modal-box {
       background: #1a1a1a;
-      padding: 2rem;
+      padding: 2rem 1.5rem;
       border-radius: 16px;
-      max-width: 90%;
+      max-width: 400px;
+      width: 100%;
       text-align: center;
     }
 
     .modal-box p {
       margin-bottom: 1rem;
       font-size: 1.2rem;
+      word-wrap: break-word;
     }
 
     .close-btn {
@@ -116,6 +129,27 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
+      width: 100%;
+      max-width: 150px;
+      margin: 0 auto;
+      display: block;
+      font-weight: 600;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      .countdown {
+        font-size: 1.6rem;
+      }
+
+      .cta-btn {
+        font-size: 1rem;
+        padding: 0.9rem 1.5rem;
+      }
     }
   </style>
 </head>
@@ -131,8 +165,8 @@
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlD6Q7aP97ffVoXf0Le_ezYEem5slumQTY4tz35qhjOzf-AzHmvbOkyz0&s=10" alt="PS5 Giveaway"/>
     <h1>Win a PlayStation 5</h1>
     <p>Only 1 per person! Complete the form on the next page to claim your PS5 before the timer runs out.</p>
-    <div class="countdown" id="countdown">3:00</div>
-    <button class="cta-btn" id="claimBtn">Claim Now</button>
+    <div class="countdown" id="countdown">LOADING</div>
+    <button class="cta-btn" id="claimBtn" disabled>Claim Now</button>
   </div>
 
   <script type="module">
@@ -166,6 +200,7 @@
     function showModal(message) {
       modalText.textContent = message;
       modal.classList.add("active");
+      mainContent.classList.add("blur");
     }
 
     function closeModal() {
@@ -175,7 +210,7 @@
 
     function trackStat(path) {
       const statRef = ref(db, `giveawaystats/${path}`);
-      update(statRef, { count: increment(1) });
+      update(statRef, { count: increment(1) }).catch(() => {}); // ignore update errors
     }
 
     function disableClaim() {
@@ -183,11 +218,11 @@
       claimBtn.disabled = true;
       countdownElement.textContent = "00:00";
       showModal("Offer expired. You missed your chance.");
-      mainContent.classList.add("blur");
       trackStat("errors");
     }
 
     function startCountdown(startTime) {
+      claimBtn.disabled = false; // enable button as timer starts
       const interval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         const remaining = 180000 - elapsed;
@@ -207,8 +242,9 @@
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           uid = user.uid;
+          // Increment views
           const viewRef = ref(db, `giveawaystats/views`);
-          update(viewRef, { count: increment(1) });
+          update(viewRef, { count: increment(1) }).catch(() => {});
 
           const userRef = ref(db, `ps5Countdown/${uid}`);
           const snapshot = await get(userRef);
@@ -226,33 +262,39 @@
       });
     });
 
-    claimBtn.addEventListener("click", () => {
-      if (expired) return;
+    claimBtn.addEventListener("click", async () => {
+      if (expired) return; // Prevent click if expired
 
-      set(ref(db, `ps5Claims/${uid}`), {
-        claimedAt: Date.now()
-      });
+      // Increment button clicks count
+      trackStat("clicks");
 
-      update(ref(db, `giveawaystats/clicks`), { count: increment(1) });
-
-      localStorage.setItem("ps5-claim-status", "pending");
-      localStorage.setItem("ps5-claim-time", Date.now());
-      window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
+      try {
+        await set(ref(db, `ps5Claims/${uid}`), {
+          claimedAt: Date.now()
+        });
+        localStorage.setItem("ps5-claim-status", "pending");
+        localStorage.setItem("ps5-claim-time", Date.now().toString());
+        window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
+      } catch (e) {
+        showModal("Error while processing your claim. Please try again.");
+      }
     });
 
     window.addEventListener("load", () => {
       const status = localStorage.getItem("ps5-claim-status");
-      const claimedTime = localStorage.getItem("ps5-claim-time");
-
       if (status === "pending") {
-        const passed = Date.now() - parseInt(claimedTime || "0");
-        if (passed >= 20000) {
-          showModal("Successfully claimed your PS5! We’ll be in touch.");
-          localStorage.removeItem("ps5-claim-status");
-          trackStat("successes");
-        } else {
-          showModal("You must stay on the next page for at least 20 seconds.");
-          trackStat("errors");
+        const claimedTimeStr = localStorage.getItem("ps5-claim-time");
+        if (claimedTimeStr) {
+          const claimedTime = parseInt(claimedTimeStr, 10);
+          if (Date.now() - claimedTime > 20000) {
+            showModal("Successfully claimed your PS5! We’ll be in touch.");
+            trackStat("success");
+            localStorage.removeItem("ps5-claim-status");
+            localStorage.removeItem("ps5-claim-time");
+          } else {
+            // Not yet 20 seconds, update claim time so user must wait full 20 seconds from now
+            localStorage.setItem("ps5-claim-time", Date.now().toString());
+          }
         }
       }
     });
