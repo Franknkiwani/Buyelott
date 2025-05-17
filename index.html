@@ -2,67 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>PS5 Giveaway</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       background: #0e0e0e;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       color: white;
       overflow-x: hidden;
       user-select: none;
-      padding: 1rem;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
-
     .wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 2rem;
       max-width: 600px;
       margin: auto;
       text-align: center;
       position: relative;
-      padding: 2rem 1rem;
     }
-
     img {
       width: 100%;
-      max-width: 350px;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(255,255,255,0.1);
       margin-bottom: 1.5rem;
-      user-select: none;
-      pointer-events: none;
     }
-
     h1 {
-      font-size: 2rem;
+      font-size: 2.5rem;
       margin-bottom: 0.5rem;
     }
-
     p {
       color: #ccc;
       font-size: 1rem;
       margin-bottom: 1.5rem;
-      padding: 0 1rem;
     }
-
     .countdown {
       font-size: 2rem;
       color: #00ffcc;
       margin-bottom: 1.5rem;
       animation: pulse 1s infinite;
-      min-width: 80px;
+      user-select: none;
     }
-
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.1); opacity: 0.7; }
     }
-
     .cta-btn {
       padding: 1rem 2rem;
       background: linear-gradient(to right, #4e00ff, #8e2de2);
@@ -72,24 +62,29 @@
       color: white;
       cursor: pointer;
       transition: all 0.3s;
-      width: 100%;
-      max-width: 300px;
+      user-select: none;
+      outline: none;
     }
-
-    .cta-btn:disabled {
-      background: gray;
-      cursor: not-allowed;
-    }
-
-    .cta-btn:hover:not(:disabled) {
+    .cta-btn:hover {
       transform: scale(1.05);
     }
-
+    .cta-btn:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    .cta-btn:active {
+      outline: none;
+      box-shadow: none;
+    }
+    .cta-btn:disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
     .blur {
       filter: blur(8px);
       pointer-events: none;
     }
-
     .modal {
       position: fixed;
       top: 0; left: 0;
@@ -101,27 +96,23 @@
       z-index: 1000;
       display: none;
       padding: 1rem;
+      box-sizing: border-box;
     }
-
     .modal.active {
       display: flex;
     }
-
     .modal-box {
       background: #1a1a1a;
-      padding: 2rem 1.5rem;
+      padding: 2rem;
       border-radius: 16px;
-      max-width: 400px;
-      width: 100%;
+      max-width: 90%;
       text-align: center;
+      color: white;
     }
-
     .modal-box p {
       margin-bottom: 1rem;
       font-size: 1.2rem;
-      word-wrap: break-word;
     }
-
     .close-btn {
       padding: 0.5rem 1rem;
       border: none;
@@ -129,35 +120,51 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
-      width: 100%;
-      max-width: 150px;
-      margin: 0 auto;
-      display: block;
-      font-weight: 600;
+      margin-right: 0.5rem;
+      outline: none;
+      user-select: none;
+    }
+    .close-btn:focus, .close-btn:active {
+      outline: none;
+      box-shadow: none;
+    }
+    /* Share button style matches */
+    .share-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: #00c853;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+    }
+    .share-btn:focus, .share-btn:active {
+      outline: none;
+      box-shadow: none;
     }
 
-    /* Mobile tweaks */
-    @media (max-width: 400px) {
+    /* Responsive font sizes */
+    @media (max-width: 480px) {
       h1 {
-        font-size: 1.6rem;
+        font-size: 2rem;
       }
-
       .countdown {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
       }
-
       .cta-btn {
         font-size: 1rem;
-        padding: 0.9rem 1.5rem;
+        padding: 0.75rem 1.5rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="modal" id="modal">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalText">
     <div class="modal-box">
       <p id="modalText"></p>
-      <button class="close-btn" onclick="closeModal()">Close</button>
+      <button class="close-btn" id="closeBtn">Close</button>
+      <button class="share-btn" id="shareBtn">Share on WhatsApp to Reset Timer</button>
     </div>
   </div>
 
@@ -171,7 +178,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, set, get, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -190,61 +197,103 @@
     const auth = getAuth();
 
     let uid = null;
-    let expired = false;
     const countdownElement = document.getElementById("countdown");
     const modal = document.getElementById("modal");
     const modalText = document.getElementById("modalText");
     const mainContent = document.getElementById("mainContent");
     const claimBtn = document.getElementById("claimBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const shareBtn = document.getElementById("shareBtn");
 
+    let countdownInterval = null;
+    let expired = false;
+
+    // Increment views stat once per page load per user/session (use localStorage to prevent multiple)
+    const incrementViews = async () => {
+      if (!localStorage.getItem("ps5-viewed")) {
+        await runTransaction(ref(db, "giveawaystats/views"), current => (current || 0) + 1);
+        localStorage.setItem("ps5-viewed", "true");
+      }
+    };
+
+    // Track clicks, success, errors
+    const trackStat = async (stat) => {
+      await runTransaction(ref(db, `giveawaystats/${stat}`), current => (current || 0) + 1);
+    };
+
+    // Show modal helper
     function showModal(message) {
       modalText.textContent = message;
       modal.classList.add("active");
       mainContent.classList.add("blur");
     }
 
+    // Close modal and redirect
+    closeBtn.onclick = () => {
+      closeModal();
+    };
+
     function closeModal() {
       modal.classList.remove("active");
       mainContent.classList.remove("blur");
+      window.location.href = "https://otieu.com/4/7950037";
     }
 
-    function trackStat(path) {
-      const statRef = ref(db, `giveawaystats/${path}`);
-      update(statRef, { count: increment(1) }).catch(() => {}); // ignore update errors
-    }
+    // Share button logic
+    shareBtn.onclick = async () => {
+      if (localStorage.getItem("ps5-shared")) {
+        alert("You can only share once to reset the timer.");
+        return;
+      }
 
-    function disableClaim() {
-      expired = true;
-      claimBtn.disabled = true;
-      countdownElement.textContent = "00:00";
-      showModal("Offer expired. You missed your chance.");
-      trackStat("errors");
-    }
+      const shareText = encodeURIComponent(
+        "Hey! Check out this awesome PS5 Giveaway! Don't miss your chance to win. Click the link: https://cyberchat.online/"
+      );
+      const whatsappUrl = `https://wa.me/?text=${shareText}`;
 
+      window.open(whatsappUrl, "_blank");
+
+      localStorage.setItem("ps5-shared", "true");
+
+      const newStartTime = Date.now();
+      await set(ref(db, `ps5Countdown/${uid}`), newStartTime);
+      startCountdown(newStartTime);
+
+      closeModal();
+    };
+
+    // Start countdown function
     function startCountdown(startTime) {
-      claimBtn.disabled = false; // enable button as timer starts
-      const interval = setInterval(() => {
+      if (countdownInterval) clearInterval(countdownInterval);
+      expired = false;
+      claimBtn.disabled = false;
+
+      countdownInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const remaining = 180000 - elapsed;
+        const remaining = 180000 - elapsed; // 3 minutes = 180000 ms
 
         if (remaining <= 0) {
-          clearInterval(interval);
-          disableClaim();
+          clearInterval(countdownInterval);
+          expired = true;
+          claimBtn.disabled = true;
+          countdownElement.textContent = "00:00";
+          showModal("Offer expired. You missed your chance.");
+          trackStat("errors");
         } else {
-          const minutes = Math.floor(remaining / 60000).toString();
+          const minutes = Math.floor(remaining / 60000).toString().padStart(1, '0');
           const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
           countdownElement.textContent = `${minutes}:${seconds}`;
         }
       }, 1000);
     }
 
+    // Firebase auth and initialization
     signInAnonymously(auth).then(() => {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           uid = user.uid;
-          // Increment views
-          const viewRef = ref(db, `giveawaystats/views`);
-          update(viewRef, { count: increment(1) }).catch(() => {});
+
+          await incrementViews();
 
           const userRef = ref(db, `ps5Countdown/${uid}`);
           const snapshot = await get(userRef);
@@ -262,11 +311,11 @@
       });
     });
 
+    // Claim button click
     claimBtn.addEventListener("click", async () => {
-      if (expired) return; // Prevent click if expired
+      if (expired) return; // no action if expired
 
-      // Increment button clicks count
-      trackStat("clicks");
+      await trackStat("clicks");
 
       try {
         await set(ref(db, `ps5Claims/${uid}`), {
@@ -275,11 +324,12 @@
         localStorage.setItem("ps5-claim-status", "pending");
         localStorage.setItem("ps5-claim-time", Date.now().toString());
         window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
-      } catch (e) {
+      } catch {
         showModal("Error while processing your claim. Please try again.");
       }
     });
 
+    // On page load, check claim status & show success modal if >20s passed
     window.addEventListener("load", () => {
       const status = localStorage.getItem("ps5-claim-status");
       if (status === "pending") {
@@ -292,7 +342,7 @@
             localStorage.removeItem("ps5-claim-status");
             localStorage.removeItem("ps5-claim-time");
           } else {
-            // Not yet 20 seconds, update claim time so user must wait full 20 seconds from now
+            // Reset claim time so user waits full 20s from now
             localStorage.setItem("ps5-claim-time", Date.now().toString());
           }
         }
