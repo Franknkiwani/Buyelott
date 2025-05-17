@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gamer Auth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
     * {
       user-select: none;
@@ -18,16 +18,19 @@
       background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
       color: #f2f2f2;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      /* no flex here since wrapper is fixed */
     }
 
     .wrapper {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 100%;
       max-width: 400px;
       padding: 20px;
       box-sizing: border-box;
+      z-index: 9999;
     }
 
     form {
@@ -58,7 +61,7 @@
     }
 
     input::placeholder {
-      color: #666;
+      color: #888;
       font-style: italic;
     }
 
@@ -102,6 +105,7 @@
     .error {
       color: #ff4c4c;
       font-size: 0.85rem;
+      min-height: 1.1em;
     }
 
     p {
@@ -121,42 +125,45 @@
     }
 
     #forgotPassword {
-      color: #00ffe1;
       text-align: right;
-      font-size: 0.9rem;
       margin-top: -12px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      user-select: text; /* Allow selecting email to copy */
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    #forgotPassword a {
+      color: #00ffe1;
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <button id="googleLoginBtn" class="btn google">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" />
+    <button id="googleLoginBtn" class="btn google" type="button">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
       Sign in with Google
     </button>
 
-    <form id="authForm">
+    <form id="authForm" novalidate>
       <div id="usernameGroup">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="@gamer123" />
+        <input type="text" id="username" name="username" placeholder="@gamer123" autocomplete="username" />
         <div id="usernameError" class="error"></div>
       </div>
 
       <label for="email">Email</label>
-      <input type="email" id="email" required placeholder="myemail@gmail.com" />
+      <input type="email" id="email" name="email" placeholder="myemail@gmail.com" autocomplete="email" required />
       <div id="emailError" class="error"></div>
 
       <label for="password">Password</label>
-      <input type="password" id="password" required placeholder="password124$" />
+      <input type="password" id="password" name="password" placeholder="password124$" autocomplete="current-password" required />
       <div id="passwordError" class="error"></div>
 
-      <!-- Forgot Password link only shown in login mode -->
-      <div id="forgotPassword" style="display:none;">Forgot password?</div>
+      <div id="forgotPassword" style="display:none;">
+        <a href="#" id="forgotPasswordLink">Forgot password?</a>
+      </div>
 
       <button type="submit" class="btn">Continue</button>
+      <div id="formMessage" class="error" style="margin-top:10px; min-height:1.2em;"></div>
     </form>
 
     <p id="toggleText">
@@ -167,7 +174,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -192,8 +199,14 @@
     const usernameGroup = document.getElementById("usernameGroup");
     const authForm = document.getElementById("authForm");
     const usernameInput = document.getElementById("username");
-    const forgotPassword = document.getElementById("forgotPassword");
     const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const usernameError = document.getElementById("usernameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const formMessage = document.getElementById("formMessage");
+    const forgotPasswordDiv = document.getElementById("forgotPassword");
+    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 
     toggleLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -201,7 +214,8 @@
       toggleLink.textContent = isRegistering ? "Login" : "Register";
       toggleText.firstChild.textContent = isRegistering ? "Already have an account? " : "Don't have an account? ";
       usernameGroup.style.display = isRegistering ? "block" : "none";
-      forgotPassword.style.display = isRegistering ? "none" : "block";
+      forgotPasswordDiv.style.display = isRegistering ? "none" : "block";
+      clearErrorsAndMessages();
     });
 
     usernameInput?.addEventListener("input", () => {
@@ -210,22 +224,8 @@
       }
     });
 
-    forgotPassword.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
-      if (!email) {
-        alert("Please enter your email to reset password.");
-        emailInput.focus();
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        alert("Password reset email sent! Check your inbox.");
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
-    });
-
     document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      clearErrorsAndMessages();
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
@@ -236,26 +236,63 @@
           balance: 0,
           joined: new Date().toISOString()
         });
-        alert("Signed in with Google!");
+        formMessage.style.color = "#00ffcc";
+        formMessage.textContent = "Signed in with Google!";
       } catch (error) {
-        alert(error.message);
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = error.message;
+      }
+    });
+
+    forgotPasswordLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      clearErrorsAndMessages();
+      const email = emailInput.value.trim();
+      if (!email) {
+        emailError.textContent = "Please enter your email to reset password";
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        formMessage.style.color = "#00ffcc";
+        formMessage.textContent = "Password reset email sent!";
+      } catch (error) {
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = error.message;
       }
     });
 
     authForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = authForm.email.value.trim();
-      const password = authForm.password.value;
+      clearErrorsAndMessages();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
       const username = usernameInput?.value.trim();
+
+      let hasError = false;
+
+      if (!email) {
+        emailError.textContent = "Email is required";
+        hasError = true;
+      }
+
+      if (!password) {
+        passwordError.textContent = "Password is required";
+        hasError = true;
+      }
+
+      if (isRegistering) {
+        if (!username || !username.startsWith("@")) {
+          usernameError.textContent = "Username must start with @";
+          hasError = true;
+        }
+      }
+
+      if (hasError) return;
 
       try {
         if (isRegistering) {
-          if (!username.startsWith("@")) {
-            document.getElementById("usernameError").textContent = "Username must start with @";
-            return;
-          } else {
-            document.getElementById("usernameError").textContent = "";
-          }
           const { user } = await createUserWithEmailAndPassword(auth, email, password);
           await set(ref(db, "users/" + user.uid), {
             email,
@@ -263,18 +300,26 @@
             balance: 0,
             joined: new Date().toISOString()
           });
-          alert("Registered and logged in!");
+          formMessage.style.color = "#00ffcc";
+          formMessage.textContent = "Registered and logged in!";
         } else {
           await signInWithEmailAndPassword(auth, email, password);
-          alert("Logged in!");
+          formMessage.style.color = "#00ffcc";
+          formMessage.textContent = "Logged in!";
         }
       } catch (err) {
-        alert(err.message);
+        formMessage.style.color = "#ff4c4c";
+        formMessage.textContent = err.message;
       }
     });
 
-    // Initially show forgot password link only on login
-    forgotPassword.style.display = "block";
+    function clearErrorsAndMessages() {
+      usernameError.textContent = "";
+      emailError.textContent = "";
+      passwordError.textContent = "";
+      formMessage.textContent = "";
+      formMessage.style.color = "#ff4c4c";
+    }
   </script>
 </body>
 </html>
