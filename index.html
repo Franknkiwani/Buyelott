@@ -2,188 +2,279 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Google & Facebook Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gamer Auth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
+    * {
+      user-select: none;
+      outline: none !important;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      font-family: "Inter", sans-serif;
+      font-family: 'Orbitron', sans-serif;
       background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: #f2f2f2;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #121212;
+      border: 1px solid #2c2c2c;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #000000aa;
+    }
+
+    label {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    input {
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #1c1c1c;
       color: #fff;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, #00ffc3 0%, transparent 70%);
-      filter: blur(120px);
-      animation: pulse 6s ease-in-out infinite;
-      top: -100px;
-      right: -100px;
-      z-index: 0;
-      opacity: 0.2;
+
+    input::placeholder {
+      color: #666;
+      font-style: italic;
     }
-    @keyframes pulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.2);
-      }
+
+    input:focus {
+      box-shadow: 0 0 4px #00ffe1;
     }
-    .login-box {
-      position: relative;
-      background: #1e1e1e;
-      padding: 2rem;
-      border-radius: 24px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-      width: 90%;
-      max-width: 380px;
-      z-index: 1;
-      text-align: center;
-    }
-    .login-box h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      color: #f0f0f0;
-    }
+
     .btn {
+      padding: 12px;
+      background: #00ffe1;
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: #00e6cc;
+      transform: translateY(-1px);
+    }
+
+    .btn.google {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      background-color: #fff;
-      color: #000;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 500;
+      gap: 8px;
+    }
+
+    .btn.google img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .error {
+      color: #ff4c4c;
+      font-size: 0.85rem;
+    }
+
+    p {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+
+    a {
+      color: #00ffe1;
+      text-decoration: none;
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.2s;
-      width: 100%;
-      margin-bottom: 1rem;
     }
-    .btn:hover {
-      background-color: #e4e4e4;
-      transform: scale(1.02);
+
+    #usernameGroup {
+      display: none;
     }
-    .btn img {
-      width: 20px;
-    }
-    .btn.facebook {
-      background-color: #1877f2;
-      color: white;
-    }
-    .btn.facebook:hover {
-      background-color: #145dbf;
-    }
-    .footer {
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      color: #888;
+
+    #forgotPassword {
+      color: #00ffe1;
+      text-align: right;
+      font-size: 0.9rem;
+      margin-top: -12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      user-select: text; /* Allow selecting email to copy */
     }
   </style>
 </head>
 <body>
-  <div class="glow"></div>
-
-  <div class="login-box">
-    <h1>Welcome Back</h1>
-
+  <div class="wrapper">
     <button id="googleLoginBtn" class="btn google">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" />
       Sign in with Google
     </button>
 
-    <button id="facebookLoginBtn" class="btn facebook">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_(2019).png" alt="Facebook logo" />
-      Sign in with Facebook
-    </button>
+    <form id="authForm">
+      <div id="usernameGroup">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="@gamer123" />
+        <div id="usernameError" class="error"></div>
+      </div>
 
-    <div class="footer">Secure login with Google or Facebook</div>
+      <label for="email">Email</label>
+      <input type="email" id="email" required placeholder="myemail@gmail.com" />
+      <div id="emailError" class="error"></div>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="password124$" />
+      <div id="passwordError" class="error"></div>
+
+      <!-- Forgot Password link only shown in login mode -->
+      <div id="forgotPassword" style="display:none;">Forgot password?</div>
+
+      <button type="submit" class="btn">Continue</button>
+    </form>
+
+    <p id="toggleText">
+      Don't have an account?
+      <a href="#" id="toggleLink">Register</a>
+    </p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      FacebookAuthProvider,
-      signInWithPopup,
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      set,
-      get,
-      child,
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL:
-        "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH",
+      measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
-    getAnalytics(app);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const googleProvider = new GoogleAuthProvider();
-    const facebookProvider = new FacebookAuthProvider();
+    let isRegistering = false;
 
-    async function handleLogin(provider) {
+    const toggleLink = document.getElementById("toggleLink");
+    const toggleText = document.getElementById("toggleText");
+    const usernameGroup = document.getElementById("usernameGroup");
+    const authForm = document.getElementById("authForm");
+    const usernameInput = document.getElementById("username");
+    const forgotPassword = document.getElementById("forgotPassword");
+    const emailInput = document.getElementById("email");
+
+    toggleLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      isRegistering = !isRegistering;
+      toggleLink.textContent = isRegistering ? "Login" : "Register";
+      toggleText.firstChild.textContent = isRegistering ? "Already have an account? " : "Don't have an account? ";
+      usernameGroup.style.display = isRegistering ? "block" : "none";
+      forgotPassword.style.display = isRegistering ? "none" : "block";
+    });
+
+    usernameInput?.addEventListener("input", () => {
+      if (!usernameInput.value.startsWith("@")) {
+        usernameInput.value = "@" + usernameInput.value.replace(/^@*/, "");
+      }
+    });
+
+    forgotPassword.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      if (!email) {
+        alert("Please enter your email to reset password.");
+        emailInput.focus();
+        return;
+      }
       try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent! Check your inbox.");
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        const userRef = ref(db, "users/" + user.uid);
-
-        // Check if user exists in DB
-        const snapshot = await get(child(ref(db), `users/${user.uid}`));
-        if (!snapshot.exists()) {
-          await set(userRef, {
-            uid: user.uid,
-            displayName: user.displayName || "",
-            email: user.email || "",
-            photoURL: user.photoURL || "",
-            createdAt: new Date().toISOString(),
-            providerId: provider.providerId,
-          });
-        }
-
-        alert(`Welcome, ${user.displayName || "User"}!`);
-
-        // Optional redirect or UI update here
-
+        await set(ref(db, "users/" + user.uid), {
+          email: user.email,
+          name: user.displayName,
+          balance: 0,
+          joined: new Date().toISOString()
+        });
+        alert("Signed in with Google!");
       } catch (error) {
-        alert("Login failed: " + error.message);
-        console.error(error);
+        alert(error.message);
       }
-    }
+    });
 
-    document
-      .getElementById("googleLoginBtn")
-      .addEventListener("click", () => handleLogin(googleProvider));
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = authForm.email.value.trim();
+      const password = authForm.password.value;
+      const username = usernameInput?.value.trim();
 
-    document
-      .getElementById("facebookLoginBtn")
-      .addEventListener("click", () => handleLogin(facebookProvider));
+      try {
+        if (isRegistering) {
+          if (!username.startsWith("@")) {
+            document.getElementById("usernameError").textContent = "Username must start with @";
+            return;
+          } else {
+            document.getElementById("usernameError").textContent = "";
+          }
+          const { user } = await createUserWithEmailAndPassword(auth, email, password);
+          await set(ref(db, "users/" + user.uid), {
+            email,
+            username,
+            balance: 0,
+            joined: new Date().toISOString()
+          });
+          alert("Registered and logged in!");
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+          alert("Logged in!");
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    // Initially show forgot password link only on login
+    forgotPassword.style.display = "block";
   </script>
 </body>
 </html>
