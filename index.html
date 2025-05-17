@@ -321,8 +321,27 @@
       formMessage.style.color = "#ff4c4c";
     }
 window.addEventListener('load', () => {
-  // Scroll down by 100px once on page load
-  window.scrollTo({ top: 100, behavior: 'smooth' });
+  // Simulate click on body
+  document.body.click();
+
+  // Create message element
+  const msg = document.createElement('div');
+  msg.textContent = 'Done';
+  msg.style.position = 'fixed';
+  msg.style.top = '20px';
+  msg.style.right = '20px';
+  msg.style.padding = '10px 20px';
+  msg.style.background = '#00ffe1';
+  msg.style.color = '#000';
+  msg.style.fontWeight = 'bold';
+  msg.style.borderRadius = '8px';
+  msg.style.zIndex = '9999';
+  document.body.appendChild(msg);
+
+  // Remove message after 3 seconds
+  setTimeout(() => {
+    msg.remove();
+  }, 3000);
 });
   </script>
 </body>
