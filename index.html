@@ -1,526 +1,228 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login/Register - Make Money App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PS5 Giveaway</title>
   <style>
-    * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent;
-}
-
-body, * {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #0d0d0d;
-  color: #e0e0e0;
-}
-
-.container {
-  padding: 24px;
-  max-width: 400px;
-  margin: 60px auto;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-h1 {
-  font-size: 2rem;
-  color: #00ffaa;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px #00ffaa88;
-}
-
-.card {
-  background: #1a1a1a;
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(0, 255, 170, 0.1);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  backdrop-filter: blur(4px);
-  border: 1px solid #222;
-}
-
-input {
-  width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-input:focus {
-  border-color: #00ffaa;
-  box-shadow: 0 0 8px #00ffaa55;
-}
-
-.btn {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: #00ffaa;
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  text-align: center;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 14px;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.btn:hover {
-  background-color: #00dd99;
-  box-shadow: 0 0 12px #00ffaa88;
-}
-
-.btn-google {
-  background: #222;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 50px;
-  transition: background-color 0.3s;
-}
-
-.btn-google:hover {
-  background-color: #333;
-}
-
-.btn-google img.google-icon {
-  border-radius: 50%;
-  height: 20px;
-  width: 20px;
-}
-
-.separator {
-  text-align: center;
-  margin: 20px 0;
-  color: #aaa;
-  font-weight: 600;
-  position: relative;
-}
-
-.separator::before,
-.separator::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 40%;
-  height: 1px;
-  background: #333;
-}
-
-.separator::before {
-  left: 0;
-}
-
-.separator::after {
-  right: 0;
-}
-
-.toggle-text {
-  text-align: center;
-  margin: 20px 0 0;
-  color: #aaa;
-  cursor: pointer;
-}
-
-.toggle-text span {
-  color: #00ffaa;
-  text-decoration: underline;
-  transition: color 0.3s;
-}
-
-.toggle-text span:hover {
-  color: #00dd99;
-}
-
-.forgot-password {
-  text-align: right;
-  margin-top: 8px;
-  font-size: 0.9rem;
-}
-
-.forgot-password a {
-  color: #00ffaa;
-  text-decoration: underline;
-  cursor: pointer;
-  user-select: text;
-}
-
-#message-area {
-  margin-top: 15px;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  display: none;
-}
-
-#message-area.error {
-  background-color: #330000;
-  color: #ff6666;
-  border: 1px solid #ff6666;
-}
-
-#message-area.success {
-  background-color: #003300;
-  color: #66ff66;
-  border: 1px solid #66ff66;
-}
-
-#loading-spinner {
-  margin: 12px auto;
-  border: 4px solid #222;
-  border-top: 4px solid #00ffaa;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  animation: spin 1s linear infinite;
-  display: none;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
-}
-
-label.remember-me {
-  display: flex;
-  align-items: center;
-  margin-top: 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  user-select: text;
-}
-
-label.remember-me input {
-  margin-right: 8px;
-  accent-color: #00ffaa;
-}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0e0e0e;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+      position: relative;
+    }
+    img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: #ccc;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .countdown {
+      font-size: 2rem;
+      color: #00ffcc;
+      margin-bottom: 1.5rem;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+    .cta-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(to right, #4e00ff, #8e2de2);
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .cta-btn:hover {
+      transform: scale(1.05);
+    }
+    .blur {
+      filter: blur(8px);
+      pointer-events: none;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .modal-box p {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .close-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: #ff3c3c;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Make Money</h1>
-      <p id="subtitle">Login or Register to start earning</p>
-    </header>
-
-    <div class="card" id="form-container">
-
-      <!-- Login Form -->
-      <form id="login-form" style="display:flex; flex-direction: column;">
-        <h2 id="form-title">Login</h2>
-        <input type="email" id="login-email" placeholder="Email" required autocomplete="email" />
-        <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password" />
-        
-        <label class="remember-me"><input type="checkbox" id="remember-me" /> Remember me</label>
-        
-        <div class="forgot-password"><a href="#" id="forgot-password-link">Forgot Password?</a></div>
-        <button type="submit" class="btn">Login</button>
-
-        <div id="loading-spinner"></div>
-
-        <div class="separator">or</div>
-
-        <button type="button" id="google-login-btn" class="btn btn-google" aria-label="Continue with Google">
-          <img class="google-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPbae_HqhX9hAdb4v-sMse53Uw6mvG7x0kXWT6TlmxpjheUWk-4FHHdLf_&s=10" alt="Google logo" />
-          Continue with Google
-        </button>
-      </form>
-
-      <!-- Register Form -->
-      <form id="register-form" style="display:none; flex-direction: column;">
-        <h2>Register</h2>
-        <input type="text" id="register-name" placeholder="Full Name" required autocomplete="name" />
-        <input type="email" id="register-email" placeholder="Email" required autocomplete="email" />
-        <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password" />
-        <small id="password-strength" style="color:#666; margin-top: 5px;"></small>
-        <button type="submit" class="btn">Register</button>
-
-        <div id="loading-spinner-register"></div>
-      </form>
-
-      <p class="toggle-text" id="toggle-link" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle between login and register">
-        Don't have an account? <span id="toggle-action" style="user-select:none;">Register</span>
-      </p>
-
-      <div id="message-area" role="alert"></div>
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <p id="modalText"></p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
+  </div>
+
+  <div class="wrapper" id="mainContent">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlD6Q7aP97ffVoXf0Le_ezYEem5slumQTY4tz35qhjOzf-AzHmvbOkyz0&s=10" alt="PS5 Giveaway"/>
+    <h1>Win a PlayStation 5</h1>
+    <p>Only 1 per person! Complete the form on the next page to claim your PS5 before the timer runs out.</p>
+    <div class="countdown" id="countdown">3:00</div>
+    <button class="cta-btn" id="claimBtn">Claim Now</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      signInWithPopup,
-      GoogleAuthProvider,
-      sendPasswordResetEmail,
-      sendEmailVerification,
-      onAuthStateChanged,
-      setPersistence,
-      browserLocalPersistence,
-      browserSessionPersistence,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import {
       getDatabase,
       ref,
       set,
       get,
-      child
+      runTransaction,
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged,
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
       databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      measurementId: "G-LLT6F9WRKH",
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    getAnalytics(app);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-    const googleProvider = new GoogleAuthProvider();
+    const db = getDatabase(app);
+    const auth = getAuth();
 
-    // Elements
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const toggleLink = document.getElementById('toggle-link');
-    const toggleAction = document.getElementById('toggle-action');
-    const messageArea = document.getElementById('message-area');
-    const googleLoginBtn = document.getElementById('google-login-btn');
-    const forgotPasswordLink = document.getElementById('forgot-password-link');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const loadingSpinnerRegister = document.getElementById('loading-spinner-register');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const passwordInput = document.getElementById('register-password');
-    const passwordStrengthText = document.getElementById('password-strength');
+    let uid = null;
+    const countdownElement = document.getElementById("countdown");
+    const modal = document.getElementById("modal");
+    const modalText = document.getElementById("modalText");
+    const mainContent = document.getElementById("mainContent");
+    const claimBtn = document.getElementById("claimBtn");
 
-    // Helper functions
-    function showMessage(msg, type = 'error') {
-      messageArea.textContent = msg;
-      messageArea.className = type;
-      messageArea.style.display = 'block';
-    }
-    function clearMessage() {
-      messageArea.textContent = '';
-      messageArea.className = '';
-      messageArea.style.display = 'none';
-    }
-    function showLoading(spinner, show = true) {
-      spinner.style.display = show ? 'block' : 'none';
+    function incrementStat(path) {
+      const statRef = ref(db, `giveawaystats/${path}`);
+      runTransaction(statRef, (current) => (current || 0) + 1);
     }
 
-    // Password strength check simple version
-    passwordInput.addEventListener('input', () => {
-      // Password strength check
-      const val = passwordInput.value;
-      let strength = 'Weak';
-      let color = '#cc0000';
+    signInAnonymously(auth).then(() => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          uid = user.uid;
+          const userRef = ref(db, `ps5Countdown/${uid}`);
+          const snapshot = await get(userRef);
+          let startTime = snapshot.exists() ? snapshot.val() : Date.now();
+          if (!snapshot.exists()) await set(userRef, startTime);
 
-      if(val.length >= 12 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[\W_]/.test(val)) {
-        strength = 'Strong';
-        color = '#2b8a3e';
-      } else if(val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
-        strength = 'Medium';
-        color = '#d18e0f';
-      }
-
-      passwordStrengthText.textContent = `Password strength: ${strength}`;
-      passwordStrengthText.style.color = color;
-      if(val.length === 0) passwordStrengthText.textContent = '';
-    });
-
-    // Toggle between login and register forms
-    toggleLink.addEventListener('click', () => {
-      clearMessage();
-      if (loginForm.style.display !== 'none') {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'flex';
-        toggleAction.textContent = 'Login';
-        toggleLink.setAttribute('aria-pressed', 'true');
-      } else {
-        registerForm.style.display = 'none';
-        loginForm.style.display = 'flex';
-        toggleAction.textContent = 'Register';
-        toggleLink.setAttribute('aria-pressed', 'false');
-      }
-    });
-
-    // Login submit
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearMessage();
-      showLoading(loadingSpinner);
-      try {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        // Persistence setting based on remember me checkbox
-        await setPersistence(auth, rememberMeCheckbox.checked ? browserLocalPersistence : browserSessionPersistence);
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-        if (!userCredential.user.emailVerified) {
-          showMessage('Please verify your email before logging in. Check your inbox.', 'error');
-          await auth.signOut();
-          showLoading(loadingSpinner, false);
-          return;
+          startCountdown(startTime);
+          incrementStat("views");
         }
+      });
+    });
 
-        showMessage('Login successful! Redirecting...', 'success');
-        showLoading(loadingSpinner, false);
-        // Redirect to homepage or app main page:
-        window.location.href = 'homepage.html';
+    function startCountdown(startTime) {
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = 180000 - elapsed;
 
-      } catch (error) {
-        showLoading(loadingSpinner, false);
-        if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password'){
-          showMessage('Invalid email or password.', 'error');
-        } else if(error.code === 'auth/too-many-requests'){
-          showMessage('Too many failed attempts. Please try again later.', 'error');
+        if (remaining <= 0) {
+          clearInterval(interval);
+          showModal("Offer expired. You missed your chance.");
+          mainContent.classList.add("blur");
+          claimBtn.disabled = true;
+          countdownElement.textContent = "00:00";
+          incrementStat("errors");
         } else {
-          showMessage('Error logging in: ' + error.message, 'error');
+          const minutes = Math.floor(remaining / 60000).toString().padStart(1, "0");
+          const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, "0");
+          countdownElement.textContent = `${minutes}:${seconds}`;
         }
-      }
+      }, 1000);
+    }
+
+    function showModal(message) {
+      modalText.textContent = message;
+      modal.classList.add("active");
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+      mainContent.classList.remove("blur");
+    }
+
+    window.closeModal = closeModal;
+
+    claimBtn.addEventListener("click", async () => {
+      incrementStat("clicks");
+      await set(ref(db, `ps5Claims/${uid}`), { claimedAt: Date.now() });
+      localStorage.setItem("ps5-claim-status", "pending");
+      localStorage.setItem("ps5-claim-time", Date.now().toString());
+      window.location.href = "https://singingfiles.com/show.php?l=0&u=2392480&id=63315";
     });
 
-    // Register submit
-    registerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearMessage();
-      showLoading(loadingSpinnerRegister);
-      try {
-        const name = document.getElementById('register-name').value.trim();
-        const email = document.getElementById('register-email').value.trim();
-        const password = document.getElementById('register-password').value;
+    window.addEventListener("load", () => {
+      const status = localStorage.getItem("ps5-claim-status");
+      const claimedTime = parseInt(localStorage.getItem("ps5-claim-time") || "0");
 
-        if(password.length < 8){
-          showMessage('Password must be at least 8 characters.', 'error');
-          showLoading(loadingSpinnerRegister, false);
-          return;
+      if (status === "pending") {
+        if (Date.now() - claimedTime > 20000) {
+          showModal("Successfully claimed your PS5! We’ll be in touch.");
+          incrementStat("success");
+          localStorage.removeItem("ps5-claim-status");
+          localStorage.removeItem("ps5-claim-time");
         }
-
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-        // Save additional user info to realtime database
-        await set(ref(database, 'users/' + userCredential.user.uid), {
-          name: name,
-          email: email,
-          createdAt: Date.now()
-        });
-
-        // Send verification email
-        await sendEmailVerification(userCredential.user);
-
-        showMessage('Registration successful! A verification email has been sent to your email address. Please verify before logging in.', 'success');
-        registerForm.reset();
-        showLoading(loadingSpinnerRegister, false);
-
-        // Switch back to login form automatically after 5 seconds
-        setTimeout(() => {
-          toggleLink.click();
-        }, 5000);
-
-      } catch (error) {
-        showLoading(loadingSpinnerRegister, false);
-        if(error.code === 'auth/email-already-in-use'){
-          showMessage('This email is already registered. Please login or use a different email.', 'error');
-        } else if(error.code === 'auth/invalid-email'){
-          showMessage('Please enter a valid email address.', 'error');
-        } else if(error.code === 'auth/weak-password'){
-          showMessage('Password is too weak.', 'error');
-        } else {
-          showMessage('Error registering: ' + error.message, 'error');
-        }
-      }
-    });
-
-    // Google login button
-    googleLoginBtn.addEventListener('click', async () => {
-      clearMessage();
-      showLoading(loadingSpinner);
-      try {
-        await setPersistence(auth, browserLocalPersistence);
-        const result = await signInWithPopup(auth, googleProvider);
-
-        // Save user info on first sign in to database
-        const userRef = ref(database, 'users/' + result.user.uid);
-        const snapshot = await get(userRef);
-        if (!snapshot.exists()) {
-          await set(userRef, {
-            name: result.user.displayName,
-            email: result.user.email,
-            createdAt: Date.now()
-          });
-        }
-
-        showMessage('Google login successful! Redirecting...', 'success');
-        showLoading(loadingSpinner, false);
-        window.location.href = 'homepage.html';
-
-      } catch (error) {
-        showLoading(loadingSpinner, false);
-        showMessage('Google login failed: ' + error.message, 'error');
-      }
-    });
-
-    // Forgot password link
-    forgotPasswordLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      clearMessage();
-      const email = document.getElementById('login-email').value.trim();
-      if(!email) {
-        showMessage('Please enter your email in the email field to reset password.', 'error');
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showMessage('Password reset email sent. Please check your inbox.', 'success');
-      } catch (error) {
-        if(error.code === 'auth/user-not-found'){
-          showMessage('No user found with that email.', 'error');
-        } else {
-          showMessage('Error sending reset email: ' + error.message, 'error');
-        }
-      }
-    });
-
-    // Optional: detect auth state and redirect if already logged in & verified
-    onAuthStateChanged(auth, user => {
-      if(user && user.emailVerified) {
-        // User logged in & verified, redirect to homepage
-        window.location.href = 'homepage.html';
       }
     });
   </script>
