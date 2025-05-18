@@ -1,235 +1,414 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-gray-950 text-white select-none">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Posts Display</title>
+  <title>CYBERCHAT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: #121212; color: #eee; font-family: Arial, sans-serif; padding: 20px; }
-    .post-card {
-      background: #1e1e1e; border-radius: 12px; padding: 16px; margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    }
-    .post-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-    }
-    .user-info {
-      display: flex; align-items: center; gap: 12px;
-    }
-    .user-pic {
-      width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
-    }
-    .user-names {
-      display: flex; flex-direction: column;
-    }
-    .username {
-      font-weight: bold; font-size: 16px;
-    }
-    .handle {
-      font-size: 12px; color: #6fc3df;
-    }
-    .post-title {
-      font-size: 18px; font-weight: bold; margin: 10px 0;
-    }
-    .post-image {
-      width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;
-    }
-    .post-stats {
-      display: flex; justify-content: space-around; font-size: 14px; color: #888; margin-bottom: 12px;
-    }
-    .post-actions {
-      display: flex; gap: 20px;
-    }
-    button {
-      cursor: pointer; background: #333; border: none; padding: 8px 12px; border-radius: 8px;
-      color: #eee; font-weight: 600; transition: background 0.3s;
-    }
-    button:hover {
-      background: #555;
-    }
-    .liked {
-      color: #ff6b81;
-      animation: pulse 0.5s ease;
-    }
-    .following {
-      background-color: #2ecc71 !important;
-      color: #fff !important;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.3); }
-      100% { transform: scale(1); }
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
     }
   </style>
 </head>
-<body>
+<body class="font-sans min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="p-3 bg-gray-900 shadow-md sticky top-0 z-50 flex justify-between items-center">
+    <h1 class="text-xl font-mono font-bold tracking-widest text-cyan-400 drop-shadow-[0_0_4px_rgba(6,182,212,0.7)] cursor-default select-none">
+      CYBER<span class="text-pink-500">CHAT</span>
+    </h1>
+    <button class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 rounded-xl text-sm">New Post</button>
+  </header>
 
-  <div id="postsContainer"></div>
+  <!-- Sections -->
+  <section id="homeSection" class="p-4 space-y-6 pb-24 block">
+    <input type="text" placeholder="Search posts..." class="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400 mb-4" />
+    <div id="postsContainer" class="space-y-6"></div>
+  </section>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  <section id="uploadSection" class="p-4 hidden">
+    <h2 class="text-xl font-bold mb-4">Upload Content</h2>
+    <p class="text-gray-400">Upload form goes here.</p>
+  </section>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  <section id="profileSection" class="p-4 hidden">
+    <div class="flex items-center gap-4 mb-4">
+      <img src="https://i.pravatar.cc/80" class="w-16 h-16 rounded-full" alt="Profile Picture" />
+      <div>
+        <h3 class="text-lg font-semibold">@username</h3>
+        <p class="text-gray-400 text-sm">123 followers</p>
+      </div>
+    </div>
+    <p class="text-gray-400">Profile details and activity go here.</p>
+  </section>
+
+  <!-- Bottom Navigation -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex justify-around p-3 text-sm text-gray-400 md:hidden">
+    <button onclick="showSection('homeSection')" class="flex flex-col items-center text-cyan-500">
+      <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 12l2-2m0 0l7-7 7 7m-9 9V3" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      Home
+    </button>
+    <button onclick="showSection('uploadSection')" class="flex flex-col items-center relative">
+      <div class="rounded-full border-2 border-cyan-500 p-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      Upload
+    </button>
+    <button onclick="showSection('profileSection')" class="flex flex-col items-center">
+      <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M5.121 17.804A7.975 7.975 0 0012 20a7.975 7.975 0 006.879-2.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      Profile
+    </button>
+  </footer>
+
+
+  <!-- Post Modal -->
+  <div id="postModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-900 rounded-xl max-w-xl w-full p-6 relative text-white max-h-[90vh] overflow-auto">
+      <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getDatabase, ref, onValue, onChildAdded, update, get, push, remove
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  const db = getDatabase(app);
+  const auth = getAuth();
+
+  const postsRef = ref(db, 'posts');
+  const postsContainer = document.getElementById('postsContainer');
+  const postModal = document.getElementById('postModal');
+  const modalContent = document.getElementById('modalContent');
+  const closeModalBtn = document.getElementById('closeModal');
+
+  let currentUser = null;
+
+  // Auth state listener
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    // Re-render posts when user changes to update UI for like/follow state
+    loadPostsRealtime();
+  });
+
+  // Section switching
+  window.showSection = function(id) {
+    ['homeSection', 'uploadSection', 'profileSection'].forEach(sec => {
+      document.getElementById(sec).classList.toggle('hidden', sec !== id);
+    });
+  };
+
+  // Share function
+  window.sharePost = function(title, text, url) {
+    if (navigator.share) {
+      navigator.share({ title, text, url })
+        .then(() => console.log('Post shared'))
+        .catch(err => console.error('Error sharing:', err));
+    } else {
+      alert(`Share this link:\n${url}`);
+    }
+  };
+
+  // Close modal
+  closeModalBtn.onclick = () => {
+    postModal.classList.add('hidden');
+    modalContent.innerHTML = '';
+  };
+
+  // Load posts with real-time listeners
+  function loadPostsRealtime() {
+    onValue(postsRef, snapshot => {
+      postsContainer.innerHTML = '';
+      const posts = snapshot.val() || {};
+      Object.entries(posts).forEach(([postId, post]) => {
+        const postEl = createPostElement(post, postId);
+        postsContainer.appendChild(postEl);
+
+        // Listen live to likes for this post
+        listenLikes(postId);
+
+        // Listen live to comments count for this post
+        listenCommentsCount(postId);
+
+        // Listen live to follow status (if logged in)
+        if (currentUser && post.userId) {
+          const followBtn = postEl.querySelector('.follow-btn');
+          listenFollowStatus(currentUser.uid, post.userId, followBtn);
+        }
+      });
+    });
+  }
+
+  // Create post element including buttons
+  function createPostElement(post, postId) {
+    const postEl = document.createElement('div');
+    postEl.className = 'bg-gray-900 rounded-2xl p-3 shadow-lg mb-4';
+    postEl.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <img src="${post.userPic || 'https://i.pravatar.cc/40'}" class="w-9 h-9 rounded-full" alt="Profile Pic" />
+          <div>
+            <h3 class="font-semibold text-sm">${post.username || 'Anonymous'}</h3>
+            <p class="text-xs text-gray-400">@${post.handle || 'user'}</p>
+            <p class="text-xs text-gray-400">${post.date || 'Date unknown'}</p>
+          </div>
+        </div>
+        <button class="follow-btn bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 rounded-full text-xs">Follow</button>
+      </div>
+      <h2 class="text-lg font-bold mb-2">${post.title || 'Untitled Post'}</h2>
+      ${post.image ? `<img src="${post.image}" class="w-full h-40 object-cover rounded-xl mb-3" alt="Post Image" />` : ''}
+      <div class="flex justify-between items-center text-sm text-gray-300 mb-2">
+        <span>Views: <span class="text-cyan-400 font-semibold">${post.views || 0}</span></span>
+        <span>Likes: <span class="text-pink-400 font-semibold" id="like-count-${postId}">${post.likes ? Object.keys(post.likes).length : 0}</span></span>
+        <span>Comments: <span class="text-green-400 font-semibold" id="comment-count-${postId}">${post.comments ? Object.keys(post.comments).length : 0}</span></span>
+      </div>
+      <div class="flex gap-4 text-sm mt-2">
+        <button class="like-btn text-white hover:text-cyan-400" data-id="${postId}">👍 Like</button>
+        <button class="text-gray-400 hover:text-green-400 view-comments-btn" data-id="${postId}">👁️ View Comments</button>
+        <button onclick="sharePost('${post.title}', 'Check this out!', window.location.href)" class="text-gray-400 hover:text-purple-400">🔗 Share</button>
+      </div>
+    `;
+
+    // Like button toggle
+    const likeBtn = postEl.querySelector('.like-btn');
+    likeBtn.onclick = async () => {
+      if (!currentUser) return alert("Please log in to like posts.");
+      const likesRef = ref(db, `posts/${postId}/likes/${currentUser.uid}`);
+      const likeSnap = await get(likesRef);
+      if (likeSnap.exists()) {
+        // User already liked, remove like (dislike)
+        await remove(likesRef);
+      } else {
+        // Add like
+        await update(likesRef, { liked: true });
+      }
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+    // Follow button toggle
+    const followBtn = postEl.querySelector('.follow-btn');
+    followBtn.onclick = async (e) => {
+      if (!currentUser) return alert("Please log in to follow users.");
+      const userIdToFollow = post.userId;
+      if (!userIdToFollow || userIdToFollow === currentUser.uid) return;
 
-    const postsRef = ref(db, 'posts');
-    const postsContainer = document.getElementById('postsContainer');
+      const followRef = ref(db, `users/${currentUser.uid}/following/${userIdToFollow}`);
+      const followSnap = await get(followRef);
+      if (followSnap.exists()) {
+        // Unfollow
+        await remove(followRef);
+      } else {
+        // Follow
+        await update(followRef, { followedAt: Date.now() });
+      }
+    };
 
-    let currentUser = null;
+    // View comments button opens modal
+    postEl.querySelector('.view-comments-btn').onclick = () => openPostModal(postId);
 
-    // Track logged-in user
-    onAuthStateChanged(auth, user => {
-      currentUser = user;
-      loadPostsRealtime();
+    return postEl;
+  }
+
+  // Listen for likes changes to update UI and animate thumbs up
+  function listenLikes(postId) {
+    const likesRef = ref(db, `posts/${postId}/likes`);
+    onValue(likesRef, snapshot => {
+      const likes = snapshot.val() || {};
+      const likeCountSpan = document.getElementById(`like-count-${postId}`);
+      if (likeCountSpan) likeCountSpan.textContent = Object.keys(likes).length;
+
+      if (!currentUser) return;
+
+      const likeBtn = document.querySelector(`.like-btn[data-id="${postId}"]`);
+      if (!likeBtn) return;
+
+      if (likes[currentUser.uid]) {
+        likeBtn.classList.add('liked');
+        animateThumbsUp(likeBtn);
+      } else {
+        likeBtn.classList.remove('liked');
+      }
     });
+  }
 
-    function loadPostsRealtime() {
-      onValue(postsRef, snapshot => {
-        postsContainer.innerHTML = '';
-        const posts = snapshot.val() || {};
+  // Animate thumbs up button with a small scale pulse
+  function animateThumbsUp(button) {
+    button.animate([
+      { transform: 'scale(1)' },
+      { transform: 'scale(1.3)' },
+      { transform: 'scale(1)' }
+    ], {
+      duration: 300,
+      easing: 'ease-out',
+    });
+  }
 
-        Object.entries(posts).forEach(([postId, post]) => {
-          // Create post card
-          const postEl = document.createElement('div');
-          postEl.className = 'post-card';
+  // Listen for follow status to update button text & color
+  function listenFollowStatus(followerId, followedUserId, followBtn) {
+    if (!followBtn) return;
+    const followRef = ref(db, `users/${followerId}/following/${followedUserId}`);
+    onValue(followRef, snapshot => {
+      if (snapshot.exists()) {
+        followBtn.textContent = "Following";
+        followBtn.classList.add("bg-green-600");
+        followBtn.classList.remove("bg-cyan-600");
+      } else {
+        followBtn.textContent = "Follow";
+        followBtn.classList.remove("bg-green-600");
+        followBtn.classList.add("bg-cyan-600");
+      }
+    });
+  }
 
-          // Check if current user liked this post
-          let userLiked = false;
-          if (currentUser && post.likesBy && post.likesBy[currentUser.uid]) {
-            userLiked = true;
-          }
+  // Listen for comments count changes to update UI count
+  function listenCommentsCount(postId) {
+    const commentsRef = ref(db, `posts/${postId}/comments`);
+    onValue(commentsRef, snapshot => {
+      const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      const commentCountSpan = document.getElementById(`comment-count-${postId}`);
+      if (commentCountSpan) commentCountSpan.textContent = count;
+    });
+  }
 
-          // Check if current user follows the post uploader
-          let userFollows = false;
-          if (currentUser && post.followers && post.followers[currentUser.uid]) {
-            userFollows = true;
-          }
+  // Open modal and load post + comments + add comment input
+  async function openPostModal(postId) {
+    const postSnapshot = await get(ref(db, `posts/${postId}`));
+    if (!postSnapshot.exists()) {
+      alert('Post not found');
+      return;
+    }
+    const post = postSnapshot.val();
 
-          postEl.innerHTML = `
-            <div class="post-header">
-              <div class="user-info">
-                <img src="${post.userPic || 'https://i.pravatar.cc/40'}" alt="User Pic" class="user-pic" />
-                <div class="user-names">
-                  <div class="username">${post.username || 'Anonymous'}</div>
-                  <div class="handle">@${post.handle || 'user'}</div>
-                </div>
-              </div>
-              <button class="follow-btn ${userFollows ? 'following' : ''}">
-                ${userFollows ? 'Following' : 'Follow'}
-              </button>
+    modalContent.innerHTML = `
+      <div>
+        <div class="flex items-center gap-4 mb-4">
+          <img src="${post.userPic || 'https://i.pravatar.cc/40'}" class="w-12 h-12 rounded-full" alt="Profile Pic" />
+          <div>
+            <h3 class="font-semibold text-lg">${post.username || 'Anonymous'}</h3>
+            <p class="text-sm text-gray-400">@${post.handle || 'user'}</p>
+            <p class="text-xs text-gray-500">${post.date || ''}</p>
+          </div>
+        </div>
+        <h2 class="text-xl font-bold mb-3">${post.title || ''}</h2>
+        ${post.image ? `<img src="${post.image}" class="w-full h-64 object-cover rounded-lg mb-4" alt="Post Image" />` : ''}
+        <div class="mb-4 text-sm text-gray-300 flex justify-between">
+          <span>Views: <strong>${post.views || 0}</strong></span>
+          <span>Likes: <strong id="modalLikeCount">${post.likes ? Object.keys(post.likes).length : 0}</strong></span>
+          <span>Comments: <strong id="modalCommentCount">${post.comments ? Object.keys(post.comments).length : 0}</strong></span>
+        </div>
+        <div class="mb-4">
+          <h3 class="font-semibold mb-2">Comments</h3>
+          <div id="modalCommentsList" class="max-h-48 overflow-y-auto space-y-2 text-gray-300"></div>
+        </div>
+        <div>
+          <input id="modalCommentInput" type="text" placeholder="Write a comment..." class="w-full p-2 rounded bg-gray-800 text-white placeholder-gray-400 mb-2" />
+          <button id="modalSubmitComment" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Post Comment</button>
+        </div>
+      </div>
+    `;
+
+    const commentsList = document.getElementById('modalCommentsList');
+    commentsList.innerHTML = 'Loading comments...';
+
+    // Load comments and listen live
+    const commentsRef = ref(db, `posts/${postId}/comments`);
+    onValue(commentsRef, snapshot => {
+      const comments = snapshot.val() || {};
+      if (Object.keys(comments).length === 0) {
+        commentsList.innerHTML = '<p>No comments yet.</p>';
+      } else {
+        commentsList.innerHTML = '';
+        Object.entries(comments).forEach(([commentId, comment]) => {
+          // Format comment date
+          const dateStr = comment.date ? new Date(comment.date).toLocaleString() : 'Unknown date';
+          // User info
+          const commenterPic = comment.userPic || 'https://i.pravatar.cc/30';
+          const commenterName = comment.username || 'Anonymous';
+          const commenterHandle = comment.handle || 'user';
+
+          // Create comment element
+          const commentEl = document.createElement('div');
+          commentEl.className = 'flex items-center gap-2 bg-gray-800 p-2 rounded';
+          commentEl.innerHTML = `
+            <img src="${commenterPic}" class="w-8 h-8 rounded-full" alt="Commenter Pic" />
+            <div class="flex-1">
+              <p class="text-sm font-semibold">${commenterName} <span class="text-xs text-gray-400">@${commenterHandle}</span></p>
+              <p class="text-xs text-gray-400">${dateStr}</p>
+              <p class="mt-1 text-gray-300">${comment.text}</p>
             </div>
-            <div class="post-title">${post.title || 'Untitled Post'}</div>
-            ${post.image ? `<img src="${post.image}" alt="Post Image" class="post-image" />` : ''}
-            <div class="post-stats">
-              <div>Views: ${post.views || 0}</div>
-              <div>Likes: <span id="like-count-${postId}">${post.likes || 0}</span></div>
-              <div>Comments: ${post.comments ? Object.keys(post.comments).length : 0}</div>
-            </div>
-            <div class="post-actions">
-              <button class="like-btn ${userLiked ? 'liked' : ''}" data-id="${postId}">👍 Like</button>
-              <button class="view-comments-btn" data-id="${postId}">👁️ View Comments</button>
-              <button class="share-btn" data-id="${postId}">🔗 Share</button>
-            </div>
+            <button class="text-cyan-400 text-xs hover:underline view-user-btn" data-userid="${comment.userId}">View User</button>
           `;
 
-          postsContainer.appendChild(postEl);
-
-          // Like button logic
-          const likeBtn = postEl.querySelector('.like-btn');
-          likeBtn.onclick = async () => {
-            if (!currentUser) {
-              alert('Please log in to like posts.');
-              return;
-            }
-            const postLikesByRef = ref(db, `posts/${postId}/likesBy/${currentUser.uid}`);
-            const postLikesRef = ref(db, `posts/${postId}/likes`);
-            if (userLiked) {
-              // Remove like
-              await set(postLikesByRef, null);
-              await update(ref(db, `posts/${postId}`), { likes: (post.likes || 1) - 1 });
-              likeBtn.classList.remove('liked');
-              userLiked = false;
-              // Update count visually
-              const countSpan = document.getElementById(`like-count-${postId}`);
-              if (countSpan) countSpan.textContent = (post.likes || 1) - 1;
-              post.likes = (post.likes || 1) - 1;
-            } else {
-              // Add like
-              await set(postLikesByRef, true);
-              await update(ref(db, `posts/${postId}`), { likes: (post.likes || 0) + 1 });
-              likeBtn.classList.add('liked');
-              userLiked = true;
-              // Animate
-              likeBtn.animate([
-                { transform: 'scale(1)' },
-                { transform: 'scale(1.4)' },
-                { transform: 'scale(1)' }
-              ], { duration: 400 });
-              // Update count visually
-              const countSpan = document.getElementById(`like-count-${postId}`);
-              if (countSpan) countSpan.textContent = (post.likes || 0) + 1;
-              post.likes = (post.likes || 0) + 1;
-            }
+          // Add click for View User button (for now just alert username)
+          commentEl.querySelector('.view-user-btn').onclick = () => {
+            alert(`User profile: ${commenterName} (@${commenterHandle})`);
+            // You can extend this to open user profile modal/page
           };
 
-          // Follow button logic
-          const followBtn = postEl.querySelector('.follow-btn');
-          followBtn.onclick = async () => {
-            if (!currentUser) {
-              alert('Please log in to follow users.');
-              return;
-            }
-            const followerRef = ref(db, `posts/${postId}/followers/${currentUser.uid}`);
-            if (userFollows) {
-              // Unfollow
-              await set(followerRef, null);
-              followBtn.textContent = 'Follow';
-              followBtn.classList.remove('following');
-              userFollows = false;
-            } else {
-              // Follow
-              await set(followerRef, true);
-              followBtn.textContent = 'Following';
-              followBtn.classList.add('following');
-              userFollows = true;
-            }
-          };
-
-          // Share button
-          const shareBtn = postEl.querySelector('.share-btn');
-          shareBtn.onclick = () => {
-            const shareData = {
-              title: post.title || 'Check out this post',
-              text: post.title || '',
-              url: window.location.href + `#post-${postId}`
-            };
-            if (navigator.share) {
-              navigator.share(shareData).catch(err => alert('Share failed: ' + err));
-            } else {
-              prompt('Copy and share this link:', shareData.url);
-            }
-          };
-
-          // View comments button placeholder
-          postEl.querySelector('.view-comments-btn').onclick = () => {
-            alert('Open comments modal for post ' + postId);
-          };
+          commentsList.appendChild(commentEl);
         });
+      }
+
+      // Update comments count in modal header
+      const modalCommentCount = document.getElementById('modalCommentCount');
+      if (modalCommentCount) modalCommentCount.textContent = Object.keys(comments).length;
+    });
+
+    // Handle new comment submit
+    document.getElementById('modalSubmitComment').onclick = async () => {
+      if (!currentUser) {
+        alert('Please log in to comment.');
+        return;
+      }
+      const commentInput = document.getElementById('modalCommentInput');
+      const text = commentInput.value.trim();
+      if (text.length === 0) return alert('Comment cannot be empty.');
+
+      // Build comment data
+      const newCommentRef = push(ref(db, `posts/${postId}/comments`));
+      await newCommentRef.set({
+        userId: currentUser.uid,
+        username: currentUser.displayName || 'Anonymous',
+        handle: (currentUser.displayName || 'user').toLowerCase().replace(/\s+/g, ''),
+        userPic: currentUser.photoURL || 'https://i.pravatar.cc/40',
+        text,
+        date: Date.now()
       });
-    }
-  </script>
+
+      commentInput.value = ''; // Clear input
+
+      // Optionally, scroll to bottom of comments
+      commentsList.scrollTop = commentsList.scrollHeight;
+    };
+
+    postModal.classList.remove('hidden');
+  }
+
+  // Initial load of posts
+  loadPostsRealtime();
+</script>
+</body>
 </body>
 </html>
