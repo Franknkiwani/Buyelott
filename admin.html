@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Hacker Data</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    body, html {
+      margin: 0; padding: 1rem;
+      background: #0a0f14;
+      color: #0f0;
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      text-shadow: 0 0 10px #0f0;
+      margin-bottom: 1rem;
+    }
+    #dataList {
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: rgba(0, 255, 0, 0.07);
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 20px #0f0 inset;
+    }
+    .entry {
+      border-bottom: 1px solid #0f0;
+      padding: 0.75rem 0;
+    }
+    .entry:last-child {
+      border-bottom: none;
+    }
+    .key {
+      font-weight: bold;
+      color: #7fff7f;
+    }
+    .value {
+      white-space: pre-wrap;
+      margin-left: 0.5rem;
+      display: inline-block;
+      max-width: 85%;
+      vertical-align: top;
+    }
+    #refreshBtn {
+      margin: 1rem 0;
+      padding: 0.5rem 1.5rem;
+      font-size: 1.2rem;
+      background: transparent;
+      border: 2px solid #0f0;
+      color: #0f0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+      align-self: center;
+    }
+    #refreshBtn:hover {
+      background: #0f0;
+      color: #000;
+    }
+    #loading {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #7fff7f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel - Hacker Submissions</h1>
+  <button id="refreshBtn">Refresh Data</button>
+  <div id="loading" style="display:none;">Loading...</div>
+  <div id="dataList"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dataList = document.getElementById('dataList');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const loading = document.getElementById('loading');
+
+    let listener = null;
+
+    function formatEntry(data) {
+      let html = '';
+      for (const [key, val] of Object.entries(data)) {
+        const valueStr = typeof val === 'object' ? JSON.stringify(val, null, 2) : val;
+        html += `<div><span class="key">${key}:</span> <span class="value">${valueStr}</span></div>`;
+      }
+      return html;
+    }
+
+    function displayData(snapshot) {
+      const data = snapshot.val();
+      dataList.innerHTML = ''; // Clear old data
+      if (!data) {
+        dataList.textContent = 'No submissions yet.';
+        return;
+      }
+      // Entries sorted by newest first (Firebase keys are push IDs)
+      const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
+      for (const [key, entry] of entries) {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'entry';
+        entryDiv.innerHTML = formatEntry(entry);
+        dataList.appendChild(entryDiv);
+      }
+    }
+
+    function startListening() {
+      loading.style.display = 'block';
+      dataList.textContent = '';
+      const hackerRef = ref(db, 'hacker');
+
+      if (listener) off(hackerRef, 'value', listener);
+
+      listener = onValue(hackerRef, snapshot => {
+        loading.style.display = 'none';
+        displayData(snapshot);
+      }, error => {
+        loading.style.display = 'none';
+        dataList.textContent = 'Failed to load data: ' + error.message;
+      });
+    }
+
+    refreshBtn.addEventListener('click', () => {
+      startListening();
+    });
+
+    // Load on start
+    startListening();
+  </script>
+</body>
+</html>
