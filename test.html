@@ -1,154 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>YouTube Style Post</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #fff;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Futuristic Post Feed</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+    user-select: none;
+  }
+  body {
+    margin: 0;
+    background: #121212;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+  }
+  #posts {
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 10px;
+  }
+  .post {
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow:
+      0 0 10px rgb(0 128 255 / 0.15),
+      inset 0 0 40px rgb(0 128 255 / 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  /* Header with avatar, username, handle, followers and follow btn */
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .avatar {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #007bff;
+  }
+  .user-info {
+    flex-grow: 1;
+  }
+  .username {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .handle {
+    color: #999;
+    font-size: 0.9rem;
+  }
+  .followers {
+    color: #55aaff;
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+  .follow-btn {
+    background: rgba(0, 123, 255, 0.2);
+    border: 1.5px solid #007bff;
+    color: #007bff;
+    border-radius: 15px;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .follow-btn.following {
+    background: #007bff;
+    color: white;
+  }
+  /* Image container with glass effect and neon border */
+  .image-wrapper {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 0 30px 3px rgba(0, 123, 255, 0.7);
+    background: rgba(255 255 255 / 0.07);
+    backdrop-filter: blur(12px);
+  }
+  .post-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  /* Hide overly tall images */
+  .post-image.tall {
+    display: none;
+  }
+  /* Time under image */
+  .time-ago {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #bbb;
+    text-align: right;
+  }
+  /* Title and description centered */
+  .post-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  .post-desc {
+    font-size: 1rem;
+    text-align: center;
+    color: #ccc;
+    max-height: 4.5em; /* roughly 3 lines */
+    overflow: hidden;
+    position: relative;
+  }
+  .read-more {
+    cursor: pointer;
+    color: #007bff;
+    font-weight: 600;
+    user-select: none;
+  }
+  /* Tags horizontal scroll with fade on edges */
+  .tags-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 5px;
+    scrollbar-width: none; /* Firefox */
+  }
+  .tags-container::-webkit-scrollbar {
+    display: none;
+  }
+  .tag {
+    background: #007bff;
+    border-radius: 12px;
+    padding: 6px 15px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .tag:hover {
+    background: #0056b3;
+  }
+  /* Engagement bar - views, likes, comments */
+  .engagement {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  .engagement > div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .engagement .like-btn.liked {
+    color: #ff3864;
+  }
+  /* Icon styles */
+  svg {
+    fill: currentColor;
+    width: 20px;
+    height: 20px;
+  }
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    #posts {
+      margin: 10px;
     }
-
-    .post-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 20px;
-      width: 400px;
-      padding: 16px;
-      display: flex;
+    .post {
+      padding: 15px;
       gap: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
-
     .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      flex-shrink: 0;
+      width: 45px;
+      height: 45px;
     }
-
-    .content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    .username {
+      font-size: 1.1rem;
     }
-
-    .header-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+    .post-title {
+      font-size: 1.1rem;
     }
-
-    .author-info {
-      display: flex;
-      flex-direction: column;
+    .post-desc {
+      font-size: 0.9rem;
     }
-
-    .author-name {
-      display: flex;
-      align-items: center;
-      font-weight: 600;
-      font-size: 15px;
-      color: #fff;
-    }
-
-    .verified-icon {
-      width: 16px;
-      height: 16px;
-      margin-left: 6px;
-    }
-
-    .handle {
-      font-size: 13px;
-      color: #aaa;
-    }
-
-    .followers {
-      font-size: 12px;
-      color: #888;
-      margin-top: 2px;
-    }
-
-    .time-follow {
-      display: flex;
-      align-items: center;
+    .tags-container {
       gap: 8px;
-      margin-top: 2px;
     }
-
-    .time {
-      font-size: 12px;
-      color: #aaa;
-    }
-
-    .follow-btn {
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 18px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .follow-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .text {
-      font-size: 14px;
-      color: #e0e0e0;
-      margin-top: 10px;
-    }
-
-    .post-image {
-      margin-top: 12px;
-      width: 100%;
-      border-radius: 12px;
-      object-fit: cover;
-      max-height: 200px;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="post-card">
-    <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&q=80');"></div>
-    <div class="content">
-      <div class="header-row">
-        <div class="author-info">
-          <div class="author-name">
-            TechSavvy
-            <!-- Verified badge as inline SVG -->
-            <svg class="verified-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#1DA1F2" d="M22.25 12.005a2.694 2.694 0 0 0-1.709-2.503 7.17 7.17 0 0 0-.11-.69A2.715 2.715 0 0 0 17.884 6.3a7.228 7.228 0 0 0-.44-.57 2.718 2.718 0 0 0-4.372-.065 7.308 7.308 0 0 0-.632-.018c-.21 0-.418.01-.624.03a2.718 2.718 0 0 0-4.398.653 7.214 7.214 0 0 0-.472.513A2.715 2.715 0 0 0 3.68 8.782c-.028.22-.044.444-.048.67a2.714 2.714 0 0 0-.658 4.165c-.007.186-.005.372.006.556a2.714 2.714 0 0 0 2.09 2.349c.12.229.257.45.41.662a2.715 2.715 0 0 0 4.062.383 7.214 7.214 0 0 0 .521.035c.192 0 .383-.01.572-.03a2.718 2.718 0 0 0 4.15-.086 7.154 7.154 0 0 0 .547-.58 2.715 2.715 0 0 0 3.127-3.54c.016-.217.024-.437.024-.658ZM10.153 15.29l-2.58-2.58 1.061-1.06 1.52 1.52 4.72-4.72 1.061 1.06-5.782 5.78Z"/>
-            </svg>
-          </div>
-          <div class="handle">@TechSavvy</div>
-          <div class="followers">1.2K followers</div>
-        </div>
-        <div class="time-follow">
-          <div class="time">3 hours ago</div>
-          <button class="follow-btn">Follow</button>
-        </div>
-      </div>
-      <div class="text">
-        Just dropped a new CSS tutorial that’ll blow your layout game out of the water. Grid, flex — you name it!
-      </div>
-      <img class="post-image" src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80" alt="Post" />
-    </div>
-  </div>
+
+<div id="posts"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const postsContainer = document.getElementById('posts');
+
+let currentUser = null;
+let userLikes = {};
+let userFollows = {};
+
+// Monitor user login state
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    loadUserEngagement(user.uid);
+  } else {
+    userLikes = {};
+    userFollows = {};
+    loadPosts();
+  }
+});
+
+// Load user's liked posts and followed users from Firebase
+function loadUserEngagement(uid) {
+  const userLikesRef = ref(db, `userLikes/${uid}`);
+  onValue(userLikesRef, snapshot => {
+    userLikes = snapshot.val() || {};
+    loadPosts();
+  });
+
+  const userFollowsRef = ref(db, `userFollows/${uid}`);
+  onValue(userFollowsRef, snapshot => {
+    userFollows = snapshot.val() || {};
+    loadPosts();
+  });
+}
+
+// SVG icons for UI
+function createSvgIcon(type) {
+  switch(type) {
+    case 'eye':
+      return `<svg viewBox="0 0 24 24"><path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5"/></svg>`;
+    case 'heart':
+      return `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+    case 'comment':
+      return `<svg viewBox="0 0 24 24"><path d="M21 6h-18c-1.104 0-2 .896-2 2v8c0 1.104.896 2 2 2h4v4l5-4h9c1.104 0 2-.896 2-2v-8c0-1.104-.896-2-2-2z"/></svg>`;
+    default:
+      return '';
+  }
+}
+
+// Create individual post HTML element
+function createPostElement(postId, post) {
+  const {
+    username = 'Unknown',
+    handle = 'unknown',
+    avatar = 'https://i.pravatar.cc/60',
+    followers = 0,
+    title = '',
+    description = '',
+    tags = [],
+    timestamp = Date.now(),
+    imageUrl = '',
+    likes = 0,
+    views = 0,
+    commentsCount = 0,
+    monetized = false,
+  } = post;
+
+  const postEl = document.createElement('div');
+  postEl.className = 'post';
+
+  // Post header (avatar, user info, follow button)
+  const header = document.createElement('div');
+  header.className = 'post-header';
+
+  const avatarImg = document.createElement('img');
+  avatarImg.className = 'avatar';
+  avatarImg.src = avatar;
+
+  const userInfo = document.createElement('div');
+  userInfo.className = 'user-info';
+
+  const usernameEl = document.createElement('div');
+  usernameEl.className = 'username';
+  usernameEl.textContent = username;
+
+  const handleEl = document.createElement('div');
+  handleEl.className = 'handle';
+  handleEl.textContent = '@' + handle;
+
+  const followersEl = document.createElement('div');
+  followersEl.className = 'followers';
+  followersEl.textContent = followers.toLocaleString() + ' followers';
+
+  userInfo.appendChild(usernameEl);
+  userInfo.appendChild(handleEl);
+  userInfo.appendChild(followersEl);
+
+  const followBtn = document.createElement('button');
+  followBtn.className = 'follow-btn';
+  if(userFollows[handle]) {
+    followBtn.classList.add('following');
+    followBtn.textContent = 'Following';
+  } else {
+    followBtn.textContent = 'Follow';
+  }
+  followBtn.onclick = () => {
+    if(!currentUser) return alert('Please log in to follow users.');
+    toggleFollow(handle, followBtn);
+  };
+
+  header.appendChild(avatarImg);
+  header.appendChild(userInfo);
+  header.appendChild(followBtn);
+
+  // Post image wrapper
+  const imgWrapper = document.createElement('div');
+  imgWrapper.className = 'image-wrapper';
+
+  const postImage = document.createElement('img');
+  postImage.className = 'post-image';
+  postImage.src = imageUrl;
+
+  postImage.onload = () => {
+    if (postImage.naturalHeight / postImage.naturalWidth > 1.6) {
+      postImage.classList.add('tall');
+    }
+  };
+
+  imgWrapper.appendChild(postImage);
+
+  // Time ago text
+  const timeAgoEl = document.createElement('div');
+  timeAgoEl.className = 'time-ago';
+  timeAgoEl.textContent = timeAgo(timestamp);
+
+  // Title and description
+  const titleEl = document.createElement('div');
+  titleEl.className = 'post-title';
+  titleEl.textContent = title;
+
+  const descEl = document.createElement('div');
+  descEl.className = 'post-desc';
+  descEl.textContent = description;
+
+  // Tags container
+  const tagsContainer = document.createElement('div');
+  tagsContainer.className = 'tags-container';
+  tags.forEach(tag => {
+    const tagEl = document.createElement('div');
+    tagEl.className = 'tag';
+    tagEl.textContent = '#' + tag;
+    tagEl.onclick = () => filterByTag(tag);
+    tagsContainer.appendChild(tagEl);
+  });
+
+  // Engagement bar (views, likes, comments)
+  const engagementBar = document.createElement('div');
+  engagementBar.className = 'engagement';
+
+  // Views
+  const viewsEl = document.createElement('div');
+  viewsEl.innerHTML = createSvgIcon('eye') + ` ${views.toLocaleString()}`;
+  engagementBar.appendChild(viewsEl);
+
+  // Likes
+  const likesEl = document.createElement('div');
+  likesEl.innerHTML = createSvgIcon('heart') + ` ${likes.toLocaleString()}`;
+  likesEl.classList.add('like-btn');
+  if (userLikes[postId]) likesEl.classList.add('liked');
+  likesEl.onclick = () => toggleLike(postId, likesEl);
+  engagementBar.appendChild(likesEl);
+
+  // Comments (static count for now)
+  const commentsEl = document.createElement('div');
+  commentsEl.innerHTML = createSvgIcon('comment') + ` ${commentsCount.toLocaleString()}`;
+  engagementBar.appendChild(commentsEl);
+
+  // Assemble post elements
+  postEl.appendChild(header);
+  postEl.appendChild(imgWrapper);
+  postEl.appendChild(timeAgoEl);
+  postEl.appendChild(titleEl);
+  postEl.appendChild(descEl);
+  postEl.appendChild(tagsContainer);
+  postEl.appendChild(engagementBar);
+
+  return postEl;
+}
+
+// Human-readable "time ago"
+function timeAgo(ts) {
+  const now = Date.now();
+  const diff = now - ts;
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + 'm ago';
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + 'h ago';
+  const days = Math.floor(hours / 24);
+  if (days < 7) return days + 'd ago';
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return weeks + 'w ago';
+  const months = Math.floor(days / 30);
+  if (months < 12) return months + 'mo ago';
+  const years = Math.floor(days / 365);
+  return years + 'y ago';
+}
+
+// Load posts from Firebase with optional tag filtering
+function loadPosts(filterTag = null) {
+  const postsRef = ref(db, 'post');
+  get(postsRef).then(snapshot => {
+    const postsData = snapshot.val();
+    postsContainer.innerHTML = ''; // Clear old posts
+
+    if (!postsData) {
+      postsContainer.textContent = 'No posts yet.';
+      return;
+}
+
+    // Convert postsData object to array with IDs
+    const postsArray = Object.entries(postsData)
+      .filter(([id, post]) => {
+        if (!filterTag) return true;
+        return post.tags && post.tags.includes(filterTag);
+      })
+      // Sort posts by timestamp descending
+      .sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+    postsArray.forEach(([postId, post]) => {
+      const postEl = createPostElement(postId, post);
+      postsContainer.appendChild(postEl);
+    });
+  }).catch(err => {
+    console.error('Error loading posts:', err);
+    postsContainer.textContent = 'Failed to load posts.';
+  });
+}
+
+// Toggle like on a post
+function toggleLike(postId, likesEl) {
+  if (!currentUser) {
+    alert('Log in to like posts.');
+    return;
+  }
+
+  const uid = currentUser.uid;
+  const userLikeRef = ref(db, `userLikes/${uid}/${postId}`);
+  const postLikesRef = ref(db, `post/${postId}/likes`);
+
+  const liked = userLikes[postId];
+  const newLikedState = !liked;
+
+  // Update userLikes in local state and UI immediately for snappy feel
+  userLikes[postId] = newLikedState;
+  likesEl.classList.toggle('liked', newLikedState);
+  let currentLikesCount = parseInt(likesEl.textContent.replace(/\D/g, '')) || 0;
+  currentLikesCount += newLikedState ? 1 : -1;
+  likesEl.innerHTML = createSvgIcon('heart') + ` ${currentLikesCount.toLocaleString()}`;
+
+  // Update in Firebase
+  update(userLikeRef, newLikedState ? true : null).catch(console.error);
+  
+  // Also update total likes count on post atomically
+  get(postLikesRef).then(snapshot => {
+    let likesCount = snapshot.val() || 0;
+    likesCount = newLikedState ? likesCount + 1 : Math.max(likesCount - 1, 0);
+    update(ref(db, `post/${postId}`), { likes: likesCount }).catch(console.error);
+  }).catch(console.error);
+}
+
+// Toggle follow/unfollow user
+function toggleFollow(handle, followBtn) {
+  if (!currentUser) {
+    alert('Log in to follow users.');
+    return;
+  }
+
+  const uid = currentUser.uid;
+  const userFollowRef = ref(db, `userFollows/${uid}/${handle}`);
+
+  const following = userFollows[handle];
+  const newFollowingState = !following;
+
+  // Update local state and UI immediately
+  userFollows[handle] = newFollowingState;
+  if (newFollowingState) {
+    followBtn.classList.add('following');
+    followBtn.textContent = 'Following';
+  } else {
+    followBtn.classList.remove('following');
+    followBtn.textContent = 'Follow';
+  }
+
+  // Update Firebase
+  update(userFollowRef, newFollowingState ? true : null).catch(console.error);
+}
+
+// Filter posts by tag (used by tag click)
+function filterByTag(tag) {
+  loadPosts(tag);
+}
+
+loadPosts();
+
+</script>
 </body>
 </html>
