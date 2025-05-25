@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>YouTube Style Post</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .post-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      width: 400px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .author-name {
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .verified-icon {
+      width: 16px;
+      height: 16px;
+      margin-left: 6px;
+    }
+
+    .handle {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .followers {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .time-follow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .time {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .follow-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .follow-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .text {
+      font-size: 14px;
+      color: #e0e0e0;
+      margin-top: 10px;
+    }
+
+    .post-image {
+      margin-top: 12px;
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="post-card">
+    <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&q=80');"></div>
+    <div class="content">
+      <div class="header-row">
+        <div class="author-info">
+          <div class="author-name">
+            TechSavvy
+            <!-- Verified badge as inline SVG -->
+            <svg class="verified-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#1DA1F2" d="M22.25 12.005a2.694 2.694 0 0 0-1.709-2.503 7.17 7.17 0 0 0-.11-.69A2.715 2.715 0 0 0 17.884 6.3a7.228 7.228 0 0 0-.44-.57 2.718 2.718 0 0 0-4.372-.065 7.308 7.308 0 0 0-.632-.018c-.21 0-.418.01-.624.03a2.718 2.718 0 0 0-4.398.653 7.214 7.214 0 0 0-.472.513A2.715 2.715 0 0 0 3.68 8.782c-.028.22-.044.444-.048.67a2.714 2.714 0 0 0-.658 4.165c-.007.186-.005.372.006.556a2.714 2.714 0 0 0 2.09 2.349c.12.229.257.45.41.662a2.715 2.715 0 0 0 4.062.383 7.214 7.214 0 0 0 .521.035c.192 0 .383-.01.572-.03a2.718 2.718 0 0 0 4.15-.086 7.154 7.154 0 0 0 .547-.58 2.715 2.715 0 0 0 3.127-3.54c.016-.217.024-.437.024-.658ZM10.153 15.29l-2.58-2.58 1.061-1.06 1.52 1.52 4.72-4.72 1.061 1.06-5.782 5.78Z"/>
+            </svg>
+          </div>
+          <div class="handle">@TechSavvy</div>
+          <div class="followers">1.2K followers</div>
+        </div>
+        <div class="time-follow">
+          <div class="time">3 hours ago</div>
+          <button class="follow-btn">Follow</button>
+        </div>
+      </div>
+      <div class="text">
+        Just dropped a new CSS tutorial that’ll blow your layout game out of the water. Grid, flex — you name it!
+      </div>
+      <img class="post-image" src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80" alt="Post" />
+    </div>
+  </div>
+</body>
+</html>
