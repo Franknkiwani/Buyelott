@@ -3,32 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Post Feed with Adsterra Banner Ad</title>
+  <title>Post Feed with HighPerformanceFormat Banner</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 2rem;
+      max-width: 600px;
+      margin: 2rem auto;
       background: #f9f9f9;
+      padding: 0 1rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
     }
     .post {
-      background: #fff;
-      padding: 1.2rem;
-      margin-bottom: 1.2rem;
+      background: white;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    }
-    .post h2 {
-      font-size: 1.2rem;
-      margin: 0 0 0.5rem;
-    }
-    .post p {
-      margin: 0;
-      color: #444;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
     }
     .ad-container {
-      margin: 2rem 0;
-      text-align: center;
+      width: 160px;
+      height: 300px;
+      margin: 2rem auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
@@ -36,33 +40,30 @@
 
   <h1>🔥 Latest Posts</h1>
 
-  <!-- Posts 1 to 5 -->
-  <div class="post"><h2>Post 1</h2><p>This is some content for post 1.</p></div>
-  <div class="post"><h2>Post 2</h2><p>This is some content for post 2.</p></div>
-  <div class="post"><h2>Post 3</h2><p>This is some content for post 3.</p></div>
-  <div class="post"><h2>Post 4</h2><p>This is some content for post 4.</p></div>
-  <div class="post"><h2>Post 5</h2><p>This is some content for post 5.</p></div>
+  <div class="post"><h2>Post 1</h2><p>Content for post 1.</p></div>
+  <div class="post"><h2>Post 2</h2><p>Content for post 2.</p></div>
+  <div class="post"><h2>Post 3</h2><p>Content for post 3.</p></div>
+  <div class="post"><h2>Post 4</h2><p>Content for post 4.</p></div>
+  <div class="post"><h2>Post 5</h2><p>Content for post 5.</p></div>
 
-  <!-- Banner Adsterra Banner Ad - REPLACE src with your actual Adsterra banner iframe src -->
   <div class="ad-container">
-    <iframe
-      src="https://ad.a-ads.com/4973356?size=728x90"
-      width="728"
-      height="90"
-      frameborder="0"
-      scrolling="no"
-      style="border:none;overflow:hidden;"
-      sandbox="allow-scripts allow-same-origin allow-popups"
-      >
-    </iframe>
+    <script type="text/javascript">
+      atOptions = {
+        'key' : 'b03c437546597f62fdb58e4c3fca33a1',
+        'format' : 'iframe',
+        'height' : 300,
+        'width' : 160,
+        'params' : {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/b03c437546597f62fdb58e4c3fca33a1/invoke.js"></script>
   </div>
 
-  <!-- Posts 6 to 10 -->
-  <div class="post"><h2>Post 6</h2><p>This is some content for post 6.</p></div>
-  <div class="post"><h2>Post 7</h2><p>This is some content for post 7.</p></div>
-  <div class="post"><h2>Post 8</h2><p>This is some content for post 8.</p></div>
-  <div class="post"><h2>Post 9</h2><p>This is some content for post 9.</p></div>
-  <div class="post"><h2>Post 10</h2><p>This is some content for post 10.</p></div>
+  <div class="post"><h2>Post 6</h2><p>Content for post 6.</p></div>
+  <div class="post"><h2>Post 7</h2><p>Content for post 7.</p></div>
+  <div class="post"><h2>Post 8</h2><p>Content for post 8.</p></div>
+  <div class="post"><h2>Post 9</h2><p>Content for post 9.</p></div>
+  <div class="post"><h2>Post 10</h2><p>Content for post 10.</p></div>
 
 </body>
 </html>
