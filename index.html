@@ -1137,6 +1137,24 @@ function createSvgIcon(type, filled = false) {
   }
 }
 
+function formatTimeAgo(timestamp) {
+  const now = new Date();
+  const postDate = new Date(timestamp);
+  const diffInSeconds = Math.floor((now - postDate) / 1000);
+
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 172800) return 'Yesterday';
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+
+  return postDate.toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 function createPostElement(post, postId, userLikes = {}) {
   const postDiv = document.createElement('div');
   postDiv.classList.add('post-card');
@@ -1175,11 +1193,15 @@ function createPostElement(post, postId, userLikes = {}) {
       </div>
       <div class="post-meta">
         <button class="follow-btn">Follow</button>
-        <div class="post-time">${new Date(timestamp).toLocaleString()}</div>
+        <div class="post-time">${formatTimeAgo(timestamp)}</div>
       </div>
     </div>
     <div class="post-title">${title}</div>
-    ${postImage ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto;" />` : ''}
+    ${
+      postImage
+        ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px;" />`
+        : ''
+    }
     <div class="post-description" data-full="${description}">
       ${shortDesc}
       ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
@@ -1256,16 +1278,16 @@ function createPostElement(post, postId, userLikes = {}) {
       followBtn.style.backgroundColor = 'grey';
     }
   });
-// CLICK TO OPEN POST (except on interactive elements)
+
+// OPEN POST
 postDiv.addEventListener('click', (e) => {
   const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
   if (!isInteractive) {
-    window.location.href = `viewpost.html?postId=${postId}`;
+    window.location.href = `viewport.html?postId=${postId}`;
   }
 });
-  return postDiv;
-}
 
+return postDiv;
 
 // ------------------------ Config ------------------------
 let randomizedPostList = [];
