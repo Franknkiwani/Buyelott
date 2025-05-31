@@ -1,1 +1,324 @@
-hi
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Post</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000000;
+    }
+    input, textarea, select {
+      color: #fff;
+      font-weight: 600;
+      background-color: #151515 !important;
+    }
+    input:-webkit-autofill,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+      box-shadow: 0 0 0px 1000px #151515 inset;
+      -webkit-text-fill-color: #fff !important;
+      font-weight: 600;
+    }
+    header {
+      background-color: #0f0f0f;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    /* Modal styles */
+    #loginModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loginModal.hidden {
+      display: none;
+    }
+    #loginModalContent {
+      background: #111;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ff4444;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      color: white;
+    }
+    #loginModalContent button {
+      background-color: #ff4444;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      margin-top: 1.5rem;
+      transition: background-color 0.3s ease;
+    }
+    #loginModalContent button:hover {
+      background-color: #cc3333;
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 w-full px-6 py-4 bg-[#0f0f0f] border-b border-gray-800 flex items-center justify-between shadow">
+    <div class="flex items-center space-x-4">
+      <!-- Profile Picture and Info -->
+      <img id="profilePic" src="https://via.placeholder.com/40" alt="Profile Pic" class="profile-pic" />
+      <div class="text-white">
+        <p id="userHandle" class="font-bold">@loading...</p>
+        <p id="userFollowers" class="text-sm text-gray-400">Followers: --</p>
+      </div>
+    </div>
+    <button id="postBtn"
+      class="bg-red-600 hover:bg-red-700 active:bg-red-800 transition px-5 py-2 rounded text-sm font-medium shadow">
+      Publish
+    </button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto px-6 py-8 max-w-4xl w-full mx-auto space-y-10">
+
+    <!-- Preview Image -->
+    <section class="space-y-3">
+      <h2 class="text-base font-semibold text-gray-300 text-center">Post Image</h2>
+      <div class="w-full aspect-square max-w-md mx-auto rounded-lg overflow-hidden bg-gray-900 border border-gray-800 shadow">
+        <img id="previewImage" src="https://via.placeholder.com/720x720.png?text=Post+Image+Preview"
+          alt="Post Preview" class="w-full h-full object-cover" />
+      </div>
+    </section>
+<div id="imgurUrlContainer" class="text-sm mt-2"></div>
+    <!-- Title -->
+    <section class="space-y-1 max-w-xl mx-auto">
+      <label for="titleInput" class="block text-sm text-gray-400 font-medium">Post Title</label>
+      <input 
+        id="titleInput" 
+        type="text" 
+        maxlength="100"
+        placeholder="Enter post title here (e.g. My first cyber post)" 
+        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+        aria-describedby="titleHelp"
+        autocomplete="off"
+      />
+      <p id="titleHelp" class="text-xs text-gray-500">Max 100 characters</p>
+    </section>
+
+    <!-- Description -->
+    <section class="space-y-1 max-w-xl mx-auto">
+      <label for="captionInput" class="block text-sm text-gray-400 font-medium">Description</label>
+      <textarea 
+        id="captionInput" 
+        maxlength="500" 
+        rows="5" 
+        placeholder="Write a description... (e.g. A glimpse into the neon-lit streets)" 
+        class="w-full border border-gray-700 rounded px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+        aria-describedby="descHelp"
+        autocomplete="off"
+      ></textarea>
+      <p id="descHelp" class="text-xs text-gray-500">Max 500 characters</p>
+    </section>
+
+    <!-- Tags -->
+    <section class="space-y-1 max-w-xl mx-auto">
+      <label for="tagsInput" class="block text-sm text-gray-400 font-medium">Tags</label>
+      <input 
+        id="tagsInput" 
+        type="text" 
+        maxlength="100"
+        placeholder="Add tags separated by commas (e.g. tech, photography, travel)" 
+        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+        aria-describedby="tagsHelp"
+        autocomplete="off"
+      />
+      <p id="tagsHelp" class="text-xs text-gray-500">Separate tags with commas, max 100 characters</p>
+    </section>
+
+    <!-- Category -->
+    <section class="space-y-1 max-w-xl mx-auto">
+      <label for="categorySelect" class="block text-sm text-gray-400 font-medium">Category</label>
+      <select 
+        id="categorySelect"
+        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+      >
+        <option value="" disabled selected>Select a category</option>
+        <option value="Travel">Travel</option>
+        <option value="Tech">Tech</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Lifestyle">Lifestyle</option>
+        <option value="Music">Music</option>
+      </select>
+    </section>
+    
+  </main>
+
+  <!-- Login Modal -->
+  <div id="loginModal">
+    <div id="loginModalContent">
+      <h2 class="text-xl font-bold mb-4">Please Log In</h2>
+      <p class="mb-6">You must be logged in to upload posts.</p>
+      <button id="loginBtn">Log In</button>
+    </div>
+  </div>
+  <!-- Firebase and App Script -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+const loginModal = document.getElementById('loginModal');
+const loginBtn = document.getElementById('loginBtn');
+const profilePic = document.getElementById('profilePic');
+const userHandle = document.getElementById('userHandle');
+const userFollowers = document.getElementById('userFollowers');
+const previewImage = document.getElementById('previewImage');
+const imgurUrlContainer = document.getElementById('imgurUrlContainer');
+
+function showLogin() {
+  loginModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function hideLogin() {
+  loginModal.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+}
+
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .catch((error) => alert("Login failed: " + error.message));
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    hideLogin();
+    const uid = user.uid;
+
+    profilePic.src = user.photoURL || 'https://via.placeholder.com/40';
+    userHandle.textContent = '@' + (user.displayName?.replace(/\s+/g, '').toLowerCase() || 'user');
+
+    try {
+      const dbRef = ref(database);
+      const snapshot = await get(child(dbRef, `users/${uid}/followers`));
+      userFollowers.textContent = snapshot.exists()
+        ? `Followers: ${snapshot.val()}`
+        : 'Followers: 0';
+    } catch (error) {
+      userFollowers.textContent = 'Followers: --';
+    }
+  } else {
+    showLogin();
+    profilePic.src = 'https://via.placeholder.com/40';
+    userHandle.textContent = '@guest';
+    userFollowers.textContent = 'Followers: --';
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const imageData = sessionStorage.getItem('uploadedImage');
+  if (imageData && previewImage) {
+    previewImage.src = imageData;
+    previewImage.style.objectFit = 'cover';
+  } else {
+    alert("No image found. Redirecting...");
+    window.history.back();
+  }
+});
+
+const postBtn = document.getElementById('postBtn');
+
+postBtn.addEventListener('click', async () => {
+  const titleInput = document.getElementById('titleInput');
+  const captionInput = document.getElementById('captionInput');
+  const tagsInput = document.getElementById('tagsInput');
+  const categorySelect = document.getElementById('categorySelect');
+
+  if (!titleInput.value.trim()) return alert('Title is required');
+  if (!captionInput.value.trim()) return alert('Caption is required');
+  if (!tagsInput.value.trim()) return alert('Tags are required');
+  if (!categorySelect.value) return alert('Please select a category');
+
+  const user = auth.currentUser;
+  if (!user) return alert('You must be logged in to post.');
+
+  const imageData = previewImage.src;
+
+  imgurUrlContainer.textContent = 'Uploading image to Imgur...';
+
+  try {
+    const imgurRes = await fetch('https://api.imgur.com/3/image', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Client-ID 784e530b6023501',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image: imageData.split(',')[1], type: 'base64' }),
+    });
+
+    const imgurJson = await imgurRes.json();
+
+    if (!imgurJson.success) throw new Error("Imgur upload failed.");
+
+    const imgurUrl = imgurJson.data.link;
+    imgurUrlContainer.innerHTML = `Uploaded to <a href="${imgurUrl}" target="_blank" class="underline text-blue-400">${imgurUrl}</a>`;
+
+    const tagsArray = tagsInput.value
+      .split(',')
+      .map(tag => '#' + tag.trim().replace(/^#/, ''))
+      .filter(tag => tag !== '');
+
+    const newPostRef = push(ref(database, 'post'));
+
+    await set(newPostRef, {
+      uid: user.uid,
+      title: titleInput.value.trim(),
+      description: captionInput.value.trim(),
+      imageUrl: imgurUrl,
+      tags: tagsArray,
+      category: categorySelect.value,
+      visibility: 'public',
+      createdAt: Date.now(),
+      author: {
+        displayName: user.displayName || 'Anonymous',
+        photoURL: user.photoURL || '',
+      }
+    });
+
+    alert("Post uploaded successfully!");
+    window.location.href = '/'; // redirect to home or post page
+
+  } catch (error) {
+    console.error(error);
+    alert("Upload failed: " + error.message);
+    imgurUrlContainer.textContent = 'Upload failed.';
+  }
+});
+</script>
+</body>
+</html>
