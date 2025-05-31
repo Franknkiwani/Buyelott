@@ -1282,7 +1282,7 @@ function createPostElement(post, postId, userLikes = {}) {
 postDiv.addEventListener('click', (e) => {
   const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
   if (!isInteractive) {
-    window.location.href = `viewport.html?postId=${postId}`;
+    window.location.href = `viewpost.html?postId=${postId}`;
   }
 });
 
