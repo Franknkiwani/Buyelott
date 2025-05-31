@@ -1258,32 +1258,95 @@ function createPostElement(post, postId, userLikes = {}) {
     });
   }
 
-  // SHARE BUTTON
-  const shareBtn = postDiv.querySelector('.share-btn');
+const shareBtn = postDiv.querySelector('.share-btn');
 
-  shareBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
+shareBtn.addEventListener('click', async (e) => {
+  e.stopPropagation();
 
-    // Use the postId passed to the function to avoid confusion
-    if (!postId) return;
+  const postId = post.id || post.postId || '';
+  if (!postId) return;
 
-    const shareUrl = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(postId)}`;
+  const shareUrl = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(postId)}`;
+  const shareTitle = post.title || 'Check this post on CyberChat!';
 
+  if (navigator.share) {
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      shareBtn.textContent = 'Link copied!';
-      shareBtn.style.backgroundColor = '#d4edda'; // subtle green feedback
-
+      await navigator.share({
+        title: shareTitle,
+        text: 'Take a look at this post!',
+        url: shareUrl,
+      });
+      shareBtn.textContent = 'Shared!';
+      shareBtn.style.backgroundColor = '#d4edda'; // green feedback
       setTimeout(() => {
         shareBtn.textContent = 'Share';
         shareBtn.style.backgroundColor = '';
       }, 1500);
     } catch (err) {
-      console.error('Failed to copy link:', err);
-      shareBtn.textContent = 'Error copying';
-      shareBtn.style.backgroundColor = '#f8d7da'; // subtle red feedback
+      console.log('Share cancelled or failed:', err);
     }
-  });
+  } else {
+    // Fallback modal for desktop or unsupported browsers
+    showShareModal(shareUrl, shareBtn);
+  }
+});
+
+// Modal function to create fallback share options
+function showShareModal(url, shareBtn) {
+  // prevent multiple modals
+  if (document.getElementById('share-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'share-modal';
+  modal.style.position = 'fixed';
+  modal.style.top = '50%';
+  modal.style.left = '50%';
+  modal.style.transform = 'translate(-50%, -50%)';
+  modal.style.background = '#222';
+  modal.style.padding = '20px';
+  modal.style.borderRadius = '12px';
+  modal.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
+  modal.style.color = 'white';
+  modal.style.zIndex = '9999';
+  modal.style.textAlign = 'center';
+  modal.style.minWidth = '280px';
+
+  modal.innerHTML = `
+    <p style="margin-bottom: 12px;">Share this post:</p>
+    <button id="copy-link-btn" style="margin:5px 10px; padding:8px 12px; cursor:pointer;">Copy Link</button>
+    <button id="fb-share-btn" style="margin:5px 10px; padding:8px 12px; cursor:pointer;">Facebook</button>
+    <button id="wa-share-btn" style="margin:5px 10px; padding:8px 12px; cursor:pointer;">WhatsApp</button>
+    <br/>
+    <button id="close-share-modal" style="margin-top:15px; padding:6px 12px; cursor:pointer;">Close</button>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Copy Link Button
+  document.getElementById('copy-link-btn').onclick = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link copied to clipboard!');
+      modal.remove();
+    }).catch(() => {
+      alert('Failed to copy. Here is the link:\n' + url);
+    });
+  };
+
+  // Facebook Share Button
+  document.getElementById('fb-share-btn').onclick = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400');
+  };
+
+  // WhatsApp Share Button
+  document.getElementById('wa-share-btn').onclick = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  // Close Modal Button
+  document.getElementById('close-share-modal').onclick = () => {
+    modal.remove();
+  };
+}
 // OPEN POST
 postDiv.addEventListener('click', (e) => {
   const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
