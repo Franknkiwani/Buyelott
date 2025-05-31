@@ -1266,13 +1266,29 @@ postDiv.addEventListener('click', (e) => {
   return postDiv;
 }
 
+
 // ------------------------ Config ------------------------
 let randomizedPostList = [];
 let currentIndex = 0;
 let observer = null;
 let postsSinceLastAd = 0;
+let totalPostsLoaded = 0;
+let isLoading = false;
 
-// ------------------------ 1. Shuffle Utility ------------------------
+const uid = auth.currentUser?.uid || null;
+
+// Clamp native ad index so it never goes beyond post count (min 6)
+function getNativeAdIndex(maxPosts) {
+  if (maxPosts < 6) return maxPosts; // fallback if few posts
+  return Math.min(maxPosts - 1, Math.floor(Math.random() * 6) + 6);
+}
+
+let nativeAdIndex = 6; // default, will reset on loadPosts
+let nativeAdInserted = false;
+
+let userLikes = {}; // cache user likes per session
+
+// ------------------------ Shuffle Utility ------------------------
 function shuffleObject(obj) {
   const keys = Object.keys(obj);
   for (let i = keys.length - 1; i > 0; i--) {
@@ -1282,23 +1298,40 @@ function shuffleObject(obj) {
   return keys;
 }
 
-// ------------------------ 2. Load Cached Posts ------------------------
+// ------------------------ Load Cached Posts ------------------------
 function loadCachedPosts() {
   const cached = localStorage.getItem('cachedPosts');
   if (!cached) return;
 
-  const posts = JSON.parse(cached);
-  const keys = shuffleObject(posts);
-  const container = document.getElementById('posts-container');
-  container.innerHTML = '';
+  try {
+    const posts = JSON.parse(cached);
+    const keys = shuffleObject(posts);
+    const container = document.getElementById('posts-container');
+    container.innerHTML = '';
 
-  for (const postId of keys) {
-    const postElement = createPostElement(posts[postId], postId, {}); // No likes offline
-    container.appendChild(postElement);
+    for (const postId of keys) {
+      const postElement = createPostElement(posts[postId], postId, {}); // no likes offline
+      if (postElement) container.appendChild(postElement);
+      else console.warn(`Cached post ${postId} failed to render`);
+    }
+  } catch (e) {
+    console.warn('Failed to parse cached posts:', e);
   }
 }
 
-// ------------------------ 3. Load Fresh Posts w/ Infinite Scroll ------------------------
+// ------------------------ Load User Likes ------------------------
+async function loadUserLikes() {
+  if (!uid) return {};
+  try {
+    const likesSnap = await get(ref(db, `likes/${uid}`));
+    return likesSnap.exists() ? likesSnap.val() : {};
+  } catch (e) {
+    console.warn('Failed to load user likes:', e);
+    return {};
+  }
+}
+
+// ------------------------ Load Fresh Posts with Infinite Scroll ------------------------
 async function loadPosts() {
   try {
     const snapshot = await get(child(dbRef, 'post'));
@@ -1315,38 +1348,76 @@ async function loadPosts() {
       const keys = shuffleObject(posts);
       randomizedPostList = keys.map(k => ({ id: k, data: posts[k] }));
       currentIndex = 0;
+      totalPostsLoaded = 0;
+      postsSinceLastAd = 0;
+      nativeAdInserted = false;
+
+      nativeAdIndex = getNativeAdIndex(randomizedPostList.length);
 
       const container = document.getElementById('posts-container');
-      container.innerHTML = ''; // Clear old cache UI
+      container.innerHTML = ''; // Clear old UI
 
-      loadNextPost(); // Start fresh loading
+      userLikes = await loadUserLikes(); // load likes once
+
+      loadNextPost(); // start loading fresh
     }
   } catch (error) {
     console.error('Error loading fresh posts:', error);
   }
 }
 
-// ------------------------ 4. Load Next Post ------------------------
+// ------------------------ Load Next Post ------------------------
 async function loadNextPost() {
+  if (isLoading) return;
   if (currentIndex >= randomizedPostList.length) return;
+  isLoading = true;
 
   const post = randomizedPostList[currentIndex];
-  const uid = auth.currentUser?.uid;
-  let userLikes = {};
-
-  if (uid) {
-    const likesSnap = await get(ref(db, `likes/${uid}`));
-    if (likesSnap.exists()) userLikes = likesSnap.val();
-  }
 
   const container = document.getElementById('posts-container');
-  const postElement = createPostElement(post.data, post.id, userLikes);
-  container.appendChild(postElement);
 
+  try {
+    const postElement = createPostElement(post.data, post.id, userLikes);
+    if (!postElement) {
+      console.warn(`Post ${post.id} could not be rendered.`);
+      currentIndex++;
+      isLoading = false;
+      loadNextPost();
+      return;
+    }
+    container.appendChild(postElement);
+  } catch (e) {
+    console.error('Error creating post element:', e);
+    currentIndex++;
+    isLoading = false;
+    loadNextPost();
+    return;
+  }
+
+  totalPostsLoaded++;
   postsSinceLastAd++;
+  
+  // --- Insert native ad once at random position ---
+  if (!nativeAdInserted && totalPostsLoaded === nativeAdIndex) {
+    const nativeWrapper = document.createElement('div');
 
-  // Inject ad after every 4 posts
-  if (postsSinceLastAd >= 4) {
+    const script1 = document.createElement('script');
+    script1.async = true;
+    script1.dataset.cfasync = "false";
+    script1.src = "//pl26795976.profitableratecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js";
+
+    const adDiv = document.createElement('div');
+    adDiv.id = "container-8f9075afd782b06bf3767fa2b0dd5775";
+
+    nativeWrapper.appendChild(script1);
+    nativeWrapper.appendChild(adDiv);
+    container.appendChild(nativeWrapper);
+
+    nativeAdInserted = true;
+  }
+
+  // --- Insert short banner ad after 2 posts or after 4 posts since last ad ---
+  if (totalPostsLoaded === 2 || postsSinceLastAd >= 4) {
     const adContainer = document.createElement('div');
     adContainer.className = 'adstera-ad';
     container.appendChild(adContainer);
@@ -1372,8 +1443,34 @@ async function loadNextPost() {
     postsSinceLastAd = 0;
   }
 
-  // Track view + setup observer for next
+  // --- Insert tall banner ad after every 4 posts ---
+  if (totalPostsLoaded % 4 === 0) {
+    const tallAd = document.createElement('div');
+    tallAd.className = 'adstera-tall';
+    container.appendChild(tallAd);
+
+    const tallOptions = document.createElement('script');
+    tallOptions.type = 'text/javascript';
+    tallOptions.text = `
+      atOptions = {
+        'key' : 'b03c437546597f62fdb58e4c3fca33a1',
+        'format' : 'iframe',
+        'height' : 300,
+        'width' : 160,
+        'params' : {}
+      };
+    `;
+    tallAd.appendChild(tallOptions);
+
+    const tallScript = document.createElement('script');
+    tallScript.type = 'text/javascript';
+    tallScript.src = '//www.highperformanceformat.com/b03c437546597f62fdb58e4c3fca33a1/invoke.js';
+    tallAd.appendChild(tallScript);
+  }
+
+  // --- Track views and observe for loading next ---
   if (observer) observer.disconnect();
+
   observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !entry.target.dataset.viewed) {
@@ -1383,19 +1480,22 @@ async function loadNextPost() {
         get(viewsRef).then(snap => {
           const currentViews = snap.val() || 0;
           set(viewsRef, currentViews + 1);
+        }).catch(e => {
+          console.warn('Failed to update views:', e);
         });
 
         observer.unobserve(entry.target);
         currentIndex++;
-        loadNextPost(); // Queue next
+        isLoading = false;
+        loadNextPost(); // queue next
       }
     });
   }, { threshold: 0.5 });
 
-  observer.observe(postElement);
+  observer.observe(container.lastChild);
 }
 
-// ------------------------ 5. Kickoff Logic ------------------------
+// ------------------------ Kickoff ------------------------
 loadCachedPosts(); // fast feedback
 loadPosts();       // async fresh load
 </script>
