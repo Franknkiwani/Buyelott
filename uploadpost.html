@@ -4,6 +4,122 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Upload Post</title>
+    <style>
+    body {
+      background-color: #000000;
+    }
+    input, textarea, select {
+      color: #fff;
+      font-weight: 600;
+      background-color: #151515 !important;
+    }
+    input:-webkit-autofill,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+      box-shadow: 0 0 0px 1000px #151515 inset;
+      -webkit-text-fill-color: #fff !important;
+      font-weight: 600;
+    }
+    header {
+      background-color: #0f0f0f;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    /* Modal styles */
+    #loginModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loginModal.hidden {
+      display: none;
+    }
+    #loginModalContent {
+      background: #111;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ff4444;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      color: white;
+    }
+    #loginModalContent button {
+      background-color: #ff4444;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      margin-top: 1.5rem;
+      transition: background-color 0.3s ease;
+    }
+    #loginModalContent button:hover {
+      background-color: #cc3333;
+    }
+.animate-spin {
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+#popupOverlay.hidden {
+  display: none;
+}
+
+#popupOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* dark translucent overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#popupBox {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  max-width: 400px;
+  width: 90%;
+  padding: 1.5rem;
+  color: white;
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#popupClose {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+#popupClose:hover,
+#popupClose:focus {
+  color: white;
+  outline: none;
+}
+  </style>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="text-white min-h-screen flex flex-col font-sans bg-[#121212]">
@@ -121,10 +237,21 @@
       <button id="loginBtn" class="bg-red-600 px-5 py-2 rounded text-white font-semibold hover:bg-red-700 transition">Log In</button>
     </div>
   </div>
-
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-white text-xl font-semibold hidden z-50">
+  <div id="loadingSpinner" class="mb-4 animate-spin rounded-full border-8 border-t-8 border-white border-t-transparent w-16 h-16"></div>
+  <div id="loadingText">Uploading... 0%</div>
+</div>
+<div id="popupOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="popupBox" class="bg-[#1a1a1a] rounded-lg shadow-lg max-w-sm w-full p-6 relative text-white">
+    <button id="popupClose" aria-label="Close popup"
+      class="absolute top-3 right-3 text-gray-400 hover:text-white focus:outline-none text-xl font-bold">&times;</button>
+    <p id="popupMessage" class="text-lg"></p>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -141,9 +268,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
-const provider = new GoogleAuthProvider();
 
-const loginModal = document.getElementById('loginModal');
 const loginBtn = document.getElementById('loginBtn');
 const profilePic = document.getElementById('profilePic');
 const userHandle = document.getElementById('userHandle');
@@ -162,10 +287,14 @@ const dropZoneText = document.getElementById('dropZoneText');
 
 let currentUser = null;
 
-// Show or hide login modal and disable post button accordingly
-function toggleLoginModal(show) {
-  loginModal.classList.toggle('hidden', !show);
-  postBtn.disabled = show;
+// Redirect login to auth.html for email/password login
+loginBtn.addEventListener('click', () => {
+  window.location.href = 'auth.html';
+});
+
+// Show or hide post button if logged in
+function togglePostButton(enabled) {
+  postBtn.disabled = !enabled;
 }
 
 // Load user info from Firebase and update UI
@@ -185,24 +314,21 @@ async function loadUserInfo(uid) {
   }
 }
 
-// Handle auth state changes
+// Listen to auth state changes and update UI accordingly
 onAuthStateChanged(auth, user => {
+  currentUser = user;
   if (user) {
-    currentUser = user;
-    toggleLoginModal(false);
+    togglePostButton(true);
     loadUserInfo(user.uid);
   } else {
-    currentUser = null;
-    toggleLoginModal(true);
+    togglePostButton(false);
+    profilePic.src = 'https://via.placeholder.com/40';
+    userHandle.textContent = '@unknown';
+    userFollowers.textContent = 'Followers: 0';
   }
 });
 
-// Trigger file input when drop zone clicked
-dropZone.addEventListener('click', () => {
-  imageInput.click();
-});
-
-// Handle file selection & drag & drop
+// Handle drag & drop and file input image preview
 function handleFile(file) {
   if (!file.type.startsWith('image/')) {
     alert('Only image files are allowed!');
@@ -217,22 +343,15 @@ function handleFile(file) {
   reader.readAsDataURL(file);
 }
 
-imageInput.addEventListener('change', e => {
-  if (e.target.files.length) {
-    handleFile(e.target.files[0]);
-  }
-});
-
+dropZone.addEventListener('click', () => imageInput.click());
 dropZone.addEventListener('dragover', e => {
   e.preventDefault();
   dropZone.classList.add('border-red-600', 'text-red-500');
 });
-
 dropZone.addEventListener('dragleave', e => {
   e.preventDefault();
   dropZone.classList.remove('border-red-600', 'text-red-500');
 });
-
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('border-red-600', 'text-red-500');
@@ -240,53 +359,85 @@ dropZone.addEventListener('drop', e => {
     handleFile(e.dataTransfer.files[0]);
   }
 });
+imageInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
 
-// Validate inputs before posting
 function validateInputs() {
   if (!previewImage.src || previewImage.classList.contains('hidden')) {
-    alert('Please upload an image.');
+    showPopup('Please upload an image.');
     return false;
   }
   if (!titleInput.value.trim()) {
-    alert('Post title is required.');
+    showPopup('Post title is required.');
     return false;
   }
   if (!captionInput.value.trim()) {
-    alert('Description is required.');
+    showPopup('Description is required.');
     return false;
   }
   if (!tagsInput.value.trim()) {
-    alert('Please enter at least one tag.');
+    showPopup('Please enter at least one tag.');
     return false;
   }
   if (!categorySelect.value) {
-    alert('Please select a category.');
+    showPopup('Please select a category.');
     return false;
   }
   return true;
 }
 
 // Upload image to Imgur
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loadingText = document.getElementById('loadingText');
+
+function showLoading() {
+  loadingOverlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+  loadingOverlay.classList.add('hidden');
+}
+
 async function uploadImageToImgur(base64Image) {
   const clientId = '891e5bb4aa94282';
   try {
-    const res = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: {
-        Authorization: `Client-ID ${clientId}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+    // We'll do manual XMLHttpRequest to track upload progress
+    return await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.imgur.com/3/image');
+      xhr.setRequestHeader('Authorization', `Client-ID ${clientId}`);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          loadingText.textContent = `Uploading... ${percent}%`;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) {
+            resolve(res.data.link);
+          } else {
+            reject(new Error('Imgur upload failed'));
+          }
+        } else {
+          reject(new Error('Imgur upload failed with status ' + xhr.status));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Imgur upload failed'));
+
+      const body = JSON.stringify({
         image: base64Image.split(',')[1],
         type: 'base64'
-      })
+      });
+
+      xhr.send(body);
     });
-    const data = await res.json();
-    if (data.success) {
-      return data.data.link;
-    } else {
-      throw new Error('Imgur upload failed');
-    }
   } catch (err) {
     console.error('Imgur upload error:', err);
     alert('Failed to upload image. Try again later.');
@@ -294,36 +445,36 @@ async function uploadImageToImgur(base64Image) {
   }
 }
 
-// Handle post upload
+// Update your publish button click to show loading overlay
+
 postBtn.addEventListener('click', async () => {
   if (!currentUser) {
-    toggleLoginModal(true);
+    alert('Please login first!');
     return;
   }
-
   if (!validateInputs()) return;
 
   postBtn.disabled = true;
-  postBtn.textContent = 'Uploading...';
+  postBtn.textContent = 'Starting upload...';
+  showLoading();
 
-  // Upload image first
   const imageUrl = await uploadImageToImgur(previewImage.src);
+
   if (!imageUrl) {
     postBtn.disabled = false;
     postBtn.textContent = 'Publish';
+    hideLoading();
     return;
   }
 
-  // Prepare post data
+  loadingText.textContent = 'Finalizing post... 100%';
+
   const postData = {
     uid: currentUser.uid,
     imageUrl,
     title: titleInput.value.trim(),
     description: captionInput.value.trim(),
-    tags: tagsInput.value
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0),
+    tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t.length > 0),
     category: categorySelect.value,
     timestamp: Date.now()
   };
@@ -333,8 +484,9 @@ postBtn.addEventListener('click', async () => {
     const newPostRef = push(postsRef);
     await set(newPostRef, postData);
     alert('Post published successfully!');
-    // Reset form
-    previewImage.src = 'https://via.placeholder.com/720x720.png?text=Drop+or+Select+Image';
+
+    // Reset form & UI
+    previewImage.src = '';
     previewImage.classList.add('hidden');
     dropZoneText.classList.remove('hidden');
     titleInput.value = '';
@@ -348,14 +500,34 @@ postBtn.addEventListener('click', async () => {
 
   postBtn.disabled = false;
   postBtn.textContent = 'Publish';
+  hideLoading();
 });
 
-// Login button action
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider).catch(err => {
-    console.error('Login error:', err);
-    alert('Login failed. Please try again.');
-  });
+</script>
+<script>
+  const profilePic = document.getElementById('profilePic');
+profilePic.style.cursor = 'pointer';
+profilePic.addEventListener('click', () => {
+  window.location.href = 'myprofile.html';
+});
+const popupOverlay = document.getElementById('popupOverlay');
+const popupMessage = document.getElementById('popupMessage');
+const popupClose = document.getElementById('popupClose');
+
+function showPopup(message) {
+  popupMessage.textContent = message;
+  popupOverlay.classList.remove('hidden');
+}
+
+function closePopup() {
+  popupOverlay.classList.add('hidden');
+}
+
+popupClose.addEventListener('click', closePopup);
+
+// Close if clicking outside popup box
+popupOverlay.addEventListener('click', (e) => {
+  if (e.target === popupOverlay) closePopup();
 });
 </script>
 </body>
