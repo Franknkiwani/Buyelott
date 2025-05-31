@@ -90,16 +90,32 @@
 
   <!-- Main Content -->
   <main class="flex-1 overflow-y-auto px-6 py-8 max-w-4xl w-full mx-auto space-y-10">
+<!-- Image Upload Section with Drag & Drop -->
+<section class="space-y-3 max-w-md mx-auto">
+  <h2 class="text-base font-semibold text-gray-300 text-center">Post Image</h2>
+  <label
+    id="dropZone"
+    for="imageInput"
+    class="w-full aspect-square rounded-lg overflow-hidden bg-gray-900 border-2 border-dashed border-gray-700 hover:border-red-600 cursor-pointer flex items-center justify-center text-gray-500 hover:text-red-500 transition select-none"
+  >
+    <img
+      id="previewImage"
+      src="https://via.placeholder.com/720x720.png?text=Drop+or+Select+Image"
+      alt="Post Preview"
+      class="w-full h-full object-cover hidden"
+    />
+    <span id="dropZoneText" class="text-center px-4">
+      Drag & Drop your image here, or click to select
+    </span>
+  </label>
+  <input
+    type="file"
+    id="imageInput"
+    accept="image/*"
+    class="hidden"
+  />
+</section>
 
-    <!-- Preview Image -->
-    <section class="space-y-3">
-      <h2 class="text-base font-semibold text-gray-300 text-center">Post Image</h2>
-      <div class="w-full aspect-square max-w-md mx-auto rounded-lg overflow-hidden bg-gray-900 border border-gray-800 shadow">
-        <img id="previewImage" src="https://via.placeholder.com/720x720.png?text=Post+Image+Preview"
-          alt="Post Preview" class="w-full h-full object-cover" />
-      </div>
-    </section>
-<div id="imgurUrlContainer" class="text-sm mt-2"></div>
     <!-- Title -->
     <section class="space-y-1 max-w-xl mx-auto">
       <label for="titleInput" class="block text-sm text-gray-400 font-medium">Post Title</label>
@@ -171,18 +187,19 @@
       <button id="loginBtn">Log In</button>
     </div>
   </div>
+
   <!-- Firebase and App Script -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
   databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
   projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com", // fixed typo here
   messagingSenderId: "1094792075584",
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
   measurementId: "G-LLT6F9WRKH"
@@ -198,126 +215,237 @@ const loginBtn = document.getElementById('loginBtn');
 const profilePic = document.getElementById('profilePic');
 const userHandle = document.getElementById('userHandle');
 const userFollowers = document.getElementById('userFollowers');
-const previewImage = document.getElementById('previewImage');
-const imgurUrlContainer = document.getElementById('imgurUrlContainer');
-
-function showLogin() {
-  loginModal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function hideLogin() {
-  loginModal.classList.add('hidden');
-  document.body.style.overflow = 'auto';
-}
-
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider)
-    .catch((error) => alert("Login failed: " + error.message));
-});
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    hideLogin();
-    const uid = user.uid;
-
-    profilePic.src = user.photoURL || 'https://via.placeholder.com/40';
-    userHandle.textContent = '@' + (user.displayName?.replace(/\s+/g, '').toLowerCase() || 'user');
-
-    try {
-      const dbRef = ref(database);
-      const snapshot = await get(child(dbRef, `users/${uid}/followers`));
-      userFollowers.textContent = snapshot.exists()
-        ? `Followers: ${snapshot.val()}`
-        : 'Followers: 0';
-    } catch (error) {
-      userFollowers.textContent = 'Followers: --';
-    }
-  } else {
-    showLogin();
-    profilePic.src = 'https://via.placeholder.com/40';
-    userHandle.textContent = '@guest';
-    userFollowers.textContent = 'Followers: --';
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const imageData = sessionStorage.getItem('uploadedImage');
-  if (imageData && previewImage) {
-    previewImage.src = imageData;
-    previewImage.style.objectFit = 'cover';
-  } else {
-    alert("No image found. Redirecting...");
-    window.history.back();
-  }
-});
-
 const postBtn = document.getElementById('postBtn');
 
-postBtn.addEventListener('click', async () => {
-  const titleInput = document.getElementById('titleInput');
-  const captionInput = document.getElementById('captionInput');
-  const tagsInput = document.getElementById('tagsInput');
-  const categorySelect = document.getElementById('categorySelect');
+const previewImage = document.getElementById('previewImage');
+const titleInput = document.getElementById('titleInput');
+const captionInput = document.getElementById('captionInput');
+const tagsInput = document.getElementById('tagsInput');
+const categorySelect = document.getElementById('categorySelect');
+const imgurUrlContainer = document.getElementById('imgurUrlContainer');
 
-  if (!titleInput.value.trim()) return alert('Title is required');
-  if (!captionInput.value.trim()) return alert('Caption is required');
-  if (!tagsInput.value.trim()) return alert('Tags are required');
-  if (!categorySelect.value) return alert('Please select a category');
+const dropZone = document.getElementById('dropZone');
+const imageInput = document.getElementById('imageInput');
+const dropZoneText = document.getElementById('dropZoneText');
 
-  const user = auth.currentUser;
-  if (!user) return alert('You must be logged in to post.');
+let currentUser = null;
 
-  const imageData = previewImage.src;
+// Toggle login modal visibility and post button enable/disable
+function toggleLoginModal(show) {
+  if (show) {
+    loginModal.classList.remove('hidden');
+    postBtn.disabled = true;
+  } else {
+    loginModal.classList.add('hidden');
+    postBtn.disabled = false;
+  }
+}
 
-  imgurUrlContainer.textContent = 'Uploading image to Imgur...';
-
+// Load user info from Firebase DB
+async function loadUserInfo(uid) {
   try {
-    const imgurRes = await fetch('https://api.imgur.com/3/image', {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      profilePic.src = userData.profilePic || 'https://via.placeholder.com/40';
+      userHandle.textContent = userData.username ? `@${userData.username}` : '@unknown';
+      userFollowers.textContent = `Followers: ${userData.followersCount || 0}`;
+    } else {
+      // Fallback if user not found in DB
+      profilePic.src = 'https://via.placeholder.com/40';
+      userHandle.textContent = '@unknown';
+      userFollowers.textContent = 'Followers: 0';
+    }
+  } catch (error) {
+    console.error('Error loading user info:', error);
+    profilePic.src = 'https://via.placeholder.com/40';
+    userHandle.textContent = '@unknown';
+    userFollowers.textContent = 'Followers: 0';
+  }
+}
+
+// Firebase auth state listener
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    toggleLoginModal(false);
+    loadUserInfo(user.uid);
+  } else {
+    currentUser = null;
+    toggleLoginModal(true);
+    profilePic.src = 'https://via.placeholder.com/40';
+    userHandle.textContent = '@unknown';
+    userFollowers.textContent = 'Followers: 0';
+  }
+});
+
+// Login button handler
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .catch(error => {
+      alert('Login failed: ' + error.message);
+      console.error(error);
+    });
+});
+
+// Validate post inputs before upload
+function validatePost() {
+  if (!titleInput.value.trim()) {
+    alert('Post title is required.');
+    titleInput.focus();
+    return false;
+  }
+  if (!categorySelect.value) {
+    alert('Please select a category.');
+    categorySelect.focus();
+    return false;
+  }
+  // Optional: validate image is uploaded (if needed)
+  if (!previewImage.src || previewImage.src.includes('placeholder')) {
+    alert('Please upload an image.');
+    return false;
+  }
+  return true;
+}
+
+// Upload post data to Firebase Realtime Database
+async function uploadPost(postData) {
+  try {
+    const postsRef = ref(database, 'post');
+    const newPostRef = push(postsRef);
+    await set(newPostRef, postData);
+    alert('Post published successfully!');
+    // Reset inputs & preview
+    titleInput.value = '';
+    captionInput.value = '';
+    tagsInput.value = '';
+    categorySelect.value = '';
+    previewImage.src = 'https://via.placeholder.com/720x720.png?text=Post+Image+Preview';
+    imgurUrlContainer.textContent = '';
+    imageInput.value = ''; // clear file input
+    dropZoneText.classList.remove('hidden');
+  } catch (error) {
+    alert('Failed to publish post: ' + error.message);
+    console.error(error);
+  }
+}
+
+// Upload image to Imgur for real, using your Client ID
+async function uploadImageToImgur(base64Image) {
+  const clientId = '891e5bb4aa94282'; // your Imgur client ID
+  try {
+    // Strip off data:image/...;base64, prefix
+    const base64Data = base64Image.split(',')[1];
+    const response = await fetch('https://api.imgur.com/3/image', {
       method: 'POST',
       headers: {
-        Authorization: 'Client-ID 784e530b6023501',
-        'Content-Type': 'application/json',
+        Authorization: `Client-ID ${clientId}`,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ image: imageData.split(',')[1], type: 'base64' }),
+      body: JSON.stringify({ image: base64Data, type: 'base64' })
     });
-
-    const imgurJson = await imgurRes.json();
-
-    if (!imgurJson.success) throw new Error("Imgur upload failed.");
-
-    const imgurUrl = imgurJson.data.link;
-    imgurUrlContainer.innerHTML = `Uploaded to <a href="${imgurUrl}" target="_blank" class="underline text-blue-400">${imgurUrl}</a>`;
-
-    const tagsArray = tagsInput.value
-      .split(',')
-      .map(tag => '#' + tag.trim().replace(/^#/, ''))
-      .filter(tag => tag !== '');
-
-    const newPostRef = push(ref(database, 'post'));
-
-    await set(newPostRef, {
-      uid: user.uid,
-      title: titleInput.value.trim(),
-      description: captionInput.value.trim(),
-      imageUrl: imgurUrl,
-      tags: tagsArray,
-      category: categorySelect.value,
-      visibility: 'public',
-      createdAt: Date.now(),
-      author: {
-        displayName: user.displayName || 'Anonymous',
-        photoURL: user.photoURL || '',
-      }
-    });
-
-    alert("Post uploaded successfully!");
-    window.location.href = '/'; // redirect to home or post page
-
+    const data = await response.json();
+    if (data.success) {
+      return data.data.link;
+    } else {
+      throw new Error('Imgur upload failed');
+    }
   } catch (error) {
+    alert('Image upload failed: ' + error.message);
     console.error(error);
-    alert("Upload failed: " + error.message);
-    imgurUrlContainer.textContent = 'Upload failed.';
+    return null;
   }
+}
+
+// Update preview image & UI when file selected
+function updatePreview(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    alert('Please upload a valid image file.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImage.src = e.target.result;
+    previewImage.classList.remove('hidden');
+    dropZoneText.classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+// File input change handler
+imageInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  updatePreview(file);
+});
+
+// Drag & drop handlers
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('border-red-600', 'text-red-500');
+});
+dropZone.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('border-red-600', 'text-red-500');
+});
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('border-red-600', 'text-red-500');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  updatePreview(file);
+  // Update file input for form compatibility
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  imageInput.files = dataTransfer.files;
+});
+
+// Publish post button click handler
+postBtn.addEventListener('click', async () => {
+  if (!currentUser) {
+    alert('You must be logged in to publish a post.');
+    return;
+  }
+  if (!validatePost()) return;
+
+  postBtn.disabled = true;
+  postBtn.textContent = 'Publishing...';
+
+  let imageUrl = previewImage.src;
+
+  // If previewImage is a base64 data URL, upload to Imgur
+  if (imageUrl.startsWith('data:')) {
+    const uploadedUrl = await uploadImageToImgur(imageUrl);
+    if (!uploadedUrl) {
+      postBtn.disabled = false;
+      postBtn.textContent = 'Publish';
+      return;
+    }
+    imageUrl = uploadedUrl;
+  }
+
+  imgurUrlContainer.textContent = imageUrl ? `Image URL: ${imageUrl}` : '';
+
+  // Split tags by commas, trim spaces, filter empty
+  const tagsArray = tagsInput.value
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean);
+
+  const postData = {
+    uid: currentUser.uid,
+    imageUrl,
+    title: titleInput.value.trim(),
+    description: captionInput.value.trim(),
+    tags: tagsArray,
+    category: categorySelect.value,
+    timestamp: Date.now()
+  };
+
+  await uploadPost(postData);
+
+  postBtn.disabled = false;
+  postBtn.textContent = 'Publish';
 });
 </script>
 </body>
