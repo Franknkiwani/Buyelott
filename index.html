@@ -1192,7 +1192,7 @@ function createPostElement(post, postId, userLikes = {}) {
         <div class="handle">${handle}</div>
       </div>
       <div class="post-meta">
-        <button class="follow-btn">Follow</button>
+        <button class="share-btn">share</button>
         <div class="post-time">${formatTimeAgo(timestamp)}</div>
       </div>
     </div>
@@ -1253,29 +1253,35 @@ function createPostElement(post, postId, userLikes = {}) {
   if (readMore) {
     readMore.addEventListener('click', (e) => {
       e.stopPropagation();
-      postDiv.querySelector('.post-description').textContent = description;
+      const descEl = postDiv.querySelector('.post-description');
+      descEl.textContent = description; // show full text
     });
   }
 
-  // FOLLOW
-  const followBtn = postDiv.querySelector('.follow-btn');
-  followBtn.addEventListener('click', async (e) => {
+  // SHARE BUTTON
+  const shareBtn = postDiv.querySelector('.share-btn');
+
+  shareBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    const uid = auth.currentUser?.uid;
-    if (!uid || !post.uid) return;
 
-    const followingRef = ref(db, `following/${uid}/${post.uid}`);
-    const isFollowingSnap = await get(followingRef);
-    const isFollowing = isFollowingSnap.exists();
+    // Use the postId passed to the function to avoid confusion
+    if (!postId) return;
 
-    if (isFollowing) {
-      await remove(followingRef);
-      followBtn.textContent = 'Follow';
-      followBtn.style.backgroundColor = '';
-    } else {
-      await set(followingRef, true);
-      followBtn.textContent = 'Following';
-      followBtn.style.backgroundColor = 'grey';
+    const shareUrl = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(postId)}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      shareBtn.textContent = 'Link copied!';
+      shareBtn.style.backgroundColor = '#d4edda'; // subtle green feedback
+
+      setTimeout(() => {
+        shareBtn.textContent = 'Share';
+        shareBtn.style.backgroundColor = '';
+      }, 1500);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+      shareBtn.textContent = 'Error copying';
+      shareBtn.style.backgroundColor = '#f8d7da'; // subtle red feedback
     }
   });
 // OPEN POST
