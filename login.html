@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CyberChat Auth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    html, body {
+      height: 100%;
+      background: #0d0d0d;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #authModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1c1c1c;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      z-index: 999;
+    }
+
+    h2 {
+      color: white;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background: #2a2a2a;
+      color: white;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      background: #00c6ff;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00a3cc;
+    }
+
+    .switch {
+      color: #888;
+      text-align: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .error {
+      color: #ff5c5c;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="authModal">
+  <h2 id="formTitle">Create Your CyberChat</h2>
+  <input type="text" id="username" placeholder="Username (required)" />
+  <input type="email" id="email" placeholder="Email (required)" />
+  <input type="password" id="password" placeholder="Password (min 6 chars)" />
+  <input type="text" id="profilePic" placeholder="Profile Image URL (optional)" />
+  <button id="authButton">Register</button>
+  <div class="switch" id="switchMode">Already have an account? Log in</div>
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const usernameInput = document.getElementById("username");
+  const profilePicInput = document.getElementById("profilePic");
+  const authButton = document.getElementById("authButton");
+  const switchMode = document.getElementById("switchMode");
+  const formTitle = document.getElementById("formTitle");
+  const errorMsg = document.getElementById("errorMsg");
+
+  let isLogin = false;
+
+  switchMode.addEventListener("click", () => {
+    isLogin = !isLogin;
+    formTitle.textContent = isLogin ? "Welcome Back to CyberChat" : "Create Your CyberChat";
+    authButton.textContent = isLogin ? "Login" : "Register";
+    switchMode.textContent = isLogin ? "New here? Create an account" : "Already have an account? Log in";
+    usernameInput.style.display = isLogin ? "none" : "block";
+    profilePicInput.style.display = isLogin ? "none" : "block";
+    errorMsg.textContent = "";
+  });
+
+  authButton.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const username = usernameInput.value.trim();
+    const profilePic = profilePicInput.value.trim() || "https://i.imgur.com/3d0XQGJ.png"; // fallback avatar
+
+    if (!email || !password || (!isLogin && !username)) {
+      errorMsg.textContent = "Please fill in all required fields.";
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "home.html";
+      } else {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCred.user.uid;
+
+        await set(ref(db, `users/${uid}`), {
+          email,
+          username,
+          profilePic,
+          stats: {
+            views: 0,
+            followers: 0,
+            revenue: 0,
+            likes: 0
+          }
+        });
+
+        window.location.href = "home.html";
+      }
+    } catch (err) {
+      errorMsg.textContent = err.message;
+    }
+  });
+</script>
+</body>
+</html>
