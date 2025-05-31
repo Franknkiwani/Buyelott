@@ -1278,7 +1278,6 @@ function createPostElement(post, postId, userLikes = {}) {
       followBtn.style.backgroundColor = 'grey';
     }
   });
-
 // OPEN POST
 postDiv.addEventListener('click', (e) => {
   const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
@@ -1287,7 +1286,8 @@ postDiv.addEventListener('click', (e) => {
   }
 });
 
-return postDiv;
+  return postDiv;
+}
 
 // ------------------------ Config ------------------------
 let randomizedPostList = [];
