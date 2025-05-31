@@ -1265,12 +1265,14 @@ postDiv.addEventListener('click', (e) => {
 });
   return postDiv;
 }
-// Load All Posts
+
+// ------------------------ Config ------------------------
 let randomizedPostList = [];
 let currentIndex = 0;
 let observer = null;
+let postsSinceLastAd = 0;
 
-// 1. Utility to Shuffle
+// ------------------------ 1. Shuffle Utility ------------------------
 function shuffleObject(obj) {
   const keys = Object.keys(obj);
   for (let i = keys.length - 1; i > 0; i--) {
@@ -1280,7 +1282,7 @@ function shuffleObject(obj) {
   return keys;
 }
 
-// 2. Load All Cached Posts Immediately (No infinite scroll here)
+// ------------------------ 2. Load Cached Posts ------------------------
 function loadCachedPosts() {
   const cached = localStorage.getItem('cachedPosts');
   if (!cached) return;
@@ -1291,12 +1293,12 @@ function loadCachedPosts() {
   container.innerHTML = '';
 
   for (const postId of keys) {
-    const postElement = createPostElement(posts[postId], postId, {}); // No likes in offline mode
+    const postElement = createPostElement(posts[postId], postId, {}); // No likes offline
     container.appendChild(postElement);
   }
 }
 
-// 3. Load Fresh Posts One by One (Infinite Scroll Mode)
+// ------------------------ 3. Load Fresh Posts w/ Infinite Scroll ------------------------
 async function loadPosts() {
   try {
     const snapshot = await get(child(dbRef, 'post'));
@@ -1306,75 +1308,25 @@ async function loadPosts() {
     const newCache = JSON.stringify(posts);
     const oldCache = localStorage.getItem('cachedPosts');
 
-    // Cache new posts if different
     if (newCache !== oldCache) {
       localStorage.setItem('cachedPosts', newCache);
       localStorage.setItem('cachedPostsTimestamp', Date.now());
 
-      // Only now we run the infinite scroll loader
       const keys = shuffleObject(posts);
       randomizedPostList = keys.map(k => ({ id: k, data: posts[k] }));
       currentIndex = 0;
 
       const container = document.getElementById('posts-container');
-      container.innerHTML = ''; // wipe old cached stuff
+      container.innerHTML = ''; // Clear old cache UI
 
-      loadNextPost(); // Start infinite scroll
+      loadNextPost(); // Start fresh loading
     }
   } catch (error) {
     console.error('Error loading fresh posts:', error);
   }
 }
 
-// 4. Load One Post at a Time (triggered by view)
-async function loadNextPost() {
-  if (currentIndex >= randomizedPostList.length) return;
-
-  const post = randomizedPostList[currentIndex];
-  const uid = auth.currentUser?.uid;
-  let userLikes = {};
-
-  if (uid) {
-    const likesSnap = await get(ref(db, `likes/${uid}`));
-    if (likesSnap.exists()) userLikes = likesSnap.val();
-  }
-
-  const container = document.getElementById('posts-container');
-  const postElement = createPostElement(post.data, post.id, userLikes);
-  container.appendChild(postElement);
-
-  // Reset + set new observer
-  if (observer) observer.disconnect();
-  observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !entry.target.dataset.viewed) {
-        entry.target.dataset.viewed = 'true';
-
-        // View tracking
-        const viewsRef = ref(db, `post/${post.id}/views`);
-        get(viewsRef).then(snap => {
-          const currentViews = snap.val() || 0;
-          set(viewsRef, currentViews + 1);
-        });
-
-        // Queue next
-        observer.unobserve(entry.target);
-        currentIndex++;
-        loadNextPost();
-      }
-    });
-  }, { threshold: 0.5 });
-
-  observer.observe(postElement);
-}
-
-// 🚀 Kickoff Logic
-loadCachedPosts(); // Fast feedback
-loadPosts();       // Fresh 1-by-1 loading
-</script>
-<script>
-let postsSinceLastAd = 0;
-
+// ------------------------ 4. Load Next Post ------------------------
 async function loadNextPost() {
   if (currentIndex >= randomizedPostList.length) return;
 
@@ -1393,13 +1345,12 @@ async function loadNextPost() {
 
   postsSinceLastAd++;
 
+  // Inject ad after every 4 posts
   if (postsSinceLastAd >= 4) {
-    // Create ad container
     const adContainer = document.createElement('div');
     adContainer.className = 'adstera-ad';
     container.appendChild(adContainer);
 
-    // Create and append the first script tag (ad options)
     const scriptOptions = document.createElement('script');
     scriptOptions.type = 'text/javascript';
     scriptOptions.text = `
@@ -1413,33 +1364,40 @@ async function loadNextPost() {
     `;
     adContainer.appendChild(scriptOptions);
 
-    // Create and append the second script tag (invoke)
     const scriptInvoke = document.createElement('script');
     scriptInvoke.type = 'text/javascript';
     scriptInvoke.src = '//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js';
     adContainer.appendChild(scriptInvoke);
 
-    postsSinceLastAd = 0; // reset counter
+    postsSinceLastAd = 0;
   }
 
-  // Intersection observer code stays the same ...
+  // Track view + setup observer for next
   if (observer) observer.disconnect();
   observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !entry.target.dataset.viewed) {
         entry.target.dataset.viewed = 'true';
 
-        // View tracking here...
+        const viewsRef = ref(db, `post/${post.id}/views`);
+        get(viewsRef).then(snap => {
+          const currentViews = snap.val() || 0;
+          set(viewsRef, currentViews + 1);
+        });
 
         observer.unobserve(entry.target);
         currentIndex++;
-        loadNextPost();
+        loadNextPost(); // Queue next
       }
     });
   }, { threshold: 0.5 });
 
   observer.observe(postElement);
 }
+
+// ------------------------ 5. Kickoff Logic ------------------------
+loadCachedPosts(); // fast feedback
+loadPosts();       // async fresh load
 </script>
 
 </body>
