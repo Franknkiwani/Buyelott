@@ -1,730 +1,359 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upload Post</title>
-    <style>
-    body {
-      background-color: #000000;
-    }
-    input, textarea, select {
-      color: #fff;
-      font-weight: 600;
-      background-color: #151515 !important;
-    }
-    input:-webkit-autofill,
-    textarea:-webkit-autofill,
-    select:-webkit-autofill {
-      box-shadow: 0 0 0px 1000px #151515 inset;
-      -webkit-text-fill-color: #fff !important;
-      font-weight: 600;
-    }
-    header {
-      background-color: #0f0f0f;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    .profile-pic {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    /* Modal styles */
-    #loginModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #loginModal.hidden {
-      display: none;
-    }
-    #loginModalContent {
-      background: #111;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #ff4444;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      color: white;
-    }
-    #loginModalContent button {
-      background-color: #ff4444;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      margin-top: 1.5rem;
-      transition: background-color 0.3s ease;
-    }
-    #loginModalContent button:hover {
-      background-color: #cc3333;
-    }
-.animate-spin {
-  animation: spin 1s linear infinite;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loading & Auth Check</title>
+<style>
+  /* Basic Reset */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    overflow: hidden; /* prevent scroll until auth checked */
+    background: #000; /* black bg */
+  }
 
+  /* Loading screen */
+  #loadingScreen {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  }
+  /* Simple gamer spinner: layered circles */
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid transparent;
+    border-top-color: #00ff99;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: relative;
+  }
+  .spinner::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 36px; height: 36px;
+    border: 4px solid #0f0;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: spinReverse 0.7s linear infinite;
+  }
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
   }
-}
-#popupOverlay.hidden {
-  display: none;
-}
-
-#popupOverlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* dark translucent overlay */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-#popupBox {
-  background-color: #1a1a1a;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
-  max-width: 400px;
-  width: 90%;
-  padding: 1.5rem;
-  color: white;
-  position: relative;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-#popupClose {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: transparent;
-  border: none;
-  color: #aaa;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-#popupClose:hover,
-#popupClose:focus {
-  color: white;
-  outline: none;
-}
-/* scale-100: normal size */
-.scale-100 {
-  transform: scale(1);
-}
-
-/* scale-90: slightly smaller */
-.scale-90 {
-  transform: scale(0.9);
-}
-
-/* opacity-100: fully visible */
-.opacity-100 {
-  opacity: 1;
-}
-
-/* opacity-0: fully transparent */
-.opacity-0 {
-  opacity: 0;
-}
-
-/* Optional: smooth transition for transform and opacity */
-.transition-transform-opacity {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.loading-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background-color: #000; /* pitch black */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.spinner {
-  width: 80px;
-  height: 80px;
-  position: relative;
-  animation: spin 1.5s linear infinite;
-}
-
-.hex {
-  width: 60px;
-  height: 52px;
-  background: linear-gradient(45deg, #00ffea, #005f73);
-  clip-path: polygon(
-    50% 0%,
-    93% 25%,
-    93% 75%,
-    50% 100%,
-    7% 75%,
-    7% 25%
-  );
-  filter: drop-shadow(0 0 8px #00ffea);
-  margin: 0 auto;
-}
-
-.loading-text {
-  margin-top: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #00ffea;
-  font-weight: 600;
-  font-size: 1.1rem;
-  letter-spacing: 0.05em;
-  user-select: none;
-}
-
-/* Spin animation */
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  @keyframes spinReverse {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(-360deg);}
   }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-/* Optional: smooth fade-in/out */
-#loginPopup.show {
-  display: flex !important;
-  animation: fadeInPopup 0.3s ease forwards;
-}
 
-@keyframes fadeInPopup {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+  /* Overlay behind popup */
+  #overlay {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9998;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  /* Popup container */
+  #loginPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #111;
+    border-radius: 20px;
+    width: 280px;
+    padding: 20px;
+    color: #0f0;
+    box-shadow: 0 0 20px #00ff99;
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
   }
-}
-  </style>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  #loginPopup.show {
+    display: block;
+  }
+
+  #loginPopup h2 {
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  #loginPopup p {
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+
+  #loginNowBtn {
+    background: #00ff99;
+    border: none;
+    color: #000;
+    padding: 12px 30px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+  }
+  #loginNowBtn:hover {
+    background: #00cc77;
+  }
+</style>
 </head>
-<body class="text-white min-h-screen flex flex-col font-sans bg-[#121212]">
+<body>
 
-  <!-- Header -->
-  <header class="sticky top-0 z-30 w-full px-6 py-4 bg-[#0f0f0f] border-b border-gray-800 flex items-center justify-between shadow">
-    <div class="flex items-center space-x-4">
-      <img id="profilePic" src="https://via.placeholder.com/40" alt="Profile Pic" class="rounded-full w-10 h-10" />
-      <div>
-        <p id="userHandle" class="font-bold">@loading...</p>
-        <p id="userFollowers" class="text-sm text-gray-400">Followers: --</p>
-      </div>
-    </div>
-    <button id="postBtn"
-      class="bg-red-600 hover:bg-red-700 active:bg-red-800 transition px-5 py-2 rounded text-sm font-medium shadow disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-      Publish
-    </button>
-  </header>
-
-  <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto px-6 py-8 max-w-4xl w-full mx-auto space-y-10">
-
-    <!-- Image Upload Section -->
-    <section class="space-y-3 max-w-md mx-auto">
-      <h2 class="text-base font-semibold text-gray-300 text-center">Post Image</h2>
-      <label
-        id="dropZone"
-        for="imageInput"
-        class="w-full aspect-square rounded-lg overflow-hidden bg-gray-900 border-2 border-dashed border-gray-700 hover:border-red-600 cursor-pointer flex items-center justify-center text-gray-500 hover:text-red-500 transition select-none relative"
-      >
-        <img
-          id="previewImage"
-          src="https://via.placeholder.com/720x720.png?text=Drop+or+Select+Image"
-          alt="Post Preview"
-          class="w-full h-full object-cover hidden"
-        />
-        <span id="dropZoneText" class="text-center px-4">
-          Drag & Drop your image here, or click to select
-        </span>
-      </label>
-      <input
-        type="file"
-        id="imageInput"
-        accept="image/*"
-        class="hidden"
-      />
-    </section>
-
-    <!-- Title -->
-    <section class="space-y-1 max-w-xl mx-auto">
-      <label for="titleInput" class="block text-sm text-gray-400 font-medium">Post Title <span class="text-red-500">*</span></label>
-      <input 
-        id="titleInput" 
-        type="text" 
-        maxlength="100"
-        placeholder="Enter post title here (e.g. My first cyber post)" 
-        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-        autocomplete="off"
-      />
-      <p class="text-xs text-gray-500">Max 100 characters</p>
-    </section>
-
-    <!-- Description -->
-    <section class="space-y-1 max-w-xl mx-auto">
-      <label for="captionInput" class="block text-sm text-gray-400 font-medium">Description <span class="text-red-500">*</span></label>
-      <textarea 
-        id="captionInput" 
-        maxlength="500" 
-        rows="5" 
-        placeholder="Write a description... (e.g. A glimpse into the neon-lit streets)" 
-        class="w-full border border-gray-700 rounded px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-        autocomplete="off"
-      ></textarea>
-      <p class="text-xs text-gray-500">Max 500 characters</p>
-    </section>
-
-    <!-- Tags -->
-    <section class="space-y-1 max-w-xl mx-auto">
-      <label for="tagsInput" class="block text-sm text-gray-400 font-medium">Tags <span class="text-red-500">*</span></label>
-      <input 
-        id="tagsInput" 
-        type="text" 
-        maxlength="100"
-        placeholder="Add tags separated by commas (e.g. tech, photography, travel)" 
-        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-        autocomplete="off"
-      />
-      <p class="text-xs text-gray-500">Separate tags with commas, max 100 characters</p>
-    </section>
-
-    <!-- Category -->
-    <section class="space-y-1 max-w-xl mx-auto">
-      <label for="categorySelect" class="block text-sm text-gray-400 font-medium">Category <span class="text-red-500">*</span></label>
-      <select 
-        id="categorySelect"
-        class="w-full border border-gray-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-      >
-        <option value="" disabled selected>Select a category</option>
-        <option value="Travel">Travel</option>
-        <option value="Tech">Tech</option>
-        <option value="Gaming">Gaming</option>
-        <option value="Lifestyle">Lifestyle</option>
-        <option value="Music">Music</option>
-      </select>
-    </section>
-
-  </main>
-
-  <!-- Login Modal -->
-  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="bg-gray-900 rounded-lg p-8 max-w-sm w-full text-center">
-      <h2 class="text-xl font-bold mb-4 text-white">Please Log In</h2>
-      <p class="mb-6 text-gray-300">You must be logged in to upload posts.</p>
-      <button id="loginBtn" class="bg-red-600 px-5 py-2 rounded text-white font-semibold hover:bg-red-700 transition">Log In</button>
-    </div>
-  </div>
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-white text-xl font-semibold hidden z-50">
-  <div id="loadingSpinner" class="mb-4 animate-spin rounded-full border-8 border-t-8 border-white border-t-transparent w-16 h-16"></div>
-  <div id="loadingText">Uploading... 0%</div>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
 </div>
-<div id="popupOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div id="popupBox" class="bg-[#1a1a1a] rounded-lg shadow-lg max-w-sm w-full p-6 relative text-white">
-    <button id="popupClose" aria-label="Close popup"
-      class="absolute top-3 right-3 text-gray-400 hover:text-white focus:outline-none text-xl font-bold">&times;</button>
-    <p id="popupMessage" class="text-lg"></p>
-  </div>
+
+<!-- Overlay -->
+<div id="overlay"></div>
+
+<!-- Login Popup -->
+<div id="loginPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle" aria-describedby="popupDesc">
+  <h2 id="popupTitle">You Are Not Logged In</h2>
+  <p id="popupDesc">Please login to continue using this app.</p>
+  <button id="loginNowBtn">Login Now</button>
 </div>
-<div class="popup scale-90 opacity-0 transition-transform-opacity">
-  <!-- popup content -->
-</div>
-<div id="successPopup" class="fixed hidden top-5 right-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl font-semibold text-lg z-50 transition-all duration-500"></div>
-<div id="loadingScreen" class="loading-screen">
-  <div class="spinner">
-    <div class="hex"></div>
-  </div>
-  <p class="loading-text">Loading your epic content...</p>
-</div>
-<div id="loginPopup" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-900 rounded-2xl shadow-lg w-80 max-w-full p-6 text-center text-white font-sans">
-    <h2 class="text-xl font-semibold mb-4">You’re not logged in</h2>
-    <p class="mb-6 text-gray-300">Please log in to continue.</p>
-    <button id="loginNowBtn" class="bg-blue-600 hover:bg-blue-700 transition rounded-full px-6 py-2 text-white font-semibold shadow-md">
-      Login Now
-    </button>
-  </div>
-</div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.appspot.com",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-
-// UI Elements
-const loginBtn = document.getElementById('loginBtn');
-const profilePic = document.getElementById('profilePic');
-const userHandle = document.getElementById('userHandle');
-const userFollowers = document.getElementById('userFollowers');
-const postBtn = document.getElementById('postBtn');
-
-const previewImage = document.getElementById('previewImage');
-const titleInput = document.getElementById('titleInput');
-const captionInput = document.getElementById('captionInput');
-const tagsInput = document.getElementById('tagsInput');
-const categorySelect = document.getElementById('categorySelect');
-
-const dropZone = document.getElementById('dropZone');
-const imageInput = document.getElementById('imageInput');
-const dropZoneText = document.getElementById('dropZoneText');
-
-const loadingOverlay = document.getElementById('loadingOverlay');
-const loadingText = document.getElementById('loadingText');
-
-let currentUser = null;
-let currentUsername = null;
-let currentProfilePic = null;
-
-// Login redirect
-loginBtn?.addEventListener('click', () => {
-  window.location.href = 'auth.html';
-});
-
-// Load user data from Firebase
-async function loadUserInfo(uid) {
-  try {
-    const userRef = ref(database, `users/${uid}`);
-    const snapshot = await get(userRef);
-    const data = snapshot.exists() ? snapshot.val() : {};
-
-    currentUsername = data.username || 'unknown';
-    currentProfilePic = data.profilePic || 'https://via.placeholder.com/40';
-
-    profilePic.src = currentProfilePic;
-    userHandle.textContent = `@${currentUsername}`;
-    userFollowers.textContent = `Followers: ${data.followers || 0}`;
-  } catch (err) {
-    console.error('Error loading user info:', err);
-    currentUsername = 'unknown';
-    currentProfilePic = 'https://via.placeholder.com/40';
-    profilePic.src = currentProfilePic;
-    userHandle.textContent = '@unknown';
-    userFollowers.textContent = 'Followers: 0';
-  }
-}
-
-// Firebase auth state
-onAuthStateChanged(auth, user => {
-  currentUser = user;
-  if (user) {
-    postBtn.disabled = false;
-    loadUserInfo(user.uid);
-  } else {
-    postBtn.disabled = true;
-    profilePic.src = 'https://via.placeholder.com/40';
-    userHandle.textContent = '@unknown';
-    userFollowers.textContent = 'Followers: 0';
-  }
-});
-
-// Drag/drop handling
-function handleFile(file) {
-  if (!file.type.startsWith('image/')) {
-    alert('Only image files are allowed!');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    previewImage.src = e.target.result;
-    previewImage.classList.remove('hidden');
-    dropZoneText.classList.add('hidden');
-  };
-  reader.readAsDataURL(file);
-}
-
-dropZone.addEventListener('click', () => imageInput.click());
-dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('border-red-600', 'text-red-500');
-});
-dropZone.addEventListener('dragleave', e => {
-  e.preventDefault();
-  dropZone.classList.remove('border-red-600', 'text-red-500');
-});
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('border-red-600', 'text-red-500');
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
-imageInput.addEventListener('change', e => {
-  if (e.target.files.length) handleFile(e.target.files[0]);
-});
-
-function validateInputs() {
-  if (!previewImage.src || previewImage.classList.contains('hidden')) {
-    showPopup('Please upload an image.');
-    return false;
-  }
-  if (!titleInput.value.trim()) {
-    showPopup('Post title is required.');
-    return false;
-  }
-  if (!captionInput.value.trim()) {
-    showPopup('Description is required.');
-    return false;
-  }
-  if (!tagsInput.value.trim()) {
-    showPopup('Please enter at least one tag.');
-    return false;
-  }
-  if (!categorySelect.value) {
-    showPopup('Please select a category.');
-    return false;
-  }
-  return true;
-}
-
-// Loading overlay controls
-function showLoading() {
-  loadingOverlay.classList.remove('hidden');
-}
-function hideLoading() {
-  loadingOverlay.classList.add('hidden');
-}
-
-// Upload to Imgur
-async function uploadImageToImgur(base64Image) {
-  const clientId = '891e5bb4aa94282';
-  try {
-    return await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://api.imgur.com/3/image');
-      xhr.setRequestHeader('Authorization', `Client-ID ${clientId}`);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-
-      xhr.upload.onprogress = event => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          loadingText.textContent = `Uploading... ${percent}%`;
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const res = JSON.parse(xhr.responseText);
-          if (res.success) resolve(res.data.link);
-          else reject(new Error('Imgur upload failed'));
-        } else reject(new Error('Imgur upload failed: ' + xhr.status));
-      };
-
-      xhr.onerror = () => reject(new Error('Imgur upload failed'));
-
-      const body = JSON.stringify({
-        image: base64Image.split(',')[1],
-        type: 'base64'
-      });
-
-      xhr.send(body);
-    });
-  } catch (err) {
-    console.error('Imgur error:', err);
-    alert('Failed to upload image.');
-    return null;
-  }
-}
-
-// Publish post
-postBtn.addEventListener('click', async () => {
-  if (!currentUser) {
-    alert('Please login first!');
-    return;
-  }
-  if (!validateInputs()) return;
-
-  postBtn.disabled = true;
-  postBtn.textContent = 'Starting upload...';
-  showLoading();
-
-  const imageUrl = await uploadImageToImgur(previewImage.src);
-  if (!imageUrl) {
-    postBtn.disabled = false;
-    postBtn.textContent = 'Publish';
-    hideLoading();
-    return;
-  }
-
-  loadingText.textContent = 'Finalizing post... 100%';
-
-  // Auto-hashtag tags
-  const rawTags = tagsInput.value.split(/[\s,]+/).map(t => t.trim()).filter(t => t.length);
-  const formattedTags = rawTags.map(tag => tag.startsWith('#') ? tag : `#${tag}`);
-
-  const postData = {
-    uid: currentUser.uid,
-    username: currentUsername,
-    profilePic: currentProfilePic,
-    imageUrl,
-    title: titleInput.value.trim(),
-    description: captionInput.value.trim(),
-    tags: formattedTags,
-    category: categorySelect.value,
-    timestamp: Date.now()
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
   };
 
-  try {
-    const postsRef = ref(database, 'post');
-    const newPostRef = push(postsRef);
-    await set(newPostRef, postData);
-    showSuccessPopup('Post published successfully!');
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    previewImage.src = '';
-    previewImage.classList.add('hidden');
-    dropZoneText.classList.remove('hidden');
-    titleInput.value = '';
-    captionInput.value = '';
-    tagsInput.value = '';
-    categorySelect.value = '';
-  } catch (err) {
-    console.error('Error saving post:', err);
-    alert('Failed to save post. Try again.');
+  const loadingScreen = document.getElementById('loadingScreen');
+  const loginPopup = document.getElementById('loginPopup');
+  const loginNowBtn = document.getElementById('loginNowBtn');
+  const overlay = document.getElementById('overlay');
+
+  // Keep body scroll disabled until auth state resolved
+  document.body.style.overflow = 'hidden';
+
+  onAuthStateChanged(auth, (user) => {
+    loadingScreen.style.display = 'none';
+
+    if (user) {
+      // Logged in -> hide popup & overlay, enable scroll
+      loginPopup.classList.remove('show');
+      overlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      console.log("User logged in:", user.uid);
+    } else {
+      // NOT logged in -> show popup & overlay, keep scroll locked
+      loginPopup.classList.add('show');
+      overlay.style.display = 'block';
+      console.log("User not logged in.");
+
+      // Optional: auto redirect to login.html after 10 seconds
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 10000);
+    }
+  });
+
+  loginNowBtn.addEventListener('click', () => {
+    window.location.href = 'login.html';
+  });
+</script>
+
+<style>
+  /* Basic Reset */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    overflow: hidden; /* prevent scroll until auth checked */
+    background: #000; /* black bg */
   }
 
-  postBtn.disabled = false;
-  postBtn.textContent = 'Publish';
-  hideLoading();
-});
-function showSuccessPopup(message) {
-  const popup = document.getElementById('successPopup');
-  popup.textContent = message;
-
-  // Show it with a pop-in animation
-  popup.classList.remove('hidden');
-  popup.classList.add('scale-100', 'opacity-100');
-
-  // Auto-hide after 3 seconds
-  setTimeout(() => {
-    popup.classList.add('opacity-0', 'scale-90');
-    setTimeout(() => {
-      popup.classList.add('hidden');
-      popup.classList.remove('opacity-0', 'scale-90');
-    }, 300); // wait for animation to finish
-  }, 3000);
-}
-</script>
-<script>
-  const profilePic = document.getElementById('profilePic');
-profilePic.style.cursor = 'pointer';
-profilePic.addEventListener('click', () => {
-  window.location.href = 'myprofile.html';
-});
-const popupOverlay = document.getElementById('popupOverlay');
-const popupMessage = document.getElementById('popupMessage');
-const popupClose = document.getElementById('popupClose');
-
-function showPopup(message) {
-  popupMessage.textContent = message;
-  popupOverlay.classList.remove('hidden');
-}
-
-function closePopup() {
-  popupOverlay.classList.add('hidden');
-}
-
-popupClose.addEventListener('click', closePopup);
-
-// Close if clicking outside popup box
-popupOverlay.addEventListener('click', (e) => {
-  if (e.target === popupOverlay) closePopup();
-});
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const loadingScreen = document.getElementById('loadingScreen');
-    loadingScreen.style.transition = 'opacity 0.5s ease';
-    loadingScreen.style.opacity = '0';
-    setTimeout(() => loadingScreen.style.display = 'none', 500);
-  }, 5000);
-});
-</script>
-<script>
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.appspot.com",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-const loadingScreen = document.getElementById('loadingScreen');
-const loginPopup = document.getElementById('loginPopup');
-const loginNowBtn = document.getElementById('loginNowBtn');
-
-// Show loading at start
-loadingScreen.style.display = 'flex';
-
-// Prevent page interaction behind popup by adding a full overlay
-const overlay = document.createElement('div');
-overlay.style.position = 'fixed';
-overlay.style.top = '0';
-overlay.style.left = '0';
-overlay.style.width = '100vw';
-overlay.style.height = '100vh';
-overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
-overlay.style.zIndex = '9998';
-overlay.style.display = 'none';
-document.body.appendChild(overlay);
-
-onAuthStateChanged(auth, (user) => {
-  loadingScreen.style.display = 'none';
-  
-  if (user) {
-    // User logged in — remove overlay & popup if shown
-    loginPopup.classList.remove('show');
-    overlay.style.display = 'none';
-  } else {
-    // No user — show popup + overlay
-    loginPopup.classList.add('show');
-    overlay.style.display = 'block';
-
-    // Optional: Auto redirect after 10 seconds if they don't click
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 10000); 
+  /* Loading screen */
+  #loadingScreen {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
   }
-});
+  /* Simple gamer spinner: layered circles */
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid transparent;
+    border-top-color: #00ff99;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: relative;
+  }
+  .spinner::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 36px; height: 36px;
+    border: 4px solid #0f0;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: spinReverse 0.7s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+  @keyframes spinReverse {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(-360deg);}
+  }
 
-loginNowBtn.addEventListener('click', () => {
-  window.location.href = 'login.html';
-});
+  /* Overlay behind popup */
+  #overlay {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9998;
+  }
+
+  /* Popup container */
+  #loginPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #111;
+    border-radius: 20px;
+    width: 280px;
+    padding: 20px;
+    color: #0f0;
+    box-shadow: 0 0 20px #00ff99;
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
+  }
+  #loginPopup.show {
+    display: block;
+  }
+
+  #loginPopup h2 {
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  #loginPopup p {
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+
+  #loginNowBtn {
+    background: #00ff99;
+    border: none;
+    color: #000;
+    padding: 12px 30px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+  }
+  #loginNowBtn:hover {
+    background: #00cc77;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay"></div>
+
+<!-- Login Popup -->
+<div id="loginPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle" aria-describedby="popupDesc">
+  <h2 id="popupTitle">You Are Not Logged In</h2>
+  <p id="popupDesc">Please login to continue using this app.</p>
+  <button id="loginNowBtn">Login Now</button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const loadingScreen = document.getElementById('loadingScreen');
+  const loginPopup = document.getElementById('loginPopup');
+  const loginNowBtn = document.getElementById('loginNowBtn');
+  const overlay = document.getElementById('overlay');
+
+  // Keep body scroll disabled until auth state resolved
+  document.body.style.overflow = 'hidden';
+
+  onAuthStateChanged(auth, (user) => {
+    loadingScreen.style.display = 'none';
+
+    if (user) {
+      // Logged in -> hide popup & overlay, enable scroll
+      loginPopup.classList.remove('show');
+      overlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      console.log("User logged in:", user.uid);
+    } else {
+      // NOT logged in -> show popup & overlay, keep scroll locked
+      loginPopup.classList.add('show');
+      overlay.style.display = 'block';
+      console.log("User not logged in.");
+
+      // Optional: auto redirect to login.html after 10 seconds
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 10000);
+    }
+  });
+
+  loginNowBtn.addEventListener('click', () => {
+    window.location.href = 'login.html';
+  });
 </script>
 </body>
 </html>
