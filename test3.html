@@ -3,125 +3,209 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bottom Left Menu with Center Upload</title>
+  <title>Hamburger Fullscreen Menu</title>
   <style>
+    /* Base and body */
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #121212;
-      height: 100vh;
       color: #eee;
-      position: relative;
+      height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
     }
-    .menu {
+    /* Hamburger menu button bottom left */
+    .bottom-left-menu {
       position: fixed;
       bottom: 20px;
       left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(25 25 25 / 0.85);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgb(0 0 0 / 0.8);
-      border-radius: 14px;
-      padding: 12px 24px;
-      user-select: none;
-      cursor: default;
-      max-width: 600px;
-      margin: 0 auto;
-      width: calc(100% - 40px);
-    }
-    /* Left and right items */
-    .menu-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #64b5f6;
+      background: rgba(30 30 30 / 0.9);
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.8);
+      cursor: pointer;
       font-weight: 600;
       font-size: 16px;
-      cursor: pointer;
-      transition: color 0.25s ease;
+      color: #64b5f6;
+      transition: background-color 0.25s ease;
+      z-index: 1100;
     }
-    .menu-item:hover {
+    .bottom-left-menu:hover {
+      background: rgba(100 181 246 / 0.2);
       color: #90caf9;
     }
-    .menu-item svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-    /* Center big upload button */
-    .upload-button {
+    .hamburger {
+      width: 22px;
+      height: 16px;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+    }
+    .hamburger span {
+      display: block;
+      height: 3px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+    /* Fullscreen overlay menu */
+    .fullscreen-menu {
+      position: fixed;
+      inset: 0;
+      background: #181818;
+      backdrop-filter: blur(14px);
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      padding: 40px 20px;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1050;
+    }
+    .fullscreen-menu.open {
+      transform: translateX(0);
+    }
+    /* Close button top right inside fullscreen menu */
+    .close-btn {
+      align-self: flex-end;
+      font-size: 28px;
+      font-weight: 700;
+      color: #64b5f6;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 40px;
+      line-height: 1;
+      border: none;
+      background: none;
+      transition: color 0.25s ease;
+    }
+    .close-btn:hover {
+      color: #90caf9;
+    }
+    /* Menu list */
+    .menu-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .menu-list li {
+      display: flex;
       align-items: center;
+      gap: 16px;
+      font-size: 22px;
+      font-weight: 600;
       cursor: pointer;
       color: #64b5f6;
       transition: color 0.25s ease;
+      user-select: none;
     }
-    .upload-button:hover {
+    .menu-list li:hover {
       color: #90caf9;
     }
-    .upload-circle {
-      width: 60px;
-      height: 60px;
-      background: #64b5f6;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 12px rgb(100 181 246 / 0.7);
-      transition: background-color 0.25s ease;
-    }
-    .upload-circle:hover {
-      background: #90caf9;
-    }
-    .upload-circle svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
-    }
-    .upload-label {
-      margin-top: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      color: currentColor;
-    }
-    /* Profile pic styling */
-    .profile-pic {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 0 6px #64b5f6;
-      border: 2px solid #64b5f6;
+    /* Menu icons */
+    .menu-list svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
-  <nav class="menu" aria-label="Main navigation">
-    <a href="#" class="menu-item" aria-label="Home">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      Home
-    </a>
+<!-- Bottom left hamburger menu -->
+<div class="bottom-left-menu" role="button" tabindex="0" aria-label="Toggle menu" id="menuToggle">
+  <div class="hamburger" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <span>Menu</span>
+</div>
 
-    <div class="upload-button" role="button" tabindex="0" aria-label="Upload">
-      <div class="upload-circle">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-      </div>
-      <span class="upload-label">Upload</span>
-    </div>
+<!-- Fullscreen overlay menu -->
+<nav class="fullscreen-menu" id="fullscreenMenu" aria-hidden="true" aria-label="Main navigation">
+  <button class="close-btn" aria-label="Close menu" id="menuClose">&times;</button>
+  <ul class="menu-list">
+    <li tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      Upload
+    </li>
+    <li tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      My Profile
+    </li>
+    <li tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19.14 12.94a7.957 7.957 0 000-1.88l2.03-1.58a.5.5 0 00.12-.63l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96a7.948 7.948 0 00-1.62-.95l-.36-2.54a.5.5 0 00-.49-.42h-3.84a.5.5 0 00-.49.42l-.36 2.54c-.58.22-1.13.53-1.62.95l-2.39-.96a.5.5 0 00-.6.22l-1.92 3.32a.5.5 0 00.12.63l2.03 1.58c-.05.31-.08.63-.08.95s.03.64.08.95l-2.03 1.58a.5.5 0 00-.12.63l1.92 3.32a.5.5 0 00.6.22l2.39-.96c.49.42 1.04.73 1.62.95l.36 2.54a.5.5 0 00.49.42h3.84a.5.5 0 00.49-.42l.36-2.54c.58-.22 1.13-.53 1.62-.95l2.39.96a.5.5 0 00.6-.22l1.92-3.32a.5.5 0 00-.12-.63l-2.03-1.58zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/>
+      </svg>
+      Settings
+    </li>
+    <li tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 15h-2v-2h2zm0-4h-2V7h2z"/>
+      </svg>
+      Help
+    </li>
+    <li tabindex="0">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M16 9v10H8V9h8m-1-6H9v2H7v2h10V5h-2z"/>
+      </svg>
+      Logout
+    </li>
+  </ul>
+</nav>
 
-    <a href="#" class="menu-item" aria-label="Profile">
-      <img src="https://i.pravatar.cc/32" alt="Profile Picture" class="profile-pic" />
-      Profile
-    </a>
-  </nav>
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const fullscreenMenu = document.getElementById('fullscreenMenu');
+  const menuClose = document.getElementById('menuClose');
+
+  function openMenu() {
+    fullscreenMenu.classList.add('open');
+    fullscreenMenu.setAttribute('aria-hidden', 'false');
+    menuToggle.setAttribute('aria-expanded', 'true');
+    // Lock scroll on body
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    fullscreenMenu.classList.remove('open');
+    fullscreenMenu.setAttribute('aria-hidden', 'true');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    // Restore scroll
+    document.body.style.overflow = '';
+  }
+
+  menuToggle.addEventListener('click', () => {
+    if (fullscreenMenu.classList.contains('open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+  menuClose.addEventListener('click', closeMenu);
+
+  // Close menu if user presses Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && fullscreenMenu.classList.contains('open')) {
+      closeMenu();
+    }
+  });
+
+  // Optional: close menu if clicking outside the menu content (not needed here, but possible)
+</script>
 
 </body>
 </html>
