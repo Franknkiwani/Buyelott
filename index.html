@@ -1349,7 +1349,7 @@ function createPostElement(post, postId, userLikes = {}) {
 
 const shareBtn = postDiv.querySelector('.share-btn');
 
-// Create feedback div only once
+// Create feedback div once per post
 let resultPara = postDiv.querySelector('.share-result');
 if (!resultPara) {
   resultPara = document.createElement('div');
@@ -1362,9 +1362,8 @@ if (!resultPara) {
 shareBtn.addEventListener('click', async (e) => {
   e.stopPropagation();
 
-  const postId = post.id || post.postId;
   if (!postId) {
-    resultPara.textContent = "Error: Missing post ID.";
+    resultPara.textContent = "❌ Error: Missing post ID.";
     resultPara.style.color = 'red';
     return;
   }
@@ -1382,10 +1381,9 @@ shareBtn.addEventListener('click', async (e) => {
       resultPara.textContent = "✅ Post shared successfully!";
       resultPara.style.color = 'green';
     } else {
-      resultPara.textContent = "ℹ️ Web Share API not supported. Showing link...";
+      resultPara.textContent = "ℹ️ Web Share not supported. Showing link...";
       resultPara.style.color = 'orange';
-      // Trigger fallback
-      showShareModal(shareUrl, shareBtn);
+      showShareModal(shareUrl, shareBtn); // Your fallback handler
     }
   } catch (err) {
     resultPara.textContent = `❌ Share failed: ${err.message || err}`;
