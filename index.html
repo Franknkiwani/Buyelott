@@ -2581,65 +2581,65 @@ function closePopup() {
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  databaseURL: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const notificationList = document.getElementById("notification-list");
+const notificationList = document.getElementById("notification-list");
 
-  function renderNotifications(notifs) {
-    if (!notifs || notifs.length === 0) {
-      notificationList.innerHTML = "<p>No notifications yet.</p>";
+async function loadAllNotifications() {
+  try {
+    const usersSnap = await get(ref(db, "notifications"));
+    if (!usersSnap.exists()) {
+      notificationList.innerHTML = "<p>No notifications found.</p>";
       return;
     }
+    const allNotifsObj = usersSnap.val(); // { uid1: {notif1, notif2}, uid2: {...} }
+    let allNotifs = [];
 
-    notificationList.innerHTML = notifs.map(n => `
-      <div style="padding: 10px; border-bottom: 1px solid #ddd;">
-        <strong>${n.title || "Notification"}</strong><br />
-        <small>${n.body || n.message || ""}</small>
-        <br /><small style="color: gray; font-size: 0.8em;">${new Date(n.time).toLocaleString()}</small>
-      </div>
-    `).join("");
+    // Flatten all notifications from all users into one array
+    for (const uid in allNotifsObj) {
+      const userNotifs = Object.values(allNotifsObj[uid]);
+      allNotifs = allNotifs.concat(userNotifs);
+    }
+
+    // Sort descending by time (latest first)
+    allNotifs.sort((a, b) => b.time - a.time);
+
+    renderNotifications(allNotifs);
+  } catch (error) {
+    notificationList.innerHTML = `<p style="color:red;">Error loading notifications: ${error.message}</p>`;
+  }
+}
+
+function renderNotifications(notifs) {
+  if (!notifs || notifs.length === 0) {
+    notificationList.innerHTML = "<p>No notifications yet.</p>";
+    return;
   }
 
-  async function loadNotifications(uid) {
-    try {
-      const notifRef = ref(db, `notifications/${uid}`);
-      const snapshot = await get(notifRef);
-      if (!snapshot.exists()) {
-        renderNotifications([]);
-        return;
-      }
-      const data = snapshot.val();
-      const notifications = Object.values(data).reverse(); // latest first
-      renderNotifications(notifications);
-    } catch (error) {
-      notificationList.innerHTML = `<p style="color:red;">Error loading notifications: ${error.message}</p>`;
-    }
-  }
+  notificationList.innerHTML = notifs.map(n => `
+    <div style="padding: 10px; border-bottom: 1px solid #ddd;">
+      <strong>${n.title || "Notification"}</strong><br />
+      <small>${n.body || n.message || ""}</small>
+      <br /><small style="color: gray; font-size: 0.8em;">${new Date(n.time).toLocaleString()}</small>
+    </div>
+  `).join("");
+}
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      loadNotifications(user.uid);
-    } else {
-      notificationList.innerHTML = "<p>Please log in to view notifications.</p>";
-    }
-  });
+// Just run this immediately — no auth check
+loadAllNotifications();
 </script>
 </body>
 </html>
