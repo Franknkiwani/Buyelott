@@ -1,86 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dark Bottom-Left Menu with Icons</title>
-<style>
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: #121212;
-    height: 100vh;
-    position: relative;
-    color: #eee;
-  }
-
-  .menu {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(25 25 25 / 0.85);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.8);
-    border-radius: 14px;
-    padding: 12px 24px;
-    display: flex;
-    gap: 24px;
-    align-items: center;
-    user-select: none;
-    cursor: default;
-    transition: background 0.3s ease;
-  }
-
-  .menu:hover {
-    background: rgba(30 30 30 / 1);
-  }
-
-  .menu a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #64b5f6; /* icy blue highlight */
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 16px;
-    padding: 6px 10px;
-    border-radius: 10px;
-    transition: background-color 0.25s ease, color 0.25s ease;
-  }
-
-  .menu a:hover {
-    background-color: #64b5f622; /* subtle blue highlight on hover */
-    color: #90caf9;
-  }
-
-  .menu svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bottom Left Menu with Center Upload</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #121212;
+      height: 100vh;
+      color: #eee;
+      position: relative;
+    }
+    .menu {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(25 25 25 / 0.85);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.8);
+      border-radius: 14px;
+      padding: 12px 24px;
+      user-select: none;
+      cursor: default;
+      max-width: 600px;
+      margin: 0 auto;
+      width: calc(100% - 40px);
+    }
+    /* Left and right items */
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64b5f6;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.25s ease;
+    }
+    .menu-item:hover {
+      color: #90caf9;
+    }
+    .menu-item svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+    /* Center big upload button */
+    .upload-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      color: #64b5f6;
+      transition: color 0.25s ease;
+    }
+    .upload-button:hover {
+      color: #90caf9;
+    }
+    .upload-circle {
+      width: 60px;
+      height: 60px;
+      background: #64b5f6;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 12px rgb(100 181 246 / 0.7);
+      transition: background-color 0.25s ease;
+    }
+    .upload-circle:hover {
+      background: #90caf9;
+    }
+    .upload-circle svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+    .upload-label {
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: currentColor;
+    }
+    /* Profile pic styling */
+    .profile-pic {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 6px #64b5f6;
+      border: 2px solid #64b5f6;
+    }
+  </style>
 </head>
 <body>
 
-<div class="menu">
-  <a href="#" aria-label="Home">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-    Home
-  </a>
-  <a href="#" aria-label="Profile">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-    Profile
-  </a>
-  <a href="#" aria-label="Settings">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.14 12.936a7.017 7.017 0 000-1.872l2.036-1.58a.5.5 0 00.12-.64l-1.928-3.34a.5.5 0 00-.6-.22l-2.4.96a6.89 6.89 0 00-1.6-.928l-.36-2.52a.5.5 0 00-.5-.44h-3.856a.5.5 0 00-.5.44l-.36 2.52a6.89 6.89 0 00-1.6.928l-2.4-.96a.5.5 0 00-.6.22l-1.928 3.34a.5.5 0 00.12.64l2.036 1.58a7.06 7.06 0 000 1.872l-2.036 1.58a.5.5 0 00-.12.64l1.928 3.34a.5.5 0 00.6.22l2.4-.96a6.89 6.89 0 001.6.928l.36 2.52a.5.5 0 00.5.44h3.856a.5.5 0 00.5-.44l.36-2.52a6.89 6.89 0 001.6-.928l2.4.96a.5.5 0 00.6-.22l1.928-3.34a.5.5 0 00-.12-.64l-2.036-1.58zM12 15.6a3.6 3.6 0 110-7.2 3.6 3.6 0 010 7.2z"/></svg>
-    Settings
-  </a>
-  <a href="#" aria-label="Help">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.25 15.5h-1.5v-1.5h1.5v1.5zm1.28-5.3c-.15.2-.4.36-.7.48-.2.08-.4.13-.53.22-.1.07-.16.16-.2.27-.05.13-.04.3.04.46h-1.38c-.07-.25-.03-.57.14-.8.1-.15.25-.3.44-.38.3-.15.48-.3.6-.53.15-.3.04-.7-.18-.93-.3-.3-.78-.35-1.1-.3-.42.07-.82.32-.93.73l-1.42-.5c.2-1.1 1.1-2 2.4-2.2 1.46-.27 2.88.72 2.6 2.3z"/></svg>
-    Help
-  </a>
-</div>
+  <nav class="menu" aria-label="Main navigation">
+    <a href="#" class="menu-item" aria-label="Home">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </a>
+
+    <div class="upload-button" role="button" tabindex="0" aria-label="Upload">
+      <div class="upload-circle">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+      </div>
+      <span class="upload-label">Upload</span>
+    </div>
+
+    <a href="#" class="menu-item" aria-label="Profile">
+      <img src="https://i.pravatar.cc/32" alt="Profile Picture" class="profile-pic" />
+      Profile
+    </a>
+  </nav>
 
 </body>
 </html>
