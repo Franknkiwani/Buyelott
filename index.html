@@ -1089,6 +1089,8 @@ body {
 <div id="topNotification" class="top-toast hidden">
   <span id="toastMessage">🔔 Notification here</span>
 </div>
+<!-- 📣 Notification Container -->
+<div id="notifications" style="padding: 1rem;"></div>
 <script type="module">
   import {
   getAuth,
@@ -2439,13 +2441,13 @@ function closePopup() {
     }
   });
 </script>
+
+
 <script type="module">
-  // Import Firebase modular SDK
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-  // Your actual Firebase config (swap with your real one)
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -2453,45 +2455,30 @@ function closePopup() {
     projectId: "itzhoyoo-f9f7e",
     storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const auth = getAuth(app);
 
-  // Show notification function
-  function showTopNotification(message, duration = 4000) {
-    const toast = document.getElementById("topNotification");
-    const text = document.getElementById("toastMessage");
+  const container = document.getElementById("notifications");
 
-    text.textContent = message;
-    toast.classList.remove("hidden");
-    toast.classList.add("show");
-
-    setTimeout(() => {
-      toast.classList.remove("show");
-      setTimeout(() => toast.classList.add("hidden"), 300);
-    }, duration);
-  }
-
-  // Listen for auth and then listen to notifications
   onAuthStateChanged(auth, user => {
     if (!user) return;
-
-    const uid = user.uid;
-    const notificationsRef = ref(db, `notifications/${uid}`);
-
-    onChildAdded(notificationsRef, snapshot => {
+    const notifRef = ref(db, `notifications/${user.uid}`);
+    
+    onChildAdded(notifRef, snapshot => {
       const data = snapshot.val();
-      if (data && data.message) {
-        showTopNotification(data.message);
-
-        // Remove notification after displaying to avoid repeats
-        remove(ref(db, `notifications/${uid}/${snapshot.key}`));
-      }
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <div style="padding: 1rem; background: #f0f0f0; margin-bottom: 0.5rem; border-left: 4px solid #007bff;">
+          <strong>${data.title}</strong><br />
+          <small>${new Date(data.time).toLocaleString()}</small><br />
+          <p>${data.body}</p>
+        </div>
+      `;
+      container.prepend(div); // newest on top
     });
   });
 </script>
