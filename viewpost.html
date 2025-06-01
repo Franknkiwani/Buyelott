@@ -1,133 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>View Post</title>
   <style>
-    /* Reset */
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --muted: #666;
+      --card: #f9f9f9;
+      --shadow: rgba(0, 0, 0, 0.05);
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --fg: #ffffff;
+      --muted: #aaa;
+      --card: #1e1e1e;
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+
     * {
       box-sizing: border-box;
     }
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fff;
-      color: #222;
-      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
-
-    /* Sticky header */
     header {
       position: sticky;
       top: 0;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-      padding: 0.75rem 1.5rem;
-      font-weight: 700;
-      font-size: 1.25rem;
-      color: #111;
-      z-index: 100;
-      user-select: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: var(--bg);
+      padding: 1rem 1.5rem;
+      font-weight: bold;
+      font-size: 1.5rem;
+      border-bottom: 1px solid var(--muted);
+      box-shadow: 0 2px 8px var(--shadow);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border: none;
+      background: none;
     }
 
     main {
-      max-width: 700px;
-      margin: 2rem auto 4rem;
+      max-width: 720px;
+      margin: 2rem auto;
       padding: 0 1rem;
     }
 
-    /* Status message */
     #status {
-      font-weight: 600;
-      font-size: 1rem;
+      color: red;
+      font-weight: bold;
       margin-bottom: 1rem;
-      color: #d32f2f; /* red for errors */
       display: none;
     }
 
-    /* Title */
     h1.post-title {
-      font-weight: 700;
       font-size: 2rem;
-      margin-bottom: 0.25rem;
-      color: #111;
-      user-select: text;
+      margin: 0 0 0.5rem;
     }
 
-    /* Post info: profile pic, username, views */
     .post-info {
       display: flex;
       align-items: center;
-      color: #555;
       font-size: 0.9rem;
+      color: var(--muted);
       margin-bottom: 1.5rem;
-      user-select: none;
+      gap: 1rem;
     }
-    .post-info img.profile-pic {
-      width: 40px;
-      height: 40px;
+    .profile-pic {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 0.75rem;
       background: #ccc;
-      flex-shrink: 0;
-    }
-    .post-info .username {
-      font-weight: 600;
-      color: #222;
-      margin-right: 1.25rem;
-    }
-    .post-info .views {
-      color: #777;
     }
 
-    /* Post image */
     .post-image {
-      width: 80%;
-      max-width: 700px;
-      display: block;
-      margin: 0 auto 2rem;
-      border-radius: 8px;
+      width: 100%;
+      max-height: 480px;
       object-fit: contain;
-      user-select: none;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px var(--shadow);
+      margin-bottom: 1.5rem;
     }
 
-    /* Post description */
     .post-description {
-      font-size: 1rem;
-      color: #333;
       white-space: pre-wrap;
-      user-select: text;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--fg);
     }
-
   </style>
 </head>
 <body>
   <header>
     CyberChat
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
   </header>
 
   <main>
     <div id="status"></div>
     <h1 class="post-title"></h1>
-
-    <div class="post-info" style="display:none;">
+    <div class="post-info" style="display: none;">
       <img src="" alt="Profile Picture" class="profile-pic" />
       <span class="username"></span>
       <span class="views"></span>
     </div>
-
-    <img src="" alt="Post Image" class="post-image" style="display:none;" />
+    <img src="" alt="Post Image" class="post-image" style="display: none;" />
     <p class="post-description"></p>
   </main>
 
-  <!-- Firebase compat -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
   <script>
+    // === Dark/Light Theme Logic ===
+    const root = document.documentElement;
+    const storedTheme = localStorage.getItem('theme');
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    }
+
+    function toggleTheme() {
+      const current = root.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Auto theme based on system if nothing stored
+    if (!storedTheme) {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(systemPrefersDark ? 'dark' : 'light');
+    } else {
+      applyTheme(storedTheme);
+    }
+
+    // === Post Logic ===
     const statusEl = document.getElementById('status');
     const titleEl = document.querySelector('.post-title');
     const profilePicEl = document.querySelector('.profile-pic');
@@ -137,39 +159,22 @@
     const postImageEl = document.querySelector('.post-image');
     const descriptionEl = document.querySelector('.post-description');
 
-    function setStatus(message, color = '#d32f2f') {
-      if(message) {
+    function setStatus(message, color = 'red') {
+      if (message) {
         statusEl.textContent = message;
-        statusEl.style.color = color;
         statusEl.style.display = 'block';
       } else {
         statusEl.style.display = 'none';
       }
     }
 
-    // Escape text to avoid HTML injection
-    function escapeHtml(text) {
-      if (!text) return '';
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    // Fallback profile pic URL (a subtle silhouette)
     const defaultProfilePic = 'https://www.gravatar.com/avatar/?d=mp&s=80';
-
-    // Get postId from URL
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('postId');
 
     if (!postId) {
       setStatus('Error: No post ID provided in URL.');
     } else {
-      setStatus(''); // Clear status
-
       const firebaseConfig = {
         apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
         authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -181,7 +186,6 @@
         measurementId: "G-LLT6F9WRKH"
       };
 
-      // Init Firebase
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
@@ -189,45 +193,27 @@
 
       db.ref(`/post/${postId}`).get()
         .then(snapshot => {
-          if (!snapshot.exists()) {
-            setStatus('Post not found.');
-            return;
-          }
+          if (!snapshot.exists()) return setStatus('Post not found.');
 
           const post = snapshot.val();
+          titleEl.textContent = post.title || 'Untitled';
+          descriptionEl.textContent = post.description || 'No description provided.';
 
-          // Title
-          titleEl.textContent = post.title || '(No Title)';
-
-          // Description
-          descriptionEl.textContent = post.description || '(No Description)';
-
-          // Image
           if (post.image) {
             postImageEl.src = post.image;
+            postImageEl.alt = post.title || 'Post Image';
             postImageEl.style.display = 'block';
-            postImageEl.alt = post.title || 'Post image';
-          } else {
-            postImageEl.style.display = 'none';
           }
 
-          // Profile pic, username, views
-          // Expecting post.author, post.authorPic, post.username, post.views
-          if (post.authorPic || post.username || post.views !== undefined) {
+          if (post.username || post.views !== undefined || post.authorPic) {
             profilePicEl.src = post.authorPic || defaultProfilePic;
-            profilePicEl.alt = post.username || 'User profile picture';
-            usernameEl.textContent = post.username || 'Unknown user';
+            usernameEl.textContent = post.username || 'Anonymous';
             viewsEl.textContent = post.views !== undefined ? `${post.views} views` : '';
             postInfoEl.style.display = 'flex';
-          } else {
-            postInfoEl.style.display = 'none';
           }
-
-          setStatus(''); // Clear any error
-
         })
-        .catch(error => {
-          console.error(error);
+        .catch(err => {
+          console.error(err);
           setStatus('Error fetching post data.');
         });
     }
