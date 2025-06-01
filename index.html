@@ -951,6 +951,41 @@ body {
 .hidden {
   display: none;
 }
+#notification-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 15, 0.95);
+  color: white;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.notif-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+#notification-list > div {
+  background: #1f1f2a;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
 </style>
 </head>
 <body>
@@ -987,7 +1022,16 @@ body {
     </svg>
   </div>
 </header>
-
+<!-- Fullscreen Notification Modal -->
+<div id="notification-modal" style="display: none;">
+  <div class="notif-modal-header">
+    <h2>Notifications</h2>
+    <button onclick="closeNotificationModal()" class="close-btn">&times;</button>
+  </div>
+  <div id="notification-list">
+    <p>Loading notifications...</p>
+  </div>
+</div>
 <main class="feed">
   <div class="composer">
     <div class="left">
@@ -2036,6 +2080,47 @@ loadPosts();       // async fresh load
   // Expose showPopup globally so you can call it anywhere
   window.showPopup = showPopup;
 })();
+  const notificationIcon = document.getElementById("notification-icon");
+  const notificationModal = document.getElementById("notification-modal");
+  const notificationList = document.getElementById("notification-list");
+
+  // Get current user ID
+  const userId = firebase.auth().currentUser?.uid;
+
+  function openNotificationModal() {
+    notificationModal.style.display = "block";
+    loadNotifications();
+  }
+
+  function closeNotificationModal() {
+    notificationModal.style.display = "none";
+  }
+
+  notificationIcon.addEventListener("click", openNotificationModal);
+
+  function loadNotifications() {
+    if (!userId) {
+      notificationList.innerHTML = "<p>Please sign in to view notifications.</p>";
+      return;
+    }
+
+    const ref = firebase.database().ref("/notifications/" + userId);
+    ref.once("value", snapshot => {
+      const data = snapshot.val();
+      if (!data) {
+        notificationList.innerHTML = "<p>No notifications yet.</p>";
+        return;
+      }
+
+      const notifs = Object.values(data).reverse();
+      notificationList.innerHTML = notifs.map(n => `
+        <div>
+          <strong>${n.title || "Notification"}</strong><br/>
+          <small>${n.message || ""}</small>
+        </div>
+      `).join("");
+    });
+  }
 </script>
 <script type="module">
   import {
