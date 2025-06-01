@@ -2579,5 +2579,67 @@ function closePopup() {
     });
   });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const notificationList = document.getElementById("notification-list");
+
+  function renderNotifications(notifs) {
+    if (!notifs || notifs.length === 0) {
+      notificationList.innerHTML = "<p>No notifications yet.</p>";
+      return;
+    }
+
+    notificationList.innerHTML = notifs.map(n => `
+      <div style="padding: 10px; border-bottom: 1px solid #ddd;">
+        <strong>${n.title || "Notification"}</strong><br />
+        <small>${n.body || n.message || ""}</small>
+        <br /><small style="color: gray; font-size: 0.8em;">${new Date(n.time).toLocaleString()}</small>
+      </div>
+    `).join("");
+  }
+
+  async function loadNotifications(uid) {
+    try {
+      const notifRef = ref(db, `notifications/${uid}`);
+      const snapshot = await get(notifRef);
+      if (!snapshot.exists()) {
+        renderNotifications([]);
+        return;
+      }
+      const data = snapshot.val();
+      const notifications = Object.values(data).reverse(); // latest first
+      renderNotifications(notifications);
+    } catch (error) {
+      notificationList.innerHTML = `<p style="color:red;">Error loading notifications: ${error.message}</p>`;
+    }
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      loadNotifications(user.uid);
+    } else {
+      notificationList.innerHTML = "<p>Please log in to view notifications.</p>";
+    }
+  });
+</script>
 </body>
 </html>
