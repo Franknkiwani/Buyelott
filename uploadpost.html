@@ -119,6 +119,100 @@
   color: white;
   outline: none;
 }
+/* scale-100: normal size */
+.scale-100 {
+  transform: scale(1);
+}
+
+/* scale-90: slightly smaller */
+.scale-90 {
+  transform: scale(0.9);
+}
+
+/* opacity-100: fully visible */
+.opacity-100 {
+  opacity: 1;
+}
+
+/* opacity-0: fully transparent */
+.opacity-0 {
+  opacity: 0;
+}
+
+/* Optional: smooth transition for transform and opacity */
+.transition-transform-opacity {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: #000; /* pitch black */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  animation: spin 1.5s linear infinite;
+}
+
+.hex {
+  width: 60px;
+  height: 52px;
+  background: linear-gradient(45deg, #00ffea, #005f73);
+  clip-path: polygon(
+    50% 0%,
+    93% 25%,
+    93% 75%,
+    50% 100%,
+    7% 75%,
+    7% 25%
+  );
+  filter: drop-shadow(0 0 8px #00ffea);
+  margin: 0 auto;
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #00ffea;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+/* Spin animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* Optional: smooth fade-in/out */
+#loginPopup.show {
+  display: flex !important;
+  animation: fadeInPopup 0.3s ease forwards;
+}
+
+@keyframes fadeInPopup {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
   </style>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
@@ -249,6 +343,25 @@
     <p id="popupMessage" class="text-lg"></p>
   </div>
 </div>
+<div class="popup scale-90 opacity-0 transition-transform-opacity">
+  <!-- popup content -->
+</div>
+<div id="successPopup" class="fixed hidden top-5 right-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl font-semibold text-lg z-50 transition-all duration-500"></div>
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner">
+    <div class="hex"></div>
+  </div>
+  <p class="loading-text">Loading your epic content...</p>
+</div>
+<div id="loginPopup" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-900 rounded-2xl shadow-lg w-80 max-w-full p-6 text-center text-white font-sans">
+    <h2 class="text-xl font-semibold mb-4">You’re not logged in</h2>
+    <p class="mb-6 text-gray-300">Please log in to continue.</p>
+    <button id="loginNowBtn" class="bg-blue-600 hover:bg-blue-700 transition rounded-full px-6 py-2 text-white font-semibold shadow-md">
+      Login Now
+    </button>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -269,6 +382,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
+// UI Elements
 const loginBtn = document.getElementById('loginBtn');
 const profilePic = document.getElementById('profilePic');
 const userHandle = document.getElementById('userHandle');
@@ -285,57 +399,63 @@ const dropZone = document.getElementById('dropZone');
 const imageInput = document.getElementById('imageInput');
 const dropZoneText = document.getElementById('dropZoneText');
 
-let currentUser = null;
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loadingText = document.getElementById('loadingText');
 
-// Redirect login to auth.html for email/password login
-loginBtn.addEventListener('click', () => {
+let currentUser = null;
+let currentUsername = null;
+let currentProfilePic = null;
+
+// Login redirect
+loginBtn?.addEventListener('click', () => {
   window.location.href = 'auth.html';
 });
 
-// Show or hide post button if logged in
-function togglePostButton(enabled) {
-  postBtn.disabled = !enabled;
-}
-
-// Load user info from Firebase and update UI
+// Load user data from Firebase
 async function loadUserInfo(uid) {
   try {
     const userRef = ref(database, `users/${uid}`);
     const snapshot = await get(userRef);
     const data = snapshot.exists() ? snapshot.val() : {};
-    profilePic.src = data.profilePic || 'https://via.placeholder.com/40';
-    userHandle.textContent = data.username ? `@${data.username}` : '@unknown';
+
+    currentUsername = data.username || 'unknown';
+    currentProfilePic = data.profilePic || 'https://via.placeholder.com/40';
+
+    profilePic.src = currentProfilePic;
+    userHandle.textContent = `@${currentUsername}`;
     userFollowers.textContent = `Followers: ${data.followers || 0}`;
-  } catch (error) {
-    console.error('Error loading user info:', error);
-    profilePic.src = 'https://via.placeholder.com/40';
+  } catch (err) {
+    console.error('Error loading user info:', err);
+    currentUsername = 'unknown';
+    currentProfilePic = 'https://via.placeholder.com/40';
+    profilePic.src = currentProfilePic;
     userHandle.textContent = '@unknown';
     userFollowers.textContent = 'Followers: 0';
   }
 }
 
-// Listen to auth state changes and update UI accordingly
+// Firebase auth state
 onAuthStateChanged(auth, user => {
   currentUser = user;
   if (user) {
-    togglePostButton(true);
+    postBtn.disabled = false;
     loadUserInfo(user.uid);
   } else {
-    togglePostButton(false);
+    postBtn.disabled = true;
     profilePic.src = 'https://via.placeholder.com/40';
     userHandle.textContent = '@unknown';
     userFollowers.textContent = 'Followers: 0';
   }
 });
 
-// Handle drag & drop and file input image preview
+// Drag/drop handling
 function handleFile(file) {
   if (!file.type.startsWith('image/')) {
     alert('Only image files are allowed!');
     return;
   }
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     previewImage.src = e.target.result;
     previewImage.classList.remove('hidden');
     dropZoneText.classList.add('hidden');
@@ -355,9 +475,7 @@ dropZone.addEventListener('dragleave', e => {
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('border-red-600', 'text-red-500');
-  if (e.dataTransfer.files.length) {
-    handleFile(e.dataTransfer.files[0]);
-  }
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
 });
 imageInput.addEventListener('change', e => {
   if (e.target.files.length) handleFile(e.target.files[0]);
@@ -387,29 +505,25 @@ function validateInputs() {
   return true;
 }
 
-// Upload image to Imgur
-const loadingOverlay = document.getElementById('loadingOverlay');
-const loadingText = document.getElementById('loadingText');
-
+// Loading overlay controls
 function showLoading() {
   loadingOverlay.classList.remove('hidden');
 }
-
 function hideLoading() {
   loadingOverlay.classList.add('hidden');
 }
 
+// Upload to Imgur
 async function uploadImageToImgur(base64Image) {
   const clientId = '891e5bb4aa94282';
   try {
-    // We'll do manual XMLHttpRequest to track upload progress
     return await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', 'https://api.imgur.com/3/image');
       xhr.setRequestHeader('Authorization', `Client-ID ${clientId}`);
       xhr.setRequestHeader('Content-Type', 'application/json');
 
-      xhr.upload.onprogress = (event) => {
+      xhr.upload.onprogress = event => {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
           loadingText.textContent = `Uploading... ${percent}%`;
@@ -419,14 +533,9 @@ async function uploadImageToImgur(base64Image) {
       xhr.onload = () => {
         if (xhr.status === 200) {
           const res = JSON.parse(xhr.responseText);
-          if (res.success) {
-            resolve(res.data.link);
-          } else {
-            reject(new Error('Imgur upload failed'));
-          }
-        } else {
-          reject(new Error('Imgur upload failed with status ' + xhr.status));
-        }
+          if (res.success) resolve(res.data.link);
+          else reject(new Error('Imgur upload failed'));
+        } else reject(new Error('Imgur upload failed: ' + xhr.status));
       };
 
       xhr.onerror = () => reject(new Error('Imgur upload failed'));
@@ -439,14 +548,13 @@ async function uploadImageToImgur(base64Image) {
       xhr.send(body);
     });
   } catch (err) {
-    console.error('Imgur upload error:', err);
-    alert('Failed to upload image. Try again later.');
+    console.error('Imgur error:', err);
+    alert('Failed to upload image.');
     return null;
   }
 }
 
-// Update your publish button click to show loading overlay
-
+// Publish post
 postBtn.addEventListener('click', async () => {
   if (!currentUser) {
     alert('Please login first!');
@@ -459,7 +567,6 @@ postBtn.addEventListener('click', async () => {
   showLoading();
 
   const imageUrl = await uploadImageToImgur(previewImage.src);
-
   if (!imageUrl) {
     postBtn.disabled = false;
     postBtn.textContent = 'Publish';
@@ -469,12 +576,18 @@ postBtn.addEventListener('click', async () => {
 
   loadingText.textContent = 'Finalizing post... 100%';
 
+  // Auto-hashtag tags
+  const rawTags = tagsInput.value.split(/[\s,]+/).map(t => t.trim()).filter(t => t.length);
+  const formattedTags = rawTags.map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+
   const postData = {
     uid: currentUser.uid,
+    username: currentUsername,
+    profilePic: currentProfilePic,
     imageUrl,
     title: titleInput.value.trim(),
     description: captionInput.value.trim(),
-    tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t.length > 0),
+    tags: formattedTags,
     category: categorySelect.value,
     timestamp: Date.now()
   };
@@ -483,9 +596,8 @@ postBtn.addEventListener('click', async () => {
     const postsRef = ref(database, 'post');
     const newPostRef = push(postsRef);
     await set(newPostRef, postData);
-    alert('Post published successfully!');
+    showSuccessPopup('Post published successfully!');
 
-    // Reset form & UI
     previewImage.src = '';
     previewImage.classList.add('hidden');
     dropZoneText.classList.remove('hidden');
@@ -493,16 +605,32 @@ postBtn.addEventListener('click', async () => {
     captionInput.value = '';
     tagsInput.value = '';
     categorySelect.value = '';
-  } catch (error) {
-    console.error('Error saving post:', error);
-    alert('Failed to save post. Please try again.');
+  } catch (err) {
+    console.error('Error saving post:', err);
+    alert('Failed to save post. Try again.');
   }
 
   postBtn.disabled = false;
   postBtn.textContent = 'Publish';
   hideLoading();
 });
+function showSuccessPopup(message) {
+  const popup = document.getElementById('successPopup');
+  popup.textContent = message;
 
+  // Show it with a pop-in animation
+  popup.classList.remove('hidden');
+  popup.classList.add('scale-100', 'opacity-100');
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    popup.classList.add('opacity-0', 'scale-90');
+    setTimeout(() => {
+      popup.classList.add('hidden');
+      popup.classList.remove('opacity-0', 'scale-90');
+    }, 300); // wait for animation to finish
+  }, 3000);
+}
 </script>
 <script>
   const profilePic = document.getElementById('profilePic');
@@ -528,6 +656,64 @@ popupClose.addEventListener('click', closePopup);
 // Close if clicking outside popup box
 popupOverlay.addEventListener('click', (e) => {
   if (e.target === popupOverlay) closePopup();
+});
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loadingScreen = document.getElementById('loadingScreen');
+    loadingScreen.style.transition = 'opacity 0.5s ease';
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => loadingScreen.style.display = 'none', 500);
+  }, 5000);
+});
+</script>
+<script>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Elements
+const loadingScreen = document.getElementById('loadingScreen');
+const loginPopup = document.getElementById('loginPopup');
+const loginNowBtn = document.getElementById('loginNowBtn');
+
+// Show loading screen while checking auth
+loadingScreen.style.display = 'flex';
+
+// Listen for auth changes
+onAuthStateChanged(auth, (user) => {
+  // Hide loading screen after Firebase check
+  loadingScreen.style.display = 'none';
+
+  if (user) {
+    console.log('User logged in:', user.uid);
+    // User is logged in — hide popup if it was shown
+    loginPopup.classList.remove('show');
+    // Add your post-login logic here if needed
+  } else {
+    console.log('No user logged in');
+    // Show neat iPhone-style popup
+    loginPopup.classList.add('show');
+  }
+});
+
+// Redirect to login on button click
+loginNowBtn.addEventListener('click', () => {
+  window.location.href = 'login.html';
 });
 </script>
 </body>
