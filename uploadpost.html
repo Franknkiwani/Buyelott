@@ -670,7 +670,6 @@ window.addEventListener('load', () => {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -682,36 +681,47 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Elements
 const loadingScreen = document.getElementById('loadingScreen');
 const loginPopup = document.getElementById('loginPopup');
 const loginNowBtn = document.getElementById('loginNowBtn');
 
-// Show loading screen while checking auth
+// Show loading at start
 loadingScreen.style.display = 'flex';
 
-// Listen for auth changes
-onAuthStateChanged(auth, (user) => {
-  // Hide loading screen after Firebase check
-  loadingScreen.style.display = 'none';
+// Prevent page interaction behind popup by adding a full overlay
+const overlay = document.createElement('div');
+overlay.style.position = 'fixed';
+overlay.style.top = '0';
+overlay.style.left = '0';
+overlay.style.width = '100vw';
+overlay.style.height = '100vh';
+overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+overlay.style.zIndex = '9998';
+overlay.style.display = 'none';
+document.body.appendChild(overlay);
 
+onAuthStateChanged(auth, (user) => {
+  loadingScreen.style.display = 'none';
+  
   if (user) {
-    console.log('User logged in:', user.uid);
-    // User is logged in — hide popup if it was shown
+    // User logged in — remove overlay & popup if shown
     loginPopup.classList.remove('show');
-    // Add your post-login logic here if needed
+    overlay.style.display = 'none';
   } else {
-    console.log('No user logged in');
-    // Show neat iPhone-style popup
+    // No user — show popup + overlay
     loginPopup.classList.add('show');
+    overlay.style.display = 'block';
+
+    // Optional: Auto redirect after 10 seconds if they don't click
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 10000); 
   }
 });
 
-// Redirect to login on button click
 loginNowBtn.addEventListener('click', () => {
   window.location.href = 'login.html';
 });
