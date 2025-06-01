@@ -698,6 +698,54 @@ body {
   cursor: not-allowed;
   transform: none;
 }
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  max-width: 90%;
+  width: 300px;
+  font-family: "SF Pro", sans-serif;
+}
+
+#popupMessage {
+  color: red;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.popup-box button {
+  margin-top: 15px;
+  padding: 10px 18px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.popup-box button:hover {
+  background: #333;
+}
 </style>
 </head>
 <body>
@@ -781,6 +829,14 @@ body {
       <div class="circle-core"></div>
     </div>
     <p class="spinner-text">Collecting data...</p>
+  </div>
+</div>
+<button onclick="showPopup('That\'s not a valid image, bro.')">Show Popup</button>
+
+<div id="customPopup" class="popup hidden">
+  <div class="popup-box">
+    <p id="popupMessage">Placeholder message</p>
+    <button id="closeBtn">OK</button>
   </div>
 </div>
 <script type="module">
@@ -1225,7 +1281,7 @@ uploadInput.addEventListener('change', (e) => {
     };
     reader.readAsDataURL(file);
   } else {
-    alert("That's not a valid image, bro.");
+    showPopup("That's not a valid image, bro.");
   }
 });
 const sendBtn = document.getElementById('sendPostBtn');
@@ -1235,7 +1291,7 @@ sendBtn.addEventListener('click', () => {
   const text = textInput.value.trim();
 
   if (!text) {
-    alert("Type something first.");
+    showPopup("Type something first.");
     return;
   }
 
@@ -1696,6 +1752,352 @@ async function loadNextPost() {
 // ------------------------ Kickoff ------------------------
 loadCachedPosts(); // fast feedback from cache
 loadPosts();       // async fresh load
+
+(() => {
+  const popup = document.getElementById("customPopup");
+  const popupMessage = document.getElementById("popupMessage");
+  const closeBtn = document.getElementById("closeBtn");
+
+  // Show popup with a given message
+  function showPopup(message) {
+    popupMessage.textContent = message;
+    popup.classList.remove("hidden");
+  }
+
+  // Close popup on OK button click
+  closeBtn.addEventListener("click", () => {
+    popup.classList.add("hidden");
+  });
+
+  // Expose showPopup globally so you can call it anywhere
+  window.showPopup = showPopup;
+})();
 </script>
+<script type="module">
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  import {
+    get,
+    child,
+    ref,
+    getDatabase
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const dbRef = ref(db);
+  const auth = getAuth();
+  let currentUser = null;
+
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+  });
+
+  const searchIcon = document.getElementById('search-icon');
+  const searchBar = document.getElementById('search-bar');
+  const blurOverlay = document.getElementById('blur-overlay');
+  const searchInput = document.getElementById('search-input');
+  const suggestionsBox = document.getElementById('suggestions');
+  const header = document.querySelector('header');
+  const mainFeed = document.querySelector('main.feed');
+  const resultsBox = document.getElementById('search-results');
+
+  let activeIndex = -1;
+  let filtered = [];
+
+  function openSearch() {
+    searchBar.classList.add('active');
+    blurOverlay.classList.add('active');
+    searchBar.setAttribute('aria-hidden', 'false');
+    blurOverlay.setAttribute('aria-hidden', 'false');
+    header.style.opacity = '0';
+    mainFeed.style.filter = 'blur(6px) brightness(0.7)';
+    searchInput.focus();
+    clearSuggestions();
+    resultsBox.innerHTML = '';
+  }
+
+  function closeSearch() {
+    searchBar.classList.remove('active');
+    blurOverlay.classList.remove('active');
+    searchBar.setAttribute('aria-hidden', 'true');
+    blurOverlay.setAttribute('aria-hidden', 'true');
+    header.style.opacity = '1';
+    mainFeed.style.filter = 'none';
+    searchInput.value = '';
+    clearSuggestions();
+    resultsBox.innerHTML = '';
+  }
+
+  function clearSuggestions() {
+    suggestionsBox.classList.remove('active');
+    suggestionsBox.innerHTML = '';
+    activeIndex = -1;
+  }
+
+  async function renderSuggestions() {
+    if (filtered.length === 0) {
+      suggestionsBox.innerHTML = `<div class="no-results">No results found</div>`;
+      suggestionsBox.classList.add('active');
+      return;
+    }
+
+    suggestionsBox.innerHTML = '';
+
+    for (let i = 0; i < filtered.length; i++) {
+      const item = filtered[i];
+      const div = document.createElement('div');
+      div.className = 'suggestion-item';
+      div.setAttribute('role', 'option');
+      div.setAttribute('tabindex', '0');
+      div.dataset.id = item.id;
+
+      div.innerHTML = `
+        <img src="${item.image || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" class="suggestion-thumb" />
+        <div class="suggestion-text">
+          <div class="suggestion-title">${item.title}</div>
+          <div class="suggestion-meta">
+            <span>${item.views} views</span>
+            <span>•</span>
+            <span>${item.username || 'cyberchat'}</span>
+          </div>
+        </div>
+      `;
+
+      if (i === activeIndex) div.classList.add('active');
+      suggestionsBox.appendChild(div);
+    }
+
+    suggestionsBox.classList.add('active');
+  }
+
+  async function updateSuggestions() {
+    const val = searchInput.value.trim().toLowerCase();
+    if (!val) {
+      clearSuggestions();
+      return;
+    }
+
+    try {
+      const snapshot = await get(child(dbRef, 'post'));
+      if (!snapshot.exists()) {
+        clearSuggestions();
+        return;
+      }
+      const data = snapshot.val();
+
+      filtered = Object.entries(data)
+        .filter(([id, post]) => post.title && post.title.toLowerCase().includes(val))
+        .map(([id, post]) => ({
+          id,
+          title: post.title,
+          views: post.views || 0,
+          thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img',
+          author: post.author || 'Unknown'
+        }));
+
+      activeIndex = -1;
+      renderSuggestions();
+
+    } catch (err) {
+      console.error('Error fetching suggestions:', err);
+      clearSuggestions();
+    }
+  }
+
+  function debounce(func, delay = 300) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  // Relevance scoring for sorting
+  function relevanceScore(query, text) {
+    if (!text) return 0;
+    query = query.toLowerCase();
+    text = text.toLowerCase();
+    if (text === query) return 100;
+    if (text.includes(query)) return 50;
+    let score = 0;
+    for (const c of query) {
+      if (text.includes(c)) score++;
+    }
+    return score;
+  }
+
+  // Render full search results feed with featured + related posts
+  function renderSearchResults(posts, query) {
+    if (!posts.length) {
+      resultsBox.innerHTML = `<div class="no-results">No posts found for "${query}"</div>`;
+      return;
+    }
+
+    posts.sort((a, b) => relevanceScore(query, b.title) - relevanceScore(query, a.title));
+
+    const featured = posts[0];
+    const others = posts.slice(1);
+
+    let html = `
+  <h2>Search results for "${query}"</h2>
+  <section class="featured-post">
+    <h3>${featured.title}</h3>
+    <img src="${featured.thumbnailUrl || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" />
+    <p>${featured.body || 'No content available'}</p>
+    <small>By ${featured.author || 'Unknown'} | ${featured.views || 0} views</small>
+  </section>
+  <hr/>
+  <section class="other-posts">
+    <h4>Related posts</h4>
+    <ul>
+`;
+
+others.forEach(post => {
+  html += `
+<li class="search-post-item" data-id="${post.id}" tabindex="0" role="button" aria-pressed="false">
+  <img src="${post.image || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" />
+  <div>
+    <strong>${post.title}</strong><br/>
+    <small>${post.views || 0} views</small>
+  </div>
+</li>
+  `;
+});
+    html += '</ul></section>';
+    resultsBox.innerHTML = html;
+
+    // Click on related posts redirects to viewpost page
+    document.querySelectorAll('.search-post-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        if (!id) return;
+        window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
+      });
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+    });
+  }
+
+  async function doFullSearch(query) {
+    closeSearch();
+    try {
+      const snapshot = await get(child(dbRef, 'post'));
+      if (!snapshot.exists()) {
+        resultsBox.innerHTML = `<div class="no-results">No posts found</div>`;
+        return;
+      }
+      const data = snapshot.val();
+      const allPosts = Object.entries(data).map(([id, post]) => ({
+        id,
+        title: post.title,
+        body: post.body || '',
+        views: post.views || 0,
+     thumbnailUrl: post.thumbnailUrl || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain',
+        author: post.author || 'Unknown'
+      }));
+
+      renderSearchResults(allPosts, query);
+
+    } catch (err) {
+      console.error('Error fetching full search:', err);
+      resultsBox.innerHTML = `<div class="no-results">Error loading search results</div>`;
+    }
+  }
+
+  // Redirect when clicking on suggestion in the suggestion box
+  suggestionsBox.addEventListener('click', e => {
+    const item = e.target.closest('.suggestion-item');
+    if (!item) return;
+    const id = item.dataset.id;
+    if (!id) return;
+    window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
+  });
+
+  // Keyboard navigation & selection for suggestions
+  searchInput.addEventListener('keydown', e => {
+    if (suggestionsBox.classList.contains('active')) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % filtered.length;
+        renderSuggestions();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+        renderSuggestions();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && filtered[activeIndex]) {
+          const id = filtered[activeIndex].id;
+          window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
+        } else if (searchInput.value.trim()) {
+          doFullSearch(searchInput.value.trim());
+          closeSearch();
+        }
+      } else if (e.key === 'Escape') {
+        closeSearch();
+      }
+    }
+  });
+
+  // Update suggestions on input with debounce
+  searchInput.addEventListener('input', debounce(updateSuggestions, 300));
+
+ // Open search overlay on icon click
+  searchIcon.addEventListener('click', () => {
+    openSearch();
+  });
+
+  // Close search when clicking on the blur overlay
+  blurOverlay.addEventListener('click', () => {
+    closeSearch();
+  });
+
+  // Close search on Escape key anywhere
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && searchBar.classList.contains('active')) {
+      closeSearch();
+    }
+  });
+
+  // Optional: Close search if user clicks outside search area
+  document.addEventListener('click', e => {
+    if (
+      searchBar.classList.contains('active') &&
+      !searchBar.contains(e.target) &&
+      e.target !== searchIcon
+    ) {
+      closeSearch();
+    }
+  });
+  function showPopup(message) {
+  document.getElementById("popupMessage").textContent = message;
+  document.getElementById("customPopup").classList.remove("hidden");
+}
+
+function closePopup() {
+  document.getElementById("customPopup").classList.add("hidden");
+}
+  </script>
 </body>
 </html>
