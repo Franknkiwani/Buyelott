@@ -574,6 +574,86 @@ body.light-theme {
 .load-more-btn:hover {
   background: #333;
 }
+/* Add to your global CSS or in a <style> tag */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle-border {
+  width: 80px;
+  height: 80px;
+  border: 6px solid #444;
+  border-top: 6px solid #00ffe1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.circle-core {
+  width: 40px;
+  height: 40px;
+  background: #00ffe1;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  margin: auto;
+}
+
+.spinner-text {
+  color: #00ffe1;
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+/* Disable selection by default */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Enable selection only in title and description areas */
+.post-title,
+.post-description {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
 </style>
 </head>
 <body>
@@ -650,6 +730,15 @@ body.light-theme {
 <div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
 <div id="search-results" class="search-results"></div>
 <div id="posts-container"></div>
+<!-- Spinner Container -->
+<div id="loading-spinner" class="spinner-overlay">
+  <div class="spinner-box">
+    <div class="circle-border">
+      <div class="circle-core"></div>
+    </div>
+    <p class="spinner-text">Collecting data...</p>
+  </div>
+</div>
 <script type="module">
   import {
   getAuth,
@@ -1259,15 +1348,26 @@ function createPostElement(post, postId, userLikes = {}) {
   }
 
 const shareBtn = postDiv.querySelector('.share-btn');
-const resultPara = document.createElement('div');
-resultPara.className = 'share-result';
-shareBtn.after(resultPara); // just below the button
+
+// Create feedback div only once
+let resultPara = postDiv.querySelector('.share-result');
+if (!resultPara) {
+  resultPara = document.createElement('div');
+  resultPara.className = 'share-result';
+  resultPara.style.fontSize = '0.9rem';
+  resultPara.style.marginTop = '6px';
+  shareBtn.after(resultPara);
+}
 
 shareBtn.addEventListener('click', async (e) => {
   e.stopPropagation();
 
-  const postId = post.id || post.postId || '';
-  if (!postId) return;
+  const postId = post.id || post.postId;
+  if (!postId) {
+    resultPara.textContent = "Error: Missing post ID.";
+    resultPara.style.color = 'red';
+    return;
+  }
 
   const shareUrl = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(postId)}`;
   const shareData = {
@@ -1279,19 +1379,20 @@ shareBtn.addEventListener('click', async (e) => {
   try {
     if (navigator.share) {
       await navigator.share(shareData);
-      resultPara.textContent = "Post shared successfully!";
+      resultPara.textContent = "✅ Post shared successfully!";
       resultPara.style.color = 'green';
     } else {
-      resultPara.textContent = "Web Share API not supported. Using fallback...";
+      resultPara.textContent = "ℹ️ Web Share API not supported. Showing link...";
       resultPara.style.color = 'orange';
-      // You can call your fallback modal here
+      // Trigger fallback
       showShareModal(shareUrl, shareBtn);
     }
   } catch (err) {
-    resultPara.textContent = `Error sharing: ${err.message || err}`;
+    resultPara.textContent = `❌ Share failed: ${err.message || err}`;
     resultPara.style.color = 'red';
   }
 
+  // Auto-clear after 3 seconds
   setTimeout(() => {
     resultPara.textContent = '';
   }, 3000);
@@ -1371,11 +1472,26 @@ async function loadUserLikes() {
   }
 }
 
+// ------------------------ Spinner Control ------------------------
+function showSpinner() {
+  const spinner = document.getElementById('loading-spinner');
+  if (spinner) spinner.style.display = 'flex';
+}
+
+function hideSpinner() {
+  const spinner = document.getElementById('loading-spinner');
+  if (spinner) spinner.style.display = 'none';
+}
+
 // ------------------------ Load Fresh Posts with Infinite Scroll ------------------------
 async function loadPosts() {
+  showSpinner();
   try {
     const snapshot = await get(child(dbRef, 'post'));
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists()) {
+      hideSpinner();
+      return;
+    }
 
     const posts = snapshot.val();
     const newCache = JSON.stringify(posts);
@@ -1404,6 +1520,7 @@ async function loadPosts() {
   } catch (error) {
     console.error('Error loading fresh posts:', error);
   }
+  hideSpinner();
 }
 
 // ------------------------ Load Next Post ------------------------
@@ -1413,7 +1530,6 @@ async function loadNextPost() {
   isLoading = true;
 
   const post = randomizedPostList[currentIndex];
-
   const container = document.getElementById('posts-container');
 
   try {
@@ -1436,7 +1552,7 @@ async function loadNextPost() {
 
   totalPostsLoaded++;
   postsSinceLastAd++;
-  
+
   // --- Insert native ad once at random position ---
   if (!nativeAdInserted && totalPostsLoaded === nativeAdIndex) {
     const nativeWrapper = document.createElement('div');
@@ -1536,9 +1652,8 @@ async function loadNextPost() {
 }
 
 // ------------------------ Kickoff ------------------------
-loadCachedPosts(); // fast feedback
+loadCachedPosts(); // fast feedback from cache
 loadPosts();       // async fresh load
 </script>
-
 </body>
 </html>
