@@ -1571,6 +1571,7 @@ function createPostElement(post, postId, userLikes = {}) {
   postDiv.dataset.id = postId;
 
   const username = post.username || 'Anonymous';
+  const handle = post.handle ? '@' + post.handle : 'view profile';
   const profilePic = post.profilePic || 'https://via.placeholder.com/50';
   const postImage = post.imageUrl || post.image || '';
   const title = post.title || 'Untitled Post';
@@ -1598,7 +1599,7 @@ function createPostElement(post, postId, userLikes = {}) {
           ${username}
           ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
         </div>
-        <div class="followers-count" data-uid="${post.uid}">Loading followers...</div>
+        <div class="handle">${handle}</div>
       </div>
       <div class="post-meta">
         <button class="share-btn">share</button>
@@ -1654,7 +1655,7 @@ function createPostElement(post, postId, userLikes = {}) {
   // COMMENT REDIRECT
   postDiv.querySelector('.comment-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-    window.location.href = `viewport.html/${postId}`;
+    window.location.href = `viewpost.html/${postId}`;
   });
 
   // READ MORE
@@ -1722,22 +1723,7 @@ postDiv.addEventListener('click', (e) => {
     window.location.href = `viewpost.html?postId=${postId}`;
   }
 });
-// Now fetch followers count dynamically
-  if (post.uid) {
-    const followersRef = firebase.database().ref(`/users/${post.uid}/followers`);
-    followersRef.once('value')
-      .then(snapshot => {
-        const followersData = snapshot.val();
-        const count = followersData ? Object.keys(followersData).length : 0;
-        const followersEl = postDiv.querySelector(`.followers-count[data-uid="${post.uid}"]`);
-        if (followersEl) {
-          followersEl.textContent = `${count} follower${count === 1 ? '' : 's'}`;
-        }
-      })
-      .catch(err => {
-        console.error('Failed to load followers:', err);
-      });
-  }
+
   return postDiv;
 }
 
