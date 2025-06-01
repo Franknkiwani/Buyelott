@@ -925,6 +925,32 @@ body {
       fill: currentColor;
     }
   }
+  .top-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  color: #111;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 14px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  transition: all 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.top-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hidden {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -1060,6 +1086,9 @@ body {
     </li>
   </ul>
 </nav>
+<div id="topNotification" class="top-toast hidden">
+  <span id="toastMessage">🔔 Notification here</span>
+</div>
 <script type="module">
   import {
   getAuth,
@@ -2410,6 +2439,61 @@ function closePopup() {
     }
   });
 </script>
+<script type="module">
+  // Import Firebase modular SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+  // Your actual Firebase config (swap with your real one)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // Show notification function
+  function showTopNotification(message, duration = 4000) {
+    const toast = document.getElementById("topNotification");
+    const text = document.getElementById("toastMessage");
+
+    text.textContent = message;
+    toast.classList.remove("hidden");
+    toast.classList.add("show");
+
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.classList.add("hidden"), 300);
+    }, duration);
+  }
+
+  // Listen for auth and then listen to notifications
+  onAuthStateChanged(auth, user => {
+    if (!user) return;
+
+    const uid = user.uid;
+    const notificationsRef = ref(db, `notifications/${uid}`);
+
+    onChildAdded(notificationsRef, snapshot => {
+      const data = snapshot.val();
+      if (data && data.message) {
+        showTopNotification(data.message);
+
+        // Remove notification after displaying to avoid repeats
+        remove(ref(db, `notifications/${uid}/${snapshot.key}`));
+      }
+    });
+  });
+</script>
 </body>
 </html>
