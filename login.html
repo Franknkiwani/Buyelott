@@ -2,106 +2,285 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CyberChat Auth</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CyberAuth</title>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
   <style>
-    *, *::before, *::after {
+    :root {
+      --bg: #fefefe;
+      --text: #111;
+      --card: #fff;
+      --border: #ccc;
+      --primary: #ff5e8e;
+      --success: #4caf50;
+      --error: #f44336;
+      --overlay-bg: rgba(0,0,0,0.4);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111;
+        --text: #fff;
+        --card: #1c1c1c;
+        --border: #333;
+        --primary: #ff5e8e;
+      }
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: "Comic Neue", system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    html, body {
-      height: 100%;
-      background: #0d0d0d;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 1rem;
     }
 
-    #authModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #1c1c1c;
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border-radius: 1.5rem;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .tab-switcher {
+      display: flex;
+      justify-content: space-between;
       border-radius: 1rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      padding: 2rem;
-      width: 90%;
-      max-width: 400px;
-      z-index: 999;
+      overflow: hidden;
+      background: var(--border);
+      margin-bottom: 1.5rem;
     }
 
-    h2 {
-      color: white;
+    .tab {
+      flex: 1;
       text-align: center;
-      margin-bottom: 1rem;
+      padding: 0.75rem 0;
+      font-weight: bold;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.3s, color 0.3s;
+      user-select: none;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .form {
+      display: none;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .form.active {
+      display: flex;
     }
 
     input, button {
       width: 100%;
       padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: none;
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
       font-size: 1rem;
-      background: #2a2a2a;
-      color: white;
-      outline: none;
-      transition: all 0.2s ease;
+      font-weight: 600;
+      outline-offset: 2px;
+      outline-color: var(--primary);
+      background: transparent;
+      color: var(--text);
+      box-sizing: border-box;
+      transition: border-color 0.3s;
     }
 
-    input::placeholder {
-      color: #aaa;
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    input[readonly] {
+      background: #eee;
+      color: #777;
+      cursor: not-allowed;
     }
 
     button {
-      background: #00c6ff;
-      font-weight: bold;
-      color: #000;
+      background: var(--primary);
+      color: white;
+      border: none;
       cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+      transition: background-color 0.3s;
     }
 
-    button:hover {
-      background: #00a3cc;
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
 
-    .switch {
-      color: #888;
-      text-align: center;
+    button:hover:not(:disabled) {
+      background: #e94e7a;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 1rem auto;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      display: block;
+    }
+
+    .forgot {
+      text-align: right;
       font-size: 0.9rem;
       cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+      margin-top: -0.3rem;
+      margin-bottom: 1rem;
+    }
+    .forgot:hover {
+      text-decoration: underline;
     }
 
-    .error {
-      color: #ff5c5c;
-      font-size: 0.85rem;
+    .note {
       text-align: center;
+      font-size: 0.85rem;
+      color: gray;
+      margin-top: 0.5rem;
+      user-select: none;
     }
 
-    .hidden {
+    /* Popup modal overlay */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
       display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-box {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 1.2rem;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      max-width: 320px;
+      text-align: center;
+      color: var(--text);
+      user-select: none;
+    }
+
+    .popup-box.success {
+      border: 4px solid var(--success);
+    }
+
+    .popup-box.error {
+      border: 4px solid var(--error);
+    }
+
+    .popup-box p {
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .popup-box button {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      transition: background-color 0.3s;
+    }
+    .popup-box button:hover {
+      background: #e94e7a;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1500;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% {transform: rotate(0deg);}
+      100% {transform: rotate(360deg);}
     }
   </style>
 </head>
 <body>
+  <div class="auth-container" role="main" aria-label="Authentication container">
 
-<div id="authModal">
-  <h2 id="formTitle">Create Your CyberChat</h2>
-  <input type="text" id="username" placeholder="Username (required)" />
-  <input type="email" id="email" placeholder="Email (required)" />
-  <input type="password" id="password" placeholder="Password (min 6 chars)" />
-  <input type="text" id="profilePic" placeholder="Profile Image URL (optional)" />
-  <button id="authButton">Register</button>
-  <div class="switch" id="switchMode">Already have an account? Log in</div>
-  <div class="error" id="errorMsg"></div>
+    <div class="tab-switcher" role="tablist" aria-label="Authentication tabs">
+      <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="login" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="signup" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+    </div>
+
+    <form id="login" class="form active" aria-labelledby="tab-login" onsubmit="return false" novalidate>
+      <input type="email" id="login-email" placeholder="Email" aria-label="Email" required autocomplete="email" />
+      <input type="password" id="login-password" placeholder="Password" aria-label="Password" required autocomplete="current-password" />
+      <div class="forgot" role="button" tabindex="0" aria-label="Forgot password" onclick="forgotPassword()" onkeypress="if(event.key==='Enter') forgotPassword()">Forgot password?</div>
+      <button type="submit" id="login-btn" onclick="loginUser()">Login</button>
+    </form>
+
+    <form id="signup" class="form" aria-labelledby="tab-signup" onsubmit="return false" novalidate>
+      <img src="https://via.placeholder.com/80" id="preview" class="profile-pic" alt="Profile preview" />
+      <input type="file" id="pic-upload" accept="image/*" aria-label="Upload profile picture" required />
+      <input type="text" id="username" placeholder="Username (max 8)" maxlength="8" aria-label="Username" required />
+      <input type="text" id="handle" placeholder="Handle" readonly aria-label="Handle" />
+      <input type="email" id="signup-email" placeholder="Email" aria-label="Email" required autocomplete="email" />
+      <input type="password" id="signup-password" placeholder="Password" aria-label="Password" required autocomplete="new-password" />
+      <button type="submit" id="signup-btn" onclick="signupUser()">Sign Up</button>
+    </form>
+
+    <div class="note" aria-live="polite" aria-atomic="true">CyberAuth</div>
+
+  </div>
+
+  <!-- Popup modal -->
+  <div class="popup-overlay" id="popup-overlay" role="alertdialog" aria-modal="true" aria-labelledby="popup-message" aria-describedby="popup-desc" tabindex="-1">
+    <div class="popup-box" id="popup-box">
+      <p id="popup-message"></p>
+      <button id="popup-ok" onclick="closePopup()">OK</button>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loading-overlay" aria-hidden="true" aria-label="Loading">
+    <div class="loader" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
+<script>
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -113,68 +292,214 @@
     measurementId: "G-LLT6F9WRKH"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const usernameInput = document.getElementById("username");
-  const profilePicInput = document.getElementById("profilePic");
-  const authButton = document.getElementById("authButton");
-  const switchMode = document.getElementById("switchMode");
-  const formTitle = document.getElementById("formTitle");
-  const errorMsg = document.getElementById("errorMsg");
+  // Elements
+  const loginForm = document.getElementById('login');
+  const signupForm = document.getElementById('signup');
+  const loginBtn = document.getElementById('login-btn');
+  const signupBtn = document.getElementById('signup-btn');
+  const forgotBtn = document.querySelector('.forgot');
+  const previewImg = document.getElementById('preview');
+  const picUpload = document.getElementById('pic-upload');
+  const usernameInput = document.getElementById('username');
+  const handleInput = document.getElementById('handle');
+  const popupOverlay = document.getElementById('popup-overlay');
+  const popupBox = document.getElementById('popup-box');
+  const popupMessage = document.getElementById('popup-message');
+  const popupOk = document.getElementById('popup-ok');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const note = document.querySelector('.note');
+  const tabs = document.querySelectorAll('.tab');
 
-  let isLogin = false;
+  // Utility: Show popup with message and type ('success' or 'error')
+  function showPopup(message, type = 'success') {
+    popupMessage.textContent = message;
+    popupBox.className = 'popup-box ' + type;
+    popupOverlay.style.display = 'flex';
+    popupOk.focus();
+  }
 
-  switchMode.addEventListener("click", () => {
-    isLogin = !isLogin;
-    formTitle.textContent = isLogin ? "Welcome Back to CyberChat" : "Create Your CyberChat";
-    authButton.textContent = isLogin ? "Login" : "Register";
-    switchMode.textContent = isLogin ? "New here? Create an account" : "Already have an account? Log in";
-    usernameInput.style.display = isLogin ? "none" : "block";
-    profilePicInput.style.display = isLogin ? "none" : "block";
-    errorMsg.textContent = "";
+  function closePopup() {
+    popupOverlay.style.display = 'none';
+  }
+
+  popupOk.addEventListener('click', closePopup);
+
+  // Switch tabs for login/signup
+  function switchTab(tabName) {
+    tabs.forEach(tab => {
+      if (tab.id === 'tab-' + tabName) {
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        document.getElementById(tabName).classList.add('active');
+      } else {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+        const formId = tab.id.replace('tab-', '');
+        document.getElementById(formId).classList.remove('active');
+      }
+    });
+  }
+
+  // Handle profile picture preview on upload
+  picUpload.addEventListener('change', () => {
+    const file = picUpload.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showPopup('Please upload a valid image file.', 'error');
+      picUpload.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImg.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   });
 
-  authButton.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    const username = usernameInput.value.trim();
-    const profilePic = profilePicInput.value.trim() || "https://i.imgur.com/3d0XQGJ.png"; // fallback avatar
+  // Generate handle from username (lowercase, no spaces)
+  usernameInput.addEventListener('input', () => {
+    const val = usernameInput.value.trim();
+    if (val.length === 0) {
+      handleInput.value = '';
+      return;
+    }
+    handleInput.value = val.toLowerCase().replace(/[^a-z0-9]/g, '');
+  });
 
-    if (!email || !password || (!isLogin && !username)) {
-      errorMsg.textContent = "Please fill in all required fields.";
+  // Show/hide loading overlay
+  function setLoading(show) {
+    loadingOverlay.style.display = show ? 'flex' : 'none';
+    note.textContent = show ? 'Processing...' : 'CyberAuth';
+  }
+
+  // Login user
+  async function loginUser() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) {
+      showPopup('Please enter email and password.', 'error');
+      return;
+    }
+    try {
+      setLoading(true);
+      await auth.signInWithEmailAndPassword(email, password);
+      showPopup('Logged in successfully!', 'success');
+      setTimeout(() => {
+        window.location.href = "index.html"; // ← redirect on login
+      }, 1000);
+    } catch (error) {
+      showPopup('Login failed: ' + error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Signup user with profile pic upload and data save
+  async function signupUser() {
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const username = usernameInput.value.trim();
+    const handle = handleInput.value.trim();
+    const file = picUpload.files[0];
+
+    if (!email || !password || !username || !handle || !file) {
+      showPopup('All fields are required.', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showPopup('Password must be at least 6 characters.', 'error');
       return;
     }
 
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "home.html";
-      } else {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCred.user.uid;
+      setLoading(true);
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
 
-        await set(ref(db, `users/${uid}`), {
-          email,
-          username,
-          profilePic,
-          stats: {
-            views: 0,
-            followers: 0,
-            revenue: 0,
-            likes: 0
-          }
-        });
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
 
-        window.location.href = "home.html";
-      }
-    } catch (err) {
-      errorMsg.textContent = err.message;
+      reader.onload = async (e) => {
+        try {
+          const base64Img = e.target.result;
+
+          await db.ref('users/' + user.uid).set({
+            username,
+            handle,
+            email,
+            profilePic: base64Img,
+            createdAt: Date.now()
+          });
+
+          showPopup('Signup successful! Please login.', 'success');
+          switchTab('login');
+          signupForm.reset();
+          previewImg.src = "https://via.placeholder.com/80";
+        } catch (err) {
+          showPopup('Error saving user data: ' + err.message, 'error');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      reader.onerror = () => {
+        showPopup('Failed to read profile picture.', 'error');
+        setLoading(false);
+      };
+
+    } catch (error) {
+      showPopup('Signup failed: ' + error.message, 'error');
+      setLoading(false);
     }
+  }
+
+  // Forgot password using the email from the login form
+  async function forgotPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      showPopup('Please enter your email in the login field first.', 'error');
+      return;
+    }
+    try {
+      setLoading(true);
+      await auth.sendPasswordResetEmail(email);
+      showPopup('Password reset email sent to ' + email, 'success');
+    } catch (error) {
+      showPopup('Failed to send reset email: ' + error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Keyboard accessibility
+  tabs.forEach(tab => {
+    tab.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const idx = Array.from(tabs).indexOf(tab);
+        let newIndex = idx + (e.key === 'ArrowRight' ? 1 : -1);
+        if (newIndex < 0) newIndex = tabs.length - 1;
+        if (newIndex >= tabs.length) newIndex = 0;
+        tabs[newIndex].focus();
+        switchTab(tabs[newIndex].id.replace('tab-', ''));
+        e.preventDefault();
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        switchTab(tab.id.replace('tab-', ''));
+        e.preventDefault();
+      }
+    });
   });
+
+  // Button bindings
+  if (loginBtn) loginBtn.addEventListener('click', e => { e.preventDefault(); loginUser(); });
+  if (signupBtn) signupBtn.addEventListener('click', e => { e.preventDefault(); signupUser(); });
+  if (forgotBtn) forgotBtn.addEventListener('click', e => { e.preventDefault(); forgotPassword(); });
 </script>
 </body>
 </html>
