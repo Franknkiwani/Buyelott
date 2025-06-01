@@ -1,611 +1,226 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>View Post</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --fg: #111111;
-      --muted: #666;
-      --card: #f9f9f9;
-      --shadow: rgba(0, 0, 0, 0.05);
-      --blue: #007bff;
-      --modal-bg: rgba(0,0,0,0.35);
-    }
-    [data-theme="dark"] {
-      --bg: #121212;
-      --fg: #ffffff;
-      --muted: #aaa;
-      --card: #1e1e1e;
-      --shadow: rgba(0, 0, 0, 0.4);
-      --blue: #0a84ff;
-      --modal-bg: rgba(0,0,0,0.7);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: 'Segoe UI', sans-serif;
-      transition: background 0.3s, color 0.3s;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
+      background: #f9f9f9;
+      color: #333;
     }
-    header {
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      padding: 1rem 1.5rem;
-      font-weight: bold;
-      font-size: 1.5rem;
-      border-bottom: 1px solid var(--muted);
-      box-shadow: 0 2px 8px var(--shadow);
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .theme-toggle {
-      cursor: pointer;
-      font-size: 0.9rem;
-      color: var(--muted);
-      border: none;
-      background: none;
-    }
-
-    main {
-      max-width: 720px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      text-align: center; /* Center all content */
-    }
-
-    #status {
-      color: red;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .post-image {
-      width: 100%;
-      max-height: 480px;
-      object-fit: contain;
-      border-radius: 12px;
-      box-shadow: 0 6px 16px var(--shadow);
-      margin-bottom: 1rem;
-      user-select: none;
-    }
-    h1.post-title {
-      font-size: 2rem;
-      margin: 0 0 1rem;
-    }
-
-    .post-description {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--fg);
-      margin: 0 auto 1rem;
+    .post {
       max-width: 600px;
-    }
-    .read-more-btn {
-      background: none;
-      border: none;
-      color: var(--blue);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 0;
-    }
-
-    .post-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-      gap: 1rem;
-    }
-    .profile-pic {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #ccc;
-      user-select: none;
-    }
-
-    .username {
-      font-weight: 600;
-    }
-
-    .views {
-      font-style: italic;
-    }
-
-    .follow-button {
-      padding: 0.4rem 1rem;
-      border: none;
+      margin: 20px auto;
+      background: #fff;
       border-radius: 20px;
-      background: var(--blue);
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.95rem;
-      min-width: 90px;
-      transition: background 0.3s ease;
-      user-select: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      overflow: hidden;
     }
-
-    .follow-button[disabled] {
-      background: var(--muted);
-      cursor: not-allowed;
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: var(--modal-bg);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .modal-overlay.active {
-      display: flex;
-    }
-    .modal {
-      background: var(--card);
-      border-radius: 20px;
-      max-width: 400px;
+    .post img {
       width: 100%;
-      padding: 1.5rem 2rem;
-      box-shadow: 0 4px 20px var(--shadow);
-      color: var(--fg);
+      height: auto;
+      display: block;
+    }
+    .post-content {
+      padding: 20px;
       text-align: center;
-      font-size: 1rem;
-      user-select: none;
     }
-    .modal h2 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-weight: 700;
-      font-size: 1.25rem;
-    }
-    .modal button {
-      margin-top: 1.5rem;
-      background: var(--blue);
-      border: none;
-      color: white;
-      border-radius: 14px;
-      padding: 0.6rem 1.6rem;
-      font-size: 1rem;
-      cursor: pointer;
+    .post-title {
+      font-size: 1.5em;
+      margin: 10px 0;
       font-weight: 600;
-      user-select: none;
-      transition: background 0.3s ease;
     }
-    .modal button:hover {
-      background: #0056b3;
+    .post-description {
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 10px;
     }
-
-    /* Comments Section */
-    #comments-section {
-      max-width: 600px;
-      margin: 2rem auto 4rem;
+    .read-more {
+      color: #007aff;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .comment-section {
+      padding: 10px 20px 20px;
+      border-top: 1px solid #eee;
+      background: #fafafa;
+    }
+    .comment-section textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      resize: none;
+      font-size: 14px;
+    }
+    .comment-section button {
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 14px;
+      margin-top: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .comment-list {
+      margin-top: 15px;
       text-align: left;
     }
-    #comments-section h3 {
-      margin-bottom: 1rem;
-      color: var(--fg);
-      font-weight: 700;
-    }
-    #comments-list {
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid var(--muted);
+    .comment-item {
+      background: white;
       border-radius: 10px;
-      padding: 1rem;
-      background: var(--card);
-      box-shadow: inset 0 0 8px var(--shadow);
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
-    .comment {
-      border-bottom: 1px solid var(--muted);
-      padding: 0.5rem 0;
-    }
-    .comment:last-child {
-      border-bottom: none;
-    }
-    .comment .comment-author {
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 0.2rem;
-      color: var(--blue);
-      user-select: none;
-    }
-    .comment .comment-text {
-      font-size: 0.95rem;
-      line-height: 1.3;
-      white-space: pre-wrap;
-      color: var(--fg);
-    }
-
-    #comment-form {
-      margin-top: 1rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-    #comment-input {
-      flex-grow: 1;
-      padding: 0.6rem 1rem;
-      border-radius: 20px;
-      border: 1px solid var(--muted);
-      font-size: 1rem;
-      outline-offset: 2px;
-      outline-color: var(--blue);
-    }
-    #comment-submit {
-      background: var(--blue);
-      border: none;
+    .follow-button {
+      background: #007aff;
       color: white;
-      border-radius: 20px;
-      padding: 0 1.2rem;
-      font-size: 1.1rem;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: 600;
       cursor: pointer;
-      user-select: none;
-      transition: background 0.3s ease;
+      margin: 10px auto;
+      display: block;
     }
-    #comment-submit:disabled {
-      background: var(--muted);
-      cursor: not-allowed;
+    .ios-popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
-    #comment-submit:hover:not(:disabled) {
-      background: #0056b3;
+    .ios-popup-inner {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
     }
-
+    .ios-popup-inner button {
+      margin-top: 15px;
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <header>
-    CyberChat
-    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-  </header>
-
-  <main>
-    <div id="status"></div>
-
-    <!-- Post Image -->
-    <img src="" alt="Post Image" class="post-image" style="display:none;" />
-
-    <!-- Post Title -->
-    <h1 class="post-title"></h1>
-
-    <!-- Post Info (profile pic, username, views, follow) -->
-    <div class="post-info" style="display:none;">
-      <img src="" alt="Profile Picture" class="profile-pic" />
-      <span class="username"></span>
-      <span class="views"></span>
-      <button id="followBtn" class="follow-button" disabled>Follow</button>
+  <div class="post" id="post1">
+    <img src="https://via.placeholder.com/600x300" alt="Post Image">
+    <div class="post-content">
+      <div class="post-title">Sample Post Title</div>
+      <div class="post-description" id="desc1">
+        This is a sample description that is long enough to test the read more functionality. We will show only the first 100 characters and hide the rest. This will be inside the modal.
+      </div>
+      <div class="read-more" onclick="openFullDescription('desc1')">Read more</div>
+      <button class="follow-button" onclick="followUser('targetUID')">Follow</button>
     </div>
+    <div class="comment-section">
+      <textarea id="commentInput1" rows="2" placeholder="Add a comment..."></textarea>
+      <button onclick="postComment('1')">Post Comment</button>
+      <div class="comment-list" id="commentList1"></div>
+    </div>
+  </div>
 
-    <!-- Post Description with Read More -->
-    <p class="post-description"></p>
-    <button class="read-more-btn" style="display:none;">Read more</button>
-
-    <!-- Comments Section -->
-    <section id="comments-section" style="display:none;">
-      <h3>Comments</h3>
-      <div id="comments-list"></div<form id="comment-form">
-        <input type="text" id="comment-input" placeholder="Add a comment..." maxlength="250" required />
-        <button type="submit" id="comment-submit" disabled>Send</button>
-      </form>
-    </section>
-  </main>
-
-  <!-- Full Description Modal -->
-  <div id="desc-modal" class="modal-overlay">
-    <div class="modal">
-      <h2>Full Description</h2>
-      <p id="full-description-text" style="white-space: pre-wrap; text-align: left;"></p>
+  <!-- Description Modal -->
+  <div class="ios-popup" id="descModal" style="display: none;">
+    <div class="ios-popup-inner">
+      <div id="descFullText"></div>
       <button onclick="closeDescModal()">OK</button>
     </div>
   </div>
 
-  <!-- Generic Modal for alerts -->
-  <div id="alert-modal" class="modal-overlay">
-    <div class="modal">
-      <p id="alert-message"></p>
+  <!-- iOS Alert -->
+  <div class="ios-popup" id="alertBox" style="display: none;">
+    <div class="ios-popup-inner">
+      <div id="alertText"></div>
       <button onclick="closeAlert()">OK</button>
     </div>
   </div>
 
-  <script>
-    // Toggle light/dark theme
-    function toggleTheme() {
-      const html = document.documentElement;
-      if(html.getAttribute('data-theme') === 'dark') {
-        html.setAttribute('data-theme', 'light');
-      } else {
-        html.setAttribute('data-theme', 'dark');
-      }
-    }
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, push, child, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 
-    // Show and close modals
-    function openDescModal() {
-      document.getElementById('desc-modal').classList.add('active');
-    }
-    function closeDescModal() {
-      document.getElementById('desc-modal').classList.remove('active');
-    }
-    function showAlert(message) {
-      document.getElementById('alert-message').textContent = message;
-      document.getElementById('alert-modal').classList.add('active');
-    }
-    function closeAlert() {
-      document.getElementById('alert-modal').classList.remove('active');
-    }
-
-    // Firebase Initialization (fill with your config)
-    // Make sure to include Firebase scripts in the <head> or before this script!
-    // For example:
-    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     const firebaseConfig = {
-      // Your Firebase config here
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    let currentUser = null;
-    let postId = null; // you'll set this from query param or other method
-    let postData = null;
-
-    // Utility: get query param
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    // Setup page
-    window.onload = async () => {
-      postId = getQueryParam('id');
-      if(!postId) {
-        document.getElementById('status').textContent = "No post specified.";
-        return;
-      }
-
-      // Auth state listener
-      auth.onAuthStateChanged(user => {
-        currentUser = user;
-        updateFollowButton();
-        loadPostData();
-      });
-      
-      // Enable comment submit only when input has text
-      const commentInput = document.getElementById('comment-input');
-      const commentSubmit = document.getElementById('comment-submit');
-      commentInput.addEventListener('input', () => {
-        commentSubmit.disabled = commentInput.value.trim() === '';
-      });
-
-      // Comment form submit
-      document.getElementById('comment-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        if(!currentUser) {
-          showAlert('You must be logged in to comment.');
-          return;
-        }
-        const commentText = commentInput.value.trim();
-        if(!commentText) return;
-        await addComment(commentText);
-        commentInput.value = '';
-        commentSubmit.disabled = true;
-      });
-
-      // Read More button click
-      document.querySelector('.read-more-btn').addEventListener('click', () => {
-        document.getElementById('full-description-text').textContent = postData.description;
-        openDescModal();
-      });
-
-      // Follow button click
-      document.getElementById('followBtn').addEventListener('click', async () => {
-        if(!currentUser) {
-          showAlert('You must be logged in to follow users.');
-          return;
-        }
-        if(currentUser.uid === postData.author.uid) {
-          showAlert("You can't follow yourself.");
-          return;
-        }
-        await followUser(postData.author.uid);
-      });
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
-    async function loadPostData() {
-      if(!postId) return;
-      try {
-        const snapshot = await db.ref(`/post/${postId}`).get();
-        if(!snapshot.exists()) {
-          document.getElementById('status').textContent = "Post not found.";
-          return;
-        }
-        postData = snapshot.val();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-        // Show image
-        const postImage = document.querySelector('.post-image');
-        if(postData.imageUrl) {
-          postImage.src = postData.imageUrl;
-          postImage.style.display = 'block';
-        } else {
-          postImage.style.display = 'none';
-        }
+    let currentUID = null;
+    onAuthStateChanged(auth, (user) => {
+      if (user) currentUID = user.uid;
+    });
 
-        // Show title
-        const postTitle = document.querySelector('.post-title');
-        postTitle.textContent = postData.title || "Untitled";
+    window.followUser = async (targetUID) => {
+      if (!currentUID) return showAlert("You must be logged in to follow");
+      if (currentUID === targetUID) return showAlert("You can't follow yourself");
 
-        // Show description first 100 chars
-        const postDesc = document.querySelector('.post-description');
-        if(postData.description) {
-          if(postData.description.length > 100) {
-            postDesc.textContent = postData.description.slice(0, 100) + '...';
-            document.querySelector('.read-more-btn').style.display = 'inline';
-          } else {
-            postDesc.textContent = postData.description;
-            document.querySelector('.read-more-btn').style.display = 'none';
-          }
-        } else {
-          postDesc.textContent = '';
-          document.querySelector('.read-more-btn').style.display = 'none';
-        }
+      const userRef = ref(db, `users/${currentUID}/following/${targetUID}`);
+      await set(userRef, true);
+      showAlert("Followed successfully");
+    };
 
-        // Show author info
-        const postInfo = document.querySelector('.post-info');
-        if(postData.author) {
-          const profilePic = postInfo.querySelector('.profile-pic');
-          profilePic.src = postData.author.photoURL || 'https://via.placeholder.com/44?text=User';
-          profilePic.alt = postData.author.username || 'User';
+    window.postComment = (postId) => {
+      const input = document.getElementById("commentInput" + postId);
+      const list = document.getElementById("commentList" + postId);
+      const comment = input.value.trim();
+      if (!currentUID) return showAlert("Login required to comment");
+      if (comment === '') return;
 
-          const usernameSpan = postInfo.querySelector('.username');
-          usernameSpan.textContent = postData.author.username || "Unknown";
-
-          const viewsSpan = postInfo.querySelector('.views');
-          viewsSpan.textContent = (postData.views ? postData.views + ' views' : '0 views');
-
-          postInfo.style.display = 'flex';
-        } else {
-          postInfo.style.display = 'none';
-        }
-
-        // Show comments section
-        document.getElementById('comments-section').style.display = 'block';
-
-        // Load comments
-        loadComments();
-
-        // Update follow button state
-        updateFollowButton();
-
-      } catch(err) {
-        console.error(err);
-        document.getElementById('status').textContent = "Error loading post.";
-      }
-    }
-
-    async function updateFollowButton() {
-      const followBtn = document.getElementById('followBtn');
-      if(!currentUser || !postData || !postData.author) {
-        followBtn.disabled = true;
-        followBtn.textContent = 'Follow';
-        return;
-      }
-      if(currentUser.uid === postData.author.uid) {
-        followBtn.disabled = true;
-        followBtn.textContent = "It's you!";
-        return;
-      }
-
-      // Check if already following
-      const followSnap = await db.ref(`/followers/${postData.author.uid}/${currentUser.uid}`).get();
-      if(followSnap.exists()) {
-        followBtn.disabled = true;
-        followBtn.textContent = 'Following';
-      } else {
-        followBtn.disabled = false;
-        followBtn.textContent = 'Follow';
-      }
-    }
-
-    async function followUser(authorUid) {
-      try {
-        // Prevent following self just in case
-        if(currentUser.uid === authorUid) {
-          showAlert("You can't follow yourself.");
-          return;
-        }
-
-        // Write to followers node: followers/{authorUid}/{followerUid}: true
-        await db.ref(`/followers/${authorUid}/${currentUser.uid}`).set(true);
-
-        // Optionally update follower count on user profile (not shown here)
-
-        updateFollowButton();
-        showAlert("Followed successfully.");
-      } catch(e) {
-        console.error(e);
-        showAlert("Error following user.");
-      }
-    }
-
-    // Load comments from Firebase
-    async function loadComments() {
-      if(!postId) return;
-      const commentsList = document.getElementById('comments-list');
-      commentsList.innerHTML = 'Loading comments...';
-
-      try {
-        const commentsSnap = await db.ref(`/comments/${postId}`).orderByChild('timestamp').limitToLast(50).get();
-        if(!commentsSnap.exists()) {
-          commentsList.innerHTML = '<p style="color: var(--muted);">No comments yet. Be the first!</p>';
-          return;
-        }
-        const comments = [];
-        commentsSnap.forEach(childSnap => {
-          comments.push(childSnap.val());
-        });
-        commentsList.innerHTML = '';
-        comments.reverse().forEach(c => {
-          const div = document.createElement('div');
-          div.classList.add('comment');
-
-          const author = document.createElement('div');
-          author.classList.add('comment-author');
-          author.textContent = c.authorName || 'Anonymous';
-
-          const text = document.createElement('div');
-          text.classList.add('comment-text');
-          text.textContent = c.text;
-
-          div.appendChild(author);
-          div.appendChild(text);
-          commentsList.appendChild(div);
-        });
-      } catch(e) {
-        console.error(e);
-        commentsList.innerHTML = '<p style="color: red;">Error loading comments.</p>';
-      }
-    }
-
-    // Add a new comment
-    async function addComment(text) {
-      if(!postId || !currentUser) return;
-      const commentObj = {
-        authorUid: currentUser.uid,
-        authorName: currentUser.displayName || 'User',
-        text: text,
+      const commentRef = push(ref(db, `comments/${postId}`));
+      set(commentRef, {
+        uid: currentUID,
+        text: comment,
         timestamp: Date.now()
-      };
-      try {
-        const newCommentRef = db.ref(`/comments/${postId}`).push();
-        await newCommentRef.set(commentObj);
-        loadComments();
-      } catch(e) {
-        console.error(e);
-        showAlert('Failed to post comment.');
-      }
-    }
+      });
+      input.value = '';
+      showAlert("Comment posted");
+    };
 
+    window.openFullDescription = (descId) => {
+      const fullText = document.getElementById(descId).textContent;
+      document.getElementById("descFullText").textContent = fullText;
+      document.getElementById("descModal").style.display = "flex";
+    };
+
+    window.closeDescModal = () => {
+      document.getElementById("descModal").style.display = "none";
+    };
+
+    window.showAlert = (msg) => {
+      document.getElementById("alertText").textContent = msg;
+      document.getElementById("alertBox").style.display = "flex";
+    };
+
+    window.closeAlert = () => {
+      document.getElementById("alertBox").style.display = "none";
+    };
   </script>
 </body>
 </html>
