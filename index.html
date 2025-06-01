@@ -1003,15 +1003,12 @@ body {
     <span class="cyber">CYBER</span><span class="chat">CHAT</span>
   </div>
 
-  <!-- 🔔 Notification Icon -->
-  <div class="right-icons icon" tabindex="0" role="button" aria-label="Notifications" id="notification-icon">
+  <!-- 🔔 Notification Icon with cleaner id and badge span -->
+  <div class="right-icons icon" tabindex="0" role="button" aria-label="Notifications" id="notif-icon" style="position: relative;">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M12 24a2.5 2.5 0 002.5-2.5h-5A2.5 2.5 0 0012 24zm6-7v-5c0-3.07-1.63-5.64-4.5-6.32V5a1.5 1.5 0 10-3 0v.68C7.63 6.36 6 8.92 6 12v5l-2 2v1h16v-1l-2-2z"/>
+      <path d="M12 22c1.1 0 1.99-.9 1.99-2h-4L10 20h2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 00-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
     </svg>
-    <!-- 🔴 Badge (optional, toggle via JS) -->
-    <span id="notif-badge" style="position: absolute; top: 2px; right: 2px; background: red; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px; display: none;">
-      3
-    </span>
+    <span id="notif-count" style="position: absolute; top: 2px; right: 2px; background: red; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px; display: none;">0</span>
   </div>
 
   <!-- ⚙️ Settings Icon -->
@@ -2640,6 +2637,324 @@ function renderNotifications(notifs) {
 
 // Just run this immediately — no auth check
 loadAllNotifications();
+</script>
+<style>
+    .icon {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      user-select: none;
+      position: relative;
+    }
+    .icon svg {
+      fill: var(--text);
+      width: 24px;
+      height: 24px;
+    }
+    .icon:hover {
+      color: var(--accent);
+    }
+    #notif-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #f00;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 50%;
+      padding: 2px 6px;
+      user-select: none;
+      display: none;
+      min-width: 18px;
+      text-align: center;
+      line-height: 18px;
+    }
+
+    #notif-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--modal-bg);
+      color: var(--text);
+      overflow-y: auto;
+      z-index: 1000;
+      padding: 1rem;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
+    }
+    #notif-modal.active {
+      display: block;
+    }
+    #notif-modal header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #333;
+    }
+    #notif-modal header h2 {
+      margin: 0;
+      font-weight: 700;
+      user-select: none;
+    }
+    #notif-close {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      font-weight: 900;
+      user-select: none;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+    #notif-close:hover {
+      color: var(--accent);
+    }
+    #notif-list {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .notif-item {
+      background: var(--notif-bg);
+      border-radius: 8px;
+      padding: 1rem 1.2rem 1rem 1rem;
+      box-shadow: 0 0 5px #000;
+      transition: background-color 0.2s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .notif-item:hover {
+      background: var(--notif-hover);
+    }
+    .notif-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.2rem;
+      color: var(--accent);
+      user-select: text;
+    }
+    .notif-body {
+      white-space: pre-wrap;
+      font-size: 1rem;
+      line-height: 1.3;
+      color: #ccc;
+      user-select: text;
+    }
+    .notif-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #777;
+      user-select: none;
+    }
+    .notif-type {
+      font-style: italic;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #555;
+    }
+    .notif-time {
+      font-variant-numeric: tabular-nums;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--btn-bg);
+      border: none;
+      color: var(--btn-color);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: color 0.2s ease;
+      user-select: none;
+    }
+    .delete-btn:hover {
+      color: var(--btn-hover);
+    }
+  </style>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const notifIcon = document.getElementById('notif-icon');
+  const notifModal = document.getElementById('notif-modal');
+  const notifClose = document.getElementById('notif-close');
+  const notifList = document.getElementById('notif-list');
+  const notifCount = document.getElementById('notif-count');
+
+  // Key prefix for localStorage to track deleted notifications per user
+  const DELETED_NOTIFS_KEY = 'cyberchat_deleted_notifications';
+
+  // Load deleted notifications from localStorage (array of IDs)
+  let deletedNotifs = [];
+  try {
+    deletedNotifs = JSON.parse(localStorage.getItem(DELETED_NOTIFS_KEY)) || [];
+  } catch {
+    deletedNotifs = [];
+  }
+
+  // Utility: human readable relative time (like "2 hours ago")
+  function timeAgo(time) {
+    if (!time) return '';
+    const now = Date.now();
+    const seconds = Math.floor((now - time) / 1000);
+    if (seconds < 0) return 'just now';
+    if (seconds < 10) return 'just now';
+    if (seconds < 60) return seconds + ' seconds ago';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + ' minute' + (minutes === 1 ? '' : 's') + ' ago';
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + ' hour' + (hours === 1 ? '' : 's') + ' ago';
+    const days = Math.floor(hours / 24);
+    if (days < 30) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+    const months = Math.floor(days / 30);
+    if (months < 12) return months + ' month' + (months === 1 ? '' : 's') + ' ago';
+    const years = Math.floor(months / 12);
+    return years + ' year' + (years === 1 ? '' : 's') + ' ago';
+  }
+
+  // Render notifications function
+  function renderNotifications(notifications) {
+    if (!notifications || notifications.length === 0) {
+      notifList.innerHTML = `<p style="color:#666;user-select:none;">No notifications yet.</p>`;
+      notifCount.style.display = 'none';
+      return;
+    }
+
+    // Filter out deleted notifications
+    const filtered = notifications.filter(n => !deletedNotifs.includes(n.id));
+
+    if (filtered.length === 0) {
+      notifList.innerHTML = `<p style="color:#666;user-select:none;">No notifications to show.</p>`;
+      notifCount.style.display = 'none';
+      return;
+    }
+
+    notifCount.textContent = filtered.length;
+    notifCount.style.display = 'inline-block';
+
+    notifList.innerHTML = filtered.map(notif => {
+      const ts = notif.timestamp ? Number(notif.timestamp) : 0;
+      const timeText = timeAgo(ts);
+      const typeText = (notif.type || notif.audience || '').toLowerCase() === 'global' ? 'GLOBAL' : 'FOR YOU';
+      const bodyText = notif.body || notif.message || '';
+
+      // Escape HTML to prevent injection if any content is dynamic
+      function escapeHtml(text) {
+        return text.replace(/[&<>"']/g, m => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[m]);
+      }
+
+      return `
+        <div class="notif-item" data-id="${escapeHtml(notif.id)}" tabindex="0" aria-label="Notification: ${escapeHtml(notif.title || 'No Title')}">
+          <button class="delete-btn" aria-label="Delete notification">&times;</button>
+          <div class="notif-title">${escapeHtml(notif.title || 'No Title')}</div>
+          <div class="notif-body">${escapeHtml(bodyText)}</div>
+          <div class="notif-meta">
+            <span class="notif-type">${typeText}</span>
+            <span class="notif-time">${timeText}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Listen to Firebase notifications node `/notification`
+  onValue(ref(db, 'notification'), snapshot => {
+    const val = snapshot.val() || {};
+    // Convert object to array with id property
+    const arr = Object.entries(val).map(([id, data]) => ({ id, ...data }));
+    // Sort descending by timestamp, newest first
+    arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    renderNotifications(arr);
+  }, { onlyOnce: false });
+
+  // Open/close modal logic
+  notifIcon.addEventListener('click', () => {
+    notifModal.classList.add('active');
+    notifModal.focus();
+  });
+  notifIcon.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      notifModal.classList.add('active');
+      notifModal.focus();
+    }
+  });
+  notifClose.addEventListener('click', () => {
+    notifModal.classList.remove('active');
+    notifIcon.focus();
+  });
+
+  // Delete notification handler
+  notifList.addEventListener('click', e => {
+    if (e.target.classList.contains('delete-btn')) {
+      const notifItem = e.target.closest('.notif-item');
+      if (!notifItem) return;
+      const id = notifItem.dataset.id;
+      if (!id) return;
+
+      // Add to deleted list and save to localStorage
+      if (!deletedNotifs.includes(id)) {
+        deletedNotifs.push(id);
+        localStorage.setItem(DELETED_NOTIFS_KEY, JSON.stringify(deletedNotifs));
+      }
+
+      // Remove element from DOM immediately for instant feedback
+      notifItem.remove();
+
+      // Update notif count in header
+      const remaining = notifList.querySelectorAll('.notif-item').length;
+      if (remaining === 0) {
+        notifList.innerHTML = `<p style="color:#666;user-select:none;">No notifications to show.</p>`;
+        notifCount.style.display = 'none';
+      }
+      else {
+        notifCount.textContent = remaining;
+      }
+    }
+  });
+
+  // Accessibility: close modal on ESC
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && notifModal.classList.contains('active')) {
+      notifModal.classList.remove('active');
+      notifIcon.focus();
+    }
+  });
+
 </script>
 </body>
 </html>
