@@ -2128,6 +2128,47 @@ loadPosts();       // async fresh load
       `).join("");
     });
   }
+// Open/close modal logic
+notifIcon.addEventListener('click', () => {
+  notifModal.classList.add('active');
+  notifModal.focus();
+});
+notifClose.addEventListener('click', () => {
+  notifModal.classList.remove('active');
+});
+notifModal.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    notifModal.classList.remove('active');
+  }
+});
+
+// Delegate delete button clicks inside notifList
+notifList.addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-btn')) {
+    const notifItem = e.target.closest('.notif-item');
+    if (!notifItem) return;
+    const id = notifItem.getAttribute('data-id');
+    if (!id) return;
+
+    // Add to deleted notifications list and save to localStorage
+    if (!deletedNotifs.includes(id)) {
+      deletedNotifs.push(id);
+      localStorage.setItem(DELETED_NOTIFS_KEY, JSON.stringify(deletedNotifs));
+    }
+
+    // Remove from DOM immediately for instant feedback
+    notifItem.remove();
+
+    // Update notif count badge
+    const visibleNotifs = notifList.querySelectorAll('.notif-item');
+    if (visibleNotifs.length === 0) {
+      notifList.innerHTML = `<p style="color:#666;user-select:none;">No notifications to show.</p>`;
+      notifCount.style.display = 'none';
+    } else {
+      notifCount.textContent = visibleNotifs.length;
+    }
+  }
+});
 </script>
 <script type="module">
   import {
