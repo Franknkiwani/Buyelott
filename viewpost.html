@@ -11,9 +11,8 @@
       --muted: #666;
       --card: #f9f9f9;
       --shadow: rgba(0, 0, 0, 0.05);
-      --primary: #007aff;
-      --ios-blue: #007aff;
-      --ios-bg: #f2f2f7;
+      --blue: #007bff;
+      --modal-bg: rgba(0,0,0,0.35);
     }
     [data-theme="dark"] {
       --bg: #121212;
@@ -21,7 +20,8 @@
       --muted: #aaa;
       --card: #1e1e1e;
       --shadow: rgba(0, 0, 0, 0.4);
-      --ios-bg: #2c2c2e;
+      --blue: #0a84ff;
+      --modal-bg: rgba(0,0,0,0.7);
     }
 
     * {
@@ -31,10 +31,8 @@
       margin: 0;
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       transition: background 0.3s, color 0.3s;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
     header {
       position: sticky;
@@ -61,8 +59,9 @@
 
     main {
       max-width: 720px;
-      margin: 2rem auto 4rem;
+      margin: 2rem auto;
       padding: 0 1rem;
+      text-align: center; /* Center all content */
     }
 
     #status {
@@ -70,10 +69,8 @@
       font-weight: bold;
       margin-bottom: 1rem;
       display: none;
-      text-align: center;
     }
 
-    /* Post styling */
     .post-image {
       width: 100%;
       max-height: 480px;
@@ -81,51 +78,38 @@
       border-radius: 12px;
       box-shadow: 0 6px 16px var(--shadow);
       margin-bottom: 1rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      user-select: none;
     }
-
     h1.post-title {
       font-size: 2rem;
-      margin: 0 0 0.5rem;
-      text-align: center;
-      font-weight: 700;
-      user-select: none;
+      margin: 0 0 1rem;
     }
 
     .post-description {
       font-size: 1rem;
       line-height: 1.6;
       color: var(--fg);
-      max-width: 650px;
       margin: 0 auto 1rem;
-      text-align: center;
-      white-space: pre-wrap;
-      user-select: text;
+      max-width: 600px;
     }
-    .read-more {
-      display: block;
-      text-align: center;
-      color: var(--ios-blue);
+    .read-more-btn {
+      background: none;
+      border: none;
+      color: var(--blue);
       cursor: pointer;
       font-weight: 600;
-      margin-bottom: 1rem;
-      user-select: none;
-    }
-    .read-more:hover {
-      text-decoration: underline;
+      font-size: 1rem;
+      padding: 0;
     }
 
-    /* Post info area (profile pic, username, views, follow button) */
     .post-info {
       display: flex;
       align-items: center;
+      justify-content: center;
       font-size: 0.9rem;
       color: var(--muted);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       gap: 1rem;
-      justify-content: center;
     }
     .profile-pic {
       width: 44px;
@@ -133,164 +117,159 @@
       border-radius: 50%;
       object-fit: cover;
       background: #ccc;
-      flex-shrink: 0;
       user-select: none;
     }
 
     .username {
       font-weight: 600;
-      user-select: text;
     }
 
     .views {
-      color: var(--muted);
-      user-select: none;
+      font-style: italic;
     }
 
     .follow-button {
       padding: 0.4rem 1rem;
       border: none;
-      border-radius: 16px;
-      background: var(--primary);
+      border-radius: 20px;
+      background: var(--blue);
       color: #fff;
       cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background-color 0.3s;
-      user-select: none;
+      font-size: 0.95rem;
       min-width: 90px;
+      transition: background 0.3s ease;
+      user-select: none;
     }
-    .follow-button:disabled {
+
+    .follow-button[disabled] {
       background: var(--muted);
       cursor: not-allowed;
-    }
-    .follow-button:hover:not(:disabled) {
-      background: #005bb5;
     }
 
     /* Modal styles */
     .modal-overlay {
+      display: none;
       position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(5px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      top:0; left:0; right:0; bottom:0;
+      background: var(--modal-bg);
+      backdrop-filter: blur(6px);
       z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.active {
+      display: flex;
     }
     .modal {
-      background: var(--ios-bg);
-      padding: 1.5rem 2rem;
+      background: var(--card);
       border-radius: 20px;
-      width: 90%;
       max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      width: 100%;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 20px var(--shadow);
       color: var(--fg);
-      user-select: none;
       text-align: center;
+      font-size: 1rem;
+      user-select: none;
     }
     .modal h2 {
       margin-top: 0;
-      font-weight: 700;
-      font-size: 1.3rem;
       margin-bottom: 1rem;
-    }
-    .modal p {
-      margin-bottom: 1.5rem;
-      white-space: pre-wrap;
-      user-select: text;
+      font-weight: 700;
+      font-size: 1.25rem;
     }
     .modal button {
-      background: var(--primary);
+      margin-top: 1.5rem;
+      background: var(--blue);
       border: none;
-      color: #fff;
-      font-weight: 600;
-      padding: 0.5rem 1.2rem;
+      color: white;
       border-radius: 14px;
+      padding: 0.6rem 1.6rem;
       font-size: 1rem;
       cursor: pointer;
+      font-weight: 600;
       user-select: none;
-      transition: background-color 0.3s;
+      transition: background 0.3s ease;
     }
     .modal button:hover {
-      background: #005bb5;
+      background: #0056b3;
     }
 
     /* Comments Section */
-    .comments-section {
-      max-width: 650px;
-      margin: 0 auto;
-      margin-top: 2rem;
-      border-top: 1px solid var(--muted);
-      padding-top: 1.5rem;
+    #comments-section {
+      max-width: 600px;
+      margin: 2rem auto 4rem;
+      text-align: left;
     }
-    .comments-section h3 {
-      margin: 0 0 1rem;
-      font-weight: 700;
-      user-select: none;
-    }
-
-    .comment-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1.5rem;
-      max-height: 250px;
-      overflow-y: auto;
-      border-radius: 10px;
-      background: var(--card);
-      box-shadow: 0 2px 10px var(--shadow);
-    }
-    .comment-list li {
-      padding: 0.7rem 1rem;
-      border-bottom: 1px solid var(--muted);
-      font-size: 0.9rem;
+    #comments-section h3 {
+      margin-bottom: 1rem;
       color: var(--fg);
-      user-select: text;
+      font-weight: 700;
     }
-    .comment-list li:last-child {
+    #comments-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--muted);
+      border-radius: 10px;
+      padding: 1rem;
+      background: var(--card);
+      box-shadow: inset 0 0 8px var(--shadow);
+    }
+    .comment {
+      border-bottom: 1px solid var(--muted);
+      padding: 0.5rem 0;
+    }
+    .comment:last-child {
       border-bottom: none;
     }
+    .comment .comment-author {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+      color: var(--blue);
+      user-select: none;
+    }
+    .comment .comment-text {
+      font-size: 0.95rem;
+      line-height: 1.3;
+      white-space: pre-wrap;
+      color: var(--fg);
+    }
 
-    .comment-input-container {
+    #comment-form {
+      margin-top: 1rem;
       display: flex;
       gap: 0.5rem;
     }
-    .comment-input {
-      flex: 1;
+    #comment-input {
+      flex-grow: 1;
       padding: 0.6rem 1rem;
-      border-radius: 16px;
+      border-radius: 20px;
       border: 1px solid var(--muted);
       font-size: 1rem;
       outline-offset: 2px;
-      user-select: text;
-      background: var(--card);
-      color: var(--fg);
-      transition: border-color 0.3s;
+      outline-color: var(--blue);
     }
-    .comment-input:focus {
-      border-color: var(--primary);
-    }
-    .comment-submit-btn {
-      background: var(--primary);
+    #comment-submit {
+      background: var(--blue);
       border: none;
-      color: #fff;
-      font-weight: 700;
-      padding: 0.6rem 1.2rem;
-      border-radius: 16px;
-      font-size: 1rem;
+      color: white;
+      border-radius: 20px;
+      padding: 0 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
       user-select: none;
-      transition: background-color 0.3s;
-      flex-shrink: 0;
+      transition: background 0.3s ease;
     }
-    .comment-submit-btn:disabled {
+    #comment-submit:disabled {
       background: var(--muted);
       cursor: not-allowed;
     }
-    .comment-submit-btn:hover:not(:disabled) {
-      background: #005bb5;
+    #comment-submit:hover:not(:disabled) {
+      background: #0056b3;
     }
+
   </style>
 </head>
 <body>
@@ -302,228 +281,331 @@
   <main>
     <div id="status"></div>
 
-    <img src="" alt="Post Image" class="post-image" style="display:none" />
+    <!-- Post Image -->
+    <img src="" alt="Post Image" class="post-image" style="display:none;" />
 
+    <!-- Post Title -->
     <h1 class="post-title"></h1>
 
-    <div class="post-description"></div>
-    <span class="read-more" style="display:none;">Read More</span>
+    <!-- Post Info (profile pic, username, views, follow) -->
+    <div class="post-info" style="display:none;">
+      <img src="" alt="Profile Picture" class="profile-pic" />
+      <span class="username"></span>
+      <span class="views"></span>
+      <button id="followBtn" class="follow-button" disabled>Follow</button>
+    </div>
 
-    <div class="post-info" style="<!-- Continued from above -->
-    <img src="" alt="Profile Picture" class="profile-pic" />
-    <span class="username"></span>
-    <span class="views"></span>
-    <button class="follow-button" disabled>Follow</button>
-  </div>
+    <!-- Post Description with Read More -->
+    <p class="post-description"></p>
+    <button class="read-more-btn" style="display:none;">Read more</button>
+
+    <!-- Comments Section -->
+    <section id="comments-section" style="display:none;">
+      <h3>Comments</h3>
+      <div id="comments-list"></div<form id="comment-form">
+        <input type="text" id="comment-input" placeholder="Add a comment..." maxlength="250" required />
+        <button type="submit" id="comment-submit" disabled>Send</button>
+      </form>
+    </section>
+  </main>
 
   <!-- Full Description Modal -->
-  <div id="desc-modal" class="modal-overlay" style="display:none;">
+  <div id="desc-modal" class="modal-overlay">
     <div class="modal">
       <h2>Full Description</h2>
-      <p id="full-description"></p>
+      <p id="full-description-text" style="white-space: pre-wrap; text-align: left;"></p>
       <button onclick="closeDescModal()">OK</button>
     </div>
   </div>
 
-  <!-- Follow Modal -->
-  <div id="follow-modal" class="modal-overlay" style="display:none;">
+  <!-- Generic Modal for alerts -->
+  <div id="alert-modal" class="modal-overlay">
     <div class="modal">
-      <p id="follow-modal-message"></p>
-      <button onclick="closeFollowModal()">OK</button>
+      <p id="alert-message"></p>
+      <button onclick="closeAlert()">OK</button>
     </div>
   </div>
 
-  <!-- Comments Section -->
-  <section class="comments-section">
-    <h3>Comments</h3>
-    <ul class="comment-list"></ul>
-    <div class="comment-input-container">
-      <input type="text" class="comment-input" placeholder="Add a comment..." />
-      <button class="comment-submit-btn" disabled>Send</button>
-    </div>
-  </section>
-
-  </main>
-
-<script>
-  // Simulated logged-in user info & post data — replace with your Firebase auth/data calls
-  const loggedInUser = {
-    uid: 'user123',
-    username: 'frank_the_coder',
-    profilePic: 'https://i.pravatar.cc/44?u=user123',
-    // Not logged in: set loggedInUser = null
-  };
-
-  // Simulated post data (replace with your Firebase post fetching)
-  const post = {
-    id: 'post001',
-    image: 'https://picsum.photos/720/480',
-    title: 'Welcome to CyberChat!',
-    description: `This is a super neat and very long description that goes beyond 100 characters so that we can test the "Read More" functionality properly. It contains all the juicy details about the post and will definitely hook you in.`,
-    user: {
-      uid: 'author123',
-      username: 'post_author',
-      profilePic: 'https://i.pravatar.cc/44?u=author123'
-    },
-    views: 1234,
-    followers: ['user999', 'user456'] // Example followers for checking if loggedInUser already follows
-  };
-
-  // Comments store (simulate with array, replace with Firebase real-time)
-  let comments = [
-    { username: 'jane_doe', text: 'Great post!' },
-    { username: 'john_smith', text: 'Loving the vibe here.' },
-  ];
-
-  // Elements refs
-  const postImage = document.querySelector('.post-image');
-  const postTitle = document.querySelector('.post-title');
-  const postDescription = document.querySelector('.post-description');
-  const readMore = document.querySelector('.read-more');
-  const profilePic = document.querySelector('.profile-pic');
-  const usernameSpan = document.querySelector('.username');
-  const viewsSpan = document.querySelector('.views');
-  const followButton = document.querySelector('.follow-button');
-  const descModal = document.getElementById('desc-modal');
-  const fullDescriptionP = document.getElementById('full-description');
-  const followModal = document.getElementById('follow-modal');
-  const followModalMessage = document.getElementById('follow-modal-message');
-  const commentList = document.querySelector('.comment-list');
-  const commentInput = document.querySelector('.comment-input');
-  const commentSubmitBtn = document.querySelector('.comment-submit-btn');
-
-  // Helper to show modal with message (iOS style)
-  function showFollowModal(message) {
-    followModalMessage.textContent = message;
-    followModal.style.display = 'flex';
-  }
-  function closeFollowModal() {
-    followModal.style.display = 'none';
-  }
-
-  // Show full description modal
-  function openDescModal() {
-    fullDescriptionP.textContent = post.description;
-    descModal.style.display = 'flex';
-  }
-  function closeDescModal() {
-    descModal.style.display = 'none';
-  }
-
-  // Render Post
-  function renderPost() {
-    postImage.src = post.image;
-    postImage.style.display = 'block';
-
-    postTitle.textContent = post.title;
-
-    // Show first 100 chars or less, add '...' if longer
-    if (post.description.length > 100) {
-      postDescription.textContent = post.description.slice(0, 100) + '...';
-      readMore.style.display = 'block';
-    } else {
-      postDescription.textContent = post.description;
-      readMore.style.display = 'none';
+  <script>
+    // Toggle light/dark theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      if(html.getAttribute('data-theme') === 'dark') {
+        html.setAttribute('data-theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+      }
     }
 
-    profilePic.src = post.user.profilePic || 'https://via.placeholder.com/44?text=?';
-    profilePic.alt = post.user.username + ' profile picture';
-
-    usernameSpan.textContent = post.user.username;
-    viewsSpan.textContent = post.views + ' views';
-
-    // Follow button logic
-    if (!loggedInUser) {
-      followButton.disabled = true;
-      followButton.textContent = 'Login to Follow';
-    } else if (loggedInUser.uid === post.user.uid) {
-      followButton.disabled = true;
-      followButton.textContent = 'You';
-    } else if (post.followers.includes(loggedInUser.uid)) {
-      followButton.disabled = false;
-      followButton.textContent = 'Following';
-      followButton.dataset.following = 'true';
-    } else {
-      followButton.disabled = false;
-      followButton.textContent = 'Follow';
-      followButton.dataset.following = 'false';
+    // Show and close modals
+    function openDescModal() {
+      document.getElementById('desc-modal').classList.add('active');
     }
-  }
-
-  // Read more click
-  readMore.addEventListener('click', openDescModal);
-
-  // Follow button click
-  followButton.addEventListener('click', () => {
-    if (!loggedInUser) {
-      showFollowModal('You need to be logged in to follow users.');
-      return;
+    function closeDescModal() {
+      document.getElementById('desc-modal').classList.remove('active');
     }
-    if (loggedInUser.uid === post.user.uid) {
-      showFollowModal("You can't follow yourself.");
-      return;
+    function showAlert(message) {
+      document.getElementById('alert-message').textContent = message;
+      document.getElementById('alert-modal').classList.add('active');
+    }
+    function closeAlert() {
+      document.getElementById('alert-modal').classList.remove('active');
     }
 
-    if (followButton.dataset.following === 'true') {
-      // Unfollow
-      post.followers = post.followers.filter(uid => uid !== loggedInUser.uid);
-      followButton.textContent = 'Follow';
-      followButton.dataset.following = 'false';
-    } else {
-      // Follow
-      post.followers.push(loggedInUser.uid);
-      followButton.textContent = 'Following';
-      followButton.dataset.following = 'true';
+    // Firebase Initialization (fill with your config)
+    // Make sure to include Firebase scripts in the <head> or before this script!
+    // For example:
+    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    // <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    const firebaseConfig = {
+      // Your Firebase config here
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentUser = null;
+    let postId = null; // you'll set this from query param or other method
+    let postData = null;
+
+    // Utility: get query param
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
     }
-  });
 
-  // Render comments
-  function renderComments() {
-    commentList.innerHTML = '';
-    if (comments.length === 0) {
-      commentList.innerHTML = '<li>No comments yet. Be the first!</li>';
-      return;
+    // Setup page
+    window.onload = async () => {
+      postId = getQueryParam('id');
+      if(!postId) {
+        document.getElementById('status').textContent = "No post specified.";
+        return;
+      }
+
+      // Auth state listener
+      auth.onAuthStateChanged(user => {
+        currentUser = user;
+        updateFollowButton();
+        loadPostData();
+      });
+      
+      // Enable comment submit only when input has text
+      const commentInput = document.getElementById('comment-input');
+      const commentSubmit = document.getElementById('comment-submit');
+      commentInput.addEventListener('input', () => {
+        commentSubmit.disabled = commentInput.value.trim() === '';
+      });
+
+      // Comment form submit
+      document.getElementById('comment-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        if(!currentUser) {
+          showAlert('You must be logged in to comment.');
+          return;
+        }
+        const commentText = commentInput.value.trim();
+        if(!commentText) return;
+        await addComment(commentText);
+        commentInput.value = '';
+        commentSubmit.disabled = true;
+      });
+
+      // Read More button click
+      document.querySelector('.read-more-btn').addEventListener('click', () => {
+        document.getElementById('full-description-text').textContent = postData.description;
+        openDescModal();
+      });
+
+      // Follow button click
+      document.getElementById('followBtn').addEventListener('click', async () => {
+        if(!currentUser) {
+          showAlert('You must be logged in to follow users.');
+          return;
+        }
+        if(currentUser.uid === postData.author.uid) {
+          showAlert("You can't follow yourself.");
+          return;
+        }
+        await followUser(postData.author.uid);
+      });
+    };
+
+    async function loadPostData() {
+      if(!postId) return;
+      try {
+        const snapshot = await db.ref(`/post/${postId}`).get();
+        if(!snapshot.exists()) {
+          document.getElementById('status').textContent = "Post not found.";
+          return;
+        }
+        postData = snapshot.val();
+
+        // Show image
+        const postImage = document.querySelector('.post-image');
+        if(postData.imageUrl) {
+          postImage.src = postData.imageUrl;
+          postImage.style.display = 'block';
+        } else {
+          postImage.style.display = 'none';
+        }
+
+        // Show title
+        const postTitle = document.querySelector('.post-title');
+        postTitle.textContent = postData.title || "Untitled";
+
+        // Show description first 100 chars
+        const postDesc = document.querySelector('.post-description');
+        if(postData.description) {
+          if(postData.description.length > 100) {
+            postDesc.textContent = postData.description.slice(0, 100) + '...';
+            document.querySelector('.read-more-btn').style.display = 'inline';
+          } else {
+            postDesc.textContent = postData.description;
+            document.querySelector('.read-more-btn').style.display = 'none';
+          }
+        } else {
+          postDesc.textContent = '';
+          document.querySelector('.read-more-btn').style.display = 'none';
+        }
+
+        // Show author info
+        const postInfo = document.querySelector('.post-info');
+        if(postData.author) {
+          const profilePic = postInfo.querySelector('.profile-pic');
+          profilePic.src = postData.author.photoURL || 'https://via.placeholder.com/44?text=User';
+          profilePic.alt = postData.author.username || 'User';
+
+          const usernameSpan = postInfo.querySelector('.username');
+          usernameSpan.textContent = postData.author.username || "Unknown";
+
+          const viewsSpan = postInfo.querySelector('.views');
+          viewsSpan.textContent = (postData.views ? postData.views + ' views' : '0 views');
+
+          postInfo.style.display = 'flex';
+        } else {
+          postInfo.style.display = 'none';
+        }
+
+        // Show comments section
+        document.getElementById('comments-section').style.display = 'block';
+
+        // Load comments
+        loadComments();
+
+        // Update follow button state
+        updateFollowButton();
+
+      } catch(err) {
+        console.error(err);
+        document.getElementById('status').textContent = "Error loading post.";
+      }
     }
-    for (const c of comments) {
-      const li = document.createElement('li');
-      li.textContent = `${c.username}: ${c.text}`;
-      commentList.appendChild(li);
+
+    async function updateFollowButton() {
+      const followBtn = document.getElementById('followBtn');
+      if(!currentUser || !postData || !postData.author) {
+        followBtn.disabled = true;
+        followBtn.textContent = 'Follow';
+        return;
+      }
+      if(currentUser.uid === postData.author.uid) {
+        followBtn.disabled = true;
+        followBtn.textContent = "It's you!";
+        return;
+      }
+
+      // Check if already following
+      const followSnap = await db.ref(`/followers/${postData.author.uid}/${currentUser.uid}`).get();
+      if(followSnap.exists()) {
+        followBtn.disabled = true;
+        followBtn.textContent = 'Following';
+      } else {
+        followBtn.disabled = false;
+        followBtn.textContent = 'Follow';
+      }
     }
-  }
 
-  // Enable comment submit button only if input has text and user logged in
-  commentInput.addEventListener('input', () => {
-    commentSubmitBtn.disabled = !commentInput.value.trim() || !loggedInUser;
-  });
+    async function followUser(authorUid) {
+      try {
+        // Prevent following self just in case
+        if(currentUser.uid === authorUid) {
+          showAlert("You can't follow yourself.");
+          return;
+        }
 
-  // Comment submit
-  commentSubmitBtn.addEventListener('click', () => {
-    if (!loggedInUser) {
-      showFollowModal('You need to be logged in to comment.');
-      return;
+        // Write to followers node: followers/{authorUid}/{followerUid}: true
+        await db.ref(`/followers/${authorUid}/${currentUser.uid}`).set(true);
+
+        // Optionally update follower count on user profile (not shown here)
+
+        updateFollowButton();
+        showAlert("Followed successfully.");
+      } catch(e) {
+        console.error(e);
+        showAlert("Error following user.");
+      }
     }
-    const text = commentInput.value.trim();
-    if (!text) return;
-    comments.push({ username: loggedInUser.username, text });
-    commentInput.value = '';
-    commentSubmitBtn.disabled = true;
-    renderComments();
-  });
 
-  // Theme toggle (dark/light)
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    if (currentTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'light');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
+    // Load comments from Firebase
+    async function loadComments() {
+      if(!postId) return;
+      const commentsList = document.getElementById('comments-list');
+      commentsList.innerHTML = 'Loading comments...';
+
+      try {
+        const commentsSnap = await db.ref(`/comments/${postId}`).orderByChild('timestamp').limitToLast(50).get();
+        if(!commentsSnap.exists()) {
+          commentsList.innerHTML = '<p style="color: var(--muted);">No comments yet. Be the first!</p>';
+          return;
+        }
+        const comments = [];
+        commentsSnap.forEach(childSnap => {
+          comments.push(childSnap.val());
+        });
+        commentsList.innerHTML = '';
+        comments.reverse().forEach(c => {
+          const div = document.createElement('div');
+          div.classList.add('comment');
+
+          const author = document.createElement('div');
+          author.classList.add('comment-author');
+          author.textContent = c.authorName || 'Anonymous';
+
+          const text = document.createElement('div');
+          text.classList.add('comment-text');
+          text.textContent = c.text;
+
+          div.appendChild(author);
+          div.appendChild(text);
+          commentsList.appendChild(div);
+        });
+      } catch(e) {
+        console.error(e);
+        commentsList.innerHTML = '<p style="color: red;">Error loading comments.</p>';
+      }
     }
-  }
 
-  // Init render
-  renderPost();
-  renderComments();
-</script>
+    // Add a new comment
+    async function addComment(text) {
+      if(!postId || !currentUser) return;
+      const commentObj = {
+        authorUid: currentUser.uid,
+        authorName: currentUser.displayName || 'User',
+        text: text,
+        timestamp: Date.now()
+      };
+      try {
+        const newCommentRef = db.ref(`/comments/${postId}`).push();
+        await newCommentRef.set(commentObj);
+        loadComments();
+      } catch(e) {
+        console.error(e);
+        showAlert('Failed to post comment.');
+      }
+    }
 
+  </script>
 </body>
 </html>
