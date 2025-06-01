@@ -102,6 +102,21 @@
       line-height: 1.6;
       color: var(--fg);
     }
+
+    .follow-button {
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .follow-button[disabled] {
+      background: var(--muted);
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -117,6 +132,7 @@
       <img src="" alt="Profile Picture" class="profile-pic" />
       <span class="username"></span>
       <span class="views"></span>
+      <button id="followBtn" class="follow-button">Follow</button>
     </div>
     <img src="" alt="Post Image" class="post-image" style="display: none;" />
     <p class="post-description"></p>
@@ -125,23 +141,19 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 
   <script>
-    // === Dark/Light Theme Logic ===
     const root = document.documentElement;
     const storedTheme = localStorage.getItem('theme');
-
     function applyTheme(theme) {
       root.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
     }
-
     function toggleTheme() {
       const current = root.getAttribute('data-theme');
       applyTheme(current === 'dark' ? 'light' : 'dark');
     }
-
-    // Auto theme based on system if nothing stored
     if (!storedTheme) {
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       applyTheme(systemPrefersDark ? 'dark' : 'light');
@@ -149,7 +161,6 @@
       applyTheme(storedTheme);
     }
 
-    // === Post Logic ===
     const statusEl = document.getElementById('status');
     const titleEl = document.querySelector('.post-title');
     const profilePicEl = document.querySelector('.profile-pic');
@@ -158,65 +169,109 @@
     const postInfoEl = document.querySelector('.post-info');
     const postImageEl = document.querySelector('.post-image');
     const descriptionEl = document.querySelector('.post-description');
+    const followBtn = document.getElementById('followBtn');
+
+    const defaultProfilePic = 'https://www.gravatar.com/avatar/?d=mp&s=80';
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('postId');
+    let postAuthorUID = null;
+    let currentUserUID = null;
 
     function setStatus(message, color = 'red') {
       if (message) {
         statusEl.textContent = message;
+        statusEl.style.color = color;
         statusEl.style.display = 'block';
       } else {
         statusEl.style.display = 'none';
       }
     }
 
-    const defaultProfilePic = 'https://www.gravatar.com/avatar/?d=mp&s=80';
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('postId');
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+    const auth = firebase.auth();
 
     if (!postId) {
       setStatus('Error: No post ID provided in URL.');
     } else {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-        authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-        databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-        projectId: "itzhoyoo-f9f7e",
-        storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-        messagingSenderId: "1094792075584",
-        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-        measurementId: "G-LLT6F9WRKH"
-      };
+      db.ref(`/post/${postId}`).get().then(snapshot => {
+        if (!snapshot.exists()) return setStatus('Post not found.');
 
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      const db = firebase.database();
+        const post = snapshot.val();
+        titleEl.textContent = post.title || 'Untitled';
+        descriptionEl.textContent = post.description || 'No description provided.';
+        postAuthorUID = post.uid || null;
 
-      db.ref(`/post/${postId}`).get()
-        .then(snapshot => {
-          if (!snapshot.exists()) return setStatus('Post not found.');
+        if (post.image) {
+          postImageEl.src = post.image;
+          postImageEl.alt = post.title || 'Post Image';
+          postImageEl.style.display = 'block';
+        }
 
-          const post = snapshot.val();
-          titleEl.textContent = post.title || 'Untitled';
-          descriptionEl.textContent = post.description || 'No description provided.';
+        if (post.username || post.views !== undefined || post.authorPic) {
+          profilePicEl.src = post.authorPic || defaultProfilePic;
+          usernameEl.textContent = post.username || 'Anonymous';
+          viewsEl.textContent = post.views !== undefined ? `${post.views} views` : '';
+          postInfoEl.style.display = 'flex';
+        }
 
-          if (post.image) {
-            postImageEl.src = post.image;
-            postImageEl.alt = post.title || 'Post Image';
-            postImageEl.style.display = 'block';
-          }
-
-          if (post.username || post.views !== undefined || post.authorPic) {
-            profilePicEl.src = post.authorPic || defaultProfilePic;
-            usernameEl.textContent = post.username || 'Anonymous';
-            viewsEl.textContent = post.views !== undefined ? `${post.views} views` : '';
-            postInfoEl.style.display = 'flex';
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          setStatus('Error fetching post data.');
-        });
+        updateFollowButton();
+      }).catch(err => {
+        console.error(err);
+        setStatus('Error fetching post data.');
+      });
     }
+
+    function updateFollowButton() {
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUserUID = user.uid;
+          if (currentUserUID === postAuthorUID) {
+            followBtn.style.display = 'none'; // hide if it's the same user
+          } else {
+            db.ref(`/users/${currentUserUID}/following/${postAuthorUID}`).once('value')
+              .then(snap => {
+                if (snap.exists()) {
+                  followBtn.textContent = 'Following';
+                  followBtn.disabled = true;
+                } else {
+                  followBtn.textContent = 'Follow';
+                  followBtn.disabled = false;
+                }
+              });
+          }
+        } else {
+          followBtn.disabled = true;
+          followBtn.textContent = 'Login to Follow';
+        }
+      });
+    }
+
+    followBtn.addEventListener('click', () => {
+      if (!currentUserUID || !postAuthorUID) return;
+
+      db.ref(`/users/${currentUserUID}/following/${postAuthorUID}`).set(true)
+        .then(() => {
+          followBtn.textContent = 'Following';
+          followBtn.disabled = true;
+        }).catch(err => {
+          console.error(err);
+          setStatus('Failed to follow user.');
+        });
+    });
   </script>
 </body>
 </html>
