@@ -747,121 +747,185 @@ body {
   background: #333;
 }
 </style>
-  <style>
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: #121212;
+    color: #eee;
+    height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  .bottom-left-menu {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 30, 30, 0.9);
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(100, 181, 246, 0.5);
+    box-shadow:
+      0 6px 12px rgba(0, 0, 0, 0.8),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    color: #64b5f6;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+    z-index: 1100;
+  }
+
+  .bottom-left-menu:hover {
+    background: rgba(100, 181, 246, 0.2);
+    color: #90caf9;
+  }
+
+  .hamburger {
+    width: 22px;
+    height: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .hamburger span {
+    display: block;
+    height: 3px;
+    background: currentColor;
+    border-radius: 2px;
+  }
+
+  .fullscreen-menu {
+    position: fixed;
+    inset: 0;
+    background: #181818;
+    backdrop-filter: blur(14px);
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1050;
+  }
+
+  .fullscreen-menu.open {
+    transform: translateX(0);
+  }
+
+  .close-btn {
+    align-self: flex-end;
+    font-size: 28px;
+    font-weight: 700;
+    color: #64b5f6;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 40px;
+    line-height: 1;
+    border: none;
+    background: none;
+    transition: color 0.25s ease;
+  }
+
+  .close-btn:hover {
+    color: #90caf9;
+  }
+
+  .menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .menu-list li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 22px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #64b5f6;
+    transition: color 0.25s ease;
+    user-select: none;
+  }
+
+  .menu-list li:hover {
+    color: #90caf9;
+  }
+
+  .menu-list svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* Special styling for logout/login button */
+  #authButton.login {
+    color: #4caf50; /* green */
+  }
+
+  #authButton.logout {
+    color: #e53935; /* red */
+  }
+
+  /* Light theme override using system preference */
+  @media (prefers-color-scheme: light) {
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #121212;
-      color: #eee;
-      height: 100vh;
-      overflow-x: hidden;
-      user-select: none;
+      background: #fafafa;
+      color: #222;
     }
+
     .bottom-left-menu {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(30 30 30 / 0.9);
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.8);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 16px;
-      color: #64b5f6;
-      transition: background-color 0.25s ease;
-      z-index: 1100;
+      background: rgba(255, 255, 255, 0.8);
+      color: #1976d2;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.03);
     }
+
     .bottom-left-menu:hover {
-      background: rgba(100 181 246 / 0.2);
-      color: #90caf9;
+      background: rgba(100, 181, 246, 0.15);
+      color: #1565c0;
     }
-    .hamburger {
-      width: 22px;
-      height: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .hamburger span {
-      display: block;
-      height: 3px;
-      background: currentColor;
-      border-radius: 2px;
-    }
+
     .fullscreen-menu {
-      position: fixed;
-      inset: 0;
-      background: #181818;
-      backdrop-filter: blur(14px);
-      color: #eee;
-      display: flex;
-      flex-direction: column;
-      padding: 40px 20px;
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 1050;
+      background: #f5f5f5;
+      color: #000;
     }
-    .fullscreen-menu.open {
-      transform: translateX(0);
-    }
+
     .close-btn {
-      align-self: flex-end;
-      font-size: 28px;
-      font-weight: 700;
-      color: #64b5f6;
-      cursor: pointer;
-      user-select: none;
-      margin-bottom: 40px;
-      line-height: 1;
-      border: none;
-      background: none;
-      transition: color 0.25s ease;
+      color: #1976d2;
     }
+
     .close-btn:hover {
-      color: #90caf9;
+      color: #1565c0;
     }
-    .menu-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
+
     .menu-list li {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 22px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #64b5f6;
-      transition: color 0.25s ease;
-      user-select: none;
+      color: #1976d2;
     }
+
     .menu-list li:hover {
-      color: #90caf9;
+      color: #1565c0;
     }
+
     .menu-list svg {
-      width: 28px;
-      height: 28px;
       fill: currentColor;
-      flex-shrink: 0;
     }
-    /* Special styling for logout/login button */
-    #authButton.login {
-      color: #4caf50; /* green */
-    }
-    #authButton.logout {
-      color: #e53935; /* red */
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
@@ -946,8 +1010,6 @@ body {
     <p class="spinner-text">Collecting data...</p>
   </div>
 </div>
-<button onclick="showPopup('That\'s not a valid image, bro.')">Show Popup</button>
-
 <div id="customPopup" class="popup hidden">
   <div class="popup-box">
     <p id="popupMessage">Placeholder message</p>
