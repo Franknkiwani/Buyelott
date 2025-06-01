@@ -666,10 +666,11 @@ window.addEventListener('load', () => {
   }, 5000);
 });
 </script>
-<script>
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -681,102 +682,25 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Show loading screen
 const loadingScreen = document.getElementById('loadingScreen');
-const loginPopup = document.getElementById('loginPopup');
-const loginNowBtn = document.getElementById('loginNowBtn');
-
-// Show loading at start
 loadingScreen.style.display = 'flex';
 
-// Prevent page interaction behind popup by adding a full overlay
-const overlay = document.createElement('div');
-overlay.style.position = 'fixed';
-overlay.style.top = '0';
-overlay.style.left = '0';
-overlay.style.width = '100vw';
-overlay.style.height = '100vh';
-overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
-overlay.style.zIndex = '9998';
-overlay.style.display = 'none';
-document.body.appendChild(overlay);
-
 onAuthStateChanged(auth, (user) => {
-  loadingScreen.style.display = 'none';
-  
   if (user) {
-    // User logged in — remove overlay & popup if shown
-    loginPopup.classList.remove('show');
-    overlay.style.display = 'none';
+    // Authenticated — proceed to the app
+    console.log("User is logged in:", user.uid);
+    loadingScreen.style.display = 'none';
   } else {
-    // No user — show popup + overlay
-    loginPopup.classList.add('show');
-    overlay.style.display = 'block';
-
-    // Optional: Auto redirect after 10 seconds if they don't click
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 10000); 
+    // Not logged in — redirect immediately
+    console.warn("No user logged in. Redirecting...");
+    window.location.href = 'login.html';
   }
 });
-
-loginNowBtn.addEventListener('click', () => {
-  window.location.href = 'login.html';
-});
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  const loadingScreen = document.getElementById('loadingScreen');
-  const loginPopup = document.getElementById('loginPopup');
-  const loginNowBtn = document.getElementById('loginNowBtn');
-  const overlay = document.getElementById('overlay');
-
-  // Keep body scroll disabled until auth state resolved
-  document.body.style.overflow = 'hidden';
-
-  onAuthStateChanged(auth, (user) => {
-    loadingScreen.style.display = 'none';
-
-    if (user) {
-      // Logged in -> hide popup & overlay, enable scroll
-      loginPopup.classList.remove('show');
-      overlay.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      console.log("User logged in:", user.uid);
-    } else {
-      // NOT logged in -> show popup & overlay, keep scroll locked
-      loginPopup.classList.add('show');
-      overlay.style.display = 'block';
-      console.log("User not logged in.");
-
-      // Optional: auto redirect to login.html after 10 seconds
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 10000);
-    }
-  });
-
-  loginNowBtn.addEventListener('click', () => {
-    window.location.href = 'login.html';
-  });
 </script>
 </body>
 </html>
