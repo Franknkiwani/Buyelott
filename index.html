@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CYBERCHAT - Clean Feed with Top Search</title>
 <style>
- :root {
+  :root {
     --bg: #0a0a0a;
     --panel: #161616;
     --border: #222;
@@ -726,7 +726,7 @@ body {
 <main class="feed">
   <div class="composer">
     <div class="left">
-      <img src="https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain/150?u=user" alt="User" />
+      <img src="https://i.pravatar.cc/150?u=user" alt="User" />
       <input type="text" placeholder="What's on your mind?" />
     </div>
 <button id="sendPostBtn">UPLOAD</button>
@@ -756,7 +756,9 @@ body {
     spellcheck="false"
   />
 </div>
-
+<div id="settings-dropdown" class="settings-dropdown hidden">
+  <div class="settings-option" id="toggle-theme">Toggle Theme</div>
+</div>
 <!-- Background blur overlay while search open -->
 <div class="blur-overlay" id="blur-overlay" tabindex="-1" aria-hidden="true"></div>
 <div id="posts-container"></div>
@@ -783,18 +785,21 @@ body {
 </div>
 <script type="module">
   import {
-    getAuth,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-  import {
-    get,
-    child,
-    ref,
-    getDatabase
-  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
+import {
+  set,
+  remove
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    get,
+    child
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -811,11 +816,11 @@ body {
   const db = getDatabase(app);
   const dbRef = ref(db);
   const auth = getAuth();
-  let currentUser = null;
+let currentUser = null;
 
-  onAuthStateChanged(auth, user => {
-    currentUser = user;
-  });
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+});
 
   const searchIcon = document.getElementById('search-icon');
   const searchBar = document.getElementById('search-bar');
@@ -827,7 +832,7 @@ body {
   const resultsBox = document.getElementById('search-results');
 
   let activeIndex = -1;
-  let filtered = [];
+  let filtered = []; // will hold {id, title, views, thumbnailUrl}
 
   function openSearch() {
     searchBar.classList.add('active');
@@ -860,41 +865,82 @@ body {
   }
 
   async function renderSuggestions() {
-    if (filtered.length === 0) {
-      suggestionsBox.innerHTML = `<div class="no-results">No results found</div>`;
-      suggestionsBox.classList.add('active');
-      return;
-    }
-
-    suggestionsBox.innerHTML = '';
-
-    for (let i = 0; i < filtered.length; i++) {
-      const item = filtered[i];
-      const div = document.createElement('div');
-      div.className = 'suggestion-item';
-      div.setAttribute('role', 'option');
-      div.setAttribute('tabindex', '0');
-      div.dataset.id = item.id;
-
-      div.innerHTML = `
-        <img src="${item.image || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" class="suggestion-thumb" />
-        <div class="suggestion-text">
-          <div class="suggestion-title">${item.title}</div>
-          <div class="suggestion-meta">
-            <span>${item.views} views</span>
-            <span>•</span>
-            <span>${item.username || 'cyberchat'}</span>
-          </div>
-        </div>
-      `;
-
-      if (i === activeIndex) div.classList.add('active');
-      suggestionsBox.appendChild(div);
-    }
-
+  if (filtered.length === 0) {
+    suggestionsBox.innerHTML = `<div class="no-results">No results found</div>`;
     suggestionsBox.classList.add('active');
+    return;
   }
 
+  suggestionsBox.innerHTML = '';
+
+  const user = JSON.parse(localStorage.getItem('authUser')); // assuming you store auth user here
+  const currentUserId = user?.uid;
+
+  for (let i = 0; i < filtered.length; i++) {
+    const item = filtered[i];
+    const div = document.createElement('div');
+    div.className = 'suggestion-item';
+    div.setAttribute('role', 'option');
+    div.setAttribute('tabindex', '0');
+    div.dataset.id = item.id;
+
+    const authorId = item.authorId || item.author || 'unknown_user';
+    let isFollowing = false;
+
+    // Check if already following
+    if (currentUserId && authorId !== currentUserId) {
+      try {
+        const followSnap = await get(child(dbRef, `users/${currentUserId}/following/${authorId}`));
+        isFollowing = followSnap.exists();
+      } catch (err) {
+        console.warn('Error checking follow status:', err);
+      }
+    }
+
+    div.innerHTML = `
+      <img src="${item.thumbnailUrl}" alt="Thumbnail" class="suggestion-thumb" />
+      <div class="suggestion-text">
+        <div class="suggestion-title">${item.title}</div>
+        <div class="suggestion-meta">
+          <span>${item.views} views</span>
+          <span>•</span>
+          <span>${item.author || 'Unknown'}</span>
+        </div>
+      </div>
+      ${
+        currentUserId && authorId !== currentUserId
+          ? `<button class="follow-button" data-author="${authorId}">${isFollowing ? 'Following' : 'Follow'}</button>`
+          : ''
+      }
+    `;
+
+    if (i === activeIndex) div.classList.add('active');
+    suggestionsBox.appendChild(div);
+
+    // Follow button logic
+    const btn = div.querySelector('.follow-button');
+    if (btn) {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const authorId = btn.dataset.author;
+        const followingRef = ref(db, `users/${currentUserId}/following/${authorId}`);
+        try {
+          if (btn.textContent === 'Follow') {
+            await set(followingRef, true);
+            btn.textContent = 'Following';
+          } else {
+            await remove(followingRef);
+            btn.textContent = 'Follow';
+          }
+        } catch (err) {
+          console.error('Error updating follow status:', err);
+        }
+      });
+    }
+  }
+
+  suggestionsBox.classList.add('active');
+}
   async function updateSuggestions() {
     const val = searchInput.value.trim().toLowerCase();
     if (!val) {
@@ -916,8 +962,7 @@ body {
           id,
           title: post.title,
           views: post.views || 0,
-          thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img',
-          author: post.author || 'Unknown'
+          thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'
         }));
 
       activeIndex = -1;
@@ -937,66 +982,76 @@ body {
     };
   }
 
-  // Relevance scoring for sorting
-  function relevanceScore(query, text) {
-    if (!text) return 0;
-    query = query.toLowerCase();
-    text = text.toLowerCase();
-    if (text === query) return 100;
-    if (text.includes(query)) return 50;
-    let score = 0;
-    for (const c of query) {
-      if (text.includes(c)) score++;
-    }
-    return score;
+  function triggerSearch(query) {
+    console.log('Search triggered for:', query);
+    const event = new CustomEvent('search', { detail: query });
+    document.dispatchEvent(event);
   }
 
-  // Render full search results feed with featured + related posts
+  // NEW: relevance scoring for search feed sorting
+  function relevanceScore(query, text) {
+  if (!text) return 0;
+  query = query.toLowerCase();
+  text = text.toLowerCase();
+  if (text === query) return 100;
+  if (text.includes(query)) return 50;
+  let score = 0;
+  for (const c of query) {
+    if (text.includes(c)) score++;
+  }
+  return score;
+}
+
+  // NEW: render the full search results feed, featured post on top, related posts below
   function renderSearchResults(posts, query) {
     if (!posts.length) {
       resultsBox.innerHTML = `<div class="no-results">No posts found for "${query}"</div>`;
       return;
     }
 
-    posts.sort((a, b) => relevanceScore(query, b.title) - relevanceScore(query, a.title));
+    // Sort posts by relevance descending
+    posts.sort((a,b) => relevanceScore(query, b.title) - relevanceScore(query, a.title));
 
+    // Featured post is the top one
     const featured = posts[0];
     const others = posts.slice(1);
 
     let html = `
-  <h2>Search results for "${query}"</h2>
-  <section class="featured-post">
-    <h3>${featured.title}</h3>
-    <img src="${fth.bing.imageUrl || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" />
-    <p>${featured.body || 'No content available'}</p>
-    <small>By ${featured.username || 'Unknown'} | ${featured.views || 0} views</small>
-  </section>
-  <hr/>
-  <section class="other-posts">
-    <h4>Related posts</h4>
-    <ul>
-`;
+      <h2>Search results for "${query}"</h2>
+      <section class="featured-post">
+        <h3>${featured.title}</h3>
+        <img src="${featured.thumbnailUrl || 'https://via.placeholder.com/200?text=No+Image'}" alt="Thumbnail" />
+        <p>${featured.body || 'No content available'}</p>
+        <small>By ${featured.author || 'Unknown'} | ${featured.views || 0} views</small>
+      </section>
+      <hr/>
+      <section class="other-posts">
+        <h4>Related posts</h4>
+        <ul>
+    `;
 
-others.forEach(post => {
-  html += `
-<li class="search-post-item" data-id="${post.id}" tabindex="0" role="button" aria-pressed="false">
-  <img src="${post.image || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain'}" alt="Thumbnail" />
-  <div>
-    <strong>${post.title}</strong><br/>
-    <small>${post.views || 0} views</small>
-  </div>
-</li>
-  `;
-});
+    others.forEach(post => {
+      html += `
+        <li class="search-post-item" data-id="${post.id}" tabindex="0" role="button" aria-pressed="false">
+          <img src="${post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'}" alt="Thumbnail" />
+          <div>
+            <strong>${post.title}</strong><br/>
+            <small>${post.views || 0} views</small>
+          </div>
+        </li>
+      `;
+    });
+
     html += '</ul></section>';
     resultsBox.innerHTML = html;
 
-    // Click on related posts redirects to viewpost page
+    // Click & keyboard to feature other posts
     document.querySelectorAll('.search-post-item').forEach(item => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
-        if (!id) return;
-        window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
+        const post = posts.find(p => p.id === id);
+        if (!post) return;
+        renderSearchResults([post, ...posts.filter(p => p.id !== id)], query);
       });
       item.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -1007,8 +1062,9 @@ others.forEach(post => {
     });
   }
 
+  // NEW: full search triggered on search input Enter or suggestion click
   async function doFullSearch(query) {
-    closeSearch();
+    closeSearch(); // unblur & hide search UI
     try {
       const snapshot = await get(child(dbRef, 'post'));
       if (!snapshot.exists()) {
@@ -1018,86 +1074,176 @@ others.forEach(post => {
       const data = snapshot.val();
       const allPosts = Object.entries(data).map(([id, post]) => ({
         id,
-        title: post.title,
-        body: post.body || '',
+        title: post.title || '',
         views: post.views || 0,
-     thumbnailUrl: post.thumbnailUrl || 'https://th.bing.com/th/id/OIG3.Qv7sSeGZLrSu5xZRQ7MI?dpr=1,9&pid=ImgDetMain',
+        thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img',
+        body: post.body || '',
         author: post.author || 'Unknown'
       }));
 
       renderSearchResults(allPosts, query);
 
     } catch (err) {
-      console.error('Error fetching full search:', err);
-      resultsBox.innerHTML = `<div class="no-results">Error loading search results</div>`;
+      console.error('Search error:', err);
+      resultsBox.innerHTML = `<div class="error">Error loading search results</div>`;
     }
   }
 
-  // Redirect when clicking on suggestion in the suggestion box
-  suggestionsBox.addEventListener('click', e => {
-    const item = e.target.closest('.suggestion-item');
-    if (!item) return;
-    const id = item.dataset.id;
-    if (!id) return;
-    window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
-  });
+  // Replace old fetchAndShowPost to do nothing now (we use renderSearchResults instead)
+  async function fetchAndShowPost(postId) {
+    // Intentionally blank because we're handling full feed rendering now
+  }
 
-  // Keyboard navigation & selection for suggestions
-  searchInput.addEventListener('keydown', e => {
-    if (suggestionsBox.classList.contains('active')) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        activeIndex = (activeIndex + 1) % filtered.length;
-        renderSuggestions();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
-        renderSuggestions();
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (activeIndex >= 0 && filtered[activeIndex]) {
-          const id = filtered[activeIndex].id;
-          window.location.href = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(id)}`;
-        } else if (searchInput.value.trim()) {
-          doFullSearch(searchInput.value.trim());
-          closeSearch();
-        }
-      } else if (e.key === 'Escape') {
-        closeSearch();
-      }
-    }
-  });
+  // Event listeners wiring
 
-  // Update suggestions on input with debounce
-  searchInput.addEventListener('input', debounce(updateSuggestions, 300));
+  searchIcon.addEventListener('click', openSearch);
+  blurOverlay.addEventListener('click', closeSearch);
 
- // Open search overlay on icon click
-  searchIcon.addEventListener('click', () => {
-    openSearch();
-  });
-
-  // Close search when clicking on the blur overlay
-  blurOverlay.addEventListener('click', () => {
-    closeSearch();
-  });
-
-  // Close search on Escape key anywhere
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && searchBar.classList.contains('active')) {
       closeSearch();
     }
   });
 
-  // Optional: Close search if user clicks outside search area
-  document.addEventListener('click', e => {
-    if (
-      searchBar.classList.contains('active') &&
-      !searchBar.contains(e.target) &&
-      e.target !== searchIcon
-    ) {
-      closeSearch();
+  searchInput.addEventListener('input', debounce(updateSuggestions));
+
+  searchInput.addEventListener('keydown', e => {
+    if (!filtered.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % filtered.length;
+      renderSuggestions();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+      renderSuggestions();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0) {
+        const selected = filtered[activeIndex];
+        searchInput.value = selected.title;
+        doFullSearch(selected.title);
+        clearSuggestions();
+        triggerSearch(selected.title);
+      } else {
+        const query = searchInput.value.trim();
+        if (query) {
+          doFullSearch(query);
+          clearSuggestions();
+          triggerSearch(query);
+        }
+      }
     }
   });
+
+  suggestionsBox.addEventListener('click', e => {
+    const item = e.target.closest('.suggestion-item');
+    if (!item) return;
+    const title = item.querySelector('.suggestion-title').textContent;
+    searchInput.value = title;
+    doFullSearch(title);
+    clearSuggestions();
+    triggerSearch(title);
+  });
+
+  suggestionsBox.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.classList.contains('suggestion-item')) {
+      const title = e.target.querySelector('.suggestion-title').textContent;
+      searchInput.value = title;
+      doFullSearch(title);
+      clearSuggestions();
+      triggerSearch(title);
+    }
+  });
+ const settingsIcon = document.getElementById("settings-icon");
+const dropdown = document.getElementById("settings-dropdown");
+const toggleThemeBtn = document.getElementById("toggle-theme");
+
+// Show/Hide settings dropdown
+settingsIcon.addEventListener("click", () => {
+  dropdown.classList.toggle("hidden");
+  updateDropdownTheme();
+});
+
+// Toggle theme logic
+toggleThemeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("light-theme");
+
+  const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+  localStorage.setItem("theme", currentTheme);
+
+  updateDropdownTheme();
+});
+
+// Apply saved theme on load
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "light") {
+    document.body.classList.add("light-theme");
+  } else {
+    document.body.classList.remove("light-theme");
+  }
+
+  updateDropdownTheme();
+});
+
+function updateDropdownTheme() {
+  if (document.body.classList.contains("light-theme")) {
+    dropdown.classList.remove("dark");
+  } else {
+    dropdown.classList.add("dark");
+  }
+}
+
+// Click outside to close dropdown
+document.addEventListener("click", (e) => {
+  if (!settingsIcon.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.add("hidden");
+  }
+});
+
+const galleryIcon = document.querySelector('.gallery-icon');
+const uploadInput = document.getElementById('uploadInput');
+
+galleryIcon.addEventListener('click', () => {
+  uploadInput.click();
+});
+
+uploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const uploadedImage = ev.target.result; // base64 string
+
+      // Save image to sessionStorage
+      sessionStorage.setItem('postImage', uploadedImage);
+      sessionStorage.removeItem('postText'); // optional reset
+
+      // Instantly redirect
+      window.location.href = 'uploadpost.html';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert("That's not a valid image, bro.");
+  }
+});
+const sendBtn = document.getElementById('sendPostBtn');
+
+sendBtn.addEventListener('click', () => {
+  const textInput = document.querySelector('.composer input[type="text"]');
+  const text = textInput.value.trim();
+
+  if (!text) {
+    alert("Type something first.");
+    return;
+  }
+
+  // Store in sessionStorage and go
+  sessionStorage.setItem('postText', text);
+  sessionStorage.removeItem('postImage'); // Optional: clear any stale image
+  window.location.href = 'uploadpost.html';
+});
 function createSvgIcon(type, filled = false) {
   switch (type) {
     case 'views':
@@ -1550,21 +1696,6 @@ async function loadNextPost() {
 // ------------------------ Kickoff ------------------------
 loadCachedPosts(); // fast feedback from cache
 loadPosts();       // async fresh load
-</script>
-<script>
-  const settingsIcon = document.getElementById('settings-icon');
-  const body = document.body;
-
-  // On page load, set theme from localStorage
-  if (localStorage.getItem('theme') === 'light') {
-    body.classList.add('light-theme');
-  }
-
-  settingsIcon.addEventListener('click', () => {
-    body.classList.toggle('light-theme');
-    localStorage.setItem('theme',
-      body.classList.contains('light-theme') ? 'light' : 'dark');
-  });
 </script>
 </body>
 </html>
