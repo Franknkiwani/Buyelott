@@ -25,6 +25,7 @@
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 12px;
+      margin-bottom: 20px;
     }
     @keyframes shimmer {
       0% { background-position: -200% 0; }
@@ -34,6 +35,8 @@
       width: 100%;
       border-radius: 12px;
       margin-bottom: 15px;
+      object-fit: cover;
+      max-height: 400px;
     }
     .post-title {
       font-size: 24px;
@@ -43,6 +46,7 @@
     .post-description {
       font-size: 16px;
       margin-bottom: 20px;
+      white-space: pre-wrap;
     }
     .stats {
       display: flex;
@@ -60,9 +64,10 @@
     }
     .comment-user {
       font-weight: bold;
+      margin-right: 6px;
     }
     .comment-text {
-      margin-left: 10px;
+      word-break: break-word;
     }
     .comment-form {
       display: flex;
@@ -74,6 +79,7 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       margin-right: 10px;
+      font-size: 14px;
     }
     .comment-button {
       padding: 10px 15px;
@@ -82,6 +88,17 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .comment-button:hover {
+      background-color: #005bb5;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 40px;
     }
   </style>
 </head>
@@ -129,6 +146,7 @@
     const postId = urlParams.get('postId');
 
     if (!postId) {
+      document.getElementById('loading').classList.remove('loading');
       document.getElementById('loading').innerText = "No postId provided in URL.";
     } else {
       const postRef = ref(db, `posts/${postId}`);
@@ -137,7 +155,7 @@
         if (snapshot.exists()) {
           const post = snapshot.val();
 
-          // Update views
+          // Update views count atomically-ish
           const viewsRef = ref(db, `posts/${postId}/views`);
           get(viewsRef).then(viewSnap => {
             let views = viewSnap.exists() ? viewSnap.val() : 0;
@@ -151,18 +169,18 @@
           document.getElementById('likes-count').innerText = likes;
 
           // Comments count
-          const comments = post.comments ? Object.keys(post.comments).length : 0;
-          document.getElementById('comments-count').innerText = comments;
+          const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
+          document.getElementById('comments-count').innerText = commentsCount;
 
-          // Fill content
-          document.getElementById('post-image').src = post.image || '';
-          document.getElementById('post-title').innerText = post.title || '';
-          document.getElementById('post-description').innerText = post.description || '';
+          // Fill post content
+          document.getElementById('post-image').src = post.image || 'https://via.placeholder.com/600x400?text=No+Image';
+          document.getElementById('post-title').innerText = post.title || 'Untitled Post';
+          document.getElementById('post-description').innerText = post.description || 'No description provided.';
 
           document.getElementById('loading').style.display = 'none';
           document.getElementById('post-content').style.display = 'block';
 
-          // Render comments
+          // Render comments initially
           const commentsList = document.getElementById('comments-list');
           commentsList.innerHTML = '';
           if (post.comments) {
@@ -174,21 +192,22 @@
             });
           }
 
-          // Submit new comment
+          // Submit new comment handler
           document.getElementById('comment-form').addEventListener('submit', e => {
             e.preventDefault();
             const commentInput = document.getElementById('comment-input');
             const commentText = commentInput.value.trim();
-            if (commentText) {
-              const newCommentRef = push(ref(db, `posts/${postId}/comments`));
-              set(newCommentRef, {
-                user: "Anonymous", // Replace with real user data
-                text: commentText,
-                timestamp: Date.now()
-              }).then(() => {
-                commentInput.value = '';
-              });
-            }
+            if (!commentText) return;
+            const newCommentRef = push(ref(db, `posts/${postId}/comments`));
+            set(newCommentRef, {
+              user: "Anonymous", // TODO: replace with logged-in user info
+              text: commentText,
+              timestamp: Date.now()
+            }).then(() => {
+              commentInput.value = '';
+            }).catch(err => {
+              console.error('Failed to post comment:', err);
+            });
           });
 
           // Live comment updates
@@ -210,10 +229,12 @@
           });
 
         } else {
+          document.getElementById('loading').classList.remove('loading');
           document.getElementById('loading').innerText = "Post not found.";
         }
       }).catch(err => {
         console.error(err);
+        document.getElementById('loading').classList.remove('loading');
         document.getElementById('loading').innerText = "Error loading post.";
       });
     }
