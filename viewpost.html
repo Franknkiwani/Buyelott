@@ -2,60 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CyberPost</title>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Post</title>
   <style>
     body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #111;
+      color: white;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #f9f9f9;
-      color: #111;
+      padding: 20px;
     }
-
     .container {
       max-width: 600px;
       margin: auto;
+      background: #1e1e1e;
       padding: 20px;
-    }
-
-    .card {
-      background: white;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: 20px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
     }
-
     img {
-      max-width: 100%;
+      width: 100%;
       border-radius: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 20px;
     }
-
     h2 {
       margin-top: 0;
     }
-
-    .tags {
-      color: #888;
-      font-size: 0.9em;
-    }
-
     .error {
+      color: #f55;
+      font-weight: bold;
       text-align: center;
-      padding: 60px 20px;
-      color: #666;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="post" class="card"></div>
-    <div id="error" class="error" style="display:none;">Post not found.</div>
+  <div class="container" id="postContainer">
+    <p>Loading post...</p>
   </div>
 
-  <script>
+  <script type="module">
+    // Firebase config
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -67,37 +56,37 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    const postContainer = document.getElementById('post');
-    const errorContainer = document.getElementById('error');
+    const container = document.getElementById('postContainer');
 
-    const postId = window.location.pathname.split('/').pop();
+    // Get postId from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('postId');
 
-    if (postId) {
-      db.ref(`/post/${postId}`).once('value')
+    if (!postId) {
+      container.innerHTML = `<p class="error">No postId provided in URL.</p>`;
+    } else {
+      const postRef = ref(db, `post/${postId}`);
+      get(postRef)
         .then(snapshot => {
-          const post = snapshot.val();
-          if (post) {
-            postContainer.innerHTML = `
-              ${post.image1 ? `<img src="${post.image1}" alt="Post Image">` : ''}
+          if (snapshot.exists()) {
+            const post = snapshot.val();
+            const html = `
+              <img src="${post.image || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="Post Image" />
               <h2>${post.title || 'Untitled Post'}</h2>
-              <p>${post.description || ''}</p>
-              <p class="tags">${(post.tags || []).map(tag => '#' + tag).join(' ')}</p>
+              <p>${post.description || 'No description provided.'}</p>
             `;
+            container.innerHTML = html;
           } else {
-            errorContainer.style.display = 'block';
+            container.innerHTML = `<p class="error">Post not found. Maybe it was deleted?</p>`;
           }
         })
-        .catch(err => {
-          console.error(err);
-          errorContainer.textContent = 'Error loading post.';
-          errorContainer.style.display = 'block';
+        .catch(error => {
+          console.error(error);
+          container.innerHTML = `<p class="error">Error loading post. Check console.</p>`;
         });
-    } else {
-      errorContainer.textContent = 'Invalid post URL.';
-      errorContainer.style.display = 'block';
     }
   </script>
 </body>
