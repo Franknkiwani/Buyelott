@@ -138,23 +138,25 @@
 
   <div id="modal"><div id="modalContent"></div></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, get, push, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, get, push, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById('postContainer');
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modalContent');
@@ -203,10 +205,10 @@
         container.innerHTML = "<p style='text-align:center;color:#f55'>Error loading post.</p>";
       });
 
-      // Load Comments
+      // Load Comments Realtime
       const commentsRef = ref(db, `comments/${postId}`);
+      const commentsList = document.getElementById('commentsList');
       onValue(commentsRef, (snapshot) => {
-        const commentsList = document.getElementById('commentsList');
         commentsList.innerHTML = '';
         snapshot.forEach(child => {
           const c = child.val();
@@ -215,16 +217,21 @@
       });
 
       // Post a Comment
-      document.getElementById('postCommentBtn').addEventListener('click', () => {
-        const input = document.getElementById('commentInput');
-        const commentText = input.value.trim();
-        if (commentText) {
+      const commentInput = document.getElementById('commentInput');
+      const postBtn = document.getElementById('postCommentBtn');
+      postBtn.addEventListener('click', () => {
+        const commentText = commentInput.value.trim();
+        if (commentText.length > 0) {
           const newCommentRef = push(ref(db, `comments/${postId}`));
-          newCommentRef.set({ text: commentText });
-          input.value = '';
+          newCommentRef.set({
+            text: commentText,
+            timestamp: Date.now()
+          });
+          commentInput.value = '';
         }
       });
     }
-  </script>
+  });
+</script>
 </body>
 </html>
