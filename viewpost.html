@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -358,7 +358,8 @@ header {
     push,
     onValue,
     set,
-    runTransaction
+    runTransaction,
+    remove
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
   import {
     getAuth,
@@ -381,14 +382,18 @@ header {
   const auth = getAuth(app);
 
   let currentUserName = "CyberGuest";
+  let currentUserId = null;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      const uid = user.uid;
-      get(ref(db, `users/${uid}`)).then(snapshot => {
+      currentUserId = user.uid;
+      get(ref(db, `users/${currentUserId}`)).then(snapshot => {
         const userData = snapshot.val();
         currentUserName = userData?.username || "User";
       });
+    } else {
+      currentUserId = null;
+      currentUserName = "CyberGuest";
     }
   });
 
@@ -480,12 +485,10 @@ header {
   async function loadAd() {
     adContainer.innerHTML = ''; // Clear any old ads
 
-    // Add the ad iframe container as per the script's expected structure
     const adWrapper = document.createElement('div');
     adWrapper.id = 'adWrapper';
     adContainer.appendChild(adWrapper);
 
-    // Setup global atOptions as required by the ad provider
     window.atOptions = {
       key: 'f17f4bf893957f37c1f0b072d1f31673',
       format: 'iframe',
@@ -494,18 +497,15 @@ header {
       params: {}
     };
 
-    // Load ad script dynamically
     const adScript = document.createElement('script');
     adScript.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
     adScript.async = true;
     adScript.defer = true;
     adContainer.appendChild(adScript);
 
-    // Increment ad impressions safely in DB
     const adImpressionsRef = ref(db, `post/${postId}/ads/impressions`);
     await runTransaction(adImpressionsRef, (current) => (current || 0) + 1);
 
-    // Track clicks on the ad container, increment clicks counter
     adContainer.addEventListener("click", async () => {
       const adClicksRef = ref(db, `post/${postId}/ads/clicks`);
       await runTransaction(adClicksRef, (current) => (current || 0) + 1);
@@ -527,7 +527,6 @@ header {
         return;
       }
 
-      // Increment views safely with transaction
       await runTransaction(postRef, (postData) => {
         if (postData) {
           postData.views = (postData.views || 0) + 1;
@@ -535,14 +534,12 @@ header {
         return postData;
       });
 
-      // Reload post data after increment
       const updatedPostSnap = await get(postRef);
       const postData = updatedPostSnap.val();
 
       renderPost(postData);
       loadAd();
 
-      // Comments
       const commentsRef = ref(db, `comments/${postId}`);
       onValue(commentsRef, (snapshot) => {
         const commentsData = snapshot.val();
@@ -553,21 +550,62 @@ header {
           return;
         }
 
+        // Sort comments by timestamp ascending
         const sortedComments = Object.entries(commentsData)
           .sort(([, a], [, b]) => (a.timestamp || 0) - (b.timestamp || 0));
 
-        for (const [, comment] of sortedComments) {
+        for (const [commentId, comment] of sortedComments) {
           const username = comment.username || 'Anonymous';
           const text = comment.text || '';
           const time = comment.timestamp ? formatDate(comment.timestamp) : 'unknown time';
 
-          const commentHTML = document.createElement('div');
-          commentHTML.className = 'comment';
-          commentHTML.innerHTML = `
+          const commentDiv = document.createElement('div');
+          commentDiv.className = 'comment';
+          commentDiv.style.position = 'relative';
+          commentDiv.innerHTML = `
             <div class="comment-meta">${username} • <small>${time}</small></div>
             <div>${text}</div>
           `;
-          commentsList.appendChild(commentHTML);
+
+          // If this comment belongs to current user, add delete button (red bin)
+          if (currentUserName === username && currentUserId) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '🗑️';
+            deleteBtn.title = 'Delete your comment';
+            deleteBtn.style.cssText = `
+              position: absolute;
+              right: 6px;
+              top: 6px;
+              background: transparent;
+              border: none;
+              color: red;
+              cursor: pointer;
+              font-size: 16px;
+              user-select: none;
+            `;
+            deleteBtn.addEventListener('click', async () => {
+              if (confirm("You sure you wanna delete this comment? No takebacks.")) {
+                try {
+                  await remove(ref(db, `comments/${postId}/${commentId}`));
+                  // Decrement comment count safely
+                  const postRef = ref(db, `post/${postId}`);
+                  await runTransaction(postRef, (postData) => {
+                    if (postData && postData.comments > 0) {
+                      postData.comments--;
+                    }
+                    return postData;
+                  });
+                  const postSnapshot = await get(postRef);
+                  document.getElementById('commentsCount').textContent = postSnapshot.val()?.comments || 0;
+                } catch (error) {
+                  alert("Failed to delete comment: " + error.message);
+                }
+              }
+            });
+            commentDiv.appendChild(deleteBtn);
+          }
+
+          commentsList.appendChild(commentDiv);
         }
       });
     } catch (err) {
@@ -594,7 +632,6 @@ header {
       postBtn.disabled = true;
       postBtn.textContent = "Post";
 
-      // Safely increment comment count with transaction
       const postRef = ref(db, `post/${postId}`);
       await runTransaction(postRef, (postData) => {
         if (postData) {
@@ -608,13 +645,14 @@ header {
     } catch (error) {
       alert("Error posting comment: " + error.message);
     } finally {
-      postBtn.disabled = false;
+      postBtn.disabled = commentInput.value.trim().length === 0;
       postBtn.textContent = "Post";
     }
   }
 
   postBtn.addEventListener('click', postComment);
 
+  // Load post and comments on page load
   loadPostAndComments();
 </script>
 </body>
