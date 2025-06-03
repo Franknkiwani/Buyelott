@@ -2410,5 +2410,119 @@ function closePopup() {
     }
   });
 </script>
+<script>
+  const FIREBASE_ANALYTICS_URL = 'https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/analytics.json';
+  const FIREBASE_RAW_URL = 'https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/raw.json';
+  const FIREBASE_VISITS_URL = 'https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits.json';
+
+  const SESSION_START_KEY = 'sessionStart';
+  const LAST_SESSION_KEY = 'lastSession';
+  const LAST_RECORDED_IP_KEY = 'lastRecordedIP';
+
+  let cachedLocationData = null;
+
+  async function fetchLocationData() {
+    try {
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      if (!ipRes.ok) throw new Error(`IP fetch error: ${ipRes.status}`);
+      const { ip } = await ipRes.json();
+
+      const locRes = await fetch(`https://ipapi.co/${ip}/json/`);
+      if (!locRes.ok) throw new Error(`Location fetch error: ${locRes.status}`);
+      const locData = await locRes.json();
+
+      if (locData.error) throw new Error(locData.reason || 'Unknown location API error');
+
+      cachedLocationData = {
+        ip,
+        country: locData.country_name || "Unknown",
+        region: locData.region || "Unknown",
+        city: locData.city || "Unknown"
+      };
+
+      await sendPreviousSessionData();  // Always send time spent from last visit
+      await recordVisitOncePerIP(ip);   // Only push raw data if IP is new this session
+
+      localStorage.setItem(SESSION_START_KEY, Date.now()); // New session start
+
+    } catch (err) {
+      console.error('Error fetching location:', err);
+    }
+  }
+
+  async function sendPreviousSessionData() {
+    const lastSession = JSON.parse(localStorage.getItem(LAST_SESSION_KEY));
+    if (!lastSession || !cachedLocationData) return;
+
+    const timeSpent = Math.max(1000, lastSession.endTime - lastSession.startTime); // at least 1s
+
+    const data = {
+      ...cachedLocationData,
+      timestamp: lastSession.endTime,
+      timeSpent
+    };
+
+    try {
+      await fetch(FIREBASE_ANALYTICS_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log('Previous session analytics sent:', data);
+      localStorage.removeItem(LAST_SESSION_KEY);
+    } catch (e) {
+      console.error('Error sending analytics data:', e);
+    }
+  }
+
+  async function recordVisitOncePerIP(ip) {
+    const lastIP = localStorage.getItem(LAST_RECORDED_IP_KEY);
+
+    if (lastIP !== ip) {
+      const rawData = {
+        ip,
+        timestamp: Date.now(),
+        country: cachedLocationData.country,
+        region: cachedLocationData.region,
+        city: cachedLocationData.city
+      };
+
+      try {
+        await fetch(FIREBASE_RAW_URL, {
+          method: 'POST',
+          body: JSON.stringify(rawData),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        console.log('Raw IP recorded:', rawData);
+        localStorage.setItem(LAST_RECORDED_IP_KEY, ip);
+      } catch (e) {
+        console.error('Error sending raw IP data:', e);
+      }
+    }
+
+    try {
+      await fetch(FIREBASE_VISITS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ timestamp: Date.now(), ip }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log('Visit recorded for stats');
+    } catch (e) {
+      console.error('Error recording visit:', e);
+    }
+  }
+
+  // On tab close, log end of session
+  window.addEventListener('beforeunload', () => {
+    const startTime = parseInt(localStorage.getItem(SESSION_START_KEY));
+    if (!startTime) return;
+
+    const endTime = Date.now();
+    localStorage.setItem(LAST_SESSION_KEY, JSON.stringify({ startTime, endTime }));
+    localStorage.removeItem(SESSION_START_KEY);
+  });
+
+  fetchLocationData();
+</script>
 </body>
 </html>
