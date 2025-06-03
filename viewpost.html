@@ -11,14 +11,15 @@
       margin: 0;
       padding: 0;
     }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 30px;
-      background: #1a1a1a;
-      border-bottom: 1px solid #333;
-    }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
     #logo {
       font-weight: 900;
       font-size: 22px;
@@ -212,6 +213,40 @@
   margin-top: 20px;
   display: flex;
   justify-content: center;
+}
+.comment-input-container {
+  display: flex;
+  margin-top: 10px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+
+  justify-content: center;  /* <-- Add this */
+  gap: 10px;                /* optional, adds spacing between input and button */
+}
+
+#commentInput {
+  flex-grow: 0;    /* Prevent stretching */
+  width: 70%;      /* or fixed px, like 400px */
+}
+
+#postCommentBtn {
+  flex-grow: 0;    /* Keep button at its natural size */
+}
+
+.comment-input-container {
+  position: sticky;
+  bottom: 0;
+  background-color: #fff; /* match header or page bg */
+  z-index: 1000;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  border-top: 1px solid #ddd; /* subtle separation */
 }
   </style>
 </head>
