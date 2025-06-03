@@ -132,12 +132,13 @@
     }
 
     function renderPost(post) {
-      const image = post.image || 'https://via.placeholder.com/600x400?text=No+Image';
+      // Check multiple possible keys for the image URL:
+      const image = post.image || post.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image';
       const title = post.title || 'Untitled Post';
       const description = post.description || 'No description provided.';
 
       container.innerHTML = `
-        <img src="${image}" alt="Post Image" class="post-image" />
+        <img src="${image}" alt="Post Image" class="post-image" onerror="this.src='https://via.placeholder.com/600x400?text=Image+Not+Found';" />
         <h2>${title}</h2>
         <p class="description">${description}</p>
       `;
@@ -150,7 +151,9 @@
       get(postRef)
         .then(snapshot => {
           if (snapshot.exists()) {
-            renderPost(snapshot.val());
+            const post = snapshot.val();
+            console.log('Post data:', post); // Debug log
+            renderPost(post);
           } else {
             renderError('Post not found. Maybe it was deleted?');
           }
