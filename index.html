@@ -1680,172 +1680,6 @@ if (!resultPara) {
   shareBtn.after(resultPara);
 }
 
-// Function to create and show the fallback share modal
-function showShareModal(shareUrl, shareBtn) {
-  // Prevent multiple modals
-  if (document.querySelector('.share-modal')) return;
-
-  // Modal wrapper
-  const modal = document.createElement('div');
-  modal.className = 'share-modal';
-  Object.assign(modal.style, {
-    position: 'fixed',
-    top: '0', left: '0', right: '0', bottom: '0',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: '9999',
-    padding: '20px',
-  });
-
-  // Modal content container
-  const container = document.createElement('div');
-  Object.assign(container.style, {
-    background: 'rgba(255 255 255 / 0.15)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '12px',
-    padding: '20px',
-    maxWidth: '400px',
-    width: '100%',
-    color: '#fff',
-    fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-    boxShadow: '0 0 15px rgba(0,0,0,0.3)',
-  });
-
-  // Post preview
-  const preview = document.createElement('div');
-  preview.style.display = 'flex';
-  preview.style.marginBottom = '15px';
-
-  // Thumbnail image (if available)
-  if (post.imageUrl) {
-    const img = document.createElement('img');
-    img.src = post.imageUrl;
-    img.alt = post.title || 'Post image preview';
-    Object.assign(img.style, {
-      width: '80px',
-      height: '80px',
-      objectFit: 'cover',
-      borderRadius: '8px',
-      marginRight: '15px',
-      flexShrink: '0',
-      boxShadow: '0 0 5px rgba(0,0,0,0.5)',
-    });
-    preview.appendChild(img);
-  }
-
-  // Text content container
-  const textCont = document.createElement('div');
-  textCont.style.flex = '1';
-
-  // Title
-  const title = document.createElement('h4');
-  title.textContent = post.title || 'CyberChat Post';
-  title.style.margin = '0 0 8px 0';
-  title.style.fontSize = '1.1rem';
-  title.style.fontWeight = '700';
-  textCont.appendChild(title);
-
-  // Description snippet (trimmed)
-  if (post.description) {
-    const desc = document.createElement('p');
-    desc.textContent = post.description.length > 100
-      ? post.description.slice(0, 97) + '...'
-      : post.description;
-    desc.style.margin = '0';
-    desc.style.fontSize = '0.9rem';
-    desc.style.opacity = '0.8';
-    textCont.appendChild(desc);
-  }
-
-  // Open post link
-  const openLink = document.createElement('a');
-  openLink.href = shareUrl;
-  openLink.target = '_blank';
-  openLink.rel = 'noopener noreferrer';
-  openLink.textContent = 'Open Post';
-  openLink.style.color = '#1da1f2';
-  openLink.style.display = 'inline-block';
-  openLink.style.marginTop = '10px';
-  openLink.style.textDecoration = 'underline';
-  textCont.appendChild(openLink);
-
-  preview.appendChild(textCont);
-  container.appendChild(preview);
-
-  // Share URL input (readonly)
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.value = shareUrl;
-  input.readOnly = true;
-  Object.assign(input.style, {
-    width: '100%',
-    padding: '8px',
-    borderRadius: '6px',
-    border: 'none',
-    marginBottom: '15px',
-    fontSize: '0.9rem',
-    fontFamily: 'monospace',
-    userSelect: 'all',
-  });
-  container.appendChild(input);
-
-  // Copy button
-  const copyBtn = document.createElement('button');
-  copyBtn.textContent = 'Copy Link';
-  Object.assign(copyBtn.style, {
-    padding: '10px 16px',
-    backgroundColor: '#1da1f2',
-    border: 'none',
-    borderRadius: '8px',
-    color: '#fff',
-    cursor: 'pointer',
-    fontWeight: '600',
-    fontSize: '1rem',
-    width: '100%',
-    userSelect: 'none',
-  });
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      copyBtn.textContent = 'Copied! ✅';
-      copyBtn.disabled = true;
-      setTimeout(() => {
-        copyBtn.textContent = 'Copy Link';
-        copyBtn.disabled = false;
-      }, 2000);
-    } catch {
-      copyBtn.textContent = 'Failed to copy ❌';
-    }
-  });
-  container.appendChild(copyBtn);
-
-  // Close button
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'Close';
-  Object.assign(closeBtn.style, {
-    marginTop: '12px',
-    padding: '8px 12px',
-    background: 'transparent',
-    border: '1px solid #fff',
-    borderRadius: '8px',
-    color: '#fff',
-    cursor: 'pointer',
-    width: '100%',
-  });
-  closeBtn.addEventListener('click', () => modal.remove());
-  container.appendChild(closeBtn);
-
-  modal.appendChild(container);
-  document.body.appendChild(modal);
-
-  // Clicking outside modal closes it
-  modal.addEventListener('click', (ev) => {
-    if (ev.target === modal) modal.remove();
-  });
-}
-
 shareBtn.addEventListener('click', async (e) => {
   e.stopPropagation();
 
@@ -1856,6 +1690,7 @@ shareBtn.addEventListener('click', async (e) => {
   }
 
   const shareUrl = `https://cyberchat.online/viewpost.html?postId=${encodeURIComponent(postId)}`;
+
   const shareData = {
     title: post.title || 'CyberChat Post',
     text: 'Check out this post on CyberChat!',
@@ -1868,15 +1703,17 @@ shareBtn.addEventListener('click', async (e) => {
       resultPara.textContent = "✅ Post shared successfully!";
       resultPara.style.color = 'green';
     } else {
-      resultPara.textContent = "ℹ️ Web Share not supported. Showing link...";
+      // Show title + url as fallback text
+      resultPara.textContent = `ℹ️ ${post.title || 'CyberChat Post'}\n${shareUrl}`;
       resultPara.style.color = 'orange';
-      showShareModal(shareUrl, shareBtn);
+      showShareModal(shareUrl, shareBtn); // Your fallback handler (optional)
     }
   } catch (err) {
     resultPara.textContent = `❌ Share failed: ${err.message || err}`;
     resultPara.style.color = 'red';
   }
 
+  // Auto-clear after 3 seconds
   setTimeout(() => {
     resultPara.textContent = '';
   }, 3000);
