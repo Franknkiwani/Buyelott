@@ -235,6 +235,11 @@
       <div id="modalBody"></div>
     </div>
   </div>
+  <!-- Your HTML must have two containers: -->
+<div id="postContainer"></div> <!-- for post content -->
+<div id="adContainer" style="margin-top:20px;"></div> <!-- separate for ad -->x
+
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import {
@@ -244,7 +249,6 @@
     push,
     onValue,
     set,
-    update,
     runTransaction
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
   import {
@@ -280,11 +284,14 @@
   });
 
   const container = document.getElementById('postContainer');
-  const modal = document.getElementById('modal');
-  const modalContent = document.getElementById('modalContent');
-  const modalBody = document.getElementById('modalBody');
+  const adContainer = document.getElementById('adContainer');
   const postId = new URLSearchParams(window.location.search).get("postId");
 
+  // Modal stuff
+  const modal = document.getElementById('modal');
+  const modalBody = document.getElementById('modalBody');
+
+  // Comments elements
   const commentsList = document.getElementById('commentsList');
   const commentInput = document.getElementById('commentInput');
   const postBtn = document.getElementById('postCommentBtn');
@@ -293,7 +300,7 @@
     postBtn.disabled = commentInput.value.trim().length === 0;
   });
 
-  modalContent.querySelector('.modal-close').addEventListener('click', () => {
+  modal.querySelector('.modal-close').addEventListener('click', () => {
     modal.style.display = 'none';
     modalBody.innerHTML = '';
   });
@@ -335,7 +342,6 @@
         <div>❤️ <span id="likesCount">${likes}</span> likes <button id="likeBtn" style="margin-left:6px;">Like</button></div>
         <div>💬 <span id="commentsCount">${comments}</span> comments</div>
       </div>
-      <div id="adContainer" style="margin-top:20px;"></div>
     `;
 
     container.querySelector('.post-image').addEventListener('click', () => {
@@ -360,26 +366,37 @@
       const postSnapshot = await get(postRef);
       document.getElementById('likesCount').textContent = postSnapshot.val()?.likes || 0;
     });
-
-    loadAd();
   }
 
   async function loadAd() {
-    const adContainer = document.getElementById('adContainer');
-    adContainer.innerHTML = '';
+    adContainer.innerHTML = ''; // Clear any old ads
 
+    // Add the ad iframe container as per the script's expected structure
+    const adWrapper = document.createElement('div');
+    adWrapper.id = 'adWrapper';
+    adContainer.appendChild(adWrapper);
+
+    // Setup global atOptions as required by the ad provider
+    window.atOptions = {
+      key: 'f17f4bf893957f37c1f0b072d1f31673',
+      format: 'iframe',
+      height: 50,
+      width: 320,
+      params: {}
+    };
+
+    // Load ad script dynamically
     const adScript = document.createElement('script');
-    adScript.src = "https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
+    adScript.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
     adScript.async = true;
     adScript.defer = true;
-
     adContainer.appendChild(adScript);
 
-    // Increment ad impressions count safely
+    // Increment ad impressions safely in DB
     const adImpressionsRef = ref(db, `post/${postId}/ads/impressions`);
     await runTransaction(adImpressionsRef, (current) => (current || 0) + 1);
 
-    // Track clicks
+    // Track clicks on the ad container, increment clicks counter
     adContainer.addEventListener("click", async () => {
       const adClicksRef = ref(db, `post/${postId}/ads/clicks`);
       await runTransaction(adClicksRef, (current) => (current || 0) + 1);
@@ -414,7 +431,9 @@
       const postData = updatedPostSnap.val();
 
       renderPost(postData);
+      loadAd();
 
+      // Comments
       const commentsRef = ref(db, `comments/${postId}`);
       onValue(commentsRef, (snapshot) => {
         const commentsData = snapshot.val();
@@ -442,7 +461,6 @@
           commentsList.appendChild(commentHTML);
         }
       });
-
     } catch (err) {
       container.innerHTML = `<p style="color:#f55;">Error loading post: ${err.message}</p>`;
     }
