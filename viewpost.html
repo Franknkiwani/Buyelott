@@ -145,8 +145,72 @@
       margin-right: auto;
       padding: 0 30px;
     }
+    .skeleton {
+  background: linear-gradient(
+    90deg,
+    #1a1a1a 25%,
+    #2a2a2a 50%,
+    #1a1a1a 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.skeleton-image {
+  height: 400px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.comment {
+  display: flex;
+  gap: 12px;
+  background: #1e1e1e;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  object-fit: cover;
+  background-color: #333;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
   </style>
 </head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <body>
 
   <header>
@@ -180,8 +244,7 @@
     push,
     onValue,
     set,
-    update,
-    serverTimestamp
+    update
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
   import {
     getAuth,
@@ -195,7 +258,7 @@
     projectId: "itzhoyoo-f9f7e",
     storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    appId: "1:1094792075584:web:d49e9c3d31082a5",
     measurementId: "G-LLT6F9WRKH"
   };
 
@@ -283,7 +346,6 @@
       });
     }
 
-    // Like button logic
     container.querySelector('#likeBtn').addEventListener('click', async () => {
       const newLikes = (post.likes || 0) + 1;
       await update(ref(db, `post/${postId}`), { likes: newLikes });
@@ -312,7 +374,6 @@
       const newViews = (postData.views || 0) + 1;
       await update(postRef, { views: newViews });
 
-      // Load updated post
       postData.views = newViews;
       renderPost(postData);
 
@@ -368,7 +429,6 @@
       postBtn.disabled = true;
       postBtn.textContent = "Post";
 
-      // Increment comment count
       const postRef = ref(db, `post/${postId}`);
       const snapshot = await get(postRef);
       const postData = snapshot.val();
