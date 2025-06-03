@@ -2,48 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>View Post</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: white;
+      background-color: #f0f2f5;
       margin: 0;
       padding: 20px;
     }
     .container {
       max-width: 600px;
       margin: auto;
-      background: #1e1e1e;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
     }
-    img {
+    .loading {
+      height: 200px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .post-image {
       width: 100%;
       border-radius: 12px;
+      margin-bottom: 15px;
+    }
+    .post-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .post-description {
+      font-size: 16px;
       margin-bottom: 20px;
     }
-    h2 {
-      margin-top: 0;
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #555;
     }
-    .error {
-      color: #f55;
+    .comments-section {
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+    .comment {
+      margin-bottom: 15px;
+    }
+    .comment-user {
       font-weight: bold;
-      text-align: center;
+    }
+    .comment-text {
+      margin-left: 10px;
+    }
+    .comment-form {
+      display: flex;
+      margin-top: 20px;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+    .comment-button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #007aff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="postContainer">
-    <p>Loading post...</p>
+  <div class="container">
+    <div id="loading" class="loading"></div>
+    <div id="post-content" style="display:none;">
+      <img id="post-image" class="post-image" src="" alt="Post Image"/>
+      <div id="post-title" class="post-title"></div>
+      <div id="post-description" class="post-description"></div>
+      <div class="stats">
+        <div><span id="views-count">0</span> Views</div>
+        <div><span id="likes-count">0</span> Likes</div>
+        <div><span id="comments-count">0</span> Comments</div>
+      </div>
+      <div class="comments-section">
+        <div id="comments-list"></div>
+        <form id="comment-form" class="comment-form">
+          <input type="text" id="comment-input" class="comment-input" placeholder="Add a comment..." required/>
+          <button type="submit" class="comment-button">Post</button>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script type="module">
-    // Firebase config
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -59,34 +125,97 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const container = document.getElementById('postContainer');
-
-    // Get postId from URL
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('postId');
 
     if (!postId) {
-      container.innerHTML = `<p class="error">No postId provided in URL.</p>`;
+      document.getElementById('loading').innerText = "No postId provided in URL.";
     } else {
-      const postRef = ref(db, `post/${postId}`);
-      get(postRef)
-        .then(snapshot => {
-          if (snapshot.exists()) {
-            const post = snapshot.val();
-            const html = `
-              <img src="${post.image || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="Post Image" />
-              <h2>${post.title || 'Untitled Post'}</h2>
-              <p>${post.description || 'No description provided.'}</p>
-            `;
-            container.innerHTML = html;
-          } else {
-            container.innerHTML = `<p class="error">Post not found. Maybe it was deleted?</p>`;
+      const postRef = ref(db, `posts/${postId}`);
+
+      get(postRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const post = snapshot.val();
+
+          // Update views
+          const viewsRef = ref(db, `posts/${postId}/views`);
+          get(viewsRef).then(viewSnap => {
+            let views = viewSnap.exists() ? viewSnap.val() : 0;
+            views++;
+            set(viewsRef, views);
+            document.getElementById('views-count').innerText = views;
+          });
+
+          // Likes count
+          const likes = post.likes ? Object.keys(post.likes).length : 0;
+          document.getElementById('likes-count').innerText = likes;
+
+          // Comments count
+          const comments = post.comments ? Object.keys(post.comments).length : 0;
+          document.getElementById('comments-count').innerText = comments;
+
+          // Fill content
+          document.getElementById('post-image').src = post.image || '';
+          document.getElementById('post-title').innerText = post.title || '';
+          document.getElementById('post-description').innerText = post.description || '';
+
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('post-content').style.display = 'block';
+
+          // Render comments
+          const commentsList = document.getElementById('comments-list');
+          commentsList.innerHTML = '';
+          if (post.comments) {
+            Object.values(post.comments).forEach(comment => {
+              const commentDiv = document.createElement('div');
+              commentDiv.className = 'comment';
+              commentDiv.innerHTML = `<span class="comment-user">${comment.user}</span><span class="comment-text">${comment.text}</span>`;
+              commentsList.appendChild(commentDiv);
+            });
           }
-        })
-        .catch(error => {
-          console.error(error);
-          container.innerHTML = `<p class="error">Error loading post. Check console.</p>`;
-        });
+
+          // Submit new comment
+          document.getElementById('comment-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const commentInput = document.getElementById('comment-input');
+            const commentText = commentInput.value.trim();
+            if (commentText) {
+              const newCommentRef = push(ref(db, `posts/${postId}/comments`));
+              set(newCommentRef, {
+                user: "Anonymous", // Replace with real user data
+                text: commentText,
+                timestamp: Date.now()
+              }).then(() => {
+                commentInput.value = '';
+              });
+            }
+          });
+
+          // Live comment updates
+          onValue(ref(db, `posts/${postId}/comments`), snapshot => {
+            const commentsData = snapshot.val();
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = '';
+            if (commentsData) {
+              Object.values(commentsData).forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.innerHTML = `<span class="comment-user">${comment.user}</span><span class="comment-text">${comment.text}</span>`;
+                commentsList.appendChild(commentDiv);
+              });
+              document.getElementById('comments-count').innerText = Object.keys(commentsData).length;
+            } else {
+              document.getElementById('comments-count').innerText = '0';
+            }
+          });
+
+        } else {
+          document.getElementById('loading').innerText = "Post not found.";
+        }
+      }).catch(err => {
+        console.error(err);
+        document.getElementById('loading').innerText = "Error loading post.";
+      });
     }
   </script>
 </body>
