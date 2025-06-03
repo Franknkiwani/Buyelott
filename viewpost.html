@@ -171,7 +171,6 @@
       <div id="modalBody"></div>
     </div>
   </div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import {
@@ -181,10 +180,14 @@
     push,
     onValue,
     set,
+    update,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-  // Your Firebase config - don't change this
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -198,6 +201,19 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  let currentUserName = "CyberGuest";
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      get(ref(db, `users/${uid}`)).then(snapshot => {
+        const userData = snapshot.val();
+        currentUserName = userData?.username || "User";
+      });
+    }
+  });
 
   const container = document.getElementById('postContainer');
   const modal = document.getElementById('modal');
@@ -209,18 +225,15 @@
   const commentInput = document.getElementById('commentInput');
   const postBtn = document.getElementById('postCommentBtn');
 
-  // Enable post button only if input is not empty
   commentInput.addEventListener('input', () => {
     postBtn.disabled = commentInput.value.trim().length === 0;
   });
 
-  // Modal close button handler
   modalContent.querySelector('.modal-close').addEventListener('click', () => {
     modal.style.display = 'none';
     modalBody.innerHTML = '';
   });
 
-  // Modal click outside content closes modal
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.style.display = 'none';
@@ -228,13 +241,11 @@
     }
   });
 
-  // Helper: format timestamp to readable string
   function formatDate(ts) {
     const d = new Date(ts);
     return d.toLocaleString();
   }
 
-  // Open modal with custom HTML content
   function openModal(contentHTML) {
     modalBody.innerHTML = contentHTML;
     modal.style.display = "flex";
@@ -256,26 +267,30 @@
         ${description.length > 100 ? '<span class="read-more" style="color:#3b82f6; font-weight:bold; cursor:pointer;">Read more</span>' : ''}
       </p>
       <div class="meta-info">
-        <div>👁 ${views} views</div>
-        <div>❤️ ${likes} likes</div>
-        <div>💬 ${comments} comments</div>
+        <div>👁 <span id="viewsCount">${views}</span> views</div>
+        <div>❤️ <span id="likesCount">${likes}</span> likes <button id="likeBtn">Like</button></div>
+        <div>💬 <span id="commentsCount">${comments}</span> comments</div>
       </div>
     `;
 
-    // Image modal open
     container.querySelector('.post-image').addEventListener('click', () => {
       openModal(`<img src="${image}" alt="Post Image" style="max-width:100%;border-radius:8px" />`);
     });
 
-    // Description read more modal open
     if (description.length > 100) {
       container.querySelector('.read-more').addEventListener('click', () => {
         openModal(`<p style="white-space: pre-wrap;">${description}</p>`);
       });
     }
+
+    // Like button logic
+    container.querySelector('#likeBtn').addEventListener('click', async () => {
+      const newLikes = (post.likes || 0) + 1;
+      await update(ref(db, `post/${postId}`), { likes: newLikes });
+      document.getElementById('likesCount').textContent = newLikes;
+    });
   }
 
-  // Load post data and comments
   async function loadPostAndComments() {
     if (!postId) {
       container.innerHTML = `<p style="color:#f55;">Error: postId missing in URL params.</p>`;
@@ -284,33 +299,37 @@
     }
 
     try {
-      // Load post data
-      const postSnapshot = await get(ref(db, `post/${postId}`));
+      const postRef = ref(db, `post/${postId}`);
+      const postSnapshot = await get(postRef);
       if (!postSnapshot.exists()) {
         container.innerHTML = `<p style="color:#f55;">Post not found.</p>`;
-        commentsList.innerHTML = '';
         return;
       }
+
       const postData = postSnapshot.val();
 
+      // Auto-increment views
+      const newViews = (postData.views || 0) + 1;
+      await update(postRef, { views: newViews });
+
+      // Load updated post
+      postData.views = newViews;
       renderPost(postData);
 
-      // Load and listen to comments realtime
       const commentsRef = ref(db, `comments/${postId}`);
       onValue(commentsRef, (snapshot) => {
         const commentsData = snapshot.val();
-        commentsList.innerHTML = ''; // clear
+        commentsList.innerHTML = '';
 
         if (!commentsData) {
           commentsList.innerHTML = `<p>No comments yet. Be the first!</p>`;
           return;
         }
 
-        // Sort comments by timestamp ascending
         const sortedComments = Object.entries(commentsData)
-          .sort(([,a],[,b]) => (a.timestamp || 0) - (b.timestamp || 0));
+          .sort(([, a], [, b]) => (a.timestamp || 0) - (b.timestamp || 0));
 
-        for (const [commentId, comment] of sortedComments) {
+        for (const [, comment] of sortedComments) {
           const username = comment.username || 'Anonymous';
           const text = comment.text || '';
           const time = comment.timestamp ? formatDate(comment.timestamp) : 'unknown time';
@@ -321,18 +340,15 @@
             <div class="comment-meta">${username} • <small>${time}</small></div>
             <div>${text}</div>
           `;
-
           commentsList.appendChild(commentHTML);
         }
       });
 
     } catch (err) {
       container.innerHTML = `<p style="color:#f55;">Error loading post: ${err.message}</p>`;
-      commentsList.innerHTML = '';
     }
   }
 
-  // Post a comment to Firebase
   async function postComment() {
     const commentText = commentInput.value.trim();
     if (!commentText) return;
@@ -341,19 +357,24 @@
     postBtn.textContent = "Posting...";
 
     try {
-      // For simplicity: use a placeholder username or load from auth/user profile
-      const username = "CyberGuest"; // Replace with logged-in username if available
-
       const newCommentRef = push(ref(db, `comments/${postId}`));
       await set(newCommentRef, {
         text: commentText,
-        username,
+        username: currentUserName,
         timestamp: Date.now()
       });
 
       commentInput.value = "";
       postBtn.disabled = true;
       postBtn.textContent = "Post";
+
+      // Increment comment count
+      const postRef = ref(db, `post/${postId}`);
+      const snapshot = await get(postRef);
+      const postData = snapshot.val();
+      const newCommentCount = (postData.comments || 0) + 1;
+      await update(postRef, { comments: newCommentCount });
+      document.getElementById('commentsCount').textContent = newCommentCount;
 
     } catch (err) {
       alert("Failed to post comment: " + err.message);
@@ -362,156 +383,10 @@
     }
   }
 
-  // Hook up comment post button
   postBtn.addEventListener('click', postComment);
 
-  // Load post and comments on page load
   loadPostAndComments();
-
 </script>
-<script>
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, get, push, onValue, runTransaction, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-const container = document.getElementById('postContainer');
-const modal = document.getElementById('modal');
-const modalContent = document.getElementById('modalContent');
-const postId = new URLSearchParams(window.location.search).get("postId");
-const commentsList = document.getElementById('commentsList');
-const commentInput = document.getElementById('commentInput');
-const postBtn = document.getElementById('postCommentBtn');
-
-let currentUserName = "cyberguest";
-
-// Detect logged-in user and get display name or email fallback
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUserName = user.displayName || user.email || "cyberguest";
-  } else {
-    currentUserName = "cyberguest";
-  }
-});
-
-// Increment views count once when page loads
-async function incrementViews() {
-  const postViewsRef = ref(db, `post/${postId}/views`);
-  await runTransaction(postViewsRef, current => (current || 0) + 1);
-}
-
-function openModal(contentHTML) {
-  modalContent.innerHTML = contentHTML + `<div class="modal-close" onclick="document.getElementById('modal').style.display='none'">Close</div>`;
-  modal.style.display = "flex";
-}
-
-function renderPost(post) {
-  const image = post.image || post.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image';
-  const title = post.title || 'Untitled';
-  const description = post.description || '';
-  const shortDesc = description.length > 30 ? description.slice(0, 30) + '...' : description;
-  const views = post.views || 0;
-  const likes = post.likes || 0;
-  const comments = post.comments || 0;
-
-  container.innerHTML = `
-    <img src="${image}" alt="Post Image" class="post-image" onclick="openModal('<img src=${image} />')" />
-    <h2>${title}</h2>
-    <p class="description" onclick="openModal('<p>${description}</p>')">${shortDesc}
-      ${description.length > 30 ? '<span class="read-more">Read more</span>' : ''}
-    </p>
-    <div class="meta-info">
-      <div>👁 ${views} views</div>
-      <div>❤️ <span id="likeCount">${likes}</span> likes <button id="likeBtn" style="background:#06b6d4; border:none; border-radius:6px; color:white; cursor:pointer;">Like</button></div>
-      <div>💬 ${comments} comments</div>
-    </div>
-  `;
-}
-
-// Load post data, increment views, setup like button and comments
-async function loadPost() {
-  if (!postId) {
-    container.innerHTML = "<p style='text-align:center;color:#f55'>No postId in URL.</p>";
-    return;
-  }
-
-  const postRef = ref(db, `post/${postId}`);
-  try {
-    const snapshot = await get(postRef);
-    if (!snapshot.exists()) {
-      container.innerHTML = "<p style='text-align:center;color:#f55'>Post not found.</p>";
-      return;
-    }
-    const post = snapshot.val();
-    renderPost(post);
-    await incrementViews();
-
-    // Like button handler
-    const likeBtn = document.getElementById('likeBtn');
-    const likeCountSpan = document.getElementById('likeCount');
-
-    likeBtn.addEventListener('click', async () => {
-      const likesRef = ref(db, `post/${postId}/likes`);
-      await runTransaction(likesRef, current => (current || 0) + 1);
-      // Update UI locally
-      let currentLikes = parseInt(likeCountSpan.textContent) || 0;
-      likeCountSpan.textContent = currentLikes + 1;
-    });
-
-    // Load comments realtime
-    const commentsRef = ref(db, `comments/${postId}`);
-    onValue(commentsRef, (snapshot) => {
-      commentsList.innerHTML = '';
-      snapshot.forEach(child => {
-        const c = child.val();
-        commentsList.innerHTML += `<div class="comment"><strong>${c.username || 'cyberguest'}:</strong> ${c.text}</div>`;
-      });
-    });
-
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "<p style='text-align:center;color:#f55'>Error loading post.</p>";
-  }
-}
-
-// Post a comment and increment comment count
-postBtn.addEventListener('click', async () => {
-  const commentText = commentInput.value.trim();
-  if (commentText.length === 0) return;
-
-  const newCommentRef = push(ref(db, `comments/${postId}`));
-  try {
-    await set(newCommentRef, {
-      text: commentText,
-      username: currentUserName,
-      timestamp: Date.now()
-    });
-
-    // Increment comment count in post atomically
-    const commentsCountRef = ref(db, `post/${postId}/comments`);
-    await runTransaction(commentsCountRef, current => (current || 0) + 1);
-
-    commentInput.value = '';
-  } catch (err) {
-    console.error('Error posting comment:', err);
-  }
-});
-
-loadPost();
-</script>
 </body>
 </html>
