@@ -127,14 +127,18 @@
 
   <div id="postContainer"></div>
 
-  <div id="commentSection">
-    <div style="max-width: 700px; margin: auto;">
-      <h3>Comments</h3>
-      <input type="text" id="commentInput" placeholder="Add a public comment..." />
-      <button id="postCommentBtn">Post Comment</button>
-      <div id="commentsList"></div>
-    </div>
+  <div id="commentsList"></div>
+
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <input id="commentInput" type="text" placeholder="Write a comment..." />
+    <button id="postCommentBtn">Post</button>
   </div>
+
+  <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items:center; justify-content:center;">
+    <div id="modalContent" style="background:white; padding:20px; border-radius:10px;"></div>
+  </div>
+
+</body>
 
   <div id="modal"><div id="modalContent"></div></div>
 
@@ -156,82 +160,80 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById('postContainer');
-    const modal = document.getElementById('modal');
-    const modalContent = document.getElementById('modalContent');
-    const postId = new URLSearchParams(window.location.search).get("postId");
+  const container = document.getElementById('postContainer');
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modalContent');
+  const postId = new URLSearchParams(window.location.search).get("postId");
 
-    function openModal(contentHTML) {
-      modalContent.innerHTML = contentHTML + `<div class="modal-close" onclick="document.getElementById('modal').style.display='none'">Close</div>`;
-      modal.style.display = "flex";
-    }
+  function openModal(contentHTML) {
+    modalContent.innerHTML = contentHTML + `<div class="modal-close" onclick="document.getElementById('modal').style.display='none'">Close</div>`;
+    modal.style.display = "flex";
+  }
 
-    function renderPost(post) {
-      const image = post.image || post.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image';
-      const title = post.title || 'Untitled';
-      const description = post.description || '';
-      const shortDesc = description.length > 30 ? description.slice(0, 30) + '...' : description;
-      const views = post.views || 0;
-      const likes = post.likes || 0;
-      const comments = post.comments || 0;
+  function renderPost(post) {
+    const image = post.image || post.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image';
+    const title = post.title || 'Untitled';
+    const description = post.description || '';
+    const shortDesc = description.length > 30 ? description.slice(0, 30) + '...' : description;
+    const views = post.views || 0;
+    const likes = post.likes || 0;
+    const comments = post.comments || 0;
 
-      container.innerHTML = `
-        <img src="${image}" alt="Post Image" class="post-image" onclick="openModal('<img src=${image} />')" />
-        <h2>${title}</h2>
-        <p class="description" onclick="openModal('<p>${description}</p>')">${shortDesc}
-          ${description.length > 30 ? '<span class="read-more">Read more</span>' : ''}
-        </p>
-        <div class="meta-info">
-          <div>👁 ${views} views</div>
-          <div>❤️ ${likes} likes</div>
-          <div>💬 ${comments} comments</div>
-        </div>
-      `;
-    }
+    container.innerHTML = `
+      <img src="${image}" alt="Post Image" class="post-image" onclick="openModal('<img src=${image} />')" />
+      <h2>${title}</h2>
+      <p class="description" onclick="openModal('<p>${description}</p>')">${shortDesc}
+        ${description.length > 30 ? '<span class="read-more">Read more</span>' : ''}
+      </p>
+      <div class="meta-info">
+        <div>👁 ${views} views</div>
+        <div>❤️ ${likes} likes</div>
+        <div>💬 ${comments} comments</div>
+      </div>
+    `;
+  }
 
-    if (!postId) {
-      container.innerHTML = "<p style='text-align:center;color:#f55'>No postId in URL.</p>";
-    } else {
-      const postRef = ref(db, `post/${postId}`);
-      get(postRef).then(snapshot => {
-        if (snapshot.exists()) {
-          renderPost(snapshot.val());
-        } else {
-          container.innerHTML = "<p style='text-align:center;color:#f55'>Post not found.</p>";
-        }
-      }).catch(err => {
-        console.error(err);
-        container.innerHTML = "<p style='text-align:center;color:#f55'>Error loading post.</p>";
+  if (!postId) {
+    container.innerHTML = "<p style='text-align:center;color:#f55'>No postId in URL.</p>";
+  } else {
+    const postRef = ref(db, `post/${postId}`);
+    get(postRef).then(snapshot => {
+      if (snapshot.exists()) {
+        renderPost(snapshot.val());
+      } else {
+        container.innerHTML = "<p style='text-align:center;color:#f55'>Post not found.</p>";
+      }
+    }).catch(err => {
+      console.error(err);
+      container.innerHTML = "<p style='text-align:center;color:#f55'>Error loading post.</p>";
+    });
+
+    // Load Comments Realtime
+    const commentsRef = ref(db, `comments/${postId}`);
+    const commentsList = document.getElementById('commentsList');
+    onValue(commentsRef, (snapshot) => {
+      commentsList.innerHTML = '';
+      snapshot.forEach(child => {
+        const c = child.val();
+        commentsList.innerHTML += `<div class="comment">${c.text}</div>`;
       });
+    });
 
-      // Load Comments Realtime
-      const commentsRef = ref(db, `comments/${postId}`);
-      const commentsList = document.getElementById('commentsList');
-      onValue(commentsRef, (snapshot) => {
-        commentsList.innerHTML = '';
-        snapshot.forEach(child => {
-          const c = child.val();
-          commentsList.innerHTML += `<div class="comment">${c.text}</div>`;
+    // Post a Comment
+    const commentInput = document.getElementById('commentInput');
+    const postBtn = document.getElementById('postCommentBtn');
+    postBtn.addEventListener('click', () => {
+      const commentText = commentInput.value.trim();
+      if (commentText.length > 0) {
+        const newCommentRef = push(ref(db, `comments/${postId}`));
+        newCommentRef.set({
+          text: commentText,
+          timestamp: Date.now()
         });
-      });
-
-      // Post a Comment
-      const commentInput = document.getElementById('commentInput');
-      const postBtn = document.getElementById('postCommentBtn');
-      postBtn.addEventListener('click', () => {
-        const commentText = commentInput.value.trim();
-        if (commentText.length > 0) {
-          const newCommentRef = push(ref(db, `comments/${postId}`));
-          newCommentRef.set({
-            text: commentText,
-            timestamp: Date.now()
-          });
-          commentInput.value = '';
-        }
-      });
-    }
-  });
+        commentInput.value = '';
+      }
+    });
+  }
 </script>
 </body>
 </html>
