@@ -248,6 +248,74 @@ header {
   margin-right: auto;
   border-top: 1px solid #ddd; /* subtle separation */
 }
+.comments-box {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1.5px solid #3b82f6;
+  border-radius: 12px;
+  padding: 12px;
+  background-color: #121212;
+  color: #eee;
+  font-size: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #1e1e1e;
+  margin-bottom: 15px;
+}
+
+.comments-box::-webkit-scrollbar {
+  width: 8px;
+}
+.comments-box::-webkit-scrollbar-track {
+  background: #1e1e1e;
+  border-radius: 12px;
+}
+.comments-box::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 12px;
+  border: 2px solid #1e1e1e;
+}
+
+.comment-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+#commentInput {
+  flex-grow: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #3b82f6;
+  background-color: #1e1e1e;
+  color: #eee;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+#commentInput:focus {
+  border-color: #60a5fa;
+}
+
+#postCommentBtn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+#postCommentBtn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+#postCommentBtn:not(:disabled):hover {
+  background-color: #2563eb;
+}
   </style>
 </head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -265,14 +333,16 @@ header {
 <div id="adContainer" style="margin-top:20px;"></div> <!-- separate for ad -->
  <div id="postContainer"></div>
 
-  <section id="commentSection">
-    <h3>Comments</h3>
-    <div id="commentsList">Loading comments...</div>
-    <div class="comment-input-container">
-      <input id="commentInput" type="text" placeholder="Write a comment..." />
-      <button id="postCommentBtn" disabled>Post</button>
-    </div>
-
+<section id="commentSection" style="max-width: 600px; margin: auto; padding: 20px;">
+  <h3>Comments</h3>
+  <div id="commentsList" class="comments-box">
+    Loading comments...
+  </div>
+  <div class="comment-input-container">
+    <input id="commentInput" type="text" placeholder="Write a comment..." />
+    <button id="postCommentBtn" disabled>Post</button>
+  </div>
+</section>
   <div id="modal">
     <div id="modalContent">
       <div class="modal-close" title="Close">&times;</div>
