@@ -1,616 +1,131 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>View Post - CyberChat</title>
-<style>
-  :root {
-    --bg: #fff;
-    --fg: #111;
-    --muted: #666;
-    --card: #f9f9f9;
-    --shadow: rgba(0,0,0,0.05);
-    --btn-bg: #007aff;
-    --btn-fg: white;
-  }
-  [data-theme="dark"] {
-    --bg: #121212;
-    --fg: #eee;
-    --muted: #aaa;
-    --card: #1e1e1e;
-    --shadow: rgba(0,0,0,0.4);
-    --btn-bg: #0a84ff;
-    --btn-fg: white;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberPost</title>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    transition: background 0.3s, color 0.3s;
-  }
-  header {
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    padding: 1rem 1.5rem;
-    font-weight: 700;
-    font-size: 1.5rem;
-    border-bottom: 1px solid var(--muted);
-    box-shadow: 0 2px 8px var(--shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-  }
-  .theme-toggle {
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    color: var(--btn-bg);
-    font-weight: 600;
-    user-select: none;
-  }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f7;
+      color: #1c1c1e;
+    }
 
-  main {
-    max-width: 720px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
+    .container {
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
 
-  #status {
-    color: #d9534f;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: none;
-    text-align: center;
-  }
+    .card {
+      background-color: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      transition: box-shadow 0.3s ease;
+    }
 
-  .post-image {
-    width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 12px;
-    box-shadow: 0 6px 16px var(--shadow);
-    margin-bottom: 1.5rem;
-  }
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
 
-  h1.post-title {
-    font-size: 2.1rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
-  .post-description {
-    text-align: center;
-    font-size: 1.1rem;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
-    white-space: pre-wrap;
-    color: var(--fg);
-  }
-  .read-more {
-    cursor: pointer;
-    color: var(--btn-bg);
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    user-select: none;
-  }
+    img {
+      max-width: 100%;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
 
-  .post-author {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-    color: var(--muted);
-  }
-  .profile-pic {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #ccc;
-  }
-  .username {
-    font-weight: 600;
-  }
-  .views {
-    font-size: 0.9rem;
-  }
+    h2 {
+      font-size: 1.6rem;
+      margin: 0 0 10px;
+    }
 
-  button.follow-btn {
-    display: block;
-    margin: 0 auto 2rem auto;
-    background: var(--btn-bg);
-    color: var(--btn-fg);
-    border: none;
-    border-radius: 24px;
-    padding: 0.5rem 1.5rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background 0.3s;
-  }
-  button.follow-btn:disabled {
-    background: var(--muted);
-    cursor: default;
-    box-shadow: none;
-  }
-  button.follow-btn:hover:not(:disabled) {
-    background: #0051c7;
-  }
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
 
-  /* Comment Section */
-  .comment-section {
-    max-width: 720px;
-    margin: 0 auto 3rem auto;
-    background: var(--card);
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px var(--shadow);
-  }
-  .comment-section h2 {
-    margin-top: 0;
-    font-weight: 700;
-    color: var(--fg);
-  }
-  .comment-input {
-    width: 100%;
-    resize: none;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    border: 1px solid var(--muted);
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-    background: var(--bg);
-    color: var(--fg);
-  }
-  .comment-input:focus {
-    outline: none;
-    border-color: var(--btn-bg);
-  }
-  .comment-submit {
-    background: var(--btn-bg);
-    border: none;
-    border-radius: 24px;
-    padding: 0.5rem 1.5rem;
-    color: var(--btn-fg);
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    user-select: none;
-  }
-  .comment-submit:disabled {
-    background: var(--muted);
-    cursor: default;
-  }
-  .comment-list {
-    margin-top: 1rem;
-    max-height: 240px;
-    overflow-y: auto;
-    border-top: 1px solid var(--muted);
-    padding-top: 0.5rem;
-  }
-  .comment {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--shadow);
-  }
-  .comment .author {
-    font-weight: 600;
-    margin-bottom: 0.15rem;
-    color: var(--btn-bg);
-  }
-  .comment .text {
-    white-space: pre-wrap;
-  }
+    .tags {
+      font-size: 0.85rem;
+      color: #666;
+      letter-spacing: 0.5px;
+    }
 
-  /* Modal */
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .modal {
-    background: var(--card);
-    border-radius: 16px;
-    max-width: 400px;
-    width: 90%;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 6px 24px var(--shadow);
-    color: var(--fg);
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .modal-close {
-    position: absolute;
-    top: 10px; right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--muted);
-  }
+    .error {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 1rem;
+      color: #888;
+    }
 
-  /* iOS-style popup */
-  #popup {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--card);
-    border-radius: 14px;
-    box-shadow: 0 6px 24px var(--shadow);
-    padding: 1rem 1.5rem;
-    display: none;
-    z-index: 1100;
-    min-width: 280px;
-    max-width: 90vw;
-    text-align: center;
-    font-weight: 600;
-    color: var(--fg);
-  }
-  #popup button {
-    margin-top: 1rem;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 12px;
-    background: var(--btn-bg);
-    color: var(--btn-fg);
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-  }
-  #popup button:hover {
-    background: #0051c7;
-  }
-</style>
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-
-<header>
-  <div>CyberChat</div>
-  <button class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-</header>
-
-<main>
-  <div id="status"></div>
-
-  <img id="post-image" class="post-image" alt="Post Image" />
-  <h1 class="post-title" id="post-title"></h1>
-  <p class="post-description" id="post-desc"></p>
-  <div class="read-more" id="read-more" style="display:none;">Read More</div>
-
-  <div class="post-author">
-    <img src="" alt="Author profile picture" class="profile-pic" id="author-pic" />
-    <span class="username" id="author-name"></span>
+  <div class="container">
+    <div id="post" class="card fade-in"></div>
+    <div id="error" class="error" style="display:none;">Post not found.</div>
   </div>
 
-  <button class="follow-btn" id="follow-btn" style="display:none;">Follow</button>
-
-  <section class="comment-section" id="comment-section" style="display:none;">
-    <h2>Comments</h2>
-    <textarea id="comment-input" class="comment-input" placeholder="Write a comment..." rows="3"></textarea>
-    <button id="comment-submit" class="comment-submit" disabled>Post Comment</button>
-    <div class="comment-list" id="comment-list"></div>
-  </section>
-</main>
-
-<!-- Full Description Modal -->
-<div class="modal-overlay" id="desc-modal">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <button class="modal-close" aria-label="Close">&times;</button>
-    <h2 id="modal-title">Full Description</h2>
-    <p id="modal-content" style="white-space: pre-wrap;"></p>
-  </div>
-</div>
-
-<!-- iOS style popup -->
-<div id="popup">
-  <div id="popup-message"></div>
-  <button id="popup-ok">OK</button>
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-
-<script>
-  // Your Firebase config (replace with your own)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  const db = firebase.database();
-  const auth = firebase.auth();
-
-  // Elements
-  const postImage = document.getElementById('post-image');
-  const postTitle = document.getElementById('post-title');
-  const postDesc = document.getElementById('post-desc');
-  const readMore = document.getElementById('read-more');
-  const authorName = document.getElementById('author-name');
-  const authorPic = document.getElementById('author-pic');
-  const followBtn = document.getElementById('follow-btn');
-  const status = document.getElementById('status');
-
-  const descModal = document.getElementById('desc-modal');
-  const modalContent = document.getElementById('modal-content');
-  const modalClose = descModal.querySelector('.modal-close');
-
-  const popup = document.getElementById('popup');
-  const popupMessage = document.getElementById('popup-message');
-  const popupOk = document.getElementById('popup-ok');
-
-  const commentSection = document.getElementById('comment-section');
-  const commentInput = document.getElementById('comment-input');
-  const commentSubmit = document.getElementById('comment-submit');
-  const commentList = document.getElementById('comment-list');
-
-  let currentUser = null;
-  let postAuthorUid = null;
-  let postId = null;
-
-  // Theme toggle
-  const themeToggle = document.querySelector('.theme-toggle');
-  function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-  }
-  themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    setTheme(current === 'dark' ? 'light' : 'dark');
-  });
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  setTheme(savedTheme);
-
-  // Helper to show popup
-  function showPopup(message) {
-    popupMessage.textContent = message;
-    popup.style.display = 'block';
-  }
-  popupOk.addEventListener('click', () => {
-    popup.style.display = 'none';
-  });
-
-  // Parse postId from URL
-  function getPostIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('postId');
-  }
-
-  // Load post data from Firebase
-  async function loadPost(postId) {
-    try {
-      const snapshot = await db.ref('post/' + postId).get();
-      if (!snapshot.exists()) {
-        status.textContent = 'Post not found.';
-        status.style.display = 'block';
-        return null;
-      }
-      status.style.display = 'none';
-      return snapshot.val();
-    } catch (err) {
-      status.textContent = 'Error loading post.';
-      status.style.display = 'block';
-      console.error(err);
-      return null;
-    }
-  }
-
-  // Load author info
-  async function loadAuthor(uid) {
-    try {
-      const snap = await db.ref('users/' + uid).get();
-      if (!snap.exists()) return null;
-      return snap.val();
-    } catch {
-      return null;
-    }
-  }
-
-  // Render post on page
-  async function renderPost(postId) {
-    const post = await loadPost(postId);
-    if (!post) return;
-
-    postAuthorUid = post.uid || null;
-
-    postImage.src = post.imageUrl || 'https://via.placeholder.com/720x400?text=No+Image';
-    postImage.alt = post.title || 'Post Image';
-
-    postTitle.textContent = post.title || 'Untitled Post';
-
-    // Description truncated
-    if(post.description && post.description.length > 100){
-      postDesc.textContent = post.description.substring(0, 100) + '...';
-      readMore.style.display = 'block';
-    } else {
-      postDesc.textContent = post.description || '';
-      readMore.style.display = 'none';
-    }
-
-    // Load author
-    if(postAuthorUid){
-      const author = await loadAuthor(postAuthorUid);
-      authorName.textContent = author?.username || 'Unknown User';
-      authorPic.src = author?.profilePicUrl || 'https://via.placeholder.com/44?text=👤';
-    } else {
-      authorName.textContent = 'Unknown User';
-      authorPic.src = 'https://via.placeholder.com/44?text=👤';
-    }
-  }
-
-  // Read More modal
-  readMore.addEventListener('click', () => {
-    modalContent.textContent = postDesc.textContent.endsWith('...') 
-      ? postDesc.textContent.slice(0, -3) + (postDesc.textContent.length > 3 ? ' ' + modalContent.textContent : '') 
-      : postDesc.textContent;
-    modalContent.textContent = '';
-    loadPost(postId).then(post => {
-      if(post && post.description) modalContent.textContent = post.description;
-      descModal.style.display = 'flex';
-    });
-  });
-  modalClose.addEventListener('click', () => {
-    descModal.style.display = 'none';
-  });
-  descModal.addEventListener('click', e => {
-    if(e.target === descModal) descModal.style.display = 'none';
-  });
-
-  // Follow Button Logic
-  async function updateFollowBtn(){
-    if(!currentUser || !postAuthorUid || currentUser.uid === postAuthorUid){
-      followBtn.style.display = 'none'; // Can't follow self or if not logged in
-      return;
-    }
-    followBtn.style.display = 'block';
-
-    // Check if already following
-    const followSnap = await db.ref(`followers/${postAuthorUid}/${currentUser.uid}`).get();
-    if(followSnap.exists()){
-      followBtn.textContent = 'Following';
-      followBtn.disabled = true;
-    } else {
-      followBtn.textContent = 'Follow';
-      followBtn.disabled = false;
-    }
-  }
-
-  followBtn.addEventListener('click', async () => {
-    if(!currentUser || !postAuthorUid || currentUser.uid === postAuthorUid) return;
-
-    try {
-      await db.ref(`followers/${postAuthorUid}/${currentUser.uid}`).set(true);
-      followBtn.textContent = 'Following';
-      followBtn.disabled = true;
-      showPopup(`You followed ${authorName.textContent}`);
-    } catch (err) {
-      showPopup('Error following user');
-      console.error(err);
-    }
-  });
-
-  // Comments logic
-  function enableCommentInput() {
-    commentInput.disabled = false;
-    commentInput.value = '';
-    commentSubmit.disabled = true;
-    commentSection.style.display = 'block';
-  }
-  commentInput.addEventListener('input', () => {
-    commentSubmit.disabled = !commentInput.value.trim();
-  });
-
-  commentSubmit.addEventListener('click', async () => {
-    if(!currentUser) {
-      showPopup('You must be logged in to comment');
-      return;
-    }
-    const commentText = commentInput.value.trim();
-    if(!commentText) return;
-
-    const commentData = {
-      uid: currentUser.uid,
-      username: currentUser.displayName || currentUser.email || 'Anonymous',
-      text: commentText,
-      timestamp: Date.now()
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
-    try {
-      await db.ref(`comments/${postId}`).push(commentData);
-      commentInput.value = '';
-      commentSubmit.disabled = true;
-    } catch(err) {
-      showPopup('Error posting comment');
-      console.error(err);
-    }
-  });
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  // Render comments
-  function renderCommentItem(cmt) {
-    const div = document.createElement('div');
-    div.className = 'comment';
-    const author = document.createElement('div');
-    author.className = 'author';
-    author.textContent = cmt.username;
-    const text = document.createElement('div');
-    text.className = 'text';
-    text.textContent = cmt.text;
-    div.appendChild(author);
-    div.appendChild(text);
-    return div;
-  }
+    const postContainer = document.getElementById('post');
+    const errorContainer = document.getElementById('error');
 
-  function setupCommentsListener(postId) {
-    const commentsRef = db.ref(`comments/${postId}`);
-    commentsRef.off(); // Remove previous listeners
+    const postId = window.location.pathname.split('/').pop();
 
-    commentsRef.on('value', snapshot => {
-      commentList.innerHTML = '';
-      if(!snapshot.exists()){
-        commentList.innerHTML = '<p style="color: var(--muted);">No comments yet.</p>';
-        return;
-      }
-      const data = snapshot.val();
-      for(let key in data){
-        const cmt = data[key];
-        commentList.appendChild(renderCommentItem(cmt));
-      }
-    });
-  }
-
-  // Auth state & init
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    if(user){
-      updateFollowBtn();
-      enableCommentInput();
+    if (postId) {
+      db.ref(`/post/${postId}`).once('value')
+        .then(snapshot => {
+          const post = snapshot.val();
+          if (post) {
+            postContainer.innerHTML = `
+              ${post.image1 ? `<img src="${post.image1}" alt="Post Image">` : ''}
+              <h2>${post.title || 'Untitled Post'}</h2>
+              <p>${post.description || 'No description available.'}</p>
+              ${post.tags ? `<p class="tags">${post.tags.map(tag => `#${tag}`).join(' ')}</p>` : ''}
+            `;
+          } else {
+            errorContainer.style.display = 'block';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          errorContainer.textContent = 'Error loading post.';
+          errorContainer.style.display = 'block';
+        });
     } else {
-      followBtn.style.display = 'none';
-    commentSection.style.display = 'none';
-  });
-
-  // Initialize page
-  window.addEventListener('DOMContentLoaded', () => {
-    postId = getPostIdFromUrl();
-    if(!postId){
-      status.textContent = 'No postId provided in URL.';
-      status.style.display = 'block';
-      return;
+      errorContainer.textContent = 'Invalid post URL.';
+      errorContainer.style.display = 'block';
     }
-    renderPost(postId).then(() => {
-      setupCommentsListener(postId);
-    });
-  });
-</script>
-
+  </script>
 </body>
 </html>
