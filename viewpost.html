@@ -244,7 +244,8 @@
     push,
     onValue,
     set,
-    update
+    update,
+    runTransaction
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
   import {
     getAuth,
@@ -348,52 +349,40 @@
     }
 
     container.querySelector('#likeBtn').addEventListener('click', async () => {
-      const newLikes = (post.likes || 0) + 1;
-      await update(ref(db, `post/${postId}`), { likes: newLikes });
-      document.getElementById('likesCount').textContent = newLikes;
+      const postRef = ref(db, `post/${postId}`);
+      await runTransaction(postRef, (postData) => {
+        if (postData) {
+          postData.likes = (postData.likes || 0) + 1;
+        }
+        return postData;
+      });
+      // Update UI after transaction
+      const postSnapshot = await get(postRef);
+      document.getElementById('likesCount').textContent = postSnapshot.val()?.likes || 0;
     });
 
     loadAd();
   }
 
   async function loadAd() {
-    // Clear previous ad if any
     const adContainer = document.getElementById('adContainer');
     adContainer.innerHTML = '';
 
-    // Insert the ad iframe (your provided snippet embedded as iframe)
-    // Note: Your original snippet used a JS script tag but that's messy inside SPA — iframe is cleaner.
-    const adWrapper = document.createElement('div');
-    adWrapper.id = "ad-wrapper";
-    adWrapper.style.width = "320px";
-    adWrapper.style.height = "50px";
-    adWrapper.style.overflow = "hidden";
-    adWrapper.style.border = "none";
-    adWrapper.style.cursor = "pointer";
+    const adScript = document.createElement('script');
+    adScript.src = "https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
+    adScript.async = true;
+    adScript.defer = true;
 
-    // Create iframe with src pointing to your ad provider (using the invoke.js URL as src)
-    const iframe = document.createElement('iframe');
-    iframe.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
-    iframe.width = "320";
-    iframe.height = "50";
-    iframe.style.border = "none";
-    iframe.scrolling = "no";
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
-    adWrapper.appendChild(iframe);
-    adContainer.appendChild(adWrapper);
+    adContainer.appendChild(adScript);
 
-    // Increment ad impressions count for this post
-    const adRef = ref(db, `post/${postId}/ads`);
-    const adSnapshot = await get(adRef);
-    const adData = adSnapshot.val() || {};
-    const newImpressions = (adData.impressions || 0) + 1;
-    await update(adRef, { impressions: newImpressions });
+    // Increment ad impressions count safely
+    const adImpressionsRef = ref(db, `post/${postId}/ads/impressions`);
+    await runTransaction(adImpressionsRef, (current) => (current || 0) + 1);
 
-    // Optional: listen for click on ad container to count clicks
-    adWrapper.addEventListener("click", async () => {
-      const adSnap = await get(adRef);
-      const currentClicks = adSnap.val()?.clicks || 0;
-      await update(adRef, { clicks: currentClicks + 1 });
+    // Track clicks
+    adContainer.addEventListener("click", async () => {
+      const adClicksRef = ref(db, `post/${postId}/ads/clicks`);
+      await runTransaction(adClicksRef, (current) => (current || 0) + 1);
     });
   }
 
@@ -412,13 +401,18 @@
         return;
       }
 
-      const postData = postSnapshot.val();
+      // Increment views safely with transaction
+      await runTransaction(postRef, (postData) => {
+        if (postData) {
+          postData.views = (postData.views || 0) + 1;
+        }
+        return postData;
+      });
 
-      // Increment views
-      const newViews = (postData.views || 0) + 1;
-      await update(postRef, { views: newViews });
+      // Reload post data after increment
+      const updatedPostSnap = await get(postRef);
+      const postData = updatedPostSnap.val();
 
-      postData.views = newViews;
       renderPost(postData);
 
       const commentsRef = ref(db, `comments/${postId}`);
@@ -473,14 +467,17 @@
       postBtn.disabled = true;
       postBtn.textContent = "Post";
 
-      // Update comment count on post
+      // Safely increment comment count with transaction
       const postRef = ref(db, `post/${postId}`);
-      const snapshot = await get(postRef);
-      const postData = snapshot.val();
-      const newCommentCount = (postData.comments || 0) + 1;
-      await update(postRef, { comments: newCommentCount });
+      await runTransaction(postRef, (postData) => {
+        if (postData) {
+          postData.comments = (postData.comments || 0) + 1;
+        }
+        return postData;
+      });
 
-      document.getElementById('commentsCount').textContent = newCommentCount;
+      const postSnapshot = await get(postRef);
+      document.getElementById('commentsCount').textContent = postSnapshot.val()?.comments || 0;
     } catch (error) {
       alert("Error posting comment: " + error.message);
     } finally {
