@@ -240,11 +240,38 @@ footer {
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // Utility to format timestamp nicely
+  // Track start time when user arrives
+  const startTime = Date.now();
+
+  // Utility: Format timestamp nicely
   function formatDate(ts) {
     const d = new Date(ts);
     return d.toLocaleString();
   }
+
+  // Utility: Format duration from ms to "Xm Ys"
+  function formatDuration(ms) {
+    if (!ms) return 'N/A';
+    const totalSeconds = Math.floor(ms / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}m ${secs}s`;
+  }
+
+  // Save analytics on page unload with timeSpentMs
+  window.addEventListener('beforeunload', () => {
+    const endTime = Date.now();
+    const timeSpentMs = endTime - startTime;
+
+    // Capture other data you track (for example IP etc. if available from your logic)
+    // For demonstration, we only save timestamp and timeSpent
+    db.ref('analytics').push({
+      timestamp: startTime,
+      timeSpentMs: timeSpentMs,
+      // IP, country, region, city should be added here if you have the info
+      // e.g., ip: 'userIP', country: 'userCountry', etc.
+    });
+  });
 
   async function loadAnalytics() {
     const snapshot = await db.ref('analytics').orderByKey().limitToLast(100).once('value');
@@ -254,10 +281,7 @@ footer {
       return;
     }
 
-    // Arrays for raw table rows
     const rawRows = [];
-
-    // Counters
     const countryCounts = {};
     const regionCounts = {};
     let totalVisits = 0;
@@ -273,7 +297,6 @@ footer {
         countryCounts[country] = (countryCounts[country] || 0) + 1;
         regionCounts[region] = (regionCounts[region] || 0) + 1;
 
-        // Build rows with info icon and hidden extra info row
         rawRows.push(`
           <tr class="main-row" style="border-bottom: 1px solid #ddd;">
             <td class="info-icon" style="cursor:pointer; text-align:center; width:30px; font-weight:bold; color:#007bff;">&#8505;</td>
@@ -283,20 +306,18 @@ footer {
           </tr>
           <tr class="extra-info-row" style="display:none; background:#f9f9fb; font-size:0.85rem; color:#555;">
             <td colspan="4" style="padding:8px 15px;">
-              <strong>Timestamp:</strong> ${formatDate(entry.timestamp)} &nbsp;&nbsp; | &nbsp;&nbsp; <strong>IP:</strong> ${entry.ip || '-'}
+              <strong>Timestamp:</strong> ${formatDate(entry.timestamp)} &nbsp;&nbsp; | &nbsp;&nbsp; <strong>IP:</strong> ${entry.ip || '-'} <br>
+              <strong>Time Spent:</strong> ${formatDuration(entry.timeSpentMs)}
             </td>
           </tr>
         `);
       }
     }
 
-    // Update total visits
     document.getElementById('totalVisits').textContent = `Total Visits Recorded: ${totalVisits}`;
 
-    // Fill raw data table (make sure your table has 4 columns in thead for this)
     document.querySelector('#rawDataTable tbody').innerHTML = rawRows.join('');
 
-    // Add toggle event listeners for info icons
     document.querySelectorAll('#rawDataTable tbody tr.main-row .info-icon').forEach(icon => {
       icon.addEventListener('click', () => {
         const mainRow = icon.closest('tr');
@@ -311,7 +332,6 @@ footer {
       });
     });
 
-    // Prepare data for charts
     function prepareChartData(counts) {
       const labels = Object.keys(counts).sort((a,b) => counts[b]-counts[a]);
       const values = labels.map(label => counts[label]);
@@ -321,7 +341,6 @@ footer {
     const countryData = prepareChartData(countryCounts);
     const regionData = prepareChartData(regionCounts);
 
-    // Create Country Chart
     new Chart(document.getElementById('countryChart'), {
       type: 'bar',
       data: {
@@ -348,7 +367,6 @@ footer {
       }
     });
 
-    // Create Region Chart
     new Chart(document.getElementById('regionChart'), {
       type: 'bar',
       data: {
