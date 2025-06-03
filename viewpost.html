@@ -364,14 +364,12 @@
     `;
     document.getElementById('adContainer').appendChild(adDiv);
 
-    // Count impression
     const adPath = `post/${postId}/ads`;
     const adSnapshot = await get(ref(db, adPath));
     const adData = adSnapshot.val() || {};
     const newImpressions = (adData.impressions || 0) + 1;
     await update(ref(db, adPath), { impressions: newImpressions });
 
-    // Click tracker
     adDiv.addEventListener("click", async () => {
       const newClicks = (adData.clicks || 0) + 1;
       await update(ref(db, adPath), { clicks: newClicks });
@@ -395,7 +393,6 @@
 
       const postData = postSnapshot.val();
 
-      // Auto-increment views
       const newViews = (postData.views || 0) + 1;
       await update(postRef, { views: newViews });
 
@@ -459,19 +456,18 @@
       const postData = snapshot.val();
       const newCommentCount = (postData.comments || 0) + 1;
       await update(postRef, { comments: newCommentCount });
-      document.getElementById('commentsCount').textContent = newCommentCount;
 
-    } catch (err) {
-      alert("Failed to post comment: " + err.message);
+      document.getElementById('commentsCount').textContent = newCommentCount;
+    } catch (error) {
+      alert("Error posting comment: " + error.message);
+    } finally {
       postBtn.disabled = false;
       postBtn.textContent = "Post";
     }
   }
 
   postBtn.addEventListener('click', postComment);
-
   loadPostAndComments();
 </script>
-
 </body>
 </html>
