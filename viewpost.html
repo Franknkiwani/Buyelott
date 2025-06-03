@@ -329,12 +329,12 @@
       <p class="description">${shortDesc}
         ${description.length > 100 ? '<span class="read-more" style="color:#3b82f6; font-weight:bold; cursor:pointer;">Read more</span>' : ''}
       </p>
-      <div class="meta-info">
+      <div class="meta-info" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">
         <div>👁 <span id="viewsCount">${views}</span> views</div>
-        <div>❤️ <span id="likesCount">${likes}</span> likes <button id="likeBtn">Like</button></div>
+        <div>❤️ <span id="likesCount">${likes}</span> likes <button id="likeBtn" style="margin-left:6px;">Like</button></div>
         <div>💬 <span id="commentsCount">${comments}</span> comments</div>
-        <div id="adContainer" style="margin-top:20px;"></div>
       </div>
+      <div id="adContainer" style="margin-top:20px;"></div>
     `;
 
     container.querySelector('.post-image').addEventListener('click', () => {
@@ -357,22 +357,43 @@
   }
 
   async function loadAd() {
-    const adDiv = document.createElement('div');
-    adDiv.id = "ad-wrapper";
-    adDiv.innerHTML = `
-      <iframe src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js" width="320" height="50" style="border:none;" scrolling="no"></iframe>
-    `;
-    document.getElementById('adContainer').appendChild(adDiv);
+    // Clear previous ad if any
+    const adContainer = document.getElementById('adContainer');
+    adContainer.innerHTML = '';
 
-    const adPath = `post/${postId}/ads`;
-    const adSnapshot = await get(ref(db, adPath));
+    // Insert the ad iframe (your provided snippet embedded as iframe)
+    // Note: Your original snippet used a JS script tag but that's messy inside SPA — iframe is cleaner.
+    const adWrapper = document.createElement('div');
+    adWrapper.id = "ad-wrapper";
+    adWrapper.style.width = "320px";
+    adWrapper.style.height = "50px";
+    adWrapper.style.overflow = "hidden";
+    adWrapper.style.border = "none";
+    adWrapper.style.cursor = "pointer";
+
+    // Create iframe with src pointing to your ad provider (using the invoke.js URL as src)
+    const iframe = document.createElement('iframe');
+    iframe.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
+    iframe.width = "320";
+    iframe.height = "50";
+    iframe.style.border = "none";
+    iframe.scrolling = "no";
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+    adWrapper.appendChild(iframe);
+    adContainer.appendChild(adWrapper);
+
+    // Increment ad impressions count for this post
+    const adRef = ref(db, `post/${postId}/ads`);
+    const adSnapshot = await get(adRef);
     const adData = adSnapshot.val() || {};
     const newImpressions = (adData.impressions || 0) + 1;
-    await update(ref(db, adPath), { impressions: newImpressions });
+    await update(adRef, { impressions: newImpressions });
 
-    adDiv.addEventListener("click", async () => {
-      const newClicks = (adData.clicks || 0) + 1;
-      await update(ref(db, adPath), { clicks: newClicks });
+    // Optional: listen for click on ad container to count clicks
+    adWrapper.addEventListener("click", async () => {
+      const adSnap = await get(adRef);
+      const currentClicks = adSnap.val()?.clicks || 0;
+      await update(adRef, { clicks: currentClicks + 1 });
     });
   }
 
@@ -393,6 +414,7 @@
 
       const postData = postSnapshot.val();
 
+      // Increment views
       const newViews = (postData.views || 0) + 1;
       await update(postRef, { views: newViews });
 
@@ -451,6 +473,7 @@
       postBtn.disabled = true;
       postBtn.textContent = "Post";
 
+      // Update comment count on post
       const postRef = ref(db, `post/${postId}`);
       const snapshot = await get(postRef);
       const postData = snapshot.val();
@@ -467,6 +490,7 @@
   }
 
   postBtn.addEventListener('click', postComment);
+
   loadPostAndComments();
 </script>
 </body>
