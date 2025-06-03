@@ -333,6 +333,7 @@
         <div>👁 <span id="viewsCount">${views}</span> views</div>
         <div>❤️ <span id="likesCount">${likes}</span> likes <button id="likeBtn">Like</button></div>
         <div>💬 <span id="commentsCount">${comments}</span> comments</div>
+        <div id="adContainer" style="margin-top:20px;"></div>
       </div>
     `;
 
@@ -350,6 +351,30 @@
       const newLikes = (post.likes || 0) + 1;
       await update(ref(db, `post/${postId}`), { likes: newLikes });
       document.getElementById('likesCount').textContent = newLikes;
+    });
+
+    loadAd();
+  }
+
+  async function loadAd() {
+    const adDiv = document.createElement('div');
+    adDiv.id = "ad-wrapper";
+    adDiv.innerHTML = `
+      <iframe src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js" width="320" height="50" style="border:none;" scrolling="no"></iframe>
+    `;
+    document.getElementById('adContainer').appendChild(adDiv);
+
+    // Count impression
+    const adPath = `post/${postId}/ads`;
+    const adSnapshot = await get(ref(db, adPath));
+    const adData = adSnapshot.val() || {};
+    const newImpressions = (adData.impressions || 0) + 1;
+    await update(ref(db, adPath), { impressions: newImpressions });
+
+    // Click tracker
+    adDiv.addEventListener("click", async () => {
+      const newClicks = (adData.clicks || 0) + 1;
+      await update(ref(db, adPath), { clicks: newClicks });
     });
   }
 
