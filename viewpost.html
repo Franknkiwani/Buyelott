@@ -1,265 +1,279 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CyberChat Post Preview</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      overflow-x: hidden;
-    }
-
-    header {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-
-    #logo {
-      font-size: 1.5rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      color: white;
-      cursor: pointer;
-    }
-
-    .view-more-btn {
-      padding: 8px 16px;
-      background: linear-gradient(135deg, #00c6ff, #0072ff);
-      color: white;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-      font-size: 0.95rem;
-    }
-
-    .view-more-btn:hover {
-      opacity: 0.9;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(12px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .container {
-      max-width: 800px;
-      width: 90%;
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .post-image {
-      width: 100%;
-      border-radius: 16px;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-size: 2.2rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .description {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #ccc;
-    }
-
-    .comments {
-      margin-top: 32px;
-    }
-
-    .comments h3 {
-      margin-bottom: 12px;
-      font-size: 1.2rem;
-      border-bottom: 1px solid #333;
-      padding-bottom: 4px;
-    }
-
-    .comment-box {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .comment-box input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #2a2a2a;
-      color: white;
-    }
-
-    .comment-box button {
-      padding: 10px 16px;
-      background: #00c6ff;
-      color: white;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .comment-box button:hover {
-      opacity: 0.9;
-    }
-
-    .comment-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .comment-item {
-      background: #1c1c1c;
-      padding: 12px;
-      border-radius: 8px;
-      color: #ddd;
-      font-size: 0.95rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="modal">
-    <div class="container">
-      <header>
-        <div id="logo">CYBERCHAT</div>
-        <button class="view-more-btn" onclick="window.location.href='https://cyberchat.online'">
-          View More Posts
-        </button>
-      </header>
-
-      <img id="postImage" class="post-image" src="" alt="Post Image" />
-      <div class="title" id="postTitle">Loading...</div>
-      <div class="description" id="postDescription"></div>
-
-      <div class="comments" id="commentSection">
-        <h3>Comments</h3>
-        <div class="comment-box">
-          <input type="text" id="commentInput" placeholder="Write a comment..." />
-          <button onclick="submitComment()">Post</button>
-        </div>
-        <div class="comment-list" id="commentList">
-          <!-- Comments will show up here -->
-        </div>
-      </div>
-    </div>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <title>View Post | CyberChat</title>  
+<style>  
+  body {  
+    background: #121212;  
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;  
+    margin: 0;  
+    padding: 0;  
+    color: white;  
+    display: flex;  
+    flex-direction: column;  
+    align-items: center;  
+    min-height: 100vh;  
+  }  
+  
+  /* Header */  
+  header {  
+    width: 80%;  
+    max-width: 800px;  
+    text-align: center;  
+    margin: 24px auto;  
+  }  
+  
+  header h1 {  
+    font-size: 1.4rem;   /* smaller, less screaming */ 
+    font-weight: 700;    /* lighter, less shouty */ 
+    color: white;  
+    margin: 0;  
+    cursor: pointer;  
+  }  
+  
+  /* New subcontainer for logo + view more under it */  
+  .header-content {  
+    width: 100%;  
+    max-width: 800px;  
+    display: flex;  
+    flex-direction: column;  
+    justify-content: center;  
+    align-items: center;  
+    padding: 12px 0;  /* tighter vertical spacing */  
+  }  
+  
+  .logo {  
+    font-size: 1.6rem;  
+    font-weight: 900;  
+    text-transform: uppercase;  
+    color: white;  
+    margin-bottom: 6px; /* some breathing room for the button below */  
+  }  
+  
+  .view-posts-btn {  
+    background: linear-gradient(135deg, #00c6ff, #0072ff);  
+    color: white;  
+    padding: 8px 18px;  
+    border-radius: 24px;  
+    font-weight: 600;  
+    text-decoration: none;  
+    transition: 0.3s ease;  
+    font-size: 0.9rem;  
+    cursor: pointer;  
+    user-select: none;  
+  }  
+  
+  .view-posts-btn:hover {  
+    opacity: 0.85;  
+    transform: scale(1.05);  
+  }  
+  
+  /* Container */  
+  .container {  
+    width: 90%;  
+    max-width: 600px;  
+    background: rgba(255, 255, 255, 0.05);  
+    backdrop-filter: blur(16px);  
+    border-radius: 16px;  
+    padding: 24px;  
+    margin: 16px auto;  
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);  
+  }  
+  
+  img.post-image {  
+    width: 100%;  
+    border-radius: 12px;  
+    cursor: pointer;  
+    object-fit: cover;  
+    aspect-ratio: 3/2;  
+    background: #222;  
+  }  
+  
+  h2 {  
+    font-size: 1.5rem;  
+    margin: 16px 0 8px;  
+    text-align: center;  
+    font-weight: 700;  
+  }  
+  
+  p.description {  
+    font-size: 1rem;  
+    color: #ccc;  
+    text-align: center;  
+    cursor: pointer;  
+  }  
+  
+  .read-more {  
+    display: block;  
+    margin-top: 6px;  
+    font-size: 0.9rem;  
+    color: #00fff7;  
+    text-decoration: underline;  
+    cursor: pointer;  
+  }  
+  
+  .meta-info {  
+    display: flex;  
+    justify-content: space-around;  
+    margin-top: 16px;  
+    font-size: 0.9rem;  
+    color: #aaa;  
+  }  
+  
+  /* Modal */  
+  .modal {  
+    position: fixed;  
+    top: 0; left: 0;  
+    width: 100vw;  
+    height: 100vh;  
+    background: rgba(0, 0, 0, 0.85);  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    z-index: 9999;  
+    padding: 20px;  
+    display: none;  
+  }  
+  
+  .modal-content {  
+    max-width: 90%;  
+    max-height: 90%;  
+    overflow-y: auto;  
+    background: #1e1e1e;  
+    padding: 20px;  
+    border-radius: 12px;  
+    text-align: center;  
+    color: white;  
+  }  
+  
+  .modal-content img {  
+    width: 100%;  
+    max-height: 400px;  
+    object-fit: contain;  
+    border-radius: 8px;  
+    margin-bottom: 12px;  
+  }  
+  
+  .modal-close {  
+    margin-top: 12px;  
+    font-size: 1rem;  
+    cursor: pointer;  
+    color: #00fff7;  
+    text-decoration: underline;  
+  }  
+</style>
+</head>  
+<body>  
+ <header>
+  <div class="header-content">
+    <div class="logo">CyberChat</div>
+    <button class="view-posts-btn">View More</button>
   </div>
+</header> 
+  
+  <main class="container" id="postContainer">  
+    <!-- Content gets injected here -->  
+  </main>  
+  
+  <div class="modal" id="modal">  
+    <div class="modal-content" id="modalContent">  
+      <!-- Populated via JS -->  
+    </div>  
+  </div>  
+  
+  <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";  
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";  
+  
+    const firebaseConfig = {  
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+      projectId: "itzhoyoo-f9f7e",  
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+      messagingSenderId: "1094792075584",  
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",  
+      measurementId: "G-LLT6F9WRKH"  
+    };  
+  
+    const app = initializeApp(firebaseConfig);  
+    const db = getDatabase(app);  
+    const container = document.getElementById('postContainer');  
+    const modal = document.getElementById('modal');  
+    const modalContent = document.getElementById('modalContent');  
+  
+    const postId = new URLSearchParams(window.location.search).get("postId");  
+  
+    function openModal(contentHTML) {  
+      modalContent.innerHTML = contentHTML + `<div class="modal-close" onclick="document.getElementById('modal').style.display='none'">Close</div>`;  
+      modal.style.display = "flex";  
+    }  
+  
+    function renderPost(post) {
+  const image = post.image || post.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image';
+  const title = post.title || 'Untitled';
+  const description = post.description || '';
+  const shortDesc = description.length > 30 ? description.slice(0, 30) + '...' : description;
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      get,
-      push,
-      onChildAdded
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  const views = post.views || 0;
+  const likes = post.likes || 0;
+  const commentsCount = post.comments || 0;
+  
+  const postId = post.id || post.key || "defaultPostId";  // Make sure you have a post ID for comments!
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  container.innerHTML = `
+    <img src="${image}" alt="Post Image" class="post-image" onclick="openModal('<img src=${image} />')" />
+    <h2>${title}</h2>
+    <p class="description" onclick="openModal('<p>${description}</p>')">${shortDesc}
+      ${description.length > 30 ? '<span class="read-more">Read more</span>' : ''}
+    </p>
+    <div class="meta-info">
+      <div>👁 ${views} views</div>
+      <div>❤️ ${likes} likes</div>
+      <div>💬 ${commentsCount} comments</div>
+    </div>
+  `;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  // Add the comment section HTML after the post content
+  const commentHTML = `
+    <div class="comment-section">
+      <h3>Comments</h3>
+      <form id="commentForm">
+        <input type="text" id="commentInput" placeholder="Add a comment..." required />
+        <button type="submit">Post</button>
+      </form>
+      <div id="commentsList">Loading comments...</div>
+    </div>
+  `;
 
-    // Get post ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get("id");
+  container.innerHTML += commentHTML;
 
-    const imageEl = document.getElementById("postImage");
-    const titleEl = document.getElementById("postTitle");
-    const descriptionEl = document.getElementById("postDescription");
-    const commentInput = document.getElementById("commentInput");
-    const commentList = document.getElementById("commentList");
-
-    function escapeHTML(str) {
-      return str?.replace(/[&<>"']/g, (m) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      }[m])) || "";
-    }
-
-    // Load post content
-    if (postId) {
-      const postRef = ref(db, `post/${postId}`);
-      get(postRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          imageEl.src = data.image1 || data.image || "";
-          titleEl.textContent = escapeHTML(data.title || "No Title");
-          descriptionEl.textContent = escapeHTML(data.description || "No Description");
-        } else {
-          titleEl.textContent = "Post not found";
-        }
-      });
-    } else {
-      titleEl.textContent = "Missing post ID";
-    }
-
-    // Comment submission
-    function submitComment() {
-      const text = commentInput.value.trim();
-      if (!text || !postId) return;
-      const commentRef = ref(db, `comments/${postId}`);
-      push(commentRef, {
-        text,
-        timestamp: Date.now()
-      }).then(() => {
-        commentInput.value = "";
-      });
-    }
-    window.submitComment = submitComment;
-
-    // Load and show comments live
-    function loadComments() {
-      const commentRef = ref(db, `comments/${postId}`);
-      onChildAdded(commentRef, (snapshot) => {
-        const data = snapshot.val();
-        const div = document.createElement("div");
-        div.className = "comment-item";
-        div.textContent = data.text;
-        commentList.appendChild(div);
-      });
-    }
-
-    if (postId) loadComments();
-  </script>
-</body>
+  // Now load comments and setup form handlers for this post ID
+  loadComments(postId);
+  setupCommentForm(postId);
+}
+    if (!postId) {  
+      container.innerHTML = "<p style='text-align:center;color:#f55'>No postId in URL.</p>";  
+    } else {  
+      const postRef = ref(db, `post/${postId}`);  
+      get(postRef).then(snapshot => {  
+        if (snapshot.exists()) {  
+          renderPost(snapshot.val());  
+        } else {  
+          container.innerHTML = "<p style='text-align:center;color:#f55'>Post not found.</p>";  
+        }  
+      }).catch(err => {  
+        console.error(err);  
+        container.innerHTML = "<p style='text-align:center;color:#f55'>Error loading post.</p>";  
+      });  
+    }  
+  
+    // Logo click = home  
+    document.getElementById("logo").addEventListener("click", () => {  
+      window.location.href = "https://cyberchat.online";  
+    });  
+  </script>  
+</body>  
 </html>
