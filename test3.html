@@ -112,5 +112,63 @@
 
     fetchLocation();
   </script>
+<!-- Firebase scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  // Your real Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  async function sendLocationToFirebase() {
+    try {
+      // Get user IP
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      if (!ipRes.ok) throw new Error(`IP fetch error: ${ipRes.status}`);
+      const { ip } = await ipRes.json();
+
+      // Get location info from ipapi.co
+      const locRes = await fetch(`https://ipapi.co/${ip}/json/`);
+      if (!locRes.ok) throw new Error(`Location fetch error: ${locRes.status}`);
+      const locData = await locRes.json();
+
+      if (locData.error) throw new Error(locData.reason || 'Unknown location API error');
+
+      // Prepare data to save
+      const timestamp = Date.now();
+      const data = {
+        ip,
+        country: locData.country_name || "Unknown",
+        region: locData.region || "Unknown",
+        city: locData.city || "Unknown",
+        timestamp
+      };
+
+      // Push data to Firebase Realtime Database under /analytics
+      await db.ref('analytics').push(data);
+
+      // Optional: console log for dev
+      console.log('User location sent to Firebase:', data);
+
+    } catch (err) {
+      console.error('Error sending location to Firebase:', err);
+    }
+  }
+
+  // Run on page load silently
+  sendLocationToFirebase();
+</script>
 </body>
 </html>
