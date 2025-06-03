@@ -7,78 +7,51 @@
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f5f5f7;
-      color: #1c1c1e;
+      font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f9f9f9;
+      color: #111;
     }
 
     .container {
-      max-width: 640px;
-      margin: 40px auto;
-      padding: 0 20px;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
     }
 
     .card {
-      background-color: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-      padding: 24px;
-      transition: box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 20px;
     }
 
     img {
       max-width: 100%;
-      border-radius: 16px;
-      margin-bottom: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
     }
 
     h2 {
-      font-size: 1.6rem;
-      margin: 0 0 10px;
-    }
-
-    p {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin: 0 0 12px;
+      margin-top: 0;
     }
 
     .tags {
-      font-size: 0.85rem;
-      color: #666;
-      letter-spacing: 0.5px;
+      color: #888;
+      font-size: 0.9em;
     }
 
     .error {
       text-align: center;
       padding: 60px 20px;
-      font-size: 1rem;
-      color: #888;
-    }
-
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      color: #666;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="post" class="card fade-in"></div>
+    <div id="post" class="card"></div>
     <div id="error" class="error" style="display:none;">Post not found.</div>
   </div>
 
@@ -110,8 +83,8 @@
             postContainer.innerHTML = `
               ${post.image1 ? `<img src="${post.image1}" alt="Post Image">` : ''}
               <h2>${post.title || 'Untitled Post'}</h2>
-              <p>${post.description || 'No description available.'}</p>
-              ${post.tags ? `<p class="tags">${post.tags.map(tag => `#${tag}`).join(' ')}</p>` : ''}
+              <p>${post.description || ''}</p>
+              <p class="tags">${(post.tags || []).map(tag => '#' + tag).join(' ')}</p>
             `;
           } else {
             errorContainer.style.display = 'block';
