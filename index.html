@@ -1741,7 +1741,7 @@ const uid = auth.currentUser?.uid || null;
 
 // Clamp native ad index so it never goes beyond post count (min 6)
 function getNativeAdIndex(maxPosts) {
-  if (maxPosts < 6) return maxPosts;
+  if (maxPosts < 6) return maxPosts; // fallback if few posts
   return Math.min(maxPosts - 1, Math.floor(Math.random() * 6) + 6);
 }
 
@@ -1804,15 +1804,44 @@ function hideSpinner() {
   if (spinner) spinner.style.display = 'none';
 }
 
-// ------------------------ Load Fresh Posts with Infinite Scroll ------------------------
-async function loadPosts() {
+// ------------------------ Load Initial Posts (5 only) ------------------------
+async function loadInitialPosts() {
   showSpinner();
   try {
-    const snapshot = await get(child(dbRef, 'post'));
+    const postsRef = ref(db, 'post');
+    const limitedQuery = query(postsRef, limitToFirst(5));
+    const snapshot = await get(limitedQuery);
     if (!snapshot.exists()) {
       hideSpinner();
       return;
     }
+    const posts = snapshot.val();
+    randomizedPostList = Object.keys(posts).map(k => ({ id: k, data: posts[k] }));
+    currentIndex = 0;
+    totalPostsLoaded = 0;
+    postsSinceLastAd = 0;
+    nativeAdInserted = false;
+    nativeAdIndex = getNativeAdIndex(randomizedPostList.length);
+
+    const container = document.getElementById('posts-container');
+    container.innerHTML = ''; // Clear old UI
+    userLikes = await loadUserLikes(); // load likes once
+
+    // Render the 5 posts immediately
+    for (; currentIndex < randomizedPostList.length; currentIndex++) {
+      await loadNextPost();
+    }
+  } catch (error) {
+    console.error('Error loading initial posts:', error);
+  }
+  hideSpinner();
+}
+
+// ------------------------ Load Remaining Posts after splash ------------------------
+async function loadRemainingPosts() {
+  try {
+    const snapshot = await get(ref(db, 'post'));
+    if (!snapshot.exists()) return;
 
     const posts = snapshot.val();
     const newCache = JSON.stringify(posts);
@@ -1824,24 +1853,23 @@ async function loadPosts() {
 
       const keys = shuffleObject(posts);
       randomizedPostList = keys.map(k => ({ id: k, data: posts[k] }));
-      currentIndex = 0;
+      currentIndex = 0; // reset so infinite scroll can start from fresh
       totalPostsLoaded = 0;
       postsSinceLastAd = 0;
       nativeAdInserted = false;
 
       nativeAdIndex = getNativeAdIndex(randomizedPostList.length);
+      userLikes = await loadUserLikes();
 
       const container = document.getElementById('posts-container');
-      container.innerHTML = ''; // Clear old UI
+      container.innerHTML = ''; // Clear UI for fresh load
 
-      userLikes = await loadUserLikes(); // load likes once
-
-      loadNextPost(); // start loading fresh
+      // Start infinite scroll lazy load with all posts
+      loadNextPost();
     }
   } catch (error) {
-    console.error('Error loading fresh posts:', error);
+    console.error('Error loading remaining posts:', error);
   }
-  hideSpinner();
 }
 
 // ------------------------ Load Next Post ------------------------
@@ -1969,32 +1997,9 @@ async function loadNextPost() {
     });
   }, { threshold: 0.5 });
 
-  observer.observe(container.lastChild);
+  observer.observe(container.lastElementChild);
 }
 
-// ------------------------ Kickoff ------------------------
-loadCachedPosts(); // fast feedback from cache
-loadPosts();       // async fresh load
-
-(() => {
-  const popup = document.getElementById("customPopup");
-  const popupMessage = document.getElementById("popupMessage");
-  const closeBtn = document.getElementById("closeBtn");
-
-  // Show popup with a given message
-  function showPopup(message) {
-    popupMessage.textContent = message;
-    popup.classList.remove("hidden");
-  }
-
-  // Close popup on OK button click
-  closeBtn.addEventListener("click", () => {
-    popup.classList.add("hidden");
-  });
-
-  // Expose showPopup globally so you can call it anywhere
-  window.showPopup = showPopup;
-})();
 </script>
 <script type="module">
   import {
