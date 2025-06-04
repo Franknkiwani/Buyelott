@@ -2,130 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>CyberChat Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile | CybeChat</title>
   <style>
-    body {
-      margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #f0f2f5;
-      color: #222;
-    }
-    .profile-container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      padding: 30px 40px;
+    * {
       box-sizing: border-box;
     }
-    .profile-header {
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: #f9f9f9;
+      color: #222;
+    }
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
       text-align: center;
     }
     .avatar {
-      width: 140px;
-      height: 140px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      box-shadow: 0 0 12px rgba(0,0,0,0.12);
-      margin-bottom: 15px;
+      border: 4px solid #00c26e;
+      margin-bottom: 20px;
     }
     .username {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
-      color: #111;
-      margin-bottom: 6px;
+      margin: 10px 0 4px;
     }
     .bio {
       font-size: 16px;
       color: #555;
-      margin-bottom: 28px;
-      min-height: 48px;
+      margin-bottom: 20px;
     }
     .stats {
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid #eee;
-      border-bottom: 1px solid #eee;
-      padding: 15px 0;
+      font-size: 14px;
       margin-bottom: 30px;
       color: #444;
-      font-weight: 600;
     }
-    .stat {
-      text-align: center;
-      flex: 1;
-      cursor: default;
-    }
-    .stat span {
-      display: block;
-      font-size: 20px;
-      color: #222;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    .buttons {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .buttons button {
-      padding: 12px 32px;
+    .follow-btn {
+      padding: 12px 24px;
+      background-color: #00c26e;
+      color: white;
       border: none;
-      border-radius: 25px;
-      font-weight: 600;
-      font-size: 15px;
-      margin: 0 10px;
+      font-weight: bold;
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-      transition: background-color 0.3s ease;
-      user-select: none;
+      transition: background 0.2s ease;
     }
-    #followBtn {
-      background-color: #34c759;
-      color: white;
+    .follow-btn:hover {
+      background-color: #00a759;
     }
-    #followBtn:hover {
-      background-color: #28a745;
-    }
-    #shareBtn {
-      background-color: #007aff;
-      color: white;
-    }
-    #shareBtn:hover {
-      background-color: #005bb5;
-    }
-    .posts {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 14px;
-    }
-    .post {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .post:hover {
-      transform: scale(1.05);
+    .not-found {
+      text-align: center;
+      margin-top: 100px;
+      font-size: 28px;
+      color: #999;
     }
   </style>
 </head>
 <body>
-
-  <div id="profile" class="profile-container">
-    <div style="text-align:center; padding: 40px; font-size: 18px; color:#888;">
-      Loading profile...
-    </div>
-  </div>
+  <div id="profileContainer">Loading profile...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -134,121 +82,47 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Grab UID from URL pathname, e.g. /uid282828bswiwiw
-    const path = window.location.pathname;
-    const uid = path.replace("/", "") || null;
+    const uid = window.location.search.replace("?", "");
+    const container = document.getElementById("profileContainer");
 
-    const profileDiv = document.getElementById("profile");
+    async function loadProfile() {
+      if (!uid) return show404();
 
-    if (!uid) {
-      profileDiv.innerHTML = '<p style="color:red; text-align:center; padding: 40px;">Invalid user ID in URL.</p>';
-      throw new Error("No UID found in URL");
-    }
-
-    async function loadProfile(uid) {
       try {
-        const userSnap = await get(child(ref(db), `users/${uid}`));
-        if (!userSnap.exists()) {
-          profileDiv.innerHTML = `
-            <div style="text-align:center; padding: 80px; font-size: 36px; color: #cc0000;">
-              404<br/>
-              <small style="font-size:18px; color:#555;">User not found.</small>
-            </div>
-          `;
-          return;
-        }
+        const snapshot = await get(ref(db, `users/${uid}`));
+        if (!snapshot.exists()) return show404();
 
-        const user = userSnap.val();
+        const user = snapshot.val();
+        const avatar = user.avatar || "https://i.imgur.com/4ZQZ4ZL.jpg";
+        const username = user.username || "Anonymous";
+        const bio = user.bio || "No bio yet.";
+        const followers = user.followers ? Object.keys(user.followers).length : 0;
 
-        // Get all posts, filter by uid
-        const postsSnap = await get(child(ref(db), 'post'));
-        let posts = [];
-        if (postsSnap.exists()) {
-          const allPosts = postsSnap.val();
-          posts = Object.values(allPosts).filter(p => p.uid === uid);
-        }
-
-        renderProfile(user, posts);
-
-      } catch (error) {
-        profileDiv.innerHTML = `<p style="color:red; text-align:center; padding: 40px;">Error loading profile: ${error.message}</p>`;
+        container.innerHTML = `
+          <div class="container">
+            <img src="${avatar}" class="avatar" />
+            <div class="username">@${username}</div>
+            <div class="bio">${bio}</div>
+            <div class="stats">Followers: ${followers}</div>
+            <button class="follow-btn">Follow</button>
+          </div>
+        `;
+      } catch (e) {
+        container.innerHTML = `<div class="not-found">Error loading profile.<br>${e.message}</div>`;
       }
     }
 
-    function renderProfile(user, posts) {
-      const {
-        username = 'unknown',
-        bio = '',
-        avatar = 'https://i.imgur.com/4ZQZ4ZL.jpg',
-        followers = 0,
-        following = 0,
-      } = user;
-
-      const postsCount = posts.length;
-
-      profileDiv.innerHTML = `
-        <div class="profile-header">
-          <img src="${avatar}" alt="Avatar" class="avatar" />
-          <div class="username">@${username}</div>
-          <div class="bio">${bio}</div>
-        </div>
-
-        <div class="stats">
-          <div class="stat">
-            <span>${postsCount}</span>
-            Posts
-          </div>
-          <div class="stat">
-            <span>${followers}</span>
-            Followers
-          </div>
-          <div class="stat">
-            <span>${following}</span>
-            Following
-          </div>
-        </div>
-
-        <div class="buttons">
-          <button id="followBtn">Follow</button>
-          <button id="shareBtn">Share</button>
-        </div>
-
-        <div class="posts">
-          ${posts.map(p => `
-            <img src="${p.image || 'https://i.imgur.com/6W9W4T2.jpg'}" alt="Post" class="post" />
-          `).join('')}
-        </div>
-      `;
-
-      // Follow button toggle (local state)
-      const followBtn = document.getElementById("followBtn");
-      let followingState = false;
-      const setFollowState = (followed) => {
-        followBtn.textContent = followed ? "Following" : "Follow";
-        followBtn.style.backgroundColor = followed ? "#1d9a42" : "#34c759";
-        followBtn.style.color = "white";
-      };
-      setFollowState(followingState);
-
-      followBtn.addEventListener("click", () => {
-        followingState = !followingState;
-        setFollowState(followingState);
-      });
-
-      // Share button alert
-      document.getElementById("shareBtn").onclick = () => {
-        alert(`Share this profile: ${window.location.href}`);
-      };
+    function show404() {
+      container.innerHTML = `<div class="not-found">🚫 404 - User Not Found</div>`;
     }
 
-    loadProfile(uid);
+    loadProfile();
   </script>
 </body>
 </html>
