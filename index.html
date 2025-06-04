@@ -925,6 +925,73 @@ body {
       fill: currentColor;
     }
   }
+  .post-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(10, 10, 25, 0.8));
+  box-shadow: 
+    0 0 10px rgba(0, 255, 255, 0.3),
+    0 0 30px rgba(255, 0, 255, 0.1),
+    inset 0 0 8px rgba(0, 255, 255, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.post-image-wrapper:hover {
+  box-shadow:
+    0 0 16px rgba(0, 255, 255, 0.4),
+    0 0 40px rgba(255, 0, 255, 0.2),
+    inset 0 0 12px rgba(255, 0, 255, 0.3);
+}
+
+/* Glitch shimmer */
+.image-placeholder.glassy {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(0,255,255,0.12), rgba(255,0,255,0.08));
+  backdrop-filter: blur(16px);
+  border-radius: 12px;
+  animation: pulse 1.5s ease-in-out infinite, glitch 2s infinite;
+  z-index: 2;
+  border: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+/* Spinner in center */
+.image-placeholder .spinner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px; height: 34px;
+  border: 4px solid rgba(0, 255, 255, 0.3);
+  border-top: 4px solid #ff00ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse shimmer */
+@keyframes pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.4; }
+}
+
+/* Glitch fx (very subtle) */
+@keyframes glitch {
+  0% { transform: translate(0px, 0px); }
+  20% { transform: translate(1px, -1px); }
+  40% { transform: translate(-1px, 1px); }
+  60% { transform: translate(0px, 0px); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* Spinner */
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -990,26 +1057,11 @@ body {
 <div class="blur-overlay" id="blur-overlay" tabindex="-1" aria-hidden="true"></div>
 <div id="posts-container"></div>
 
-<button id="load-more-btn" style="display:none; margin: 20px auto; padding: 10px 20px; font-weight: bold;">
-  Load More
-</button>
-
-<div id="end-message" style="color: red; text-align: center; font-weight: bold; margin-top: 20px; display: none;">
-  You caught up! Come back later for fresh posts.
-</div>
 <!-- Suggestions Box -->
 <div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
 <div id="search-results" class="search-results"></div>
 <div id="posts-container"></div>
-<!-- Spinner Container -->
-<div id="loading-spinner" class="spinner-overlay">
-  <div class="spinner-box">
-    <div class="circle-border">
-      <div class="circle-core"></div>
-    </div>
-    <p class="spinner-text">Collecting data...</p>
-  </div>
-</div>
+
 <div id="customPopup" class="popup hidden">
   <div class="popup-box">
     <p id="popupMessage">Placeholder message</p>
@@ -1592,43 +1644,84 @@ function createPostElement(post, postId, userLikes = {}) {
     : '';
 
   postDiv.innerHTML = `
-    <div class="post-header">
-      <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
-      <div class="user-info">
-        <div class="username">
-          ${username}
-          ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
+  <div class="post-header">
+    <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
+    <div class="user-info">
+      <div class="username">
+        ${username}
+        ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
+      </div>
+      <div class="handle">${handle}</div>
+    </div>
+    <div class="post-meta">
+      <button class="share-btn">share</button>
+      <div class="post-time">${formatTimeAgo(timestamp)}</div>
+    </div>
+  </div>
+  <div class="post-title">${title}</div>
+  ${
+    postImage
+      ? `
+      <div class="post-image-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;">
+        <div class="image-placeholder glassy" style="
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+          backdrop-filter: blur(14px);
+          animation: pulse 1.6s ease-in-out infinite;
+          z-index: 2;
+        ">
+          <div class="spinner" style="
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 34px; height: 34px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "></div>
         </div>
-        <div class="handle">${handle}</div>
-      </div>
-      <div class="post-meta">
-        <button class="share-btn">share</button>
-        <div class="post-time">${formatTimeAgo(timestamp)}</div>
-      </div>
+        <img 
+          src="${postImage}" 
+          alt="Post image" 
+          class="post-image" 
+          loading="lazy" 
+          style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: none; opacity: 0; transition: opacity 0.6s ease;"
+          onload="this.style.display='block'; this.style.opacity='1'; if(this.previousElementSibling) this.previousElementSibling.remove();"
+          onerror="this.style.display='block'; this.style.opacity='1'; this.style.objectFit='contain'; this.src='https://i.imgur.com/UH3IPXw.png'; if(this.previousElementSibling) this.previousElementSibling.remove();"
+        />
+      </div>`
+      : ''
+  }
+  <div class="post-description" data-full="${description}">
+    ${shortDesc}
+    ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
+  </div>
+  <div class="post-stats">
+    <div>${createSvgIcon('views')} ${views}</div>
+    <div class="like-wrapper">
+      <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
+      <span class="like-count">${likes}</span>
     </div>
-    <div class="post-title">${title}</div>
-    ${
-      postImage
-        ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px;" />`
-        : ''
-    }
-    <div class="post-description" data-full="${description}">
-      ${shortDesc}
-      ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
+    <div class="comment-wrapper">
+      <div>${createSvgIcon('comments')} ${comments}</div>
+      <button class="comment-btn">Comment</button>
     </div>
-    <div class="post-stats">
-      <div>${createSvgIcon('views')} ${views}</div>
-      <div class="like-wrapper">
-        <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
-        <span class="like-count">${likes}</span>
-      </div>
-      <div class="comment-wrapper">
-        <div>${createSvgIcon('comments')} ${comments}</div>
-        <button class="comment-btn">Comment</button>
-      </div>
-    </div>
-    ${adHtml}
-  `;
+  </div>
+  ${adHtml}
+`;
+
+// ⏱ Force-remove shimmer after 5 sec if image doesn't load
+setTimeout(() => {
+  const shimmer = postDiv.querySelector('.image-placeholder');
+  const img = postDiv.querySelector('.post-image');
+  if (shimmer) shimmer.remove();
+  if (img && img.style.display === 'none') {
+    img.style.display = 'block';
+    img.style.opacity = '1';
+  }
+}, 5000);
 
   // LIKE HANDLER
   postDiv.querySelector('.like-btn').addEventListener('click', async (e) => {
