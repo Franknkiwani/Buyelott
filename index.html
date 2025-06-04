@@ -1128,6 +1128,21 @@ body {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+.post-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.05);
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+
+.post-container:hover {
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
 </style>
 </head>
 <body>
