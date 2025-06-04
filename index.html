@@ -1576,53 +1576,63 @@ function createPostElement(post, postId, userLikes = {}) {
     ? `<div class="post-ads"><iframe src="https://your-ad-provider.com/adframe" class="ad-frame" width="100%" height="90" style="border:none;"></iframe></div>`
     : '';
 
-  // placeholder glassy loading div for image
-  const imageHtml = `
-    <div class="post-image-wrapper">
-      <div class="image-placeholder glassy"></div>
-      <img src="${postImage}" alt="Post Image" loading="lazy" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" style="display:none; border-radius:12px; width:100%; height:auto;" />
-    </div>
-  `;
-}
 
   postDiv.innerHTML = `
-    <div class="post-header">
-      <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
-      <div class="user-info">
-        <div class="username">
-          ${username}
-          ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
-        </div>
-        <div class="handle">${handle}</div>
+  <div class="post-header">
+    <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
+    <div class="user-info">
+      <div class="username">
+        ${username}
+        ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
       </div>
-      <div class="post-meta">
-        <button class="share-btn">share</button>
-        <div class="post-time">${formatTimeAgo(timestamp)}</div>
-      </div>
+      <div class="handle">${handle}</div>
     </div>
-    <div class="post-title">${title}</div>
-    ${
-      postImage
-        ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px;" />`
-        : ''
-    }
-    <div class="post-description" data-full="${description}">
-      ${shortDesc}
-      ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
+    <div class="post-meta">
+      <button class="share-btn">share</button>
+      <div class="post-time">${formatTimeAgo(timestamp)}</div>
     </div>
-    <div class="post-stats">
-      <div>${createSvgIcon('views')} ${views}</div>
-      <div class="like-wrapper">
-        <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
-        <span class="like-count">${likes}</span>
-      </div>
-      <div class="comment-wrapper">
-        <div>${createSvgIcon('comments')} ${comments}</div>
-        <button class="comment-btn">Comment</button>
-      </div>
+  </div>
+  <div class="post-title">${title}</div>
+  ${
+    postImage
+      ? `
+      <div class="post-image-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;">
+        <div class="image-placeholder glassy" style="
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(12px);
+          animation: pulse 1.4s ease-in-out infinite;
+          border-radius: 10px;
+          "></div>
+        <img 
+          src="${postImage}" 
+          alt="Post image" 
+          class="post-image" 
+          loading="lazy" 
+          style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: none;" 
+          onload="this.style.display='block'; this.previousElementSibling.style.display='none';"
+        />
+      </div>`
+      : ''
+  }
+  <div class="post-description" data-full="${description}">
+    ${shortDesc}
+    ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
+  </div>
+  <div class="post-stats">
+    <div>${createSvgIcon('views')} ${views}</div>
+    <div class="like-wrapper">
+      <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
+      <span class="like-count">${likes}</span>
     </div>
-    ${adHtml}
-  `;
+    <div class="comment-wrapper">
+      <div>${createSvgIcon('comments')} ${comments}</div>
+      <button class="comment-btn">Comment</button>
+    </div>
+  </div>
+  ${adHtml}
+`;
 
   // LIKE HANDLER
   postDiv.querySelector('.like-btn').addEventListener('click', async (e) => {
