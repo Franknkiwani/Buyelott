@@ -9,7 +9,6 @@
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-
     body {
       background: #f0f2f5;
       margin: 0;
@@ -17,7 +16,6 @@
       display: flex;
       justify-content: center;
     }
-
     .container {
       width: 100%;
       max-width: 600px;
@@ -25,22 +23,21 @@
       border-radius: 28px;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
       padding: 2rem;
+      display: flex;
+      flex-direction: column;
     }
-
     h1, h2 {
       font-size: 1.4rem;
       margin-bottom: 1rem;
       color: #111;
       text-align: center;
     }
-
     .user-info {
       display: flex;
       align-items: center;
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
-
     .user-info img {
       width: 56px;
       height: 56px;
@@ -48,14 +45,12 @@
       object-fit: cover;
       border: 2px solid #eee;
     }
-
     .user-info .meta p {
       margin: 0;
       line-height: 1.4;
       font-size: 0.9rem;
       color: #555;
     }
-
     textarea {
       width: 100%;
       padding: 1rem;
@@ -66,7 +61,6 @@
       font-size: 1rem;
       margin-bottom: 1rem;
     }
-
     button {
       width: 100%;
       padding: 0.85rem;
@@ -78,16 +72,13 @@
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
-
     button:hover {
       background-color: #005ecb;
     }
-
     #loginPrompt {
       text-align: center;
       color: #666;
     }
-
     .message-card {
       background: #fafafa;
       border-radius: 18px;
@@ -95,14 +86,16 @@
       margin-bottom: 0.8rem;
       border: 1px solid #ddd;
       font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      max-width: 70%;
+      word-break: break-word;
     }
-
     .message-meta {
       color: #777;
       font-size: 0.8rem;
       margin-bottom: 0.4rem;
     }
-
     #customAlert {
       position: fixed;
       bottom: 20px;
@@ -116,24 +109,32 @@
       display: none;
       z-index: 1000;
     }
-
     .divider {
       margin: 2rem 0 1rem;
       border-top: 1px solid #ddd;
     }
-
     .received-section {
       background: #fdfdfd;
       border: 2px dashed #007aff33;
       padding: 1rem;
       border-radius: 20px;
       margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      max-height: 300px;
+      overflow-y: auto;
     }
-
     .received-section h2 {
       font-size: 1.1rem;
       margin-bottom: 0.5rem;
       color: #007aff;
+    }
+    #userMessages {
+      display: flex;
+      flex-direction: column;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -143,16 +144,17 @@
     <div id="authSection">
       <div id="userCard" style="display:none">
         <div class="user-info">
-          <img id="userPic" src="" alt="Profile Picture">
+          <img id="userPic" src="https://via.placeholder.com/56" alt="Profile Picture">
           <div class="meta">
             <p id="userName">Username</p>
             <p id="userEmail">Email</p>
           </div>
         </div>
         <textarea id="contactMessage" placeholder="Type your message..."></textarea>
-        <button onclick="submitContact()">Send Message</button>
+        <button id="sendBtn">Send Message</button>
 
         <div class="divider"></div>
+
         <h2>Your Messages</h2>
         <div id="userMessages"></div>
 
@@ -171,126 +173,136 @@
 
   <div id="customAlert"></div>
 
-<!-- At the bottom of your HTML before </body> -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  set,
-  push,
-  onChildAdded,
-  get,
-  child
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signInWithPopup,
+    GoogleAuthProvider
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    set,
+    push,
+    onChildAdded,
+    get,
+    child
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-// ✅ Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-let currentUser = null;
+  let currentUser = null;
 
-const userCard = document.getElementById("userCard");
-const loginPrompt = document.getElementById("loginPrompt");
-const contactForm = document.getElementById("contactForm");
-const userName = document.getElementById("userName");
-const userEmail = document.getElementById("userEmail");
-const userUsername = document.getElementById("userUsername");
-const message = document.getElementById("message");
-const messagesContainer = document.getElementById("messagesContainer");
+  const userCard = document.getElementById("userCard");
+  const loginPrompt = document.getElementById("loginPrompt");
+  const userName = document.getElementById("userName");
+  const userEmail = document.getElementById("userEmail");
+  const userPic = document.getElementById("userPic");
+  const contactMessage = document.getElementById("contactMessage");
+  const sendBtn = document.getElementById("sendBtn");
+  const userMessages = document.getElementById("userMessages");
+  const receivedMessages = document.getElementById("receivedMessages");
 
-function showPopup(text, color = "#0a84ff") {
-  const popup = document.createElement("div");
-  popup.innerText = text;
-  popup.style.position = "fixed";
-  popup.style.bottom = "30px";
-  popup.style.left = "50%";
-  popup.style.transform = "translateX(-50%)";
-  popup.style.background = color;
-  popup.style.color = "white";
-  popup.style.padding = "14px 20px";
-  popup.style.borderRadius = "20px";
-  popup.style.fontSize = "16px";
-  popup.style.zIndex = 9999;
-  popup.style.boxShadow = "0 0 15px rgba(0,0,0,0.3)";
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 3000);
-}
-
-// ✅ Load messages (real-time)
-function loadMessages(uid) {
-  const messagesRef = ref(db, `contactmessages/${uid}`);
-  onChildAdded(messagesRef, (snapshot) => {
-    const msg = snapshot.val();
-    const div = document.createElement("div");
-    div.className = "rounded-xl px-4 py-2 text-white w-fit max-w-[70%] text-sm mb-2";
-    div.style.backgroundColor = msg.from === "admin" ? "#ff3b30" : "#34c759";
-    div.style.alignSelf = msg.from === "admin" ? "flex-start" : "flex-end";
-    div.innerText = msg.from === "admin" ? `@cyberchat: ${msg.message}` : `You: ${msg.message}`;
-    messagesContainer.appendChild(div);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  });
-}
-
-// ✅ Send message
-function sendMessage() {
-  if (!currentUser) return showPopup("You must be signed in to send", "#ff3b30");
-  const msg = message.value.trim();
-  if (msg.length < 3) return showPopup("Write a real message", "#ff9500");
-
-  const msgRef = push(ref(db, `contactmessages/${currentUser.uid}`));
-  set(msgRef, {
-    from: "user",
-    message: msg,
-    timestamp: Date.now(),
-    name: currentUser.displayName || "Unknown",
-    email: currentUser.email,
-    uid: currentUser.uid
-  }).then(() => {
-    message.value = "";
-    showPopup("Sent!", "#34c759");
-  }).catch((err) => {
-    console.error(err);
-    showPopup("Failed to send", "#ff3b30");
-  });
-}
-
-// ✅ Auth state check
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    userCard.style.display = "block";
-    loginPrompt.style.display = "none";
-    userName.innerText = user.displayName || "No Name";
-    userEmail.innerText = user.email;
-    get(child(ref(db), `users/${user.uid}/username`)).then(snapshot => {
-      userUsername.innerText = snapshot.exists() ? snapshot.val() : "No Username";
-    });
-    loadMessages(user.uid);
-  } else {
-    currentUser = null;
-    userCard.style.display = "none";
-    loginPrompt.style.display = "block";
+  function showPopup(text, color = "#0a84ff") {
+    const popup = document.createElement("div");
+    popup.innerText = text;
+    popup.style.position = "fixed";
+    popup.style.bottom = "30px";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+    popup.style.background = color;
+    popup.style.color = "white";
+    popup.style.padding = "14px 20px";
+    popup.style.borderRadius = "20px";
+    popup.style.fontSize = "16px";
+    popup.style.zIndex = 9999;
+    popup.style.boxShadow = "0 0 15px rgba(0,0,0,0.3)";
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 3000);
   }
-});
 
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
-</script>
-</body>
-</html>
+  // Load user messages in green "You:" bubble
+  function loadUserMessages(uid) {
+    const userMsgsRef = ref(db, `contactmessages/${uid}`);
+    userMessages.innerHTML = "";
+    onChildAdded(userMsgsRef, (snapshot) => {
+      const msg = snapshot.val();
+      const div = document.createElement("div");
+      div.className = "message-card";
+      div.style.backgroundColor = "#34c759"; // green
+      div.style.alignSelf = "flex-end";
+      div.innerText = `You: ${msg.message}`;
+      userMessages.appendChild(div);
+      userMessages.scrollTop = userMessages.scrollHeight;
+    });
+  }
+
+  // Load received messages from admin in red "@cyberchat:" bubble
+  function loadReceivedMessages(uid) {
+    const receivedMsgsRef = ref(db, `receivedmessages/${uid}`);
+    receivedMessages.innerHTML = "";
+    onChildAdded(receivedMsgsRef, (snapshot) => {
+      const msg = snapshot.val();
+      const div = document.createElement("div");
+      div.className = "message-card";
+      div.style.backgroundColor = "#ff3b30"; // red
+      div.style.alignSelf = "flex-start";
+      div.innerText = `@cyberchat: ${msg.message}`;
+      receivedMessages.appendChild(div);
+      receivedMessages.scrollTop = receivedMessages.scrollHeight;
+    });
+  }
+
+  // Send user's message and save it under contactmessages/{uid}
+  function submitContact() {
+    if (!currentUser) return showPopup("You must be signed in to send messages", "#ff3b30");
+    const msg = contactMessage.value.trim();
+    if (msg.length < 3) return showPopup("Write a real message, not that weak stuff!", "#ff9500");
+
+    const msgRef = push(ref(db, `contactmessages/${currentUser.uid}`));
+    set(msgRef, {
+      from: "user",
+      message: msg,
+      timestamp: Date.now(),
+      uid: currentUser.uid,
+      name: currentUser.displayName || "Unknown",
+      email: currentUser.email
+    }).then(() => {
+      contactMessage.value = "";
+      showPopup("Message sent!", "#34c759");
+    }).catch(err => {
+      console.error(err);
+      showPopup("Failed to send message", "#ff3b30");
+    });
+  }
+
+  // Simple sign-in with Google popup
+  window.signIn = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(err => {
+      console.error(err);
+      showPopup("Sign in failed", "#ff3b30");
+    });
+  };
+
+  // On auth state changed, update UI and load messages
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      user
