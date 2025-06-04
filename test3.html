@@ -2,173 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>CyberChat Users</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>User Location Tracker</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       background: #f9f9f9;
       color: #222;
-      padding: 2rem;
-      max-width: 450px;
-      margin: 50px auto;
+    }
+    h1 {
       text-align: center;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+      margin: 30px 0;
     }
-    .loading {
-      font-style: italic;
-      color: #888;
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
     }
-    .error {
-      color: red;
+    .user-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
     }
-    .location-info {
-      margin-top: 1rem;
-      text-align: left;
+    .user-card:hover {
+      transform: translateY(-6px);
+    }
+    .user-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+    }
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .user-bio {
+      font-size: 14px;
+      color: #555;
+      height: 40px;
+      overflow: hidden;
     }
   </style>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <h1>User Location Tracker</h1>
-  <p id="status" class="loading">Fetching location…</p>
-  <div id="location" class="location-info"></div>
+  <h1>👥 CyberChat Users</h1>
+  <div id="userList" class="user-grid">Loading...</div>
 
-  <script>
-    // Your real Firebase config below
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    async function fetchLocation() {
+    const userList = document.getElementById("userList");
+
+    async function loadUsers() {
       try {
-        const res = await fetch('http://ip-api.com/json/');
-        if (!res.ok) throw new Error('Network response was not OK');
-        const data = await res.json();
-        if (data.status !== 'success') throw new Error('Failed to get location');
+        const snap = await get(child(ref(db), 'users'));
+        if (!snap.exists()) {
+          userList.innerHTML = "<p>No users found.</p>";
+          return;
+        }
 
-        document.getElementById('status').textContent = 'Location found:';
-        const locDiv = document.getElementById('location');
-
-        locDiv.innerHTML = `
-          <strong>Country:</strong> ${data.country} (${data.countryCode})<br/>
-          <strong>Region:</strong> ${data.regionName} (${data.region})<br/>
-          <strong>City:</strong> ${data.city}<br/>
-          <strong>ZIP:</strong> ${data.zip}<br/>
-          <strong>Latitude:</strong> ${data.lat}<br/>
-          <strong>Longitude:</strong> ${data.lon}<br/>
-          <strong>Timezone:</strong> ${data.timezone}<br/>
-          <strong>ISP:</strong> ${data.isp}<br/>
-          <strong>Org:</strong> ${data.org}
-        `;
-
-        // Save location data to Firestore
-        await saveLocation(data);
-
+        const users = snap.val();
+        userList.innerHTML = Object.entries(users).map(([uid, user]) => {
+          const avatar = user.avatar || "https://i.imgur.com/4ZQZ4ZL.jpg";
+          const username = user.username || "unknown";
+          const bio = user.bio || "";
+          return `
+            <div class="user-card" onclick="location.href='test.html?${uid}'">
+              <img src="${avatar}" class="user-avatar" alt="${username}" />
+              <div class="user-name">@${username}</div>
+              <div class="user-bio">${bio}</div>
+            </div>
+          `;
+        }).join("");
       } catch (err) {
-        document.getElementById('status').textContent = 'Could not fetch location.';
-        document.getElementById('status').classList.remove('loading');
-        document.getElementById('status').classList.add('error');
-        console.error('Error fetching location:', err);
+        userList.innerHTML = `<p style="color:red;">Error loading users: ${err.message}</p>`;
       }
     }
 
-    async function saveLocation(locationData) {
-      try {
-        // Compose doc ID by countryCode_region_city, replace spaces with underscores
-        const docId = `${locationData.countryCode}_${locationData.region}_${locationData.city}`.replace(/\s+/g, '_');
-
-        const docRef = db.collection('userLocations').doc(docId);
-
-        // Atomically increment count in Firestore, merge other info
-        await docRef.set({
-          country: locationData.country,
-          countryCode: locationData.countryCode,
-          region: locationData.regionName,
-          city: locationData.city,
-          count: firebase.firestore.FieldValue.increment(1),
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        console.log('Location saved to Firestore:', docId);
-      } catch (error) {
-        console.error('Error saving location:', error);
-      }
-    }
-
-    fetchLocation();
+    loadUsers();
   </script>
-<!-- Firebase scripts -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-  // Your real Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  async function sendLocationToFirebase() {
-    try {
-      // Get user IP
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      if (!ipRes.ok) throw new Error(`IP fetch error: ${ipRes.status}`);
-      const { ip } = await ipRes.json();
-
-      // Get location info from ipapi.co
-      const locRes = await fetch(`https://ipapi.co/${ip}/json/`);
-      if (!locRes.ok) throw new Error(`Location fetch error: ${locRes.status}`);
-      const locData = await locRes.json();
-
-      if (locData.error) throw new Error(locData.reason || 'Unknown location API error');
-
-      // Prepare data to save
-      const timestamp = Date.now();
-      const data = {
-        ip,
-        country: locData.country_name || "Unknown",
-        region: locData.region || "Unknown",
-        city: locData.city || "Unknown",
-        timestamp
-      };
-
-      // Push data to Firebase Realtime Database under /analytics
-      await db.ref('analytics').push(data);
-
-      // Optional: console log for dev
-      console.log('User location sent to Firebase:', data);
-
-    } catch (err) {
-      console.error('Error sending location to Firebase:', err);
-    }
-  }
-
-  // Run on page load silently
-  sendLocationToFirebase();
-</script>
 </body>
 </html>
