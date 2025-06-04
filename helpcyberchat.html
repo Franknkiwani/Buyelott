@@ -171,102 +171,126 @@
 
   <div id="customAlert"></div>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<!-- At the bottom of your HTML before </body> -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  push,
+  onChildAdded,
+  get,
+  child
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+// ✅ Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-    const userCard = document.getElementById('userCard');
-    const loginPrompt = document.getElementById('loginPrompt');
+let currentUser = null;
 
-    let currentUser = null;
+const userCard = document.getElementById("userCard");
+const loginPrompt = document.getElementById("loginPrompt");
+const contactForm = document.getElementById("contactForm");
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
+const userUsername = document.getElementById("userUsername");
+const message = document.getElementById("message");
+const messagesContainer = document.getElementById("messagesContainer");
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        userCard.style.display = 'block';
-        loginPrompt.style.display = 'none';
-        document.getElementById('userName').textContent = user.displayName || 'No Username';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userPic').src = user.photoURL || 'https://via.placeholder.com/56';
+function showPopup(text, color = "#0a84ff") {
+  const popup = document.createElement("div");
+  popup.innerText = text;
+  popup.style.position = "fixed";
+  popup.style.bottom = "30px";
+  popup.style.left = "50%";
+  popup.style.transform = "translateX(-50%)";
+  popup.style.background = color;
+  popup.style.color = "white";
+  popup.style.padding = "14px 20px";
+  popup.style.borderRadius = "20px";
+  popup.style.fontSize = "16px";
+  popup.style.zIndex = 9999;
+  popup.style.boxShadow = "0 0 15px rgba(0,0,0,0.3)";
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 3000);
+}
 
-        loadMessages(user.uid);
-      } else {
-        userCard.style.display = 'none';
-        loginPrompt.style.display = 'block';
-      }
+// ✅ Load messages (real-time)
+function loadMessages(uid) {
+  const messagesRef = ref(db, `contactmessages/${uid}`);
+  onChildAdded(messagesRef, (snapshot) => {
+    const msg = snapshot.val();
+    const div = document.createElement("div");
+    div.className = "rounded-xl px-4 py-2 text-white w-fit max-w-[70%] text-sm mb-2";
+    div.style.backgroundColor = msg.from === "admin" ? "#ff3b30" : "#34c759";
+    div.style.alignSelf = msg.from === "admin" ? "flex-start" : "flex-end";
+    div.innerText = msg.from === "admin" ? `@cyberchat: ${msg.message}` : `You: ${msg.message}`;
+    messagesContainer.appendChild(div);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  });
+}
+
+// ✅ Send message
+function sendMessage() {
+  if (!currentUser) return showPopup("You must be signed in to send", "#ff3b30");
+  const msg = message.value.trim();
+  if (msg.length < 3) return showPopup("Write a real message", "#ff9500");
+
+  const msgRef = push(ref(db, `contactmessages/${currentUser.uid}`));
+  set(msgRef, {
+    from: "user",
+    message: msg,
+    timestamp: Date.now(),
+    name: currentUser.displayName || "Unknown",
+    email: currentUser.email,
+    uid: currentUser.uid
+  }).then(() => {
+    message.value = "";
+    showPopup("Sent!", "#34c759");
+  }).catch((err) => {
+    console.error(err);
+    showPopup("Failed to send", "#ff3b30");
+  });
+}
+
+// ✅ Auth state check
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    userCard.style.display = "block";
+    loginPrompt.style.display = "none";
+    userName.innerText = user.displayName || "No Name";
+    userEmail.innerText = user.email;
+    get(child(ref(db), `users/${user.uid}/username`)).then(snapshot => {
+      userUsername.innerText = snapshot.exists() ? snapshot.val() : "No Username";
     });
+    loadMessages(user.uid);
+  } else {
+    currentUser = null;
+    userCard.style.display = "none";
+    loginPrompt.style.display = "block";
+  }
+});
 
-    function signIn() {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).catch(() => showAlert("Sign-in failed."));
-    }
-
-    function submitContact() {
-      const message = document.getElementById('contactMessage').value.trim();
-      if (!message) return showAlert("Please write something.");
-
-      push(ref(db, "help/contact"), {
-        uid: currentUser.uid,
-        email: currentUser.email,
-        username: currentUser.displayName || "No Username",
-        profile: currentUser.photoURL || "",
-        message,
-        timestamp: Date.now()
-      }).then(() => {
-        showAlert("Message sent!");
-        document.getElementById('contactMessage').value = '';
-      }).catch(() => showAlert("Failed to send."));
-    }
-
-    function loadMessages(uid) {
-      const userBox = document.getElementById("userMessages");
-      const receivedBox = document.getElementById("receivedMessages");
-
-      onValue(ref(db, "help/contact"), (snapshot) => {
-        userBox.innerHTML = "";
-        receivedBox.innerHTML = "";
-        snapshot.forEach((child) => {
-          const msg = child.val();
-          const el = document.createElement('div');
-          el.className = "message-card";
-          el.innerHTML = `
-            <div class="message-meta">
-              ${msg.username || "Anonymous"} • ${new Date(msg.timestamp).toLocaleString()}
-            </div>
-            <div>${msg.message}</div>
-          `;
-          if (msg.uid === uid) {
-            userBox.appendChild(el);
-          } else {
-            receivedBox.appendChild(el);
-          }
-        });
-      });
-    }
-
-    function showAlert(message) {
-      const alertBox = document.getElementById("customAlert");
-      alertBox.textContent = message;
-      alertBox.style.display = "block";
-      setTimeout(() => alertBox.style.display = "none", 3000);
-    }
-  </script>
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+</script>
 </body>
 </html>
