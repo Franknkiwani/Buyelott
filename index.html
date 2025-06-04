@@ -925,6 +925,42 @@ body {
       fill: currentColor;
     }
   }
+.post-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.15); /* Glass effect base */
+  backdrop-filter: blur(10px);            /* The glassy blur */
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.image-placeholder {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.25);
+  animation: shimmer 1.5s infinite;
+  z-index: 10;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  display: none; /* Hide until loaded */
+}
+
+/* Simple shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
 </style>
 </head>
 <body>
@@ -982,6 +1018,10 @@ body {
     autocomplete="off"
     spellcheck="false"
   />
+</div>
+<div class="post-image-wrapper">
+  <div class="image-placeholder"></div>
+  <img src="${postImage}" alt="Post image" class="post-image" />
 </div>
 <div id="settings-dropdown" class="settings-dropdown hidden">
   <div class="settings-option" id="toggle-theme">Toggle Theme</div>
