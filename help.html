@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: #f0f2f5;
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+    }
+
+    h1, h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: #111;
+      text-align: center;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-info img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #eee;
+    }
+
+    .user-info .meta p {
+      margin: 0;
+      line-height: 1.4;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      min-height: 100px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #005ecb;
+    }
+
+    #loginPrompt {
+      text-align: center;
+      color: #666;
+    }
+
+    .message-card {
+      background: #fafafa;
+      border-radius: 18px;
+      padding: 1rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #ddd;
+      font-size: 0.95rem;
+    }
+
+    .message-meta {
+      color: #777;
+      font-size: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    #customAlert {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #007aff;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1000;
+    }
+
+    .divider {
+      margin: 2rem 0 1rem;
+      border-top: 1px solid #ddd;
+    }
+
+    .received-section {
+      background: #fdfdfd;
+      border: 2px dashed #007aff33;
+      padding: 1rem;
+      border-radius: 20px;
+      margin-top: 1rem;
+    }
+
+    .received-section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #007aff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Contact Us</h1>
+    <div id="authSection">
+      <div id="userCard" style="display:none">
+        <div class="user-info">
+          <img id="userPic" src="" alt="Profile Picture">
+          <div class="meta">
+            <p id="userName">Username</p>
+            <p id="userEmail">Email</p>
+          </div>
+        </div>
+        <textarea id="contactMessage" placeholder="Type your message..."></textarea>
+        <button onclick="submitContact()">Send Message</button>
+
+        <div class="divider"></div>
+        <h2>Your Messages</h2>
+        <div id="userMessages"></div>
+
+        <div class="received-section">
+          <h2>Received Messages</h2>
+          <div id="receivedMessages"></div>
+        </div>
+      </div>
+
+      <div id="loginPrompt" style="display:none">
+        <p>You need to be signed in to contact us.</p>
+        <button onclick="signIn()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="customAlert"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getDatabase(app);
+
+    const userCard = document.getElementById('userCard');
+    const loginPrompt = document.getElementById('loginPrompt');
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        userCard.style.display = 'block';
+        loginPrompt.style.display = 'none';
+        document.getElementById('userName').textContent = user.displayName || 'No Username';
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userPic').src = user.photoURL || 'https://via.placeholder.com/56';
+
+        loadMessages(user.uid);
+      } else {
+        userCard.style.display = 'none';
+        loginPrompt.style.display = 'block';
+      }
+    });
+
+    function signIn() {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).catch(() => showAlert("Sign-in failed."));
+    }
+
+    function submitContact() {
+      const message = document.getElementById('contactMessage').value.trim();
+      if (!message) return showAlert("Please write something.");
+
+      push(ref(db, "help/contact"), {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        username: currentUser.displayName || "No Username",
+        profile: currentUser.photoURL || "",
+        message,
+        timestamp: Date.now()
+      }).then(() => {
+        showAlert("Message sent!");
+        document.getElementById('contactMessage').value = '';
+      }).catch(() => showAlert("Failed to send."));
+    }
+
+    function loadMessages(uid) {
+      const userBox = document.getElementById("userMessages");
+      const receivedBox = document.getElementById("receivedMessages");
+
+      onValue(ref(db, "help/contact"), (snapshot) => {
+        userBox.innerHTML = "";
+        receivedBox.innerHTML = "";
+        snapshot.forEach((child) => {
+          const msg = child.val();
+          const el = document.createElement('div');
+          el.className = "message-card";
+          el.innerHTML = `
+            <div class="message-meta">
+              ${msg.username || "Anonymous"} • ${new Date(msg.timestamp).toLocaleString()}
+            </div>
+            <div>${msg.message}</div>
+          `;
+          if (msg.uid === uid) {
+            userBox.appendChild(el);
+          } else {
+            receivedBox.appendChild(el);
+          }
+        });
+      });
+    }
+
+    function showAlert(message) {
+      const alertBox = document.getElementById("customAlert");
+      alertBox.textContent = message;
+      alertBox.style.display = "block";
+      setTimeout(() => alertBox.style.display = "none", 3000);
+    }
+  </script>
+</body>
+</html>
