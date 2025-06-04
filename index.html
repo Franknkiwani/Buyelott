@@ -1568,10 +1568,10 @@ function formatTimeAgo(timestamp) {
 function createPostElement(post, postId, userLikes = {}) {
   const postDiv = document.createElement('div');
   postDiv.classList.add('post-card');
-  postDiv.dataset.id = postId
+  postDiv.dataset.id = postId;
 
   const username = post.username || 'Anonymous';
-  const handle = post.handle ? '@' + post.handle : '@cyberchat;
+  const handle = post.handle ? '@' + post.handle : '@profile';
   const profilePic = post.profilePic || 'https://via.placeholder.com/50';
   const postImage = post.imageUrl || post.image || '';
   const title = post.title || 'Untitled Post';
