@@ -1741,7 +1741,7 @@ const uid = auth.currentUser?.uid || null;
 
 // Clamp native ad index so it never goes beyond post count (min 6)
 function getNativeAdIndex(maxPosts) {
-  if (maxPosts < 6) return maxPosts; // fallback if few posts
+  if (maxPosts < 6) return maxPosts;
   return Math.min(maxPosts - 1, Math.floor(Math.random() * 6) + 6);
 }
 
@@ -1845,49 +1845,6 @@ async function loadPosts() {
 }
 
 // ------------------------ Load Next Post ------------------------
-async function loadPosts() {
-  showSpinner();
-  try {
-    const snapshot = await get(child(dbRef, 'post'));
-    if (!snapshot.exists()) {
-      hideSpinner();
-      return;
-    }
-
-    const posts = snapshot.val();
-    const newCache = JSON.stringify(posts);
-    const oldCache = localStorage.getItem('cachedPosts');
-
-    if (newCache !== oldCache) {
-      localStorage.setItem('cachedPosts', newCache);
-      localStorage.setItem('cachedPostsTimestamp', Date.now());
-
-      const keys = shuffleObject(posts);
-      randomizedPostList = keys.map(k => ({ id: k, data: posts[k] }));
-      currentIndex = 0;
-      totalPostsLoaded = 0;
-      postsSinceLastAd = 0;
-      nativeAdInserted = false;
-
-      nativeAdIndex = getNativeAdIndex(randomizedPostList.length);
-
-      const container = document.getElementById('posts-container');
-      container.innerHTML = ''; // Clear old UI
-
-      userLikes = await loadUserLikes(); // load likes once
-
-      // Load first 5 posts immediately (or less if fewer posts)
-      const initialBatch = Math.min(5, randomizedPostList.length);
-      for (let i = 0; i < initialBatch; i++) {
-        await loadNextPost();
-      }
-    }
-  } catch (error) {
-    console.error('Error loading fresh posts:', error);
-  }
-  hideSpinner();
-}
-
 async function loadNextPost() {
   if (isLoading) return;
   if (currentIndex >= randomizedPostList.length) return;
@@ -1902,7 +1859,7 @@ async function loadNextPost() {
       console.warn(`Post ${post.id} could not be rendered.`);
       currentIndex++;
       isLoading = false;
-      await loadNextPost();
+      loadNextPost();
       return;
     }
     container.appendChild(postElement);
@@ -1910,57 +1867,10 @@ async function loadNextPost() {
     console.error('Error creating post element:', e);
     currentIndex++;
     isLoading = false;
-    await loadNextPost();
+    loadNextPost();
     return;
   }
 
-  totalPostsLoaded++;
-  postsSinceLastAd++;
-
-  // Insert ads exactly as you already do (unchanged)...
-
-  if (!nativeAdInserted && totalPostsLoaded === nativeAdIndex) {
-    // ... insert native ad code here (same as your current)
-    nativeAdInserted = true;
-  }
-
-  if (totalPostsLoaded === 2 || postsSinceLastAd >= 4) {
-    // ... insert short banner ad code here (your current code)
-    postsSinceLastAd = 0;
-  }
-
-  if (totalPostsLoaded % 4 === 0) {
-    // ... insert tall banner ad code here (your current code)
-  }
-
-  // Setup IntersectionObserver on last post to trigger loading next
-  if (observer) observer.disconnect();
-
-  observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !entry.target.dataset.viewed) {
-        entry.target.dataset.viewed = 'true';
-
-        // Track views
-        const viewsRef = ref(db, `post/${post.id}/views`);
-        get(viewsRef).then(snap => {
-          const currentViews = snap.val() || 0;
-          set(viewsRef, currentViews + 1);
-        }).catch(e => {
-          console.warn('Failed to update views:', e);
-        });
-
-        observer.unobserve(entry.target);
-        currentIndex++;
-        isLoading = false;
-        loadNextPost(); // load next post on scroll intersect
-      }
-    });
-  }, { threshold: 0.5 });
-
-  observer.observe(container.lastChild);
-  isLoading = false;
-}
   totalPostsLoaded++;
   postsSinceLastAd++;
 
