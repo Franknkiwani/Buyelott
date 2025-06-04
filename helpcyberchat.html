@@ -305,4 +305,87 @@
   onAuthStateChanged(auth, user => {
     if (user) {
       currentUser = user;
-      user
+      userUsername.innerText = snapshot.exists() ? snapshot.val() : "No Username";
+    });
+
+    // Show user messages
+    loadUserMessages(user.uid);
+    loadReceivedMessages(user.uid);
+  } else {
+    userCard.style.display = "none";
+    loginPrompt.style.display = "block";
+  }
+});
+
+// ✅ Load sent messages (user's own messages)
+function loadUserMessages(uid) {
+  const container = document.getElementById("userMessages");
+  const userMsgsRef = ref(db, `contactmessages/${uid}`);
+  onChildAdded(userMsgsRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data.from === "user") {
+      const card = document.createElement("div");
+      card.className = "message-card";
+      card.innerHTML = `
+        <div class="message-meta">You • ${new Date(data.timestamp).toLocaleString()}</div>
+        <div>${data.message}</div>
+      `;
+      container.appendChild(card);
+    }
+  });
+}
+
+// ✅ Load received messages (from admin)
+function loadReceivedMessages(uid) {
+  const container = document.getElementById("receivedMessages");
+  const userMsgsRef = ref(db, `contactmessages/${uid}`);
+  onChildAdded(userMsgsRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data.from === "admin") {
+      const card = document.createElement("div");
+      card.className = "message-card";
+      card.innerHTML = `
+        <div class="message-meta">CyberChat • ${new Date(data.timestamp).toLocaleString()}</div>
+        <div>${data.message}</div>
+      `;
+      container.appendChild(card);
+    }
+  });
+}
+
+// ✅ Send message handler
+function submitContact() {
+  const msg = document.getElementById("contactMessage").value.trim();
+  if (!currentUser) return showPopup("You're not logged in!", "#ff3b30");
+  if (msg.length < 3) return showPopup("Your message is too short", "#ff9500");
+
+  const msgRef = push(ref(db, `contactmessages/${currentUser.uid}`));
+  set(msgRef, {
+    from: "user",
+    message: msg,
+    timestamp: Date.now(),
+    name: currentUser.displayName || "Unknown",
+    email: currentUser.email,
+    uid: currentUser.uid
+  }).then(() => {
+    document.getElementById("contactMessage").value = "";
+    showPopup("Message sent!", "#34c759");
+  }).catch((err) => {
+    console.error(err);
+    showPopup("Error sending message", "#ff3b30");
+  });
+}
+
+// ✅ Sign in logic (popup sign-in)
+function signIn() {
+  import("https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js").then(({ GoogleAuthProvider, signInWithPopup }) => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch((error) => {
+      console.error(error);
+      showPopup("Sign-in failed", "#ff3b30");
+    });
+  });
+}
+</script>
+</body>
+</html>
