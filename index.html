@@ -1741,7 +1741,7 @@ const uid = auth.currentUser?.uid || null;
 
 // Clamp native ad index so it never goes beyond post count (min 6)
 function getNativeAdIndex(maxPosts) {
-  if (maxPosts < 6) return maxPosts; // fallback if few posts
+  if (maxPosts < 6) return maxPosts;
   return Math.min(maxPosts - 1, Math.floor(Math.random() * 6) + 6);
 }
 
