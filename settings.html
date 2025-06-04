@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings</title>
+  <style>
+    :root {
+      --bg-light: #f9f9f9;
+      --bg-dark: #111;
+      --text-light: #000;
+      --text-dark: #fff;
+      --accent-light: #0066ff;
+      --accent-dark: #00ccff;
+      --delete-red: #ff2b2b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    .settings-container {
+      max-width: 500px;
+      margin: 5vh auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(16px);
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .profile-info img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      object-fit: cover;
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-switch input[type="checkbox"] {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      -webkit-appearance: none;
+      background: #ccc;
+      outline: none;
+      border-radius: 30px;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .toggle-switch input[type="checkbox"]::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      top: 3px;
+      left: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch input[type="checkbox"]:checked {
+      background: var(--accent);
+    }
+
+    .toggle-switch input[type="checkbox"]:checked::before {
+      transform: translateX(22px);
+    }
+
+    .link {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      margin: 0.5rem 0;
+      font-weight: 500;
+    }
+
+    .link:hover {
+      opacity: 0.7;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 12px;
+      background: var(--delete-red);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #cc2222;
+    }
+
+    /* Confirmation modal styles */
+    #confirm-delete-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #confirm-delete-modal.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #222;
+      color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 20px var(--delete-red);
+    }
+
+    .modal-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .modal-buttons button {
+      width: 40%;
+      padding: 0.75rem;
+      font-weight: bold;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .modal-buttons .cancel-btn {
+      background: #555;
+      color: #ccc;
+    }
+
+    .modal-buttons .cancel-btn:hover {
+      background: #666;
+    }
+
+    .modal-buttons .confirm-btn {
+      background: var(--delete-red);
+      color: white;
+    }
+
+    .modal-buttons .confirm-btn:hover {
+      background: #cc2222;
+    }
+
+    /* Full red scary overlay while deleting */
+    #deleting-overlay {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: var(--delete-red);
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #deleting-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Spinner */
+    .spinner {
+      border: 6px solid rgba(255,255,255,0.3);
+      border-top: 6px solid white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-top: 2rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="settings-container">
+  <div class="profile-info">
+    <img id="user-pic" src="https://i.imgur.com/8Km9tLL.png" alt="Profile" />
+    <div>
+      <h3 id="user-name" style="margin: 0;">Loading...</h3>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="toggle-switch">
+      <span>Dark Mode</span>
+      <input type="checkbox" id="theme-toggle" />
+    </div>
+  </div>
+
+  <div class="section">
+    <a class="link" onclick="location.href='help.html'">Help Center</a>
+    <a class="link" onclick="location.href='help.html'">Contact Us</a>
+    <a class="link" onclick="location.html='help.html'">Report a Bug</a>
+  </div>
+
+  <div class="section">
+    <button id="delete-account-btn">Delete Account</button>
+  </div>
+</div>
+
+<!-- Confirmation modal -->
+<div id="confirm-delete-modal">
+  <div class="modal-content">
+    <p>⚠️ Are you sure you want to <strong>delete your account</strong>? This action is <em>irreversible</em>!</p>
+    <div class="modal-buttons">
+      <button class="cancel-btn" id="cancel-delete">Cancel</button>
+      <button class="confirm-btn" id="confirm-delete">Yes, Delete My Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deleting overlay -->
+<div id="deleting-overlay">
+  <div>Deleting Your Account...</div>
+  <div class="spinner"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const nameEl = document.getElementById("user-name");
+  const picEl = document.getElementById("user-pic");
+  const themeToggle = document.getElementById('theme-toggle');
+  const deleteBtn = document.getElementById('delete-account-btn');
+  const confirmModal = document.getElementById('confirm-delete-modal');
+  const cancelDeleteBtn = document.getElementById('cancel-delete');
+  const confirmDeleteBtn = document.getElementById('confirm-delete');
+  const deletingOverlay = document.getElementById('deleting-overlay');
+
+  // Theme handling
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  setTheme(savedTheme);
+  themeToggle.checked = savedTheme === 'dark';
+
+  themeToggle.addEventListener('change', () => {
+    const mode = themeToggle.checked ? 'dark' : 'light';
+    localStorage.setItem('theme', mode);
+    setTheme(mode);
+  });
+
+  function setTheme(mode) {
+    document.body.style.setProperty('--bg', mode === 'dark' ? '#111' : '#f9f9f9');
+    document.body.style.setProperty('--text', mode === 'dark' ? '#fff' : '#000');
+    document.body.style.setProperty('--accent', mode === 'dark' ? '#00ccff' : '#0066ff');
+  }
+
+  // Load user info or fallback
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      nameEl.textContent = user.displayName || "Unnamed User";
+      picEl.src = user.photoURL || "https://i.imgur.com/8Km9tLL.png";
+    } else {
+      nameEl.textContent = "Guest";
+      picEl.src = "https://i.imgur.com/8Km9tLL.png";
+      // If no user, redirect to login page immediately
+      location.href = "login.html";
+    }
+  });
+
+  // Show confirm modal on delete button click
+  deleteBtn.addEventListener('click', () => {
+    confirmModal.classList.add('active');
+  });
+
+  // Cancel deletion
+  cancelDeleteBtn.addEventListener('click', () => {
+    confirmModal.classList.remove('active');
+  });
+
+  // Confirm deletion
+  confirmDeleteBtn.addEventListener('click', async () => {
+    confirmModal.classList.remove('active');
+    deletingOverlay.classList.add('active');
+
+    const user = auth.currentUser;
+    if (!user) {
+      alert("No user is logged in.");
+      deletingOverlay.classList.remove('active');
+      location.href = "login.html";
+      return;
+    }
+
+    try {
+      await deleteUser(user);
+      // Success: user deleted, redirect
+      deletingOverlay.innerHTML = "<div>Account deleted successfully.<br>Redirecting...</div>";
+      setTimeout(() => {
+        location.href = "login.html";
+      }, 2000);
+    } catch (error) {
+      deletingOverlay.classList.remove('active');
+      if (error.code === 'auth/requires-recent-login') {
+        alert("For security reasons, please log out and log in again before deleting your account.");
+        await signOut(auth);
+        location.href = "login.html";
+      } else {
+        alert("Failed to delete account: " + error.message);
+        console.error(error);
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
