@@ -1729,7 +1729,6 @@ postDiv.addEventListener('click', (e) => {
   return postDiv;
 }
 
-// ------------------------ Config ------------------------
 let randomizedPostList = [];
 let currentIndex = 0;
 let observer = null;
@@ -1739,18 +1738,16 @@ let isLoading = false;
 
 const uid = auth.currentUser?.uid || null;
 
-// Clamp native ad index so it never goes beyond post count (min 6)
 function getNativeAdIndex(maxPosts) {
   if (maxPosts < 6) return maxPosts;
   return Math.min(maxPosts - 1, Math.floor(Math.random() * 6) + 6);
 }
 
-let nativeAdIndex = 6; // default, will reset on loadPosts
+let nativeAdIndex = 6;
 let nativeAdInserted = false;
 
-let userLikes = {}; // cache user likes per session
+let userLikes = {};
 
-// ------------------------ Shuffle Utility ------------------------
 function shuffleObject(obj) {
   const keys = Object.keys(obj);
   for (let i = keys.length - 1; i > 0; i--) {
@@ -1760,7 +1757,6 @@ function shuffleObject(obj) {
   return keys;
 }
 
-// ------------------------ Load Cached Posts ------------------------
 function loadCachedPosts() {
   const cached = localStorage.getItem('cachedPosts');
   if (!cached) return;
@@ -1772,7 +1768,7 @@ function loadCachedPosts() {
     container.innerHTML = '';
 
     for (const postId of keys) {
-      const postElement = createPostElement(posts[postId], postId, {}); // no likes offline
+      const postElement = createPostElement(posts[postId], postId, {});
       if (postElement) container.appendChild(postElement);
       else console.warn(`Cached post ${postId} failed to render`);
     }
@@ -1781,7 +1777,6 @@ function loadCachedPosts() {
   }
 }
 
-// ------------------------ Load User Likes ------------------------
 async function loadUserLikes() {
   if (!uid) return {};
   try {
@@ -1793,7 +1788,6 @@ async function loadUserLikes() {
   }
 }
 
-// ------------------------ Spinner Control ------------------------
 function showSpinner() {
   const spinner = document.getElementById('loading-spinner');
   if (spinner) spinner.style.display = 'flex';
@@ -1804,7 +1798,6 @@ function hideSpinner() {
   if (spinner) spinner.style.display = 'none';
 }
 
-// ------------------------ Load Fresh Posts with Infinite Scroll ------------------------
 async function loadPosts() {
   showSpinner();
   try {
@@ -1832,11 +1825,11 @@ async function loadPosts() {
       nativeAdIndex = getNativeAdIndex(randomizedPostList.length);
 
       const container = document.getElementById('posts-container');
-      container.innerHTML = ''; // Clear old UI
+      container.innerHTML = '';
 
-      userLikes = await loadUserLikes(); // load likes once
+      userLikes = await loadUserLikes();
 
-      loadNextPost(); // start loading fresh
+      loadNextPost();
     }
   } catch (error) {
     console.error('Error loading fresh posts:', error);
@@ -1844,7 +1837,6 @@ async function loadPosts() {
   hideSpinner();
 }
 
-// ------------------------ Load Next Post ------------------------
 async function loadNextPost() {
   if (isLoading) return;
   if (currentIndex >= randomizedPostList.length) return;
@@ -1874,7 +1866,6 @@ async function loadNextPost() {
   totalPostsLoaded++;
   postsSinceLastAd++;
 
-  // --- Insert native ad once at random position ---
   if (!nativeAdInserted && totalPostsLoaded === nativeAdIndex) {
     const nativeWrapper = document.createElement('div');
 
@@ -1893,7 +1884,6 @@ async function loadNextPost() {
     nativeAdInserted = true;
   }
 
-  // --- Insert short banner ad after 2 posts or after 4 posts since last ad ---
   if (totalPostsLoaded === 2 || postsSinceLastAd >= 4) {
     const adContainer = document.createElement('div');
     adContainer.className = 'adstera-ad';
@@ -1920,7 +1910,6 @@ async function loadNextPost() {
     postsSinceLastAd = 0;
   }
 
-  // --- Insert tall banner ad after every 4 posts ---
   if (totalPostsLoaded % 4 === 0) {
     const tallAd = document.createElement('div');
     tallAd.className = 'adstera-tall';
@@ -1945,7 +1934,6 @@ async function loadNextPost() {
     tallAd.appendChild(tallScript);
   }
 
-  // --- Track views and observe for loading next ---
   if (observer) observer.disconnect();
 
   observer = new IntersectionObserver(entries => {
@@ -1964,7 +1952,7 @@ async function loadNextPost() {
         observer.unobserve(entry.target);
         currentIndex++;
         isLoading = false;
-        loadNextPost(); // queue next
+        loadNextPost();
       }
     });
   }, { threshold: 0.5 });
@@ -1972,27 +1960,23 @@ async function loadNextPost() {
   observer.observe(container.lastChild);
 }
 
-// ------------------------ Kickoff ------------------------
-loadCachedPosts(); // fast feedback from cache
-loadPosts();       // async fresh load
+loadCachedPosts();
+loadPosts();
 
 (() => {
   const popup = document.getElementById("customPopup");
   const popupMessage = document.getElementById("popupMessage");
   const closeBtn = document.getElementById("closeBtn");
 
-  // Show popup with a given message
   function showPopup(message) {
     popupMessage.textContent = message;
     popup.classList.remove("hidden");
   }
 
-  // Close popup on OK button click
   closeBtn.addEventListener("click", () => {
     popup.classList.add("hidden");
   });
 
-  // Expose showPopup globally so you can call it anywhere
   window.showPopup = showPopup;
 })();
 </script>
