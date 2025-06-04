@@ -1576,15 +1576,6 @@ function createPostElement(post, postId, userLikes = {}) {
     ? `<div class="post-ads"><iframe src="https://your-ad-provider.com/adframe" class="ad-frame" width="100%" height="90" style="border:none;"></iframe></div>`
     : '';
 
-  // placeholder glassy loading div for image
-  const imageHtml = `
-    <div class="post-image-wrapper">
-      <div class="image-placeholder glassy"></div>
-      <img src="${postImage}" alt="Post Image" loading="lazy" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" style="display:none; border-radius:12px; width:100%; height:auto;" />
-    </div>
-  `;
-}
-
   postDiv.innerHTML = `
     <div class="post-header">
       <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
