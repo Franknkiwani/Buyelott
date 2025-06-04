@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CYBERCHAT - Clean Feed with Top Search</title>
+
 <style>
   :root {
     --bg: #0a0a0a;
@@ -1059,6 +1060,73 @@ body {
 .post-container:hover {
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
   transform: translateY(-2px);
+}
+.post-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(10, 10, 25, 0.8));
+  box-shadow: 
+    0 0 10px rgba(0, 255, 255, 0.3),
+    0 0 30px rgba(255, 0, 255, 0.1),
+    inset 0 0 8px rgba(0, 255, 255, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.post-image-wrapper:hover {
+  box-shadow:
+    0 0 16px rgba(0, 255, 255, 0.4),
+    0 0 40px rgba(255, 0, 255, 0.2),
+    inset 0 0 12px rgba(255, 0, 255, 0.3);
+}
+
+/* Glitch shimmer */
+.image-placeholder.glassy {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(0,255,255,0.12), rgba(255,0,255,0.08));
+  backdrop-filter: blur(16px);
+  border-radius: 12px;
+  animation: pulse 1.5s ease-in-out infinite, glitch 2s infinite;
+  z-index: 2;
+  border: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+/* Spinner in center */
+.image-placeholder .spinner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px; height: 34px;
+  border: 4px solid rgba(0, 255, 255, 0.3);
+  border-top: 4px solid #ff00ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse shimmer */
+@keyframes pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.4; }
+}
+
+/* Glitch fx (very subtle) */
+@keyframes glitch {
+  0% { transform: translate(0px, 0px); }
+  20% { transform: translate(1px, -1px); }
+  40% { transform: translate(-1px, 1px); }
+  60% { transform: translate(0px, 0px); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* Spinner */
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 </style>
 </head>
