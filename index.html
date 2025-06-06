@@ -416,7 +416,7 @@ function renderPosts() {
     const download = prompt("Enter download link:");
     if (!download || !download.trim()) return alert("Download link is required!");
 
-    const postsRef = ref(db, "dlspost/post");
+    const postsRef = ref(db, "dlspost/posts");
     const newPostRef = push(postsRef);
 
     set(newPostRef, {
