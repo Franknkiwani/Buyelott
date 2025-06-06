@@ -1846,6 +1846,7 @@ let observer = null;
 let postsSinceLastAd = 0;
 let totalPostsLoaded = 0;
 let isLoading = false;
+const POSTS_PER_SECOND = 3; // Adjust this as needed
 
 const uid = auth.currentUser?.uid || null;
 
@@ -2069,12 +2070,11 @@ async function loadNextPost() {
   }, { threshold: 0.5 });
 
   observer.observe(container.lastChild);
-}
 
-loadCachedPosts();
-loadPosts();
+  // Everything below here was added from the original global scope
+  loadCachedPosts();
+  loadPosts();
 
-(() => {
   const popup = document.getElementById("customPopup");
   const popupMessage = document.getElementById("popupMessage");
   const closeBtn = document.getElementById("closeBtn");
@@ -2089,7 +2089,7 @@ loadPosts();
   });
 
   window.showPopup = showPopup;
-})();
+}
 </script>
 <script type="module">
   import {
