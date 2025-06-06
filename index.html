@@ -2067,29 +2067,6 @@ async function loadNextPost() {
         loadNextPost();
       }
     });
-  }, { threshold: 0.5 });
-
-  observer.observe(container.lastChild);
-
-  // Everything below here was added from the original global scope
-  loadCachedPosts();
-  loadPosts();
-
-  const popup = document.getElementById("customPopup");
-  const popupMessage = document.getElementById("popupMessage");
-  const closeBtn = document.getElementById("closeBtn");
-
-  function showPopup(message) {
-    popupMessage.textContent = message;
-    popup.classList.remove("hidden");
-  }
-
-  closeBtn.addEventListener("click", () => {
-    popup.classList.add("hidden");
-  });
-
-  window.showPopup = showPopup;
-}
 </script>
 <script type="module">
   import {
