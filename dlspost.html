@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Download Post</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background: #1f1f1f;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: slideUp 0.6s ease;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      background: #292929;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      transition: 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      background: #333;
+      outline: none;
+    }
+
+    .dropzone {
+      border: 2px dashed #444;
+      padding: 2rem;
+      text-align: center;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .dropzone:hover {
+      background: #2a2a2a;
+    }
+
+    .btn {
+      width: 100%;
+      background: #00c2ff;
+      color: black;
+      padding: 1rem;
+      border: none;
+      font-weight: bold;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #00a8e0;
+    }
+
+    .cpd-display {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 1rem;
+      color: #0f0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0 }
+      to { transform: translateY(0); opacity: 1 }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="title">Upload Your Magic</div>
+    <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+      Click to upload your file
+    </div>
+    <input type="file" id="fileInput" style="display:none" />
+
+    <input type="text" id="postTitle" placeholder="Enter a neat title" required>
+    <textarea id="postDesc" rows="5" placeholder="Write a clean, powerful description..." required></textarea>
+
+    <input type="url" id="downloadLink" placeholder="Link to downloadable file" required>
+
+    <div class="cpd-display" id="cpdValue">CPD: Calculating...</div>
+
+    <button class="btn" onclick="uploadPost()">Upload This Magic</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    const titleEl = document.getElementById('postTitle');
+    const descEl = document.getElementById('postDesc');
+    const linkEl = document.getElementById('downloadLink');
+    const cpdEl = document.getElementById('cpdValue');
+    let cpd = 0;
+
+    function calcCPD(title, desc) {
+      const lenScore = Math.min(title.length + desc.length, 300);
+      const raw = 0.001 + (lenScore / 300) * (0.005 - 0.001);
+      return Math.round(raw * 1000) / 1000;
+    }
+
+    titleEl.addEventListener('input', updateCPD);
+    descEl.addEventListener('input', updateCPD);
+
+    function updateCPD() {
+      cpd = calcCPD(titleEl.value, descEl.value);
+      cpdEl.innerText = `CPD: $${cpd.toFixed(3)} per download`;
+    }
+
+    async function uploadPost() {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file || !titleEl.value || !descEl.value || !linkEl.value) {
+        alert("All fields required.");
+        return;
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) return alert("You're not logged in");
+
+        const postData = {
+          title: titleEl.value,
+          desc: descEl.value,
+          downloadLink: linkEl.value,
+          cpd: cpd,
+          downloads: 0,
+          createdBy: user.uid,
+          createdAt: Date.now()
+        };
+
+        const postRef = push(ref(db, 'downloads'));
+        await update(postRef, postData);
+
+        alert("Post uploaded! 🎉");
+      });
+    }
+  </script>
+</body>
+</html>
