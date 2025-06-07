@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Referral Dashboard</title>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
@@ -11,11 +12,13 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    * {
+      box-sizing: border-box;
+    }
     body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-      color: #fff;
+      margin: 0; padding: 0;
+      background: #000;
+      color: #00ffcc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
@@ -23,64 +26,121 @@
       justify-content: flex-start;
       min-height: 100vh;
       padding: 2rem 1rem;
-      box-sizing: border-box;
     }
     h1 {
-      font-size: 2rem;
-      color: #00ffcc;
-      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+      user-select: none;
     }
     .card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 1.25rem;
+      background: rgba(0, 255, 204, 0.1);
+      border-radius: 1.5rem;
       width: 100%;
-      max-width: 500px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0, 255, 204, 0.2);
+      max-width: 480px;
+      padding: 2rem 1.5rem;
       margin-bottom: 2rem;
-      backdrop-filter: blur(20px);
+      box-shadow: 0 0 30px rgba(0,255,204,0.25);
+      backdrop-filter: blur(15px);
+      user-select: none;
     }
     .link {
-      word-wrap: break-word;
-      background: rgba(255, 255, 255, 0.1);
+      word-break: break-word;
+      background: rgba(0, 255, 204, 0.15);
       padding: 1rem;
-      border-radius: 1rem;
-      margin: 1rem 0;
-      font-size: 0.95rem;
-      color: #00ffcc;
+      border-radius: 1.25rem;
+      font-size: 1rem;
+      color: #00ffc8;
+      font-weight: 600;
+      user-select: text;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .link:hover {
+      background: rgba(0,255,204,0.3);
     }
     button {
+      margin-top: 1.5rem;
       background: #00ffcc;
-      color: #000;
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 1.5rem;
-      font-weight: bold;
+      color: #000;
+      font-weight: 700;
+      padding: 0.85rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 2rem;
       cursor: pointer;
-      margin-top: 1rem;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      max-width: 480px;
+      user-select: none;
     }
-    #cashoutBtn[disabled] {
-      opacity: 0.4;
+    button:active {
+      background-color: #00d9b3;
+    }
+    button:disabled {
+      background-color: #00ffcc66;
       cursor: not-allowed;
+    }
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #00ffcc;
+      text-align: center;
+      padding: 2rem;
+    }
+    #loadingScreen div.spinner {
+      width: 70px;
+      height: 70px;
+      border: 7px solid #00ffcc;
+      border-top: 7px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    #loadingScreen p {
+      margin-top: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      user-select: none;
+    }
+    #loadingScreen p.subtext {
+      font-size: 1rem;
+      opacity: 0.6;
+      margin-top: 0.5rem;
+    }
+    /* Ad container */
+    .ad-container {
+      margin: 1rem auto 2rem;
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <div id="loadingScreen" style="position: fixed; inset: 0; background: radial-gradient(circle at center, #111 0%, #000 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #00ffcc; text-align: center; padding: 2rem;">
-    <div style="width: 60px; height: 60px; border: 6px solid #00ffcc; border-top: 6px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-    <p style="margin-top: 1.5rem; font-size: 1.2rem;">Loading your earnings...</p>
-    <p style="font-size: 0.9rem; opacity: 0.6;">Get ready to secure the bag 💼</p>
-  </div>  <h1>Referral Dashboard</h1>
-  <div class="card">
-    <p>Your referral link:</p>
-    <div class="link" id="referralLink">Loading...</div>
-    <button onclick="shareReferral()">Share Referral Link</button>
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <p>Loading your earnings...</p>
+    <p class="subtext">Get ready to secure the bag 💼</p>
   </div>
-  <div class="card">
-    <p>Clicks: <span id="clicks">0</span></p>
-    <p>Earnings: $<span id="earnings">0.00</span></p>
-    <button id="cashoutBtn" disabled>Cash Out $10</button>
-  </div>  <div style="margin: 1rem auto; text-align: center;">
+
+  <h1>Referral Dashboard</h1>
+
+  <div class="card" aria-label="Referral link container">
+    <p>Your referral link:</p>
+    <div class="link" id="referralLink" tabindex="0" title="Click to copy referral link">Loading...</div>
+    <button id="shareBtn">Share Referral Link</button>
+  </div>
+
+  <div class="ad-container">
     <script type="text/javascript">    
       atOptions = {    
         'key' : 'f17f4bf893957f37c1f0b072d1f31673',    
@@ -91,7 +151,15 @@
       };    
     </script>    
     <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>    
-  </div>  <script type="module">
+  </div>
+
+  <div class="card" aria-label="Referral stats container">
+    <p>Clicks: <span id="clicks">0</span></p>
+    <p>Earnings: $<span id="earnings">0.00</span></p>
+    <button id="cashoutBtn" disabled>Cash Out $10</button>
+  </div>
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -111,47 +179,78 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // Hide loading screen after 3 seconds
     setTimeout(() => {
       const loader = document.getElementById("loadingScreen");
       if (loader) loader.style.display = "none";
     }, 3000);
 
+    function updateUIForUser(user) {
+      const uid = user.uid;
+      const link = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
+      const referralLinkEl = document.getElementById("referralLink");
+      referralLinkEl.innerText = link;
+
+      // Copy on click
+      referralLinkEl.onclick = () => {
+        navigator.clipboard.writeText(link).then(() => {
+          alert("Referral link copied to clipboard!");
+        });
+      };
+
+      // Fetch clicks and earnings from Firebase DB
+      const clicksRef = ref(db, `referrals/${uid}/clicks`);
+      const earningsRef = ref(db, `referrals/${uid}/earnings`);
+
+      get(clicksRef).then(snap => {
+        const clicks = snap.exists() ? snap.val() : 0;
+        document.getElementById("clicks").innerText = clicks;
+      });
+
+      get(earningsRef).then(snap => {
+        const amount = snap.exists() ? parseFloat(snap.val()) : 0.00;
+        document.getElementById("earnings").innerText = amount.toFixed(2);
+
+        const cashoutBtn = document.getElementById("cashoutBtn");
+        if (amount >= 10) {
+          cashoutBtn.disabled = false;
+        } else {
+          cashoutBtn.disabled = true;
+        }
+      });
+    }
+
     onAuthStateChanged(auth, user => {
       if (user) {
-        const uid = user.uid;
-        const link = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
-        document.getElementById("referralLink").innerText = link;
-
-        const clicksRef = ref(db, `referrals/${uid}/clicks`);
-        const earningsRef = ref(db, `referrals/${uid}/earnings`);
-
-        get(clicksRef).then(snap => {
-          document.getElementById("clicks").innerText = snap.exists() ? snap.val() : 0;
-        });
-        get(earningsRef).then(snap => {
-          const amount = snap.exists() ? parseFloat(snap.val()) : 0.00;
-          document.getElementById("earnings").innerText = amount.toFixed(2);
-          if (amount >= 10) {
-            document.getElementById("cashoutBtn").disabled = false;
-          }
-        });
+        updateUIForUser(user);
       } else {
+        // Redirect to login if not logged in
         window.location.href = "login.html";
       }
     });
 
-    window.shareReferral = () => {
+    // Share button handler
+    document.getElementById("shareBtn").addEventListener("click", () => {
       const link = document.getElementById("referralLink").innerText;
       if (navigator.share) {
         navigator.share({
           title: "Join CyberChat and earn!",
           text: "Get paid for sharing links. Tap to join:",
           url: link
+        }).catch(() => {
+          // fallback to clipboard copy
+          navigator.clipboard.writeText(link);
+          alert("Link copied to clipboard!");
         });
       } else {
         navigator.clipboard.writeText(link);
         alert("Link copied to clipboard!");
-      }
-    }
-  </script></body>
+});
+
+    // Cashout button click (placeholder, since actual payment integration isn't specified)
+    document.getElementById("cashoutBtn").addEventListener("click", () => {
+      alert("Cashout feature coming soon! Stay tuned for the real money moves 💸");
+    });
+  </script>
+</body>
 </html>
