@@ -76,7 +76,7 @@
     <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
   </div>
 
-  <!-- Firebase Logic -->
+  <!-- Firebase Referral Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -115,11 +115,11 @@
           return;
         }
 
-        // Increase clicks every visit
+        // Add 1 click every time
         const clicksRef = ref(db, `users/${uid}/clicks`);
         await runTransaction(clicksRef, current => (current || 0) + 1);
 
-        // Only reward $0.10 once per visitor
+        // Add $0.10 once per browser
         if (!localStorage.getItem(`rewarded_${uid}`)) {
           const balanceRef = ref(db, `users/${uid}/balance`);
           await runTransaction(balanceRef, current => (current || 0) + 0.10);
