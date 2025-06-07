@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Redirecting…</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Referral Tracker</title>
+</head>
+<body>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -21,31 +23,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
 
-    const params = new URLSearchParams(window.location.search);
-    const refUid = params.get("ref");
-    const postId = params.get("id"); // optional – can track per-post
-
-    if (refUid) {
-      // Retrieve real link
-      get(ref(db, `/users/${refUid}/outboundLink`)).then(snap => {
-        const realUrl = snap.val();
-        if (realUrl) {
-          // Log click
-          push(ref(db, `/referrals/${refUid}`), {
-            timestamp: serverTimestamp(),
-            ip: "0.0.0.0" // placeholder – IP capture requires backend
-          });
-          window.location = realUrl;
-        } else {
-          document.body.innerText = "Invalid referral ID";
-        }
-      });
-    } else {
-      document.body.innerText = "Missing referral ID";
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
     }
+
+    (async () => {
+      const refUID = getQueryParam('ref');
+      if (!refUID) {
+        // No referral ID, send to homepage
+        window.location.href = '/';
+        return;
+      }
+
+      let visitorIP = 'N/A';
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        visitorIP = data.ip;
+      } catch {
+        // ignore errors
+      }
+
+      const referralsRef = ref(db, `referrals/${refUID}`);
+      await push(referralsRef, {
+        timestamp: serverTimestamp(),
+        ip: visitorIP,
+        userAgent: navigator.userAgent
+      });
+
+      // Redirect after tracking
+      window.location.href = '/';
+    })();
   </script>
-</head>
-<body style="font-family:sans-serif;background:#f2f2f2;margin:0;display:flex;justify-content:center;align-items:center;height:100vh;">
-  <p>Redirecting…</p>
 </body>
 </html>
