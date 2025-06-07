@@ -134,7 +134,8 @@
 
       if (user) {
         const uid = user.uid;
-        const link = `${window.location.origin}/?referuid=${uid}`;
+        // HERE: Referral link is relative, no domain
+        const link = `referralLink.html?referuid=${uid}`;
 
         popupContent.innerHTML = `
           <h3>Share & Earn</h3>
@@ -157,13 +158,14 @@
       }
     });
 
-    // Reward Logic
+    // Reward Logic - runs if URL has referuid param
     const urlParams = new URLSearchParams(window.location.search);
     const referUid = urlParams.get('referuid');
 
     async function rewardAndRedirect(uid) {
       if (!uid || localStorage.getItem(`rewarded_${uid}`)) {
-        window.location.href = `referral.html?referuid=${uid}`;
+        // Already rewarded or no UID, redirect to referral page without giving more rewards
+        window.location.href = `referralLink.html?referuid=${uid}`;
         return;
       }
 
@@ -171,6 +173,7 @@
       const clicksRef = ref(db, `users/${uid}/clicks`);
 
       try {
+        // Give $0.10 reward and increment clicks count atomically
         await runTransaction(balanceRef, current => (current || 0) + 0.10);
         await runTransaction(clicksRef, current => (current || 0) + 1);
         localStorage.setItem(`rewarded_${uid}`, "true");
@@ -179,7 +182,7 @@
         console.error("Reward error:", err);
       }
 
-      window.location.href = `referral.html?referuid=${uid}`;
+      window.location.href = `referralLink.html?referuid=${uid}`;
     }
 
     if (referUid) {
