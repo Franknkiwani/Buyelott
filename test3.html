@@ -14,11 +14,11 @@
       align-items: center;
       min-height: 100vh;
     }
-    #loginForm, #dashboard {
+    #dashboard {
       background: white;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgb(31 38 135 / 0.2);
+      box-shadow: 0 4px 20px rgba(31, 38, 135, 0.2);
       max-width: 400px;
       width: 100%;
       box-sizing: border-box;
@@ -29,22 +29,20 @@
       color: #1f267d;
     }
     label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
       font-weight: 600;
     }
-    input[type="email"],
-    input[type="password"],
-    input[type="text"] {
-      width: 100%;
+    #referralLink {
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      word-break: break-all;
+      background: #e2e8f0;
       padding: 0.5rem;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 1rem;
+      user-select: all;
+      cursor: pointer;
     }
     button {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       width: 100%;
       padding: 0.75rem;
       background: #1f267d;
@@ -54,29 +52,14 @@
       font-size: 1.1rem;
       cursor: pointer;
       font-weight: 700;
-      transition: background-color 0.3s ease;
     }
     button:hover {
       background: #2b33b2;
     }
-    #referralLink {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      word-break: break-all;
-      background: #e2e8f0;
-      padding: 0.5rem;
-      border-radius: 8px;
-      user-select: all;
-      cursor: pointer;
-    }
     #stats {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       font-size: 1.1rem;
       color: #222;
-    }
-    #logoutBtn {
-      margin-top: 2rem;
-      background: #b00020;
     }
     #message {
       margin-top: 1rem;
@@ -87,17 +70,7 @@
 </head>
 <body>
 
-  <div id="loginForm">
-    <h1>Login to Referral Dashboard</h1>
-    <label for="email">Email:</label>
-    <input type="email" id="email" required autocomplete="username" />
-    <label for="password">Password:</label>
-    <input type="password" id="password" required autocomplete="current-password" />
-    <button id="loginBtn">Login</button>
-    <div id="message"></div>
-  </div>
-
-  <div id="dashboard" style="display:none;">
+  <div id="dashboard">
     <h1>Your Referral Dashboard</h1>
     <label>Your Referral Link:</label>
     <div id="referralLink" title="Click to copy"></div>
@@ -107,13 +80,12 @@
       <p>Clicks: <span id="clicksCount">0</span></p>
       <p>Earnings: $<span id="earningsAmount">0.00</span></p>
     </div>
-    <button id="logoutBtn">Logout</button>
+    <div id="message"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -128,95 +100,45 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
 
-    const loginForm = document.getElementById('loginForm');
-    const dashboard = document.getElementById('dashboard');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('loginBtn');
-    const messageDiv = document.getElementById('message');
     const referralLinkDiv = document.getElementById('referralLink');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const clicksCountSpan = document.getElementById('clicksCount');
     const earningsAmountSpan = document.getElementById('earningsAmount');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const messageDiv = document.getElementById('message');
 
-    function showMessage(msg, isError = true) {
-      messageDiv.textContent = msg;
-      messageDiv.style.color = isError ? '#b00020' : '#007bff';
-    }
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get('uid');
 
-    loginBtn.addEventListener('click', () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+    if (!uid) {
+      messageDiv.textContent = "❌ No UID provided in URL. Add ?uid=YOUR_ID to view your dashboard.";
+      document.getElementById("dashboard").style.display = "none";
+    } else {
+      const referralURL = `${location.origin}/referralLink.html?referuid=${uid}`;
+      referralLinkDiv.textContent = referralURL;
 
-      if (!email || !password) {
-        showMessage('Please enter both email and password.');
-        return;
-      }
-
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          showMessage('', false);
-        })
-        .catch(err => {
-          showMessage('Login failed: ' + err.message);
-        });
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      signOut(auth).then(() => {
-        loginForm.style.display = 'block';
-        dashboard.style.display = 'none';
-        emailInput.value = '';
-        passwordInput.value = '';
-        showMessage('');
+      const clicksRef = ref(db, `users/${uid}/clicks`);
+      onValue(clicksRef, snapshot => {
+        const clicks = snapshot.val() || 0;
+        clicksCountSpan.textContent = clicks;
       });
-    });
 
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        // Logged in
-        loginForm.style.display = 'none';
-        dashboard.style.display = 'block';
+      const earningsRef = ref(db, `users/${uid}/balance`);
+      onValue(earningsRef, snapshot => {
+        const earnings = snapshot.val() || 0;
+        earningsAmountSpan.textContent = earnings.toFixed(2);
+      });
 
-        const uid = user.uid;
-        const baseLink = `${location.origin}/referralLink.html?referuid=${uid}`;
-        referralLinkDiv.textContent = baseLink;
+      referralLinkDiv.addEventListener('click', () => {
+        navigator.clipboard.writeText(referralURL)
+          .then(() => alert('Referral link copied!'));
+      });
 
-        // Listen for changes on user's referral stats
-        const clicksRef = ref(db, `users/${uid}/clicks`);
-        onValue(clicksRef, snapshot => {
-          const clicks = snapshot.val() || 0;
-          clicksCountSpan.textContent = clicks;
-        });
-
-        const earningsRef = ref(db, `users/${uid}/balance`);
-        onValue(earningsRef, snapshot => {
-          const earnings = snapshot.val() || 0;
-          earningsAmountSpan.textContent = earnings.toFixed(2);
-        });
-      } else {
-        // Not logged in
-        loginForm.style.display = 'block';
-        dashboard.style.display = 'none';
-      }
-    });
-
-    copyLinkBtn.addEventListener('click', () => {
-      const text = referralLinkDiv.textContent;
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Referral link copied!'))
-        .catch(() => alert('Failed to copy referral link.'));
-    });
-
-    referralLinkDiv.addEventListener('click', () => {
-      const text = referralLinkDiv.textContent;
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Referral link copied!'))
-        .catch(() => alert('Failed to copy referral link.'));
-    });
+      copyLinkBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(referralURL)
+          .then(() => alert('Referral link copied!'));
+      });
+    }
   </script>
 </body>
 </html>
