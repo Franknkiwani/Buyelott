@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>3D Glassy Dark App with Blue Hero & CTAs</title>
   <style>
+    /* Your existing styles... (keep all as-is) */
     * {
       margin: 0;
       padding: 0;
@@ -16,6 +17,7 @@
       background: linear-gradient(145deg, #0e0e0e, #1a1a1a);
       color: white;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow-x: hidden;
     }
 
     header {
@@ -79,7 +81,7 @@
     .hero {
       margin-top: 50px;
       width: 95%;
-      padding: 60px 20px 40px; /* extra bottom padding for CTAs */
+      padding: 60px 20px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -148,7 +150,6 @@
       animation: flicker 1.5s infinite ease-in-out;
     }
 
-    /* subtle flicker animation to simulate fire */
     @keyframes flicker {
       0%, 100% {
         opacity: 1;
@@ -171,47 +172,87 @@
     }
 
    .cta-btn {
-  flex: 1;
-  padding: 12px 0;
-  font-weight: 700;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: 2px solid black; /* <-- Black edge added here */
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-  box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  background: rgba(255 255 255 / 0.1);
-  color: white;
-}
+      flex: 1;
+      padding: 12px 0;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 2px solid black;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      background: rgba(255 255 255 / 0.1);
+      color: white;
+    }
 
-.cta-btn.download {
-  background: rgba(0, 153, 255, 0.8);
-  box-shadow:
-    0 4px 12px rgba(0, 153, 255, 0.6);
-  border-color: black; /* keep black edges */
-}
+    .cta-btn.download {
+      background: rgba(0, 153, 255, 0.8);
+      box-shadow:
+        0 4px 12px rgba(0, 153, 255, 0.6);
+      border-color: black;
+    }
 
-.cta-btn.download:hover {
-  background: rgba(0, 153, 255, 1);
-  border-color: black;
-}
+    .cta-btn.download:hover {
+      background: rgba(0, 153, 255, 1);
+      border-color: black;
+    }
 
-.cta-btn.create {
-  background: rgba(0, 255, 204, 0.8);
-  box-shadow:
-    0 4px 12px rgba(0, 255, 204, 0.6);
-  color: black;
-  font-weight: 800;
-  border-color: black;
-}
+    .cta-btn.create {
+      background: rgba(0, 255, 204, 0.8);
+      box-shadow:
+        0 4px 12px rgba(0, 255, 204, 0.6);
+      color: black;
+      font-weight: 800;
+      border-color: black;
+    }
 
-.cta-btn.create:hover {
-  background: rgba(0, 255, 204, 1);
-  border-color: black;
-}
+    .cta-btn.create:hover {
+      background: rgba(0, 255, 204, 1);
+      border-color: black;
+    }
+
+    /* Loading screen styles */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      user-select: none;
+    }
+
+    /* Soccer ball SVG container */
+    .soccer-ball {
+      width: 80px;
+      height: 80px;
+      animation: spin 2s linear infinite;
+      filter: drop-shadow(0 0 6px #00aaff);
+      margin-bottom: 16px;
+    }
+
+    /* Spin animation */
+    @keyframes spin {
+      from { transform: rotate(0deg);}
+      to { transform: rotate(360deg);}
+    }
+
+    /* Loading text */
+    #loading-text {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #00aaff;
+      text-shadow: 0 0 10px #00aaff;
+      letter-spacing: 1.2px;
+    }
  .container {
     max-width: 600px;
     margin: 2rem auto;
@@ -279,99 +320,57 @@
     background: #666;
     cursor: not-allowed;
   }
- /* Fullscreen overlay with background blur */
-.countdown-overlay {
-  position: fixed;
-  inset: 0; /* top/right/bottom/left 0 */
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 9999;
-}
 
-/* Show overlay when visible */
-.countdown-overlay.visible {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* The glassy popup box */
-.countdown-popup {
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 2rem 3rem;
-  color: white;
-  font-size: 2.2rem;
-  font-weight: 600;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  text-align: center;
-  min-width: 320px;
-  max-width: 400px;
-  user-select: none;
-}
-  .container {
-    text-align: center;
-  }
-
-  svg {
-    width: 200px;
-    height: 150px;
-    display: block;
-    margin: 0 auto 25px;
-  }
-
-  .loading-text {
-    font-size: 1.5rem;
-    letter-spacing: 3px;
-    opacity: 0.85;
-    animation: fadeInOut 3s ease-in-out infinite;
-  }
-
-  @keyframes fadeInOut {
-    0%, 100% { opacity: 0.85; }
-    50% { opacity: 0.4; }
-  }
-
-  .ball {
-    animation: bounce 2s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-  }
-
-  .loading-bar-container {
-    width: 250px;
-    height: 12px;
-    background: #222;
-    border-radius: 6px;
-    overflow: hidden;
-    margin: 0 auto;
+  /* Glassy popup styles */
+  #loadingPopup {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255 255 255 / 0.1);
+    backdrop-filter: blur(12px);
     display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    color: #00cc88;
+    font-weight: 700;
+    font-size: 3rem;
+    user-select: none;
   }
-
-  .loading-bar {
-    height: 100%;
-    width: 0%;
-    background: #fff;
-    border-radius: 6px;
-    transition: width 3s linear;
+  #loadingPopup .spinner {
+    margin-bottom: 1rem;
+    width: 64px;
+    height: 64px;
+    border: 6px solid rgba(0,204,136,0.3);
+    border-top-color: #00cc88;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
   </style>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-label="Loading content" role="alert" aria-live="assertive">
+    <svg class="soccer-ball" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <circle cx="32" cy="32" r="30" fill="#fff" stroke="#000" stroke-width="2"/>
+      <!-- Black pentagons -->
+      <polygon fill="#000" points="32,12 39,22 34,34 26,34 21,22"/>
+      <polygon fill="#000" points="44,20 50,28 43,34 34,34 39,22"/>
+      <polygon fill="#000" points="20,22 26,34 18,36 12,26 14,18"/>
+      <polygon fill="#000" points="50,28 56,36 50,44 43,34 44,20"/>
+      <polygon fill="#000" points="26,34 34,34 32,46 25,44 18,36"/>
+      <!-- White hexagons formed by gaps -->
+      <polygon fill="#fff" points="39,22 44,20 50,28 56,36 50,44 43,34"/>
+      <polygon fill="#fff" points="21,22 26,34 25,44 18,36 14,18"/>
+    </svg>
+    <div id="loading-text">Loading...</div>
+  </div>
+
   <header>
     <div class="logo">
       <span class="dls">DLS</span>
@@ -398,75 +397,17 @@
   </section>
 
   <div class="container">
-    <!-- Your 3D magic or main app content here -->
+    <!-- Your main app content goes here -->
   </div>
- <div class="container" id="modContainer">
-  <h1>MODS</h1>
-    <!-- Big Box Ad (300x250) -->
-<div style="width: 300px; height: 250px; margin: 15px auto;">
-  <script type="text/javascript">
-    atOptions = {
-      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
-</div>
-</div>
-  <!-- Big Box Ad (300x250) -->
-<div style="width: 300px; height: 250px; margin: 15px auto;">
-  <script type="text/javascript">
-    atOptions = {
-      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
-</div>
-<style>
-  #modContainer {
-    text-align: center;
-  }
-</style>
+<div class="container" id="modContainer">
+  <h1>Mod Feed</h1>
   <div id="mods"></div>
   <button id="loadMore">Load More Mods</button>
-    <!-- Big Box Ad (300x250) -->
-<div style="width: 300px; height: 250px; margin: 15px auto;">
-  <script type="text/javascript">
-    atOptions = {
-      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
-</div>
-<div style="width:320px; height:50px; margin: 15px auto;">
-  <script type="text/javascript">
-    atOptions = {
-      'key': 'f17f4bf893957f37c1f0b072d1f31673',
-      'format': 'iframe',
-      'height': 50,
-      'width': 320,
-      'params': {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>
-</div>
 </div>
 
-<div id="countdownOverlay" class="countdown-overlay">
-  <div class="countdown-popup">
-    <!-- Big Box Ad (300x250) -->
-<div style="width: 300px; height: 250px; margin: 15px auto;">
+<!-- Glassy loading popup -->
+<div id="loadingPopup">
+  <div style="margin: 1rem auto; text-align: center;">
   <script type="text/javascript">
     atOptions = {
       'key' : '037f6e178c935a44f2ef5ab0ce53116a',
@@ -478,9 +419,10 @@
   </script>
   <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
-    <p>Download starting in <span id="countdownTimer">5</span> seconds...</p>
-  <!-- Big Box Ad (300x250) -->
-<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <div class="spinner"></div>
+
+  <div>Loading... <span id="countdown">6</span>s</div>
+<div style="margin: 1rem auto; text-align: center;">
   <script type="text/javascript">
     atOptions = {
       'key' : '037f6e178c935a44f2ef5ab0ce53116a',
@@ -493,46 +435,8 @@
   <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
 </div>
-  <div class="container">
-    <div id="loading-screen">
-      <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
-        <g stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" >
-          <circle cx="50" cy="50" r="8"/>
-          <line x1="50" y1="58" x2="50" y2="90"/>
-          <line x1="50" y1="65" x2="40" y2="75"/>
-          <line x1="50" y1="65" x2="60" y2="75"/>
-          <line x1="50" y1="90" x2="40" y2="110"/>
-          <line x1="50" y1="90" x2="60" y2="110"/>
-        </g>
-
-        <g stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" transform="translate(110,0)">
-          <circle cx="50" cy="50" r="8"/>
-          <line x1="50" y1="58" x2="50" y2="90"/>
-          <line x1="50" y1="65" x2="40" y2="75"/>
-          <line x1="50" y1="65" x2="60" y2="75"/>
-          <line x1="50" y1="90" x2="40" y2="110"/>
-          <line x1="50" y1="90" x2="60" y2="110"/>
-        </g>
-
-        <circle class="ball" cx="105" cy="95" r="10" stroke="#fff" stroke-width="2" fill="none"/>
-        <path class="ball" stroke="#fff" stroke-width="1" fill="none" d="
-          M95 95 l5 -3 l5 3 l-5 3 l-5 -3
-          M100 90 l0 10
-          M110 90 l0 10
-          M102 87 l6 3
-          M98 87 l-6 3
-        "/>
-      </svg>
-      <div class="loading-text">Loading...</div>
-
-      <div class="loading-bar-container" id="loading-bar-container">
-        <div class="loading-bar" id="loading-bar"></div>
-      </div>
-    </div>
-  </div>
-
 <script>
-  // Your Firebase config
+  // Firebase config & init
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -552,21 +456,51 @@
   // DOM elements
   const modsEl = document.getElementById("mods");
   const loadMoreBtn = document.getElementById("loadMore");
+  const popup = document.getElementById("loadingPopup");
+  const countdownEl = document.getElementById("countdown");
 
   // State
   let allMods = [];
   let displayedMods = [];
   let currentIndex = 0;
 
-  // Shuffle function
+  // Shuffle function (Fisher-Yates)
   function shuffleArray(arr) {
-    for(let i = arr.length - 1; i > 0; i--) {
+    for(let i = arr.length -1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]]; // fixed swap
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   }
 
-  // Load from localStorage or Firebase
+  // Create ad element with scripts
+  function createAdScript(key, height, width) {
+    const adWrapper = document.createElement('div');
+    adWrapper.style.margin = "1rem auto";
+    adWrapper.style.textAlign = "center";
+
+    const configScript = document.createElement('script');
+    configScript.type = 'text/javascript';
+    configScript.text = `
+      atOptions = {
+        'key' : '${key}',
+        'format' : 'iframe',
+        'height' : ${height},
+        'width' : ${width},
+        'params' : {}
+      };
+    `;
+
+    const invokeScript = document.createElement('script');
+    invokeScript.type = 'text/javascript';
+    invokeScript.src = `//www.highperformanceformat.com/${key}/invoke.js`;
+
+    adWrapper.appendChild(configScript);
+    adWrapper.appendChild(invokeScript);
+
+    return adWrapper;
+  }
+
+  // Load mods from localStorage or Firebase
   async function loadMods() {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
@@ -597,59 +531,42 @@
     displayNextBatch();
   }
 
-  // Display next batch of mods
-function displayNextBatch() {
-  if (currentIndex >= allMods.length) {
-    loadMoreBtn.disabled = true;
-    loadMoreBtn.textContent = "No more mods";
-    return;
-  }
-
-  const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
-  nextBatch.forEach((mod, index) => {
-    displayedMods.push(mod);
-    const card = createModCard(mod);
-    modsEl.appendChild(card);
-
-    const globalIndex = currentIndex + index + 1; // +1 because index is zero-based
-    if (globalIndex % 3 === 0) {
-      // Create ad container div with fixed size
-      const adContainer = document.createElement("div");
-      adContainer.style.width = "320px";
-      adContainer.style.height = "50px";
-      adContainer.style.margin = "15px auto";
-      // Assign a unique id for ad slot
-      const adSlotId = `ad-slot-${globalIndex}`;
-      adContainer.id = adSlotId;
-      modsEl.appendChild(adContainer);
-
-      // Define atOptions on window for this ad slot
-      window.atOptions = {
-        key: 'f17f4bf893957f37c1f0b072d1f31673',
-        format: 'iframe',
-        height: 50,
-        width: 320,
-        params: {},
-        containerId: adSlotId
-      };
-
-      // Create script element asynchronously
-      const adScript = document.createElement("script");
-      adScript.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
-      adScript.async = true;
-      document.body.appendChild(adScript);
+  // Display next batch of mods + ads
+  function displayNextBatch() {
+    if (currentIndex >= allMods.length) {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = "No more mods";
+      return;
     }
-  });
+    const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
 
-  currentIndex += BATCH_SIZE;
+    nextBatch.forEach((mod, i) => {
+      displayedMods.push(mod);
+      const card = createModCard(mod);
+      modsEl.appendChild(card);
 
-  if (currentIndex >= allMods.length) {
-    loadMoreBtn.disabled = true;
-    loadMoreBtn.textContent = "No more mods";
+      const globalIndex = currentIndex + i + 1; // 1-based index globally
+
+      // Insert ads after posts according to the rule:
+      // After every 2 posts: big ad
+      if (globalIndex % 2 === 0) {
+        modsEl.appendChild(createAdScript('037f6e178c935a44f2ef5ab0ce53116a', 250, 300));
+      } 
+      // After every 1 post: small ad
+      else if (globalIndex % 1 === 0) {
+        modsEl.appendChild(createAdScript('f17f4bf893957f37c1f0b072d1f31673', 50, 320));
+      }
+    });
+
+    currentIndex += nextBatch.length;  // <---- FIXED increment by actual loaded posts
+
+    if (currentIndex >= allMods.length) {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = "No more mods";
+    }
   }
-}
 
-  // Create a mod card element
+  // Create a mod card element with download button
   function createModCard(mod) {
     const card = document.createElement("div");
     card.className = "mod-card";
@@ -671,35 +588,28 @@ function displayNextBatch() {
     const btn = document.createElement("button");
     btn.className = "download-btn";
     btn.textContent = `Download Now (${mod.downloads || 0})`;
-    btn.onclick = async () => {
-      // Increment downloads locally and in Firebase
-      mod.downloads = (mod.downloads || 0) + 1;
-      btn.textContent = `Download Now (${mod.downloads})`;
-      try {
-        await db.ref(`/mods/${mod.id}/downloads`).set(mod.downloads);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
-      } catch (e) {
-        console.error("Failed to update downloads count:", e);
-      }
 
-      // Show countdown popup
-      const overlay = document.getElementById("countdownOverlay");
-      const timerEl = document.getElementById("countdownTimer");
-      let countdown = 5;
+    btn.onclick = () => {
+      let secondsLeft = 7; // 5 second countdown
+      popup.style.display = "flex";
+      countdownEl.textContent = secondsLeft;
 
-      timerEl.textContent = countdown;
-      overlay.classList.add("visible");
-
-      const interval = setInterval(() => {
-        countdown--;
-        timerEl.textContent = countdown;
-        if (countdown <= 0) {
-          clearInterval(interval);
-          overlay.classList.remove("visible");
-          // Redirect after countdown
+      const intervalId = setInterval(() => {
+        secondsLeft--;
+        countdownEl.textContent = secondsLeft;
+        if (secondsLeft <= 0) {
+          clearInterval(intervalId);
+          popup.style.display = "none";
           window.location.href = "downloadnow.html";
         }
       }, 1000);
+
+      // Increment downloads async (non-blocking)
+      mod.downloads = (mod.downloads || 0) + 1;
+      btn.textContent = `Download Now (${mod.downloads})`;
+      db.ref(`/mods/${mod.id}/downloads`).set(mod.downloads)
+        .catch(e => console.error("Failed to update downloads count:", e));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
     };
 
     info.appendChild(btn);
@@ -708,60 +618,28 @@ function displayNextBatch() {
     return card;
   }
 
-  // Load initial mods
+  // Initial load
   loadMods();
 
   // Load more on button click
   loadMoreBtn.onclick = () => {
     displayNextBatch();
   };
-
-  // Wait 3.5s then swap to bar, start animation
-  setTimeout(() => {
-    const loadingScreen = document.getElementById('loading-screen');
-    const loadingBarContainer = document.getElementById('loading-bar-container');
-    const loadingBar = document.getElementById('loading-bar');
-
-    // Show bar container inside loading screen
-    loadingBarContainer.style.display = 'block';
-
-    // Animate bar fill
-    setTimeout(() => {
-      loadingBar.style.width = '100%';
-
-      // When animation ends (3s), remove loading screen & close page
-      setTimeout(() => {
-        loadingScreen.remove();
-        // Attempt to close the window/tab
-        window.close();
-      }, 3000);
-
-    }, 50);
-  }, 3500);
 </script>
-<script>
-  // Wait 3.5s then swap to bar, start animation
-  setTimeout(() => {
-    const loadingScreen = document.getElementById('loading-screen');
-    const loadingBarContainer = document.getElementById('loading-bar-container');
-    const loadingBar = document.getElementById('loading-bar');
-
-    // Show bar container inside loading screen
-    loadingBarContainer.style.display = 'block';
-
-    // Animate bar fill
-    setTimeout(() => {
-      loadingBar.style.width = '100%';
-
-      // When animation ends (3s), remove loading screen & close page
+  <script>
+    // Hide loading screen after 5 seconds
+    window.addEventListener('load', () => {
       setTimeout(() => {
-        loadingScreen.remove();
-        // Attempt to close the window/tab
-        window.close();
-      }, 3000);
-
-    }, 50);
-  }, 3500);
-</script>
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 500);
+        }
+      }, 5000); // 5000 ms = 5 seconds
+    });
+  </script>
 </body>
 </html>
