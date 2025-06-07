@@ -3,18 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <title>Referral Reward</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      padding: 1rem;
       background: #f0f4f8;
       color: #333;
-      text-align: center;
-      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .ad-slot {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
     }
     .message-box {
       background: white;
@@ -23,7 +29,7 @@
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
       max-width: 400px;
       width: 100%;
-      transition: color 0.3s ease;
+      text-align: center;
     }
     a {
       color: #007bff;
@@ -33,20 +39,47 @@
     a:hover {
       text-decoration: underline;
     }
-    .error {
-      color: #d93025; /* Google red for errors */
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
+
+  <!-- Top Ad -->
+  <div class="ad-slot">
+    <script type="text/javascript">
+      atOptions = {
+        'key': '037f6e178c935a44f2ef5ab0ce53116a',
+        'format': 'iframe',
+        'height': 250,
+        'width': 300,
+        'params': {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  </div>
+
+  <!-- Message -->
   <div class="message-box" id="messageBox">
     <p>Processing your referral...</p>
   </div>
 
+  <!-- Bottom Ad -->
+  <div class="ad-slot">
+    <script type="text/javascript">
+      atOptions = {
+        'key': '037f6e178c935a44f2ef5ab0ce53116a',
+        'format': 'iframe',
+        'height': 250,
+        'width': 300,
+        'params': {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  </div>
+
+  <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, runTransaction, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -65,60 +98,42 @@
     const urlParams = new URLSearchParams(window.location.search);
     const referUid = urlParams.get('referuid');
 
-    function redirectToHome() {
-      setTimeout(() => {
-        window.location.href = 'https://cyberchat.online';
-      }, 3500);
-    }
-
     async function rewardUser(uid) {
       if (!uid) {
-        messageBox.innerHTML = `<p class="error">Invalid referral link.</p>`;
-        redirectToHome();
+        messageBox.innerHTML = '<p>Invalid referral link.</p>';
+        setTimeout(() => window.location.href = 'https://cyberchat.online', 4000);
         return;
       }
 
-      // Check if user exists
+      const userRef = ref(db, `users/${uid}`);
+
       try {
-        const userSnapshot = await get(ref(db, `users/${uid}`));
-        if (!userSnapshot.exists()) {
-          messageBox.innerHTML = `<p class="error">Referral user not found.</p>`;
-          redirectToHome();
+        const snapshot = await get(userRef);
+        if (!snapshot.exists()) {
+          messageBox.innerHTML = `<p style="color:red;">Referral user not found.</p>`;
+          setTimeout(() => window.location.href = 'https://cyberchat.online', 4000);
           return;
         }
-      } catch (error) {
-        console.error("Error checking user existence:", error);
-        messageBox.innerHTML = `<p class="error">Error connecting to server. Please try again later.</p>`;
-        redirectToHome();
-        return;
-      }
 
-      if (localStorage.getItem(`rewarded_${uid}`)) {
-        messageBox.innerHTML = `
-          <p>You have already claimed this referral reward.</p>
-          <p><a href="https://cyberchat.online">Go to Home</a></p>
-        `;
-        redirectToHome();
-        return;
-      }
-
-      const balanceRef = ref(db, `users/${uid}/balance`);
-      const clicksRef = ref(db, `users/${uid}/clicks`);
-
-      try {
-        await runTransaction(balanceRef, current => (current || 0) + 0.10);
+        // Increase clicks every visit
+        const clicksRef = ref(db, `users/${uid}/clicks`);
         await runTransaction(clicksRef, current => (current || 0) + 1);
-        localStorage.setItem(`rewarded_${uid}`, "true");
+
+        // Only reward $0.10 once per visitor
+        if (!localStorage.getItem(`rewarded_${uid}`)) {
+          const balanceRef = ref(db, `users/${uid}/balance`);
+          await runTransaction(balanceRef, current => (current || 0) + 0.10);
+          localStorage.setItem(`rewarded_${uid}`, "true");
+        }
 
         messageBox.innerHTML = `
-          <p>Thank you for visiting! Your referral earned $0.10 for user: <strong>${uid}</strong>.</p>
-          <p><a href="https://cyberchat.online">Go to Home</a></p>
+          <p>Thanks for visiting! Referral credited to <strong>${uid}</strong>.</p>
+          <p><a href="https://cyberchat.online">Go to CyberChat</a></p>
         `;
-        redirectToHome();
       } catch (error) {
-        console.error('Error rewarding referral:', error);
-        messageBox.innerHTML = `<p class="error">Error processing referral. Please try again later.</p>`;
-        redirectToHome();
+        console.error('Referral error:', error);
+        messageBox.innerHTML = `<p>Error processing referral. Try again later.</p>`;
+        setTimeout(() => window.location.href = 'https://cyberchat.online', 4000);
       }
     }
 
