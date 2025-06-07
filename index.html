@@ -3,442 +3,491 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DLS 25 Mods</title>
+  <title>3D Glassy Dark App with Blue Hero & CTAs</title>
   <style>
-    /* Your existing CSS styles */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
     }
 
-    body {
-      background-color: #000;
-      color: #fff;
-      font-family: "Segoe UI", sans-serif;
-      padding-bottom: 100px;
+    html, body {
+      height: 100%;
+      background: linear-gradient(145deg, #0e0e0e, #1a1a1a);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     header {
-      position: sticky;
+      width: 100%;
+      height: 40px;
+      position: fixed;
       top: 0;
-      background: #000;
-      padding: 12px 16px;
+      left: 0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #222;
-      z-index: 1000;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(40, 40, 40, 0.4);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        inset 0 0 0.5px rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      z-index: 999;
+      transform: perspective(800px) translateZ(10px);
     }
 
     .logo {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .balance-btn {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      backdrop-filter: blur(4px);
-    }
-
-    .countdown-container {
-      background: #111;
-      color: #fff;
-      padding: 14px 0;
-      text-align: center;
-      font-size: 1rem;
-      font-weight: 500;
-      border-bottom: 1px solid #222;
-    }
-
-    #countdown {
-      margin-top: 4px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #00ff88;
-      font-family: monospace;
-    }
-
-    .post-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90%, 1fr));
-      gap: 16px;
-      padding: 16px;
-      justify-content: center;
-    }
-
-    .post {
-      background: #111;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 0 6px rgba(255, 255, 255, 0.05);
-      transition: transform 0.2s ease;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .post img {
-      width: 100%;
-      display: block;
-    }
-
-    .post-content {
-      padding: 12px 16px;
-    }
-
-    .post-title {
-      font-size: 1rem;
       font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .download-btn {
-      background: #00ff88;
-      color: #000;
-      padding: 10px;
-      text-align: center;
-      border-radius: 8px;
-      font-weight: 600;
-      text-decoration: none;
-      display: block;
-      margin-top: 8px;
-    }
-
-    .upload-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #00ff88;
-      color: #000;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 32px;
-      font-weight: bold;
-      box-shadow: 0 0 10px #00ff88aa;
-      z-index: 999;
-      cursor: pointer;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
       user-select: none;
     }
+
+    .logo .dls {
+      color: hotpink;
+    }
+
+    .logo .num {
+      color: white;
+    }
+
+    .logo .mods {
+      color: cyan;
+    }
+
+    .glass-btn {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero {
+      margin-top: 50px;
+      width: 95%;
+      padding: 60px 20px 40px; /* extra bottom padding for CTAs */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0099ff, #005fbb);
+      color: white;
+      text-align: center;
+      box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.7),
+        inset 0 0 40px rgba(0, 0, 0, 0.9);
+      border-radius: 14px;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: none;
+      max-width: none;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 8px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 0, 0, 0.6);
+      margin-bottom: 12px;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      font-weight: 500;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 30px;
+    }
+
+    /* Custom Tinder-style fire icon */
+    .fire-icon {
+      display: inline-block;
+      width: 20px;
+      height: 28px;
+      background: linear-gradient(45deg, #ff5f6d, #ffc371);
+      clip-path: polygon(
+        50% 0%,
+        65% 25%,
+        80% 40%,
+        85% 55%,
+        70% 70%,
+        75% 85%,
+        60% 100%,
+        40% 85%,
+        30% 70%,
+        15% 50%,
+        30% 30%
+      );
+      filter: drop-shadow(0 0 5px #ff5f6d);
+      position: relative;
+      animation: flicker 1.5s infinite ease-in-out;
+    }
+
+    /* subtle flicker animation to simulate fire */
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 7px #ff5f6d);
+        transform: translateY(0);
+      }
+      50% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 12px #ff4a56);
+        transform: translateY(-2px);
+      }
+    }
+
+    .cta-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+   .cta-btn {
+  flex: 1;
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid black; /* <-- Black edge added here */
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255 255 255 / 0.1);
+  color: white;
+}
+
+.cta-btn.download {
+  background: rgba(0, 153, 255, 0.8);
+  box-shadow:
+    0 4px 12px rgba(0, 153, 255, 0.6);
+  border-color: black; /* keep black edges */
+}
+
+.cta-btn.download:hover {
+  background: rgba(0, 153, 255, 1);
+  border-color: black;
+}
+
+.cta-btn.create {
+  background: rgba(0, 255, 204, 0.8);
+  box-shadow:
+    0 4px 12px rgba(0, 255, 204, 0.6);
+  color: black;
+  font-weight: 800;
+  border-color: black;
+}
+
+.cta-btn.create:hover {
+  background: rgba(0, 255, 204, 1);
+  border-color: black;
+}
   </style>
 </head>
 <body>
-
   <header>
-    <div class="logo">DLS 25 Mods</div>
-    <div class="balance-btn">$0.000</div>
+    <div class="logo">
+      <span class="dls">DLS</span>
+      <span class="num"> 25 </span>
+      <span class="mods">MODS</span>
+    </div>
+    <button class="glass-btn">CREATE MODS</button>
   </header>
 
-  <div class="countdown-container">
-    <span>New Mods Coming In</span>
-    <div id="countdown">Loading...</div>
+  <section class="hero">
+    <h1>
+      <span class="fire-icon"></span>
+      DLS25 MODS
+      <span class="fire-icon"></span>
+    </h1>
+    <p>
+      The best mods for Dream League Soccer are here.
+      <span class="fire-icon"></span>
+    </p>
+    <div class="cta-container">
+      <button class="cta-btn download">DOWNLOAD NOW</button>
+      <button class="cta-btn create">CREATE NOW</button>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Your 3D magic or main app content here -->
   </div>
-
-  <div class="post-grid" id="postContainer">
-    <!-- Posts will be dynamically inserted here -->
-  </div>
-
- <div class="upload-btn" title="Upload new mod" onclick="location.href='dlspost.html'">+</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-
-  const countdownEl = document.getElementById("countdown");
-  const postContainer = document.getElementById("postContainer");
-  const uploadBtn = document.querySelector(".upload-btn");
-  const balanceBtn = document.querySelector(".balance-btn");
-
-  let allPosts = [];
-  let currentIndex = 0;
-  const POSTS_PER_BATCH = 2;
-  let currentUserUID = null;
-  let countdownTimer = null;
-
-  // Escape HTML to prevent injection issues
-  function escapeHTML(str) {
-    if (!str) return "";
-    return str.replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[m]);
-  }
-
-  // Shuffle posts array (Fisher-Yates)
-  function shuffleArray(arr) {
-    let a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Glassy Dark App with Blue Hero & CTAs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    return a;
-  }
 
-  // Inject ad script dynamically inside ad container
-  function injectAdScript(adContainer) {
-    adContainer.innerHTML = "";
-
-    const script1 = document.createElement("script");
-    script1.type = "text/javascript";
-    script1.text = `
-      atOptions = {
-        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    `;
-
-    const script2 = document.createElement("script");
-    script2.type = "text/javascript";
-    script2.src = "//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js";
-
-    adContainer.appendChild(script1);
-    adContainer.appendChild(script2);
-  }
-
-  // Render a batch of posts and inject ads after
-  // Modify your renderPosts() function like this:
-
-function renderPosts() {
-  const postsToShow = allPosts.slice(currentIndex, currentIndex + POSTS_PER_BATCH);
-
-  postsToShow.forEach((post, idx) => {
-    // Create post element
-    const postEl = document.createElement("div");
-    postEl.className = "post";
-    postEl.innerHTML = `
-      <img src="${escapeHTML(post.thumb)}" alt="${escapeHTML(post.title)}" onerror="this.src='fallback.jpg';" />
-      <div class="post-content">
-        <div class="post-title">${escapeHTML(post.title)}</div>
-        <div class="post-description">${escapeHTML(post.description || '')}</div>
-        <a class="download-btn" href="${escapeHTML(post.download)}" target="_blank" rel="noopener">Download Now</a>
-      </div>
-    `;
-    postContainer.appendChild(postEl);
-
-    // After each post, add the small iframe ad (50x320)
-    const smallAdDiv = document.createElement("div");
-    smallAdDiv.className = "small-ad-container";
-    smallAdDiv.style.width = "320px";
-    smallAdDiv.style.height = "50px";
-    smallAdDiv.style.margin = "10px auto";
-
-    // Inject small ad script dynamically (to avoid duplicate global atOptions, use an IIFE)
-    (function(adDiv){
-      adDiv.innerHTML = ''; // clear any previous content
-
-      // Create atOptions script text element (wrapped in a <script> tag)
-      const atOptionsScript = document.createElement("script");
-      atOptionsScript.type = "text/javascript";
-      atOptionsScript.text = `
-        atOptions = {
-          'key' : 'f17f4bf893957f37c1f0b072d1f31673',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      `;
-      adDiv.appendChild(atOptionsScript);
-
-      // Create the actual ad loader script
-      const adLoaderScript = document.createElement("script");
-      adLoaderScript.type = "text/javascript";
-      adLoaderScript.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
-      adDiv.appendChild(adLoaderScript);
-    })(smallAdDiv);
-
-    postContainer.appendChild(smallAdDiv);
-
-    // Now, after every 5 posts, inject the bigger async ad
-    const globalIndex = currentIndex + idx + 1; // +1 because idx is 0-based
-    if (globalIndex % 5 === 0) {
-      const bigAdDiv = document.createElement("div");
-      bigAdDiv.className = "big-ad-container";
-      bigAdDiv.style.width = "100%";
-      bigAdDiv.style.margin = "20px auto";
-      
-      // Container div for the big ad
-      const bigAdInnerDiv = document.createElement("div");
-      bigAdInnerDiv.id = "container-8f9075afd782b06bf3767fa2b0dd5775";
-      bigAdDiv.appendChild(bigAdInnerDiv);
-
-      postContainer.appendChild(bigAdDiv);
-
-      // Load the async big ad script only once per insertion
-      const bigAdScript = document.createElement("script");
-      bigAdScript.async = true;
-      bigAdScript.setAttribute("data-cfasync", "false");
-      bigAdScript.src = "//pl26795976.profitableratecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js";
-      postContainer.appendChild(bigAdScript);
+    html, body {
+      height: 100%;
+      background: linear-gradient(145deg, #0e0e0e, #1a1a1a);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
-  });
 
-  currentIndex += POSTS_PER_BATCH;
+    header {
+      width: 100%;
+      height: 40px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(40, 40, 40, 0.4);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        inset 0 0 0.5px rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      z-index: 999;
+      transform: perspective(800px) translateZ(10px);
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+
+    .logo .dls {
+      color: hotpink;
+    }
+
+    .logo .num {
+      color: white;
+    }
+
+    .logo .mods {
+      color: cyan;
+    }
+
+    .glass-btn {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero {
+      margin-top: 50px;
+      width: 95%;
+      padding: 60px 20px 40px; /* extra bottom padding for CTAs */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0099ff, #005fbb);
+      color: white;
+      text-align: center;
+      box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.7),
+        inset 0 0 40px rgba(0, 0, 0, 0.9);
+      border-radius: 14px;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: none;
+      max-width: none;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 8px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 0, 0, 0.6);
+      margin-bottom: 12px;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      font-weight: 500;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 30px;
+    }
+
+    /* Custom Tinder-style fire icon */
+    .fire-icon {
+      display: inline-block;
+      width: 20px;
+      height: 28px;
+      background: linear-gradient(45deg, #ff5f6d, #ffc371);
+      clip-path: polygon(
+        50% 0%,
+        65% 25%,
+        80% 40%,
+        85% 55%,
+        70% 70%,
+        75% 85%,
+        60% 100%,
+        40% 85%,
+        30% 70%,
+        15% 50%,
+        30% 30%
+      );
+      filter: drop-shadow(0 0 5px #ff5f6d);
+      position: relative;
+      animation: flicker 1.5s infinite ease-in-out;
+    }
+
+    /* subtle flicker animation to simulate fire */
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 7px #ff5f6d);
+        transform: translateY(0);
+      }
+      50% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 12px #ff4a56);
+        transform: translateY(-2px);
+      }
+    }
+
+    .cta-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+   .cta-btn {
+  flex: 1;
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid black; /* <-- Black edge added here */
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255 255 255 / 0.1);
+  color: white;
 }
 
-  // Start the countdown timer for release date
-  function startCountdown(endDate) {
-    if (countdownTimer) clearInterval(countdownTimer);
-    const releaseDate = new Date(endDate).getTime();
+.cta-btn.download {
+  background: rgba(0, 153, 255, 0.8);
+  box-shadow:
+    0 4px 12px rgba(0, 153, 255, 0.6);
+  border-color: black; /* keep black edges */
+}
 
-    countdownTimer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = releaseDate - now;
+.cta-btn.download:hover {
+  background: rgba(0, 153, 255, 1);
+  border-color: black;
+}
 
-      if (distance <= 0) {
-        clearInterval(countdownTimer);
-        countdownEl.innerText = "Released!";
-        return;
-      }
+.cta-btn.create {
+  background: rgba(0, 255, 204, 0.8);
+  box-shadow:
+    0 4px 12px rgba(0, 255, 204, 0.6);
+  color: black;
+  font-weight: 800;
+  border-color: black;
+}
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((distance / 1000 / 60) % 60);
-      const secs = Math.floor((distance / 1000) % 60);
-      countdownEl.innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
-    }, 1000);
-  }
+.cta-btn.create:hover {
+  background: rgba(0, 255, 204, 1);
+  border-color: black;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span class="dls">DLS</span>
+      <span class="num"> 25 </span>
+      <span class="mods">MODS</span>
+    </div>
+    <button class="glass-btn">CREATE MODS</button>
+  </header>
 
-  // Load posts and countdown from Firebase or localStorage cache
-  function loadPostsAndTimer() {
-    const cached = localStorage.getItem("dlsposts");
-    if (cached) {
-      allPosts = JSON.parse(cached);
-      renderPosts();
-    }
+  <section class="hero">
+    <h1>
+      <span class="fire-icon"></span>
+      DLS25 MODS
+      <span class="fire-icon"></span>
+    </h1>
+    <p>
+      The best mods for Dream League Soccer are here.
+      <span class="fire-icon"></span>
+    </p>
+    <div class="cta-container">
+      <button class="cta-btn download">DOWNLOAD NOW</button>
+      <button class="cta-btn create">CREATE NOW</button>
+    </div>
+  </section>
 
-    onValue(ref(db, 'dlspost'), (snapshot) => {
-      const data = snapshot.val();
-
-      if (!data) {
-        countdownEl.innerText = "No data found";
-        postContainer.innerHTML = "<p style='text-align:center;'>No posts found.</p>";
-        return;
-      }
-
-      // Handle countdown timer
-      if (data.timer) {
-        startCountdown(data.timer);
-      } else {
-        countdownEl.innerText = "No countdown set";
-      }
-
-      // Handle posts
-      if (data.posts) {
-        const postsArr = Object.values(data.posts);
-        allPosts = shuffleArray(postsArr);
-        localStorage.setItem("dlsposts", JSON.stringify(allPosts));
-
-        postContainer.innerHTML = "";
-        currentIndex = 0;
-        renderPosts();
-      } else {
-        postContainer.innerHTML = "<p style='text-align:center;'>No posts available.</p>";
-      }
-    }, { onlyOnce: true });
-  }
-
-  // Update user balance in UI button
-  function updateUserBalance(uid) {
-    const balanceRef = ref(db, `users/${uid}/balance`);
-    onValue(balanceRef, (snapshot) => {
-      const balance = snapshot.val();
-      balanceBtn.textContent = balance !== null ? `$${parseFloat(balance).toFixed(3)}` : "$0.000";
-    });
-  }
-
-  // Anonymous sign-in
-  signInAnonymously(auth)
-    .then(() => {
-      console.log("Signed in anonymously");
-    })
-    .catch((error) => {
-      console.error("Anonymous sign-in failed:", error);
-    });
-
-  // Auth state listener for current user and balance update
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUserUID = user.uid;
-      console.log("Anonymous User ID:", currentUserUID);
-      updateUserBalance(currentUserUID);
-    } else {
-      console.log("User signed out");
-      balanceBtn.textContent = "$0.000";
-      currentUserUID = null;
-    }
-  });
-
-  // Upload new post flow triggered by button
-  uploadBtn.addEventListener("click", () => {
-    const title = prompt("Enter mod title:");
-    if (!title || !title.trim()) return alert("Title is required!");
-
-    const description = prompt("Enter mod description:");
-    if (!description || !description.trim()) return alert("Description is required!");
-
-    const thumb = prompt("Enter thumbnail image URL:");
-    if (!thumb || !thumb.trim()) return alert("Thumbnail URL is required!");
-
-    const download = prompt("Enter download link:");
-    if (!download || !download.trim()) return alert("Download link is required!");
-
-    const postsRef = ref(db, "dlspost/posts");
-    const newPostRef = push(postsRef);
-
-    set(newPostRef, {
-      title: title.trim(),
-      description: description.trim(),
-      thumb: thumb.trim(),
-      download: download.trim()
-    })
-    .then(() => {
-      alert("Post uploaded successfully!");
-      localStorage.removeItem("dlsposts");
-      postContainer.innerHTML = "";
-      currentIndex = 0;
-      loadPostsAndTimer();
-    })
-    .catch((error) => {
-      alert("Failed to upload post: " + error.message);
-    });
-  });
-
-  // Initial load
-  loadPostsAndTimer();
-</script>
+  <div class="container">
+    <!-- Your 3D magic or main app content here -->
+  </div>
 </body>
 </html>
