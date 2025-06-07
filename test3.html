@@ -1,84 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Referral Dashboard - CyberChat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    #dashboard {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    h1 {
-      margin-bottom: 1rem;
-      text-align: center;
-      color: #1f267d;
-    }
-    #referralLink {
-      margin: 1rem 0;
-      word-break: break-all;
-      background: #e2e8f0;
-      padding: 0.5rem;
-      border-radius: 8px;
-      user-select: all;
-      font-size: 0.9rem;
-    }
-    button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 1rem;
-      background: #1f267d;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background: #2b33b2;
-    }
-    #logoutBtn {
-      background-color: #b00020;
-      margin-top: 2rem;
-    }
-    #stats {
-      font-size: 1.1rem;
-      margin-top: 1rem;
-    }
+    :root {
+      --bg-color: #0d0d0d;
+      --card-bg: #1a1a1a;
+      --primary: #00ffcc;
+      --secondary: #ffffffcc;
+      --danger: #ff4444;
+      --radius: 1.5rem;
+    }body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+  text-align: center;
+}
+
+.link-box {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 1rem;
+  word-break: break-word;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: var(--secondary);
+  text-align: center;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #00ddaa;
+}
+
+.stat {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--secondary);
+  text-align: center;
+}
+
+.cashout {
+  background: #222;
+  color: white;
+  border: 2px solid var(--primary);
+}
+
+.cashout:disabled {
+  background: #444;
+  color: #777;
+  border-color: #333;
+  cursor: not-allowed;
+}
+
+.logout {
+  background: var(--danger);
+}
+
   </style>
 </head>
 <body>
-  <div id="dashboard" style="display:none;">
-    <h1>Your Referral Dashboard</h1>
-    <div id="referralLink" title="Click to copy"></div>
-    <button id="copyLinkBtn">Copy Link</button>
+  <div class="card" id="dashboard" style="display:none">
+    <h1>Referral Dashboard</h1>
+    <div id="referralLink" class="link-box" title="Tap to copy"></div>
+    <button class="btn" id="copyLinkBtn">Copy Link</button><div class="stat">Clicks: <span id="clicksCount">0</span></div>
+<div class="stat">Earnings: $<span id="earningsAmount">0.00</span></div>
 
-    <div id="stats">
-      <p>Clicks: <span id="clicksCount">0</span></p>
-      <p>Earnings: $<span id="earningsAmount">0.00</span></p>
-    </div>
+<button class="btn cashout" id="cashoutBtn" disabled>Cash Out</button>
+<button class="btn logout" id="logoutBtn">Logout</button>
 
-    <button id="logoutBtn">Logout</button>
-  </div>
-
-  <script type="module">
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -103,51 +130,35 @@
     const clicksCount = document.getElementById('clicksCount');
     const earningsAmount = document.getElementById('earningsAmount');
     const logoutBtn = document.getElementById('logoutBtn');
+    const cashoutBtn = document.getElementById('cashoutBtn');
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, user => {
       if (!user) {
-        // User not logged in — redirect to login
         window.location.href = 'login.html';
         return;
       }
-
       dashboard.style.display = 'block';
       const uid = user.uid;
       const referralURL = `${location.origin}/referralLink.html?referuid=${uid}`;
       referralLink.textContent = referralURL;
 
-      // Live updates
       const clicksRef = ref(db, `users/${uid}/clicks`);
-      onValue(clicksRef, snapshot => {
-        clicksCount.textContent = snapshot.val() || 0;
+      onValue(clicksRef, snap => {
+        clicksCount.textContent = snap.val() || 0;
       });
 
       const earningsRef = ref(db, `users/${uid}/balance`);
-      onValue(earningsRef, snapshot => {
-        const earnings = parseFloat(snapshot.val() || 0).toFixed(2);
-        earningsAmount.textContent = earnings;
+      onValue(earningsRef, snap => {
+        const earnings = parseFloat(snap.val() || 0);
+        earningsAmount.textContent = earnings.toFixed(2);
+        cashoutBtn.disabled = earnings < 10;
       });
 
-      // Copy logic
-      copyLinkBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(referralURL)
-          .then(() => alert("Copied!"))
-          .catch(() => alert("Couldn't copy"));
-      });
+      copyLinkBtn.onclick = () => navigator.clipboard.writeText(referralURL).then(() => alert("Copied!"));
+      referralLink.onclick = () => navigator.clipboard.writeText(referralURL).then(() => alert("Copied!"));
 
-      referralLink.addEventListener('click', () => {
-        navigator.clipboard.writeText(referralURL)
-          .then(() => alert("Copied!"))
-          .catch(() => alert("Couldn't copy"));
-      });
-
-      // Logout logic
-      logoutBtn.addEventListener('click', () => {
-        signOut(auth).then(() => {
-          window.location.href = 'login.html';
-        });
-      });
+      logoutBtn.onclick = () => signOut(auth).then(() => location.href = 'login.html');
+      cashoutBtn.onclick = () => alert('Withdraw Requested!');
     });
-  </script>
-</body>
+  </script></body>
 </html>
