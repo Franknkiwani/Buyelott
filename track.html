@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Referral Tracking</title>
+  <title>Tracking Referral...</title>
 </head>
 <body>
-  <p>Tracking your referral... please wait.</p>
+  <p>Redirecting you to CyberChat...</p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -33,8 +33,7 @@
     (async () => {
       const uid = getQueryParam('referrallinkuser');
       if (!uid) {
-        // No UID? Bounce them out to homepage
-        window.location.href = '/';
+        window.location.href = '/'; // fallback redirect
         return;
       }
 
@@ -47,24 +46,22 @@
 
         if (snapshot.exists()) {
           const data = snapshot.val();
-          currentBalance = data.balance || 0;
-          currentClicks = data.clicks || 0;
+          currentBalance = parseFloat(data.balance) || 0;
+          currentClicks = parseInt(data.clicks) || 0;
         }
 
-        const newBalance = currentBalance + 0.10;
-        const newClicks = currentClicks + 1;
-
         await update(userRef, {
-          balance: newBalance,
-          clicks: newClicks,
+          balance: parseFloat((currentBalance + 0.10).toFixed(2)),
+          clicks: currentClicks + 1,
           lastReferral: serverTimestamp()
         });
+
       } catch (err) {
-        console.error("Error updating referral data:", err);
+        console.error("Referral update failed:", err);
       }
 
-      // Redirect visitor away after tracking
-      window.location.href = '/';
+      // ✅ FINAL REDIRECT TO CYBERCHAT
+      window.location.href = "/home.html"; // or "/cyberchat" if that’s your homepage route
     })();
   </script>
 </body>
