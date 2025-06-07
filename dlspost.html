@@ -593,7 +593,7 @@ postBtn.addEventListener('click', async () => {
   };
 
   try {
-    const postsRef = ref(database, 'dlsposts');
+    const postsRef = ref(database, 'dlspost');
     const newPostRef = push(postsRef);
     await set(newPostRef, postData);
     showSuccessPopup('Post published successfully!');
