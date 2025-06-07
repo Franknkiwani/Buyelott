@@ -2,154 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CyberChat Earnings (No Anonymous)</title>
+  <title>Referral Dashboard - CyberChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background: #121212;
-      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0; padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #loginForm, #dashboard {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgb(31 38 135 / 0.2);
+      max-width: 400px;
+      width: 100%;
       box-sizing: border-box;
     }
-
-    .glass-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      border-radius: 12px;
-      padding: 14px 28px;
-      font-size: 16px;
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-      max-width: 400px;
-      margin: auto;
+    h1 {
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #1f267d;
+    }
+    label {
       display: block;
-      text-align: center;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-      transition: transform 0.2s ease;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: 600;
     }
-
-    .glass-btn:hover {
-      transform: scale(1.03);
-    }
-
-    .popup {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 999;
-    }
-
-    .popup-content {
-      background: #1e1e1e;
-      padding: 2em;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 400px;
-      color: white;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      animation: fadeIn 0.3s ease;
-    }
-
-    .popup-content input {
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0 20px;
-      font-size: 15px;
+      padding: 0.5rem;
       border-radius: 8px;
-      border: 1px solid #555;
-      background: #2c2c2c;
-      color: white;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1rem;
     }
-
-    .popup-content button,
-    .popup-content a {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
+    button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: #1f267d;
+      color: white;
       border: none;
-      border-radius: 10px;
-      background: #007bff;
-      color: white;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 1.1rem;
       cursor: pointer;
-      width: 100%;
-      max-width: 300px;
-      transition: background 0.2s;
-      text-decoration: none;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
     }
-
-    .popup-content button:hover,
-    .popup-content a:hover {
-      background: #0056b3;
+    button:hover {
+      background: #2b33b2;
     }
-
-    .popup-content button:disabled {
-      background: gray;
-      cursor: not-allowed;
+    #referralLink {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      word-break: break-all;
+      background: #e2e8f0;
+      padding: 0.5rem;
+      border-radius: 8px;
+      user-select: all;
+      cursor: pointer;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    #stats {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #222;
     }
-
-    .ad-container {
-      width: 100%;
+    #logoutBtn {
+      margin-top: 2rem;
+      background: #b00020;
+    }
+    #message {
+      margin-top: 1rem;
+      color: #b00020;
       text-align: center;
-      margin: 10px 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Ad -->
-  <div class="ad-container">
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    </script>
-    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  <div id="loginForm">
+    <h1>Login to Referral Dashboard</h1>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required autocomplete="username" />
+    <label for="password">Password:</label>
+    <input type="password" id="password" required autocomplete="current-password" />
+    <button id="loginBtn">Login</button>
+    <div id="message"></div>
   </div>
 
-  <!-- Earnings Button -->
-  <button class="glass-btn" id="earningsBtn">EARNINGS: $0.00</button>
+  <div id="dashboard" style="display:none;">
+    <h1>Your Referral Dashboard</h1>
+    <label>Your Referral Link:</label>
+    <div id="referralLink" title="Click to copy"></div>
+    <button id="copyLinkBtn">Copy Link</button>
 
-  <!-- Popup -->
-  <div id="referralPopup" style="display: none;" class="popup">
-    <div class="popup-content" id="popupContent"></div>
+    <div id="stats">
+      <p>Clicks: <span id="clicksCount">0</span></p>
+      <p>Earnings: $<span id="earningsAmount">0.00</span></p>
+    </div>
+    <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- Bottom Ad -->
-  <div class="ad-container">
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    </script>
-    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
-  </div>
-
-  <!-- Firebase Earnings Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -158,82 +122,100 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    const earningsBtn = document.getElementById('earningsBtn');
-    const popup = document.getElementById('referralPopup');
-    const popupContent = document.getElementById('popupContent');
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('dashboard');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const messageDiv = document.getElementById('message');
+    const referralLinkDiv = document.getElementById('referralLink');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const clicksCountSpan = document.getElementById('clicksCount');
+    const earningsAmountSpan = document.getElementById('earningsAmount');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    function closePopup() {
-      popup.style.display = 'none';
-      popupContent.innerHTML = '';
+    function showMessage(msg, isError = true) {
+      messageDiv.textContent = msg;
+      messageDiv.style.color = isError ? '#b00020' : '#007bff';
     }
 
-    function copyReferralLink() {
-      const referralInput = document.getElementById('referralLink');
-      if (!referralInput) return;
-      navigator.clipboard.writeText(referralInput.value)
-        .then(() => alert('Referral link copied to clipboard!'))
-        .catch(() => alert('Failed to copy link'));
-    }
+    loginBtn.addEventListener('click', () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
 
-    earningsBtn.addEventListener('click', () => {
-      const user = auth.currentUser;
-      popup.style.display = 'flex';
+      if (!email || !password) {
+        showMessage('Please enter both email and password.');
+        return;
+      }
 
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          showMessage('', false);
+        })
+        .catch(err => {
+          showMessage('Login failed: ' + err.message);
+        });
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        loginForm.style.display = 'block';
+        dashboard.style.display = 'none';
+        emailInput.value = '';
+        passwordInput.value = '';
+        showMessage('');
+      });
+    });
+
+    onAuthStateChanged(auth, user => {
       if (user) {
+        // Logged in
+        loginForm.style.display = 'none';
+        dashboard.style.display = 'block';
+
         const uid = user.uid;
-        const link = `${window.location.origin}/referralLink.html?referuid=${uid}`;
-        const earningsRef = ref(db, `/referrals/${uid}`);
+        const baseLink = `${location.origin}/referralLink.html?referuid=${uid}`;
+        referralLinkDiv.textContent = baseLink;
 
-        onValue(earningsRef, (snapshot) => {
-          const data = snapshot.val() || {};
-          const clicks = data.clicks || 0;
-          const earnings = (clicks * 0.02).toFixed(2);
-          const cashoutEligible = parseFloat(earnings) >= 10;
+        // Listen for changes on user's referral stats
+        const clicksRef = ref(db, `users/${uid}/clicks`);
+        onValue(clicksRef, snapshot => {
+          const clicks = snapshot.val() || 0;
+          clicksCountSpan.textContent = clicks;
+        });
 
-          popupContent.innerHTML = `
-            <h3>Referral Dashboard</h3>
-            <p>Your referral link:</p>
-            <input type="text" id="referralLink" readonly value="${link}" />
-            <p>Clicks: <strong>${clicks}</strong></p>
-            <p>Earnings: <strong>$${earnings}</strong></p>
-            <button id="copyBtn">Copy Link</button>
-            <button ${!cashoutEligible ? 'disabled' : ''}>${cashoutEligible ? 'Cash Out Now' : 'Minimum $10 to Cash Out'}</button>
-            <button id="closeBtn">Close</button>
-          `;
-
-          document.getElementById('copyBtn').addEventListener('click', copyReferralLink);
-          document.getElementById('closeBtn').addEventListener('click', closePopup);
+        const earningsRef = ref(db, `users/${uid}/balance`);
+        onValue(earningsRef, snapshot => {
+          const earnings = snapshot.val() || 0;
+          earningsAmountSpan.textContent = earnings.toFixed(2);
         });
       } else {
-        popupContent.innerHTML = `
-          <h3>Access Denied</h3>
-          <p>You must sign in to see your referrals.</p>
-          <a href="login.html">Go to Login</a>
-          <button id="closeBtn">Close</button>
-        `;
-        document.getElementById('closeBtn').addEventListener('click', closePopup);
+        // Not logged in
+        loginForm.style.display = 'block';
+        dashboard.style.display = 'none';
       }
     });
 
-    // Real-time earnings button
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        const uid = user.uid;
-        const earningsRef = ref(db, `/referrals/${uid}`);
-        onValue(earningsRef, (snapshot) => {
-          const data = snapshot.val() || {};
-          const clicks = data.clicks || 0;
-          const earnings = (clicks * 0.02).toFixed(2);
-          earningsBtn.textContent = `EARNINGS: $${earnings}`;
-        });
-      }
+    copyLinkBtn.addEventListener('click', () => {
+      const text = referralLinkDiv.textContent;
+      navigator.clipboard.writeText(text)
+        .then(() => alert('Referral link copied!'))
+        .catch(() => alert('Failed to copy referral link.'));
+    });
+
+    referralLinkDiv.addEventListener('click', () => {
+      const text = referralLinkDiv.textContent;
+      navigator.clipboard.writeText(text)
+        .then(() => alert('Referral link copied!'))
+        .catch(() => alert('Failed to copy referral link.'));
     });
   </script>
 </body>
