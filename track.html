@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Referral Tracker</title>
+  <title>Referral Tracking</title>
 </head>
 <body>
+  <p style="text-align:center; margin-top:20vh; font-family: Arial, sans-serif;">
+    Tracking your referral... Please wait.
+  </p>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -23,33 +27,41 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
 
+    // Helper to get URL param
     function getQueryParam(param) {
-      return new URLSearchParams(window.location.search).get(param);
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
 
     (async () => {
-      const refUID = getQueryParam('ref');
+      const refUID = getQueryParam('referrallinkuser');
       if (!refUID) {
-        // No referral ID, send to homepage
+        // No ref UID? Bounce to homepage ASAP
         window.location.href = '/';
         return;
       }
 
+      // Try to get visitor IP, fallback to 'N/A'
       let visitorIP = 'N/A';
       try {
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         visitorIP = data.ip;
-      } catch {
-        // ignore errors
+      } catch (e) {
+        console.warn('IP fetch failed:', e);
       }
 
-      const referralsRef = ref(db, `referrals/${refUID}`);
-      await push(referralsRef, {
-        timestamp: serverTimestamp(),
-        ip: visitorIP,
-        userAgent: navigator.userAgent
-      });
+      // Record referral info
+      try {
+        const referralsRef = ref(db, `referrals/${refUID}`);
+        await push(referralsRef, {
+          timestamp: serverTimestamp(),
+          ip: visitorIP,
+          userAgent: navigator.userAgent
+        });
+      } catch (err) {
+        console.error('Failed to record referral:', err);
+      }
 
       // Redirect after tracking
       window.location.href = '/';
