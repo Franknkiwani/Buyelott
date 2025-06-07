@@ -153,15 +153,13 @@
     return urlParams.get(param);
   }
 
-  // Detect if this page is track.html by pathname
   const isTrackingPage = window.location.pathname.endsWith('track.html');
 
   if (isTrackingPage) {
-    // This runs ONLY on track.html to track referral and redirect
     (async () => {
       const refUID = getQueryParam('ref');
       if (!refUID) {
-        window.location.href = '/'; // No ref, send home
+        window.location.href = '/';
         return;
       }
 
@@ -170,9 +168,7 @@
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         visitorIP = data.ip;
-      } catch (e) {
-        // ignore errors, IP optional
-      }
+      } catch {}
 
       const referralsRef = ref(db, `referrals/${refUID}`);
       await push(referralsRef, {
@@ -181,11 +177,9 @@
         userAgent: navigator.userAgent
       });
 
-      // Redirect user silently after tracking
       window.location.href = '/';
     })();
   } else {
-    // This runs on your main app page to show referral popup, balance, etc.
     const openBtn = document.getElementById("openReferral");
     const closeBtn = document.getElementById("closeReferral");
     const popup = document.getElementById("referralPopup");
@@ -197,6 +191,7 @@
     const cashoutBtn = document.getElementById("cashoutBtn");
     const referralTable = document.getElementById("referralTable").querySelector("tbody");
     const signinPrompt = document.getElementById("signinPrompt");
+    const copyBtn = document.getElementById("copyReferralBtn");
 
     openBtn.addEventListener("click", () => popup.style.display = "flex");
     closeBtn.addEventListener("click", () => popup.style.display = "none");
@@ -213,14 +208,26 @@
         usernameEl.textContent = name;
         userPic.src = photo;
 
-        // Make referral link domain-agnostic
-        referralLinkEl.textContent = `Referral Link: track.html?ref=${uid}`;
-        referralLinkEl.href = `track.html?ref=${uid}`;
-        referralLinkEl.style.color = '#0d6efd';
-        referralLinkEl.style.textDecoration = 'underline';
-        referralLinkEl.target = '_blank';
+        // Build referral link as an anchor tag
+        referralLinkEl.innerHTML = '';
+        const a = document.createElement('a');
+        a.href = `track.html?ref=${uid}`;
+        a.textContent = `track.html?ref=${uid}`;
+        a.style.color = '#0d6efd';
+        a.style.textDecoration = 'underline';
+        a.target = '_blank';
+        referralLinkEl.appendChild(a);
 
-        // Listen to referral logs under /referrals/{uid}
+        // Copy button functionality
+        copyBtn.disabled = false;
+        copyBtn.textContent = "Copy Link";
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(a.href).then(() => {
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => copyBtn.textContent = "Copy Link", 1500);
+          }).catch(() => alert("Failed to copy. Please copy manually."));
+        };
+
         const referralsRef = ref(db, `/referrals/${uid}`);
         onValue(referralsRef, snapshot => {
           const data = snapshot.val() || {};
@@ -240,7 +247,6 @@
             referralTable.appendChild(row);
           });
 
-          // Balance calculation: $0.10 per referral click
           const balance = entries.length * 0.10;
           balanceEl.textContent = balance.toFixed(3);
           cashoutBtn.disabled = balance < 10;
@@ -259,10 +265,10 @@
         referralCard.style.display = "none";
         signinPrompt.style.display = "block";
         openBtn.textContent = `$0.000`;
+        copyBtn.disabled = true;
       }
     });
   }
 </script>
-
 </body>
 </html>
