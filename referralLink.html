@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Referral Reward</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f4f8;
+      color: #333;
+      text-align: center;
+      padding: 1rem;
+    }
+    .message-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="message-box" id="messageBox">
+    <p>Processing your referral...</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const messageBox = document.getElementById('messageBox');
+    const urlParams = new URLSearchParams(window.location.search);
+    const referUid = urlParams.get('referuid');
+
+    async function rewardUser(uid) {
+      if (!uid) {
+        messageBox.innerHTML = '<p>Invalid referral link.</p>';
+        return;
+      }
+
+      if (localStorage.getItem(`rewarded_${uid}`)) {
+        messageBox.innerHTML = `<p>You have already claimed this referral reward.</p><p><a href="index.html">Go to Home</a></p>`;
+        return;
+      }
+
+      const balanceRef = ref(db, `users/${uid}/balance`);
+      const clicksRef = ref(db, `users/${uid}/clicks`);
+
+      try {
+        await runTransaction(balanceRef, current => (current || 0) + 0.10);
+        await runTransaction(clicksRef, current => (current || 0) + 1);
+        localStorage.setItem(`rewarded_${uid}`, "true");
+
+        messageBox.innerHTML = `
+          <p>Thank you for visiting! Your referral earned $0.10 for user: <strong>${uid}</strong>.</p>
+          <p><a href="index.html">Go to Home</a></p>
+        `;
+      } catch (error) {
+        console.error('Error rewarding referral:', error);
+        messageBox.innerHTML = `<p>Error processing referral. Please try again later.</p>`;
+      }
+    }
+
+    rewardUser(referUid);
+  </script>
+</body>
+</html>
