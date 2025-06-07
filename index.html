@@ -715,6 +715,29 @@ function displayNextBatch() {
   loadMoreBtn.onclick = () => {
     displayNextBatch();
   };
+
+  // Wait 3.5s then swap to bar, start animation
+  setTimeout(() => {
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingBarContainer = document.getElementById('loading-bar-container');
+    const loadingBar = document.getElementById('loading-bar');
+
+    // Show bar container inside loading screen
+    loadingBarContainer.style.display = 'block';
+
+    // Animate bar fill
+    setTimeout(() => {
+      loadingBar.style.width = '100%';
+
+      // When animation ends (3s), remove loading screen & close page
+      setTimeout(() => {
+        loadingScreen.remove();
+        // Attempt to close the window/tab
+        window.close();
+      }, 3000);
+
+    }, 50);
+  }, 3500);
 </script>
 <script>
   // Wait 3.5s then swap to bar, start animation
