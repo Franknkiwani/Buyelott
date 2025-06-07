@@ -14,7 +14,6 @@
       margin: 0;
       background: #f2f2f2;
     }
-
     .glass-btn {
       background: rgba(255,255,255,0.1);
       border: 1px solid #ccc;
@@ -24,101 +23,53 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .popup-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
+      display: none; justify-content: center; align-items: center;
       z-index: 9999;
     }
-
     .popup {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: #fff; border-radius: 16px; padding: 24px;
+      width: 90%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       position: relative;
     }
-
     .popup .close-btn {
-      position: absolute;
-      right: 16px;
-      top: 12px;
-      font-size: 20px;
-      cursor: pointer;
+      position: absolute; right: 16px; top: 12px;
+      font-size: 20px; cursor: pointer;
     }
-
     .user-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
     }
-
     .user-info img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: 1px solid #ccc;
+      width: 60px; height: 60px; border-radius: 50%; border: 1px solid #ccc;
     }
-
-    .user-info h2 {
-      margin: 0;
-    }
-
     .balance {
-      font-size: 1.25rem;
-      margin: 12px 0;
-      font-weight: 600;
-      color: #0d6efd;
+      font-size: 1.25rem; margin: 12px 0; font-weight: 600; color: #0d6efd;
     }
-
+    .cashout-section {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
     .cashout-btn {
-      padding: 10px 20px;
-      background: #0d6efd;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
+      padding: 10px 20px; background: #0d6efd;
+      color: white; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600;
     }
-
     .cashout-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
+      background: #999; cursor: not-allowed;
     }
-
     table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
+      width: 100%; margin-top: 20px; border-collapse: collapse;
     }
-
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
+      padding: 10px; border-bottom: 1px solid #eee; text-align: left;
     }
-
-    th {
-      background: #f0f0f0;
-    }
-
+    th { background: #f0f0f0; }
     .signin-prompt {
-      text-align: center;
-      font-size: 1rem;
-      margin-top: 20px;
+      text-align: center; font-size: 1rem; margin-top: 20px;
     }
-
     .signin-prompt a {
-      color: #0d6efd;
-      font-weight: 600;
-      text-decoration: none;
+      color: #0d6efd; font-weight: 600; text-decoration: none;
     }
   </style>
 </head>
@@ -144,7 +95,10 @@
       </div>
 
       <div class="balance">Balance: $<span id="balanceAmount">0.000</span></div>
-      <button id="cashoutBtn" class="cashout-btn" disabled>💸 Cash Out (Min $10)</button>
+      <div class="cashout-section">
+        <button id="cashoutBtn" class="cashout-btn" disabled>💸 Cash Out (Min $10)</button>
+        <span style="font-size:0.9rem;color:#7fdb6a;">CPC: $0.05–$0.15</span>
+      </div>
 
       <table id="referralTable">
         <thead>
@@ -174,7 +128,6 @@
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
-
   const app = initializeApp(firebaseConfig);
   const auth = getAuth();
   const db = getDatabase();
@@ -205,28 +158,19 @@
 
       usernameEl.textContent = name;
       userPic.src = photo;
-      referralLinkEl.textContent = `Referral Link: https://yourdomain.com/cyberchatrefer.html/${uid}`;
+      referralLinkEl.textContent = `Referral Link: https://yourdomain.com/track.html?ref=${uid}`;
 
       const clicksRef = ref(db, `/referrals/${uid}`);
-      onValue(clicksRef, (snapshot) => {
+      onValue(clicksRef, snapshot => {
         const data = snapshot.val() || {};
         const entries = Object.entries(data);
         referralTable.innerHTML = "";
-        let count = 0;
-
         entries.forEach(([key, val], i) => {
           const row = document.createElement("tr");
-          const date = new Date(val.timestamp).toLocaleDateString();
-          row.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${date}</td>
-            <td>${val.ip || "N/A"}</td>
-          `;
+          row.innerHTML = `<td>${i+1}</td><td>${new Date(val.timestamp).toLocaleDateString()}</td><td>${val.ip || "N/A"}</td>`;
           referralTable.appendChild(row);
-          count++;
         });
-
-        const balance = count * 0.10;
+        const balance = entries.length * 0.10;
         balanceEl.textContent = balance.toFixed(3);
         cashoutBtn.disabled = balance < 10;
         openBtn.innerText = `$${balance.toFixed(3)}`;
@@ -238,6 +182,5 @@
     }
   });
 </script>
-
 </body>
 </html>
