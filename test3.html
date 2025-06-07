@@ -129,11 +129,10 @@
     </div>
   </div>
 </div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -149,74 +148,121 @@
   const auth = getAuth();
   const db = getDatabase();
 
-  const openBtn = document.getElementById("openReferral");
-  const closeBtn = document.getElementById("closeReferral");
-  const popup = document.getElementById("referralPopup");
-  const referralCard = document.getElementById("referralCard");
-  const usernameEl = document.getElementById("username");
-  const userPic = document.getElementById("userPic");
-  const balanceEl = document.getElementById("balanceAmount");
-  const referralLinkEl = document.getElementById("referralLink");
-  const cashoutBtn = document.getElementById("cashoutBtn");
-  const referralTable = document.getElementById("referralTable").querySelector("tbody");
-  const signinPrompt = document.getElementById("signinPrompt");
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
 
-  openBtn.addEventListener("click", () => popup.style.display = "flex");
-  closeBtn.addEventListener("click", () => popup.style.display = "none");
+  // Detect if this page is track.html by pathname
+  const isTrackingPage = window.location.pathname.endsWith('track.html');
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      referralCard.style.display = "block";
-      signinPrompt.style.display = "none";
+  if (isTrackingPage) {
+    // This runs ONLY on track.html to track referral and redirect
+    (async () => {
+      const refUID = getQueryParam('ref');
+      if (!refUID) {
+        window.location.href = '/'; // No ref, send home
+        return;
+      }
 
-      const name = user.displayName || "CyberUser";
-      const photo = user.photoURL || "https://i.imgur.com/OVW1Z5z.png";
-      const uid = user.uid;
+      let visitorIP = 'N/A';
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        visitorIP = data.ip;
+      } catch (e) {
+        // ignore errors, IP optional
+      }
 
-      usernameEl.textContent = name;
-      userPic.src = photo;
-      referralLinkEl.textContent = `Referral Link: https://yourdomain.com/track.html?ref=${uid}`;
-
-      // Listen to referral logs under /referrals/{uid}
-      const referralsRef = ref(db, `/referrals/${uid}`);
-      onValue(referralsRef, snapshot => {
-        const data = snapshot.val() || {};
-        const entries = Object.entries(data);
-        referralTable.innerHTML = "";
-
-        entries.forEach(([key, val], i) => {
-          const timestamp = val.timestamp || Date.now();
-          const ip = val.ip || "N/A";
-
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${new Date(timestamp).toLocaleDateString()}</td>
-            <td>${ip}</td>
-          `;
-          referralTable.appendChild(row);
-        });
-
-        // Balance calculation: $0.10 per referral click
-        const balance = entries.length * 0.10;
-        balanceEl.textContent = balance.toFixed(3);
-        cashoutBtn.disabled = balance < 10;
-        openBtn.textContent = `$${balance.toFixed(3)}`;
+      const referralsRef = ref(db, `referrals/${refUID}`);
+      await push(referralsRef, {
+        timestamp: serverTimestamp(),
+        ip: visitorIP,
+        userAgent: navigator.userAgent
       });
 
-      cashoutBtn.onclick = () => {
-        if (balanceEl.textContent < 10) return;
+      // Redirect user silently after tracking
+      window.location.href = '/';
+    })();
+  } else {
+    // This runs on your main app page to show referral popup, balance, etc.
+    const openBtn = document.getElementById("openReferral");
+    const closeBtn = document.getElementById("closeReferral");
+    const popup = document.getElementById("referralPopup");
+    const referralCard = document.getElementById("referralCard");
+    const usernameEl = document.getElementById("username");
+    const userPic = document.getElementById("userPic");
+    const balanceEl = document.getElementById("balanceAmount");
+    const referralLinkEl = document.getElementById("referralLink");
+    const cashoutBtn = document.getElementById("cashoutBtn");
+    const referralTable = document.getElementById("referralTable").querySelector("tbody");
+    const signinPrompt = document.getElementById("signinPrompt");
 
-        // Your cash out logic here (e.g. open a form, redirect, or send a request)
-        alert("Cash Out feature coming soon! But you have enough balance to cash out.");
-      };
+    openBtn.addEventListener("click", () => popup.style.display = "flex");
+    closeBtn.addEventListener("click", () => popup.style.display = "none");
 
-    } else {
-      referralCard.style.display = "none";
-      signinPrompt.style.display = "block";
-      openBtn.textContent = `$0.000`;
-    }
-  });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        referralCard.style.display = "block";
+        signinPrompt.style.display = "none";
+
+        const name = user.displayName || "CyberUser";
+        const photo = user.photoURL || "https://i.imgur.com/OVW1Z5z.png";
+        const uid = user.uid;
+
+        usernameEl.textContent = name;
+        userPic.src = photo;
+
+        // Make referral link domain-agnostic
+        referralLinkEl.textContent = `Referral Link: track.html?ref=${uid}`;
+        referralLinkEl.href = `track.html?ref=${uid}`;
+        referralLinkEl.style.color = '#0d6efd';
+        referralLinkEl.style.textDecoration = 'underline';
+        referralLinkEl.target = '_blank';
+
+        // Listen to referral logs under /referrals/{uid}
+        const referralsRef = ref(db, `/referrals/${uid}`);
+        onValue(referralsRef, snapshot => {
+          const data = snapshot.val() || {};
+          const entries = Object.entries(data);
+          referralTable.innerHTML = "";
+
+          entries.forEach(([key, val], i) => {
+            const timestamp = val.timestamp || Date.now();
+            const ip = val.ip || "N/A";
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${i + 1}</td>
+              <td>${new Date(timestamp).toLocaleDateString()}</td>
+              <td>${ip}</td>
+            `;
+            referralTable.appendChild(row);
+          });
+
+          // Balance calculation: $0.10 per referral click
+          const balance = entries.length * 0.10;
+          balanceEl.textContent = balance.toFixed(3);
+          cashoutBtn.disabled = balance < 10;
+          openBtn.textContent = `$${balance.toFixed(3)}`;
+        });
+
+        cashoutBtn.onclick = () => {
+          if (parseFloat(balanceEl.textContent) < 10) {
+            alert("You need at least $10 to cash out.");
+            return;
+          }
+          alert("Cash Out feature coming soon! But you have enough balance to cash out.");
+        };
+
+      } else {
+        referralCard.style.display = "none";
+        signinPrompt.style.display = "block";
+        openBtn.textContent = `$0.000`;
+      }
+    });
+  }
 </script>
+
 </body>
 </html>
