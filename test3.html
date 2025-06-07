@@ -1,114 +1,111 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Referral Dashboard - CyberChat</title>
+  <title>Referral Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --bg-color: #0d0d0d;
-      --card-bg: #1a1a1a;
-      --primary: #00ffcc;
-      --secondary: #ffffffcc;
-      --danger: #ff4444;
-      --radius: 1.5rem;
-    }body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background: var(--bg-color);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
-}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0e0e0e;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+    }
 
-.card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 2rem;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-}
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
 
-h1 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: var(--primary);
-  text-align: center;
-}
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 1.5rem;
+    }
 
-.link-box {
-  background: #2a2a2a;
-  padding: 1rem;
-  border-radius: 1rem;
-  word-break: break-word;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  color: var(--secondary);
-  text-align: center;
-}
+    .link {
+      word-break: break-all;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      color: #00d4ff;
+    }
 
-.btn {
-  display: block;
-  width: 100%;
-  padding: 1rem;
-  background: var(--primary);
-  color: #000;
-  font-weight: bold;
-  border: none;
-  border-radius: var(--radius);
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      background: #00d4ff;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
 
-.btn:hover {
-  background: #00ddaa;
-}
+    button:disabled {
+      background: #555;
+      color: #aaa;
+      cursor: not-allowed;
+    }
 
-.stat {
-  margin: 0.5rem 0;
-  font-size: 1.1rem;
-  color: var(--secondary);
-  text-align: center;
-}
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
 
-.cashout {
-  background: #222;
-  color: white;
-  border: 2px solid var(--primary);
-}
+    .cashout-info {
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-top: 0.5rem;
+    }
 
-.cashout:disabled {
-  background: #444;
-  color: #777;
-  border-color: #333;
-  cursor: not-allowed;
-}
-
-.logout {
-  background: var(--danger);
-}
-
+    @media (max-width: 500px) {
+      h1 { font-size: 1.5rem; }
+      .card { padding: 1.2rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="card" id="dashboard" style="display:none">
-    <h1>Referral Dashboard</h1>
-    <div id="referralLink" class="link-box" title="Tap to copy"></div>
-    <button class="btn" id="copyLinkBtn">Copy Link</button><div class="stat">Clicks: <span id="clicksCount">0</span></div>
-<div class="stat">Earnings: $<span id="earningsAmount">0.00</span></div>
 
-<button class="btn cashout" id="cashoutBtn" disabled>Cash Out</button>
-<button class="btn logout" id="logoutBtn">Logout</button>
+  <h1>Referral Dashboard</h1>
 
-  </div>  <script type="module">
+  <div class="card">
+    <div>Your referral link:</div>
+    <div class="link" id="refLink">Loading...</div>
+    <button id="copyBtn">📋 Copy Link</button>
+    <button id="shareBtn">📤 Share Link</button>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <span>Clicks:</span>
+      <span id="clicks">0</span>
+    </div>
+    <div class="stats">
+      <span>Earnings:</span>
+      <span id="earnings">$0.00</span>
+    </div>
+    <button id="cashoutBtn" disabled>💸 Cash Out</button>
+    <div class="cashout-info">Minimum $10 to Cash Out</div>
+  </div>
+
+  <!-- Firebase & Logic -->
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -117,48 +114,75 @@ h1 {
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
     const db = getDatabase(app);
-    const auth = getAuth(app);
 
-    const dashboard = document.getElementById('dashboard');
-    const referralLink = document.getElementById('referralLink');
-    const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const clicksCount = document.getElementById('clicksCount');
-    const earningsAmount = document.getElementById('earningsAmount');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const cashoutBtn = document.getElementById('cashoutBtn');
+    const refLinkEl = document.getElementById("refLink");
+    const copyBtn = document.getElementById("copyBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const clicksEl = document.getElementById("clicks");
+    const earningsEl = document.getElementById("earnings");
+    const cashoutBtn = document.getElementById("cashoutBtn");
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = "login.html";
         return;
       }
-      dashboard.style.display = 'block';
+
       const uid = user.uid;
-      const referralURL = `${location.origin}/referralLink.html?referuid=${uid}`;
-      referralLink.textContent = referralURL;
+      const refLink = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
+      refLinkEl.textContent = refLink;
 
-      const clicksRef = ref(db, `users/${uid}/clicks`);
-      onValue(clicksRef, snap => {
-        clicksCount.textContent = snap.val() || 0;
-      });
+      // Copy to clipboard
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(refLink).then(() => {
+          copyBtn.textContent = "✅ Copied!";
+          setTimeout(() => (copyBtn.textContent = "📋 Copy Link"), 2000);
+        });
+      };
 
-      const earningsRef = ref(db, `users/${uid}/balance`);
-      onValue(earningsRef, snap => {
-        const earnings = parseFloat(snap.val() || 0);
-        earningsAmount.textContent = earnings.toFixed(2);
-        cashoutBtn.disabled = earnings < 10;
-      });
+      // Native share
+      shareBtn.onclick = () => {
+        if (navigator.share) {
+          navigator.share({
+            title: "Join CyberChat and earn!",
+            text: "Get paid when your friends join. Here's my link:",
+            url: refLink
+          }).catch(() => {});
+        } else {
+          alert("Sharing not supported on this device.");
+        }
+      };
 
-      copyLinkBtn.onclick = () => navigator.clipboard.writeText(referralURL).then(() => alert("Copied!"));
-      referralLink.onclick = () => navigator.clipboard.writeText(referralURL).then(() => alert("Copied!"));
+      try {
+        const userRef = ref(db, `users/${uid}`);
+        const snap = await get(userRef);
+        if (!snap.exists()) return;
 
-      logoutBtn.onclick = () => signOut(auth).then(() => location.href = 'login.html');
-      cashoutBtn.onclick = () => alert('Withdraw Requested!');
+        const data = snap.val();
+        const clicks = data.clicks || 0;
+        const earnings = data.balance || 0;
+
+        clicksEl.textContent = clicks;
+        earningsEl.textContent = `$${earnings.toFixed(2)}`;
+
+        if (earnings >= 10) {
+          cashoutBtn.disabled = false;
+          cashoutBtn.onclick = () => alert("Cashout request submitted!");
+        } else {
+          cashoutBtn.disabled = true;
+        }
+
+      } catch (err) {
+        console.error("Error loading data:", err);
+      }
     });
-  </script></body>
+  </script>
+</body>
 </html>
