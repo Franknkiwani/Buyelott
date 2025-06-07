@@ -655,51 +655,26 @@
         }
       }, 5000); // 5000 ms = 5 seconds
     });
+const urlParams = new URLSearchParams(window.location.search);
+const referUid = urlParams.get('referuid');
+
+async function rewardUser(uid) {
+  if (!uid) return;
+  const userBalanceRef = ref(db, `users/${uid}/balance`);
+  try {
+    await runTransaction(userBalanceRef, (currentBalance) => {
+      if (currentBalance === null) return 0.10;
+      return currentBalance + 0.10;
+    });
+    console.log(`Added $0.10 to user ${uid} balance.`);
+  } catch (error) {
+    console.error('Error updating balance:', error);
+  }
+}
+
+if (referUid) {
+  rewardUser(referUid);
+}
   </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Parse URL for referuid param
-  const urlParams = new URLSearchParams(window.location.search);
-  const referUid = urlParams.get('referuid');
-
-  // Function to add $0.10 to balance safely using transaction
-  async function rewardUser(uid) {
-    if (!uid) return;
-
-    const userBalanceRef = ref(db, `users/${uid}/balance`);
-    try {
-      await runTransaction(userBalanceRef, (currentBalance) => {
-        if (currentBalance === null) {
-          return 0.10; // starting balance
-        }
-        return currentBalance + 0.10;
-      });
-      console.log(`Added $0.10 to user ${uid} balance.`);
-    } catch (error) {
-      console.error('Error updating balance:', error);
-    }
-  }
-
-  // Trigger referral reward
-  if (referUid) {
-    rewardUser(referUid);
-  }
-</script>
 </body>
 </html>
