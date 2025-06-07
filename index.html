@@ -423,7 +423,31 @@
 <div class="container" id="modContainer">
 <h1 style="text-align: center;">🔥MODS🔥</h1>
   <div id="mods"></div>
+  <div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">    
+    atOptions = {    
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',    
+      'format' : 'iframe',    
+      'height' : 50,    
+      'width' : 320,    
+      'params' : {}    
+    };    
+  </script>    
+  <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>    
+</div>
   <button id="loadMore">Load More Mods</button>
+<div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
 </div>
 
 <!-- Glassy loading popup -->
@@ -456,6 +480,8 @@
   <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
 </div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>  
 <script>
   // Firebase config & init
   const firebaseConfig = {
@@ -467,12 +493,16 @@
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
+
+  // Make sure Firebase SDK scripts are loaded before this
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   // Constants
-  const BATCH_SIZE = 6;
+  const BATCH_SIZE = 5;
   const LOCAL_STORAGE_KEY = "loadedMods";
+  const REFRESH_COUNT_KEY = "modsRefreshCount";
+  const MAX_REFRESHES = 3;
 
   // DOM elements
   const modsEl = document.getElementById("mods");
@@ -485,22 +515,22 @@
   let displayedMods = [];
   let currentIndex = 0;
 
-  // Shuffle function (Fisher-Yates)
+  // Fisher-Yates shuffle
   function shuffleArray(arr) {
-    for(let i = arr.length -1; i > 0; i--) {
+    for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   }
 
-  // Create ad element with scripts
+  // Creates ad element with scripts
   function createAdScript(key, height, width) {
-    const adWrapper = document.createElement('div');
+    const adWrapper = document.createElement("div");
     adWrapper.style.margin = "1rem auto";
     adWrapper.style.textAlign = "center";
 
-    const configScript = document.createElement('script');
-    configScript.type = 'text/javascript';
+    const configScript = document.createElement("script");
+    configScript.type = "text/javascript";
     configScript.text = `
       atOptions = {
         'key' : '${key}',
@@ -511,8 +541,8 @@
       };
     `;
 
-    const invokeScript = document.createElement('script');
-    invokeScript.type = 'text/javascript';
+    const invokeScript = document.createElement("script");
+    invokeScript.type = "text/javascript";
     invokeScript.src = `//www.highperformanceformat.com/${key}/invoke.js`;
 
     adWrapper.appendChild(configScript);
@@ -521,20 +551,28 @@
     return adWrapper;
   }
 
-  // Load mods from localStorage or Firebase
+  // Load mods from localStorage or Firebase with refresh count expiration
   async function loadMods() {
+    let refreshCount = parseInt(localStorage.getItem(REFRESH_COUNT_KEY) || "0", 10);
+    refreshCount++;
+    localStorage.setItem(REFRESH_COUNT_KEY, refreshCount.toString());
+
+    let useCache = false;
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
+
+    if (refreshCount < MAX_REFRESHES && saved) {
       try {
         allMods = JSON.parse(saved);
-        console.log("Loaded mods from localStorage:", allMods.length);
-      } catch {
+        useCache = true;
+        console.log(`Loaded mods from localStorage. Refresh count: ${refreshCount}`);
+      } catch (e) {
+        console.warn("Failed parsing localStorage, fetching fresh:", e);
         allMods = [];
       }
     }
 
-    if (!allMods.length) {
-      console.log("Fetching mods from Firebase...");
+    if (!useCache) {
+      console.log("Fetching mods from Firebase fresh...");
       const snapshot = await db.ref("/mods").once("value");
       if (!snapshot.exists()) {
         modsEl.innerHTML = "<p>No mods found.</p>";
@@ -543,22 +581,26 @@
       }
       allMods = Object.entries(snapshot.val()).map(([key, val]) => ({
         id: key,
-        ...val
+        ...val,
       }));
+
       shuffleArray(allMods);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+      localStorage.setItem(REFRESH_COUNT_KEY, "0"); // reset refresh count on fresh fetch
+      console.log("Saved fresh mods to localStorage and reset refresh count.");
     }
 
     displayNextBatch();
   }
 
-  // Display next batch of mods + ads
+  // Display next batch of mods and ads
   function displayNextBatch() {
     if (currentIndex >= allMods.length) {
       loadMoreBtn.disabled = true;
       loadMoreBtn.textContent = "No more mods";
       return;
     }
+
     const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
 
     nextBatch.forEach((mod, i) => {
@@ -566,20 +608,20 @@
       const card = createModCard(mod);
       modsEl.appendChild(card);
 
-      const globalIndex = currentIndex + i + 1; // 1-based index globally
+      const globalIndex = currentIndex + i + 1; // 1-based global index
 
-      // Insert ads after posts according to the rule:
-      // After every 2 posts: big ad
+      // Insert ads:
+      // After every 5th mod: big ad
       if (globalIndex % 2 === 0) {
-        modsEl.appendChild(createAdScript('037f6e178c935a44f2ef5ab0ce53116a', 250, 300));
-      } 
-      // After every 1 post: small ad
-      else if (globalIndex % 1 === 0) {
-        modsEl.appendChild(createAdScript('f17f4bf893957f37c1f0b072d1f31673', 50, 320));
+        modsEl.appendChild(createAdScript("037f6e178c935a44f2ef5ab0ce53116a", 250, 300));
+      }
+      // After every 2nd mod (but not 5th): small ad
+      else if (globalIndex % 4 === 0) {
+        modsEl.appendChild(createAdScript("f17f4bf893957f37c1f0b072d1f31673", 50, 320));
       }
     });
 
-    currentIndex += nextBatch.length;  // <---- FIXED increment by actual loaded posts
+    currentIndex += nextBatch.length;
 
     if (currentIndex >= allMods.length) {
       loadMoreBtn.disabled = true;
@@ -587,14 +629,14 @@
     }
   }
 
-  // Create a mod card element with download button
+  // Create mod card element with download button and countdown
   function createModCard(mod) {
     const card = document.createElement("div");
     card.className = "mod-card";
 
     const img = document.createElement("img");
     img.className = "mod-image";
-    img.src = mod.imageurl || "";
+    img.src = mod.imageurl || "https://via.placeholder.com/300x180?text=No+Image";
     img.alt = mod.title || "Mod image";
     card.appendChild(img);
 
@@ -611,7 +653,7 @@
     btn.textContent = `Download Now (${mod.downloads || 0})`;
 
     btn.onclick = () => {
-      let secondsLeft = 7; // 5 second countdown
+      let secondsLeft = 7; // countdown seconds
       popup.style.display = "flex";
       countdownEl.textContent = secondsLeft;
 
@@ -621,15 +663,19 @@
         if (secondsLeft <= 0) {
           clearInterval(intervalId);
           popup.style.display = "none";
+          // Redirect - you might want to customize this URL based on the mod
           window.location.href = "downloadnow.html";
         }
       }, 1000);
 
-      // Increment downloads async (non-blocking)
+      // Update download count locally and remotely
       mod.downloads = (mod.downloads || 0) + 1;
       btn.textContent = `Download Now (${mod.downloads})`;
-      db.ref(`/mods/${mod.id}/downloads`).set(mod.downloads)
-        .catch(e => console.error("Failed to update downloads count:", e));
+
+      // Save back to Firebase & localStorage async, but don’t wait/block UI
+      db.ref(`/mods/${mod.id}/downloads`).set(mod.downloads).catch(e => {
+        console.error("Failed to update downloads count:", e);
+      });
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
     };
 
@@ -639,10 +685,10 @@
     return card;
   }
 
-  // Initial load
+  // Init
   loadMods();
 
-  // Load more on button click
+  // Hook up "Load More" button
   loadMoreBtn.onclick = () => {
     displayNextBatch();
   };
