@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Referral Dashboard</title>
+  <title>Referral Popup</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
@@ -11,18 +11,46 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #f8f8f8;
       margin: 0;
-      padding: 20px;
+      background: #f2f2f2;
     }
 
-    .card {
+    .glass-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid #ccc;
+      padding: 12px 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup {
       background: #fff;
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      width: 90%;
       max-width: 600px;
-      margin: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .popup .close-btn {
+      position: absolute;
+      right: 16px;
+      top: 12px;
+      font-size: 20px;
+      cursor: pointer;
     }
 
     .user-info {
@@ -41,7 +69,6 @@
 
     .user-info h2 {
       margin: 0;
-      font-size: 1.5rem;
     }
 
     .balance {
@@ -68,14 +95,14 @@
 
     table {
       width: 100%;
-      margin-top: 24px;
+      margin-top: 20px;
       border-collapse: collapse;
     }
 
     th, td {
-      padding: 12px;
-      text-align: left;
+      padding: 10px;
       border-bottom: 1px solid #eee;
+      text-align: left;
     }
 
     th {
@@ -90,39 +117,47 @@
 
     .signin-prompt a {
       color: #0d6efd;
-      text-decoration: none;
       font-weight: 600;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
 
-<div class="card" id="referralCard" style="display: none;">
-  <div class="user-info">
-    <img id="userPic" src="" alt="Profile Picture"/>
-    <div>
-      <h2 id="username">User</h2>
-      <div id="referralLink" style="font-size: 0.9rem; color: #777;"></div>
+<button class="glass-btn" id="openReferral">$0.000</button>
+
+<div class="popup-overlay" id="referralPopup">
+  <div class="popup">
+    <div class="close-btn" id="closeReferral">&times;</div>
+
+    <div id="signinPrompt" class="signin-prompt">
+      Not signed in? <a href="login.html">Sign In Now</a>
+    </div>
+
+    <div id="referralCard" style="display: none;">
+      <div class="user-info">
+        <img id="userPic" src="" alt="Profile Pic"/>
+        <div>
+          <h2 id="username">User</h2>
+          <div id="referralLink" style="font-size: 0.9rem; color: #777;"></div>
+        </div>
+      </div>
+
+      <div class="balance">Balance: $<span id="balanceAmount">0.000</span></div>
+      <button id="cashoutBtn" class="cashout-btn" disabled>💸 Cash Out (Min $10)</button>
+
+      <table id="referralTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
-
-  <div class="balance">Balance: $<span id="balanceAmount">0.000</span></div>
-  <button id="cashoutBtn" class="cashout-btn" disabled>💸 Cash Out (Min $10)</button>
-
-  <table id="referralTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>IP</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div id="signinPrompt" class="signin-prompt">
-  Not signed in? <a href="login.html">Sign In Now</a>
 </div>
 
 <script type="module">
@@ -144,6 +179,9 @@
   const auth = getAuth();
   const db = getDatabase();
 
+  const openBtn = document.getElementById("openReferral");
+  const closeBtn = document.getElementById("closeReferral");
+  const popup = document.getElementById("referralPopup");
   const referralCard = document.getElementById("referralCard");
   const usernameEl = document.getElementById("username");
   const userPic = document.getElementById("userPic");
@@ -152,6 +190,9 @@
   const cashoutBtn = document.getElementById("cashoutBtn");
   const referralTable = document.getElementById("referralTable").querySelector("tbody");
   const signinPrompt = document.getElementById("signinPrompt");
+
+  openBtn.addEventListener("click", () => popup.style.display = "flex");
+  closeBtn.addEventListener("click", () => popup.style.display = "none");
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -179,7 +220,7 @@
           row.innerHTML = `
             <td>${i + 1}</td>
             <td>${date}</td>
-            <td>${val.ip || "Unknown"}</td>
+            <td>${val.ip || "N/A"}</td>
           `;
           referralTable.appendChild(row);
           count++;
@@ -188,11 +229,12 @@
         const balance = count * 0.10;
         balanceEl.textContent = balance.toFixed(3);
         cashoutBtn.disabled = balance < 10;
+        openBtn.innerText = `$${balance.toFixed(3)}`;
       });
-
     } else {
       referralCard.style.display = "none";
       signinPrompt.style.display = "block";
+      openBtn.innerText = `$0.000`;
     }
   });
 </script>
