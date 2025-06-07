@@ -2,59 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CyberChat Earnings (No Anonymous)</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 2rem;
-      background: #f4f4f4;
+      padding: 1rem;
+      background: #121212;
+      color: white;
+      box-sizing: border-box;
     }
 
     .glass-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 12px 24px;
-      font-size: 18px;
-      color: black;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 16px;
+      color: #fff;
       cursor: pointer;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-      transition: all 0.2s ease;
+      width: 100%;
+      max-width: 400px;
+      margin: auto;
+      display: block;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s ease;
     }
 
     .glass-btn:hover {
-      transform: scale(1.05);
+      transform: scale(1.03);
     }
 
     .popup {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.85);
       display: flex; align-items: center; justify-content: center;
       z-index: 999;
     }
 
     .popup-content {
-      background: white;
+      background: #1e1e1e;
       padding: 2em;
       border-radius: 20px;
-      width: 80%;
+      width: 90%;
       max-width: 400px;
+      color: white;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       animation: fadeIn 0.3s ease;
     }
 
-    input#referralLink {
+    .popup-content input {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
+      margin: 10px 0 20px;
+      font-size: 15px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #555;
+      background: #2c2c2c;
+      color: white;
     }
 
     .popup-content button,
@@ -66,8 +77,11 @@
       border-radius: 10px;
       background: #007bff;
       color: white;
-      cursor: pointer;
       font-size: 15px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      transition: background 0.2s;
       text-decoration: none;
     }
 
@@ -76,23 +90,67 @@
       background: #0056b3;
     }
 
+    .popup-content button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Ad placement cleanup */
+    .ad-container {
+      width: 100%;
+      text-align: center;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
 
-  <button class="glass-btn" id="earningsBtn">EARNINGS: $0.000</button>
+  <!-- Ad on top -->
+  <div class="ad-container">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  </div>
 
+  <!-- Button -->
+  <button class="glass-btn" id="earningsBtn">EARNINGS: $0.00</button>
+
+  <!-- Popup -->
   <div id="referralPopup" style="display: none;" class="popup">
     <div class="popup-content" id="popupContent"></div>
   </div>
 
+  <!-- Ad on bottom -->
+  <div class="ad-container">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  </div>
+
+  <!-- Firebase logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -101,12 +159,12 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
     const earningsBtn = document.getElementById('earningsBtn');
     const popup = document.getElementById('referralPopup');
@@ -132,27 +190,51 @@
 
       if (user) {
         const uid = user.uid;
-        // Use current domain + /referralLink.html?referuid=uid format
         const link = `${window.location.origin}/referralLink.html?referuid=${uid}`;
+        const earningsRef = ref(db, `/referrals/${uid}`);
 
-        popupContent.innerHTML = `
-          <h3>Share & Earn</h3>
-          <p>Your unique referral link:</p>
-          <input type="text" id="referralLink" readonly value="${link}" />
-          <button id="copyBtn">Copy Link</button>
-          <button id="closeBtn">Close</button>
-        `;
+        onValue(earningsRef, (snapshot) => {
+          const data = snapshot.val() || {};
+          const clicks = data.clicks || 0;
+          const earnings = (clicks * 0.02).toFixed(2); // $0.02 per click
+          const cashoutEligible = parseFloat(earnings) >= 10;
 
-        document.getElementById('copyBtn').addEventListener('click', copyReferralLink);
-        document.getElementById('closeBtn').addEventListener('click', closePopup);
+          popupContent.innerHTML = `
+            <h3>Referral Dashboard</h3>
+            <p>Your referral link:</p>
+            <input type="text" id="referralLink" readonly value="${link}" />
+            <p>Clicks: <strong>${clicks}</strong></p>
+            <p>Earnings: <strong>$${earnings}</strong></p>
+            <button id="copyBtn">Copy Link</button>
+            <button ${!cashoutEligible ? 'disabled' : ''}>${cashoutEligible ? 'Cash Out Now' : 'Minimum $10 to Cash Out'}</button>
+            <button id="closeBtn">Close</button>
+          `;
+
+          document.getElementById('copyBtn').addEventListener('click', copyReferralLink);
+          document.getElementById('closeBtn').addEventListener('click', closePopup);
+        });
       } else {
         popupContent.innerHTML = `
           <h3>Access Denied</h3>
-          <p>You must sign in to get your referral link.</p>
+          <p>You must sign in to see your referrals.</p>
           <a href="login.html">Go to Login</a>
           <button id="closeBtn">Close</button>
         `;
         document.getElementById('closeBtn').addEventListener('click', closePopup);
+      }
+    });
+
+    // Update earnings text in button live
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const uid = user.uid;
+        const earningsRef = ref(db, `/referrals/${uid}`);
+        onValue(earningsRef, (snapshot) => {
+          const data = snapshot.val() || {};
+          const clicks = data.clicks || 0;
+          const earnings = (clicks * 0.02).toFixed(2);
+          earningsBtn.textContent = `EARNINGS: $${earnings}`;
+        });
       }
     });
   </script>
