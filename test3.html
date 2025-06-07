@@ -8,7 +8,8 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f0f4f8;
-      margin: 0; padding: 2rem;
+      margin: 0;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -18,7 +19,7 @@
       background: white;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(31, 38, 135, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       max-width: 400px;
       width: 100%;
       box-sizing: border-box;
@@ -28,51 +29,44 @@
       text-align: center;
       color: #1f267d;
     }
-    label {
-      font-weight: 600;
-    }
     #referralLink {
       margin: 1rem 0;
-      font-size: 0.9rem;
       word-break: break-all;
       background: #e2e8f0;
       padding: 0.5rem;
       border-radius: 8px;
       user-select: all;
-      cursor: pointer;
+      font-size: 0.9rem;
     }
     button {
-      margin-top: 0.5rem;
       width: 100%;
       padding: 0.75rem;
+      margin-top: 1rem;
       background: #1f267d;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: 700;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background: #2b33b2;
     }
-    #stats {
-      margin-top: 1.5rem;
-      font-size: 1.1rem;
-      color: #222;
+    #logoutBtn {
+      background-color: #b00020;
+      margin-top: 2rem;
     }
-    #message {
+    #stats {
+      font-size: 1.1rem;
       margin-top: 1rem;
-      color: #b00020;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-
-  <div id="dashboard">
+  <div id="dashboard" style="display:none;">
     <h1>Your Referral Dashboard</h1>
-    <label>Your Referral Link:</label>
     <div id="referralLink" title="Click to copy"></div>
     <button id="copyLinkBtn">Copy Link</button>
 
@@ -80,12 +74,14 @@
       <p>Clicks: <span id="clicksCount">0</span></p>
       <p>Earnings: $<span id="earningsAmount">0.00</span></p>
     </div>
-    <div id="message"></div>
+
+    <button id="logoutBtn">Logout</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -94,51 +90,64 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    const referralLinkDiv = document.getElementById('referralLink');
+    const dashboard = document.getElementById('dashboard');
+    const referralLink = document.getElementById('referralLink');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const clicksCountSpan = document.getElementById('clicksCount');
-    const earningsAmountSpan = document.getElementById('earningsAmount');
-    const messageDiv = document.getElementById('message');
+    const clicksCount = document.getElementById('clicksCount');
+    const earningsAmount = document.getElementById('earningsAmount');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    const params = new URLSearchParams(window.location.search);
-    const uid = params.get('uid');
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // User not logged in — redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
 
-    if (!uid) {
-      messageDiv.textContent = "❌ No UID provided in URL. Add ?uid=YOUR_ID to view your dashboard.";
-      document.getElementById("dashboard").style.display = "none";
-    } else {
+      dashboard.style.display = 'block';
+      const uid = user.uid;
       const referralURL = `${location.origin}/referralLink.html?referuid=${uid}`;
-      referralLinkDiv.textContent = referralURL;
+      referralLink.textContent = referralURL;
 
+      // Live updates
       const clicksRef = ref(db, `users/${uid}/clicks`);
       onValue(clicksRef, snapshot => {
-        const clicks = snapshot.val() || 0;
-        clicksCountSpan.textContent = clicks;
+        clicksCount.textContent = snapshot.val() || 0;
       });
 
       const earningsRef = ref(db, `users/${uid}/balance`);
       onValue(earningsRef, snapshot => {
-        const earnings = snapshot.val() || 0;
-        earningsAmountSpan.textContent = earnings.toFixed(2);
+        const earnings = parseFloat(snapshot.val() || 0).toFixed(2);
+        earningsAmount.textContent = earnings;
       });
 
-      referralLinkDiv.addEventListener('click', () => {
-        navigator.clipboard.writeText(referralURL)
-          .then(() => alert('Referral link copied!'));
-      });
-
+      // Copy logic
       copyLinkBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(referralURL)
-          .then(() => alert('Referral link copied!'));
+          .then(() => alert("Copied!"))
+          .catch(() => alert("Couldn't copy"));
       });
-    }
+
+      referralLink.addEventListener('click', () => {
+        navigator.clipboard.writeText(referralURL)
+          .then(() => alert("Copied!"))
+          .catch(() => alert("Couldn't copy"));
+      });
+
+      // Logout logic
+      logoutBtn.addEventListener('click', () => {
+        signOut(auth).then(() => {
+          window.location.href = 'login.html';
+        });
+      });
+    });
   </script>
 </body>
 </html>
