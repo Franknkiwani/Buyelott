@@ -212,7 +212,114 @@
   background: rgba(0, 255, 204, 1);
   border-color: black;
 }
+ .container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  .mod-card {
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.7);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+  }
+  .mod-card:hover {
+    transform: translateY(-5px);
+  }
+  .mod-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .mod-info {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mod-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex: 1;
+  }
+  button.download-btn {
+    background: #007aff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    width: 120px;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button.download-btn:active {
+    background-color: #005bb5;
+  }
+  #loadMore {
+    display: block;
+    margin: 2rem auto;
+    background: #00cc88;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    color: #121212;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+  }
+  #loadMore:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+ /* Fullscreen overlay with background blur */
+.countdown-overlay {
+  position: fixed;
+  inset: 0; /* top/right/bottom/left 0 */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 9999;
+}
+
+/* Show overlay when visible */
+.countdown-overlay.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* The glassy popup box */
+.countdown-popup {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem 3rem;
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  text-align: center;
+  min-width: 320px;
+  max-width: 400px;
+  user-select: none;
+}
   </style>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <header>
@@ -243,5 +350,200 @@
   <div class="container">
     <!-- Your 3D magic or main app content here -->
   </div>
+ <div class="container" id="modContainer">
+  <h1>MODS</h1>
+</div>
+
+<style>
+  #modContainer {
+    text-align: center;
+  }
+</style>
+  <div id="mods"></div>
+  <button id="loadMore">Load More Mods</button>
+</div>
+<div id="countdownOverlay" class="countdown-overlay">
+  <div class="countdown-popup">
+    <!-- Big Box Ad (300x250) -->
+<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
+    <p>Download starting in <span id="countdownTimer">5</span> seconds...</p>
+  <!-- Big Box Ad (300x250) -->
+<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
+</div>
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Constants
+  const BATCH_SIZE = 6;
+  const LOCAL_STORAGE_KEY = "loadedMods";
+
+  // DOM elements
+  const modsEl = document.getElementById("mods");
+  const loadMoreBtn = document.getElementById("loadMore");
+
+  // State
+  let allMods = [];
+  let displayedMods = [];
+  let currentIndex = 0;
+
+  // Shuffle function
+  function shuffleArray(arr) {
+    for(let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]]; // fixed swap
+    }
+  }
+
+  // Load from localStorage or Firebase
+  async function loadMods() {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      try {
+        allMods = JSON.parse(saved);
+        console.log("Loaded mods from localStorage:", allMods.length);
+      } catch {
+        allMods = [];
+      }
+    }
+
+    if (!allMods.length) {
+      console.log("Fetching mods from Firebase...");
+      const snapshot = await db.ref("/mods").once("value");
+      if (!snapshot.exists()) {
+        modsEl.innerHTML = "<p>No mods found.</p>";
+        loadMoreBtn.disabled = true;
+        return;
+      }
+      allMods = Object.entries(snapshot.val()).map(([key, val]) => ({
+        id: key,
+        ...val
+      }));
+      shuffleArray(allMods);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+    }
+
+    displayNextBatch();
+  }
+
+  // Display next batch of mods
+  function displayNextBatch() {
+    if (currentIndex >= allMods.length) {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = "No more mods";
+      return;
+    }
+    const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
+    nextBatch.forEach(mod => {
+      displayedMods.push(mod);
+      const card = createModCard(mod);
+      modsEl.appendChild(card);
+    });
+    currentIndex += BATCH_SIZE;
+    if (currentIndex >= allMods.length) {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = "No more mods";
+    }
+  }
+
+  // Create a mod card element
+  function createModCard(mod) {
+    const card = document.createElement("div");
+    card.className = "mod-card";
+
+    const img = document.createElement("img");
+    img.className = "mod-image";
+    img.src = mod.imageurl || "";
+    img.alt = mod.title || "Mod image";
+    card.appendChild(img);
+
+    const info = document.createElement("div");
+    info.className = "mod-info";
+
+    const title = document.createElement("div");
+    title.className = "mod-title";
+    title.textContent = mod.title || "Untitled Mod";
+    info.appendChild(title);
+
+    const btn = document.createElement("button");
+    btn.className = "download-btn";
+    btn.textContent = `Download Now (${mod.downloads || 0})`;
+    btn.onclick = async () => {
+      // Increment downloads locally and in Firebase
+      mod.downloads = (mod.downloads || 0) + 1;
+      btn.textContent = `Download Now (${mod.downloads})`;
+      try {
+        await db.ref(`/mods/${mod.id}/downloads`).set(mod.downloads);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+      } catch (e) {
+        console.error("Failed to update downloads count:", e);
+      }
+
+      // Show countdown popup
+      const overlay = document.getElementById("countdownOverlay");
+      const timerEl = document.getElementById("countdownTimer");
+      let countdown = 5;
+
+      timerEl.textContent = countdown;
+      overlay.classList.add("visible");
+
+      const interval = setInterval(() => {
+        countdown--;
+        timerEl.textContent = countdown;
+        if (countdown <= 0) {
+          clearInterval(interval);
+          overlay.classList.remove("visible");
+          // Redirect after countdown
+          window.location.href = "downloadnow.html";
+        }
+      }, 1000);
+    };
+
+    info.appendChild(btn);
+    card.appendChild(info);
+
+    return card;
+  }
+
+  // Load initial mods
+  loadMods();
+
+  // Load more on button click
+  loadMoreBtn.onclick = () => {
+    displayNextBatch();
+  };
+</script>
 </body>
 </html>
