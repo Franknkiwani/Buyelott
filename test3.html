@@ -1,173 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CyberChat Referral</title>
+  <title>Referral Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #f9f9f9;
+      background: #f8f8f8;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
 
-    .glass-btn {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      color: #333;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    #referralPopup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .popup-content {
+    .card {
       background: #fff;
-      border-radius: 20px;
-      padding: 32px 24px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      animation: popupFade 0.3s ease-out;
-      position: relative;
-      text-align: center;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      max-width: 600px;
+      margin: auto;
     }
 
-    @keyframes popupFade {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .popup-content h2 {
-      font-size: 1.75rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-
-    .popup-content input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 0.9rem;
-      margin: 8px 0;
-    }
-
-    .popup-content button.copy-btn {
-      margin-top: 8px;
-      background: #0d6efd;
-      color: #fff;
-      font-weight: 600;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .popup-content button.copy-btn:hover {
-      background: #0b5ed7;
-    }
-
-    #userInfo {
+    .user-info {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
     }
 
-    #userPic {
-      width: 42px;
-      height: 42px;
+    .user-info img {
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       border: 1px solid #ccc;
     }
 
-    .popup-content .signin-prompt {
-      font-size: 0.85rem;
-      margin-top: 12px;
-      color: #777;
+    .user-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
     }
 
-    .popup-content .signin-prompt a {
-      color: #0d6efd;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .popup-content .signin-prompt a:hover {
-      text-decoration: underline;
-    }
-
-    .popup-close {
-      position: absolute;
-      top: 12px;
-      right: 16px;
+    .balance {
       font-size: 1.25rem;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: #888;
+      margin: 12px 0;
+      font-weight: 600;
+      color: #0d6efd;
     }
 
-    .popup-close:hover {
-      color: #000;
+    .cashout-btn {
+      padding: 10px 20px;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .cashout-btn:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 24px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    .signin-prompt {
+      text-align: center;
+      font-size: 1rem;
+      margin-top: 20px;
+    }
+
+    .signin-prompt a {
+      color: #0d6efd;
+      text-decoration: none;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-<!-- 🔘 Trigger Button -->
-<button class="glass-btn" onclick="openReferralPopup()">$0.000</button>
-
-<!-- 💬 Referral Popup -->
-<div id="referralPopup" class="hidden">
-  <div class="popup-content">
-    <button class="popup-close" onclick="closeReferralPopup()">×</button>
-    <h2>Refer & Earn 💸</h2>
-
-    <div id="userInfo" style="display: none;">
-      <img id="userPic" src="" alt="User" />
-      <span id="username"></span>
-    </div>
-
-    <input id="referralLink" readonly placeholder="Your referral link will appear here"/>
-
-    <button id="copyLink" class="copy-btn">📋 Copy Referral Link</button>
-
-    <div id="signinPrompt" class="signin-prompt hidden">
-      Not signed in? <a href="login.html">Sign In Now</a>
+<div class="card" id="referralCard" style="display: none;">
+  <div class="user-info">
+    <img id="userPic" src="" alt="Profile Picture"/>
+    <div>
+      <h2 id="username">User</h2>
+      <div id="referralLink" style="font-size: 0.9rem; color: #777;"></div>
     </div>
   </div>
+
+  <div class="balance">Balance: $<span id="balanceAmount">0.000</span></div>
+  <button id="cashoutBtn" class="cashout-btn" disabled>💸 Cash Out (Min $10)</button>
+
+  <table id="referralTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>IP</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
-<!-- 🔌 Firebase + Logic -->
+<div id="signinPrompt" class="signin-prompt">
+  Not signed in? <a href="login.html">Sign In Now</a>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -180,53 +141,60 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  const auth = getAuth();
+  const db = getDatabase();
 
-  const referralPopup = document.getElementById("referralPopup");
-  const referralLink = document.getElementById("referralLink");
-  const copyLink = document.getElementById("copyLink");
-  const userInfo = document.getElementById("userInfo");
-  const username = document.getElementById("username");
+  const referralCard = document.getElementById("referralCard");
+  const usernameEl = document.getElementById("username");
   const userPic = document.getElementById("userPic");
+  const balanceEl = document.getElementById("balanceAmount");
+  const referralLinkEl = document.getElementById("referralLink");
+  const cashoutBtn = document.getElementById("cashoutBtn");
+  const referralTable = document.getElementById("referralTable").querySelector("tbody");
   const signinPrompt = document.getElementById("signinPrompt");
 
-  // 🔓 Auth Logic
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, (user) => {
     if (user) {
+      referralCard.style.display = "block";
+      signinPrompt.style.display = "none";
+
       const name = user.displayName || "CyberUser";
       const photo = user.photoURL || "https://i.imgur.com/OVW1Z5z.png";
       const uid = user.uid;
 
-      userInfo.style.display = "flex";
-      signinPrompt.classList.add("hidden");
-
-      username.textContent = name;
+      usernameEl.textContent = name;
       userPic.src = photo;
+      referralLinkEl.textContent = `Referral Link: https://yourdomain.com/cyberchatrefer.html/${uid}`;
 
-      referralLink.value = `https://yourdomain.com/cyberchatrefer.html/${uid}`;
+      const clicksRef = ref(db, `/referrals/${uid}`);
+      onValue(clicksRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const entries = Object.entries(data);
+        referralTable.innerHTML = "";
+        let count = 0;
+
+        entries.forEach(([key, val], i) => {
+          const row = document.createElement("tr");
+          const date = new Date(val.timestamp).toLocaleDateString();
+          row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${date}</td>
+            <td>${val.ip || "Unknown"}</td>
+          `;
+          referralTable.appendChild(row);
+          count++;
+        });
+
+        const balance = count * 0.10;
+        balanceEl.textContent = balance.toFixed(3);
+        cashoutBtn.disabled = balance < 10;
+      });
+
     } else {
-      userInfo.style.display = "none";
-      signinPrompt.classList.remove("hidden");
-      referralLink.value = "Sign in to get your referral link!";
+      referralCard.style.display = "none";
+      signinPrompt.style.display = "block";
     }
   });
-
-  // 🧠 Popup control
-  window.openReferralPopup = function () {
-    referralPopup.classList.remove("hidden");
-  };
-
-  window.closeReferralPopup = function () {
-    referralPopup.classList.add("hidden");
-  };
-
-  // 📋 Copy function
-  copyLink.onclick = () => {
-    referralLink.select();
-    document.execCommand("copy");
-    copyLink.textContent = "✅ Copied!";
-    setTimeout(() => copyLink.textContent = "📋 Copy Referral Link", 1500);
-  };
 </script>
 
 </body>
