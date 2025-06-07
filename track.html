@@ -6,13 +6,11 @@
   <title>Referral Tracking</title>
 </head>
 <body>
-  <p style="text-align:center; margin-top:20vh; font-family: Arial, sans-serif;">
-    Tracking your referral... Please wait.
-  </p>
+  <p>Tracking your referral... please wait.</p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, get, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -21,49 +19,51 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+      appId: "1:1094792075584:web:d49e9c3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
 
-    // Helper to get URL param
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
 
     (async () => {
-      const refUID = getQueryParam('referrallinkuser');
-      if (!refUID) {
-        // No ref UID? Bounce to homepage ASAP
+      const uid = getQueryParam('referrallinkuser');
+      if (!uid) {
+        // No UID? Bounce them out to homepage
         window.location.href = '/';
         return;
       }
 
-      // Try to get visitor IP, fallback to 'N/A'
-      let visitorIP = 'N/A';
       try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        visitorIP = data.ip;
-      } catch (e) {
-        console.warn('IP fetch failed:', e);
-      }
+        const userRef = ref(db, `users/${uid}`);
+        const snapshot = await get(userRef);
 
-      // Record referral info
-      try {
-        const referralsRef = ref(db, `referrals/${refUID}`);
-        await push(referralsRef, {
-          timestamp: serverTimestamp(),
-          ip: visitorIP,
-          userAgent: navigator.userAgent
+        let currentBalance = 0;
+        let currentClicks = 0;
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          currentBalance = data.balance || 0;
+          currentClicks = data.clicks || 0;
+        }
+
+        const newBalance = currentBalance + 0.10;
+        const newClicks = currentClicks + 1;
+
+        await update(userRef, {
+          balance: newBalance,
+          clicks: newClicks,
+          lastReferral: serverTimestamp()
         });
       } catch (err) {
-        console.error('Failed to record referral:', err);
+        console.error("Error updating referral data:", err);
       }
 
-      // Redirect after tracking
+      // Redirect visitor away after tracking
       window.location.href = '/';
     })();
   </script>
