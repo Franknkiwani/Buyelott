@@ -352,8 +352,33 @@
   </div>
  <div class="container" id="modContainer">
   <h1>MODS</h1>
+    <!-- Big Box Ad (300x250) -->
+<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
-
+</div>
+  <!-- Big Box Ad (300x250) -->
+<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
 <style>
   #modContainer {
     text-align: center;
@@ -361,7 +386,33 @@
 </style>
   <div id="mods"></div>
   <button id="loadMore">Load More Mods</button>
+    <!-- Big Box Ad (300x250) -->
+<div style="width: 300px; height: 250px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
+<div style="width:320px; height:50px; margin: 15px auto;">
+  <script type="text/javascript">
+    atOptions = {
+      'key': 'f17f4bf893957f37c1f0b072d1f31673',
+      'format': 'iframe',
+      'height': 50,
+      'width': 320,
+      'params': {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>
+</div>
+</div>
+
 <div id="countdownOverlay" class="countdown-overlay">
   <div class="countdown-popup">
     <!-- Big Box Ad (300x250) -->
@@ -459,24 +510,56 @@
   }
 
   // Display next batch of mods
-  function displayNextBatch() {
-    if (currentIndex >= allMods.length) {
-      loadMoreBtn.disabled = true;
-      loadMoreBtn.textContent = "No more mods";
-      return;
-    }
-    const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
-    nextBatch.forEach(mod => {
-      displayedMods.push(mod);
-      const card = createModCard(mod);
-      modsEl.appendChild(card);
-    });
-    currentIndex += BATCH_SIZE;
-    if (currentIndex >= allMods.length) {
-      loadMoreBtn.disabled = true;
-      loadMoreBtn.textContent = "No more mods";
-    }
+function displayNextBatch() {
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+    return;
   }
+
+  const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
+  nextBatch.forEach((mod, index) => {
+    displayedMods.push(mod);
+    const card = createModCard(mod);
+    modsEl.appendChild(card);
+
+    const globalIndex = currentIndex + index + 1; // +1 because index is zero-based
+    if (globalIndex % 3 === 0) {
+      // Create ad container div with fixed size
+      const adContainer = document.createElement("div");
+      adContainer.style.width = "320px";
+      adContainer.style.height = "50px";
+      adContainer.style.margin = "15px auto";
+      // Assign a unique id for ad slot
+      const adSlotId = `ad-slot-${globalIndex}`;
+      adContainer.id = adSlotId;
+      modsEl.appendChild(adContainer);
+
+      // Define atOptions on window for this ad slot
+      window.atOptions = {
+        key: 'f17f4bf893957f37c1f0b072d1f31673',
+        format: 'iframe',
+        height: 50,
+        width: 320,
+        params: {},
+        containerId: adSlotId
+      };
+
+      // Create script element asynchronously
+      const adScript = document.createElement("script");
+      adScript.src = "//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js";
+      adScript.async = true;
+      document.body.appendChild(adScript);
+    }
+  });
+
+  currentIndex += BATCH_SIZE;
+
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+  }
+}
 
   // Create a mod card element
   function createModCard(mod) {
