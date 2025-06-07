@@ -1,108 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Referral Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0e0e0e;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
       color: #fff;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
-      padding: 2rem 1.5rem;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      box-sizing: border-box;
     }
-
     h1 {
-      font-size: 1.8rem;
-      font-weight: 600;
+      font-size: 2rem;
+      color: #00ffcc;
       margin-bottom: 1rem;
     }
-
     .card {
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      padding: 1.5rem;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      margin-bottom: 1.5rem;
-    }
-
-    .link {
-      word-break: break-all;
-      font-size: 1rem;
-      margin: 0.5rem 0;
-      color: #00d4ff;
-    }
-
-    button {
+      border-radius: 1.25rem;
       width: 100%;
-      padding: 0.9rem;
-      font-size: 1rem;
-      background: #00d4ff;
+      max-width: 500px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 255, 204, 0.2);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(20px);
+    }
+    .link {
+      word-wrap: break-word;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      border-radius: 1rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      color: #00ffcc;
+    }
+    button {
+      background: #00ffcc;
       color: #000;
       border: none;
-      border-radius: 12px;
-      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 1.5rem;
+      font-weight: bold;
       cursor: pointer;
       margin-top: 1rem;
     }
-
-    button:disabled {
-      background: #555;
-      color: #aaa;
+    #cashoutBtn[disabled] {
+      opacity: 0.4;
       cursor: not-allowed;
-    }
-
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.1rem;
-      margin: 1rem 0;
-    }
-
-    .cashout-info {
-      text-align: center;
-      font-size: 0.9rem;
-      opacity: 0.7;
-      margin-top: 0.5rem;
-    }
-
-    @media (max-width: 500px) {
-      h1 { font-size: 1.5rem; }
-      .card { padding: 1.2rem; }
     }
   </style>
 </head>
 <body>
-
-  <h1>Referral Dashboard</h1>
-
+  <div id="loadingScreen" style="position: fixed; inset: 0; background: radial-gradient(circle at center, #111 0%, #000 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #00ffcc; text-align: center; padding: 2rem;">
+    <div style="width: 60px; height: 60px; border: 6px solid #00ffcc; border-top: 6px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 1.5rem; font-size: 1.2rem;">Loading your earnings...</p>
+    <p style="font-size: 0.9rem; opacity: 0.6;">Get ready to secure the bag 💼</p>
+  </div>  <h1>Referral Dashboard</h1>
   <div class="card">
-    <div>Your referral link:</div>
-    <div class="link" id="refLink">Loading...</div>
-    <button id="copyBtn">📋 Copy Link</button>
-    <button id="shareBtn">📤 Share Link</button>
+    <p>Your referral link:</p>
+    <div class="link" id="referralLink">Loading...</div>
+    <button onclick="shareReferral()">Share Referral Link</button>
   </div>
-
   <div class="card">
-    <div class="stats">
-      <span>Clicks:</span>
-      <span id="clicks">0</span>
-    </div>
-    <div class="stats">
-      <span>Earnings:</span>
-      <span id="earnings">$0.00</span>
-    </div>
-    <button id="cashoutBtn" disabled>💸 Cash Out</button>
-    <div class="cashout-info">Minimum $10 to Cash Out</div>
-  </div>
-
-  <!-- Firebase & Logic -->
-  <script type="module">
+    <p>Clicks: <span id="clicks">0</span></p>
+    <p>Earnings: $<span id="earnings">0.00</span></p>
+    <button id="cashoutBtn" disabled>Cash Out $10</button>
+  </div>  <div style="margin: 1rem auto; text-align: center;">
+    <script type="text/javascript">    
+      atOptions = {    
+        'key' : 'f17f4bf893957f37c1f0b072d1f31673',    
+        'format' : 'iframe',    
+        'height' : 50,    
+        'width' : 320,    
+        'params' : {}    
+      };    
+    </script>    
+    <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>    
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -119,70 +108,50 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
+    const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const refLinkEl = document.getElementById("refLink");
-    const copyBtn = document.getElementById("copyBtn");
-    const shareBtn = document.getElementById("shareBtn");
-    const clicksEl = document.getElementById("clicks");
-    const earningsEl = document.getElementById("earnings");
-    const cashoutBtn = document.getElementById("cashoutBtn");
+    setTimeout(() => {
+      const loader = document.getElementById("loadingScreen");
+      if (loader) loader.style.display = "none";
+    }, 3000);
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const uid = user.uid;
+        const link = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
+        document.getElementById("referralLink").innerText = link;
 
-      const uid = user.uid;
-      const refLink = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
-      refLinkEl.textContent = refLink;
+        const clicksRef = ref(db, `referrals/${uid}/clicks`);
+        const earningsRef = ref(db, `referrals/${uid}/earnings`);
 
-      // Copy to clipboard
-      copyBtn.onclick = () => {
-        navigator.clipboard.writeText(refLink).then(() => {
-          copyBtn.textContent = "✅ Copied!";
-          setTimeout(() => (copyBtn.textContent = "📋 Copy Link"), 2000);
+        get(clicksRef).then(snap => {
+          document.getElementById("clicks").innerText = snap.exists() ? snap.val() : 0;
         });
-      };
-
-      // Native share
-      shareBtn.onclick = () => {
-        if (navigator.share) {
-          navigator.share({
-            title: "Join CyberChat and earn!",
-            text: "Get paid when your friends join. Here's my link:",
-            url: refLink
-          }).catch(() => {});
-        } else {
-          alert("Sharing not supported on this device.");
-        }
-      };
-
-      try {
-        const userRef = ref(db, `users/${uid}`);
-        const snap = await get(userRef);
-        if (!snap.exists()) return;
-
-        const data = snap.val();
-        const clicks = data.clicks || 0;
-        const earnings = data.balance || 0;
-
-        clicksEl.textContent = clicks;
-        earningsEl.textContent = `$${earnings.toFixed(2)}`;
-
-        if (earnings >= 10) {
-          cashoutBtn.disabled = false;
-          cashoutBtn.onclick = () => alert("Cashout request submitted!");
-        } else {
-          cashoutBtn.disabled = true;
-        }
-
-      } catch (err) {
-        console.error("Error loading data:", err);
+        get(earningsRef).then(snap => {
+          const amount = snap.exists() ? parseFloat(snap.val()) : 0.00;
+          document.getElementById("earnings").innerText = amount.toFixed(2);
+          if (amount >= 10) {
+            document.getElementById("cashoutBtn").disabled = false;
+          }
+        });
+      } else {
+        window.location.href = "login.html";
       }
     });
-  </script>
-</body>
+
+    window.shareReferral = () => {
+      const link = document.getElementById("referralLink").innerText;
+      if (navigator.share) {
+        navigator.share({
+          title: "Join CyberChat and earn!",
+          text: "Get paid for sharing links. Tap to join:",
+          url: link
+        });
+      } else {
+        navigator.clipboard.writeText(link);
+        alert("Link copied to clipboard!");
+      }
+    }
+  </script></body>
 </html>
