@@ -245,11 +245,41 @@
       } else {
         navigator.clipboard.writeText(link);
         alert("Link copied to clipboard!");
-});
+}
+    });
 
-    // Cashout button click (placeholder, since actual payment integration isn't specified)
+    // Cash out button handler
     document.getElementById("cashoutBtn").addEventListener("click", () => {
-      alert("Cashout feature coming soon! Stay tuned for the real money moves 💸");
+      const user = auth.currentUser;
+      if (!user) return alert("You must be logged in to cash out.");
+
+      const earningsRef = ref(db, `referrals/${user.uid}/earnings`);
+      get(earningsRef).then(snap => {
+        const currentEarnings = snap.exists() ? parseFloat(snap.val()) : 0.00;
+        if (currentEarnings < 10) {
+          alert("You need at least $10 to cash out.");
+          return;
+        }
+
+        // Process cashout logic here:
+        // For demo, we'll reset earnings to 0 and alert success
+        const updates = {};
+        updates[`referrals/${user.uid}/earnings`] = 0;
+        updates[`referrals/${user.uid}/lastCashout`] = Date.now();
+
+        // Update DB atomically
+        import { update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+        update(ref(db), updates)
+          .then(() => {
+            alert("Cash out successful! Your earnings have been reset.");
+            document.getElementById("earnings").innerText = "0.00";
+            document.getElementById("cashoutBtn").disabled = true;
+          })
+          .catch(err => {
+            console.error("Cash out failed:", err);
+            alert("Cash out failed. Please try again later.");
+          });
+      });
     });
   </script>
 </body>
