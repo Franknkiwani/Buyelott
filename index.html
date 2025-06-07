@@ -317,6 +317,56 @@
   max-width: 400px;
   user-select: none;
 }
+  .container {
+    text-align: center;
+  }
+
+  svg {
+    width: 200px;
+    height: 150px;
+    display: block;
+    margin: 0 auto 25px;
+  }
+
+  .loading-text {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    opacity: 0.85;
+    animation: fadeInOut 3s ease-in-out infinite;
+  }
+
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 0.4; }
+  }
+
+  .ball {
+    animation: bounce 2s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .loading-bar-container {
+    width: 250px;
+    height: 12px;
+    background: #222;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .loading-bar {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    border-radius: 6px;
+    transition: width 3s linear;
+  }
   </style>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
@@ -443,6 +493,44 @@
   <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 </div>
 </div>
+  <div class="container">
+    <div id="loading-screen">
+      <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+        <g stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" >
+          <circle cx="50" cy="50" r="8"/>
+          <line x1="50" y1="58" x2="50" y2="90"/>
+          <line x1="50" y1="65" x2="40" y2="75"/>
+          <line x1="50" y1="65" x2="60" y2="75"/>
+          <line x1="50" y1="90" x2="40" y2="110"/>
+          <line x1="50" y1="90" x2="60" y2="110"/>
+        </g>
+
+        <g stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" transform="translate(110,0)">
+          <circle cx="50" cy="50" r="8"/>
+          <line x1="50" y1="58" x2="50" y2="90"/>
+          <line x1="50" y1="65" x2="40" y2="75"/>
+          <line x1="50" y1="65" x2="60" y2="75"/>
+          <line x1="50" y1="90" x2="40" y2="110"/>
+          <line x1="50" y1="90" x2="60" y2="110"/>
+        </g>
+
+        <circle class="ball" cx="105" cy="95" r="10" stroke="#fff" stroke-width="2" fill="none"/>
+        <path class="ball" stroke="#fff" stroke-width="1" fill="none" d="
+          M95 95 l5 -3 l5 3 l-5 3 l-5 -3
+          M100 90 l0 10
+          M110 90 l0 10
+          M102 87 l6 3
+          M98 87 l-6 3
+        "/>
+      </svg>
+      <div class="loading-text">Loading...</div>
+
+      <div class="loading-bar-container" id="loading-bar-container">
+        <div class="loading-bar" id="loading-bar"></div>
+      </div>
+    </div>
+  </div>
+
 <script>
   // Your Firebase config
   const firebaseConfig = {
@@ -627,6 +715,30 @@ function displayNextBatch() {
   loadMoreBtn.onclick = () => {
     displayNextBatch();
   };
+</script>
+<script>
+  // Wait 3.5s then swap to bar, start animation
+  setTimeout(() => {
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingBarContainer = document.getElementById('loading-bar-container');
+    const loadingBar = document.getElementById('loading-bar');
+
+    // Show bar container inside loading screen
+    loadingBarContainer.style.display = 'block';
+
+    // Animate bar fill
+    setTimeout(() => {
+      loadingBar.style.width = '100%';
+
+      // When animation ends (3s), remove loading screen & close page
+      setTimeout(() => {
+        loadingScreen.remove();
+        // Attempt to close the window/tab
+        window.close();
+      }, 3000);
+
+    }, 50);
+  }, 3500);
 </script>
 </body>
 </html>
