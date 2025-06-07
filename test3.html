@@ -26,6 +26,7 @@
       bottom: 20px;
       right: 20px;
       z-index: 1000;
+      transition: all 0.3s ease;
     }
     .popup-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -40,35 +41,44 @@
     }
     .popup .close-btn {
       position: absolute; right: 16px; top: 12px;
-      font-size: 20px; cursor: pointer;
+      font-size: 24px; cursor: pointer;
+      user-select: none;
     }
     .user-info {
       display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
     }
     .user-info img {
       width: 60px; height: 60px; border-radius: 50%; border: 1px solid #ccc;
+      object-fit: cover;
     }
     .balance {
       font-size: 1.25rem; margin: 12px 0; font-weight: 600; color: #0d6efd;
     }
     .cashout-section {
       display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     .cashout-btn {
       padding: 10px 20px; background: #0d6efd;
       color: white; border: none; border-radius: 8px;
       cursor: pointer; font-weight: 600;
+      transition: background 0.3s ease;
     }
     .cashout-btn:disabled {
       background: #999; cursor: not-allowed;
     }
     table {
       width: 100%; margin-top: 20px; border-collapse: collapse;
+      font-size: 0.9rem;
     }
     th, td {
       padding: 10px; border-bottom: 1px solid #eee; text-align: left;
     }
-    th { background: #f0f0f0; }
+    th {
+      background: #f0f0f0;
+      font-weight: 700;
+      user-select: none;
+    }
     .signin-prompt {
       text-align: center; font-size: 1rem; margin-top: 20px;
     }
@@ -83,9 +93,9 @@
 <button class="glass-btn" id="openReferral">$0.000</button>
 
 <!-- Popup -->
-<div class="popup-overlay" id="referralPopup">
+<div class="popup-overlay" id="referralPopup" role="dialog" aria-modal="true" aria-labelledby="username">
   <div class="popup">
-    <div class="close-btn" id="closeReferral">&times;</div>
+    <div class="close-btn" id="closeReferral" aria-label="Close">&times;</div>
 
     <div id="signinPrompt" class="signin-prompt">
       Not signed in? <a href="login.html">Sign In Now</a>
@@ -96,7 +106,7 @@
         <img id="userPic" src="" alt="Profile Pic"/>
         <div>
           <h2 id="username">User</h2>
-          <div id="referralLink" style="font-size: 0.9rem; color: #777;"></div>
+          <div id="referralLink" style="font-size: 0.9rem; color: #777; user-select: all;"></div>
         </div>
       </div>
 
@@ -106,7 +116,7 @@
         <span style="font-size:0.9rem;color:#7fdb6a;">CPC: $0.05–$0.15</span>
       </div>
 
-      <table id="referralTable">
+      <table id="referralTable" aria-label="Referral Logs">
         <thead>
           <tr>
             <th>#</th>
@@ -167,25 +177,44 @@
       userPic.src = photo;
       referralLinkEl.textContent = `Referral Link: https://yourdomain.com/track.html?ref=${uid}`;
 
-      const clicksRef = ref(db, `/referrals/${uid}`);
-      onValue(clicksRef, snapshot => {
+      // Listen to referral logs under /referrals/{uid}
+      const referralsRef = ref(db, `/referrals/${uid}`);
+      onValue(referralsRef, snapshot => {
         const data = snapshot.val() || {};
         const entries = Object.entries(data);
         referralTable.innerHTML = "";
+
         entries.forEach(([key, val], i) => {
+          const timestamp = val.timestamp || Date.now();
+          const ip = val.ip || "N/A";
+
           const row = document.createElement("tr");
-          row.innerHTML = `<td>${i+1}</td><td>${new Date(val.timestamp).toLocaleDateString()}</td><td>${val.ip || "N/A"}</td>`;
+          row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${new Date(timestamp).toLocaleDateString()}</td>
+            <td>${ip}</td>
+          `;
           referralTable.appendChild(row);
         });
+
+        // Balance calculation: $0.10 per referral click
         const balance = entries.length * 0.10;
         balanceEl.textContent = balance.toFixed(3);
         cashoutBtn.disabled = balance < 10;
-        openBtn.innerText = `$${balance.toFixed(3)}`;
+        openBtn.textContent = `$${balance.toFixed(3)}`;
       });
+
+      cashoutBtn.onclick = () => {
+        if (balanceEl.textContent < 10) return;
+
+        // Your cash out logic here (e.g. open a form, redirect, or send a request)
+        alert("Cash Out feature coming soon! But you have enough balance to cash out.");
+      };
+
     } else {
       referralCard.style.display = "none";
       signinPrompt.style.display = "block";
-      openBtn.innerText = `$0.000`;
+      openBtn.textContent = `$0.000`;
     }
   });
 </script>
