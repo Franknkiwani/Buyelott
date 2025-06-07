@@ -87,14 +87,13 @@
   <button class="glass-btn" id="earningsBtn">EARNINGS: $0.000</button>
 
   <div id="referralPopup" style="display: none;" class="popup">
-    <div class="popup-content" id="popupContent">
-      <!-- Content dynamically injected -->
-    </div>
+    <div class="popup-content" id="popupContent"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -109,6 +108,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
     const earningsBtn = document.getElementById('earningsBtn');
     const popup = document.getElementById('referralPopup');
@@ -133,7 +133,6 @@
       popup.style.display = 'flex';
 
       if (user) {
-        // User is logged in: show referral link
         const uid = user.uid;
         const link = `${window.location.origin}/?referuid=${uid}`;
 
@@ -147,27 +146,45 @@
 
         document.getElementById('copyBtn').addEventListener('click', copyReferralLink);
         document.getElementById('closeBtn').addEventListener('click', closePopup);
-
       } else {
-        // Not logged in: show message + signin link
         popupContent.innerHTML = `
           <h3>Access Denied</h3>
           <p>You must sign in to get your referral link.</p>
           <a href="login.html">Go to Login</a>
           <button id="closeBtn">Close</button>
         `;
-
         document.getElementById('closeBtn').addEventListener('click', closePopup);
       }
     });
 
-    // Optional: keep track of auth changes so UI can react if needed
-    onAuthStateChanged(auth, (user) => {
-      // Can update UI here if you want
-      // e.g. earningsBtn.textContent = user ? `EARNINGS: $... (logged in)` : 'EARNINGS: $0.000 (not logged in)';
-    });
+    // Reward Logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const referUid = urlParams.get('referuid');
 
+    async function rewardAndRedirect(uid) {
+      if (!uid || localStorage.getItem(`rewarded_${uid}`)) {
+        window.location.href = `referral.html?referuid=${uid}`;
+        return;
+      }
+
+      const balanceRef = ref(db, `users/${uid}/balance`);
+      const clicksRef = ref(db, `users/${uid}/clicks`);
+
+      try {
+        await runTransaction(balanceRef, current => (current || 0) + 0.10);
+        await runTransaction(clicksRef, current => (current || 0) + 1);
+        localStorage.setItem(`rewarded_${uid}`, "true");
+        console.log(`Rewarded $0.10 to ${uid}`);
+      } catch (err) {
+        console.error("Reward error:", err);
+      }
+
+      window.location.href = `referral.html?referuid=${uid}`;
+    }
+
+    if (referUid) {
+      rewardAndRedirect(referUid);
+    }
   </script>
-
 </body>
 </html>
