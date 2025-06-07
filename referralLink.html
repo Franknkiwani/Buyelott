@@ -23,6 +23,7 @@
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
       max-width: 400px;
       width: 100%;
+      transition: color 0.3s ease;
     }
     a {
       color: #007bff;
@@ -31,6 +32,10 @@
     }
     a:hover {
       text-decoration: underline;
+    }
+    .error {
+      color: #d93025; /* Google red for errors */
+      font-weight: bold;
     }
   </style>
 </head>
@@ -41,7 +46,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, runTransaction, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -56,19 +61,44 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const messageBox = document.getElementById('messageBox');
     const urlParams = new URLSearchParams(window.location.search);
     const referUid = urlParams.get('referuid');
 
+    function redirectToHome() {
+      setTimeout(() => {
+        window.location.href = 'https://cyberchat.online';
+      }, 3500);
+    }
+
     async function rewardUser(uid) {
       if (!uid) {
-        messageBox.innerHTML = '<p>Invalid referral link.</p>';
+        messageBox.innerHTML = `<p class="error">Invalid referral link.</p>`;
+        redirectToHome();
+        return;
+      }
+
+      // Check if user exists
+      try {
+        const userSnapshot = await get(ref(db, `users/${uid}`));
+        if (!userSnapshot.exists()) {
+          messageBox.innerHTML = `<p class="error">Referral user not found.</p>`;
+          redirectToHome();
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking user existence:", error);
+        messageBox.innerHTML = `<p class="error">Error connecting to server. Please try again later.</p>`;
+        redirectToHome();
         return;
       }
 
       if (localStorage.getItem(`rewarded_${uid}`)) {
-        messageBox.innerHTML = `<p>You have already claimed this referral reward.</p><p><a href="index.html">Go to Home</a></p>`;
+        messageBox.innerHTML = `
+          <p>You have already claimed this referral reward.</p>
+          <p><a href="https://cyberchat.online">Go to Home</a></p>
+        `;
+        redirectToHome();
         return;
       }
 
@@ -82,11 +112,13 @@
 
         messageBox.innerHTML = `
           <p>Thank you for visiting! Your referral earned $0.10 for user: <strong>${uid}</strong>.</p>
-          <p><a href="index.html">Go to Home</a></p>
+          <p><a href="https://cyberchat.online">Go to Home</a></p>
         `;
+        redirectToHome();
       } catch (error) {
         console.error('Error rewarding referral:', error);
-        messageBox.innerHTML = `<p>Error processing referral. Please try again later.</p>`;
+        messageBox.innerHTML = `<p class="error">Error processing referral. Please try again later.</p>`;
+        redirectToHome();
       }
     }
 
