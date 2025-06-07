@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>Referral Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* Reset & base */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      background: #0e0e0e;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #0e0e0e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 1rem;
+    }
+    #loader h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00d4ff;
+      text-shadow: 0 0 10px #00d4ff;
+    }
+    .money-icon {
+      font-size: 3rem;
+      animation: glowPulse 1.5s ease-in-out infinite alternate;
+      color: #00ff95;
+      filter: drop-shadow(0 0 6px #00ff95);
+    }
+    @keyframes glowPulse {
+      0% { filter: drop-shadow(0 0 6px #00ff95); }
+      100% { filter: drop-shadow(0 0 20px #00ff95); }
+    }
+
+    /* Main content */
+    #content {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 1.5rem;
+    }
+
+    .link {
+      word-break: break-word;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      color: #00d4ff;
+      user-select: all;
+      cursor: pointer;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      background: #00d4ff;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #00a8cc;
+    }
+
+    button:disabled {
+      background: #555;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+      user-select: none;
+    }
+
+    .cashout-info {
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-top: 0.5rem;
+      user-select: none;
+    }
+
+    /* Ad container styling */
+    #ad-container {
+      margin: 1rem auto;
+      text-align: center;
+      user-select: none;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 500px) {
+      h1 { font-size: 1.5rem; }
+      .card { padding: 1.2rem; }
+      button { font-size: 0.95rem; }
+    }
+/* Loader Container */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 1.5rem;
+  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #00fff7;
+  user-select: none;
+}
+
+/* Loader Heading */
+#loader h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 5px #00fff7,
+    0 0 10px #00fff7,
+    0 0 20px #00fff7,
+    0 0 40px #0ff;
+  animation: flicker 3s infinite;
+}
+
+/* Money Icon - glowing neon */
+.money-icon {
+  font-size: 4rem;
+  animation: pulseGlow 1.8s ease-in-out infinite alternate;
+  color: #00fff7;
+  filter:
+    drop-shadow(0 0 6px #00fff7)
+    drop-shadow(0 0 15px #00fff7);
+}
+
+/* Flicker effect on text */
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+  }
+  20%, 22%, 24%, 55% {
+    opacity: 0.5;
+  }
+}
+
+/* Pulsing neon glow for icon */
+@keyframes pulseGlow {
+  0% {
+    filter: drop-shadow(0 0 6px #00fff7) drop-shadow(0 0 15px #00fff7);
+    transform: scale(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 18px #00fff7) drop-shadow(0 0 30px #00fff7);
+    transform: scale(1.1);
+  }
+}
+
+/* Animated horizontal progress bar */
+#loader::after {
+  content: "";
+  display: block;
+  margin-top: 2rem;
+  width: 200px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(270deg, #00fff7, #005f60, #00fff7);
+  background-size: 400% 100%;
+  animation: loadingBar 3s linear infinite;
+  filter: drop-shadow(0 0 4px #00fff7);
+}
+
+@keyframes loadingBar {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 400% 50%;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loader">
+    <div class="money-icon">💸</div>
+    <h1>Loading</h1>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div id="content">
+    <h1>Referral Dashboard</h1>
+
+    <div class="card">
+      <div>Your referral link:</div>
+      <div class="link" id="refLink" title="Tap to copy link">Loading...</div>
+      <button id="copyBtn">📋 Copy Link</button>
+      <button id="shareBtn">📤 Share Link</button>
+    </div>
+
+    <div id="ad-container">
+      <script type="text/javascript">        
+        atOptions = {        
+          'key' : 'f17f4bf893957f37c1f0b072d1f31673',        
+          'format' : 'iframe',        
+          'height' : 50,        
+          'width' : 320,        
+          'params' : {}        
+        };        
+      </script>          
+      <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <span>Clicks:</span>
+        <span id="clicks">0</span>
+      </div>
+      <div class="stats">
+        <span>Earnings:</span>
+        <span id="earnings">$0.00</span>
+      </div>
+      <button id="cashoutBtn" disabled>💸 Cash Out</button>
+      <div class="cashout-info">Minimum $10 to Cash Out</div>
+    </div>
+  </div>
+
+  <!-- Firebase & Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getDatabase(app);
+
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('content');
+    const refLinkEl = document.getElementById("refLink");
+    const copyBtn = document.getElementById("copyBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const clicksEl = document.getElementById("clicks");
+    const earningsEl = document.getElementById("earnings");
+    const cashoutBtn = document.getElementById("cashoutBtn");
+
+    function showContent() {
+      loader.style.display = 'none';
+      content.style.display = 'flex';
+    }
+
+    // Wait 3 seconds, then start Firebase auth check
+    setTimeout(() => {
+      onAuthStateChanged(auth, async user => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const uid = user.uid;
+        const refLink = `https://cyberchat.online/referralLink.html?referuid=${uid}`;
+        refLinkEl.textContent = refLink;
+        refLinkEl.onclick = () => {
+          navigator.clipboard.writeText(refLink).then(() => {
+            copyBtn.textContent = "✅ Copied!";
+            setTimeout(() => (copyBtn.textContent = "📋 Copy Link"), 2000);
+          });
+        };
+
+        // Copy button action
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(refLink).then(() => {
+            copyBtn.textContent = "✅ Copied!";
+            setTimeout(() => (copyBtn.textContent = "📋 Copy Link"), 2000);
+          });
+        };
+
+        // Share button action using Web Share API
+        shareBtn.onclick = () => {
+          if (navigator.share) {
+            navigator.share({
+              title: "Join CyberChat and earn!",
+              text: "Get paid when your friends join. Here's my link:",
+              url: refLink
+            }).catch(() => {});
+          } else {
+            alert("Sharing not supported on this device.");
+          }
+        };
+
+        try {
+          const userRef = ref(db, `users/${uid}`);
+          const snap = await get(userRef);
+          if (!snap.exists()) {
+            clicksEl.textContent = "0";
+            earningsEl.textContent = "$0.00";
+            cashoutBtn.disabled = true;
+            showContent();
+            return;
+          }
+
+          const data = snap.val();
+          const clicks = data.clicks || 0;
+          const earnings = data.balance || 0;
+
+          clicksEl.textContent = clicks;
+          earningsEl.textContent = `$${earnings.toFixed(2)}`;
+
+          if (earnings >= 10) {
+            cashoutBtn.disabled = false;
+            cashoutBtn.onclick = () => alert("Cashout request submitted! We'll contact you soon.");
+          } else {
+            cashoutBtn.disabled = true;
+            cashoutBtn.onclick = null;
+          }
+
+          showContent();
+
+        } catch (err) {
+          console.error("Error loading data:", err);
+          showContent();
+        }
+      });
+    }, 3000);
+
+  </script>
+</body>
+</html>
