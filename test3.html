@@ -2,110 +2,232 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CyberChat Users</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberChat Referral</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
   <style>
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-family: 'Inter', sans-serif;
       background: #f9f9f9;
-      color: #222;
+      margin: 0;
+      padding: 0;
     }
-    h1 {
-      text-align: center;
-      margin: 30px 0;
-    }
-    .user-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-    .user-card {
-      background: white;
+
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 24px;
       border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .user-card:hover {
-      transform: translateY(-6px);
-    }
-    .user-avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 12px;
-    }
-    .user-name {
-      font-size: 18px;
       font-weight: 600;
-      margin-bottom: 6px;
+      color: #333;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .user-bio {
-      font-size: 14px;
-      color: #555;
-      height: 40px;
-      overflow: hidden;
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    #referralPopup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-content {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      animation: popupFade 0.3s ease-out;
+      position: relative;
+      text-align: center;
+    }
+
+    @keyframes popupFade {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup-content h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .popup-content input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+      margin: 8px 0;
+    }
+
+    .popup-content button.copy-btn {
+      margin-top: 8px;
+      background: #0d6efd;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .popup-content button.copy-btn:hover {
+      background: #0b5ed7;
+    }
+
+    #userInfo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+    #userPic {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid #ccc;
+    }
+
+    .popup-content .signin-prompt {
+      font-size: 0.85rem;
+      margin-top: 12px;
+      color: #777;
+    }
+
+    .popup-content .signin-prompt a {
+      color: #0d6efd;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .popup-content .signin-prompt a:hover {
+      text-decoration: underline;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.25rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .popup-close:hover {
+      color: #000;
     }
   </style>
 </head>
 <body>
-  <h1>👥 CyberChat Users</h1>
-  <div id="userList" class="user-grid">Loading...</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+<!-- 🔘 Trigger Button -->
+<button class="glass-btn" onclick="openReferralPopup()">$0.000</button>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<!-- 💬 Referral Popup -->
+<div id="referralPopup" class="hidden">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closeReferralPopup()">×</button>
+    <h2>Refer & Earn 💸</h2>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    <div id="userInfo" style="display: none;">
+      <img id="userPic" src="" alt="User" />
+      <span id="username"></span>
+    </div>
 
-    const userList = document.getElementById("userList");
+    <input id="referralLink" readonly placeholder="Your referral link will appear here"/>
 
-    async function loadUsers() {
-      try {
-        const snap = await get(child(ref(db), 'users'));
-        if (!snap.exists()) {
-          userList.innerHTML = "<p>No users found.</p>";
-          return;
-        }
+    <button id="copyLink" class="copy-btn">📋 Copy Referral Link</button>
 
-        const users = snap.val();
-        userList.innerHTML = Object.entries(users).map(([uid, user]) => {
-          const avatar = user.avatar || "https://i.imgur.com/4ZQZ4ZL.jpg";
-          const username = user.username || "unknown";
-          const bio = user.bio || "";
-          return `
-            <div class="user-card" onclick="location.href='test.html?${uid}'">
-              <img src="${avatar}" class="user-avatar" alt="${username}" />
-              <div class="user-name">@${username}</div>
-              <div class="user-bio">${bio}</div>
-            </div>
-          `;
-        }).join("");
-      } catch (err) {
-        userList.innerHTML = `<p style="color:red;">Error loading users: ${err.message}</p>`;
-      }
+    <div id="signinPrompt" class="signin-prompt hidden">
+      Not signed in? <a href="login.html">Sign In Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- 🔌 Firebase + Logic -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const referralPopup = document.getElementById("referralPopup");
+  const referralLink = document.getElementById("referralLink");
+  const copyLink = document.getElementById("copyLink");
+  const userInfo = document.getElementById("userInfo");
+  const username = document.getElementById("username");
+  const userPic = document.getElementById("userPic");
+  const signinPrompt = document.getElementById("signinPrompt");
+
+  // 🔓 Auth Logic
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      const name = user.displayName || "CyberUser";
+      const photo = user.photoURL || "https://i.imgur.com/OVW1Z5z.png";
+      const uid = user.uid;
+
+      userInfo.style.display = "flex";
+      signinPrompt.classList.add("hidden");
+
+      username.textContent = name;
+      userPic.src = photo;
+
+      referralLink.value = `https://yourdomain.com/cyberchatrefer.html/${uid}`;
+    } else {
+      userInfo.style.display = "none";
+      signinPrompt.classList.remove("hidden");
+      referralLink.value = "Sign in to get your referral link!";
     }
+  });
 
-    loadUsers();
-  </script>
+  // 🧠 Popup control
+  window.openReferralPopup = function () {
+    referralPopup.classList.remove("hidden");
+  };
+
+  window.closeReferralPopup = function () {
+    referralPopup.classList.add("hidden");
+  };
+
+  // 📋 Copy function
+  copyLink.onclick = () => {
+    referralLink.select();
+    document.execCommand("copy");
+    copyLink.textContent = "✅ Copied!";
+    setTimeout(() => copyLink.textContent = "📋 Copy Referral Link", 1500);
+  };
+</script>
+
 </body>
 </html>
