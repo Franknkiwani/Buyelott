@@ -5,50 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dark Mod Maker</title>
   <style>
-    /* Reset and box-sizing */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
+/* Reset and box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
-    /* Dark theme base */
-    body {
-      background: #121212;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      transition: background-color 0.3s, color 0.3s;
-    }
+/* Light theme variables with pink background */
+:root {
+  --bg-color: #ffe4ec;       /* soft pastel pink */
+  --text-color: #fff;        /* white text */
+  --header-bg: #ffcade;      /* slightly deeper pink */
+  --header-shadow: rgba(255, 192, 203, 0.4); /* subtle pinkish shadow */
+}
 
-    /* Header styling */
-    header {
-      background: #1f1f1f;
-      padding: 1rem 1.5rem;
-      font-weight: 700;
-      font-size: 1.6rem;
-      text-align: center;
-      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
-      user-select: none;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+/* Dark theme variables */
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #eee;
+  --header-bg: #1f1f1f;
+  --header-shadow: rgba(0, 0, 0, 0.8);
+}
 
-    /* Container for main content */
-    main {
-      flex: 1;
-      max-width: 480px;
-      margin: 1rem auto 2rem;
-      width: 90%;
-    }
+/* Body styling using variables */
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s, color 0.3s;
+}
 
-    /* Form container with glassy dark card style */
+/* Header styling using variables */
+header {
+  background: var(--header-bg);
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  font-size: 1.6rem;
+  text-align: center;
+  box-shadow: 0 1px 8px var(--header-shadow);
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Container for main content */
+main {
+  flex: 1;
+  max-width: 480px;
+  margin: 1rem auto 2rem;
+  width: 90%;
+}
+/* Form container with glassy dark card style */
     form {
       background: #222;
       border-radius: 14px;
@@ -576,10 +591,36 @@
 #popup-close-btn:hover {
   background: #115293;
 }
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #eee;
+  border-top: 6px solid #09f;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
-  <header>Dark Mod Maker</header>
+  <header>CREATE MODS</header>
   <main>
     <!-- Mod creation form -->
     <form id="modForm" novalidate>
@@ -712,9 +753,9 @@
 
       <!-- Mod options -->
       <div class="switch-container">
-        <label for="modBossSwitch">Mod Boss On/Off</label>
+        <label for="modBossSwitch">Mod Boost On/Off</label>
         <label class="switch">
-          <input type="checkbox" id="modBossSwitch" />
+          <input type="checkbox" id="moBossSwitch" />
           <span class="slider"></span>
         </label>
       </div>
@@ -755,6 +796,9 @@
     <p id="popup-message"></p>
     <button id="popup-close-btn">Okay</button>
   </div>
+</div>
+<div id="spinner" class="spinner-overlay">
+  <div class="spinner"></div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -836,7 +880,7 @@ themeToggleContainer.addEventListener("keydown", e => {
 });
 loadTheme();
 
-// AUTH STATE
+// ==== AUTH STATE HANDLING ====
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -849,7 +893,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// FORM VALIDATION - concise and clear
+// ==== FORM VALIDATION ====
 function validateForm() {
   const valid =
     modTitle.value.trim() !== "" &&
@@ -858,11 +902,11 @@ function validateForm() {
   saveModBtn.disabled = !valid;
 }
 
-// Attach input listeners
+// Attach validation listeners
 modTitle.addEventListener("input", validateForm);
 modDesc.addEventListener("input", validateForm);
 
-// DROPZONE LOGIC
+// ==== DROPZONE HANDLERS ====
 dropzone.addEventListener("click", () => fileInput.click());
 
 dropzone.addEventListener("dragover", (e) => {
@@ -885,7 +929,7 @@ fileInput.addEventListener("change", () => {
   if (fileInput.files.length) handleFile(fileInput.files[0]);
 });
 
-// IMAGE LOAD + RATIO CHECK + FILE ASSIGNMENT + PREVIEW
+// ==== IMAGE VALIDATION + PREVIEW ====
 function handleFile(file) {
   if (!file.type.startsWith("image/")) {
     showPopup("Please upload an image file.");
@@ -910,33 +954,26 @@ function handleFile(file) {
     dropzone.textContent = file.name;
     validateForm();
 
-    // Preview logic
+    // Show preview
     const previewImg = document.getElementById("preview-img");
-    if (previewImg.src) {
-      URL.revokeObjectURL(previewImg.src); // clean old URL
-    }
+    if (previewImg.src) URL.revokeObjectURL(previewImg.src); // cleanup old URL
     previewImg.src = URL.createObjectURL(file);
     previewImg.style.display = "block";
   };
 
-  img.onerror = () => {
-    showPopup("Invalid image file.");
-  };
-
+  img.onerror = () => showPopup("Invalid image file.");
   img.src = URL.createObjectURL(file);
 }
 
 // Clear preview helper
 function clearPreview() {
   const previewImg = document.getElementById("preview-img");
-  if (previewImg.src) {
-    URL.revokeObjectURL(previewImg.src);
-  }
+  if (previewImg.src) URL.revokeObjectURL(previewImg.src);
   previewImg.src = "";
   previewImg.style.display = "none";
 }
 
-// IMGUR UPLOAD - nicely abstracted
+// ==== IMGUR UPLOAD ====
 async function uploadImageToImgur(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -967,11 +1004,11 @@ async function uploadImageToImgur(file, onProgress) {
     };
 
     xhr.onerror = () => reject(new Error("Network error during Imgur upload."));
-
     xhr.send(formData);
   });
 }
-// FIREBASE SAVE
+
+// ==== FIREBASE SAVE MOD ====
 async function saveMod(data) {
   const modsRef = ref(db, "mods");
   const newModRef = push(modsRef);
@@ -979,12 +1016,11 @@ async function saveMod(data) {
   return newModRef.key;
 }
 
-// SAVE BUTTON LOGIC with neat async flow and UI state control
+// ==== SAVE BUTTON HANDLER ====
 saveModBtn.addEventListener("click", async (e) => {
   e.preventDefault();
   if (!currentUser || saveModBtn.disabled) return;
 
-  // Disable and update UI
   saveModBtn.disabled = true;
   saveModBtn.textContent = "Uploading image...";
   uploadProgress.style.display = "block";
@@ -1001,7 +1037,7 @@ saveModBtn.addEventListener("click", async (e) => {
       userId: currentUser.uid,
       title: modTitle.value.trim(),
       description: modDesc.value.trim(),
-      screenshotUrl: imgUrl,
+      screenshotUrl: imgUrl,  // NOTE: aligned naming
       bossOn: modBossSwitch.checked,
       mineOn: modMineSwitch.checked,
       visibility: modVisibility.value,
@@ -1012,7 +1048,7 @@ saveModBtn.addEventListener("click", async (e) => {
 
     showPopup("Mod saved successfully!");
 
-    // Reset form/UI
+    // Reset UI & form
     modForm.reset();
     dropzone.textContent = "Drop screenshot here (16:9 ratio)";
     selectedFile = null;
@@ -1021,7 +1057,7 @@ saveModBtn.addEventListener("click", async (e) => {
     saveModBtn.textContent = "Save Mod";
     saveModBtn.disabled = true;
 
-    // Optionally reload the mod list
+    // Reload user's mods
     loadUserMods();
 
   } catch (error) {
@@ -1033,7 +1069,7 @@ saveModBtn.addEventListener("click", async (e) => {
   }
 });
 
-// ESCAPE HTML - solid XSS prevention
+// ==== XSS PREVENTION ====
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (m) => {
     switch (m) {
@@ -1047,7 +1083,7 @@ function escapeHtml(text) {
   });
 }
 
-// LOAD MODS - efficient UI update + event binding
+// ==== LOAD USER MODS & RENDER ====
 function loadUserMods() {
   if (!currentUser) return;
 
@@ -1084,7 +1120,7 @@ function loadUserMods() {
       modsList.appendChild(div);
     }
 
-    // Attach delete handlers with your custom confirm modal
+    // Attach delete handlers with confirmation
     modsList.querySelectorAll(".deleteModBtn").forEach((btn) => {
       btn.onclick = async () => {
         const confirmed = await showConfirm("Delete this mod?");
@@ -1329,6 +1365,12 @@ function showConfirm(message) {
   });
 }
 
+</script>
+<script>
+  setTimeout(() => {
+    const spinner = document.getElementById("spinner");
+    if (spinner) spinner.style.display = "none";
+  }, 5000);
 </script>
 </body>
 </html>
