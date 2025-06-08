@@ -513,7 +513,7 @@
   let allMods = [];
   let currentIndex = 0;
 
-  // Your ads data - 3 ad configs
+  // Ads config - 3 variants
   const adConfigs = [
     {
       key: "037f6e178c935a44f2ef5ab0ce53116a",
@@ -529,7 +529,7 @@
     },
     {
       key: "8f9075afd782b06bf3767fa2b0dd5775",
-      height: 250, // Assuming height; adjust as needed
+      height: 250,
       width: 300,
       customDivId: "container-8f9075afd782b06bf3767fa2b0dd5775",
       customScriptSrc: "//pl26795976.profitableratecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js",
@@ -550,7 +550,6 @@
     container.style.textAlign = "center";
 
     if (adConfig.isCustom) {
-      // Custom ad with container div + async script
       const div = document.createElement("div");
       div.id = adConfig.customDivId;
       container.appendChild(div);
@@ -564,7 +563,6 @@
       return container;
     }
 
-    // Normal ads with atOptions inline script + invoke script
     const configScript = document.createElement("script");
     configScript.type = "text/javascript";
     configScript.text = `
@@ -627,7 +625,6 @@
     displayNextBatch();
   }
 
-  // Create mod card for each mod object
   function createModCard(mod) {
     const card = document.createElement("div");
     card.className = "mod-card";
@@ -685,9 +682,8 @@
     return card;
   }
 
-  // Helper to inject ads before and after batch
+  // Inject two different ads top and bottom of batch
   function injectBatchAds() {
-    // Pick two random different ads to show double ads
     let firstAdIndex = Math.floor(Math.random() * adConfigs.length);
     let secondAdIndex = firstAdIndex;
     while (secondAdIndex === firstAdIndex) {
@@ -696,13 +692,10 @@
     const firstAd = createAdElement(adConfigs[firstAdIndex]);
     const secondAd = createAdElement(adConfigs[secondAdIndex]);
 
-    // Insert at top and bottom of batch container (last inserted mod card batch container)
     modsEl.appendChild(firstAd);
-    // ... batch content inserted in caller function
     modsEl.appendChild(secondAd);
   }
 
-  // Display next batch of mods + ads top and bottom
   function displayNextBatch() {
     if (currentIndex >= allMods.length) {
       loadMoreBtn.disabled = true;
@@ -710,11 +703,9 @@
       return;
     }
 
-    // Insert double ads at top of batch
-    let topAd1 = createAdElement(adConfigs[0]);
-    let topAd2 = createAdElement(adConfigs[1]);
-    modsEl.appendChild(topAd1);
-    modsEl.appendChild(topAd2);
+    // Double ads on top
+    modsEl.appendChild(createAdElement(adConfigs[0]));
+    modsEl.appendChild(createAdElement(adConfigs[1]));
 
     const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
 
@@ -723,11 +714,9 @@
       modsEl.appendChild(card);
     });
 
-    // Insert double ads at bottom of batch
-    let bottomAd1 = createAdElement(adConfigs[1]);
-    let bottomAd2 = createAdElement(adConfigs[2]);
-    modsEl.appendChild(bottomAd1);
-    modsEl.appendChild(bottomAd2);
+    // Double ads on bottom
+    modsEl.appendChild(createAdElement(adConfigs[1]));
+    modsEl.appendChild(createAdElement(adConfigs[2]));
 
     currentIndex += nextBatch.length;
 
@@ -737,58 +726,44 @@
     }
   }
 
-  // Debounce utility to avoid too many ad inserts from scroll/timer
   let adThrottle = false;
   function throttleAdInject() {
     if (adThrottle) return false;
     adThrottle = true;
-    setTimeout(() => (adThrottle = false), 5000); // 5 sec cooldown
+    setTimeout(() => (adThrottle = false), 5000);
     return true;
   }
 
-  // Inject random ads into the mods container
+  // Inject random ads into mods container (can be duplicates)
   function injectRandomAds(count = 2) {
     for (let i = 0; i < count; i++) {
-      // Random ad config, maybe allow duplicates for double ads
       const randomAdConfig = adConfigs[Math.floor(Math.random() * adConfigs.length)];
       const adEl = createAdElement(randomAdConfig);
       modsEl.appendChild(adEl);
     }
   }
 
-  // Scroll listener to trigger ad inject near bottom
   window.addEventListener("scroll", () => {
     const scrollPosition = window.scrollY + window.innerHeight;
-    const threshold = document.body.offsetHeight - 500; // 500px from bottom
+    const threshold = document.body.offsetHeight - 500;
 
     if (scrollPosition > threshold && throttleAdInject()) {
       console.log("Scroll near bottom detected - injecting ads...");
-      injectRandomAds(2); // double ads on scroll trigger
+      injectRandomAds(2);
     }
   });
+// Initialize on page load
+  window.addEventListener("DOMContentLoaded", () => {
+    loadMoreBtn.addEventListener("click", () => {
+      displayNextBatch();
+    });
 
-  // Timer ad injection every 10 seconds
-  setInterval(() => {
-    if (throttleAdInject()) {
-      console.log("Timer triggered ad injection...");
-      injectRandomAds(2); // double ads on timer trigger
-    }
-  }, 10000);
-
-  // Load More button click handler with ad injection
-  loadMoreBtn.addEventListener("click", () => {
-    if (loadMoreBtn.disabled) return;
-
-    displayNextBatch();
-
-    if (throttleAdInject()) {
-      console.log("Load More click ad injection...");
-      injectRandomAds(2); // double ads on click trigger
-    }
+    loadMods().catch(err => {
+      console.error("Error loading mods:", err);
+      modsEl.innerHTML = "<p>Failed to load mods. Try refreshing.</p>";
+      loadMoreBtn.disabled = true;
+    });
   });
-
-  // Initial mods load on page load
-  loadMods();
 </script>
   <script>
     // Hide loading screen after 5 seconds
