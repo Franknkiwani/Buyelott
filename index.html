@@ -804,8 +804,6 @@ if (referUid) {
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  const logEl = document.getElementById('log');
-
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -820,11 +818,6 @@ if (referUid) {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  function log(msg) {
-    logEl.textContent += msg + '\n';
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
   async function incrementCounter(path) {
     const counterRef = ref(db, path);
     return runTransaction(counterRef, current => (current || 0) + 1);
@@ -837,70 +830,66 @@ if (referUid) {
 
   async function detectCountry() {
     try {
-      const res = await fetch('https://ipinfo.io/json?token=');
+      const res = await fetch('https://ipinfo.io/json?token='); // add your token here or leave blank
       if (!res.ok) throw new Error('Failed to fetch IP info');
       const data = await res.json();
       return data.country || 'Unknown';
     } catch (e) {
-      log('Country detection failed: ' + e.message);
+      console.log('Country detection failed:', e.message);
       return 'Unknown';
     }
   }
 
   async function main() {
-    logEl.textContent = '';
-    log('Detecting country...');
+    console.log('Detecting country...');
     const country = await detectCountry();
-    log(`Visitor country detected: ${country}`);
+    console.log(`Visitor country detected: ${country}`);
 
-    log('Incrementing page views...');
+    console.log('Incrementing page views...');
     await incrementCounter('analytics/views');
-    log('Incrementing page reloads...');
+
+    console.log('Incrementing page reloads...');
     await incrementCounter('analytics/reloads');
-    log('Incrementing visits for country...');
+
+    console.log('Incrementing visits for country...');
     await incrementCounter(`analytics/countries/${country}`);
 
-    // Concurrent users handling
+    // Increment concurrent users
     const concurrentRef = ref(db, 'analytics/concurrentUsers');
     await runTransaction(concurrentRef, val => (val || 0) + 1);
+
+    // Automatically decrement after 15 seconds to simulate user leaving
     setTimeout(() => {
       runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
-      log('Concurrent user left (decremented)');
+      console.log('Concurrent user left (decremented)');
     }, 15000);
 
-    // Log current stats
-    log('Fetching current stats...');
+    // Fetch and log stats
+    console.log('Fetching current stats...');
     const statsPaths = ['views', 'reloads', 'clicks', 'concurrentUsers', 'timeSpentSeconds'];
     for (const key of statsPaths) {
       const snap = await get(ref(db, `analytics/${key}`));
       const val = snap.val() ?? 0;
       if (key === 'timeSpentSeconds') {
-        log(`${key}: ${val} seconds (~${Math.floor(val / 60)} minutes)`);
+        console.log(`${key}: ${val} seconds (~${Math.floor(val / 60)} minutes)`);
       } else {
-        log(`${key}: ${val}`);
+        console.log(`${key}: ${val}`);
       }
     }
 
-    // Listen for ALL clicks anywhere in the page
-    document.addEventListener('click', async () => {
-      await incrementCounter('analytics/clicks');
-      log('Registered a click anywhere on the page');
-    });
-
-    // Time spent tracking - send increments every 5 seconds while user is on page
+    // Time spent tracking: increment every 5 seconds
     let secondsElapsed = 0;
     const interval = setInterval(async () => {
       secondsElapsed += 5;
       await incrementTimeSpent(5);
-      log(`Added 5 seconds to time spent (total session: ${secondsElapsed}s)`);
+      console.log(`Added 5 seconds to time spent (total session: ${secondsElapsed}s)`);
     }, 5000);
 
-    // Cleanup on page unload (optional)
+    // Decrement concurrent users on page unload
     window.addEventListener('beforeunload', () => {
       clearInterval(interval);
-      // Decrement concurrent users immediately when user leaves
       runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
-      log('User leaving, decrementing concurrent users');
+      console.log('User leaving, decrementing concurrent users');
     });
   }
 
