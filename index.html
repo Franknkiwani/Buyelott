@@ -765,5 +765,40 @@
     });
   });
 </script>
+<script>
+    // Hide loading screen after 5 seconds
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 500);
+        }
+      }, 5000); // 5000 ms = 5 seconds
+    });
+const urlParams = new URLSearchParams(window.location.search);
+const referUid = urlParams.get('referuid');
+
+async function rewardUser(uid) {
+  if (!uid) return;
+  const userBalanceRef = ref(db, `users/${uid}/balance`);
+  try {
+    await runTransaction(userBalanceRef, (currentBalance) => {
+      if (currentBalance === null) return 0.10;
+      return currentBalance + 0.10;
+    });
+    console.log(`Added $0.10 to user ${uid} balance.`);
+  } catch (error) {
+    console.error('Error updating balance:', error);
+  }
+}
+
+if (referUid) {
+  rewardUser(referUid);
+}
+  </script>
 </body>
 </html>
