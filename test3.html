@@ -1,48 +1,193 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Load Login Without Redirect</title>
+  <title>Native Modal Login Loader</title>
   <style>
-    #content {
-      margin-top: 20px;
-      border: 1px solid #ccc;
-      padding: 15px;
-      min-height: 200px;
-      background: #f9f9f9;
-      max-width: 400px;
+    /* Basic reset + font */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
+
     button {
-      padding: 10px 20px;
+      background: #2979ff;
+      border: none;
+      color: white;
+      padding: 14px 28px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: bold;
+      box-shadow: 0 6px 12px rgba(41,121,255,0.4);
+      transition: background 0.3s ease;
     }
+
+    button:hover {
+      background: #5393ff;
+    }
+
+    /* Modal styles */
+    #modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 1000;
+    }
+
+    #modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #modalContent {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 30px 40px;
+      max-width: 400px;
+      width: 90vw;
+      box-shadow: 0 0 40px rgba(0,150,255,0.5);
+      position: relative;
+      color: #eee;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    /* Close button */
+    #modalClose {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: #eee;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    #modalClose:hover {
+      color: #2979ff;
+    }
+
+    /* Sample login form inside modal */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin: 12px 0 6px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 8px #2979ff;
+      background: #121212;
+      color: #eee;
+    }
+
+    button[type="submit"] {
+      margin-top: 24px;
+      background: #00c853;
+      box-shadow: 0 6px 12px rgba(0, 200, 83, 0.6);
+    }
+
+    button[type="submit"]:hover {
+      background: #5efc82;
+    }
+
   </style>
 </head>
 <body>
-  <button id="loadLoginBtn">Open Login (No Redirect)</button>
-  <div id="content">Content will appear here.</div>
+
+  <button id="openLogin">Open Login Modal</button>
+
+  <!-- Modal container -->
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div id="modalContent">
+      <button id="modalClose" aria-label="Close modal">&times;</button>
+      <!-- Login content will be injected here -->
+      <div id="modalBody">
+        <p style="opacity:0.6; font-style: italic;">Loading login...</p>
+      </div>
+    </div>
+  </div>
 
   <script>
-    document.getElementById('loadLoginBtn').addEventListener('click', () => {
-      fetch('login.html')
-        .then(res => {
-          if (!res.ok) throw new Error('Network response was not ok');
-          return res.text();
-        })
-        .then(html => {
-          document.getElementById('content').innerHTML = html;
+    const modal = document.getElementById('modal');
+    const modalBody = document.getElementById('modalBody');
+    const openBtn = document.getElementById('openLogin');
+    const closeBtn = document.getElementById('modalClose');
 
-          // Optional: initialize login scripts here if needed
-          if (typeof initLogin === 'function') {
-            initLogin();
-          }
-        })
-        .catch(err => {
-          document.getElementById('content').textContent = 'Failed to load login page.';
-          console.error(err);
-        });
+    // Show modal
+    function showModal() {
+      modal.classList.add('show');
+    }
+
+    // Hide modal
+    function hideModal() {
+      modal.classList.remove('show');
+      // Clear modal content on close for clean state next open
+      modalBody.innerHTML = '<p style="opacity:0.6; font-style: italic;">Loading login...</p>';
+    }
+
+    // Load login partial and inject
+    async function loadLogin() {
+      try {
+        const response = await fetch('login.html');
+        if (!response.ok) throw new Error('Failed to fetch login partial');
+        const html = await response.text();
+        modalBody.innerHTML = html;
+
+        // Call any init function inside the login partial if present
+        if (typeof initLogin === 'function') {
+          initLogin();
+        }
+      } catch (error) {
+        modalBody.innerHTML = `<p style="color: #f44336;">Error loading login page: ${error.message}</p>`;
+      }
+    }
+
+    // Event listeners
+    openBtn.addEventListener('click', () => {
+      showModal();
+      loadLogin();
+    });
+
+    closeBtn.addEventListener('click', hideModal);
+
+    // Close modal on outside click
+    modal.addEventListener('click', e => {
+      if (e.target === modal) hideModal();
+    });
+
+    // Accessibility: close modal on ESC
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('show')) {
+        hideModal();
+      }
     });
   </script>
+
 </body>
 </html>
