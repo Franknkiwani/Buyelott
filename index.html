@@ -800,5 +800,111 @@ if (referUid) {
   rewardUser(referUid);
 }
   </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const logEl = document.getElementById('log');
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  function log(msg) {
+    logEl.textContent += msg + '\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  async function incrementCounter(path) {
+    const counterRef = ref(db, path);
+    return runTransaction(counterRef, current => (current || 0) + 1);
+  }
+
+  async function incrementTimeSpent(seconds) {
+    const timeRef = ref(db, 'analytics/timeSpentSeconds');
+    return runTransaction(timeRef, current => (current || 0) + seconds);
+  }
+
+  async function detectCountry() {
+    try {
+      const res = await fetch('https://ipinfo.io/json?token=');
+      if (!res.ok) throw new Error('Failed to fetch IP info');
+      const data = await res.json();
+      return data.country || 'Unknown';
+    } catch (e) {
+      log('Country detection failed: ' + e.message);
+      return 'Unknown';
+    }
+  }
+
+  async function main() {
+    logEl.textContent = '';
+    log('Detecting country...');
+    const country = await detectCountry();
+    log(`Visitor country detected: ${country}`);
+
+    log('Incrementing page views...');
+    await incrementCounter('analytics/views');
+    log('Incrementing page reloads...');
+    await incrementCounter('analytics/reloads');
+    log('Incrementing visits for country...');
+    await incrementCounter(`analytics/countries/${country}`);
+
+    // Concurrent users handling
+    const concurrentRef = ref(db, 'analytics/concurrentUsers');
+    await runTransaction(concurrentRef, val => (val || 0) + 1);
+    setTimeout(() => {
+      runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
+      log('Concurrent user left (decremented)');
+    }, 15000);
+
+    // Log current stats
+    log('Fetching current stats...');
+    const statsPaths = ['views', 'reloads', 'clicks', 'concurrentUsers', 'timeSpentSeconds'];
+    for (const key of statsPaths) {
+      const snap = await get(ref(db, `analytics/${key}`));
+      const val = snap.val() ?? 0;
+      if (key === 'timeSpentSeconds') {
+        log(`${key}: ${val} seconds (~${Math.floor(val / 60)} minutes)`);
+      } else {
+        log(`${key}: ${val}`);
+      }
+    }
+
+    // Listen for ALL clicks anywhere in the page
+    document.addEventListener('click', async () => {
+      await incrementCounter('analytics/clicks');
+      log('Registered a click anywhere on the page');
+    });
+
+    // Time spent tracking - send increments every 5 seconds while user is on page
+    let secondsElapsed = 0;
+    const interval = setInterval(async () => {
+      secondsElapsed += 5;
+      await incrementTimeSpent(5);
+      log(`Added 5 seconds to time spent (total session: ${secondsElapsed}s)`);
+    }, 5000);
+
+    // Cleanup on page unload (optional)
+    window.addEventListener('beforeunload', () => {
+      clearInterval(interval);
+      // Decrement concurrent users immediately when user leaves
+      runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
+      log('User leaving, decrementing concurrent users');
+    });
+  }
+
+  main();
+</script>
 </body>
 </html>
