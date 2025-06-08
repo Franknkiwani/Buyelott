@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dark Mod Maker</title>
+  <style>
+    /* Reset and box-sizing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    /* Dark theme base */
+    body {
+      background: #121212;
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Header styling */
+    header {
+      background: #1f1f1f;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      font-size: 1.6rem;
+      text-align: center;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+      user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Container for main content */
+    main {
+      flex: 1;
+      max-width: 480px;
+      margin: 1rem auto 2rem;
+      width: 90%;
+    }
+
+    /* Form container with glassy dark card style */
+    form {
+      background: #222;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.7),
+        inset 0 0 10px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      user-select: none;
+    }
+
+    /* Labels styling */
+    label {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.95rem;
+    }
+
+    /* Red asterisk for required fields */
+    .required {
+      color: #ff3860;
+      font-weight: 700;
+    }
+
+    /* Text inputs and textarea styling */
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1.5px solid #333;
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      color: #eee;
+      resize: vertical;
+      transition: border-color 0.25s ease;
+    }
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #007aff;
+      outline: none;
+    }
+    textarea {
+      min-height: 100px;
+    }
+
+    /* Dropzone styles */
+    .dropzone {
+      position: relative;
+      border: 2px dashed #444;
+      border-radius: 14px;
+      height: 180px; /* approx 16:9 ratio with 320px width */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #777;
+      font-size: 1.1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.3s ease;
+      background: #171717;
+      text-align: center;
+      padding: 1rem;
+    }
+    .dropzone.dragover {
+      border-color: #007aff;
+      color: #007aff;
+      background: #202020;
+    }
+
+    /* Hidden actual file input */
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Progress bar container */
+    .progress-bar {
+      width: 100%;
+      background: #333;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 12px;
+      margin-top: 0.5rem;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.7);
+    }
+    .progress-fill {
+      height: 100%;
+      background: #007aff;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Switch container */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.95rem;
+    }
+    /* Switch styling */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #555;
+      border-radius: 24px;
+      transition: 0.4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+    input:checked + .slider {
+      background-color: #007aff;
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Button styling */
+    button {
+      background: #007aff;
+      color: white;
+      font-weight: 700;
+      padding: 0.9rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    button:disabled {
+      background: #334466;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: #005ecb;
+    }
+
+    /* My Mods section styling */
+    #myMods {
+      margin-top: 2rem;
+      background: #222;
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.7),
+        inset 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+    #myMods h2 {
+      margin-top: 0;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #00aaff;
+    }
+    .mod-item {
+      background: #181818;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .mod-item div {
+      max-width: 70%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    .mod-delete-btn {
+      background: #ff3860;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      cursor: pointer;
+      color: white;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+    }
+    .mod-delete-btn:hover {
+      background: #d23050;
+    }
+
+    /* Theme toggle container */
+    #themeToggleContainer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #eee;
+      z-index: 20;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 520px) {
+      main {
+        width: 95%;
+      }
+      .mod-item div {
+        max-width: 60%;
+        font-size: 0.85rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 0.8rem;
+      }
+    }
+    /* My Mods section styling */
+#myMods {
+  margin-top: 2rem;
+  background: #222;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
+}
+#myMods h2 {
+  margin-top: 0;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #00aaff;
+}
+
+/* Single mod item styling */
+.mod-item {
+  background: #181818;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Mod title */
+.mod-item h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #00aaff;
+  font-weight: 700;
+}
+
+/* Mod description */
+.mod-item p {
+  margin: 0;
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Mod image */
+.mod-item img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+/* Delete button */
+.mod-delete-btn {
+  align-self: flex-end;
+  background: #ff3860;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: white;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
+}
+.mod-delete-btn:hover {
+  background: #d23050;
+}
+
+/* Theme toggle container */
+#themeToggleContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #222;
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #eee;
+  z-index: 20;
+}
+
+/* Responsive adjustments */
+@media (max-width: 520px) {
+  main {
+    width: 95%;
+  }
+
+  .mod-item h3 {
+    font-size: 1rem;
+  }
+
+  .mod-item p {
+    font-size: 0.85rem;
+  }
+
+  .mod-delete-btn {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.9rem;
+  }
+}
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 90%;
+  width: 360px;
+}
+
+#popup-message {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: pink;
+}
+
+#popup-close-btn {
+  background: #007aff;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.hidden {
+  display: none;
+}
+#confirm-modal.hidden {
+  display: none;
+}
+#confirm-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  font-family: Arial, sans-serif;
+}
+
+.confirm-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-modal-content {
+  position: relative;
+  background: #222;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  max-width: 320px;
+  width: 100%;
+  color: white;
+  text-align: center;
+}
+
+.confirm-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.confirm-buttons button {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  min-width: 80px;
+  transition: background-color 0.25s ease;
+}
+
+.btn-yes {
+  background: #4caf50;
+  color: white;
+}
+.btn-yes:hover {
+  background: #45a045;
+}
+
+.btn-no {
+  background: #f44336;
+  color: white;
+}
+.btn-no:hover {
+  background: #d7372f;
+}
+/* Backdrop to dim background */
+.popup-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide with opacity for smooth toggle */
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Popup container */
+.popup-box {
+  background: black;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Message styling */
+#popup-message {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  /* Default neutral color */
+  color: purple;
+}
+
+/* Success message color */
+.success {
+  color: #2e7d32; /* Strong green, easy on the eyes */
+}
+
+/* Error message color */
+.error {
+  color: #d32f2f; /* Classic red, noticeable but not screaming */
+}
+
+/* Button styling */
+#popup-close-btn {
+  background: #1976d2; /* Blue button, trustworthy and clear */
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+#popup-close-btn:hover {
+  background: #115293;
+}
+  </style>
+</head>
+<body>
+  <header>Dark Mod Maker</header>
+  <main>
+    <!-- Mod creation form -->
+    <form id="modForm" novalidate>
+      <!-- Mod Title -->
+      <label for="modTitle">Mod Title<span class="required">*</span></label>
+      <input
+        type="text"
+        id="modTitle"
+        name="modTitle"
+        maxlength="50"
+        placeholder="Enter mod title"
+        required
+      />
+
+      <!-- Mod Description -->
+      <label for="modDesc">Mod Description<span class="required">*</span></label>
+      <textarea
+        id="modDesc"
+        name="modDesc"
+        maxlength="300"
+        placeholder="Describe your mod"
+        required
+      ></textarea>
+<div id="preview-container">
+  <img id="preview-img" src="" alt="Image preview" style="max-width: 100%; height: auto; display: none;" />
+</div>
+<!-- Screenshot dropzone -->
+<label>Mod Screenshot (16:9)<span class="required">*</span></label>
+<div
+  class="dropzone"
+  id="dropzone"
+  tabindex="0"
+  aria-label="Drop a mod screenshot here or click to select"
+  style="
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+    border: 2px dashed #aaa;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    text-align: center;
+    color: #666;
+    font-weight: 500;
+  "
+>
+  <span
+    id="dropzoneText"
+    style="
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    "
+  >
+    Drag & Drop your screenshot or click to select
+  </span>
+
+  <input
+    type="file"
+    id="modScreenshot"
+    name="modScreenshot"
+    accept="image/*"
+    required
+    style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    "
+  />
+
+  <img
+    id="imagePreview"
+    alt="Mod Screenshot Preview"
+    style="
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    "
+  />
+</div>
+<script>
+  const modScreenshotInput = document.getElementById("modScreenshot");
+  const imagePreview = document.getElementById("imagePreview");
+  const dropzoneText = document.getElementById("dropzoneText");
+
+  modScreenshotInput.addEventListener("change", () => {
+    const file = modScreenshotInput.files[0];
+    if (file && file.type.startsWith("image/")) {
+      imagePreview.src = URL.createObjectURL(file);
+      imagePreview.style.display = "block";
+      dropzoneText.style.display = "none";
+    } else {
+      imagePreview.style.display = "none";
+      imagePreview.src = "";
+      dropzoneText.style.display = "block";
+    }
+  });
+</script>
+
+  <input
+    type="file"
+    id="modScreenshot"
+    name="modScreenshot"
+    accept="image/*"
+    required
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;"
+  />
+
+  <img
+    id="imagePreview"
+    alt="Mod Screenshot Preview"
+    style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
+  />
+</div>
+      <!-- Progress bar for image upload -->
+      <div class="progress-bar" id="uploadProgress" style="display:none;">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <!-- Mod options -->
+      <div class="switch-container">
+        <label for="modBossSwitch">Mod Boss On/Off</label>
+        <label class="switch">
+          <input type="checkbox" id="modBossSwitch" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-container">
+        <label for="modMineSwitch">This Mod is Mine</label>
+        <label class="switch">
+          <input type="checkbox" id="modMineSwitch" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <label for="modVisibility">Visibility</label>
+      <select id="modVisibility" name="modVisibility" required>
+        <option value="public">Public</option>
+        <option value="private">Private</option>
+      </select>
+
+      <!-- Save mod button -->
+      <button type="submit" id="saveModBtn" disabled>Save Mod</button>
+    </form>
+
+    <!-- My Mods section -->
+    <section id="myMods">
+      <h2>My Mods</h2>
+      <div id="modsList">
+        <!-- User mods will be dynamically appended here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Theme toggle -->
+  <div id="themeToggleContainer" role="button" tabindex="0" aria-pressed="false" aria-label="Toggle light/dark theme">
+    🌙 Dark Mode
+  </div>
+<div id="popup-modal" class="popup-backdrop hidden">
+  <div class="popup-box">
+    <p id="popup-message"></p>
+    <button id="popup-close-btn">Okay</button>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  onValue,
+  remove,
+  query,
+  orderByChild,
+  equalTo,
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH",
+};
+
+const IMGUR_CLIENT_ID = "891e5bb4aa94282";
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+
+// DOM references
+const modForm = document.getElementById("modForm");
+const modTitle = document.getElementById("modTitle");
+const modDesc = document.getElementById("modDesc");
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("modScreenshot");
+const uploadProgress = document.getElementById("uploadProgress");
+const progressFill = document.getElementById("progressFill");
+const modBossSwitch = document.getElementById("modBossSwitch");
+const modMineSwitch = document.getElementById("modMineSwitch");
+const modVisibility = document.getElementById("modVisibility");
+const saveModBtn = document.getElementById("saveModBtn");
+const modsList = document.getElementById("modsList");
+const themeToggleContainer = document.getElementById("themeToggleContainer");
+
+let selectedFile = null;
+
+// THEME TOGGLE
+function loadTheme() {
+  const saved = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", saved);
+  themeToggleContainer.textContent = saved === "dark" ? "🌙 Dark Mode" : "☀️ Light Mode";
+  themeToggleContainer.setAttribute("aria-pressed", saved === "dark" ? "true" : "false");
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+  themeToggleContainer.textContent = next === "dark" ? "🌙 Dark Mode" : "☀️ Light Mode";
+  themeToggleContainer.setAttribute("aria-pressed", next === "dark" ? "true" : "false");
+}
+
+themeToggleContainer.addEventListener("click", toggleTheme);
+themeToggleContainer.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    toggleTheme();
+  }
+});
+loadTheme();
+
+// AUTH STATE
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    enableForm();
+    loadUserMods();
+  } else {
+    currentUser = null;
+    disableForm();
+    modsList.innerHTML = `<p style="color:#f55;">You must be logged in to manage mods.</p>`;
+  }
+});
+
+// FORM VALIDATION - concise and clear
+function validateForm() {
+  const valid =
+    modTitle.value.trim() !== "" &&
+    modDesc.value.trim() !== "" &&
+    selectedFile !== null;
+  saveModBtn.disabled = !valid;
+}
+
+// Attach input listeners
+modTitle.addEventListener("input", validateForm);
+modDesc.addEventListener("input", validateForm);
+
+// DROPZONE LOGIC
+dropzone.addEventListener("click", () => fileInput.click());
+
+dropzone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropzone.classList.add("dragover");
+});
+
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("dragover");
+});
+
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropzone.classList.remove("dragover");
+  const files = e.dataTransfer.files;
+  if (files.length) handleFile(files[0]);
+});
+
+fileInput.addEventListener("change", () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+// IMAGE LOAD + RATIO CHECK + FILE ASSIGNMENT + PREVIEW
+function handleFile(file) {
+  if (!file.type.startsWith("image/")) {
+    showPopup("Please upload an image file.");
+    return;
+  }
+
+  const img = new Image();
+  img.onload = async () => {
+    const ratio = img.width / img.height;
+    if (ratio < 1.75 || ratio > 1.85) {
+      const proceed = await showConfirm(
+        "Screenshot should be roughly 16:9. Continue anyway?"
+      );
+      if (!proceed) {
+        selectedFile = null;
+        validateForm();
+        clearPreview();
+        return;
+      }
+    }
+    selectedFile = file;
+    dropzone.textContent = file.name;
+    validateForm();
+
+    // Preview logic
+    const previewImg = document.getElementById("preview-img");
+    if (previewImg.src) {
+      URL.revokeObjectURL(previewImg.src); // clean old URL
+    }
+    previewImg.src = URL.createObjectURL(file);
+    previewImg.style.display = "block";
+  };
+
+  img.onerror = () => {
+    showPopup("Invalid image file.");
+  };
+
+  img.src = URL.createObjectURL(file);
+}
+
+// Clear preview helper
+function clearPreview() {
+  const previewImg = document.getElementById("preview-img");
+  if (previewImg.src) {
+    URL.revokeObjectURL(previewImg.src);
+  }
+  previewImg.src = "";
+  previewImg.style.display = "none";
+}
+
+// IMGUR UPLOAD - nicely abstracted
+async function uploadImageToImgur(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.imgur.com/3/image");
+    xhr.setRequestHeader("Authorization", `Client-ID ${IMGUR_CLIENT_ID}`);
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        onProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (res.success && res.data.link) {
+          resolve(res.data.link);
+        } else {
+          reject(new Error("Imgur upload failed."));
+        }
+      } catch {
+        reject(new Error("Imgur response parse error."));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Network error during Imgur upload."));
+
+    xhr.send(formData);
+  });
+}
+// FIREBASE SAVE
+async function saveMod(data) {
+  const modsRef = ref(db, "mods");
+  const newModRef = push(modsRef);
+  await set(newModRef, data);
+  return newModRef.key;
+}
+
+// SAVE BUTTON LOGIC with neat async flow and UI state control
+saveModBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+  if (!currentUser || saveModBtn.disabled) return;
+
+  // Disable and update UI
+  saveModBtn.disabled = true;
+  saveModBtn.textContent = "Uploading image...";
+  uploadProgress.style.display = "block";
+  progressFill.style.width = "0%";
+
+  try {
+    const imgUrl = await uploadImageToImgur(selectedFile, (percent) => {
+      progressFill.style.width = percent + "%";
+    });
+
+    saveModBtn.textContent = "Saving mod...";
+
+    const modData = {
+      userId: currentUser.uid,
+      title: modTitle.value.trim(),
+      description: modDesc.value.trim(),
+      screenshotUrl: imgUrl,
+      bossOn: modBossSwitch.checked,
+      mineOn: modMineSwitch.checked,
+      visibility: modVisibility.value,
+      createdAt: Date.now(),
+    };
+
+    await saveMod(modData);
+
+    showPopup("Mod saved successfully!");
+
+    // Reset form/UI
+    modForm.reset();
+    dropzone.textContent = "Drop screenshot here (16:9 ratio)";
+    selectedFile = null;
+    uploadProgress.style.display = "none";
+    progressFill.style.width = "0%";
+    saveModBtn.textContent = "Save Mod";
+    saveModBtn.disabled = true;
+
+    // Optionally reload the mod list
+    loadUserMods();
+
+  } catch (error) {
+    console.error("Error saving mod:", error);
+    showPopup(`❌ Oops! Something went wrong:\n${error.message}`);
+    saveModBtn.textContent = "Save Mod";
+    saveModBtn.disabled = false;
+    uploadProgress.style.display = "none";
+  }
+});
+
+// ESCAPE HTML - solid XSS prevention
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, (m) => {
+    switch (m) {
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case '"': return "&quot;";
+      case "'": return "&#039;";
+      default: return m;
+    }
+  });
+}
+
+// LOAD MODS - efficient UI update + event binding
+function loadUserMods() {
+  if (!currentUser) return;
+
+  const userModsRef = query(
+    ref(db, "mods"),
+    orderByChild("userId"),
+    equalTo(currentUser.uid)
+  );
+
+  onValue(userModsRef, (snapshot) => {
+    const mods = snapshot.val();
+    modsList.innerHTML = "";
+
+    if (!mods) {
+      modsList.innerHTML = `<p style="color:#888;">No mods uploaded yet.</p>`;
+      return;
+    }
+
+    for (const [key, mod] of Object.entries(mods)) {
+      const div = document.createElement("div");
+      div.className = "mod-item";
+      div.innerHTML = `
+        <strong>${escapeHtml(mod.title)}</strong><br/>
+        <small>${escapeHtml(mod.description)}</small><br/>
+        <img src="${escapeHtml(mod.screenshotUrl)}" alt="Screenshot" style="max-width:200px; aspect-ratio:16/9; object-fit:cover; margin:8px 0;"/>
+        <p>
+          Boss: ${mod.bossOn ? "On" : "Off"} | 
+          Mine: ${mod.mineOn ? "On" : "Off"} | 
+          Visibility: ${escapeHtml(mod.visibility)} | 
+          Downloads: ${typeof mod.downloadsCount === "number" ? mod.downloadsCount : 0}
+        </p>
+        <button data-key="${key}" class="deleteModBtn" aria-label="Delete mod ${escapeHtml(mod.title)}">Delete</button>
+      `;
+      modsList.appendChild(div);
+    }
+
+    // Attach delete handlers with your custom confirm modal
+    modsList.querySelectorAll(".deleteModBtn").forEach((btn) => {
+      btn.onclick = async () => {
+        const confirmed = await showConfirm("Delete this mod?");
+        if (!confirmed) return;
+
+        try {
+          await remove(ref(db, "mods/" + btn.dataset.key));
+          showPopup("Mod deleted successfully!");
+        } catch (error) {
+          console.error("Error deleting mod:", error);
+          showPopup("❌ Failed to delete mod.");
+        }
+      };
+    });
+  });
+}
+
+// LOAD DOWNLOADS - efficient UI update + event binding
+function loadUserDownloads() {
+  if (!currentUser) return;
+
+  const userDownloadsRef = query(
+    ref(db, "downloads"),
+    orderByChild("userId"),
+    equalTo(currentUser.uid)
+  );
+
+  onValue(userDownloadsRef, (snapshot) => {
+    const downloads = snapshot.val();
+    downloadsList.innerHTML = "";
+
+    if (!downloads) {
+      downloadsList.innerHTML = `<p style="color:#888;">No downloads available yet.</p>`;
+      return;
+    }
+
+    for (const [key, download] of Object.entries(downloads)) {
+      const div = document.createElement("div");
+      div.className = "download-item";
+      div.innerHTML = `
+        <strong>${escapeHtml(download.title)}</strong><br/>
+        <small>${escapeHtml(download.description)}</small><br/>
+        <a href="${escapeHtml(download.fileUrl)}" target="_blank" rel="noopener noreferrer" download>Download File</a><br/>
+        <p>
+          Visibility: ${escapeHtml(download.visibility)}<br/>
+          Uploaded: ${download.uploadedAt ? new Date(download.uploadedAt).toLocaleDateString() : "Unknown"}<br/>
+          File Size: ${download.fileSize ? (download.fileSize / 1024 / 1024).toFixed(2) + " MB" : "N/A"}<br/>
+          Downloads Count: ${typeof download.downloadsCount === "number" ? download.downloadsCount : 0}<br/>
+          Tags: ${download.tags && download.tags.length > 0 ? download.tags.map(escapeHtml).join(", ") : "None"}
+        </p>
+        <button data-key="${key}" class="deleteDownloadBtn" aria-label="Delete download ${escapeHtml(download.title)}">Delete</button>
+      `;
+      downloadsList.appendChild(div);
+    }
+
+    // Attach delete handlers with your custom confirm modal
+    downloadsList.querySelectorAll(".deleteDownloadBtn").forEach((btn) => {
+      btn.onclick = async () => {
+        const confirmed = await showConfirm("Delete this download?");
+        if (!confirmed) return;
+
+        try {
+          await remove(ref(db, "downloads/" + btn.dataset.key));
+          showPopup("Download deleted successfully!");
+        } catch (error) {
+          console.error("Error deleting download:", error);
+          showPopup("❌ Failed to delete download.");
+        }
+      };
+    });
+  });
+}
+
+// FORM ENABLE/DISABLE FOR AUTH STATES
+function enableForm() {
+  modForm.querySelectorAll("input, textarea, select, button").forEach((el) => {
+    el.disabled = false;
+  });
+  validateForm();
+}
+
+function disableForm() {
+  modForm.querySelectorAll("input, textarea, select, button").forEach((el) => {
+    el.disabled = true;
+  });
+  saveModBtn.disabled = true;
+}
+// Show toast popup (bottom fade-in/out)
+function showToast(message) {
+  let popup = document.getElementById('popup-toast');
+
+  if (!popup) {
+    popup = document.createElement("div");
+    popup.id = "popup-toast";
+    popup.classList.add("hidden");
+
+    popup.style.position = "fixed";
+    popup.style.bottom = "24px";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%) translateY(30px)";
+    popup.style.background = "rgba(33, 33, 33, 0.95)";
+    popup.style.color = "white";
+    popup.style.padding = "14px 24px";
+    popup.style.borderRadius = "14px";
+    popup.style.fontSize = "1rem";
+    popup.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.25)";
+    popup.style.opacity = "0";
+    popup.style.pointerEvents = "none";
+    popup.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+    popup.style.zIndex = "9999";
+
+    document.body.appendChild(popup);
+  }
+
+  popup.textContent = message;
+  popup.classList.remove('hidden');
+  popup.style.opacity = "1";
+  popup.style.pointerEvents = "auto";
+  popup.style.transform = "translateX(-50%) translateY(0)";
+
+  setTimeout(() => {
+    popup.style.opacity = "0";
+    popup.style.pointerEvents = "none";
+    popup.style.transform = "translateX(-50%) translateY(30px)";
+    setTimeout(() => popup.classList.add('hidden'), 300);
+  }, 3000);
+}
+
+// Show fullscreen modal popup (centered)
+function showPopup(message) {
+  let modal = document.getElementById("popup-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "popup-modal";
+    modal.className = "popup-backdrop hidden";
+    modal.innerHTML = `
+      <div class="popup-box">
+        <p id="popup-message"></p>
+        <button id="popup-close-btn">Okay</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Add default styles only once
+    const style = document.createElement("style");
+    style.textContent = `
+      .popup-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      .popup-box {
+        background: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        max-width: 90%;
+        width: 360px;
+      }
+      .popup-box p {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        color: #333;
+      }
+      #popup-close-btn {
+        background: #007aff;
+        color: white;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .hidden {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const messageBox = modal.querySelector("#popup-message");
+  const closeBtn = modal.querySelector("#popup-close-btn");
+
+  messageBox.textContent = message;
+  modal.classList.remove("hidden");
+
+  closeBtn.onclick = () => {
+    modal.classList.add("hidden");
+  };
+}
+
+// Custom async confirm modal returns Promise<boolean>
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    let modal = document.getElementById("confirm-modal");
+
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "confirm-modal";
+      modal.className = "popup-backdrop hidden";
+      modal.innerHTML = `
+        <div class="popup-box">
+          <p id="confirm-message"></p>
+          <div style="display:flex; justify-content:center; gap: 12px;">
+            <button id="confirm-yes-btn" style="background:#007aff; color:#fff; padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-weight:600;">Yes</button>
+            <button id="confirm-no-btn" style="background:#ccc; color:#333; padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-weight:600;">No</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const messageBox = modal.querySelector("#confirm-message");
+    const yesBtn = modal.querySelector("#confirm-yes-btn");
+    const noBtn = modal.querySelector("#confirm-no-btn");
+
+    messageBox.textContent = message;
+    modal.classList.remove("hidden");
+
+    const cleanUp = () => {
+      yesBtn.onclick = null;
+      noBtn.onclick = null;
+      modal.classList.add("hidden");
+    };
+
+    yesBtn.onclick = () => {
+      cleanUp();
+      resolve(true);
+    };
+
+    noBtn.onclick = () => {
+      cleanUp();
+      resolve(false);
+    };
+  });
+}
+
+</script>
+</body>
+</html>
