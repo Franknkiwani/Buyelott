@@ -800,7 +800,12 @@ if (referUid) {
   rewardUser(referUid);
 }
   </script>
-<script type="module">
+<body>
+  <h1>🌍 Country Leaderboard</h1>
+  <ul id="list">
+    <li>Loading...</li>
+  </ul>
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
