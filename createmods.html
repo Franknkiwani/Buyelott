@@ -853,54 +853,39 @@ loadTheme();
 
 // AUTH STATE
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    enableForm();
-    loadUserMods();
-  } else {
-    currentUser = null;
-    disableForm();
-    modsList.innerHTML = `<p style="color:#f55;">You must be logged in to manage mods.</p>`;
-  }
+  currentUser = user;
+  user
+    ? (enableForm(), loadUserMods())
+    : (disableForm(),
+       (modsList.innerHTML = `<p style="color:#f55;">You must be logged in to manage mods.</p>`));
 });
 
-// FORM VALIDATION - concise and clear
+// FORM VALIDATION - less strict
 function validateForm() {
-  const valid =
-    modTitle.value.trim() !== "" &&
-    modDesc.value.trim() !== "" &&
-    selectedFile !== null;
-  saveModBtn.disabled = !valid;
+  saveModBtn.disabled = !(modTitle.value.trim() && modDesc.value.trim() && selectedFile);
 }
 
-// Attach input listeners
+// Input listeners
 modTitle.addEventListener("input", validateForm);
 modDesc.addEventListener("input", validateForm);
 
 // DROPZONE LOGIC
 dropzone.addEventListener("click", () => fileInput.click());
-
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropzone.classList.add("dragover");
 });
-
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("dragover");
-});
-
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
 dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropzone.classList.remove("dragover");
-  const files = e.dataTransfer.files;
-  if (files.length) handleFile(files[0]);
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
 });
-
 fileInput.addEventListener("change", () => {
   if (fileInput.files.length) handleFile(fileInput.files[0]);
 });
 
-// IMAGE LOAD + RATIO CHECK + FILE ASSIGNMENT + PREVIEW
+// HANDLE FILE
 function handleFile(file) {
   if (!file.type.startsWith("image/")) {
     showPopup("Please upload an image file.");
@@ -908,50 +893,33 @@ function handleFile(file) {
   }
 
   const img = new Image();
-  img.onload = async () => {
+  img.onload = () => {
     const ratio = img.width / img.height;
     if (ratio < 1.75 || ratio > 1.85) {
-      const proceed = await showConfirm(
-        "Screenshot should be roughly 16:9. Continue anyway?"
-      );
-      if (!proceed) {
-        selectedFile = null;
-        validateForm();
-        clearPreview();
-        return;
-      }
+      console.warn("⚠️ Image isn't exactly 16:9. Continuing anyway.");
     }
     selectedFile = file;
     dropzone.textContent = file.name;
     validateForm();
 
-    // Preview logic
     const previewImg = document.getElementById("preview-img");
-    if (previewImg.src) {
-      URL.revokeObjectURL(previewImg.src); // clean old URL
-    }
+    if (previewImg.src) URL.revokeObjectURL(previewImg.src);
     previewImg.src = URL.createObjectURL(file);
     previewImg.style.display = "block";
   };
 
-  img.onerror = () => {
-    showPopup("Invalid image file.");
-  };
-
+  img.onerror = () => showPopup("Invalid image file.");
   img.src = URL.createObjectURL(file);
 }
 
-// Clear preview helper
 function clearPreview() {
   const previewImg = document.getElementById("preview-img");
-  if (previewImg.src) {
-    URL.revokeObjectURL(previewImg.src);
-  }
+  if (previewImg.src) URL.revokeObjectURL(previewImg.src);
   previewImg.src = "";
   previewImg.style.display = "none";
 }
 
-// IMGUR UPLOAD - nicely abstracted
+// IMGUR UPLOAD
 async function uploadImageToImgur(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -971,21 +939,17 @@ async function uploadImageToImgur(file, onProgress) {
     xhr.onload = () => {
       try {
         const res = JSON.parse(xhr.responseText);
-        if (res.success && res.data.link) {
-          resolve(res.data.link);
-        } else {
-          reject(new Error("Imgur upload failed."));
-        }
+        res.success && res.data.link ? resolve(res.data.link) : reject(new Error("Imgur upload failed."));
       } catch {
         reject(new Error("Imgur response parse error."));
       }
     };
 
     xhr.onerror = () => reject(new Error("Network error during Imgur upload."));
-
     xhr.send(formData);
   });
 }
+
 // FIREBASE SAVE
 async function saveMod(data) {
   const modsRef = ref(db, "mods");
@@ -994,12 +958,11 @@ async function saveMod(data) {
   return newModRef.key;
 }
 
-// SAVE BUTTON LOGIC with neat async flow and UI state control
+// SAVE BUTTON LOGIC
 saveModBtn.addEventListener("click", async (e) => {
   e.preventDefault();
-  if (!currentUser || saveModBtn.disabled) return;
+  if (!currentUser) return;
 
-  // Disable and update UI
   saveModBtn.disabled = true;
   saveModBtn.textContent = "Uploading image...";
   uploadProgress.style.display = "block";
@@ -1017,60 +980,45 @@ saveModBtn.addEventListener("click", async (e) => {
       title: modTitle.value.trim(),
       description: modDesc.value.trim(),
       screenshotUrl: imgUrl,
-      bossOn: modBossSwitch.checked,
-      mineOn: modMineSwitch.checked,
       visibility: modVisibility.value,
       createdAt: Date.now(),
     };
 
     await saveMod(modData);
 
-    showPopup("Mod saved successfully!");
-
-    // Reset form/UI
+    showPopup("✅ Mod saved!");
     modForm.reset();
     dropzone.textContent = "Drop screenshot here (16:9 ratio)";
     selectedFile = null;
+    clearPreview();
     uploadProgress.style.display = "none";
     progressFill.style.width = "0%";
     saveModBtn.textContent = "Save Mod";
     saveModBtn.disabled = true;
 
-    // Optionally reload the mod list
     loadUserMods();
 
   } catch (error) {
     console.error("Error saving mod:", error);
-    showPopup(`❌ Oops! Something went wrong:\n${error.message}`);
+    showPopup(`❌ Save failed:\n${error.message}`);
     saveModBtn.textContent = "Save Mod";
-    saveModBtn.disabled = false;
     uploadProgress.style.display = "none";
+    saveModBtn.disabled = false;
   }
 });
 
-// ESCAPE HTML - solid XSS prevention
+// Escape HTML
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, (m) => {
-    switch (m) {
-      case "&": return "&amp;";
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case '"': return "&quot;";
-      case "'": return "&#039;";
-      default: return m;
-    }
-  });
+  return text.replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  })[m]);
 }
 
-// LOAD MODS - efficient UI update + event binding
+// Load mods
 function loadUserMods() {
   if (!currentUser) return;
 
-  const userModsRef = query(
-    ref(db, "mods"),
-    orderByChild("userId"),
-    equalTo(currentUser.uid)
-  );
+  const userModsRef = query(ref(db, "mods"), orderByChild("userId"), equalTo(currentUser.uid));
 
   onValue(userModsRef, (snapshot) => {
     const mods = snapshot.val();
@@ -1089,34 +1037,27 @@ function loadUserMods() {
         <small>${escapeHtml(mod.description)}</small><br/>
         <img src="${escapeHtml(mod.screenshotUrl)}" alt="Screenshot" style="max-width:200px; aspect-ratio:16/9; object-fit:cover; margin:8px 0;"/>
         <p>
-          Boss: ${mod.bossOn ? "On" : "Off"} | 
-          Mine: ${mod.mineOn ? "On" : "Off"} | 
           Visibility: ${escapeHtml(mod.visibility)} | 
-          Downloads: ${typeof mod.downloadsCount === "number" ? mod.downloadsCount : 0}
+          Downloads: ${mod.downloadsCount || 0}
         </p>
         <button data-key="${key}" class="deleteModBtn" aria-label="Delete mod ${escapeHtml(mod.title)}">Delete</button>
       `;
       modsList.appendChild(div);
     }
 
-    // Attach delete handlers with your custom confirm modal
     modsList.querySelectorAll(".deleteModBtn").forEach((btn) => {
       btn.onclick = async () => {
-        const confirmed = await showConfirm("Delete this mod?");
-        if (!confirmed) return;
-
         try {
           await remove(ref(db, "mods/" + btn.dataset.key));
-          showPopup("Mod deleted successfully!");
-        } catch (error) {
-          console.error("Error deleting mod:", error);
-          showPopup("❌ Failed to delete mod.");
+          showPopup("Mod deleted.");
+        } catch (err) {
+          console.error("Delete failed:", err);
+          showPopup("❌ Delete failed.");
         }
       };
     });
   });
 }
-
 // LOAD DOWNLOADS - efficient UI update + event binding
 function loadUserDownloads() {
   if (!currentUser) return;
