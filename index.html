@@ -484,286 +484,206 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>  
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>  
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const BATCH_SIZE = 5;
-  const LOCAL_STORAGE_KEY = "loadedMods";
-  const REFRESH_COUNT_KEY = "modsRefreshCount";
-  const MAX_REFRESHES = 3;
+const BATCH_SIZE = 5;
+const LOCAL_STORAGE_KEY = "loadedMods";
+const REFRESH_COUNT_KEY = "modsRefreshCount";
+const MAX_REFRESHES = 3;
 
-  const modsEl = document.getElementById("mods");
-  const loadMoreBtn = document.getElementById("loadMore");
-  const popup = document.getElementById("loadingPopup");
-  const countdownEl = document.getElementById("countdown");
+const modsEl = document.getElementById("mods");
+const loadMoreBtn = document.getElementById("loadMore");
+const popup = document.getElementById("loadingPopup");
+const countdownEl = document.getElementById("countdown");
 
-  let allMods = [];
-  let currentIndex = 0;
+let allMods = [];
+let currentIndex = 0;
 
-  // Ads config - 3 variants
-  const adConfigs = [
-    {
-      key: "037f6e178c935a44f2ef5ab0ce53116a",
-      height: 250,
-      width: 300,
-      src: "//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js",
-    },
-    {
-      key: "b03c437546597f62fdb58e4c3fca33a1",
-      height: 300,
-      width: 160,
-      src: "//www.highperformanceformat.com/b03c437546597f62fdb58e4c3fca33a1/invoke.js",
-    },
-    {
-      key: "8f9075afd782b06bf3767fa2b0dd5775",
-      height: 250,
-      width: 300,
-      customDivId: "container-8f9075afd782b06bf3767fa2b0dd5775",
-      customScriptSrc: "//pl26795976.profitableratecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js",
-      isCustom: true,
-    }
-  ];
+// Your exact high CPM ad snippet wrapped cleanly
+function createHighCPMAdElement() {
+  const container = document.createElement("div");
+  container.style.margin = "1rem auto";
+  container.style.textAlign = "center";
 
-  function shuffleArray(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-  }
-
-  function createAdElement(adConfig) {
-    const container = document.createElement("div");
-    container.style.margin = "1rem auto";
-    container.style.textAlign = "center";
-
-    if (adConfig.isCustom) {
-      const div = document.createElement("div");
-      div.id = adConfig.customDivId;
-      container.appendChild(div);
-
-      const script = document.createElement("script");
-      script.async = true;
-      script.setAttribute("data-cfasync", "false");
-      script.src = adConfig.customScriptSrc;
-      container.appendChild(script);
-
-      return container;
-    }
-
-    const configScript = document.createElement("script");
-    configScript.type = "text/javascript";
-    configScript.text = `
-      atOptions = {
-        'key': '${adConfig.key}',
-        'format': 'iframe',
-        'height': ${adConfig.height},
-        'width': ${adConfig.width},
-        'params': {}
-      };
-    `;
-
-    const invokeScript = document.createElement("script");
-    invokeScript.type = "text/javascript";
-    invokeScript.src = adConfig.src;
-
-    container.appendChild(configScript);
-    container.appendChild(invokeScript);
-
-    return container;
-  }
-
-  async function loadMods() {
-    let refreshCount = parseInt(localStorage.getItem(REFRESH_COUNT_KEY) || "0", 10);
-    refreshCount++;
-    localStorage.setItem(REFRESH_COUNT_KEY, refreshCount.toString());
-
-    let useCache = false;
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-
-    if (refreshCount < MAX_REFRESHES && saved) {
-      try {
-        allMods = JSON.parse(saved);
-        useCache = true;
-        console.log(`Loaded mods from localStorage. Refresh count: ${refreshCount}`);
-      } catch (e) {
-        console.warn("Failed parsing localStorage, fetching fresh:", e);
-        allMods = [];
-      }
-    }
-
-    if (!useCache) {
-      console.log("Fetching mods from Firebase fresh...");
-      const snapshot = await get(ref(db, "/mods"));
-      if (!snapshot.exists()) {
-        modsEl.innerHTML = "<p>No mods found.</p>";
-        loadMoreBtn.disabled = true;
-        return;
-      }
-      allMods = Object.entries(snapshot.val()).map(([key, val]) => ({
-        id: key,
-        ...val,
-      }));
-      shuffleArray(allMods);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
-      localStorage.setItem(REFRESH_COUNT_KEY, "0");
-      console.log("Saved fresh mods to localStorage and reset refresh count.");
-    }
-
-    displayNextBatch();
-  }
-
-  function createModCard(mod) {
-    const card = document.createElement("div");
-    card.className = "mod-card";
-
-    const img = document.createElement("img");
-    img.className = "mod-image";
-    img.src = mod.screenshotUrl || "https://via.placeholder.com/300x180?text=No+Image";
-    img.alt = mod.title || "Mod image";
-    card.appendChild(img);
-
-    const info = document.createElement("div");
-    info.className = "mod-info";
-
-    const title = document.createElement("div");
-    title.className = "mod-title";
-    title.textContent = mod.title || "Untitled Mod";
-    info.appendChild(title);
-
-    const btn = document.createElement("button");
-    btn.className = "download-btn";
-    btn.textContent = `Download Now (${mod.downloads || 0})`;
-
-    btn.onclick = () => {
-      let secondsLeft = 7;
-      popup.style.display = "flex";
-      countdownEl.textContent = secondsLeft;
-
-      const intervalId = setInterval(() => {
-        secondsLeft--;
-        countdownEl.textContent = secondsLeft;
-        if (secondsLeft <= 0) {
-          clearInterval(intervalId);
-          popup.style.display = "none";
-          window.location.href = mod.downloadUrl || "downloadnow.html";
-        }
-      }, 1000);
-
-      mod.downloads = (mod.downloads || 0) + 1;
-      btn.textContent = `Download Now (${mod.downloads})`;
-
-      set(ref(db, `/mods/${mod.id}/downloads`), mod.downloads).catch(e => {
-        console.error("Failed to update downloads count:", e);
-      });
-
-      const modIndex = allMods.findIndex(m => m.id === mod.id);
-      if (modIndex > -1) {
-        allMods[modIndex].downloads = mod.downloads;
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
-      }
+  const script1 = document.createElement('script');
+  script1.type = 'text/javascript';
+  script1.text = `
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
     };
+  `;
 
-    info.appendChild(btn);
-    card.appendChild(info);
+  const script2 = document.createElement('script');
+  script2.type = 'text/javascript';
+  script2.src = "//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js";
 
-    return card;
+  container.appendChild(script1);
+  container.appendChild(script2);
+
+  return container;
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+}
 
-  // Inject two different ads top and bottom of batch
-  function injectBatchAds() {
-    let firstAdIndex = Math.floor(Math.random() * adConfigs.length);
-    let secondAdIndex = firstAdIndex;
-    while (secondAdIndex === firstAdIndex) {
-      secondAdIndex = Math.floor(Math.random() * adConfigs.length);
+async function loadMods() {
+  let refreshCount = parseInt(localStorage.getItem(REFRESH_COUNT_KEY) || "0", 10);
+  refreshCount++;
+  localStorage.setItem(REFRESH_COUNT_KEY, refreshCount.toString());
+
+  let useCache = false;
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  if (refreshCount < MAX_REFRESHES && saved) {
+    try {
+      allMods = JSON.parse(saved);
+      useCache = true;
+      console.log(`Loaded mods from localStorage. Refresh count: ${refreshCount}`);
+    } catch (e) {
+      console.warn("Failed parsing localStorage, fetching fresh:", e);
+      allMods = [];
     }
-    const firstAd = createAdElement(adConfigs[firstAdIndex]);
-    const secondAd = createAdElement(adConfigs[secondAdIndex]);
-
-    modsEl.appendChild(firstAd);
-    modsEl.appendChild(secondAd);
   }
 
-  function displayNextBatch() {
-    if (currentIndex >= allMods.length) {
+  if (!useCache) {
+    console.log("Fetching mods from Firebase fresh...");
+    const snapshot = await get(ref(db, "/mods"));
+    if (!snapshot.exists()) {
+      modsEl.innerHTML = "<p>No mods found.</p>";
       loadMoreBtn.disabled = true;
-      loadMoreBtn.textContent = "No more mods";
       return;
     }
+    allMods = Object.entries(snapshot.val()).map(([key, val]) => ({
+      id: key,
+      ...val,
+    }));
+    shuffleArray(allMods);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+    localStorage.setItem(REFRESH_COUNT_KEY, "0");
+    console.log("Saved fresh mods to localStorage and reset refresh count.");
+  }
 
-    // Double ads on top
-    modsEl.appendChild(createAdElement(adConfigs[0]));
-    modsEl.appendChild(createAdElement(adConfigs[1]));
+  displayNextBatch();
+}
 
-    const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
+function createModCard(mod) {
+  const card = document.createElement("div");
+  card.className = "mod-card";
 
-    nextBatch.forEach(mod => {
-      const card = createModCard(mod);
-      modsEl.appendChild(card);
+  const img = document.createElement("img");
+  img.className = "mod-image";
+  img.src = mod.screenshotUrl || "https://via.placeholder.com/300x180?text=No+Image";
+  img.alt = mod.title || "Mod image";
+  card.appendChild(img);
+
+  const info = document.createElement("div");
+  info.className = "mod-info";
+
+  const title = document.createElement("div");
+  title.className = "mod-title";
+  title.textContent = mod.title || "Untitled Mod";
+  info.appendChild(title);
+
+  const btn = document.createElement("button");
+  btn.className = "download-btn";
+  btn.textContent = `Download Now (${mod.downloads || 0})`;
+
+  btn.onclick = () => {
+    let secondsLeft = 7;
+    popup.style.display = "flex";
+    countdownEl.textContent = secondsLeft;
+
+    const intervalId = setInterval(() => {
+      secondsLeft--;
+      countdownEl.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(intervalId);
+        popup.style.display = "none";
+        window.location.href = mod.downloadUrl || "downloadnow.html";
+      }
+    }, 1000);
+
+    mod.downloads = (mod.downloads || 0) + 1;
+    btn.textContent = `Download Now (${mod.downloads})`;
+
+    set(ref(db, `/mods/${mod.id}/downloads`), mod.downloads).catch(e => {
+      console.error("Failed to update downloads count:", e);
     });
 
-    // Double ads on bottom
-    modsEl.appendChild(createAdElement(adConfigs[1]));
-    modsEl.appendChild(createAdElement(adConfigs[2]));
-
-    currentIndex += nextBatch.length;
-
-    if (currentIndex >= allMods.length) {
-      loadMoreBtn.disabled = true;
-      loadMoreBtn.textContent = "No more mods";
+    const modIndex = allMods.findIndex(m => m.id === mod.id);
+    if (modIndex > -1) {
+      allMods[modIndex].downloads = mod.downloads;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
     }
+  };
+
+  info.appendChild(btn);
+  card.appendChild(info);
+
+  return card;
+}
+
+function displayNextBatch() {
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+    return;
   }
 
-  let adThrottle = false;
-  function throttleAdInject() {
-    if (adThrottle) return false;
-    adThrottle = true;
-    setTimeout(() => (adThrottle = false), 5000);
-    return true;
-  }
+  const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
 
-  // Inject random ads into mods container (can be duplicates)
-  function injectRandomAds(count = 2) {
-    for (let i = 0; i < count; i++) {
-      const randomAdConfig = adConfigs[Math.floor(Math.random() * adConfigs.length)];
-      const adEl = createAdElement(randomAdConfig);
-      modsEl.appendChild(adEl);
-    }
-  }
+  nextBatch.forEach((mod, idx) => {
+    const card = createModCard(mod);
+    modsEl.appendChild(card);
 
-  window.addEventListener("scroll", () => {
-    const scrollPosition = window.scrollY + window.innerHeight;
-    const threshold = document.body.offsetHeight - 500;
-
-    if (scrollPosition > threshold && throttleAdInject()) {
-      console.log("Scroll near bottom detected - injecting ads...");
-      injectRandomAds(2);
+    // Inject ad after the 3rd mod (idx === 2)
+    if (idx === 2) {
+      const adElement = createHighCPMAdElement();
+      modsEl.appendChild(adElement);
     }
   });
-// Initialize on page load
-  window.addEventListener("DOMContentLoaded", () => {
-    loadMoreBtn.addEventListener("click", () => {
-      displayNextBatch();
-    });
 
-    loadMods().catch(err => {
-      console.error("Error loading mods:", err);
-      modsEl.innerHTML = "<p>Failed to load mods. Try refreshing.</p>";
-      loadMoreBtn.disabled = true;
-    });
+  currentIndex += nextBatch.length;
+
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadMoreBtn.addEventListener("click", () => {
+    displayNextBatch();
   });
+
+  loadMods().catch(err => {
+    console.error("Error loading mods:", err);
+    modsEl.innerHTML = "<p>Failed to load mods. Try refreshing.</p>";
+    loadMoreBtn.disabled = true;
+  });
+});
 </script>
 <script>
     // Hide loading screen after 5 seconds
