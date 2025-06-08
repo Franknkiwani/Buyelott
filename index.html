@@ -802,7 +802,7 @@ if (referUid) {
   </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -818,82 +818,24 @@ if (referUid) {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  async function incrementCounter(path) {
-    const counterRef = ref(db, path);
-    return runTransaction(counterRef, current => (current || 0) + 1);
-  }
-
-  async function incrementTimeSpent(seconds) {
-    const timeRef = ref(db, 'analytics/timeSpentSeconds');
-    return runTransaction(timeRef, current => (current || 0) + seconds);
-  }
-
-  async function detectCountry() {
-    try {
-      const res = await fetch('https://ipinfo.io/json?token='); // add your token here or leave blank
-      if (!res.ok) throw new Error('Failed to fetch IP info');
-      const data = await res.json();
-      return data.country || 'Unknown';
-    } catch (e) {
-      console.log('Country detection failed:', e.message);
-      return 'Unknown';
-    }
-  }
-
-  async function main() {
-    console.log('Detecting country...');
-    const country = await detectCountry();
-    console.log(`Visitor country detected: ${country}`);
-
-    console.log('Incrementing page views...');
-    await incrementCounter('analytics/views');
-
-    console.log('Incrementing page reloads...');
-    await incrementCounter('analytics/reloads');
-
-    console.log('Incrementing visits for country...');
-    await incrementCounter(`analytics/countries/${country}`);
-
-    // Increment concurrent users
-    const concurrentRef = ref(db, 'analytics/concurrentUsers');
-    await runTransaction(concurrentRef, val => (val || 0) + 1);
-
-    // Automatically decrement after 15 seconds to simulate user leaving
-    setTimeout(() => {
-      runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
-      console.log('Concurrent user left (decremented)');
-    }, 15000);
-
-    // Fetch and log stats
-    console.log('Fetching current stats...');
-    const statsPaths = ['views', 'reloads', 'clicks', 'concurrentUsers', 'timeSpentSeconds'];
-    for (const key of statsPaths) {
-      const snap = await get(ref(db, `analytics/${key}`));
-      const val = snap.val() ?? 0;
-      if (key === 'timeSpentSeconds') {
-        console.log(`${key}: ${val} seconds (~${Math.floor(val / 60)} minutes)`);
-      } else {
-        console.log(`${key}: ${val}`);
-      }
-    }
-
-    // Time spent tracking: increment every 5 seconds
-    let secondsElapsed = 0;
-    const interval = setInterval(async () => {
-      secondsElapsed += 5;
-      await incrementTimeSpent(5);
-      console.log(`Added 5 seconds to time spent (total session: ${secondsElapsed}s)`);
-    }, 5000);
-
-    // Decrement concurrent users on page unload
-    window.addEventListener('beforeunload', () => {
-      clearInterval(interval);
-      runTransaction(concurrentRef, val => Math.max((val || 1) - 1, 0));
-      console.log('User leaving, decrementing concurrent users');
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      const country = data.country_name || "Unknown";
+      const countRef = ref(db, "countryCounts/" + country);
+      runTransaction(countRef, (current) => (current || 0) + 1)
+        .then(() => get(countRef))
+        .then(snapshot => {
+          const count = snapshot.val();
+          if (document.getElementById("country")) document.getElementById("country").textContent = country;
+          if (document.getElementById("count")) document.getElementById("count").textContent = count;
+        });
+    })
+    .catch(err => {
+      if (document.getElementById("country")) document.getElementById("country").textContent = "Fetch error";
+      if (document.getElementById("count")) document.getElementById("count").textContent = "N/A";
+      console.error("Country fetch failed:", err);
     });
-  }
-
-  main();
 </script>
 </body>
 </html>
