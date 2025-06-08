@@ -591,32 +591,6 @@ main {
 #popup-close-btn:hover {
   background: #115293;
 }
-.spinner-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(10, 10, 10, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid #eee;
-  border-top: 6px solid #09f;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
   </style>
 </head>
 <body>
@@ -797,9 +771,6 @@ main {
     <button id="popup-close-btn">Okay</button>
   </div>
 </div>
-<div id="spinner" class="spinner-overlay">
-  <div class="spinner"></div>
-</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import {
@@ -880,7 +851,7 @@ themeToggleContainer.addEventListener("keydown", e => {
 });
 loadTheme();
 
-// ==== AUTH STATE HANDLING ====
+// AUTH STATE
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -893,7 +864,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// ==== FORM VALIDATION ====
+// FORM VALIDATION - concise and clear
 function validateForm() {
   const valid =
     modTitle.value.trim() !== "" &&
@@ -902,11 +873,11 @@ function validateForm() {
   saveModBtn.disabled = !valid;
 }
 
-// Attach validation listeners
+// Attach input listeners
 modTitle.addEventListener("input", validateForm);
 modDesc.addEventListener("input", validateForm);
 
-// ==== DROPZONE HANDLERS ====
+// DROPZONE LOGIC
 dropzone.addEventListener("click", () => fileInput.click());
 
 dropzone.addEventListener("dragover", (e) => {
@@ -929,7 +900,7 @@ fileInput.addEventListener("change", () => {
   if (fileInput.files.length) handleFile(fileInput.files[0]);
 });
 
-// ==== IMAGE VALIDATION + PREVIEW ====
+// IMAGE LOAD + RATIO CHECK + FILE ASSIGNMENT + PREVIEW
 function handleFile(file) {
   if (!file.type.startsWith("image/")) {
     showPopup("Please upload an image file.");
@@ -954,26 +925,33 @@ function handleFile(file) {
     dropzone.textContent = file.name;
     validateForm();
 
-    // Show preview
+    // Preview logic
     const previewImg = document.getElementById("preview-img");
-    if (previewImg.src) URL.revokeObjectURL(previewImg.src); // cleanup old URL
+    if (previewImg.src) {
+      URL.revokeObjectURL(previewImg.src); // clean old URL
+    }
     previewImg.src = URL.createObjectURL(file);
     previewImg.style.display = "block";
   };
 
-  img.onerror = () => showPopup("Invalid image file.");
+  img.onerror = () => {
+    showPopup("Invalid image file.");
+  };
+
   img.src = URL.createObjectURL(file);
 }
 
 // Clear preview helper
 function clearPreview() {
   const previewImg = document.getElementById("preview-img");
-  if (previewImg.src) URL.revokeObjectURL(previewImg.src);
+  if (previewImg.src) {
+    URL.revokeObjectURL(previewImg.src);
+  }
   previewImg.src = "";
   previewImg.style.display = "none";
 }
 
-// ==== IMGUR UPLOAD ====
+// IMGUR UPLOAD - nicely abstracted
 async function uploadImageToImgur(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -1004,11 +982,11 @@ async function uploadImageToImgur(file, onProgress) {
     };
 
     xhr.onerror = () => reject(new Error("Network error during Imgur upload."));
+
     xhr.send(formData);
   });
 }
-
-// ==== FIREBASE SAVE MOD ====
+// FIREBASE SAVE
 async function saveMod(data) {
   const modsRef = ref(db, "mods");
   const newModRef = push(modsRef);
@@ -1016,11 +994,12 @@ async function saveMod(data) {
   return newModRef.key;
 }
 
-// ==== SAVE BUTTON HANDLER ====
+// SAVE BUTTON LOGIC with neat async flow and UI state control
 saveModBtn.addEventListener("click", async (e) => {
   e.preventDefault();
   if (!currentUser || saveModBtn.disabled) return;
 
+  // Disable and update UI
   saveModBtn.disabled = true;
   saveModBtn.textContent = "Uploading image...";
   uploadProgress.style.display = "block";
@@ -1037,7 +1016,7 @@ saveModBtn.addEventListener("click", async (e) => {
       userId: currentUser.uid,
       title: modTitle.value.trim(),
       description: modDesc.value.trim(),
-      screenshotUrl: imgUrl,  // NOTE: aligned naming
+      screenshotUrl: imgUrl,
       bossOn: modBossSwitch.checked,
       mineOn: modMineSwitch.checked,
       visibility: modVisibility.value,
@@ -1048,7 +1027,7 @@ saveModBtn.addEventListener("click", async (e) => {
 
     showPopup("Mod saved successfully!");
 
-    // Reset UI & form
+    // Reset form/UI
     modForm.reset();
     dropzone.textContent = "Drop screenshot here (16:9 ratio)";
     selectedFile = null;
@@ -1057,7 +1036,7 @@ saveModBtn.addEventListener("click", async (e) => {
     saveModBtn.textContent = "Save Mod";
     saveModBtn.disabled = true;
 
-    // Reload user's mods
+    // Optionally reload the mod list
     loadUserMods();
 
   } catch (error) {
@@ -1069,7 +1048,7 @@ saveModBtn.addEventListener("click", async (e) => {
   }
 });
 
-// ==== XSS PREVENTION ====
+// ESCAPE HTML - solid XSS prevention
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (m) => {
     switch (m) {
@@ -1083,7 +1062,7 @@ function escapeHtml(text) {
   });
 }
 
-// ==== LOAD USER MODS & RENDER ====
+// LOAD MODS - efficient UI update + event binding
 function loadUserMods() {
   if (!currentUser) return;
 
@@ -1120,7 +1099,7 @@ function loadUserMods() {
       modsList.appendChild(div);
     }
 
-    // Attach delete handlers with confirmation
+    // Attach delete handlers with your custom confirm modal
     modsList.querySelectorAll(".deleteModBtn").forEach((btn) => {
       btn.onclick = async () => {
         const confirmed = await showConfirm("Delete this mod?");
@@ -1365,12 +1344,6 @@ function showConfirm(message) {
   });
 }
 
-</script>
-<script>
-  setTimeout(() => {
-    const spinner = document.getElementById("spinner");
-    if (spinner) spinner.style.display = "none";
-  }, 5000);
 </script>
 </body>
 </html>
