@@ -802,7 +802,7 @@ if (referUid) {
   </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, increment, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, runTransaction, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -817,15 +817,30 @@ if (referUid) {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Increment views on page load
-  const viewsRef = ref(db, "analytics/views");
-  runTransaction(viewsRef, current => (current || 0) + 1);
+  // Track view count
+  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
 
-  // Increment clicks on body click
+  // Track global clicks
   document.addEventListener("click", () => {
-    const clicksRef = ref(db, "analytics/clicks");
-    runTransaction(clicksRef, current => (current || 0) + 1);
+    runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
   });
+
+  // Track country via ipapi.co (no key)
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      const country = data.country_name || "Unknown";
+      runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
+
+      const logRef = push(ref(db, "analytics/logs"));
+      set(logRef, {
+        ip: data.ip,
+        country: country,
+        city: data.city || "Unknown",
+        timestamp: Date.now()
+      });
+    })
+    .catch(err => console.error("GeoIP Error:", err));
 </script>
 </body>
 </html>
