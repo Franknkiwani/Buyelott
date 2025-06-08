@@ -800,5 +800,32 @@ if (referUid) {
   rewardUser(referUid);
 }
   </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, increment, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Increment views on page load
+  const viewsRef = ref(db, "analytics/views");
+  runTransaction(viewsRef, current => (current || 0) + 1);
+
+  // Increment clicks on body click
+  document.addEventListener("click", () => {
+    const clicksRef = ref(db, "analytics/clicks");
+    runTransaction(clicksRef, current => (current || 0) + 1);
+  });
+</script>
 </body>
 </html>
