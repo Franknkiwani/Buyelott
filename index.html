@@ -784,23 +784,43 @@ if (referUid) {
     .catch(err => console.error("GeoIP Error:", err));
 </script>
 <script>
-  // Define allowed Tier 1 countries (you can expand this list)
-  const tier1Countries = ['US', 'GB', 'CA', 'AU', 'NZ', 'DE', 'FR'];
+  // Define allowed Tier 1 countries based on Adsterra targeting
+  const tier1Countries = [
+    'US', // United States
+    'GB', // United Kingdom
+    'CA', // Canada
+    'AU', // Australia
+    'NZ', // New Zealand
+    'DE', // Germany
+    'FR', // France
+    'IT', // Italy
+    'ES', // Spain
+    'NL', // Netherlands
+    'SE', // Sweden
+    'JP', // Japan
+    'IE', // Ireland
+    'NO', // Norway
+    'FI', // Finland
+    'DK', // Denmark
+    'CH', // Switzerland
+    'BE', // Belgium
+    'SG'  // Singapore (high CPM in tech niches)
+  ];
 
-  // Call free IP API
+  // Call free IP geolocation API
   fetch('https://ipapi.co/json/')
     .then(response => response.json())
     .then(data => {
       const userCountry = data.country_code;
 
-      // If country NOT in Tier 1 list, redirect
+      // If country NOT in Tier 1 list, redirect to blocked page
       if (!tier1Countries.includes(userCountry)) {
         window.location.href = "blockaccess.html";
       }
     })
     .catch(error => {
       console.error("Geo API error:", error);
-      // Optional: Block by default if API fails
+      // Optional fallback: redirect by default if API fails
       window.location.href = "blockaccess.html";
     });
 </script>
