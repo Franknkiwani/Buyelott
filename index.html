@@ -783,5 +783,26 @@ if (referUid) {
     })
     .catch(err => console.error("GeoIP Error:", err));
 </script>
+<script>
+  // Define allowed Tier 1 countries (you can expand this list)
+  const tier1Countries = ['US', 'GB', 'CA', 'AU', 'NZ', 'DE', 'FR'];
+
+  // Call free IP API
+  fetch('https://ipapi.co/json/')
+    .then(response => response.json())
+    .then(data => {
+      const userCountry = data.country_code;
+
+      // If country NOT in Tier 1 list, redirect
+      if (!tier1Countries.includes(userCountry)) {
+        window.location.href = "blockaccess.html";
+      }
+    })
+    .catch(error => {
+      console.error("Geo API error:", error);
+      // Optional: Block by default if API fails
+      window.location.href = "blockaccess.html";
+    });
+</script>
 </body>
 </html>
