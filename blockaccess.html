@@ -5,71 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Access Restricted</title>
   <style>
-    body {
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: #000;
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      padding: 1rem;
+      justify-content: flex-start;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      user-select: none;
     }
 
     h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      text-align: center;
     }
 
     p {
-      color: #aaa;
+      color: #ccc;
       font-size: 1rem;
-      max-width: 400px;
+      text-align: center;
+      max-width: 480px;
+      margin-bottom: 2rem;
     }
 
-    .allowed {
-      margin-top: 2rem;
+    .country {
+      width: 100%;
+      max-width: 500px;
       background: #111;
-      padding: 1rem 2rem;
       border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(255,255,255,0.05);
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 1rem 0 0 0;
-    }
-
-    li {
-      padding: 0.25rem 0;
-      font-weight: 500;
-      color: #fff;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .flag {
       margin-right: 0.5rem;
+      font-size: 1.25rem;
+    }
+
+    .country-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .vpn-button {
+      width: 100%;
+      border: none;
+      color: #fff;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .vpn-button:hover {
+      opacity: 0.85;
     }
   </style>
 </head>
 <body>
-  <h1>🌐 Access Restricted</h1>
-  <p>Sorry, this content is only available in select regions due to premium ad targeting and compliance.</p>
 
-  <div class="allowed">
-    <strong>✅ Allowed Countries</strong>
-    <ul>
-      <li><span class="flag">🇺🇸</span>United States (US)</li>
-      <li><span class="flag">🇬🇧</span>United Kingdom (GB)</li>
-      <li><span class="flag">🇨🇦</span>Canada (CA)</li>
-      <li><span class="flag">🇦🇺</span>Australia (AU)</li>
-      <li><span class="flag">🇳🇿</span>New Zealand (NZ)</li>
-      <li><span class="flag">🇩🇪</span>Germany (DE)</li>
-      <li><span class="flag">🇫🇷</span>France (FR)</li>
-    </ul>
-  </div>
+  <h1>🌐 Access Restricted</h1>
+  <p>This content is only available in select regions due to ad targeting and compliance.</p>
+
+  <div id="country-list"></div>
+
+  <!-- Popunder Ad -->
+  <script type="text/javascript" src="//pl26857223.profitableratecpm.com/a8/a7/b1/a8a7b1389678bf2846d808769e5f078f.js"></script>
+
+  <script>
+    const countries = [
+      { code: 'US', flag: '🇺🇸', name: 'United States' },
+      { code: 'GB', flag: '🇬🇧', name: 'United Kingdom' },
+      { code: 'CA', flag: '🇨🇦', name: 'Canada' },
+      { code: 'AU', flag: '🇦🇺', name: 'Australia' },
+      { code: 'NZ', flag: '🇳🇿', name: 'New Zealand' },
+      { code: 'DE', flag: '🇩🇪', name: 'Germany' },
+      { code: 'FR', flag: '🇫🇷', name: 'France' },
+      { code: 'IT', flag: '🇮🇹', name: 'Italy' },
+      { code: 'ES', flag: '🇪🇸', name: 'Spain' },
+      { code: 'NL', flag: '🇳🇱', name: 'Netherlands' },
+      { code: 'SE', flag: '🇸🇪', name: 'Sweden' },
+      { code: 'JP', flag: '🇯🇵', name: 'Japan' },
+      { code: 'IE', flag: '🇮🇪', name: 'Ireland' },
+      { code: 'NO', flag: '🇳🇴', name: 'Norway' },
+      { code: 'FI', flag: '🇫🇮', name: 'Finland' },
+      { code: 'DK', flag: '🇩🇰', name: 'Denmark' },
+      { code: 'CH', flag: '🇨🇭', name: 'Switzerland' },
+      { code: 'BE', flag: '🇧🇪', name: 'Belgium' },
+      { code: 'SG', flag: '🇸🇬', name: 'Singapore' }
+    ];
+
+    const buttonColors = [
+      '#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF2D55', '#5856D6',
+      '#FF3B30', '#5AC8FA', '#D9702E', '#FF375F', '#1ABC9C', '#FF9F0A',
+      '#BF5AF2', '#0A84FF', '#30D158', '#FFD60A', '#64D2FF', '#FF453A', '#AC8E68'
+    ];
+
+    const container = document.getElementById('country-list');
+
+    countries.forEach((country, i) => {
+      const div = document.createElement('div');
+      div.className = 'country';
+      div.innerHTML = `
+        <div class="country-name">
+          <span class="flag">${country.flag}</span>${country.name} (${country.code})
+        </div>
+        <button class="vpn-button" style="background-color: ${buttonColors[i % buttonColors.length]}"
+          onclick="redirectRandom()">
+          Use ${country.name} VPN
+        </button>
+      `;
+      container.appendChild(div);
+    });
+
+    function redirectRandom() {
+      const links = [
+        "https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590",
+        "https://www.profitableratecpm.com/d1u65c0a3?key=1ec183e9ff70ce6858d6d1ef7fa62f08"
+      ];
+      const chosen = links[Math.floor(Math.random() * links.length)];
+      window.location.href = chosen;
+    }
+  </script>
 </body>
 </html>
