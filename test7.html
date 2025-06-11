@@ -1,146 +1,286 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Earn Tasks</title>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" defer></script>
+  <title>CyberChat — Jobs Made Easier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* === Base Reset & Layout === */
+    :root {
+      --bg: #1c1c1e;
+      --text: #f2f2f7;
+      --primary: #0a84ff;
+      --border: #3a3a3c;
+      --glass-bg: rgba(28, 28, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
+
     body {
-      margin: 0; padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: linear-gradient(145deg, #121212, #1e1e1e);
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
-    h1 {
-      font-weight: 700;
-      font-size: 2rem;
-      margin: 1rem 0 0.25rem;
-      letter-spacing: 0.03em;
-      user-select: none;
-    }
-    #location-info {
-      font-weight: 400;
-      font-size: 1rem;
-      color: #999;
-      margin-bottom: 1rem;
-      user-select: none;
-    }
-    #earn-total {
-      background: rgba(255 255 255 / 0.05);
-      backdrop-filter: blur(8px);
-      padding: 12px 24px;
-      border-radius: 14px;
-      font-size: 1.25rem;
-      margin-bottom: 2rem;
-      border: 1px solid rgba(255 255 255 / 0.1);
-      min-width: 280px;
-      text-align: center;
-      user-select: none;
-    }
-    #taskList {
-      width: 90%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .task-card {
-      background: rgba(255 255 255 / 0.05);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      border: 1px solid rgba(255 255 255 / 0.1);
-      padding: 1rem 1.2rem;
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 6px 18px rgba(0 0 0 / 0.2);
-      user-select: none;
-      transition: background-color 0.2s ease;
+      padding: 0.5rem 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      backdrop-filter: saturate(180%) blur(8px);
     }
-    .task-card:hover {
-      background: rgba(255 255 255 / 0.12);
-      cursor: pointer;
+
+    .left-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
-    .task-left {
+
+    .left-header h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.2px;
+      margin-bottom: 0.1rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.5rem;
     }
-    .task-icon {
-      font-size: 1.9rem;
-      color: #0f0;
+
+    .left-header .logo {
+      stroke: var(--primary);
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
     }
-    .task-title {
+
+    .left-header p {
+      font-size: 0.70rem;
+      color: var(--primary);
       font-weight: 600;
-      font-size: 1.1rem;
-      color: #ddd;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      max-width: 200px;
+      letter-spacing: 0.8px;
+      opacity: 0;
+      animation: slideFadeIn 1.2s forwards;
+      animation-delay: 0.4s;
+      margin-left: 0;
+      padding-left: 28px;
     }
-    .task-earnings {
-      font-weight: 500;
-      font-size: 0.9rem;
-      color: #4caf50;
-      user-select: text;
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
-    .earn-btn {
-      background: #0f0;
-      color: #000;
-      border: none;
-      padding: 0.55rem 1.1rem;
-      border-radius: 10px;
+
+    .earnings-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--primary);
       font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: default;
       user-select: none;
-      transition: background-color 0.2s ease;
-      flex-shrink: 0;
-      box-shadow: 0 4px 6px rgba(0 255 0 / 0.3);
+      backdrop-filter: saturate(180%) blur(8px);
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.4);
+      transition: background 0.3s ease;
+      min-width: 70px;
+      text-align: center;
     }
-    .earn-btn:hover {
-      background: #1aff1a;
+
+    .earnings-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
     }
-    .earn-btn:active {
-      transform: scale(0.95);
-      transition-duration: 0.1s;
+
+    .location-time-bar {
+      margin: 1rem auto 0;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      backdrop-filter: saturate(180%) blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
     }
-    /* Responsive tweak */
-    @media (max-width: 400px) {
-      #earn-total {
-        font-size: 1.1rem;
-        min-width: 100%;
-      }
-      .task-title {
-        max-width: 130px;
-        font-size: 1rem;
-      }
+
+    .location-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
     }
+
+    .time-ios {
+      font-family: 'SF Pro Display', 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      transition: all 0.2s ease;
+      min-width: 100px;
+      text-align: center;
+    }
+    /* Prevent text selection globally */
+body, 
+* {
+  user-select: none;       /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE10+ */
+}
+/* Earnings button */
+.earnings-btn {
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: default;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transition: background 0.3s ease;
+}
+
+.earnings-btn:hover {
+  background: linear-gradient(135deg, #3b82f6, #4f46e5);
+}
+
+/* Alert for task limits */
+.alert {
+  background-color: #f87171; /* Tailwind red-400 vibe */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  max-width: 320px;
+  margin: 1rem auto;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(248, 113, 113, 0.5);
+}
+
+/* Task completion button (if you add any in future) */
+.task-btn {
+  background-color: #10b981; /* Emerald green */
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
+  transition: background-color 0.25s ease;
+}
+
+.task-btn:hover {
+  background-color: #059669;
+}
+
+/* Disabled state for buttons */
+.task-btn:disabled {
+  background-color: #94a3b8; /* gray-ish */
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* Subtle fade-in for alerts */
+@keyframes fadeInAlert {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert {
+  animation: fadeInAlert 0.3s ease forwards;
+}
+#tasksContainer {
+  text-align: center;
+}
+
+#tasksContainer h2 {
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  user-select: none;
+  color: #fff;
+}
   </style>
 </head>
 <body>
-  <h1>Earn Tasks</h1>
-  <div id="location-info">Locating you...</div>
-  <div id="earn-total" aria-live="polite">Total Earned: $0.000</div>
-  <div id="taskList" aria-live="polite" role="list">Loading tasks...</div>
+
+<header>
+  <div class="left-header">
+    <h1>
+      <svg
+        class="logo"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 12v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM9 10V7a3 3 0 016 0v3" />
+      </svg>
+      CYBERCHAT
+    </h1>
+    <p>JOBS MADE EASIER</p>
+  </div>
+
+  <button class="earnings-btn" aria-label="Current earnings">$0.000</button>
+</header>
+
+<div class="location-time-bar">
+  <div class="location-box" id="locationBox">Detecting location...</div>
+  <div class="time-ios" id="timeBox">00:00:00</div>
+</div>
+
+<div id="tasksContainer">
+  <h2>Available Tasks</h2>
+  <ul id="tasksList">
+    <li>Loading tasks...</li>
+  </ul>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -154,226 +294,182 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getDatabase(app);
+  const auth = getAuth(app);
 
-  let currentUser = null;
-  let totalEarnings = 0;
-  let completedTaskIds = new Set();
+  let use24Hour = true;
 
-  // For task 2: track clicks timestamps to limit 10 clicks/hour
-  let task2Clicks = [];
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      currentUser = user;
-      const balanceRef = ref(db, `users/${user.uid}/balance`);
-      get(balanceRef).then(snapshot => {
-        if (snapshot.exists()) {
-          totalEarnings = snapshot.val();
-          updateTotalEarningsDisplay();
-        }
-      });
-    } else {
-      currentUser = null;
-      totalEarnings = 0;
-      updateTotalEarningsDisplay();
-      completedTaskIds.clear();
-      task2Clicks = [];
+  async function updateTimeFromIP() {
+    try {
+      const res = await fetch("https://worldtimeapi.org/api/ip");
+      const data = await res.json();
+      const { datetime } = data;
+      const now = new Date(datetime);
+      displayTime(now);
+    } catch (err) {
+      console.error("Time fetch failed, falling back to local time.");
+      displayTime(new Date());
     }
+  }
+
+  function displayTime(date) {
+    const timeOptions = use24Hour
+      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const timeStr = date.toLocaleTimeString('en-US', timeOptions);
+    document.getElementById('timeBox').textContent = timeStr;
+  }
+
+  document.getElementById("timeBox").addEventListener("click", () => {
+    use24Hour = !use24Hour;
+    updateTimeFromIP();
   });
 
-  function updateTotalEarningsDisplay() {
-    document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
-  }
-
-  function handleEarn(taskId, amount, button) {
-    if (!currentUser) {
-      alert("You must be logged in to earn.");
-      return;
-    }
-
-    // TASK 1: unlimited but with anti-bot cooldown handled separately
-    if (taskId === 1) {
-      // Normal earnings on every valid click
-      totalEarnings += amount;
-      update(ref(db, `users/${currentUser.uid}`), {
-        balance: parseFloat(totalEarnings.toFixed(3))
-      });
-      updateTotalEarningsDisplay();
-      return;
-    }
-
-    // TASK 2: limit 10 clicks per hour with redirect on click
-    if (taskId === 2) {
-      const now = Date.now();
-
-      // Remove clicks older than 1 hour
-      task2Clicks = task2Clicks.filter(ts => now - ts < 3600000);
-
-      if (task2Clicks.length >= 10) {
-        alert("Max 10 clicks per hour reached for this task.");
-        return;
-      }
-
-      // Add new click timestamp
-      task2Clicks.push(now);
-
-      // Add earnings
-      totalEarnings += amount;
-      update(ref(db, `users/${currentUser.uid}`), {
-        balance: parseFloat(totalEarnings.toFixed(3))
-      });
-      updateTotalEarningsDisplay();
-
-      // Redirect user
-      window.open("https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041", "_blank");
-
-      return;
-    }
-
-    // For other tasks: only 1 time completion allowed
-    if (completedTaskIds.has(taskId)) {
-      alert("Already completed.");
-      return;
-    }
-
-    completedTaskIds.add(taskId);
-    totalEarnings += amount;
-    update(ref(db, `users/${currentUser.uid}`), {
-      balance: parseFloat(totalEarnings.toFixed(3))
-    });
-
-    button.textContent = "✔ Done";
-    button.disabled = true;
-    updateTotalEarningsDisplay();
-  }
-
-  const tasks = [
-    { id: 1, title: "Click to Earn", icon: "fas fa-mouse-pointer", amount: 0.001 },
-    { id: 2, title: "Visit Link and Earn", icon: "fas fa-fingerprint", amount: 0.10 },
-    { id: 3, title: "Claim Reward", icon: "fas fa-gift", amount: 0.001 },
-    { id: 4, title: "Spin Task", icon: "fas fa-rotate", amount: 0.001 },
-    { id: 5, title: "Daily Tap", icon: "fas fa-calendar-check", amount: 0.001 },
-    { id: 6, title: "Bonus Touch", icon: "fas fa-coins", amount: 0.001 },
-    { id: 7, title: "Lucky Earn", icon: "fas fa-star", amount: 0.001 },
-    { id: 8, title: "Scratch Task", icon: "fas fa-splotch", amount: 0.001 },
-    { id: 9, title: "Quick Tap", icon: "fas fa-bolt", amount: 0.001 },
-    { id: 10, title: "Instant Claim", icon: "fas fa-check-double", amount: 0.001 }
-  ];
-
-  const maxTasksPerUser = 3;
-
-  function countryCodeToFlagEmoji(countryCode) {
-    if (!countryCode) return "";
-    return countryCode
-      .toUpperCase()
-      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
-  }
-
-  async function convertToLocalCurrency(usdAmount, targetCurrency) {
-    if (!targetCurrency || targetCurrency === "USD") return usdAmount;
-
-    try {
-      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
-      const data = await res.json();
-      const rate = data.rates[targetCurrency];
-      return rate ? usdAmount * rate : usdAmount;
-    } catch {
-      return usdAmount; // fallback to USD if something breaks
-    }
-  }
-
-  // Anti-bot cooldown logic for task 1
-  function setupAntiBotProtection(button) {
-    let lastClickTime = 0;
-    let cooldownTimer = null;
-
-    button.addEventListener("click", (e) => {
-      const now = Date.now();
-
-      if (button.disabled) {
-        e.preventDefault();
-        return;
-      }
-
-      if (now - lastClickTime < 2000) { // 2 seconds min gap
-        // Disable button and start cooldown countdown
-        button.disabled = true;
-        let cooldown = 90;
-        button.textContent = `Wait ${cooldown}s`;
-
-        cooldownTimer = setInterval(() => {
-          cooldown--;
-          button.textContent = `Wait ${cooldown}s`;
-          if (cooldown <= 0) {
-            clearInterval(cooldownTimer);
-            button.disabled = false;
-            button.textContent = "Earn";
-          }
-        }, 1000);
-        e.preventDefault();
-        return;
-      }
-
-      lastClickTime = now;
-      // Let normal handleEarn run after this event listener finishes
-    });
-  }
-
-  async function renderTasks(user) {
-    const taskList = document.getElementById("taskList");
-    taskList.innerHTML = "";
-
-    const flag = countryCodeToFlagEmoji(user.country_code);
-    document.getElementById("location-info").textContent = `Tasks for ${user.country} ${flag}`;
-
-    // Shuffle and slice tasks
-    const shuffled = [...tasks].sort(() => Math.random() - 0.5).slice(0, maxTasksPerUser);
-
-    for (const task of shuffled) {
-      const localAmount = await convertToLocalCurrency(task.amount, user.currency);
-
-      const card = document.createElement("div");
-      card.className = "task-card";
-      card.innerHTML = `
-        <div class="task-left">
-          <div class="task-icon"><i class="${task.icon}"></i></div>
-          <div class="task-info">
-            <div class="task-title">${task.title}</div>
-            <div class="task-earnings">${user.currency} ${localAmount.toFixed(3)}</div>
-          </div>
-        </div>
-        <button class="earn-btn" onclick="handleEarn(${task.id}, ${task.amount}, this)">Earn</button>
-      `;
-      taskList.appendChild(card);
-
-      // Setup anti-bot for task 1
-      if (task.id === 1) {
-        setupAntiBotProtection(card.querySelector("button"));
-      }
-    }
-  }
-
-  async function getUserLocation() {
+  async function fetchLocation() {
     try {
       const res = await fetch("https://ipapi.co/json/");
       const data = await res.json();
-      return {
-        country: data.country_name,
-        country_code: data.country_code,
-        currency: data.currency,
-        city: data.city
-      };
-    } catch {
-      return { country: "Remote", country_code: null, currency: "USD", city: "" };
+      const { country_name, country_code } = data;
+      const flag = country_code
+        ? country_code
+            .toUpperCase()
+            .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()))
+        : '🌐';
+
+      document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${country_name}`;
+    } catch (err) {
+      console.error("Location fetch failed, showing default.");
+      document.getElementById("locationBox").textContent = "🌐 Unknown Location";
     }
   }
 
-  getUserLocation().then(renderTasks);
+  // Show user balance in USD (no conversion)
+  const earningsBtn = document.querySelector('.earnings-btn');
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const balanceRef = ref(db, `users/${user.uid}/balance`);
+        const snapshot = await get(balanceRef);
+        const balance = snapshot.exists() ? snapshot.val() : 0.0;
+        earningsBtn.textContent = `$${Number(balance).toFixed(3)}`;
+        earningsBtn.title = `Your balance in USD`;
 
-  // Expose handleEarn for inline onclick usage
-  window.handleEarn = handleEarn;
+        loadTasks(); // load tasks only after user logged in
+      } catch (err) {
+        console.error("Failed to fetch balance:", err);
+        earningsBtn.textContent = "$0.000";
+        earningsBtn.title = "Failed to load balance";
+      }
+    } else {
+      earningsBtn.textContent = "$0.000";
+      earningsBtn.title = "Not logged in";
+      document.getElementById('tasksList').innerHTML = '<li>Please log in to see tasks.</li>';
+    }
+  });
+
+  fetchLocation();
+  updateTimeFromIP();
+
+  setInterval(() => {
+    displayTime(new Date());
+  }, 1000);
+
+  const tasksListEl = document.getElementById('tasksList');
+
+  async function loadTasks() {
+    const tasksRef = ref(db, 'tasks');
+    const snapshot = await get(tasksRef);
+
+    if (!snapshot.exists()) {
+      tasksListEl.innerHTML = '<li>No tasks available.</li>';
+      return;
+    }
+
+    const tasks = snapshot.val();
+    tasksListEl.innerHTML = ''; // Clear loading
+
+    for (const [taskId, task] of Object.entries(tasks)) {
+      const li = document.createElement('li');
+      li.textContent = `${task.title} - Earn $${task.reward.toFixed(2)}`;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Complete';
+      btn.dataset.taskId = taskId;
+      li.appendChild(document.createTextNode(' ')); // space before button
+      li.appendChild(btn);
+
+      tasksListEl.appendChild(li);
+    }
+  }
+
+  tasksListEl.addEventListener('click', async (e) => {
+    if (e.target.tagName === 'BUTTON') {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You must be logged in to complete tasks.');
+        return;
+      }
+
+      const taskId = e.target.dataset.taskId;
+      e.target.disabled = true;
+      e.target.textContent = 'Processing...';
+
+      try {
+        await completeTask(user.uid, taskId);
+        e.target.textContent = 'Done!';
+        e.target.disabled = true;
+
+        // Update balance after completing task
+        const balanceRef = ref(db, `users/${user.uid}/balance`);
+        const snapshot = await get(balanceRef);
+        const balance = snapshot.exists() ? snapshot.val() : 0.0;
+        earningsBtn.textContent = `$${Number(balance).toFixed(3)}`;
+      } catch (err) {
+        alert('Failed to complete task, try again.');
+        e.target.disabled = false;
+        e.target.textContent = 'Complete';
+        console.error(err);
+      }
+    }
+  });
+
+  async function completeTask(userId, taskId) {
+    const now = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+    const taskRef = ref(db, `tasks/${taskId}`);
+    const userTaskRef = ref(db, `users/${userId}/tasksCompleted/${taskId}`);
+
+    const taskSnap = await get(taskRef);
+    if (!taskSnap.exists()) return;
+
+    const task = taskSnap.val();
+
+    const userTaskSnap = await get(userTaskRef);
+    let countToday = 0;
+    if (userTaskSnap.exists()) {
+      const userTask = userTaskSnap.val();
+      if (userTask.date === now) countToday = userTask.count;
+    }
+
+    if (task.maxPerDay && countToday >= task.maxPerDay) {
+      alert("Daily limit reached for this task.");
+      throw new Error("Daily limit reached");
+    }
+
+    // Update count
+    await set(userTaskRef, {
+      date: now,
+      count: countToday + 1
+    });
+
+    // Add reward to user balance
+    const balanceRef = ref(db, `users/${userId}/balance`);
+    const balanceSnap = await get(balanceRef);
+    let balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+    balance += task.reward;
+    await set(balanceRef, balance);
+
+    alert(`Task completed! You earned $${task.reward.toFixed(2)}`);
+  }
 </script>
 </body>
 </html>
