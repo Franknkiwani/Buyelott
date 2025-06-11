@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Task & Earn</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
-  body {
-    background:#121212; color:#eee;
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    display:flex; flex-direction:column; align-items:center; padding:20px;
-  }
-  h1 { margin-bottom:20px; font-size:1.6rem; }
-  #earnings { margin-bottom:25px; font-weight:700; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task & Earn</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+    body {
+      background:#121212; color:#eee;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      display:flex; flex-direction:column; align-items:center; padding:20px;
+    }
+    h1 { margin-bottom:20px; font-size:1.6rem; }
+    #earnings { margin-bottom:25px; font-weight:700; }
 
-  .task {
-    background:#1e1e1e; border:1px solid #444;
-    border-radius:14px; padding:20px; max-width:400px; width:100%;
-    margin-bottom:20px; box-shadow:0 6px 14px rgba(0,0,0,0.6);
-    text-align:center;
-  }
-  .task h2 { margin-bottom:12px; font-size:1.2rem; color:#0af; }
-  .task p { font-size:0.95rem; color:#bbb; margin-bottom:15px; }
-  .task .amount { color:#4caf50; font-weight:700; margin-bottom:18px; }
+    .task {
+      background:#1e1e1e; border:1px solid #444;
+      border-radius:14px; padding:20px; max-width:400px; width:100%;
+      margin-bottom:20px; box-shadow:0 6px 14px rgba(0,0,0,0.6);
+      text-align:center;
+    }
+    .task h2 { margin-bottom:12px; font-size:1.2rem; color:#0af; }
+    .task p { font-size:0.95rem; color:#bbb; margin-bottom:15px; }
+    .task .amount { color:#4caf50; font-weight:700; margin-bottom:18px; }
 
-  button {
-    width:100%; padding:14px; margin-bottom:10px;
-    background:#0a84ff; border:none; border-radius:12px;
-    color:#fff; font-weight:600; font-size:1.05rem;
-    cursor:pointer; transition:background .3s;
-  }
-  button:disabled { background:#444; cursor: not-allowed; }
-  button:not(:disabled):hover { background:#0060df; }
+    button {
+      width:100%; padding:14px; margin-bottom:10px;
+      background:#0a84ff; border:none; border-radius:12px;
+      color:#fff; font-weight:600; font-size:1.05rem;
+      cursor:pointer; transition:background .3s;
+    }
+    button:disabled { background:#444; cursor: not-allowed; }
+    button:not(:disabled):hover { background:#0060df; }
 
-  #modal-bg {
-    position:fixed; inset:0; background:rgba(0,0,0,0.75);
-    display:none; justify-content:center; align-items:center; z-index:1000;
-  }
-  #modal {
-    background:#222; border-radius:16px; padding:24px;
-    max-width:320px; width:90%; box-shadow:0 0 20px #0a84ff; text-align:center;
-  }
-  #modal h2 { font-size:1.3rem; margin-bottom:12px; }
-  #modal p { margin-bottom:20px; color:#ccc; }
-</style>
+    #modal-bg {
+      position:fixed; inset:0; background:rgba(0,0,0,0.75);
+      display:none; justify-content:center; align-items:center; z-index:1000;
+    }
+    #modal {
+      background:#222; border-radius:16px; padding:24px;
+      max-width:320px; width:90%; box-shadow:0 0 20px #0a84ff; text-align:center;
+    }
+    #modal h2 { font-size:1.3rem; margin-bottom:12px; }
+    #modal p { margin-bottom:20px; color:#ccc; }
+  </style>
 </head>
 <body>
 
@@ -72,13 +72,10 @@
   </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-
 <script>
-// --- Firebase config & init ---
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -93,52 +90,52 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.database();
 let currentUser = null;
 
-// UI refs
 const earnDisplay = document.getElementById('earnings');
 const btn1 = document.getElementById('btn-task1');
 const btnVisit = document.getElementById('btn-visit');
 const btnClaim = document.getElementById('btn-claim');
 
-// Modal
 const modalBg = document.getElementById('modal-bg');
 const modalTitle = document.getElementById('modal-title');
 const modalText = document.getElementById('modal-text');
 const modalBtn = document.getElementById('modal-ok');
-function showModal(label, msg){
-  modalTitle.textContent = label;
+function showModal(title, msg){
+  modalTitle.textContent = title;
   modalText.textContent = msg;
   modalBg.style.display = 'flex';
 }
 modalBtn.onclick = ()=> modalBg.style.display = 'none';
 
-// Utility
 const now = ()=>Date.now();
 
-// Load earnings
 function loadEarnings(){
   if(!currentUser){ earnDisplay.textContent='Log in to earn.'; return; }
   const ref = db.ref(`users/${currentUser.uid}/earnings`);
   ref.on('value', snap=>{
-    const val = snap.val()||0;
+    const val = snap.val() ?? 0;
     earnDisplay.textContent = `Earnings: $${parseFloat(val).toFixed(4)}`;
   });
 }
 
-// Safe earnings update
 async function addEarning(amount){
   if(!currentUser){ showModal('Not logged in','Login to earn'); return false; }
   const ref = db.ref(`users/${currentUser.uid}/earnings`);
-  await ref.transaction(curr=>(curr||0)+amount);
+  await ref.transaction(curr=>(curr || 0) + amount);
   return true;
 }
 
-// Auth listener
-auth.onAuthStateChanged(u=>{
-  currentUser = u;
+auth.onAuthStateChanged(async user=>{
+  currentUser = user;
+  if(currentUser){
+    const userRef = db.ref(`users/${currentUser.uid}/earnings`);
+    const snapshot = await userRef.once('value');
+    if(snapshot.val() === null){
+      await userRef.set(0); // Auto-create earnings if missing
+    }
+  }
   loadEarnings();
 });
 
-// Task 1 logic
 let cd1 = false;
 btn1.onclick = async ()=>{
   if(!currentUser){ showModal('Please log in','Log in to earn.'); return; }
@@ -148,7 +145,6 @@ btn1.onclick = async ()=>{
   setTimeout(()=>{cd1=false; btn1.disabled=false;}, 3000);
 };
 
-// Task 2 logic
 const R = { reward:0.005, minTime:10000, cooldown:20000, hrMax:20, dayMax:30 };
 let visitStart=0, tmr=null, claimOk=false;
 
@@ -207,10 +203,6 @@ window.onload = ()=>{
     claimOk=true; btnClaim.disabled=false;
   } else resetVisit();
 };
-
-// Adsterra script
 </script>
-<script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
-
 </body>
 </html>
