@@ -2,179 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Earn Tasks</title>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+  <title>Job Search App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      margin: 0;
-      background: #0f0f0f;
-      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif;
-      color: white;
-      padding: 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+      color: #333;
     }
-    .task {
-      background: #1a1a1a;
-      border: 1px solid #2c2c2e;
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      transition: transform 0.2s;
+    header {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    .task:hover {
-      transform: scale(1.01);
-    }
-    .task h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1.2rem;
-    }
-    .task p {
-      margin: 0.3rem 0;
-      color: #d1d1d6;
-    }
-    .btn {
-      background: #0a84ff;
-      border: none;
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 12px;
+    input[type="text"] {
+      padding: 10px;
       font-size: 1rem;
-      margin-top: 0.7rem;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      margin-left: 10px;
       cursor: pointer;
     }
-    .btn:disabled {
-      background: #2c2c2e;
-      cursor: not-allowed;
+    button:hover {
+      background-color: #0056b3;
+    }
+    #jobs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .job-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    .job-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .company {
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .btn {
+      text-decoration: none;
+      background: #007bff;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center; font-weight:600;">🎯 Earn Tasks</h1>
-  <div id="tasks-container"></div>
+  <header>
+    <h1>Find Remote Jobs</h1>
+    <p>Search by keyword (e.g. developer, designer, AI)</p>
+    <input type="text" id="searchInput" placeholder="Enter job keyword" />
+    <button onclick="searchJobs()">Search</button>
+  </header>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  <div id="jobs"></div>
+  <div id="loading" hidden>Loading jobs…</div>
+  <div id="error" hidden style="color:red;">Failed to load jobs. Try refreshing.</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  <script>
+    const jobsContainer = document.getElementById('jobs');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const container = document.getElementById('tasks-container');
+    async function searchJobs() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
 
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        loadSpecialTasks(user.uid);
-        loadFirebaseTasks(user.uid);
-      } else {
-        container.innerHTML = "<p>Please sign in to earn tasks.</p>";
-      }
-    });
+      jobsContainer.innerHTML = '';
+      loading.hidden = false;
+      error.hidden = true;
 
-    function loadSpecialTasks(uid) {
-      const specialTasks = [
-        {
-          id: "click1",
-          title: "💸 Click to Earn",
-          description: "Click the button to earn $0.001 instantly. Once per click.",
-          reward: 0.001,
-          action: async (btn) => {
-            btn.disabled = true;
-            await updateBalance(uid, 0.001);
-            alert("✅ You earned $0.001!");
-            btn.disabled = false;
-          }
-        },
-        {
-          id: "visit1",
-          title: "🌐 Visit Website for $0.025",
-          description: "Visit our sponsor site and stay for at least 30 seconds.",
-          reward: 0.025,
-          action: async (btn) => {
-            const now = Date.now();
-            const last = localStorage.getItem("lastVisitEarnTime");
-            if (last && now - parseInt(last) < 30000) {
-              alert("⏱ Wait a bit before visiting again.");
-              return;
-            }
-            localStorage.setItem("lastVisitEarnTime", now);
-            window.open("https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041", "_blank");
-            await updateBalance(uid, 0.025);
-            alert("✅ $0.025 credited for your visit!");
-          }
+      try {
+        const res = await fetch(`https://remotive.io/api/remote-jobs?search=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (!data.jobs || data.jobs.length === 0) {
+          jobsContainer.innerHTML = `<p>No jobs found for "${query}".</p>`;
+          return;
         }
-      ];
 
-      for (const task of specialTasks) {
-        const el = document.createElement("div");
-        el.className = "task";
-        el.innerHTML = `
-          <h2>${task.title}</h2>
-          <p>${task.description}</p>
-          <button class="btn">Do Task</button>
-        `;
-        const btn = el.querySelector("button");
-        btn.onclick = () => task.action(btn);
-        container.appendChild(el);
+        data.jobs.forEach(job => {
+          const card = document.createElement('div');
+          card.className = 'job-card';
+          card.innerHTML = `
+            <div class="job-title">${job.title}</div>
+            <div class="company">${job.company_name}</div>
+            <a href="${job.url}" class="btn" target="_blank">Apply</a>
+          `;
+          jobsContainer.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        error.hidden = false;
+      } finally {
+        loading.hidden = true;
       }
-    }
-
-    async function loadFirebaseTasks(uid) {
-      const snap = await get(ref(db, "tasks"));
-      if (!snap.exists()) return;
-
-      const tasks = snap.val();
-      for (const [id, task] of Object.entries(tasks)) {
-        const el = document.createElement("div");
-        el.className = "task";
-        el.innerHTML = `
-          <h2>${task.title}</h2>
-          <p>${task.description}</p>
-          <p>💵 Reward: $${task.reward.toFixed(3)}</p>
-          <button class="btn">Complete Task</button>
-        `;
-
-        const btn = el.querySelector("button");
-        btn.onclick = async () => {
-          const today = new Date().toISOString().split('T')[0];
-          const userTaskRef = ref(db, `users/${uid}/tasksCompleted/${id}`);
-          const snap = await get(userTaskRef);
-          const data = snap.exists() ? snap.val() : {};
-          if (task.maxPerDay && data.date === today && data.count >= task.maxPerDay) {
-            alert("📴 Task limit reached for today.");
-            return;
-          }
-
-          await updateBalance(uid, task.reward);
-          await set(userTaskRef, {
-            date: today,
-            count: (data.count || 0) + 1
-          });
-          alert(`✅ Earned $${task.reward.toFixed(3)}`);
-        };
-
-        container.appendChild(el);
-      }
-    }
-
-    async function updateBalance(uid, reward) {
-      const refBal = ref(db, `users/${uid}/balance`);
-      const snap = await get(refBal);
-      const bal = snap.exists() ? snap.val() : 0;
-      await set(refBal, parseFloat((bal + reward).toFixed(5)));
     }
   </script>
 </body>
