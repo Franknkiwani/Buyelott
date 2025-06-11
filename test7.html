@@ -268,216 +268,187 @@ body,
     <div class="location-box" id="locationBox">Detecting location...</div>
     <div class="time-ios" id="timeBox">00:00:00</div>
   </div>
-<div id="tasksContainer">
-  <h2>Available Tasks</h2>
-  <ul id="tasksList">
-    <li>Loading tasks...</li>
-  </ul>
-</div>
 
-<div id="locationBox" style="margin-top: 1rem; font-weight: bold;"></div>
-<div id="timeBox" style="cursor: pointer; user-select: none; font-family: monospace; margin-top: 0.5rem;"></div>
+  <div id="tasksContainer">
+    <h2>Available Tasks</h2>
+    <ul id="tasksList">
+      <li>Loading tasks...</li>
+    </ul>
+  </div>
 
-<button class="earnings-btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-weight: bold; cursor: default;">$0.000</button>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+    let use24Hour = true;
 
-  let use24Hour = true;
-
-  async function updateTimeFromIP() {
-    try {
-      const res = await fetch("https://worldtimeapi.org/api/ip");
-      const data = await res.json();
-      const now = new Date(data.datetime);
-      displayTime(now);
-    } catch {
-      displayTime(new Date());
-    }
-  }
-
-  function displayTime(date) {
-    const options = use24Hour
-      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
-      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-    document.getElementById('timeBox').textContent = date.toLocaleTimeString('en-US', options);
-  }
-
-  document.getElementById("timeBox").addEventListener("click", () => {
-    use24Hour = !use24Hour;
-    updateTimeFromIP();
-  });
-
-  async function fetchLocation() {
-    try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      const flag = data.country_code
-        ? [...data.country_code.toUpperCase()]
-            .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
-            .join('')
-        : '🌐';
-      document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${data.country_name}`;
-    } catch {
-      document.getElementById("locationBox").textContent = "🌐 Unknown Location";
-    }
-  }
-
-  const earningsBtn = document.querySelector('.earnings-btn');
-  const tasksListEl = document.getElementById('tasksList');
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    async function updateTimeFromIP() {
       try {
+        const res = await fetch("https://worldtimeapi.org/api/ip");
+        const data = await res.json();
+        const now = new Date(data.datetime);
+        displayTime(now);
+      } catch {
+        displayTime(new Date());
+      }
+    }
+
+    function displayTime(date) {
+      const options = use24Hour
+        ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+        : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      document.getElementById('timeBox').textContent = date.toLocaleTimeString('en-US', options);
+    }
+
+    document.getElementById("timeBox").addEventListener("click", () => {
+      use24Hour = !use24Hour;
+      updateTimeFromIP();
+    });
+
+    async function fetchLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        const flag = data.country_code
+          ? [...data.country_code.toUpperCase()]
+              .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
+              .join('')
+          : '🌐';
+        document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${data.country_name}`;
+      } catch {
+        document.getElementById("locationBox").textContent = "🌐 Unknown Location";
+      }
+    }
+
+    const earningsBtn = document.querySelector('.earnings-btn');
+    const tasksListEl = document.getElementById('tasksList');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
+          const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+          earningsBtn.textContent = `$${balance.toFixed(3)}`;
+          earningsBtn.title = "Your balance in USD";
+
+          loadTasks();
+        } catch (err) {
+          earningsBtn.textContent = "$0.000";
+          earningsBtn.title = "Failed to load balance";
+          console.error(err);
+        }
+      } else {
+        earningsBtn.textContent = "$0.000";
+        earningsBtn.title = "Not logged in";
+        tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
+      }
+    });
+
+    fetchLocation();
+    updateTimeFromIP();
+    setInterval(() => displayTime(new Date()), 1000);
+
+    async function loadTasks() {
+      const tasksSnap = await get(ref(db, 'tasks'));
+      if (!tasksSnap.exists()) {
+        tasksListEl.innerHTML = '<li>No tasks available.</li>';
+        return;
+      }
+      const tasks = tasksSnap.val();
+      tasksListEl.innerHTML = ''; // clear "Loading"
+
+      for (const [id, task] of Object.entries(tasks)) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${task.title}</strong> - Earn $${task.reward.toFixed(2)}
+          <p>${task.description || ''}</p>
+        `;
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Complete';
+        btn.dataset.taskId = id;
+        li.appendChild(btn);
+        tasksListEl.appendChild(li);
+      }
+    }
+
+    tasksListEl.addEventListener('click', async (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      const user = auth.currentUser;
+      if (!user) return alert('You must be logged in to complete tasks.');
+
+      const btn = e.target;
+      const taskId = btn.dataset.taskId;
+
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      try {
+        await completeTask(user.uid, taskId);
+
+        btn.textContent = 'Done!';
+        btn.disabled = true;
+
+        // update balance display after task done
         const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
         const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
         earningsBtn.textContent = `$${balance.toFixed(3)}`;
-        earningsBtn.title = "Your balance in USD";
-
-        await loadTasks();
       } catch (err) {
-        earningsBtn.textContent = "$0.000";
-        earningsBtn.title = "Failed to load balance";
+        alert(err.message || 'Failed to complete task, try again.');
+        btn.disabled = false;
+        btn.textContent = 'Complete';
         console.error(err);
       }
-    } else {
-      earningsBtn.textContent = "$0.000";
-      earningsBtn.title = "Not logged in";
-      tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
-    }
-  });
+    });
 
-  fetchLocation();
-  updateTimeFromIP();
-  setInterval(() => displayTime(new Date()), 1000);
+    async function completeTask(userId, taskId) {
+      const today = new Date().toISOString().slice(0, 10);
+      const taskSnap = await get(ref(db, `tasks/${taskId}`));
+      if (!taskSnap.exists()) throw new Error('Task does not exist.');
 
-  async function loadTasks() {
-    const tasksSnap = await get(ref(db, 'tasks'));
-    if (!tasksSnap.exists()) {
-      tasksListEl.innerHTML = '<li>No tasks available.</li>';
-      return;
-    }
-    const tasks = tasksSnap.val();
-    tasksListEl.innerHTML = ''; // clear "Loading"
+      const task = taskSnap.val();
 
-    for (const [id, task] of Object.entries(tasks)) {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <strong>${task.title}</strong> - Earn $${task.reward.toFixed(2)}
-        <p>${task.description || ''}</p>
-      `;
+      const userTaskRef = ref(db, `users/${userId}/tasksCompleted/${taskId}`);
+      const userTaskSnap = await get(userTaskRef);
 
-      const btn = document.createElement('button');
-      btn.textContent = 'Complete';
-      btn.dataset.taskId = id;
-      li.appendChild(btn);
-      tasksListEl.appendChild(li);
-    }
-  }
-
-  tasksListEl.addEventListener('click', async (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const user = auth.currentUser;
-    if (!user) return alert('You must be logged in to complete tasks.');
-
-    const btn = e.target;
-    const taskId = btn.dataset.taskId;
-
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
-
-    try {
-      await completeTask(user.uid, taskId);
-
-      btn.textContent = 'Done!';
-      btn.disabled = true;
-
-      // update balance display after task done
-      const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
-      const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
-      earningsBtn.textContent = `$${balance.toFixed(3)}`;
-    } catch (err) {
-      alert(err.message || 'Failed to complete task, try again.');
-      btn.disabled = false;
-      btn.textContent = 'Complete';
-      console.error(err);
-    }
-  });
-
-  async function completeTask(userId, taskId) {
-    const today = new Date().toISOString().slice(0, 10);
-    const taskSnap = await get(ref(db, `tasks/${taskId}`));
-    if (!taskSnap.exists()) throw new Error('Task does not exist.');
-
-    const task = taskSnap.val();
-
-    const userTaskRef = ref(db, `users/${userId}/tasksCompleted/${taskId}`);
-    const userTaskSnap = await get(userTaskRef);
-
-    let countToday = 0;
-    if (userTaskSnap.exists()) {
-      const userTask = userTaskSnap.val();
-      if (userTask.date === today) countToday = userTask.count;
-    }
-
-    if (task.maxPerDay && countToday >= task.maxPerDay) {
-      throw new Error("Daily limit reached for this task.");
-    }
-
-    // increment task completion count for today
-    await set(userTaskRef, { date: today, count: countToday + 1 });
-
-    // add reward to user balance
-    const balanceRef = ref(db, `users/${userId}/balance`);
-    const balanceSnap = await get(balanceRef);
-    let balance = balanceSnap.exists() ? balanceSnap.val() : 0;
-    balance += task.reward;
-    await set(balanceRef, balance);
-
-    alert(`Task completed! You earned $${task.reward.toFixed(2)}`);
-  }
-
-  // OPTIONAL: Initial tasks data setup - comment this out if tasks already exist in Firebase.
-  // (Uncomment this block if you want to push your tasks JSON into Firebase)
-  /*
-  async function setupTasks() {
-    const tasks = {
-      "-NgF8d2xk38ssDEaVbm3": {
-        title: "Watch and Rate a YouTube Ad",
-        description: "Open the ad, watch it fully, and leave a thumbs up.",
-        type: "video",
-        reward: 0.05,
-        maxPerDay: 3,
-        createdAt: "2025-06-11T13:45:30.233Z"
-      },
-      "-NgF8eFxks823hYhxG7a": {
-        title: "Install our Chrome Extension",
-        description: "Try out the tool and give us feedback.",
-        type: "app",
-        reward: 0.10
+      let countToday = 0;
+      if (userTaskSnap.exists()) {
+        const userTask = userTaskSnap.val();
+        if (userTask.date === today) countToday = userTask.count;
       }
-    };
-    await set(ref(db, 'tasks'), tasks);
-  }
-  // setupTasks();
-  */
-</script>
+
+      if (task.maxPerDay && countToday >= task.maxPerDay) {
+        throw new Error("Daily limit reached for this task.");
+      }
+
+      // increment task completion count for today
+      await set(userTaskRef, { date: today, count: countToday + 1 });
+
+      // add reward to user balance
+      const balanceRef = ref(db, `users/${userId}/balance`);
+      const balanceSnap = await get(balanceRef);
+      let balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+      balance += task.reward;
+      await set(balanceRef, balance);
+
+      alert(`Task completed! You earned $${task.reward.toFixed(2)}`);
+    }
+  </script>
 </body>
 </html>
