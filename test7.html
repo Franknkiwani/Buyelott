@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Click to Earn - Firebase</title>
+  <title>Click to Earn - Firebase Debug</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     body {
@@ -92,6 +92,18 @@
       font-weight: 500;
       color: #00ff99;
     }
+    #debug-log {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      height: 120px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -100,13 +112,22 @@
   <div id="earn-total">Total Earned: $0.000</div>
   <div class="task-list" id="taskList"></div>
 
+  <div id="debug-log"></div>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
 
   <script>
-    // Replace with your actual Firebase config
+    function debugLog(msg) {
+      const logDiv = document.getElementById('debug-log');
+      logDiv.textContent += msg + '\n';
+      logDiv.scrollTop = logDiv.scrollHeight;
+      console.log(msg);
+    }
+
+    // Replace with your actual Firebase config (copy exactly from your Firebase console)
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -118,12 +139,10 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Global vars
     let currentUser = null;
     let totalEarnings = 0;
     let completedTaskIds = new Set();
@@ -183,20 +202,23 @@
 
     async function getUserLocation() {
       try {
+        debugLog("Fetching location...");
         const res = await fetch("https://ipapi.co/json/");
+        if (!res.ok) throw new Error("Location fetch failed");
         const data = await res.json();
+        debugLog(`Location detected: ${data.country_name} (${data.country_code})`);
         return {
           country: data.country_name,
           country_code: data.country_code,
           currency: data.currency,
           city: data.city
         };
-      } catch {
+      } catch (e) {
+        debugLog("Location fetch error: " + e.message);
         return { country: "Remote", country_code: null, currency: "USD", city: "" };
       }
     }
 
-    // Earn button handler
     async function handleEarn(taskId, amount, button) {
       if (!currentUser) {
         alert("User not authenticated yet.");
@@ -208,7 +230,7 @@
       }
 
       try {
-        // Read current balance from DB (optional but keeps in sync)
+        debugLog(`Earning task ${taskId} for $${amount.toFixed(3)}...`);
         const balanceRef = db.ref(`users/${currentUser.uid}/balance`);
         const snap = await balanceRef.get();
         let currentBalance = 0;
@@ -217,42 +239,62 @@
         }
         const newBalance = currentBalance + amount;
 
-        // Save new balance
+        // Update Firebase balance
         await balanceRef.set(newBalance);
 
-        totalEarnings = newBalance;
+        // Mark this task as completed locally
         completedTaskIds.add(taskId);
-        button.textContent = "✔ Done";
+
+        // Disable the button to prevent repeat clicks
         button.disabled = true;
+        button.textContent = "Completed";
+
+        totalEarnings = newBalance;
         updateTotalEarningsDisplay();
-      } catch (e) {
-        alert("Error saving earnings: " + e.message);
+
+        debugLog(`Balance updated: $${newBalance.toFixed(3)}`);
+      } catch (error) {
+        debugLog("Error updating balance: " + error.message);
+        alert("Failed to update earnings. Try again.");
       }
     }
 
-    // Anonymous sign-in to Firebase (replace with your own auth flow)
-    auth.signInAnonymously()
-      .then(() => {
-        currentUser = auth.currentUser;
-        console.log("Logged in as:", currentUser.uid);
-        // Load user balance from DB
-        return db.ref(`users/${currentUser.uid}/balance`).get();
-      })
-      .then(snap => {
-        totalEarnings = snap.exists() ? snap.val() : 0;
-        updateTotalEarningsDisplay();
-        return getUserLocation();
-      })
-      .then(location => {
-        renderTasks(location);
-      })
-      .catch(err => {
-        console.error("Error during init:", err);
-        alert("Failed to initialize app.");
-      });
+    // Initialization flow
+    async function init() {
+      try {
+        // Firebase anonymous auth
+        debugLog("Signing in anonymously...");
+        const userCredential = await auth.signInAnonymously();
+        currentUser = userCredential.user;
+        debugLog(`Signed in as UID: ${currentUser.uid}`);
 
-    // Expose handleEarn globally
-    window.handleEarn = handleEarn;
+        // Get location info
+        const location = await getUserLocation();
+
+        // Load user balance from Firebase
+        const userBalanceSnap = await db.ref(`users/${currentUser.uid}/balance`).get();
+        if (userBalanceSnap.exists()) {
+          totalEarnings = userBalanceSnap.val();
+          debugLog(`Loaded user balance: $${totalEarnings.toFixed(3)}`);
+        } else {
+          totalEarnings = 0;
+          debugLog("No balance found, starting at $0.000");
+          await db.ref(`users/${currentUser.uid}/balance`).set(0);
+        }
+
+        // Render tasks based on location
+        renderTasks(location);
+      } catch (err) {
+        debugLog("Initialization error: " + err.message);
+        alert("Error during initialization: " + err.message);
+      }
+    }
+
+    // Run on page load
+    window.onload = () => {
+      init();
+    }
   </script>
+
 </body>
 </html>
