@@ -3,206 +3,256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Task & Earn</title>
+  <title>Click to Earn - Firebase</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
     body {
-      background:#121212; color:#eee;
-      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-      display:flex; flex-direction:column; align-items:center; padding:20px;
+      margin: 0; padding: 0;
+      background: #0b0b0b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: white;
     }
-    h1 { margin-bottom:20px; font-size:1.6rem; }
-    #earnings { margin-bottom:25px; font-weight:700; }
-
-    .task {
-      background:#1e1e1e; border:1px solid #444;
-      border-radius:14px; padding:20px; max-width:400px; width:100%;
-      margin-bottom:20px; box-shadow:0 6px 14px rgba(0,0,0,0.6);
-      text-align:center;
+    #location-info {
+      max-width: 600px;
+      margin: 20px auto 10px auto;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.25em;
+      border: 2px solid #00ffcc;
+      border-radius: 14px;
+      padding: 10px 20px;
+      display: inline-block;
+      background: rgba(0, 255, 204, 0.1);
+      user-select: none;
     }
-    .task h2 { margin-bottom:12px; font-size:1.2rem; color:#0af; }
-    .task p { font-size:0.95rem; color:#bbb; margin-bottom:15px; }
-    .task .amount { color:#4caf50; font-weight:700; margin-bottom:18px; }
-
-    button {
-      width:100%; padding:14px; margin-bottom:10px;
-      background:#0a84ff; border:none; border-radius:12px;
-      color:#fff; font-weight:600; font-size:1.05rem;
-      cursor:pointer; transition:background .3s;
+    .task-list {
+      padding: 0 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 600px;
+      margin: auto;
     }
-    button:disabled { background:#444; cursor: not-allowed; }
-    button:not(:disabled):hover { background:#0060df; }
-
-    #modal-bg {
-      position:fixed; inset:0; background:rgba(0,0,0,0.75);
-      display:none; justify-content:center; align-items:center; z-index:1000;
+    .task-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px;
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
     }
-    #modal {
-      background:#222; border-radius:16px; padding:24px;
-      max-width:320px; width:90%; box-shadow:0 0 20px #0a84ff; text-align:center;
+    .task-card:hover {
+      transform: scale(1.01);
     }
-    #modal h2 { font-size:1.3rem; margin-bottom:12px; }
-    #modal p { margin-bottom:20px; color:#ccc; }
+    .task-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .task-icon {
+      font-size: 26px;
+      background: #1a1a1a;
+      padding: 14px;
+      border-radius: 14px;
+      color: #00ffc8;
+    }
+    .task-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .task-title {
+      font-size: 1.05em;
+      font-weight: 600;
+    }
+    .task-earnings {
+      color: #00ff99;
+      font-weight: 500;
+      font-size: 0.95em;
+    }
+    .earn-btn {
+      background: #00ffcc;
+      color: #000;
+      border: none;
+      padding: 10px 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .earn-btn:hover {
+      background: #00e6b8;
+    }
+    #earn-total {
+      text-align: center;
+      margin: 16px 0 24px 0;
+      font-weight: 500;
+      color: #00ff99;
+    }
   </style>
 </head>
 <body>
 
-<h1>Task & Earn</h1>
-<div id="earnings">Loading earnings...</div>
+  <div id="location-info">Detecting location...</div>
+  <div id="earn-total">Total Earned: $0.000</div>
+  <div class="task-list" id="taskList"></div>
 
-<div class="task">
-  <h2>Task 1: Click & Earn</h2>
-  <p>Click once to earn <strong>$0.001</strong>. No auto-click allowed.</p>
-  <button id="btn-task1">Click & Earn $0.001</button>
-</div>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
 
-<div class="task">
-  <h2>Task 2: Visit & Earn</h2>
-  <p>Visit the link, stay 10 sec, then claim <strong>$0.005</strong><br>
-  (20s cooldown, 20/hr, 30/day)</p>
-  <button id="btn-visit">Visit & Earn $0.005</button>
-  <button id="btn-claim" disabled>Claim Reward</button>
-</div>
+  <script>
+    // Replace with your actual Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
 
-<div id="modal-bg">
-  <div id="modal">
-    <h2 id="modal-title">Title</h2>
-    <p id="modal-text">Message here</p>
-    <button id="modal-ok">Okay</button>
-  </div>
-</div>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth(), db = firebase.database();
-let currentUser = null;
+    // Global vars
+    let currentUser = null;
+    let totalEarnings = 0;
+    let completedTaskIds = new Set();
+    const maxTasksPerUser = 3;
 
-const earnDisplay = document.getElementById('earnings');
-const btn1 = document.getElementById('btn-task1');
-const btnVisit = document.getElementById('btn-visit');
-const btnClaim = document.getElementById('btn-claim');
+    const tasks = [
+      { id: 1, title: "Click to Earn", icon: "fas fa-mouse-pointer", amount: 0.001 },
+      { id: 2, title: "Tap Here", icon: "fas fa-fingerprint", amount: 0.001 },
+      { id: 3, title: "Claim Reward", icon: "fas fa-gift", amount: 0.001 },
+      { id: 4, title: "Spin Task", icon: "fas fa-rotate", amount: 0.001 },
+      { id: 5, title: "Daily Tap", icon: "fas fa-calendar-check", amount: 0.001 },
+      { id: 6, title: "Bonus Touch", icon: "fas fa-coins", amount: 0.001 },
+      { id: 7, title: "Lucky Earn", icon: "fas fa-star", amount: 0.001 },
+      { id: 8, title: "Scratch Task", icon: "fas fa-splotch", amount: 0.001 },
+      { id: 9, title: "Quick Tap", icon: "fas fa-bolt", amount: 0.001 },
+      { id: 10, title: "Instant Claim", icon: "fas fa-check-double", amount: 0.001 }
+    ];
 
-const modalBg = document.getElementById('modal-bg');
-const modalTitle = document.getElementById('modal-title');
-const modalText = document.getElementById('modal-text');
-const modalBtn = document.getElementById('modal-ok');
-function showModal(title, msg){
-  modalTitle.textContent = title;
-  modalText.textContent = msg;
-  modalBg.style.display = 'flex';
-}
-modalBtn.onclick = ()=> modalBg.style.display = 'none';
-
-const now = ()=>Date.now();
-
-function loadEarnings(){
-  if(!currentUser){ earnDisplay.textContent='Log in to earn.'; return; }
-  const ref = db.ref(`users/${currentUser.uid}/earnings`);
-  ref.on('value', snap=>{
-    const val = snap.val() ?? 0;
-    earnDisplay.textContent = `Earnings: $${parseFloat(val).toFixed(4)}`;
-  });
-}
-
-async function addEarning(amount){
-  if(!currentUser){ showModal('Not logged in','Login to earn'); return false; }
-  const ref = db.ref(`users/${currentUser.uid}/earnings`);
-  await ref.transaction(curr=>(curr || 0) + amount);
-  return true;
-}
-
-auth.onAuthStateChanged(async user=>{
-  currentUser = user;
-  if(currentUser){
-    const userRef = db.ref(`users/${currentUser.uid}/earnings`);
-    const snapshot = await userRef.once('value');
-    if(snapshot.val() === null){
-      await userRef.set(0); // Auto-create earnings if missing
+    function countryCodeToFlagEmoji(countryCode) {
+      if (!countryCode) return "";
+      return countryCode
+        .toUpperCase()
+        .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
     }
-  }
-  loadEarnings();
-});
 
-let cd1 = false;
-btn1.onclick = async ()=>{
-  if(!currentUser){ showModal('Please log in','Log in to earn.'); return; }
-  if(cd1){ showModal('Slow down','Wait a few seconds.'); return; }
-  cd1 = true; btn1.disabled = true;
-  if(await addEarning(0.001)) showModal('Success!','You earned $0.001');
-  setTimeout(()=>{cd1=false; btn1.disabled=false;}, 3000);
-};
+    function updateTotalEarningsDisplay() {
+      document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
+    }
 
-const R = { reward:0.005, minTime:10000, cooldown:20000, hrMax:20, dayMax:30 };
-let visitStart=0, tmr=null, claimOk=false;
+    function renderTasks(user) {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
 
-function loadRecords(){
-  const arr=JSON.parse(localStorage.getItem('records')||'[]');
-  return arr.filter(r=>now()-r<24*3600*1000);
-}
-function saveRecord(ts){
-  const a=loadRecords(); a.push(ts);
-  localStorage.setItem('records', JSON.stringify(a));
-}
-function countHr(){ return loadRecords().filter(r=>r>now()-3600*1000).length }
-function countDay(){ return loadRecords().length }
-function canVisit(){
-  const last=+localStorage.getItem('lastVisit')||0;
-  return now()-last>R.cooldown;
-}
-function resetVisit(){
-  visitStart=0; claimOk=false; btnClaim.disabled=true;
-  clearTimeout(tmr); localStorage.removeItem('visitStart');
-}
+      const flag = countryCodeToFlagEmoji(user.country_code);
+      document.getElementById("location-info").textContent = `Tasks for ${user.country} ${flag}`;
 
-btnVisit.onclick = ()=>{
-  if(!currentUser){ showModal('Please log in','Login to earn.'); return; }
-  if(!canVisit()){ showModal('Too fast','20s cooldown.'); return; }
-  if(countHr()>=R.hrMax){ showModal('Hourly limit','20 visits/hour max.'); return; }
-  if(countDay()>=R.dayMax){ showModal('Daily limit','30 visits/day max.'); return; }
+      // Shuffle tasks and pick top 3
+      const shuffled = [...tasks].sort(() => Math.random() - 0.5).slice(0, maxTasksPerUser);
 
-  window.open('https://example.com/ad-link','_blank');
-  visitStart = now();
-  localStorage.setItem('visitStart',visitStart);
-  btnClaim.disabled = true;
-  tmr = setTimeout(()=>{
-    claimOk=true; btnClaim.disabled=false;
-    showModal('Ready!','You may claim your $0.005 reward');
-  }, R.minTime);
-  localStorage.setItem('lastVisit', now());
-};
+      shuffled.forEach(task => {
+        const card = document.createElement("div");
+        card.className = "task-card";
+        card.innerHTML = `
+          <div class="task-left">
+            <div class="task-icon"><i class="${task.icon}"></i></div>
+            <div class="task-info">
+              <div class="task-title">${task.title}</div>
+              <div class="task-earnings">$${task.amount.toFixed(3)}</div>
+            </div>
+          </div>
+          <button class="earn-btn" onclick="handleEarn(${task.id}, ${task.amount}, this)">Earn</button>
+        `;
+        taskList.appendChild(card);
+      });
+      updateTotalEarningsDisplay();
+    }
 
-btnClaim.onclick = async ()=>{
-  if(!claimOk){ showModal('Too soon','Stay 10 seconds first.'); resetVisit(); return; }
-  if(!canVisit()){ showModal('Too fast','20s cooldown.'); resetVisit(); return; }
-  if(countHr()>=R.hrMax){ showModal('Hourly limit','20 visits/hour max.'); resetVisit(); return; }
-  if(countDay()>=R.dayMax){ showModal('Daily limit','30 visits/day max.'); resetVisit(); return; }
+    async function getUserLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        return {
+          country: data.country_name,
+          country_code: data.country_code,
+          currency: data.currency,
+          city: data.city
+        };
+      } catch {
+        return { country: "Remote", country_code: null, currency: "USD", city: "" };
+      }
+    }
 
-  if(await addEarning(R.reward)){
-    saveRecord(now());
-    showModal('Success!','$0.005 added to earnings.');
-  } else showModal('Error','Update failed.');
-  resetVisit();
-};
+    // Earn button handler
+    async function handleEarn(taskId, amount, button) {
+      if (!currentUser) {
+        alert("User not authenticated yet.");
+        return;
+      }
+      if (completedTaskIds.has(taskId)) {
+        alert("You already completed this task.");
+        return;
+      }
 
-window.onload = ()=>{
-  const sv = +localStorage.getItem('visitStart')||0;
-  if(sv && now()-sv>=R.minTime){
-    claimOk=true; btnClaim.disabled=false;
-  } else resetVisit();
-};
-</script>
+      try {
+        // Read current balance from DB (optional but keeps in sync)
+        const balanceRef = db.ref(`users/${currentUser.uid}/balance`);
+        const snap = await balanceRef.get();
+        let currentBalance = 0;
+        if (snap.exists()) {
+          currentBalance = snap.val();
+        }
+        const newBalance = currentBalance + amount;
+
+        // Save new balance
+        await balanceRef.set(newBalance);
+
+        totalEarnings = newBalance;
+        completedTaskIds.add(taskId);
+        button.textContent = "✔ Done";
+        button.disabled = true;
+        updateTotalEarningsDisplay();
+      } catch (e) {
+        alert("Error saving earnings: " + e.message);
+      }
+    }
+
+    // Anonymous sign-in to Firebase (replace with your own auth flow)
+    auth.signInAnonymously()
+      .then(() => {
+        currentUser = auth.currentUser;
+        console.log("Logged in as:", currentUser.uid);
+        // Load user balance from DB
+        return db.ref(`users/${currentUser.uid}/balance`).get();
+      })
+      .then(snap => {
+        totalEarnings = snap.exists() ? snap.val() : 0;
+        updateTotalEarningsDisplay();
+        return getUserLocation();
+      })
+      .then(location => {
+        renderTasks(location);
+      })
+      .catch(err => {
+        console.error("Error during init:", err);
+        alert("Failed to initialize app.");
+      });
+
+    // Expose handleEarn globally
+    window.handleEarn = handleEarn;
+  </script>
 </body>
 </html>
