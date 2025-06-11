@@ -1,103 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tasks</title>
+  <meta charset="UTF-8">
+  <title>Tasks – CyberRewards</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0a0a0a;
-      --card: #1c1c1e;
-      --border: #2c2c2e;
-      --text: #ffffffcc;
-      --accent: #0a84ff;
-      --glow: rgba(10, 132, 255, 0.2);
-    }
-
     body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
+      background-color: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif;
       padding: 1rem;
-      max-width: 600px;
-      margin-inline: auto;
+      margin: 0;
     }
-
-    h2 {
-      font-size: 1.6rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: white;
-    }
-
-    .task-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.2rem;
-      margin-bottom: 1.2rem;
-      box-shadow: 0 0 10px var(--glow);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      transition: transform 0.2s ease;
-    }
-
-    .task-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .task-title {
-      font-size: 1.1rem;
+    .header {
+      font-size: 1.5rem;
       font-weight: 600;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      margin-bottom: 1rem;
     }
-
-    .task-desc {
-      font-size: 0.95rem;
-      line-height: 1.4;
+    .task {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 18px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
     }
-
-    .task-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      opacity: 0.8;
+    .task h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
     }
-
-    .task-btn {
-      background: var(--accent);
+    .task button {
+      background: #0a84ff;
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-weight: 500;
-      font-size: 0.9rem;
+      padding: 10px 18px;
+      font-size: 1rem;
+      border-radius: 14px;
+      margin-top: 0.5rem;
       cursor: pointer;
-      margin-top: 0.8rem;
     }
-
-    .task-btn:disabled {
+    .task button:disabled {
       background: #555;
       cursor: not-allowed;
+    }
+    .balance {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      background: #111;
+      padding: 0.75rem;
+      border-radius: 14px;
+      border: 1px solid #333;
     }
   </style>
 </head>
 <body>
-  <h2>Available Tasks</h2>
-  <div id="tasksList">Loading...</div>
+  <div class="header">💰 Earn Rewards</div>
+  <div id="balanceDisplay" class="balance">Balance: $0.000</div>
+
+  <!-- STATIC Task 1: Click to Earn -->
+  <div class="task">
+    <h3>💸 Earn $0.001 per click</h3>
+    <p>Tap the button to earn money instantly. Once per minute allowed.</p>
+    <button onclick="handleClickTask()" id="clickBtn">Click to Earn</button>
+  </div>
+
+  <!-- STATIC Task 2: Visit site -->
+  <div class="task">
+    <h3>🌐 Visit and Earn $0.025</h3>
+    <p>Visit our sponsor and get paid. No clickbait or spam. Once daily.</p>
+    <button onclick="handleVisitTask()" id="visitBtn">Visit & Earn</button>
+  </div>
+
+  <!-- Firebase Tasks -->
+  <div id="taskList"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -113,93 +95,115 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
+    const auth = getAuth();
 
-    const tasksList = document.getElementById("tasksList");
+    let uid = null;
 
-    const typeIcons = {
-      video: "🎥",
-      app: "🧩",
-      article: "📄",
-      survey: "🗳️"
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        tasksList.innerHTML = `<p>Please log in to view tasks.</p>`;
-        return;
-      }
-
-      const tasksSnap = await get(ref(db, "tasks"));
-      if (!tasksSnap.exists()) {
-        tasksList.innerHTML = `<p>No tasks available.</p>`;
-        return;
-      }
-
-      const tasks = tasksSnap.val();
-      tasksList.innerHTML = "";
-
-      for (const [taskId, task] of Object.entries(tasks)) {
-        const card = document.createElement("div");
-        card.className = "task-card";
-
-        const icon = typeIcons[task.type] || "📝";
-
-        card.innerHTML = `
-          <div class="task-title">${icon} ${task.title}</div>
-          <div class="task-desc">${task.description}</div>
-          <div class="task-footer">
-            <span>Reward: $${task.reward?.toFixed(2) || "0.00"}</span>
-            ${task.maxPerDay ? `<span>Max: ${task.maxPerDay}/day</span>` : ""}
-          </div>
-        `;
-
-        const btn = document.createElement("button");
-        btn.className = "task-btn";
-        btn.textContent = "Complete";
-
-        btn.addEventListener("click", async () => {
-          btn.disabled = true;
-          btn.textContent = "Processing...";
-          try {
-            await completeTask(user.uid, taskId, task);
-            btn.textContent = "✓ Done!";
-          } catch (e) {
-            alert(e.message || "Failed to complete");
-            btn.disabled = false;
-            btn.textContent = "Complete";
-          }
-        });
-
-        card.appendChild(btn);
-        tasksList.appendChild(card);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        uid = user.uid;
+        updateBalance();
+        loadFirebaseTasks();
+      } else {
+        alert("Login required");
+        window.location.href = "/login.html";
       }
     });
 
-    async function completeTask(uid, taskId, task) {
-      const today = new Date().toISOString().slice(0, 10);
-      const userTaskRef = ref(db, `users/${uid}/tasksCompleted/${taskId}`);
-      const snap = await get(userTaskRef);
+    async function updateBalance() {
+      const balRef = ref(db, `users/${uid}/balance`);
+      const snap = await get(balRef);
+      const balance = snap.exists() ? snap.val() : 0;
+      document.getElementById("balanceDisplay").textContent = `Balance: $${balance.toFixed(3)}`;
+    }
 
-      let countToday = 0;
-      if (snap.exists() && snap.val().date === today) {
-        countToday = snap.val().count;
+    async function incrementBalance(amount) {
+      const balRef = ref(db, `users/${uid}/balance`);
+      const snap = await get(balRef);
+      const current = snap.exists() ? snap.val() : 0;
+      await set(balRef, current + amount);
+      updateBalance();
+    }
+
+    // === STATIC TASK HANDLERS ===
+    async function handleClickTask() {
+      const lastClickRef = ref(db, `users/${uid}/lastClickEarn`);
+      const snap = await get(lastClickRef);
+      const now = Date.now();
+      const oneMinute = 60 * 1000;
+
+      if (snap.exists() && now - snap.val() < oneMinute) {
+        alert("Wait a minute between clicks.");
+        return;
       }
 
-      if (task.maxPerDay && countToday >= task.maxPerDay) {
-        throw new Error("You've already completed this task today.");
+      await set(lastClickRef, now);
+      await incrementBalance(0.001);
+      alert("Earned $0.001!");
+    }
+
+    async function handleVisitTask() {
+      const today = new Date().toISOString().split('T')[0];
+      const visitRef = ref(db, `users/${uid}/visitedToday`);
+      const snap = await get(visitRef);
+
+      if (snap.exists() && snap.val() === today) {
+        alert("You already visited today.");
+        return;
       }
 
-      await set(userTaskRef, {
+      await set(visitRef, today);
+      await incrementBalance(0.025);
+      window.open("https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041", "_blank");
+    }
+
+    // === FIREBASE TASKS ===
+    function loadFirebaseTasks() {
+      const taskRef = ref(db, 'tasks');
+      onValue(taskRef, snapshot => {
+        const container = document.getElementById("taskList");
+        container.innerHTML = "";
+        const tasks = snapshot.val();
+
+        if (!tasks) {
+          container.innerHTML = "<p>No tasks available.</p>";
+          return;
+        }
+
+        Object.entries(tasks).forEach(([key, task]) => {
+          const div = document.createElement("div");
+          div.className = "task";
+          div.innerHTML = `
+            <h3>${task.title}</h3>
+            <p>${task.description}</p>
+            <small>Type: ${task.type || "general"} – Reward: $${task.reward.toFixed(3)}</small><br>
+            <button onclick="completeTask('${key}', ${task.reward}, ${task.maxPerDay || 'null'})">Complete Task</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    window.completeTask = async function (taskId, reward, maxPerDay) {
+      const today = new Date().toISOString().split('T')[0];
+      const taskPath = `users/${uid}/tasksCompleted/${taskId}`;
+      const taskRef = ref(db, taskPath);
+      const snap = await get(taskRef);
+
+      const data = snap.exists() ? snap.val() : { count: 0, date: "" };
+      if (data.date === today && maxPerDay && data.count >= maxPerDay) {
+        alert("Daily limit reached for this task.");
+        return;
+      }
+
+      await set(taskRef, {
         date: today,
-        count: countToday + 1
+        count: data.date === today ? data.count + 1 : 1
       });
 
-      const balanceRef = ref(db, `users/${uid}/balance`);
-      const balanceSnap = await get(balanceRef);
-      const currentBalance = balanceSnap.exists() ? balanceSnap.val() : 0;
-      await set(balanceRef, currentBalance + (task.reward || 0));
-    }
+      await incrementBalance(reward);
+      alert(`Task completed! Earned $${reward.toFixed(3)}`);
+    };
   </script>
 </body>
 </html>
