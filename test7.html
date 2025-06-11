@@ -91,134 +91,152 @@
   <div id="taskList">Loading tasks...</div>
 
   <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-    let currentUser = null;
-    let totalEarnings = 0;
-    let completedTaskIds = new Set();
+  let currentUser = null;
+  let totalEarnings = 0;
+  let completedTaskIds = new Set();
 
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        const balanceRef = ref(db, `users/${user.uid}/balance`);
-        get(balanceRef).then(snapshot => {
-          if (snapshot.exists()) {
-            totalEarnings = snapshot.val();
-            updateTotalEarningsDisplay();
-          }
-        });
-      } else {
-        currentUser = null;
-      }
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      const balanceRef = ref(db, `users/${user.uid}/balance`);
+      get(balanceRef).then(snapshot => {
+        if (snapshot.exists()) {
+          totalEarnings = snapshot.val();
+          updateTotalEarningsDisplay();
+        }
+      });
+    } else {
+      currentUser = null;
+    }
+  });
+
+  function updateTotalEarningsDisplay() {
+    document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
+  }
+
+  function handleEarn(taskId, amount, button) {
+    if (!currentUser) {
+      alert("You must be logged in to earn.");
+      return;
+    }
+    if (completedTaskIds.has(taskId)) {
+      alert("Already completed.");
+      return;
+    }
+
+    completedTaskIds.add(taskId);
+    totalEarnings += amount;
+    update(ref(db, `users/${currentUser.uid}`), {
+      balance: parseFloat(totalEarnings.toFixed(3))
     });
 
-    function updateTotalEarningsDisplay() {
-      document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
+    button.textContent = "✔ Done";
+    button.disabled = true;
+    updateTotalEarningsDisplay();
+  }
+
+  const tasks = [
+    { id: 1, title: "Click to Earn", icon: "fas fa-mouse-pointer", amount: 0.001 },
+    { id: 2, title: "Tap Here", icon: "fas fa-fingerprint", amount: 0.001 },
+    { id: 3, title: "Claim Reward", icon: "fas fa-gift", amount: 0.001 },
+    { id: 4, title: "Spin Task", icon: "fas fa-rotate", amount: 0.001 },
+    { id: 5, title: "Daily Tap", icon: "fas fa-calendar-check", amount: 0.001 },
+    { id: 6, title: "Bonus Touch", icon: "fas fa-coins", amount: 0.001 },
+    { id: 7, title: "Lucky Earn", icon: "fas fa-star", amount: 0.001 },
+    { id: 8, title: "Scratch Task", icon: "fas fa-splotch", amount: 0.001 },
+    { id: 9, title: "Quick Tap", icon: "fas fa-bolt", amount: 0.001 },
+    { id: 10, title: "Instant Claim", icon: "fas fa-check-double", amount: 0.001 }
+  ];
+
+  const maxTasksPerUser = 3;
+
+  function countryCodeToFlagEmoji(countryCode) {
+    if (!countryCode) return "";
+    return countryCode
+      .toUpperCase()
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+  }
+
+  async function convertToLocalCurrency(usdAmount, targetCurrency) {
+    if (!targetCurrency || targetCurrency === "USD") return usdAmount;
+
+    try {
+      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+      const data = await res.json();
+      const rate = data.rates[targetCurrency];
+      return rate ? usdAmount * rate : usdAmount;
+    } catch {
+      return usdAmount; // fallback to USD if something breaks
     }
+  }
 
-    function handleEarn(taskId, amount, button) {
-      if (!currentUser) {
-        alert("You must be logged in to earn.");
-        return;
-      }
-      if (completedTaskIds.has(taskId)) {
-        alert("Already completed.");
-        return;
-      }
+  async function renderTasks(user) {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
 
-      completedTaskIds.add(taskId);
-      totalEarnings += amount;
-      update(ref(db, `users/${currentUser.uid}`), {
-        balance: parseFloat(totalEarnings.toFixed(3))
-      });
+    const flag = countryCodeToFlagEmoji(user.country_code);
+    document.getElementById("location-info").textContent = `Tasks for ${user.country} ${flag}`;
 
-      button.textContent = "✔ Done";
-      button.disabled = true;
-      updateTotalEarningsDisplay();
-    }
+    const shuffled = [...tasks].sort(() => Math.random() - 0.5).slice(0, maxTasksPerUser);
 
-    const tasks = [
-      { id: 1, title: "Click to Earn", icon: "fas fa-mouse-pointer", amount: 0.001 },
-      { id: 2, title: "Tap Here", icon: "fas fa-fingerprint", amount: 0.001 },
-      { id: 3, title: "Claim Reward", icon: "fas fa-gift", amount: 0.001 },
-      { id: 4, title: "Spin Task", icon: "fas fa-rotate", amount: 0.001 },
-      { id: 5, title: "Daily Tap", icon: "fas fa-calendar-check", amount: 0.001 },
-      { id: 6, title: "Bonus Touch", icon: "fas fa-coins", amount: 0.001 },
-      { id: 7, title: "Lucky Earn", icon: "fas fa-star", amount: 0.001 },
-      { id: 8, title: "Scratch Task", icon: "fas fa-splotch", amount: 0.001 },
-      { id: 9, title: "Quick Tap", icon: "fas fa-bolt", amount: 0.001 },
-      { id: 10, title: "Instant Claim", icon: "fas fa-check-double", amount: 0.001 }
-    ];
+    for (const task of shuffled) {
+      const localAmount = await convertToLocalCurrency(task.amount, user.currency);
 
-    const maxTasksPerUser = 3;
-
-    function countryCodeToFlagEmoji(countryCode) {
-      if (!countryCode) return "";
-      return countryCode
-        .toUpperCase()
-        .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
-    }
-
-    function renderTasks(user) {
-      const taskList = document.getElementById("taskList");
-      taskList.innerHTML = "";
-
-      const flag = countryCodeToFlagEmoji(user.country_code);
-      document.getElementById("location-info").textContent = `Tasks for ${user.country} ${flag}`;
-
-      const shuffled = [...tasks].sort(() => Math.random() - 0.5).slice(0, maxTasksPerUser);
-      shuffled.forEach(task => {
-        const card = document.createElement("div");
-        card.className = "task-card";
-        card.innerHTML = `
-          <div class="task-left">
-            <div class="task-icon"><i class="${task.icon}"></i></div>
-            <div class="task-info">
-              <div class="task-title">${task.title}</div>
-              <div class="task-earnings">$${task.amount.toFixed(3)}</div>
-            </div>
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.innerHTML = `
+        <div class="task-left">
+          <div class="task-icon"><i class="${task.icon}"></i></div>
+          <div class="task-info">
+            <div class="task-title">${task.title}</div>
+            <div class="task-earnings">${user.currency} ${localAmount.toFixed(3)}</div>
           </div>
-          <button class="earn-btn" onclick="handleEarn(${task.id}, ${task.amount}, this)">Earn</button>
-        `;
-        taskList.appendChild(card);
-      });
+        </div>
+        <button class="earn-btn" onclick="handleEarn(${task.id}, ${task.amount}, this)">Earn</button>
+      `;
+      taskList.appendChild(card);
     }
+  }
 
-    async function getUserLocation() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        return {
-          country: data.country_name,
-          country_code: data.country_code,
-          currency: data.currency,
-          city: data.city
-        };
-      } catch {
-        return { country: "Remote", country_code: null, currency: "USD", city: "" };
-      }
+  async function getUserLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      return {
+        country: data.country_name,
+        country_code: data.country_code,
+        currency: data.currency,
+        city: data.city
+      };
+    } catch {
+      return { country: "Remote", country_code: null, currency: "USD", city: "" };
     }
+  }
 
-    getUserLocation().then(renderTasks);
-    window.handleEarn = handleEarn; // for inline onclick
-  </script>
+  getUserLocation().then(renderTasks);
+
+  // Expose handleEarn for inline onclick usage
+  window.handleEarn = handleEarn;
+</script>
 </body>
 </html>
