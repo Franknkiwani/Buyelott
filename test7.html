@@ -5,54 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tasks</title>
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0a0a;
+      --card: #1c1c1e;
+      --border: #2c2c2e;
+      --text: #ffffffcc;
+      --accent: #0a84ff;
+      --glow: rgba(10, 132, 255, 0.2);
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f8f9fa;
       margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
       padding: 1rem;
       max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+      margin-inline: auto;
     }
+
     h2 {
-      margin-bottom: 1rem;
+      font-size: 1.6rem;
       text-align: center;
+      margin-bottom: 1.5rem;
+      color: white;
     }
-    #tasksList {
-      list-style: none;
-      padding: 0;
-    }
-    #tasksList li {
-      background: #fff;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 0 10px var(--glow);
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      transition: transform 0.2s ease;
     }
-    button {
-      align-self: flex-start;
-      padding: 0.5rem 1rem;
-      background: #007aff;
+
+    .task-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .task-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .task-desc {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .task-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .task-btn {
+      background: var(--accent);
       color: white;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
       font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 0.8rem;
     }
-    button:disabled {
-      background: #999;
-      cursor: default;
+
+    .task-btn:disabled {
+      background: #555;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <h2>Tasks</h2>
-  <ul id="tasksList">
-    <li>Loading tasks...</li>
-  </ul>
+  <h2>Available Tasks</h2>
+  <div id="tasksList">Loading...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -74,52 +115,68 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    const tasksList = document.getElementById('tasksList');
+    const tasksList = document.getElementById("tasksList");
 
-    onAuthStateChanged(auth, async user => {
+    const typeIcons = {
+      video: "🎥",
+      app: "🧩",
+      article: "📄",
+      survey: "🗳️"
+    };
+
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        tasksList.innerHTML = `<li>Please log in to see tasks.</li>`;
+        tasksList.innerHTML = `<p>Please log in to view tasks.</p>`;
         return;
       }
 
-      const tasksSnap = await get(ref(db, 'tasks'));
+      const tasksSnap = await get(ref(db, "tasks"));
       if (!tasksSnap.exists()) {
-        tasksList.innerHTML = `<li>No tasks available.</li>`;
+        tasksList.innerHTML = `<p>No tasks available.</p>`;
         return;
       }
 
       const tasks = tasksSnap.val();
-      tasksList.innerHTML = '';
+      tasksList.innerHTML = "";
 
-      Object.entries(tasks).forEach(([taskId, task]) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <strong>${task.title}</strong>
-          <p>${task.description || ''}</p>
-          <p>💰 $${task.reward?.toFixed(2) || '0.00'}</p>
+      for (const [taskId, task] of Object.entries(tasks)) {
+        const card = document.createElement("div");
+        card.className = "task-card";
+
+        const icon = typeIcons[task.type] || "📝";
+
+        card.innerHTML = `
+          <div class="task-title">${icon} ${task.title}</div>
+          <div class="task-desc">${task.description}</div>
+          <div class="task-footer">
+            <span>Reward: $${task.reward?.toFixed(2) || "0.00"}</span>
+            ${task.maxPerDay ? `<span>Max: ${task.maxPerDay}/day</span>` : ""}
+          </div>
         `;
 
-        const btn = document.createElement('button');
-        btn.textContent = 'Complete';
-        btn.addEventListener('click', async () => {
+        const btn = document.createElement("button");
+        btn.className = "task-btn";
+        btn.textContent = "Complete";
+
+        btn.addEventListener("click", async () => {
           btn.disabled = true;
-          btn.textContent = 'Processing...';
+          btn.textContent = "Processing...";
           try {
-            await handleTaskComplete(user.uid, taskId, task);
-            btn.textContent = 'Done!';
-          } catch (err) {
-            alert(err.message || 'Error completing task');
+            await completeTask(user.uid, taskId, task);
+            btn.textContent = "✓ Done!";
+          } catch (e) {
+            alert(e.message || "Failed to complete");
             btn.disabled = false;
-            btn.textContent = 'Complete';
+            btn.textContent = "Complete";
           }
         });
 
-        li.appendChild(btn);
-        tasksList.appendChild(li);
-      });
+        card.appendChild(btn);
+        tasksList.appendChild(card);
+      }
     });
 
-    async function handleTaskComplete(uid, taskId, task) {
+    async function completeTask(uid, taskId, task) {
       const today = new Date().toISOString().slice(0, 10);
       const userTaskRef = ref(db, `users/${uid}/tasksCompleted/${taskId}`);
       const snap = await get(userTaskRef);
@@ -133,13 +190,11 @@
         throw new Error("You've already completed this task today.");
       }
 
-      // Update task completion count
       await set(userTaskRef, {
         date: today,
         count: countToday + 1
       });
 
-      // Update user balance
       const balanceRef = ref(db, `users/${uid}/balance`);
       const balanceSnap = await get(balanceRef);
       const currentBalance = balanceSnap.exists() ? balanceSnap.val() : 0;
