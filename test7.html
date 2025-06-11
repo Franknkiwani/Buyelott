@@ -6,10 +6,8 @@
   <title>Tasks</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #f5f5f7;
-      color: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8f9fa;
       margin: 0;
       padding: 1rem;
       max-width: 600px;
@@ -17,79 +15,44 @@
       margin-right: auto;
     }
     h2 {
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
     }
     #tasksList {
-      list-style-type: none;
+      list-style: none;
       padding: 0;
     }
     #tasksList li {
       background: #fff;
-      margin-bottom: 1rem;
       padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
-    }
-    #tasksList li strong {
-      font-size: 1.1rem;
-    }
-    #tasksList li p {
-      margin: 0.3rem 0 1rem 0;
-      font-size: 0.95rem;
-      color: #555;
+      gap: 0.5rem;
     }
     button {
       align-self: flex-start;
-      padding: 0.4rem 0.8rem;
-      border: none;
+      padding: 0.5rem 1rem;
       background: #007aff;
       color: white;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
-      transition: background 0.25s ease;
+      font-weight: 500;
     }
     button:disabled {
       background: #999;
       cursor: default;
     }
-    #balance {
-      font-weight: 700;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-      text-align: right;
-      user-select: none;
-    }
-    #timeBox, #locationBox {
-      font-size: 0.9rem;
-      color: #666;
-      user-select: none;
-      cursor: pointer;
-    }
-    #header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
   </style>
 </head>
 <body>
-  <div id="header">
-    <div id="locationBox" title="Your Location">🌐 Loading location...</div>
-    <div id="timeBox" title="Click to toggle 12/24 hour">--:--:--</div>
-  </div>
-
-  <div id="balance">$0.000</div>
-
-  <div id="tasksContainer">
-    <h2>Available Tasks</h2>
-    <ul id="tasksList">
-      <li>Loading tasks...</li>
-    </ul>
-  </div>
+  <h2>Tasks</h2>
+  <ul id="tasksList">
+    <li>Loading tasks...</li>
+  </ul>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -111,158 +74,76 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    let use24Hour = true;
+    const tasksList = document.getElementById('tasksList');
 
-    async function updateTimeFromIP() {
-      try {
-        const res = await fetch("https://worldtimeapi.org/api/ip");
-        const data = await res.json();
-        const now = new Date(data.datetime);
-        displayTime(now);
-      } catch {
-        displayTime(new Date());
-      }
-    }
-
-    function displayTime(date) {
-      const options = use24Hour
-        ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
-        : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-      document.getElementById('timeBox').textContent = date.toLocaleTimeString('en-US', options);
-    }
-
-    document.getElementById("timeBox").addEventListener("click", () => {
-      use24Hour = !use24Hour;
-      updateTimeFromIP();
-    });
-
-    async function fetchLocation() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        const flag = data.country_code
-          ? [...data.country_code.toUpperCase()]
-              .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
-              .join('')
-          : '🌐';
-        document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${data.country_name}`;
-      } catch {
-        document.getElementById("locationBox").textContent = "🌐 Unknown Location";
-      }
-    }
-
-    const balanceEl = document.getElementById('balance');
-    const tasksListEl = document.getElementById('tasksList');
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
-          const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
-          balanceEl.textContent = `$${balance.toFixed(3)}`;
-          balanceEl.title = "Your balance in USD";
-
-          await loadTasks();
-        } catch (err) {
-          balanceEl.textContent = "$0.000";
-          balanceEl.title = "Failed to load balance";
-          console.error(err);
-        }
-      } else {
-        balanceEl.textContent = "$0.000";
-        balanceEl.title = "Not logged in";
-        tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
-      }
-    });
-
-    fetchLocation();
-    updateTimeFromIP();
-    setInterval(() => displayTime(new Date()), 1000);
-
-    async function loadTasks() {
-      const tasksSnap = await get(ref(db, 'tasks'));
-      if (!tasksSnap.exists()) {
-        tasksListEl.innerHTML = '<li>No tasks available.</li>';
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        tasksList.innerHTML = `<li>Please log in to see tasks.</li>`;
         return;
       }
-      const tasks = tasksSnap.val();
-      tasksListEl.innerHTML = ''; // clear "Loading"
 
-      for (const [id, task] of Object.entries(tasks)) {
+      const tasksSnap = await get(ref(db, 'tasks'));
+      if (!tasksSnap.exists()) {
+        tasksList.innerHTML = `<li>No tasks available.</li>`;
+        return;
+      }
+
+      const tasks = tasksSnap.val();
+      tasksList.innerHTML = '';
+
+      Object.entries(tasks).forEach(([taskId, task]) => {
         const li = document.createElement('li');
         li.innerHTML = `
-          <strong>${task.title}</strong> - Earn $${task.reward.toFixed(2)}
+          <strong>${task.title}</strong>
           <p>${task.description || ''}</p>
+          <p>💰 $${task.reward?.toFixed(2) || '0.00'}</p>
         `;
 
         const btn = document.createElement('button');
         btn.textContent = 'Complete';
-        btn.dataset.taskId = id;
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          btn.textContent = 'Processing...';
+          try {
+            await handleTaskComplete(user.uid, taskId, task);
+            btn.textContent = 'Done!';
+          } catch (err) {
+            alert(err.message || 'Error completing task');
+            btn.disabled = false;
+            btn.textContent = 'Complete';
+          }
+        });
+
         li.appendChild(btn);
-        tasksListEl.appendChild(li);
-      }
-    }
-
-    tasksListEl.addEventListener('click', async (e) => {
-      if (e.target.tagName !== 'BUTTON') return;
-      const user = auth.currentUser;
-      if (!user) return alert('You must be logged in to complete tasks.');
-
-      const btn = e.target;
-      const taskId = btn.dataset.taskId;
-
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
-
-      try {
-        await completeTask(user.uid, taskId);
-
-        btn.textContent = 'Done!';
-        btn.disabled = true;
-
-        // update balance display after task done
-        const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
-        const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
-        balanceEl.textContent = `$${balance.toFixed(3)}`;
-      } catch (err) {
-        alert(err.message || 'Failed to complete task, try again.');
-        btn.disabled = false;
-        btn.textContent = 'Complete';
-        console.error(err);
-      }
+        tasksList.appendChild(li);
+      });
     });
 
-    async function completeTask(userId, taskId) {
+    async function handleTaskComplete(uid, taskId, task) {
       const today = new Date().toISOString().slice(0, 10);
-      const taskSnap = await get(ref(db, `tasks/${taskId}`));
-      if (!taskSnap.exists()) throw new Error('Task does not exist.');
-
-      const task = taskSnap.val();
-
-      const userTaskRef = ref(db, `users/${userId}/tasksCompleted/${taskId}`);
-      const userTaskSnap = await get(userTaskRef);
+      const userTaskRef = ref(db, `users/${uid}/tasksCompleted/${taskId}`);
+      const snap = await get(userTaskRef);
 
       let countToday = 0;
-      if (userTaskSnap.exists()) {
-        const userTask = userTaskSnap.val();
-        if (userTask.date === today) countToday = userTask.count;
+      if (snap.exists() && snap.val().date === today) {
+        countToday = snap.val().count;
       }
 
       if (task.maxPerDay && countToday >= task.maxPerDay) {
-        throw new Error("Daily limit reached for this task.");
+        throw new Error("You've already completed this task today.");
       }
 
-      // increment task completion count for today
-      await set(userTaskRef, { date: today, count: countToday + 1 });
+      // Update task completion count
+      await set(userTaskRef, {
+        date: today,
+        count: countToday + 1
+      });
 
-      // add reward to user balance
-      const balanceRef = ref(db, `users/${userId}/balance`);
+      // Update user balance
+      const balanceRef = ref(db, `users/${uid}/balance`);
       const balanceSnap = await get(balanceRef);
-      let balance = balanceSnap.exists() ? balanceSnap.val() : 0;
-      balance += task.reward;
-      await set(balanceRef, balance);
-
-      alert(`Task completed! You earned $${task.reward.toFixed(2)}`);
+      const currentBalance = balanceSnap.exists() ? balanceSnap.val() : 0;
+      await set(balanceRef, currentBalance + (task.reward || 0));
     }
   </script>
 </body>
