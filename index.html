@@ -621,94 +621,144 @@ a.apply-btn:hover {
 <div id="error" hidden>Failed to load jobs. Try again.</div>
 <div id="jobs"></div>
 <div id="userLocation" style="margin-bottom: 1rem; font-weight: 600;"></div>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, set, runTransaction, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    let use24Hour = true;
+  // =================== LIVE TIME DISPLAY ===================
+  let use24Hour = true;
+  const timeBox = document.getElementById("timeBox");
 
-    async function updateTimeFromIP() {
-      try {
-        const res = await fetch("https://worldtimeapi.org/api/ip");
-        const data = await res.json();
-        const now = new Date(data.datetime);
-        displayTime(now);
-      } catch {
-        displayTime(new Date());
-      }
+  async function updateTimeFromIP() {
+    try {
+      const res = await fetch("https://worldtimeapi.org/api/ip");
+      const data = await res.json();
+      const now = new Date(data.datetime);
+      displayTime(now);
+    } catch {
+      displayTime(new Date());
     }
+  }
 
-    function displayTime(date) {
-      const options = use24Hour
-        ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
-        : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-      document.getElementById('timeBox').textContent = date.toLocaleTimeString('en-US', options);
-    }
+  function displayTime(date) {
+    const options = use24Hour
+      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    if (timeBox) timeBox.textContent = date.toLocaleTimeString('en-US', options);
+  }
 
-    document.getElementById("timeBox").addEventListener("click", () => {
+  if (timeBox) {
+    timeBox.addEventListener("click", () => {
       use24Hour = !use24Hour;
       updateTimeFromIP();
     });
+  }
 
-    async function fetchLocation() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        const flag = data.country_code
-          ? [...data.country_code.toUpperCase()]
-              .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
-              .join('')
-          : '🌐';
-        document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${data.country_name}`;
-      } catch {
-        document.getElementById("locationBox").textContent = "🌐 Unknown Location";
-      }
+  // =================== LOCATION DISPLAY ===================
+  const locationBox = document.getElementById("locationBox");
+
+  async function fetchLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      const flag = data.country_code
+        ? [...data.country_code.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
+        : '🌐';
+      if (locationBox) locationBox.innerHTML = `<span>${flag}</span> ${data.country_name}`;
+    } catch {
+      if (locationBox) locationBox.textContent = "🌐 Unknown Location";
     }
+  }
 
-    const earningsBtn = document.querySelector('.earnings-btn');
-    const tasksListEl = document.getElementById('tasksList');
+  // =================== USER BALANCE & TASKS ===================
+  const earningsBtn = document.querySelector('.earnings-btn');
+  const tasksListEl = document.getElementById('tasksList');
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
-          const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
+        const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+        if (earningsBtn) {
           earningsBtn.textContent = `$${balance.toFixed(3)}`;
           earningsBtn.title = "Your balance in USD";
+        }
 
-          loadTasks();
-        } catch (err) {
+        loadTasks?.();
+      } catch (err) {
+        if (earningsBtn) {
           earningsBtn.textContent = "$0.000";
           earningsBtn.title = "Failed to load balance";
-          console.error(err);
         }
-      } else {
+        console.error(err);
+      }
+    } else {
+      if (earningsBtn) {
         earningsBtn.textContent = "$0.000";
         earningsBtn.title = "Not logged in";
+      }
+      if (tasksListEl) {
         tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
       }
-    });
+    }
+  });
 
-    fetchLocation();
-    updateTimeFromIP();
-    setInterval(() => displayTime(new Date()), 1000);
-  </script>
+  // =================== ANALYTICS TRACKING ===================
+  // Page view count
+  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
+
+  // Click limiter
+  let lastClickTime = 0;
+  document.addEventListener("click", () => {
+    const now = Date.now();
+    if (now - lastClickTime > 2000) {
+      runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
+      lastClickTime = now;
+    }
+  });
+
+  // Geo logging (once per day)
+  const today = new Date().toDateString();
+  if (localStorage.getItem("loggedCountry") !== today) {
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        const country = data.country_name || "Unknown";
+        const logRef = push(ref(db, "analytics/logs"));
+        set(logRef, {
+          ip: data.ip,
+          country,
+          city: data.city || "Unknown",
+          timestamp: Date.now(),
+          page: location.pathname
+        });
+
+        runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
+        localStorage.setItem("loggedCountry", today);
+      })
+      .catch(err => console.warn("GeoIP failed:", err));
+  }
+
+  // =================== INITIALIZATION ===================
+  fetchLocation();
+  updateTimeFromIP();
+  setInterval(() => displayTime(new Date()), 1000);
+</script>
 <script>
   const jobsContainer = document.getElementById('jobs');
   const loadingEl = document.getElementById('loading');
@@ -949,57 +999,6 @@ function renderJobs(jobs, term) {
     if (loader) loader.style.display = 'none';
   }, 3000);
 </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, runTransaction, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Page view counter (runs once per load)
-  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
-
-  // Limit clicks to one every 2s
-  let lastClickTime = 0;
-  document.addEventListener("click", () => {
-    const now = Date.now();
-    if (now - lastClickTime > 2000) {
-      runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
-      lastClickTime = now;
-    }
-  });
-
-  // Geo log only once per day per browser
-  const today = new Date().toDateString();
-  if (localStorage.getItem("loggedCountry") !== today) {
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
-        const country = data.country_name || "Unknown";
-        const logRef = push(ref(db, "analytics/logs"));
-        set(logRef, {
-          ip: data.ip,
-          country: country,
-          city: data.city || "Unknown",
-          timestamp: Date.now(),
-          page: location.pathname
-        });
-
-        runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
-        localStorage.setItem("loggedCountry", today);
-      })
-      .catch(err => console.warn("GeoIP failed:", err));
-  }
-</script>
 </body>
 </html>
