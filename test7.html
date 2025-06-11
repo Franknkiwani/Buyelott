@@ -2,132 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Click to Earn - Firebase Debug</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Earn Tasks</title>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     body {
-      margin: 0; padding: 0;
-      background: #0b0b0b;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: white;
-    }
-    #location-info {
-      max-width: 600px;
-      margin: 20px auto 10px auto;
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.25em;
-      border: 2px solid #00ffcc;
-      border-radius: 14px;
-      padding: 10px 20px;
-      display: inline-block;
-      background: rgba(0, 255, 204, 0.1);
-      user-select: none;
-    }
-    .task-list {
-      padding: 0 20px 20px 20px;
+      background: linear-gradient(145deg, #121212, #1e1e1e);
+      font-family: "Segoe UI", sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      max-width: 600px;
-      margin: auto;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 1rem 0 0.25rem;
+    }
+    #location-info {
+      font-size: 1rem;
+      color: #aaa;
+      margin-bottom: 1rem;
+    }
+    #earn-total {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #taskList {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 90%;
+      max-width: 500px;
     }
     .task-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px;
-      border-radius: 18px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease;
-    }
-    .task-card:hover {
-      transform: scale(1.01);
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
     .task-left {
       display: flex;
-      gap: 12px;
       align-items: center;
     }
     .task-icon {
-      font-size: 26px;
-      background: #1a1a1a;
-      padding: 14px;
-      border-radius: 14px;
-      color: #00ffc8;
-    }
-    .task-info {
-      display: flex;
-      flex-direction: column;
+      font-size: 2rem;
+      margin-right: 1rem;
     }
     .task-title {
-      font-size: 1.05em;
-      font-weight: 600;
+      font-size: 1.1rem;
+      font-weight: bold;
     }
     .task-earnings {
-      color: #00ff99;
-      font-weight: 500;
-      font-size: 0.95em;
+      font-size: 0.9rem;
+      color: #0f0;
     }
     .earn-btn {
-      background: #00ffcc;
+      background: #0f0;
       color: #000;
+      padding: 0.6rem 1rem;
       border: none;
-      padding: 10px 16px;
-      font-weight: 600;
-      border-radius: 12px;
+      border-radius: 10px;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: 0.2s ease-in-out;
     }
     .earn-btn:hover {
-      background: #00e6b8;
-    }
-    #earn-total {
-      text-align: center;
-      margin: 16px 0 24px 0;
-      font-weight: 500;
-      color: #00ff99;
-    }
-    #debug-log {
-      max-width: 600px;
-      margin: 20px auto;
-      background: #111;
-      color: #0f0;
-      font-family: monospace;
-      padding: 10px;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      height: 120px;
-      overflow-y: auto;
+      background: #1aff1a;
     }
   </style>
 </head>
 <body>
-
-  <div id="location-info">Detecting location...</div>
+  <h1>Earn Tasks</h1>
+  <div id="location-info">Loading location...</div>
   <div id="earn-total">Total Earned: $0.000</div>
-  <div class="task-list" id="taskList"></div>
+  <div id="taskList">Loading tasks...</div>
 
-  <div id="debug-log"></div>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-
-  <script>
-    function debugLog(msg) {
-      const logDiv = document.getElementById('debug-log');
-      logDiv.textContent += msg + '\n';
-      logDiv.scrollTop = logDiv.scrollHeight;
-      console.log(msg);
-    }
-
-    // Replace with your actual Firebase config (copy exactly from your Firebase console)
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -139,14 +107,53 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
     let currentUser = null;
     let totalEarnings = 0;
     let completedTaskIds = new Set();
-    const maxTasksPerUser = 3;
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        const balanceRef = ref(db, `users/${user.uid}/balance`);
+        get(balanceRef).then(snapshot => {
+          if (snapshot.exists()) {
+            totalEarnings = snapshot.val();
+            updateTotalEarningsDisplay();
+          }
+        });
+      } else {
+        currentUser = null;
+      }
+    });
+
+    function updateTotalEarningsDisplay() {
+      document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
+    }
+
+    function handleEarn(taskId, amount, button) {
+      if (!currentUser) {
+        alert("You must be logged in to earn.");
+        return;
+      }
+      if (completedTaskIds.has(taskId)) {
+        alert("Already completed.");
+        return;
+      }
+
+      completedTaskIds.add(taskId);
+      totalEarnings += amount;
+      update(ref(db, `users/${currentUser.uid}`), {
+        balance: parseFloat(totalEarnings.toFixed(3))
+      });
+
+      button.textContent = "✔ Done";
+      button.disabled = true;
+      updateTotalEarningsDisplay();
+    }
 
     const tasks = [
       { id: 1, title: "Click to Earn", icon: "fas fa-mouse-pointer", amount: 0.001 },
@@ -161,15 +168,13 @@
       { id: 10, title: "Instant Claim", icon: "fas fa-check-double", amount: 0.001 }
     ];
 
+    const maxTasksPerUser = 3;
+
     function countryCodeToFlagEmoji(countryCode) {
       if (!countryCode) return "";
       return countryCode
         .toUpperCase()
         .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
-    }
-
-    function updateTotalEarningsDisplay() {
-      document.getElementById("earn-total").textContent = `Total Earned: $${totalEarnings.toFixed(3)}`;
     }
 
     function renderTasks(user) {
@@ -179,9 +184,7 @@
       const flag = countryCodeToFlagEmoji(user.country_code);
       document.getElementById("location-info").textContent = `Tasks for ${user.country} ${flag}`;
 
-      // Shuffle tasks and pick top 3
       const shuffled = [...tasks].sort(() => Math.random() - 0.5).slice(0, maxTasksPerUser);
-
       shuffled.forEach(task => {
         const card = document.createElement("div");
         card.className = "task-card";
@@ -197,104 +200,25 @@
         `;
         taskList.appendChild(card);
       });
-      updateTotalEarningsDisplay();
     }
 
     async function getUserLocation() {
       try {
-        debugLog("Fetching location...");
         const res = await fetch("https://ipapi.co/json/");
-        if (!res.ok) throw new Error("Location fetch failed");
         const data = await res.json();
-        debugLog(`Location detected: ${data.country_name} (${data.country_code})`);
         return {
           country: data.country_name,
           country_code: data.country_code,
           currency: data.currency,
           city: data.city
         };
-      } catch (e) {
-        debugLog("Location fetch error: " + e.message);
+      } catch {
         return { country: "Remote", country_code: null, currency: "USD", city: "" };
       }
     }
 
-    async function handleEarn(taskId, amount, button) {
-      if (!currentUser) {
-        alert("User not authenticated yet.");
-        return;
-      }
-      if (completedTaskIds.has(taskId)) {
-        alert("You already completed this task.");
-        return;
-      }
-
-      try {
-        debugLog(`Earning task ${taskId} for $${amount.toFixed(3)}...`);
-        const balanceRef = db.ref(`users/${currentUser.uid}/balance`);
-        const snap = await balanceRef.get();
-        let currentBalance = 0;
-        if (snap.exists()) {
-          currentBalance = snap.val();
-        }
-        const newBalance = currentBalance + amount;
-
-        // Update Firebase balance
-        await balanceRef.set(newBalance);
-
-        // Mark this task as completed locally
-        completedTaskIds.add(taskId);
-
-        // Disable the button to prevent repeat clicks
-        button.disabled = true;
-        button.textContent = "Completed";
-
-        totalEarnings = newBalance;
-        updateTotalEarningsDisplay();
-
-        debugLog(`Balance updated: $${newBalance.toFixed(3)}`);
-      } catch (error) {
-        debugLog("Error updating balance: " + error.message);
-        alert("Failed to update earnings. Try again.");
-      }
-    }
-
-    // Initialization flow
-    async function init() {
-      try {
-        // Firebase anonymous auth
-        debugLog("Signing in anonymously...");
-        const userCredential = await auth.signInAnonymously();
-        currentUser = userCredential.user;
-        debugLog(`Signed in as UID: ${currentUser.uid}`);
-
-        // Get location info
-        const location = await getUserLocation();
-
-        // Load user balance from Firebase
-        const userBalanceSnap = await db.ref(`users/${currentUser.uid}/balance`).get();
-        if (userBalanceSnap.exists()) {
-          totalEarnings = userBalanceSnap.val();
-          debugLog(`Loaded user balance: $${totalEarnings.toFixed(3)}`);
-        } else {
-          totalEarnings = 0;
-          debugLog("No balance found, starting at $0.000");
-          await db.ref(`users/${currentUser.uid}/balance`).set(0);
-        }
-
-        // Render tasks based on location
-        renderTasks(location);
-      } catch (err) {
-        debugLog("Initialization error: " + err.message);
-        alert("Error during initialization: " + err.message);
-      }
-    }
-
-    // Run on page load
-    window.onload = () => {
-      init();
-    }
+    getUserLocation().then(renderTasks);
+    window.handleEarn = handleEarn; // for inline onclick
   </script>
-
 </body>
 </html>
