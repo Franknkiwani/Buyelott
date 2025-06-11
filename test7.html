@@ -1,121 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Job Search App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f5f7fa;
-      padding: 20px;
-      color: #333;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
-      padding: 10px;
-      font-size: 1rem;
-      width: 300px;
-      max-width: 90%;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 10px 15px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #jobs {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .job-card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      padding: 15px;
-    }
-    .job-title {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-    .company {
-      color: #666;
-      margin-bottom: 10px;
-    }
-    .btn {
-      text-decoration: none;
-      background: #007bff;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      display: inline-block;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search App — ArbeitNow API</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f9faff;
+    margin: 0; padding: 20px;
+    color: #222;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  input[type="text"] {
+    padding: 12px;
+    font-size: 1rem;
+    width: 300px;
+    max-width: 90%;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline-offset: 2px;
+  }
+  button {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  button:hover {
+    background: #1e40af;
+  }
+  #jobs {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(320px,1fr));
+    gap: 16px;
+  }
+  .job-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  }
+  .job-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+  .company {
+    color: #555;
+    margin-bottom: 10px;
+  }
+  .location {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  a.apply-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  a.apply-btn:hover {
+    background: #1e40af;
+  }
+  #loading {
+    text-align: center;
+    margin-top: 30px;
+    font-style: italic;
+  }
+  #error {
+    text-align: center;
+    margin-top: 30px;
+    color: red;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Find Remote Jobs</h1>
-    <p>Search by keyword (e.g. developer, designer, AI)</p>
-    <input type="text" id="searchInput" placeholder="Enter job keyword" />
-    <button onclick="searchJobs()">Search</button>
-  </header>
 
-  <div id="jobs"></div>
-  <div id="loading" hidden>Loading jobs…</div>
-  <div id="error" hidden style="color:red;">Failed to load jobs. Try refreshing.</div>
+<header>
+  <h1>Remote Job Finder</h1>
+  <p>Search for remote jobs by keyword</p>
+  <input id="searchInput" type="text" placeholder="e.g. developer, designer, marketing" />
+  <button onclick="searchJobs()">Search</button>
+</header>
 
-  <script>
-    const jobsContainer = document.getElementById('jobs');
-    const loading = document.getElementById('loading');
-    const error = document.getElementById('error');
+<div id="loading" hidden>Loading jobs…</div>
+<div id="error" hidden>Failed to load jobs. Try again.</div>
+<div id="jobs"></div>
 
-    async function searchJobs() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
+<script>
+  const jobsContainer = document.getElementById('jobs');
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
 
-      jobsContainer.innerHTML = '';
-      loading.hidden = false;
-      error.hidden = true;
-
-      try {
-        const res = await fetch(`https://remotive.io/api/remote-jobs?search=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        if (!data.jobs || data.jobs.length === 0) {
-          jobsContainer.innerHTML = `<p>No jobs found for "${query}".</p>`;
-          return;
-        }
-
-        data.jobs.forEach(job => {
-          const card = document.createElement('div');
-          card.className = 'job-card';
-          card.innerHTML = `
-            <div class="job-title">${job.title}</div>
-            <div class="company">${job.company_name}</div>
-            <a href="${job.url}" class="btn" target="_blank">Apply</a>
-          `;
-          jobsContainer.appendChild(card);
-        });
-      } catch (err) {
-        console.error(err);
-        error.hidden = false;
-      } finally {
-        loading.hidden = true;
-      }
+  async function searchJobs() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!query) {
+      alert('Type something to search jobs!');
+      return;
     }
-  </script>
+    jobsContainer.innerHTML = '';
+    errorEl.hidden = true;
+    loadingEl.hidden = false;
+
+    try {
+      const res = await fetch('https://www.arbeitnow.com/api/job-board-api');
+      if (!res.ok) throw new Error('Network error');
+      const data = await res.json();
+
+      // Filter jobs by search query on title or company
+      const filtered = data.data.filter(job =>
+        job.position.toLowerCase().includes(query) ||
+        job.company.toLowerCase().includes(query)
+      );
+
+      loadingEl.hidden = true;
+
+      if (filtered.length === 0) {
+        jobsContainer.innerHTML = `<p>No jobs found for "<strong>${query}</strong>"</p>`;
+        return;
+      }
+
+      filtered.forEach(job => {
+        const card = document.createElement('div');
+        card.className = 'job-card';
+        card.innerHTML = `
+          <div class="job-title">${job.position}</div>
+          <div class="company">${job.company}</div>
+          <div class="location">${job.location || 'Remote'}</div>
+          <a href="${job.url}" class="apply-btn" target="_blank" rel="noopener">Apply</a>
+        `;
+        jobsContainer.appendChild(card);
+      });
+
+    } catch (err) {
+      console.error(err);
+      loadingEl.hidden = true;
+      errorEl.hidden = false;
+    }
+  }
+</script>
+
 </body>
 </html>
