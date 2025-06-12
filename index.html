@@ -190,35 +190,54 @@
   <div>Verifying... Please wait</div>
   <div class="spinner"></div>
 </div>
-  <script>
-    const checkbox = document.getElementById("check");
-    const goBtn = document.getElementById("goBtn");
-    const msg = document.getElementById("msg");
-    const loadingOverlay = document.getElementById("loadingOverlay");
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, runTransaction, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const redirectURL = "https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590";
+  // Firebase config + init
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-    checkbox.addEventListener("change", () => {
-      goBtn.disabled = !checkbox.checked;
-    });
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    goBtn.addEventListener("click", () => {
-      if (!checkbox.checked) return;
+  // DOM Elements
+  const checkbox = document.getElementById("check");
+  const goBtn = document.getElementById("goBtn");
+  const msg = document.getElementById("msg");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const mainContent = document.getElementById("mainContent");
 
-      // Show loading overlay and hide main content
-      loadingOverlay.style.display = "flex";
-      document.getElementById("mainContent").style.display = "none";
+  const redirectURL = "https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590";
 
-      // Save timestamp before redirect
-      localStorage.setItem("sub_verify_click", Date.now().toString());
+  // Checkbox toggle enabling button
+  checkbox.addEventListener("change", () => {
+    goBtn.disabled = !checkbox.checked;
+  });
 
-      // Wait 5 seconds then redirect
-      setTimeout(() => {
-        window.location.href = redirectURL;
-      }, 5000);
-    });
+  // Click handler with loading overlay + redirect
+  goBtn.addEventListener("click", () => {
+    if (!checkbox.checked) return;
 
-    // On page load: check if user returned too fast
+    loadingOverlay.style.display = "flex";
+    mainContent.style.display = "none";
+
+    localStorage.setItem("sub_verify_click", Date.now().toString());
+
+    setTimeout(() => {
+      window.location.href = redirectURL;
+    }, 5000);
+  });
+
+  // On page load: check if user returned too fast
+  (() => {
     const lastClick = localStorage.getItem("sub_verify_click");
     if (lastClick) {
       const elapsed = (Date.now() - parseInt(lastClick, 10)) / 1000;
@@ -231,16 +250,19 @@
         checkbox.checked = false;
         goBtn.disabled = true;
         msg.style.display = "block";
-        localStorage.removeItem("sub_verify_click");
+        // Keep timestamp for next load to enforce delay
       }
     }
-  // =================== ANALYTICS TRACKING ===================
-  // Page view count
+  })();
+
+  // Firebase analytics stuff:
+
+  // Page views increment
   runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
 
-  // Click limiter
+  // Limit clicks to one every 2 seconds (only count clicks on goBtn)
   let lastClickTime = 0;
-  document.addEventListener("click", () => {
+  goBtn.addEventListener("click", () => {
     const now = Date.now();
     if (now - lastClickTime > 2000) {
       runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
@@ -248,7 +270,7 @@
     }
   });
 
-  // Geo logging (once per day)
+  // Geo logging once per day per browser
   const today = new Date().toDateString();
   if (localStorage.getItem("loggedCountry") !== today) {
     fetch("https://ipapi.co/json/")
@@ -269,12 +291,7 @@
       })
       .catch(err => console.warn("GeoIP failed:", err));
   }
-
-  // =================== INITIALIZATION ===================
-  fetchLocation();
-  updateTimeFromIP();
-  setInterval(() => displayTime(new Date()), 1000);
-  </script>
+</script>
   <script type='text/javascript' src='//pl26857223.profitableratecpm.com/a8/a7/b1/a8a7b1389678bf2846d808769e5f078f.js'></script>
   <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
 </body>
