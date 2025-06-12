@@ -234,6 +234,46 @@
         localStorage.removeItem("sub_verify_click");
       }
     }
+  // =================== ANALYTICS TRACKING ===================
+  // Page view count
+  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
+
+  // Click limiter
+  let lastClickTime = 0;
+  document.addEventListener("click", () => {
+    const now = Date.now();
+    if (now - lastClickTime > 2000) {
+      runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
+      lastClickTime = now;
+    }
+  });
+
+  // Geo logging (once per day)
+  const today = new Date().toDateString();
+  if (localStorage.getItem("loggedCountry") !== today) {
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        const country = data.country_name || "Unknown";
+        const logRef = push(ref(db, "analytics/logs"));
+        set(logRef, {
+          ip: data.ip,
+          country,
+          city: data.city || "Unknown",
+          timestamp: Date.now(),
+          page: location.pathname
+        });
+
+        runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
+        localStorage.setItem("loggedCountry", today);
+      })
+      .catch(err => console.warn("GeoIP failed:", err));
+  }
+
+  // =================== INITIALIZATION ===================
+  fetchLocation();
+  updateTimeFromIP();
+  setInterval(() => displayTime(new Date()), 1000);
   </script>
   <script type='text/javascript' src='//pl26857223.profitableratecpm.com/a8/a7/b1/a8a7b1389678bf2846d808769e5f078f.js'></script>
   <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
