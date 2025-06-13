@@ -1,360 +1,1292 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DLS Matchmaking + Chat Single Page</title>
-  <style>
-    /* Basic styles */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #121212;
-      color: white;
-      margin: 0; padding: 2rem;
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh;
-    }
-    #loading {
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    #matchInfo {
-      margin: 1rem 0;
-      font-size: 1.2rem;
-    }
-    #chatBtn {
-      margin-top: 1rem;
-      padding: 0.7rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: white;
-      background: #64748b;
-      cursor: not-allowed;
-      user-select: none;
-      transition: background 0.3s ease;
-    }
-    #chatBtn.enabled {
-      background: #3b82f6;
-      cursor: pointer;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CYBERCHAT - Clean Feed with Top Search</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --panel: #161616;
+    --border: #222;
+    --text: #f1f1f1;
+    --pink: #ff2e88;
+    --blue: #1e90ff;
+    --input-bg: #1c1c1c;
+    --overlay-bg: rgba(10, 10, 10, 0.8);
+  }
+  body.light-theme .post-title,
+body.light-theme .post-description,
+body.light-theme .post-stats,
+body.light-theme .username,
+body.light-theme .handle,
+body.light-theme .post-time {
+  color: #111 !important;
+}
 
-    /* Chat popup modal styles */
-    #chatModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-    #chatModal.active {
-      display: flex;
-    }
-    #chatModalContent {
-      background: #1e1e1e;
-      border-radius: 12px;
-      width: 400px;
-      height: 600px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 0 20px #3b82f6;
-      position: relative;
-    }
-    #chatModalHeader {
-      background: #3b82f6;
-      color: white;
-      padding: 1rem;
-      font-weight: 700;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-    }
-    #chatModalHeader div {
-      font-size: 0.9rem;
-    }
-    #chatModalClose {
-      cursor: pointer;
-      font-weight: 900;
-      font-size: 1.3rem;
-      padding: 0 0.5rem;
-      border-radius: 4px;
-      background: #2563eb;
-      transition: background 0.2s ease;
-    }
-    #chatModalClose:hover {
-      background: #1d4ed8;
-    }
+body.light-theme .post-stats svg {
+  stroke: #111 !important;
+}
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body, html {
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: bold;
+    overflow-x: hidden;
+  }
 
-    #messages {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      border-bottom: 1px solid #333;
-      background: #121212;
-    }
-    .msg {
-      margin-bottom: 0.8rem;
-      padding: 0.5rem 0.8rem;
-      border-radius: 8px;
-      max-width: 75%;
-      word-wrap: break-word;
-    }
-    .msg.self {
-      background: #3b82f6;
-      margin-left: auto;
-    }
-    .msg.other {
-      background: #64748b;
-      margin-right: auto;
-    }
-    #chatForm {
-      display: flex;
-      padding: 1rem;
-      background: #2a2a2a;
-    }
-    #chatInput {
-      flex-grow: 1;
-      border-radius: 8px;
-      border: none;
-      padding: 0.7rem 1rem;
-      font-size: 1rem;
-      margin-right: 0.8rem;
-    }
-    #chatInput:focus {
-      outline: none;
-      box-shadow: 0 0 6px #3b82f6;
-    }
-    #chatSend {
-      background: #3b82f6;
-      border: none;
-      color: white;
-      font-weight: 700;
-      font-size: 1rem;
-      border-radius: 8px;
-      padding: 0.7rem 1.2rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    #chatSend:hover {
-      background: #2563eb;
-    }
-  </style>
+  header {
+    height: 56px;
+    background-color: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+  }
+
+  .left-icons, .right-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .icon svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--text);
+    cursor: pointer;
+    transition: fill 0.2s;
+  }
+  .icon svg:hover {
+    fill: var(--pink);
+  }
+
+  .brand {
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .brand .cyber {
+    color: var(--pink);
+  }
+  .brand .chat {
+    color: var(--blue);
+  }
+
+  main.feed {
+    max-width: 700px;
+    margin: 24px auto;
+    padding: 0 16px;
+    transition: filter 0.3s ease;
+  }
+
+  /* Composer */
+  .composer {
+    background-color: var(--input-bg);
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .composer .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+  .composer img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .composer input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: bold;
+  }
+  .composer input::placeholder {
+    color: #777;
+  }
+  .composer .gallery-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--blue);
+    cursor: pointer;
+    transition: fill 0.2s;
+  }
+  .composer .gallery-icon svg:hover {
+    fill: var(--pink);
+  }
+
+  /* Top search bar */
+  .search-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--pink);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1500;
+  }
+  .search-bar.active {
+    transform: translateY(0);
+  }
+  .search-bar svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--pink);
+  }
+  .search-bar input {
+    flex: 1;
+    background: var(--input-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 18px;
+    color: var(--text);
+    font-weight: bold;
+    outline: none;
+    caret-color: var(--pink);
+  }
+  .search-bar input::placeholder {
+    color: #777;
+  }
+
+  /* Background blur overlay while search open */
+  .blur-overlay {
+    position: fixed;
+    top: 56px; /* below the search bar */
+    left: 0; right: 0; bottom: 0;
+    backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.6);
+    z-index: 1400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .blur-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Suggestions box */
+  .suggestions {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 0 12px var(--blue);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1600;
+    color: var(--text);
+    font-weight: normal;
+    display: none;
+  }
+  .suggestions.active {
+    display: block;
+  }
+  .suggestion-item {
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .suggestion-item:hover, .suggestion-item:focus {
+    background: var(--pink);
+    color: var(--bg);
+    outline: none;
+  }
+  .no-results {
+    color: #777;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .search-results {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.post-card {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: white;
+}
+.not-found, .error {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #888;
+}
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  border: 1px solid white;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background-color: #f0f0f0;
+}
+
+.suggestion-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: #eaeaea;
+  border: 2px solid black; /* Thick black edge */
+}
+
+.suggestion-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.suggestion-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-meta {
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.suggestion-meta .views {
+  color: cyan; /* Cyan views */
+  font-weight: 500;
+}
+
+.follow-button {
+  padding: 4px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+}
+
+.follow-button:hover {
+  background-color: #0056b3;
+}
+.settings-dropdown {
+  position: absolute;
+  top: 60px; /* Adjust based on header height */
+  right: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  z-index: 999;
+  width: 200px;
+  transition: all 0.2s ease;
+  padding: 10px 0;
+}
+
+.settings-dropdown.dark {
+  background: #1e1e1e;
+  color: #fff;
+}
+
+.settings-option {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.settings-option:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.settings-dropdown.hidden {
+  display: none;
+}
+body.light-theme {
+  --bg: #f9f9f9;
+  --panel: #fff;
+  --border: #ccc;
+  --text: #111;
+  --pink: #d9006c;
+  --blue: #007bff;
+  --input-bg: #eee;
+  --overlay-bg: rgba(255, 255, 255, 0.8);
+  background: var(--bg);
+  color: var(--text);
+}
+  #posts-container {
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .post-card {
+    width: 95%;
+    max-width: 700px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .profile-pic {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #444;
+  }
+
+  .user-info {
+    margin-left: 1rem;
+    flex-grow: 1;
+  }
+
+  .username {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+  }
+
+  .handle {
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+
+  .post-meta {
+    text-align: right;
+  }
+
+  .follow-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-bottom: 0.3rem;
+    transition: background 0.3s ease;
+  }
+
+  .follow-btn:hover {
+    background: linear-gradient(to right, #8e2de2, #4a00e0);
+  }
+
+  .post-time {
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  .post-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    color: #fff;
+  }
+
+  .post-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 1rem;
+    margin: 1rem 0;
+  }
+
+  .post-description {
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+
+  .post-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1rem;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
+  .like-wrapper, .comment-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .like-btn,
+  .comment-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0.2rem;
+    transition: transform 0.2s ease;
+  }
+
+  .like-btn:hover,
+  .comment-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .like-btn.liked svg {
+    filter: drop-shadow(0 0 6px #ff2e88);
+  }
+
+  .like-count {
+    color: #ff2e88;
+    font-weight: 500;
+  }
+
+  svg {
+    pointer-events: none;
+    display: inline-block;
+  }
+  .verified-badge {
+  color: #1da1f2;
+  font-size: 14px;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.post-ads {
+  margin-top: 10px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.ad-frame {
+  width: 100%;
+  height: 90px;
+  border: none;
+}
+
+.read-more {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.like-btn.liked svg {
+  fill: #ff2e88;
+  stroke: #ff2e88;
+}
+
+.follow-btn {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.follow-btn:hover {
+  opacity: 0.85;
+}
+</style>
 </head>
 <body>
 
-  <div id="loading">Looking for a match...</div>
-  <div id="matchInfo">No match found yet.</div>
-  <button id="chatBtn" disabled title="Find a match to enable chat">💬 Message Your Opponent</button>
-
-  <!-- Chat Modal Popup -->
-  <div id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle">
-    <div id="chatModalContent">
-      <div id="chatModalHeader">
-        <div id="userIDs">User1: -- | User2: --</div>
-        <div id="chatTimer">00:00</div>
-        <div id="chatModalClose" role="button" aria-label="Close chat popup">&times;</div>
-      </div>
-      <div id="messages"></div>
-      <form id="chatForm">
-        <input id="chatInput" autocomplete="off" placeholder="Type a message..." required />
-        <button id="chatSend" type="submit">Send</button>
-      </form>
-    </div>
+<header>
+  <div class="left-icons icon" id="search-icon" tabindex="0" role="button" aria-label="Open search">
+    <!-- Search SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+    </svg>
+    <span style="margin-left:6px; font-weight: normal; font-size: 16px; color: var(--text);">Search</span>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>
+  <div class="brand">
+    <span class="cyber">CYBER</span><span class="chat">CHAT</span>
+  </div>
+     
+     <div class="right-icons icon" tabindex="0" role="button" aria-label="Settings" id="settings-icon">
+    <!-- Settings SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 15a3 3 0 100-6 3 3 0 000 6zm9-3a7.986 7.986 0 01-.535 2.915l2.122 1.652-1.5 2.598-2.512-.647A7.986 7.986 0 0112 21a7.986 7.986 0 01-2.915-.535l-1.652 2.122-2.598-1.5.647-2.512A7.986 7.986 0 013 12c0-.997.181-1.953.535-2.915L1.413 7.433l1.5-2.598 2.512.647A7.986 7.986 0 0112 3a7.986 7.986 0 012.915.535l1.652-2.122 2.598 1.5-.647 2.512A7.986 7.986 0 0121 12z"/>
+    </svg>
+  </div>
+</header>
 
-  <script>
-    // Your Firebase config here
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+<main class="feed">
+  <div class="composer">
+    <div class="left">
+      <img src="https://i.pravatar.cc/150?u=user" alt="User" />
+      <input type="text" placeholder="What's on your mind?" />
+    </div>
+<button id="sendPostBtn">UPLOAD</button>
+<div class="gallery-icon" tabindex="0" role="button" aria-label="Upload from gallery">
+  <img src="https://img.icons8.com/?size=100&id=4nhOwJ1RGNj0&format=png&color=000000" alt="Upload" width="28" height="28" style="cursor: pointer;" />
+  <input type="file" accept="image/*" id="uploadInput" style="display: none;" />
+</div>
+  <input type="file" accept="image/*" id="uploadInput" style="display: none;">
+</div>
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+  <!-- Your feed posts would go here -->
+</main>
 
-    const auth = firebase.auth();
-    const db = firebase.database();
+<!-- continuing inside body, after main.feed -->
 
-    // Globals
-    let userId = null;
-    let matchUserId = null;
-    let matchRoomId = null;
+<!-- Top Search Bar -->
+<div class="search-bar" id="search-bar" aria-hidden="true" role="search">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg>
+  <input
+    type="search"
+    id="search-input"
+    placeholder="Search CYBERCHAT..."
+    aria-label="Search CYBERCHAT"
+    autocomplete="off"
+    spellcheck="false"
+  />
+</div>
+<div id="settings-dropdown" class="settings-dropdown hidden">
+  <div class="settings-option" id="toggle-theme">Toggle Theme</div>
+</div>
+<!-- Background blur overlay while search open -->
+<div class="blur-overlay" id="blur-overlay" tabindex="-1" aria-hidden="true"></div>
 
-    const loadingEl = document.getElementById('loading');
-    const matchInfoEl = document.getElementById('matchInfo');
-    const chatBtn = document.getElementById('chatBtn');
-    const chatModal = document.getElementById('chatModal');
-    const chatModalClose = document.getElementById('chatModalClose');
-    const messagesEl = document.getElementById('messages');
-    const chatForm = document.getElementById('chatForm');
-    const chatInput = document.getElementById('chatInput');
-    const userIDsEl = document.getElementById('userIDs');
-    const chatTimerEl = document.getElementById('chatTimer');
+<!-- Suggestions Box -->
+<div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
+<div id="search-results" class="search-results"></div>
+<div id="posts-container"></div>
+<script type="module">
+  import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    // Timer vars
-    let chatStartTime = null;
-    let chatTimerInterval = null;
+import {
+  set,
+  remove
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    get,
+    child
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // Authenticate anonymously
-    auth.signInAnonymously()
-      .then(() => {
-        userId = auth.currentUser.uid;
-        loadingEl.textContent = `Looking for a match... Your ID: ${userId}`;
-        findMatch();
-      })
-      .catch(err => {
-        loadingEl.textContent = 'Auth failed: ' + err.message;
-      });
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    function findMatch() {
-      const waitingRef = db.ref('waiting');
-      const matchesRef = db.ref('matches');
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const dbRef = ref(db);
+  const auth = getAuth();
+let currentUser = null;
 
-      // Try to find waiting user
-      waitingRef.once('value', snapshot => {
-        const waitingUsers = snapshot.val() || {};
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+});
 
-        // Find waiting user that's not self
-        const waitingUserId = Object.keys(waitingUsers).find(id => id !== userId);
+  const searchIcon = document.getElementById('search-icon');
+  const searchBar = document.getElementById('search-bar');
+  const blurOverlay = document.getElementById('blur-overlay');
+  const searchInput = document.getElementById('search-input');
+  const suggestionsBox = document.getElementById('suggestions');
+  const header = document.querySelector('header');
+  const mainFeed = document.querySelector('main.feed');
+  const resultsBox = document.getElementById('search-results');
 
-        if (waitingUserId) {
-          // Match found!
-          matchUserId = waitingUserId;
-          waitingRef.child(waitingUserId).remove();
+  let activeIndex = -1;
+  let filtered = []; // will hold {id, title, views, thumbnailUrl}
 
-          const ids = [userId, matchUserId].sort();
-          matchRoomId = ids.join('_');
+  function openSearch() {
+    searchBar.classList.add('active');
+    blurOverlay.classList.add('active');
+    searchBar.setAttribute('aria-hidden', 'false');
+    blurOverlay.setAttribute('aria-hidden', 'false');
+    header.style.opacity = '0';
+    mainFeed.style.filter = 'blur(6px) brightness(0.7)';
+    searchInput.focus();
+    clearSuggestions();
+    resultsBox.innerHTML = '';
+  }
 
-          matchesRef.child(matchRoomId).set({
-            users: ids,
-            createdAt: Date.now()
-          });
+  function closeSearch() {
+    searchBar.classList.remove('active');
+    blurOverlay.classList.remove('active');
+    searchBar.setAttribute('aria-hidden', 'true');
+    blurOverlay.setAttribute('aria-hidden', 'true');
+    header.style.opacity = '1';
+    mainFeed.style.filter = 'none';
+    searchInput.value = '';
+    clearSuggestions();
+    resultsBox.innerHTML = '';
+  }
 
-          showMatchFound();
+  function clearSuggestions() {
+    suggestionsBox.classList.remove('active');
+    suggestionsBox.innerHTML = '';
+    activeIndex = -1;
+  }
 
-        } else {
-          // No one waiting, add self
-          waitingRef.child(userId).set(true);
+  async function renderSuggestions() {
+  if (filtered.length === 0) {
+    suggestionsBox.innerHTML = `<div class="no-results">No results found</div>`;
+    suggestionsBox.classList.add('active');
+    return;
+  }
 
-          // Listen for matches involving current user
-          matchesRef.on('value', snapshot => {
-            const matches = snapshot.val() || {};
-            for (const roomId in matches) {
-              if (matches[roomId].users.includes(userId)) {
-                matchRoomId = roomId;
-                matchUserId = matches[roomId].users.find(id => id !== userId);
-                showMatchFound();
-                break;
-              }
-            }
-          });
+  suggestionsBox.innerHTML = '';
+
+  const user = JSON.parse(localStorage.getItem('authUser')); // assuming you store auth user here
+  const currentUserId = user?.uid;
+
+  for (let i = 0; i < filtered.length; i++) {
+    const item = filtered[i];
+    const div = document.createElement('div');
+    div.className = 'suggestion-item';
+    div.setAttribute('role', 'option');
+    div.setAttribute('tabindex', '0');
+    div.dataset.id = item.id;
+
+    const authorId = item.authorId || item.author || 'unknown_user';
+    let isFollowing = false;
+
+    // Check if already following
+    if (currentUserId && authorId !== currentUserId) {
+      try {
+        const followSnap = await get(child(dbRef, `users/${currentUserId}/following/${authorId}`));
+        isFollowing = followSnap.exists();
+      } catch (err) {
+        console.warn('Error checking follow status:', err);
+      }
+    }
+
+    div.innerHTML = `
+      <img src="${item.thumbnailUrl}" alt="Thumbnail" class="suggestion-thumb" />
+      <div class="suggestion-text">
+        <div class="suggestion-title">${item.title}</div>
+        <div class="suggestion-meta">
+          <span>${item.views} views</span>
+          <span>•</span>
+          <span>${item.author || 'Unknown'}</span>
+        </div>
+      </div>
+      ${
+        currentUserId && authorId !== currentUserId
+          ? `<button class="follow-button" data-author="${authorId}">${isFollowing ? 'Following' : 'Follow'}</button>`
+          : ''
+      }
+    `;
+
+    if (i === activeIndex) div.classList.add('active');
+    suggestionsBox.appendChild(div);
+
+    // Follow button logic
+    const btn = div.querySelector('.follow-button');
+    if (btn) {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const authorId = btn.dataset.author;
+        const followingRef = ref(db, `users/${currentUserId}/following/${authorId}`);
+        try {
+          if (btn.textContent === 'Follow') {
+            await set(followingRef, true);
+            btn.textContent = 'Following';
+          } else {
+            await remove(followingRef);
+            btn.textContent = 'Follow';
+          }
+        } catch (err) {
+          console.error('Error updating follow status:', err);
         }
       });
     }
+  }
 
-    function showMatchFound() {
-      loadingEl.style.display = 'none';
-      matchInfoEl.textContent = `Matched with User: ${matchUserId}`;
-      chatBtn.disabled = false;
-      chatBtn.classList.add('enabled');
-      chatBtn.title = 'Click to chat with your opponent';
+  suggestionsBox.classList.add('active');
+}
+  async function updateSuggestions() {
+    const val = searchInput.value.trim().toLowerCase();
+    if (!val) {
+      clearSuggestions();
+      return;
     }
 
-    // Open chat modal
-    chatBtn.addEventListener('click', () => {
-      if (!matchRoomId) return;
-      openChat();
-    });
-
-    function openChat() {
-      userIDsEl.textContent = `User1: ${userId} | User2: ${matchUserId}`;
-      chatTimerEl.textContent = '00:00';
-      chatStartTime = Date.now();
-      chatModal.classList.add('active');
-      messagesEl.innerHTML = ''; // clear previous messages
-
-      // Start timer
-      chatTimerInterval = setInterval(() => {
-        const elapsed = Date.now() - chatStartTime;
-        const mins = Math.floor(elapsed / 60000).toString().padStart(2, '0');
-        const secs = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-        chatTimerEl.textContent = `${mins}:${secs}`;
-      }, 1000);
-
-      listenForMessages();
-    }
-
-    chatModalClose.addEventListener('click', () => {
-      chatModal.classList.remove('active');
-      clearInterval(chatTimerInterval);
-      chatInput.value = '';
-      messagesEl.innerHTML = '';
-      stopListeningForMessages();
-    });
-
-    // Chat message send
-    chatForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      sendMessage(text);
-      chatInput.value = '';
-    });
-
-    // Firebase message listener and sender
-    let messagesRef = null;
-    let messagesListener = null;
-
-    function listenForMessages() {
-      messagesRef = db.ref(`chatrooms/${matchRoomId}/messages`);
-      messagesListener = messagesRef.on('child_added', snapshot => {
-        const msg = snapshot.val();
-        addMessage(msg);
-      });
-    }
-
-    function stopListeningForMessages() {
-      if (messagesRef && messagesListener) {
-        messagesRef.off('child_added', messagesListener);
+    try {
+      const snapshot = await get(child(dbRef, 'post'));
+      if (!snapshot.exists()) {
+        clearSuggestions();
+        return;
       }
-      messagesRef = null;
-      messagesListener = null;
+      const data = snapshot.val();
+
+      filtered = Object.entries(data)
+        .filter(([id, post]) => post.title && post.title.toLowerCase().includes(val))
+        .map(([id, post]) => ({
+          id,
+          title: post.title,
+          views: post.views || 0,
+          thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'
+        }));
+
+      activeIndex = -1;
+      renderSuggestions();
+
+    } catch (err) {
+      console.error('Error fetching suggestions:', err);
+      clearSuggestions();
+    }
+  }
+
+  function debounce(func, delay = 300) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  function triggerSearch(query) {
+    console.log('Search triggered for:', query);
+    const event = new CustomEvent('search', { detail: query });
+    document.dispatchEvent(event);
+  }
+
+  // NEW: relevance scoring for search feed sorting
+  function relevanceScore(query, text) {
+  if (!text) return 0;
+  query = query.toLowerCase();
+  text = text.toLowerCase();
+  if (text === query) return 100;
+  if (text.includes(query)) return 50;
+  let score = 0;
+  for (const c of query) {
+    if (text.includes(c)) score++;
+  }
+  return score;
+}
+
+  // NEW: render the full search results feed, featured post on top, related posts below
+  function renderSearchResults(posts, query) {
+    if (!posts.length) {
+      resultsBox.innerHTML = `<div class="no-results">No posts found for "${query}"</div>`;
+      return;
     }
 
-    function addMessage(msg) {
-      const div = document.createElement('div');
-      div.classList.add('msg');
-      div.classList.add(msg.userId === userId ? 'self' : 'other');
-      div.textContent = msg.userId + ': ' + msg.text;
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+    // Sort posts by relevance descending
+    posts.sort((a,b) => relevanceScore(query, b.title) - relevanceScore(query, a.title));
 
-    function sendMessage(text) {
-      if (!messagesRef) return;
-      const newMsgRef = messagesRef.push();
-      newMsgRef.set({
-        userId,
-        text,
-        timestamp: Date.now()
+    // Featured post is the top one
+    const featured = posts[0];
+    const others = posts.slice(1);
+
+    let html = `
+      <h2>Search results for "${query}"</h2>
+      <section class="featured-post">
+        <h3>${featured.title}</h3>
+        <img src="${featured.thumbnailUrl || 'https://via.placeholder.com/200?text=No+Image'}" alt="Thumbnail" />
+        <p>${featured.body || 'No content available'}</p>
+        <small>By ${featured.author || 'Unknown'} | ${featured.views || 0} views</small>
+      </section>
+      <hr/>
+      <section class="other-posts">
+        <h4>Related posts</h4>
+        <ul>
+    `;
+
+    others.forEach(post => {
+      html += `
+        <li class="search-post-item" data-id="${post.id}" tabindex="0" role="button" aria-pressed="false">
+          <img src="${post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'}" alt="Thumbnail" />
+          <div>
+            <strong>${post.title}</strong><br/>
+            <small>${post.views || 0} views</small>
+          </div>
+        </li>
+      `;
+    });
+
+    html += '</ul></section>';
+    resultsBox.innerHTML = html;
+
+    // Click & keyboard to feature other posts
+    document.querySelectorAll('.search-post-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        const post = posts.find(p => p.id === id);
+        if (!post) return;
+        renderSearchResults([post, ...posts.filter(p => p.id !== id)], query);
       });
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+    });
+  }
+
+  // NEW: full search triggered on search input Enter or suggestion click
+  async function doFullSearch(query) {
+    closeSearch(); // unblur & hide search UI
+    try {
+      const snapshot = await get(child(dbRef, 'post'));
+      if (!snapshot.exists()) {
+        resultsBox.innerHTML = `<div class="no-results">No posts found</div>`;
+        return;
+      }
+      const data = snapshot.val();
+      const allPosts = Object.entries(data).map(([id, post]) => ({
+        id,
+        title: post.title || '',
+        views: post.views || 0,
+        thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img',
+        body: post.body || '',
+        author: post.author || 'Unknown'
+      }));
+
+      renderSearchResults(allPosts, query);
+
+    } catch (err) {
+      console.error('Search error:', err);
+      resultsBox.innerHTML = `<div class="error">Error loading search results</div>`;
     }
-  </script>
+  }
+
+  // Replace old fetchAndShowPost to do nothing now (we use renderSearchResults instead)
+  async function fetchAndShowPost(postId) {
+    // Intentionally blank because we're handling full feed rendering now
+  }
+
+  // Event listeners wiring
+
+  searchIcon.addEventListener('click', openSearch);
+  blurOverlay.addEventListener('click', closeSearch);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && searchBar.classList.contains('active')) {
+      closeSearch();
+    }
+  });
+
+  searchInput.addEventListener('input', debounce(updateSuggestions));
+
+  searchInput.addEventListener('keydown', e => {
+    if (!filtered.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % filtered.length;
+      renderSuggestions();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+      renderSuggestions();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIndex >= 0) {
+        const selected = filtered[activeIndex];
+        searchInput.value = selected.title;
+        doFullSearch(selected.title);
+        clearSuggestions();
+        triggerSearch(selected.title);
+      } else {
+        const query = searchInput.value.trim();
+        if (query) {
+          doFullSearch(query);
+          clearSuggestions();
+          triggerSearch(query);
+        }
+      }
+    }
+  });
+
+  suggestionsBox.addEventListener('click', e => {
+    const item = e.target.closest('.suggestion-item');
+    if (!item) return;
+    const title = item.querySelector('.suggestion-title').textContent;
+    searchInput.value = title;
+    doFullSearch(title);
+    clearSuggestions();
+    triggerSearch(title);
+  });
+
+  suggestionsBox.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.classList.contains('suggestion-item')) {
+      const title = e.target.querySelector('.suggestion-title').textContent;
+      searchInput.value = title;
+      doFullSearch(title);
+      clearSuggestions();
+      triggerSearch(title);
+    }
+  });
+ const settingsIcon = document.getElementById("settings-icon");
+const dropdown = document.getElementById("settings-dropdown");
+const toggleThemeBtn = document.getElementById("toggle-theme");
+
+// Show/Hide settings dropdown
+settingsIcon.addEventListener("click", () => {
+  dropdown.classList.toggle("hidden");
+  updateDropdownTheme();
+});
+
+// Toggle theme logic
+toggleThemeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("light-theme");
+
+  const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+  localStorage.setItem("theme", currentTheme);
+
+  updateDropdownTheme();
+});
+
+// Apply saved theme on load
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "light") {
+    document.body.classList.add("light-theme");
+  } else {
+    document.body.classList.remove("light-theme");
+  }
+
+  updateDropdownTheme();
+});
+
+function updateDropdownTheme() {
+  if (document.body.classList.contains("light-theme")) {
+    dropdown.classList.remove("dark");
+  } else {
+    dropdown.classList.add("dark");
+  }
+}
+
+// Click outside to close dropdown
+document.addEventListener("click", (e) => {
+  if (!settingsIcon.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.add("hidden");
+  }
+});
+
+const galleryIcon = document.querySelector('.gallery-icon');
+const uploadInput = document.getElementById('uploadInput');
+
+galleryIcon.addEventListener('click', () => {
+  uploadInput.click();
+});
+
+uploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const uploadedImage = ev.target.result; // base64 string
+
+      // Save image to sessionStorage
+      sessionStorage.setItem('postImage', uploadedImage);
+      sessionStorage.removeItem('postText'); // optional reset
+
+      // Instantly redirect
+      window.location.href = 'uploadpost.html';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert("That's not a valid image, bro.");
+  }
+});
+const sendBtn = document.getElementById('sendPostBtn');
+
+sendBtn.addEventListener('click', () => {
+  const textInput = document.querySelector('.composer input[type="text"]');
+  const text = textInput.value.trim();
+
+  if (!text) {
+    alert("Type something first.");
+    return;
+  }
+
+  // Store in sessionStorage and go
+  sessionStorage.setItem('postText', text);
+  sessionStorage.removeItem('postImage'); // Optional: clear any stale image
+  window.location.href = 'uploadpost.html';
+});
+function createSvgIcon(type, filled = false) {
+  switch (type) {
+    case 'views':
+      return `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>`;
+    case 'likes':
+      return filled
+        ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="#ff2e88" stroke="#ff2e88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M20.84 4.61c-1.69-1.69-4.44-1.69-6.13 0L12 7.34l-2.71-2.73a4.36 4.36 0 00-6.13 6.2l8.3 8.39 8.3-8.39a4.36 4.36 0 000-6.2z"/>
+           </svg>`
+        : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M20.84 4.61c-1.69-1.69-4.44-1.69-6.13 0L12 7.34l-2.71-2.73a4.36 4.36 0 00-6.13 6.2l8.3 8.39 8.3-8.39a4.36 4.36 0 000-6.2z"/>
+           </svg>`;
+    case 'comments':
+      return `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>`;
+    default:
+      return '';
+  }
+}
+
+function createPostElement(post, postId, userLikes = {}) {
+  const postDiv = document.createElement('div');
+  postDiv.classList.add('post-card');
+  postDiv.dataset.id = postId;
+
+  const username = post.username || 'Anonymous';
+  const handle = post.handle ? '@' + post.handle : '@user';
+  const profilePic = post.profilePic || 'https://via.placeholder.com/50';
+  const postImage = post.imageUrl || post.image || '';
+  const title = post.title || 'Untitled Post';
+  const description = post.description || '';
+  const views = post.views || 0;
+  const likes = post.likes || 0;
+  const comments = post.comments || 0;
+  const timestamp = post.timestamp || Date.now();
+  const liked = userLikes[postId] === true;
+  const isMonetized = post.monetize === 'on';
+  const isVerified = post.verified === true;
+
+  const shortDesc = description.length > 120 ? description.slice(0, 120) + '...' : description;
+  const showReadMore = description.length > 120;
+
+  const adHtml = isMonetized
+    ? `<div class="post-ads"><iframe src="https://your-ad-provider.com/adframe" class="ad-frame" width="100%" height="90" style="border:none;"></iframe></div>`
+    : '';
+
+  postDiv.innerHTML = `
+    <div class="post-header">
+      <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
+      <div class="user-info">
+        <div class="username">
+          ${username}
+          ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
+        </div>
+        <div class="handle">${handle}</div>
+      </div>
+      <div class="post-meta">
+        <button class="follow-btn">Follow</button>
+        <div class="post-time">${new Date(timestamp).toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="post-title">${title}</div>
+    ${postImage ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto;" />` : ''}
+    <div class="post-description" data-full="${description}">
+      ${shortDesc}
+      ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
+    </div>
+    <div class="post-stats">
+      <div>${createSvgIcon('views')} ${views}</div>
+      <div class="like-wrapper">
+        <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
+        <span class="like-count">${likes}</span>
+      </div>
+      <div class="comment-wrapper">
+        <div>${createSvgIcon('comments')} ${comments}</div>
+        <button class="comment-btn">Comment</button>
+      </div>
+    </div>
+    ${adHtml}
+  `;
+
+  // LIKE HANDLER
+  postDiv.querySelector('.like-btn').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const btn = postDiv.querySelector('.like-btn');
+    const isLiked = btn.dataset.liked === 'true';
+    const newLiked = !isLiked;
+    btn.dataset.liked = newLiked;
+    btn.classList.toggle('liked', newLiked);
+    btn.innerHTML = createSvgIcon('likes', newLiked);
+
+    const countEl = postDiv.querySelector('.like-count');
+    const newLikes = Math.max(0, parseInt(countEl.textContent) + (newLiked ? 1 : -1));
+    countEl.textContent = newLikes;
+
+    await set(ref(db, `post/${postId}/likes`), newLikes);
+
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      await set(ref(db, `likes/${uid}/${postId}`), newLiked);
+    }
+  });
+
+  // COMMENT REDIRECT
+  postDiv.querySelector('.comment-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    window.location.href = `viewport.html/${postId}`;
+  });
+
+  // READ MORE
+  const readMore = postDiv.querySelector('.read-more');
+  if (readMore) {
+    readMore.addEventListener('click', (e) => {
+      e.stopPropagation();
+      postDiv.querySelector('.post-description').textContent = description;
+    });
+  }
+
+  // FOLLOW
+  const followBtn = postDiv.querySelector('.follow-btn');
+  followBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const uid = auth.currentUser?.uid;
+    if (!uid || !post.uid) return;
+
+    const followingRef = ref(db, `following/${uid}/${post.uid}`);
+    const isFollowingSnap = await get(followingRef);
+    const isFollowing = isFollowingSnap.exists();
+
+    if (isFollowing) {
+      await remove(followingRef);
+      followBtn.textContent = 'Follow';
+      followBtn.style.backgroundColor = '';
+    } else {
+      await set(followingRef, true);
+      followBtn.textContent = 'Following';
+      followBtn.style.backgroundColor = 'grey';
+    }
+  });
+
+  // CLICK TO OPEN POST
+  postDiv.addEventListener('click', (e) => {
+    const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
+    if (!isInteractive) {
+      window.location.href = `viewport.html/${postId}`;
+    }
+  });
+
+  return postDiv;
+}
+
+// Load All Posts
+async function loadPosts() {
+  try {
+    const snapshot = await get(child(dbRef, 'post'));
+    if (!snapshot.exists()) return;
+
+    const posts = snapshot.val();
+    const container = document.getElementById('posts-container');
+    container.innerHTML = '';
+
+    let userLikes = {};
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      const likesSnap = await get(ref(db, `likes/${uid}`));
+      if (likesSnap.exists()) userLikes = likesSnap.val();
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.dataset.viewed) {
+          entry.target.dataset.viewed = 'true';
+          const postId = entry.target.dataset.id;
+          const viewsRef = ref(db, `post/${postId}/views`);
+          get(viewsRef).then(snap => {
+            const currentViews = snap.val() || 0;
+            set(viewsRef, currentViews + 1);
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+
+    for (const postId in posts) {
+      const postElement = createPostElement(posts[postId], postId, userLikes);
+      container.appendChild(postElement);
+      observer.observe(postElement);
+    }
+  } catch (error) {
+    console.error('Error loading posts:', error);
+  }
+}
+
+loadPosts();
+</script>
 </body>
 </html>
