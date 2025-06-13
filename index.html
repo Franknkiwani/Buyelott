@@ -1,649 +1,630 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CYBERCHAT - Clean Feed with Top Search</title>
+  <title>Jobs – Earn $1000+/Month Working from Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <meta name="description" content="Discover legit remote jobs offering $1000+ monthly income. Work from home opportunities for UK and USA residents. Start earning today!" />
+  <meta name="keywords" content="remote jobs, work from home, earn money online, UK jobs, USA jobs, legitimate online jobs, part-time work" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="Jobs Finder – Earn $1000+/Month Working from Home (UK & USA)" />
+  <meta property="og:description" content="Discover legit remote jobs offering $1000+ monthly income. Work from home opportunities for UK and USA residents." />
+  <meta property="og:image" content="https://i.ytimg.com/vi/uDNJWwARMAw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA0D3QwEtNFUZsVAVbrRUbFHua1hw" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jobs Finder – Earn $1000+/Month Working from Home (UK & USA)" />
+  <meta name="twitter:description" content="Discover legit remote jobs offering $1000+ monthly income. Work from home opportunities for UK and USA residents." />
+  <meta name="twitter:image" content="https://i.ytimg.com/vi/uDNJWwARMAw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA0D3QwEtNFUZsVAVbrRUbFHua1hw" />
+  
+  <!-- Favicon, charset etc. -->
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+</head>
+  <style>
+    :root {
+      --bg: #1c1c1e;
+      --text: #f2f2f7;
+      --primary: #0a84ff;
+      --border: #3a3a3c;
+      --glass-bg: rgba(28, 28, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+  
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      backdrop-filter: saturate(180%) blur(8px);
+    }
+
+    .left-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .left-header h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.2px;
+      margin-bottom: 0.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .left-header .logo {
+      stroke: var(--primary);
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .left-header p {
+      font-size: 0.70rem;
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      opacity: 0;
+      animation: slideFadeIn 1.2s forwards;
+      animation-delay: 0.4s;
+      margin-left: 0;
+      padding-left: 28px;
+    }
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .earnings-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: default;
+      user-select: none;
+      backdrop-filter: saturate(180%) blur(8px);
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.4);
+      transition: background 0.3s ease;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .earnings-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
+    }
+
+    .location-time-bar {
+      margin: 1rem auto 0;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      backdrop-filter: saturate(180%) blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    .location-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .time-ios {
+      font-family: 'SF Pro Display', 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      transition: all 0.2s ease;
+      min-width: 100px;
+      text-align: center;
+    }
+    /* Prevent text selection globally */
+body, 
+* {
+  user-select: none;       /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE10+ */
+}
+
+  </style>
 <style>
-  :root {
-    --bg: #0a0a0a;
-    --panel: #161616;
-    --border: #222;
-    --text: #f1f1f1;
-    --pink: #ff2e88;
-    --blue: #1e90ff;
-    --input-bg: #1c1c1c;
-    --overlay-bg: rgba(10, 10, 10, 0.8);
-  }
-  body.light-theme .post-title,
-body.light-theme .post-description,
-body.light-theme .post-stats,
-body.light-theme .username,
-body.light-theme .handle,
-body.light-theme .post-time {
-  color: #111 !important;
-}
-
-body.light-theme .post-stats svg {
-  stroke: #111 !important;
-}
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body, html {
-    height: 100%;
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-weight: bold;
-    overflow-x: hidden;
-  }
-
-  header {
-    height: 56px;
-    background-color: var(--panel);
+  form {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    transition: opacity 0.3s ease;
+    justify-content: center;
+    gap: 15px;
+    max-width: 800px;
+    max-width: 100%;
   }
 
-  .left-icons, .right-icons {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .icon svg {
-    width: 20px;
-    height: 20px;
-    fill: var(--text);
-    cursor: pointer;
-    transition: fill 0.2s;
-  }
-  .icon svg:hover {
-    fill: var(--pink);
-  }
-
-  .brand {
-    font-size: 20px;
-    letter-spacing: 1px;
-    color: var(--text);
-  }
-  .brand .cyber {
-    color: var(--pink);
-  }
-  .brand .chat {
-    color: var(--blue);
-  }
-
-  main.feed {
-    max-width: 700px;
-    margin: 24px auto;
-    padding: 0 16px;
-    transition: filter 0.3s ease;
-  }
-
-  /* Composer */
-  .composer {
-    background-color: var(--input-bg);
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .composer .left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-  }
-  .composer img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .composer input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    color: var(--text);
-    font-weight: bold;
-  }
-  .composer input::placeholder {
-    color: #777;
-  }
-  .composer .gallery-icon svg {
-    width: 22px;
-    height: 22px;
-    fill: var(--blue);
-    cursor: pointer;
-    transition: fill 0.2s;
-  }
-  .composer .gallery-icon svg:hover {
-    fill: var(--pink);
-  }
-
-  /* Top search bar */
-  .search-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;
-    background: var(--panel);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--pink);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 12px;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease;
-    z-index: 1500;
-  }
-  .search-bar.active {
-    transform: translateY(0);
-  }
-  .search-bar svg {
-    width: 24px;
-    height: 24px;
-    fill: var(--pink);
-  }
-  .search-bar input {
-    flex: 1;
-    background: var(--input-bg);
-    border: none;
-    border-radius: 12px;
-    padding: 8px 16px;
-    font-size: 18px;
-    color: var(--text);
-    font-weight: bold;
-    outline: none;
-    caret-color: var(--pink);
-  }
-  .search-bar input::placeholder {
-    color: #777;
-  }
-
-  /* Background blur overlay while search open */
-  .blur-overlay {
-    position: fixed;
-    top: 56px; /* below the search bar */
-    left: 0; right: 0; bottom: 0;
-    backdrop-filter: blur(6px);
-    background: rgba(0,0,0,0.6);
-    z-index: 1400;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-  .blur-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Suggestions box */
-  .suggestions {
-    position: fixed;
-    top: 56px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 600px;
-    background: var(--panel);
-    border-radius: 12px;
-    padding: 12px 16px;
-    box-shadow: 0 0 12px var(--blue);
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1600;
-    color: var(--text);
-    font-weight: normal;
-    display: none;
-  }
-  .suggestions.active {
-    display: block;
-  }
-  .suggestion-item {
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .suggestion-item:hover, .suggestion-item:focus {
-    background: var(--pink);
-    color: var(--bg);
-    outline: none;
-  }
-  .no-results {
-    color: #777;
-    text-align: center;
-    padding: 20px 0;
-  }
-  .search-results {
-  margin-top: 1rem;
-  padding: 1rem;
-}
-.post-card {
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: white;
-}
-.not-found, .error {
-  padding: 2rem;
-  text-align: center;
-  font-size: 1.2rem;
-  color: #888;
-}
-.suggestion-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  gap: 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-  border: 1px solid white;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.suggestion-item:hover,
-.suggestion-item.active {
-  background-color: #f0f0f0;
-}
-
-.suggestion-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background-color: #eaeaea;
-  border: 2px solid black; /* Thick black edge */
-}
-
-.suggestion-text {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.suggestion-title {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #222;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.suggestion-meta {
-  font-size: 0.85rem;
-  color: #666;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.suggestion-meta .views {
-  color: cyan; /* Cyan views */
-  font-weight: 500;
-}
-
-.follow-button {
-  padding: 4px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 0.3s ease;
-}
-
-.follow-button:hover {
-  background-color: #0056b3;
-}
-.settings-dropdown {
-  position: absolute;
-  top: 60px; /* Adjust based on header height */
-  right: 16px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  z-index: 999;
-  width: 200px;
-  transition: all 0.2s ease;
-  padding: 10px 0;
-}
-
-.settings-dropdown.dark {
-  background: #1e1e1e;
-  color: #fff;
-}
-
-.settings-option {
-  padding: 12px 16px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.settings-option:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.settings-dropdown.hidden {
-  display: none;
-}
-body.light-theme {
-  --bg: #f9f9f9;
-  --panel: #fff;
-  --border: #ccc;
-  --text: #111;
-  --pink: #d9006c;
-  --blue: #007bff;
-  --input-bg: #eee;
-  --overlay-bg: rgba(255, 255, 255, 0.8);
-  background: var(--bg);
-  color: var(--text);
-}
-  #posts-container {
-    padding: 2rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    align-items: center;
-  }
-
-  .post-card {
-    width: 95%;
-    max-width: 700px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px);
-    border-radius: 1.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    transition: transform 0.3s ease;
-  }
-
-  .post-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .post-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .profile-pic {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #444;
-  }
-
-  .user-info {
-    margin-left: 1rem;
+  input[type="text"] {
     flex-grow: 1;
-  }
-
-  .username {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-  }
-
-  .handle {
-    font-size: 0.85rem;
-    color: #aaa;
-  }
-
-  .post-meta {
-    text-align: right;
-  }
-
-  .follow-btn {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
-    border: none;
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    margin-bottom: 0.3rem;
-    transition: background 0.3s ease;
-  }
-
-  .follow-btn:hover {
-    background: linear-gradient(to right, #8e2de2, #4a00e0);
-  }
-
-  .post-time {
-    font-size: 0.75rem;
-    color: #888;
-  }
-
-  .post-title {
-    font-size: 1.3rem;
+    padding: 14px 18px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    border: 1.5px solid #3a3a3c;
+    background: #2c2c2e;
+    color: #f2f2f7;
     font-weight: 600;
-    margin-top: 1rem;
-    color: #fff;
   }
 
-  .post-image {
-    width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 1rem;
-    margin: 1rem 0;
+  input[type="text"]:focus {
+    border-color: #0a84ff;
+    background: #1c1c1e;
   }
 
-  .post-description {
-    font-size: 1rem;
-    color: #ccc;
-    margin-bottom: 1rem;
-  }
-
-  .post-stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding-top: 1rem;
-    font-size: 0.9rem;
-    color: #aaa;
-  }
-
-  .like-wrapper, .comment-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .like-btn,
-  .comment-btn {
-    background: none;
+  button {
+    background: #0a84ff;
+    color: white;
+    font-weight: 700;
     border: none;
-    color: inherit;
+    padding: 14px 30px;
+    border-radius: 12px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 0.2rem;
-    transition: transform 0.2s ease;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgb(10 132 255 / 0.5);
+    transition: background-color 0.25s ease;
+    user-select: none;
   }
 
-  .like-btn:hover,
-  .comment-btn:hover {
-    transform: scale(1.1);
+  button:hover {
+    background: #0060df;
+    box-shadow: 0 6px 15px rgb(0 96 223 / 0.7);
   }
 
-  .like-btn.liked svg {
-    filter: drop-shadow(0 0 6px #ff2e88);
+  #loading,
+  #error {
+    margin-top: 40px;
+    font-size: 1.2rem;
   }
 
-  .like-count {
-    color: #ff2e88;
-    font-weight: 500;
+  #loading {
+    font-style: italic;
+    color: #8e8e93;
   }
 
-  svg {
-    pointer-events: none;
-    display: inline-block;
+  #error {
+    color: #ff453a;
+    font-weight: 600;
   }
-  .verified-badge {
-  color: #1da1f2;
-  font-size: 14px;
-  margin-left: 5px;
-  font-weight: bold;
-}
 
-.post-ads {
-  margin-top: 10px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-}
+  
 
-.ad-frame {
-  width: 100%;
-  height: 90px;
-  border: none;
-}
+  .job-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #f2f2f7;
+    line-height: 1.3;
+  }
 
-.read-more {
-  color: #007bff;
-  cursor: pointer;
-  font-weight: 600;
-  margin-left: 6px;
-}
+  .company {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #d1d1d6;
+    margin-bottom: 6px;
+  }
 
-.like-btn.liked svg {
-  fill: #ff2e88;
-  stroke: #ff2e88;
-}
+  .location {
+    font-size: 0.95rem;
+    color: #8e8e93;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
 
-.follow-btn {
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  font-weight: 600;
-}
+  a.apply-btn {
+    align-self: flex-start;
+    padding: 12px 22px;
+    background: #0a84ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgb(10 132 255 / 0.6);
+    transition: background-color 0.25s ease;
+  }
 
-.follow-btn:hover {
-  opacity: 0.85;
+  a.apply-btn:hover {
+    background: #0060df;
+    box-shadow: 0 6px 18px rgb(0 96 223 / 0.8);
+  }
+
+
+  @media (max-width: 480px) {
+    form {
+      flex-direction: column;
+    }
+    input[type="text"] {
+      width: 100%;
+    }
+    button {
+      width: 100%;
+      margin-left: 0;
+    }
+    #jobs {
+      grid-template-columns: 1fr;
+      padding-bottom: 60px;
+    }
+  }
+  form {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  max-width: 700px;
+  width: 80%;
+  margin: 0 auto; /* THIS makes the form center horizontally */
 }
 </style>
+      <style>
+  .salary-highlight {
+    font-weight: bold;
+    color: #00b300; /* vibrant green */
+    background: #e6ffe6;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 4px 0;
+  }
+  .apply-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.unlock-btn {
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.apply-btn {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px;
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.apply-btn:hover {
+  background-color: #0056b3;
+}
+form {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  max-width: 700px;
+  width: 90%;
+}
+
+input[type="text"] {
+  flex-grow: 1;
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid #3a3a3c;
+  background: #2c2c2e;
+  color: #f2f2f7;
+  font-weight: 600;
+}
+
+input[type="text"]:focus {
+  border-color: #0a84ff;
+  background: #1c1c1e;
+}
+
+button {
+  background: #0a84ff;
+  color: white;
+  font-weight: 700;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgb(10 132 255 / 0.5);
+  transition: background-color 0.25s ease;
+  user-select: none;
+}
+
+button:hover {
+  background: #0060df;
+  box-shadow: 0 6px 15px rgb(0 96 223 / 0.7);
+}
+
+#loading,
+#error {
+  margin-top: 40px;
+  font-size: 1.2rem;
+}
+
+#loading {
+  font-style: italic;
+  color: #8e8e93;
+}
+
+#error {
+  color: #ff453a;
+  font-weight: 600;
+}
+
+#jobs {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  width: 80%;
+  padding-bottom: 40px;
+  justify-content: center;
+}
+
+.job-card {
+  background: #2c2c2e;
+  padding: 28px 30px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  margin: 0 auto; /* Center horizontally */
+}
+
+.job-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.job-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+  color: #f2f2f7;
+  line-height: 1.3;
+}
+
+.company {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #d1d1d6;
+  margin-bottom: 6px;
+}
+
+.location {
+  font-size: 0.95rem;
+  color: #8e8e93;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+a.apply-btn {
+  align-self: flex-start;
+  padding: 12px 22px;
+  background: #0a84ff;
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgb(10 132 255 / 0.6);
+  transition: background-color 0.25s ease;
+}
+
+a.apply-btn:hover {
+  background: #0060df;
+  box-shadow: 0 6px 18px rgb(0 96 223 / 0.8);
+}
+
+.earnings-btn {
+  background-color: #30d158;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  width: auto !important;
+  max-width: fit-content;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.earnings-btn:hover {
+  background-color: #28b24b;
+  transform: scale(1.03);
+}
+
+.earnings-btn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 480px) {
+  form {
+    flex-direction: column;
+  }
+
+  input[type="text"] {
+    width: 100%;
+  }
+
+  button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  #jobs {
+    grid-template-columns: 1fr;
+    padding-bottom: 60px;
+  }
+}
+@media (min-width: 768px) {
+  #jobs {
+    display: grid;
+    grid-template-columns: 1fr; /* Still full width but inside grid */
+  }
+}
+#jobs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  max-width: 1000px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: center;
+}
+
+.job-card {
+  flex: 0 0 360px; /* fixed width */
+  box-sizing: border-box;
+}
+</style>
+<script type='text/javascript' src='//pl26878612.profitableratecpm.com/8c/3b/42/8c3b421a473baa4a3596a25e597c691e.js'></script>
+<script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
 </head>
+<script type="text/javascript">
+	atOptions = {
+		'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+		'format' : 'iframe',
+		'height' : 250,
+		'width' : 300,
+		'params' : {}
+	};
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
 <body>
+  <header>
+    <div class="left-header">
+      <h1>
+        <svg
+          class="logo"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          width="24"
+          height="24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 12v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM9 10V7a3 3 0 016 0v3" />
+        </svg>
+        CYBERCHAT
+      </h1>
+      <p>JOBS MADE EASIER</p>
+    </div>
 
-<header>
-  <div class="left-icons icon" id="search-icon" tabindex="0" role="button" aria-label="Open search">
-    <!-- Search SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-    </svg>
-    <span style="margin-left:6px; font-weight: normal; font-size: 16px; color: var(--text);">Search</span>
-  </div>
+    <button class="earnings-btn" aria-label="Current earnings">$0.000</button>
+  </header>
 
-  <div class="brand">
-    <span class="cyber">CYBER</span><span class="chat">CHAT</span>
+  <div class="location-time-bar">
+    <div class="location-box" id="locationBox">Detecting location...</div>
+    <div class="time-ios" id="timeBox">00:00:00</div>
   </div>
-     
-     <div class="right-icons icon" tabindex="0" role="button" aria-label="Settings" id="settings-icon">
-    <!-- Settings SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M12 15a3 3 0 100-6 3 3 0 000 6zm9-3a7.986 7.986 0 01-.535 2.915l2.122 1.652-1.5 2.598-2.512-.647A7.986 7.986 0 0112 21a7.986 7.986 0 01-2.915-.535l-1.652 2.122-2.598-1.5.647-2.512A7.986 7.986 0 013 12c0-.997.181-1.953.535-2.915L1.413 7.433l1.5-2.598 2.512.647A7.986 7.986 0 0112 3a7.986 7.986 0 012.915.535l1.652-2.122 2.598 1.5-.647 2.512A7.986 7.986 0 0121 12z"/>
-    </svg>
-  </div>
+  <div style="
+  text-align: center;
+  margin: 2rem 0;
+">
+  <span style="
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border: 1.5px solid #0077ff;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #0077ff;
+    user-select: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  ">
+    Available Jobs
+  </span>
+</div>
+  <form onsubmit="event.preventDefault(); searchJobs();">
+    <input id="searchInput" type="text" placeholder="e.g. Software Engineer, Project Manager" autocomplete="off" />
+    <button type="submit">Search</button>
+  </form>
 </header>
 
-<main class="feed">
-  <div class="composer">
-    <div class="left">
-      <img src="https://i.pravatar.cc/150?u=user" alt="User" />
-      <input type="text" placeholder="What's on your mind?" />
-    </div>
-<button id="sendPostBtn">UPLOAD</button>
-<div class="gallery-icon" tabindex="0" role="button" aria-label="Upload from gallery">
-  <img src="https://img.icons8.com/?size=100&id=4nhOwJ1RGNj0&format=png&color=000000" alt="Upload" width="28" height="28" style="cursor: pointer;" />
-  <input type="file" accept="image/*" id="uploadInput" style="display: none;" />
-</div>
-  <input type="file" accept="image/*" id="uploadInput" style="display: none;">
-</div>
-
-  <!-- Your feed posts would go here -->
-</main>
-
-<!-- continuing inside body, after main.feed -->
-
-<!-- Top Search Bar -->
-<div class="search-bar" id="search-bar" aria-hidden="true" role="search">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-  </svg>
-  <input
-    type="search"
-    id="search-input"
-    placeholder="Search CYBERCHAT..."
-    aria-label="Search CYBERCHAT"
-    autocomplete="off"
-    spellcheck="false"
-  />
-</div>
-<div id="settings-dropdown" class="settings-dropdown hidden">
-  <div class="settings-option" id="toggle-theme">Toggle Theme</div>
-</div>
-<!-- Background blur overlay while search open -->
-<div class="blur-overlay" id="blur-overlay" tabindex="-1" aria-hidden="true"></div>
-
-<!-- Suggestions Box -->
-<div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
-<div id="search-results" class="search-results"></div>
-<div id="posts-container"></div>
-<script type="module">
-  import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-import {
-  set,
-  remove
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<div id="loading" hidden>Loading jobs…</div>
+<div id="error" hidden>Failed to load jobs. Try again.</div>
+<div id="jobs"></div>
+<div id="userLocation" style="margin-bottom: 1rem; font-weight: 600;"></div>
+ <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import {
-    getDatabase,
-    ref,
-    get,
-    child
-  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, get, set, runTransaction, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -652,641 +633,372 @@ import {
     projectId: "itzhoyoo-f9f7e",
     storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const dbRef = ref(db);
-  const auth = getAuth();
-let currentUser = null;
+  const auth = getAuth(app);
 
-onAuthStateChanged(auth, user => {
-  currentUser = user;
-});
+  // =================== LIVE TIME DISPLAY ===================
+  let use24Hour = true;
+  const timeBox = document.getElementById("timeBox");
 
-  const searchIcon = document.getElementById('search-icon');
-  const searchBar = document.getElementById('search-bar');
-  const blurOverlay = document.getElementById('blur-overlay');
-  const searchInput = document.getElementById('search-input');
-  const suggestionsBox = document.getElementById('suggestions');
-  const header = document.querySelector('header');
-  const mainFeed = document.querySelector('main.feed');
-  const resultsBox = document.getElementById('search-results');
-
-  let activeIndex = -1;
-  let filtered = []; // will hold {id, title, views, thumbnailUrl}
-
-  function openSearch() {
-    searchBar.classList.add('active');
-    blurOverlay.classList.add('active');
-    searchBar.setAttribute('aria-hidden', 'false');
-    blurOverlay.setAttribute('aria-hidden', 'false');
-    header.style.opacity = '0';
-    mainFeed.style.filter = 'blur(6px) brightness(0.7)';
-    searchInput.focus();
-    clearSuggestions();
-    resultsBox.innerHTML = '';
+  async function updateTimeFromIP() {
+    try {
+      const res = await fetch("https://worldtimeapi.org/api/ip");
+      const data = await res.json();
+      const now = new Date(data.datetime);
+      displayTime(now);
+    } catch {
+      displayTime(new Date());
+    }
   }
 
-  function closeSearch() {
-    searchBar.classList.remove('active');
-    blurOverlay.classList.remove('active');
-    searchBar.setAttribute('aria-hidden', 'true');
-    blurOverlay.setAttribute('aria-hidden', 'true');
-    header.style.opacity = '1';
-    mainFeed.style.filter = 'none';
-    searchInput.value = '';
-    clearSuggestions();
-    resultsBox.innerHTML = '';
+  function displayTime(date) {
+    const options = use24Hour
+      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    if (timeBox) timeBox.textContent = date.toLocaleTimeString('en-US', options);
   }
 
-  function clearSuggestions() {
-    suggestionsBox.classList.remove('active');
-    suggestionsBox.innerHTML = '';
-    activeIndex = -1;
+  if (timeBox) {
+    timeBox.addEventListener("click", () => {
+      use24Hour = !use24Hour;
+      updateTimeFromIP();
+    });
   }
 
-  async function renderSuggestions() {
-  if (filtered.length === 0) {
-    suggestionsBox.innerHTML = `<div class="no-results">No results found</div>`;
-    suggestionsBox.classList.add('active');
-    return;
+  // =================== LOCATION DISPLAY ===================
+  const locationBox = document.getElementById("locationBox");
+
+  async function fetchLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      const flag = data.country_code
+        ? [...data.country_code.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
+        : '🌐';
+      if (locationBox) locationBox.innerHTML = `<span>${flag}</span> ${data.country_name}`;
+    } catch {
+      if (locationBox) locationBox.textContent = "🌐 Unknown Location";
+    }
   }
 
-  suggestionsBox.innerHTML = '';
+  // =================== USER BALANCE & TASKS ===================
+  const earningsBtn = document.querySelector('.earnings-btn');
+  const tasksListEl = document.getElementById('tasksList');
 
-  const user = JSON.parse(localStorage.getItem('authUser')); // assuming you store auth user here
-  const currentUserId = user?.uid;
-
-  for (let i = 0; i < filtered.length; i++) {
-    const item = filtered[i];
-    const div = document.createElement('div');
-    div.className = 'suggestion-item';
-    div.setAttribute('role', 'option');
-    div.setAttribute('tabindex', '0');
-    div.dataset.id = item.id;
-
-    const authorId = item.authorId || item.author || 'unknown_user';
-    let isFollowing = false;
-
-    // Check if already following
-    if (currentUserId && authorId !== currentUserId) {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
       try {
-        const followSnap = await get(child(dbRef, `users/${currentUserId}/following/${authorId}`));
-        isFollowing = followSnap.exists();
+        const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
+        const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+        if (earningsBtn) {
+          earningsBtn.textContent = `$${balance.toFixed(3)}`;
+          earningsBtn.title = "Your balance in USD";
+        }
+
+        loadTasks?.();
       } catch (err) {
-        console.warn('Error checking follow status:', err);
-      }
-    }
-
-    div.innerHTML = `
-      <img src="${item.thumbnailUrl}" alt="Thumbnail" class="suggestion-thumb" />
-      <div class="suggestion-text">
-        <div class="suggestion-title">${item.title}</div>
-        <div class="suggestion-meta">
-          <span>${item.views} views</span>
-          <span>•</span>
-          <span>${item.author || 'Unknown'}</span>
-        </div>
-      </div>
-      ${
-        currentUserId && authorId !== currentUserId
-          ? `<button class="follow-button" data-author="${authorId}">${isFollowing ? 'Following' : 'Follow'}</button>`
-          : ''
-      }
-    `;
-
-    if (i === activeIndex) div.classList.add('active');
-    suggestionsBox.appendChild(div);
-
-    // Follow button logic
-    const btn = div.querySelector('.follow-button');
-    if (btn) {
-      btn.addEventListener('click', async e => {
-        e.stopPropagation();
-        const authorId = btn.dataset.author;
-        const followingRef = ref(db, `users/${currentUserId}/following/${authorId}`);
-        try {
-          if (btn.textContent === 'Follow') {
-            await set(followingRef, true);
-            btn.textContent = 'Following';
-          } else {
-            await remove(followingRef);
-            btn.textContent = 'Follow';
-          }
-        } catch (err) {
-          console.error('Error updating follow status:', err);
+        if (earningsBtn) {
+          earningsBtn.textContent = "$0.000";
+          earningsBtn.title = "Failed to load balance";
         }
-      });
-    }
-  }
-
-  suggestionsBox.classList.add('active');
-}
-  async function updateSuggestions() {
-    const val = searchInput.value.trim().toLowerCase();
-    if (!val) {
-      clearSuggestions();
-      return;
-    }
-
-    try {
-      const snapshot = await get(child(dbRef, 'post'));
-      if (!snapshot.exists()) {
-        clearSuggestions();
-        return;
+        console.error(err);
       }
-      const data = snapshot.val();
-
-      filtered = Object.entries(data)
-        .filter(([id, post]) => post.title && post.title.toLowerCase().includes(val))
-        .map(([id, post]) => ({
-          id,
-          title: post.title,
-          views: post.views || 0,
-          thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'
-        }));
-
-      activeIndex = -1;
-      renderSuggestions();
-
-    } catch (err) {
-      console.error('Error fetching suggestions:', err);
-      clearSuggestions();
-    }
-  }
-
-  function debounce(func, delay = 300) {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-
-  function triggerSearch(query) {
-    console.log('Search triggered for:', query);
-    const event = new CustomEvent('search', { detail: query });
-    document.dispatchEvent(event);
-  }
-
-  // NEW: relevance scoring for search feed sorting
-  function relevanceScore(query, text) {
-  if (!text) return 0;
-  query = query.toLowerCase();
-  text = text.toLowerCase();
-  if (text === query) return 100;
-  if (text.includes(query)) return 50;
-  let score = 0;
-  for (const c of query) {
-    if (text.includes(c)) score++;
-  }
-  return score;
-}
-
-  // NEW: render the full search results feed, featured post on top, related posts below
-  function renderSearchResults(posts, query) {
-    if (!posts.length) {
-      resultsBox.innerHTML = `<div class="no-results">No posts found for "${query}"</div>`;
-      return;
-    }
-
-    // Sort posts by relevance descending
-    posts.sort((a,b) => relevanceScore(query, b.title) - relevanceScore(query, a.title));
-
-    // Featured post is the top one
-    const featured = posts[0];
-    const others = posts.slice(1);
-
-    let html = `
-      <h2>Search results for "${query}"</h2>
-      <section class="featured-post">
-        <h3>${featured.title}</h3>
-        <img src="${featured.thumbnailUrl || 'https://via.placeholder.com/200?text=No+Image'}" alt="Thumbnail" />
-        <p>${featured.body || 'No content available'}</p>
-        <small>By ${featured.author || 'Unknown'} | ${featured.views || 0} views</small>
-      </section>
-      <hr/>
-      <section class="other-posts">
-        <h4>Related posts</h4>
-        <ul>
-    `;
-
-    others.forEach(post => {
-      html += `
-        <li class="search-post-item" data-id="${post.id}" tabindex="0" role="button" aria-pressed="false">
-          <img src="${post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img'}" alt="Thumbnail" />
-          <div>
-            <strong>${post.title}</strong><br/>
-            <small>${post.views || 0} views</small>
-          </div>
-        </li>
-      `;
-    });
-
-    html += '</ul></section>';
-    resultsBox.innerHTML = html;
-
-    // Click & keyboard to feature other posts
-    document.querySelectorAll('.search-post-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const id = item.dataset.id;
-        const post = posts.find(p => p.id === id);
-        if (!post) return;
-        renderSearchResults([post, ...posts.filter(p => p.id !== id)], query);
-      });
-      item.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          item.click();
-        }
-      });
-    });
-  }
-
-  // NEW: full search triggered on search input Enter or suggestion click
-  async function doFullSearch(query) {
-    closeSearch(); // unblur & hide search UI
-    try {
-      const snapshot = await get(child(dbRef, 'post'));
-      if (!snapshot.exists()) {
-        resultsBox.innerHTML = `<div class="no-results">No posts found</div>`;
-        return;
+    } else {
+      if (earningsBtn) {
+        earningsBtn.textContent = "$0.000";
+        earningsBtn.title = "Not logged in";
       }
-      const data = snapshot.val();
-      const allPosts = Object.entries(data).map(([id, post]) => ({
-        id,
-        title: post.title || '',
-        views: post.views || 0,
-        thumbnailUrl: post.thumbnailUrl || 'https://via.placeholder.com/48?text=No+Img',
-        body: post.body || '',
-        author: post.author || 'Unknown'
-      }));
-
-      renderSearchResults(allPosts, query);
-
-    } catch (err) {
-      console.error('Search error:', err);
-      resultsBox.innerHTML = `<div class="error">Error loading search results</div>`;
-    }
-  }
-
-  // Replace old fetchAndShowPost to do nothing now (we use renderSearchResults instead)
-  async function fetchAndShowPost(postId) {
-    // Intentionally blank because we're handling full feed rendering now
-  }
-
-  // Event listeners wiring
-
-  searchIcon.addEventListener('click', openSearch);
-  blurOverlay.addEventListener('click', closeSearch);
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && searchBar.classList.contains('active')) {
-      closeSearch();
-    }
-  });
-
-  searchInput.addEventListener('input', debounce(updateSuggestions));
-
-  searchInput.addEventListener('keydown', e => {
-    if (!filtered.length) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      activeIndex = (activeIndex + 1) % filtered.length;
-      renderSuggestions();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
-      renderSuggestions();
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (activeIndex >= 0) {
-        const selected = filtered[activeIndex];
-        searchInput.value = selected.title;
-        doFullSearch(selected.title);
-        clearSuggestions();
-        triggerSearch(selected.title);
-      } else {
-        const query = searchInput.value.trim();
-        if (query) {
-          doFullSearch(query);
-          clearSuggestions();
-          triggerSearch(query);
-        }
+      if (tasksListEl) {
+        tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
       }
     }
   });
 
-  suggestionsBox.addEventListener('click', e => {
-    const item = e.target.closest('.suggestion-item');
-    if (!item) return;
-    const title = item.querySelector('.suggestion-title').textContent;
-    searchInput.value = title;
-    doFullSearch(title);
-    clearSuggestions();
-    triggerSearch(title);
-  });
+  // =================== ANALYTICS TRACKING ===================
+  // Page view count
+  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
 
-  suggestionsBox.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && e.target.classList.contains('suggestion-item')) {
-      const title = e.target.querySelector('.suggestion-title').textContent;
-      searchInput.value = title;
-      doFullSearch(title);
-      clearSuggestions();
-      triggerSearch(title);
+  // Click limiter
+  let lastClickTime = 0;
+  document.addEventListener("click", () => {
+    const now = Date.now();
+    if (now - lastClickTime > 2000) {
+      runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
+      lastClickTime = now;
     }
   });
- const settingsIcon = document.getElementById("settings-icon");
-const dropdown = document.getElementById("settings-dropdown");
-const toggleThemeBtn = document.getElementById("toggle-theme");
 
-// Show/Hide settings dropdown
-settingsIcon.addEventListener("click", () => {
-  dropdown.classList.toggle("hidden");
-  updateDropdownTheme();
-});
+  // Geo logging (once per day)
+  const today = new Date().toDateString();
+  if (localStorage.getItem("loggedCountry") !== today) {
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        const country = data.country_name || "Unknown";
+        const logRef = push(ref(db, "analytics/logs"));
+        set(logRef, {
+          ip: data.ip,
+          country,
+          city: data.city || "Unknown",
+          timestamp: Date.now(),
+          page: location.pathname
+        });
 
-// Toggle theme logic
-toggleThemeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("light-theme");
-
-  const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
-  localStorage.setItem("theme", currentTheme);
-
-  updateDropdownTheme();
-});
-
-// Apply saved theme on load
-window.addEventListener("DOMContentLoaded", () => {
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "light") {
-    document.body.classList.add("light-theme");
-  } else {
-    document.body.classList.remove("light-theme");
+        runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
+        localStorage.setItem("loggedCountry", today);
+      })
+      .catch(err => console.warn("GeoIP failed:", err));
   }
 
-  updateDropdownTheme();
-});
+  // =================== INITIALIZATION ===================
+  fetchLocation();
+  updateTimeFromIP();
+  setInterval(() => displayTime(new Date()), 1000);
+</script>
+<script>
+  const jobsContainer = document.getElementById('jobs');
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
+  const searchInput = document.getElementById('searchInput');
 
-function updateDropdownTheme() {
-  if (document.body.classList.contains("light-theme")) {
-    dropdown.classList.remove("dark");
-  } else {
-    dropdown.classList.add("dark");
+  const APP_ID = 'ad28a898';
+  const APP_KEY = '0bfd84fafcb616f2ef531b779cb424c2';
+
+  const CACHE_DURATION = 3600 * 1000; // 1 hour cache
+  const CACHE_KEY_PREFIX = 'adzuna_jobs_';
+
+  function loadFromCache(term) {
+    const c = localStorage.getItem(CACHE_KEY_PREFIX + term);
+    if (!c) return null;
+    const data = JSON.parse(c);
+    if (Date.now() - data.timestamp > CACHE_DURATION) {
+      localStorage.removeItem(CACHE_KEY_PREFIX + term);
+      return null;
+    }
+    return data.jobs;
   }
-}
 
-// Click outside to close dropdown
-document.addEventListener("click", (e) => {
-  if (!settingsIcon.contains(e.target) && !dropdown.contains(e.target)) {
-    dropdown.classList.add("hidden");
+  function saveToCache(term, jobs) {
+    localStorage.setItem(
+      CACHE_KEY_PREFIX + term,
+      JSON.stringify({ timestamp: Date.now(), jobs })
+    );
   }
-});
 
-const galleryIcon = document.querySelector('.gallery-icon');
-const uploadInput = document.getElementById('uploadInput');
-
-galleryIcon.addEventListener('click', () => {
-  uploadInput.click();
-});
-
-uploadInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const uploadedImage = ev.target.result; // base64 string
-
-      // Save image to sessionStorage
-      sessionStorage.setItem('postImage', uploadedImage);
-      sessionStorage.removeItem('postText'); // optional reset
-
-      // Instantly redirect
-      window.location.href = 'uploadpost.html';
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("That's not a valid image, bro.");
+  async function fetchJobs(term, country) {
+    const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1` +
+      `?app_id=${APP_ID}&app_key=${APP_KEY}` +
+      `&results_per_page=20&what=${encodeURIComponent(term)}` +
+      `&content-type=application/json&sort_by=relevance`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('API error');
+    return (await r.json()).results || [];
   }
-});
-const sendBtn = document.getElementById('sendPostBtn');
 
-sendBtn.addEventListener('click', () => {
-  const textInput = document.querySelector('.composer input[type="text"]');
-  const text = textInput.value.trim();
-
-  if (!text) {
-    alert("Type something first.");
+  
+function renderJobs(jobs, term) {
+  jobsContainer.innerHTML = '';
+  if (!jobs.length) {
+    jobsContainer.innerHTML = `<p>No jobs found for "<strong>${term}</strong>"</p>`;
     return;
   }
 
-  // Store in sessionStorage and go
-  sessionStorage.setItem('postText', text);
-  sessionStorage.removeItem('postImage'); // Optional: clear any stale image
-  window.location.href = 'uploadpost.html';
-});
-function createSvgIcon(type, filled = false) {
-  switch (type) {
-    case 'views':
-      return `
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>`;
-    case 'likes':
-      return filled
-        ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="#ff2e88" stroke="#ff2e88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M20.84 4.61c-1.69-1.69-4.44-1.69-6.13 0L12 7.34l-2.71-2.73a4.36 4.36 0 00-6.13 6.2l8.3 8.39 8.3-8.39a4.36 4.36 0 000-6.2z"/>
-           </svg>`
-        : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M20.84 4.61c-1.69-1.69-4.44-1.69-6.13 0L12 7.34l-2.71-2.73a4.36 4.36 0 00-6.13 6.2l8.3 8.39 8.3-8.39a4.36 4.36 0 000-6.2z"/>
-           </svg>`;
-    case 'comments':
-      return `
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-        </svg>`;
-    default:
-      return '';
-  }
-}
+  jobs.forEach((job, index) => {
+    const salaryMonthly = job.salary_min
+      ? `<span class="salary-highlight">$${Math.round(job.salary_min / 12).toLocaleString()} / month</span>`
+      : `<span class="salary-highlight">Salary not disclosed</span>`;
 
-function createPostElement(post, postId, userLikes = {}) {
-  const postDiv = document.createElement('div');
-  postDiv.classList.add('post-card');
-  postDiv.dataset.id = postId;
+    const unlocked = localStorage.getItem(`job_unlocked_${index}`) === 'true';
 
-  const username = post.username || 'Anonymous';
-  const handle = post.handle ? '@' + post.handle : '@user';
-  const profilePic = post.profilePic || 'https://via.placeholder.com/50';
-  const postImage = post.imageUrl || post.image || '';
-  const title = post.title || 'Untitled Post';
-  const description = post.description || '';
-  const views = post.views || 0;
-  const likes = post.likes || 0;
-  const comments = post.comments || 0;
-  const timestamp = post.timestamp || Date.now();
-  const liked = userLikes[postId] === true;
-  const isMonetized = post.monetize === 'on';
-  const isVerified = post.verified === true;
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.innerHTML = `
+      <div class="job-title">${job.title}</div>
+      <div class="salary">${salaryMonthly}</div>
+      <div class="company">${job.company.display_name || 'Unknown Company'}</div>
+      <div class="location">${job.location.display_name || 'Location not specified'}</div>
+      <button class="unlock-btn" data-index="${index}" ${unlocked ? 'style="display:none;"' : ''}>
+        🔓 Unlock Job
+      </button>
+      <a href="${job.redirect_url}" class="apply-btn" target="_blank" rel="noopener noreferrer"
+        ${!unlocked ? 'style="pointer-events:none; opacity:0.5;"' : ''}>
+        Apply
+      </a>
+    `;
+    jobsContainer.appendChild(card);
 
-  const shortDesc = description.length > 120 ? description.slice(0, 120) + '...' : description;
-  const showReadMore = description.length > 120;
+    // Insert ad block after every 3rd job using iframe (isolated environment)
+    if ((index + 1) % 1 === 0) {
+      const adWrapper = document.createElement('div');
+      adWrapper.className = 'ad-container';
+      adWrapper.style.cssText = 'width: 300px; height: 250px; margin: 20px auto;';
 
-  const adHtml = isMonetized
-    ? `<div class="post-ads"><iframe src="https://your-ad-provider.com/adframe" class="ad-frame" width="100%" height="90" style="border:none;"></iframe></div>`
-    : '';
+      // Create iframe for the ad
+      const iframe = document.createElement('iframe');
+      iframe.width = '300';
+      iframe.height = '250';
+      iframe.style.border = 'none';
 
-  postDiv.innerHTML = `
-    <div class="post-header">
-      <img src="${profilePic}" alt="${username} profile" class="profile-pic"/>
-      <div class="user-info">
-        <div class="username">
-          ${username}
-          ${isVerified ? '<span class="verified-badge" title="Verified">✔️</span>' : ''}
-        </div>
-        <div class="handle">${handle}</div>
-      </div>
-      <div class="post-meta">
-        <button class="follow-btn">Follow</button>
-        <div class="post-time">${new Date(timestamp).toLocaleString()}</div>
-      </div>
-    </div>
-    <div class="post-title">${title}</div>
-    ${postImage ? `<img src="${postImage}" alt="Post image" class="post-image" style="width: 100%; height: auto;" />` : ''}
-    <div class="post-description" data-full="${description}">
-      ${shortDesc}
-      ${showReadMore ? '<span class="read-more">Read more</span>' : ''}
-    </div>
-    <div class="post-stats">
-      <div>${createSvgIcon('views')} ${views}</div>
-      <div class="like-wrapper">
-        <button class="like-btn ${liked ? 'liked' : ''}" data-liked="${liked}">${createSvgIcon('likes', liked)}</button>
-        <span class="like-count">${likes}</span>
-      </div>
-      <div class="comment-wrapper">
-        <div>${createSvgIcon('comments')} ${comments}</div>
-        <button class="comment-btn">Comment</button>
-      </div>
-    </div>
-    ${adHtml}
-  `;
+      // Inject ad code inside iframe via srcdoc
+      iframe.srcdoc = `
+        <html>
+          <head><base target="_top"></head>
+          <body style="margin:0">
+            <script type="text/javascript">
+              atOptions = {
+                key: '037f6e178c935a44f2ef5ab0ce53116a',
+                format: 'iframe',
+                height: 250,
+                width: 300,
+                params: {}
+              };
+            <\/script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"><\/script>
+          </body>
+        </html>
+      `;
 
-  // LIKE HANDLER
-  postDiv.querySelector('.like-btn').addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const btn = postDiv.querySelector('.like-btn');
-    const isLiked = btn.dataset.liked === 'true';
-    const newLiked = !isLiked;
-    btn.dataset.liked = newLiked;
-    btn.classList.toggle('liked', newLiked);
-    btn.innerHTML = createSvgIcon('likes', newLiked);
-
-    const countEl = postDiv.querySelector('.like-count');
-    const newLikes = Math.max(0, parseInt(countEl.textContent) + (newLiked ? 1 : -1));
-    countEl.textContent = newLikes;
-
-    await set(ref(db, `post/${postId}/likes`), newLikes);
-
-    const uid = auth.currentUser?.uid;
-    if (uid) {
-      await set(ref(db, `likes/${uid}/${postId}`), newLiked);
+      adWrapper.appendChild(iframe);
+      jobsContainer.appendChild(adWrapper);
     }
   });
 
-  // COMMENT REDIRECT
-  postDiv.querySelector('.comment-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    window.location.href = `viewport.html/${postId}`;
-  });
+  // Unlock button event listeners
+  document.querySelectorAll('.unlock-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = btn.getAttribute('data-index');
+      window.open('https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041', '_blank');
 
-  // READ MORE
-  const readMore = postDiv.querySelector('.read-more');
-  if (readMore) {
-    readMore.addEventListener('click', (e) => {
-      e.stopPropagation();
-      postDiv.querySelector('.post-description').textContent = description;
+      btn.innerText = '🔓 Unlocking...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        localStorage.setItem(`job_unlocked_${i}`, 'true');
+        renderJobs(jobs, term); // Rerender with updated unlocks
+      }, 3000);
+    });
+  });
+}
+
+  async function searchJobs(term, country) {
+    errorEl.hidden = true;
+    loadingEl.hidden = false;
+    jobsContainer.innerHTML = '';
+
+    const cacheKey = `${term}_${country}`;
+    const cached = loadFromCache(cacheKey);
+    if (cached) {
+      loadingEl.hidden = true;
+      renderJobs(cached, term);
+      return;
+    }
+
+    try {
+      const jobs = await fetchJobs(term, country);
+      loadingEl.hidden = true;
+      renderJobs(jobs, term);
+      saveToCache(cacheKey, jobs);
+      return jobs;
+    } catch (e) {
+      console.error(e);
+      loadingEl.hidden = true;
+      errorEl.hidden = false;
+      return [];
+    }
+  }
+
+  async function loadForUser() {
+    // Try browser geolocation
+    return new Promise(resolve => {
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const {latitude, longitude} = pos.coords;
+          // Simplest: do reverse lookup for country code (skip detailed geolocation)
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+          const json = await res.json();
+          resolve(json.countryCode.toLowerCase());
+        },
+        () => resolve('us'), // fallback country
+        {timeout:5000}
+      );
     });
   }
 
-  // FOLLOW
-  const followBtn = postDiv.querySelector('.follow-btn');
-  followBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const uid = auth.currentUser?.uid;
-    if (!uid || !post.uid) return;
+  window.onload = async () => {
+    loadingEl.hidden = false;
+    const country = await loadForUser(); // 'us' or 'gb' or fallback
+    const defaultTerm = 'Software Engineer';
+    let jobs = await searchJobs(defaultTerm, country);
 
-    const followingRef = ref(db, `following/${uid}/${post.uid}`);
-    const isFollowingSnap = await get(followingRef);
-    const isFollowing = isFollowingSnap.exists();
-
-    if (isFollowing) {
-      await remove(followingRef);
-      followBtn.textContent = 'Follow';
-      followBtn.style.backgroundColor = '';
-    } else {
-      await set(followingRef, true);
-      followBtn.textContent = 'Following';
-      followBtn.style.backgroundColor = 'grey';
+    if (!jobs.length) {
+      jobs = await searchJobs(defaultTerm, country === 'us' ? 'gb' : 'us');
     }
+    loadingEl.hidden = true;
+  };
+
+  document.querySelector('form').onsubmit = e => {
+    e.preventDefault();
+    (async () => {
+      const country = await loadForUser();
+      await searchJobs(searchInput.value.trim(), country);
+    })();
+  };
+
+  // Apply width style after jobs are rendered (better inside renderJobs if dynamic)
+  // But since your code adds this here, this runs only once on load, won't affect dynamically added cards
+  // So remove or move inside renderJobs if you want consistent styling.
+  document.querySelectorAll('.job-card').forEach(card => {
+    card.style.width = '90vw'; // or whatever width you want
   });
-
-  // CLICK TO OPEN POST
-  postDiv.addEventListener('click', (e) => {
-    const isInteractive = e.target.closest('.like-btn, .comment-btn, .follow-btn, .profile-pic, .username');
-    if (!isInteractive) {
-      window.location.href = `viewport.html/${postId}`;
-    }
-  });
-
-  return postDiv;
-}
-
-// Load All Posts
-async function loadPosts() {
-  try {
-    const snapshot = await get(child(dbRef, 'post'));
-    if (!snapshot.exists()) return;
-
-    const posts = snapshot.val();
-    const container = document.getElementById('posts-container');
-    container.innerHTML = '';
-
-    let userLikes = {};
-    const uid = auth.currentUser?.uid;
-    if (uid) {
-      const likesSnap = await get(ref(db, `likes/${uid}`));
-      if (likesSnap.exists()) userLikes = likesSnap.val();
-    }
-
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !entry.target.dataset.viewed) {
-          entry.target.dataset.viewed = 'true';
-          const postId = entry.target.dataset.id;
-          const viewsRef = ref(db, `post/${postId}/views`);
-          get(viewsRef).then(snap => {
-            const currentViews = snap.val() || 0;
-            set(viewsRef, currentViews + 1);
-          });
-        }
-      });
-    }, { threshold: 0.5 });
-
-    for (const postId in posts) {
-      const postElement = createPostElement(posts[postId], postId, userLikes);
-      container.appendChild(postElement);
-      observer.observe(postElement);
-    }
-  } catch (error) {
-    console.error('Error loading posts:', error);
-  }
-}
-
-loadPosts();
 </script>
+
+<style>
+  #loading-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(20,20,20,0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .spinner {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 6px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+    box-shadow:
+      0 0 8px rgba(255,255,255,0.3),
+      inset 0 0 10px rgba(255,255,255,0.2);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+</div>
+
+<script>
+  // Example: remove spinner after 3 seconds
+  setTimeout(() => {
+    const loader = document.getElementById('loading-screen');
+    if (loader) loader.style.display = 'none';
+  }, 3000);
+</script>
+
 </body>
 </html>
