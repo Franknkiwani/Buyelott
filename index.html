@@ -1,226 +1,360 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DLS Match Making</title>
-<style>
-  /* Reset */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: #f5f7fa;
-    color: #222;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  header {
-    border-bottom: 3px solid #0070f3;
-    padding: 1rem 1.5rem;
-    text-align: center;
-    font-weight: 700;
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-    background: white;
-    user-select: none;
-  }
-  main {
-    flex: 1;
-    max-width: 480px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    background: white;
-    padding: 1.5rem 2rem;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
-  }
-  label {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-  input[type="text"], select {
-    padding: 0.6rem 0.8rem;
-    border: 1.5px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-  }
-  input[type="text"]:focus, select:focus {
-    border-color: #0070f3;
-    outline: none;
-  }
-  button {
-    background: #0070f3;
-    border: none;
-    color: white;
-    padding: 0.75rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.25s ease;
-  }
-  button:hover {
-    background: #005bb5;
-  }
-  section#matches {
-    margin-top: 2rem;
-  }
-  .match-card {
-    background: white;
-    padding: 1rem 1.25rem;
-    border-radius: 7px;
-    box-shadow: 0 1px 6px rgb(0 0 0 / 0.08);
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-  }
-  @media (max-width: 520px) {
-    main {
-      margin: 1rem;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLS Matchmaking + Chat Single Page</title>
+  <style>
+    /* Basic styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0; padding: 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
     }
-    form {
-      padding: 1rem 1rem;
+    #loading {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
     }
-  }
-</style>
+    #matchInfo {
+      margin: 1rem 0;
+      font-size: 1.2rem;
+    }
+    #chatBtn {
+      margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      background: #64748b;
+      cursor: not-allowed;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    #chatBtn.enabled {
+      background: #3b82f6;
+      cursor: pointer;
+    }
+
+    /* Chat popup modal styles */
+    #chatModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    #chatModal.active {
+      display: flex;
+    }
+    #chatModalContent {
+      background: #1e1e1e;
+      border-radius: 12px;
+      width: 400px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 20px #3b82f6;
+      position: relative;
+    }
+    #chatModalHeader {
+      background: #3b82f6;
+      color: white;
+      padding: 1rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    #chatModalHeader div {
+      font-size: 0.9rem;
+    }
+    #chatModalClose {
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 1.3rem;
+      padding: 0 0.5rem;
+      border-radius: 4px;
+      background: #2563eb;
+      transition: background 0.2s ease;
+    }
+    #chatModalClose:hover {
+      background: #1d4ed8;
+    }
+
+    #messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      border-bottom: 1px solid #333;
+      background: #121212;
+    }
+    .msg {
+      margin-bottom: 0.8rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+    .msg.self {
+      background: #3b82f6;
+      margin-left: auto;
+    }
+    .msg.other {
+      background: #64748b;
+      margin-right: auto;
+    }
+    #chatForm {
+      display: flex;
+      padding: 1rem;
+      background: #2a2a2a;
+    }
+    #chatInput {
+      flex-grow: 1;
+      border-radius: 8px;
+      border: none;
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      margin-right: 0.8rem;
+    }
+    #chatInput:focus {
+      outline: none;
+      box-shadow: 0 0 6px #3b82f6;
+    }
+    #chatSend {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 8px;
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #chatSend:hover {
+      background: #2563eb;
+    }
+  </style>
 </head>
 <body>
-<header>DLS Match Making</header>
-<main>
-  <form id="matchForm" autocomplete="off">
-    <label for="teamName">Your Team Name</label>
-    <input type="text" id="teamName" name="teamName" placeholder="e.g. Cape Crushers" required minlength="3" maxlength="20" />
 
-    <label for="region">Region</label>
-    <select id="region" name="region" required>
-      <option value="" disabled selected>Select region</option>
-      <option value="africa">Africa</option>
-      <option value="europe">Europe</option>
-      <option value="asia">Asia</option>
-      <option value="americas">Americas</option>
-      <option value="oceania">Oceania</option>
-    </select>
+  <div id="loading">Looking for a match...</div>
+  <div id="matchInfo">No match found yet.</div>
+  <button id="chatBtn" disabled title="Find a match to enable chat">💬 Message Your Opponent</button>
 
-    <button type="submit">Find Match</button>
-  </form>
+  <!-- Chat Modal Popup -->
+  <div id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle">
+    <div id="chatModalContent">
+      <div id="chatModalHeader">
+        <div id="userIDs">User1: -- | User2: --</div>
+        <div id="chatTimer">00:00</div>
+        <div id="chatModalClose" role="button" aria-label="Close chat popup">&times;</div>
+      </div>
+      <div id="messages"></div>
+      <form id="chatForm">
+        <input id="chatInput" autocomplete="off" placeholder="Type a message..." required />
+        <button id="chatSend" type="submit">Send</button>
+      </form>
+    </div>
+  </div>
 
-  <section id="matches" aria-live="polite"></section>
-</main>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>
 
-<!-- Firebase SDKs -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getDatabase, ref, push, get, query, orderByChild, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  <script>
+    // Your Firebase config here
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
 
-  // Your real Firebase config:
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-  const form = document.getElementById('matchForm');
-  const matchesSection = document.getElementById('matches');
+    // Globals
+    let userId = null;
+    let matchUserId = null;
+    let matchRoomId = null;
 
-  async function addToWaiting(teamName, region) {
-    const waitingRef = ref(db, 'waiting_teams');
-    const newEntryRef = await push(waitingRef, {
-      teamName,
-      region,
-      timestamp: Date.now()
-    });
-    return newEntryRef.key;
-  }
+    const loadingEl = document.getElementById('loading');
+    const matchInfoEl = document.getElementById('matchInfo');
+    const chatBtn = document.getElementById('chatBtn');
+    const chatModal = document.getElementById('chatModal');
+    const chatModalClose = document.getElementById('chatModalClose');
+    const messagesEl = document.getElementById('messages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const userIDsEl = document.getElementById('userIDs');
+    const chatTimerEl = document.getElementById('chatTimer');
 
-  async function findMatch(region, excludeKey) {
-    const waitingRef = ref(db, 'waiting_teams');
-    const regionQuery = query(waitingRef, orderByChild('region'));
-    const snapshot = await get(regionQuery);
-    if (!snapshot.exists()) return null;
+    // Timer vars
+    let chatStartTime = null;
+    let chatTimerInterval = null;
 
-    let matchKey = null;
-    let matchData = null;
-    snapshot.forEach(childSnap => {
-      const data = childSnap.val();
-      const key = childSnap.key;
-      if (data.region === region && key !== excludeKey) {
-        matchKey = key;
-        matchData = data;
-        return true;
-      }
-    });
-    if (matchKey && matchData) {
-      return { key: matchKey, data: matchData };
+    // Authenticate anonymously
+    auth.signInAnonymously()
+      .then(() => {
+        userId = auth.currentUser.uid;
+        loadingEl.textContent = `Looking for a match... Your ID: ${userId}`;
+        findMatch();
+      })
+      .catch(err => {
+        loadingEl.textContent = 'Auth failed: ' + err.message;
+      });
+
+    function findMatch() {
+      const waitingRef = db.ref('waiting');
+      const matchesRef = db.ref('matches');
+
+      // Try to find waiting user
+      waitingRef.once('value', snapshot => {
+        const waitingUsers = snapshot.val() || {};
+
+        // Find waiting user that's not self
+        const waitingUserId = Object.keys(waitingUsers).find(id => id !== userId);
+
+        if (waitingUserId) {
+          // Match found!
+          matchUserId = waitingUserId;
+          waitingRef.child(waitingUserId).remove();
+
+          const ids = [userId, matchUserId].sort();
+          matchRoomId = ids.join('_');
+
+          matchesRef.child(matchRoomId).set({
+            users: ids,
+            createdAt: Date.now()
+          });
+
+          showMatchFound();
+
+        } else {
+          // No one waiting, add self
+          waitingRef.child(userId).set(true);
+
+          // Listen for matches involving current user
+          matchesRef.on('value', snapshot => {
+            const matches = snapshot.val() || {};
+            for (const roomId in matches) {
+              if (matches[roomId].users.includes(userId)) {
+                matchRoomId = roomId;
+                matchUserId = matches[roomId].users.find(id => id !== userId);
+                showMatchFound();
+                break;
+              }
+            }
+          });
+        }
+      });
     }
-    return null;
-  }
 
-  async function removeWaiting(key) {
-    if (!key) return;
-    const entryRef = ref(db, `waiting_teams/${key}`);
-    await remove(entryRef);
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    matchesSection.textContent = '';
-    const teamName = form.teamName.value.trim();
-    const region = form.region.value;
-
-    if (!teamName || !region) {
-      matchesSection.textContent = 'Please fill in all fields.';
-      return;
+    function showMatchFound() {
+      loadingEl.style.display = 'none';
+      matchInfoEl.textContent = `Matched with User: ${matchUserId}`;
+      chatBtn.disabled = false;
+      chatBtn.classList.add('enabled');
+      chatBtn.title = 'Click to chat with your opponent';
     }
 
-    const ownKey = await addToWaiting(teamName, region);
+    // Open chat modal
+    chatBtn.addEventListener('click', () => {
+      if (!matchRoomId) return;
+      openChat();
+    });
 
-    matchesSection.textContent = 'Searching for a match... ⏳';
+    function openChat() {
+      userIDsEl.textContent = `User1: ${userId} | User2: ${matchUserId}`;
+      chatTimerEl.textContent = '00:00';
+      chatStartTime = Date.now();
+      chatModal.classList.add('active');
+      messagesEl.innerHTML = ''; // clear previous messages
 
-    let attempts = 0;
-    const maxAttempts = 10;
+      // Start timer
+      chatTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - chatStartTime;
+        const mins = Math.floor(elapsed / 60000).toString().padStart(2, '0');
+        const secs = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+        chatTimerEl.textContent = `${mins}:${secs}`;
+      }, 1000);
 
-    const intervalId = setInterval(async () => {
-      attempts++;
-      const match = await findMatch(region, ownKey);
-      if (match) {
-        clearInterval(intervalId);
+      listenForMessages();
+    }
 
-        await removeWaiting(match.key);
-        await removeWaiting(ownKey);
+    chatModalClose.addEventListener('click', () => {
+      chatModal.classList.remove('active');
+      clearInterval(chatTimerInterval);
+      chatInput.value = '';
+      messagesEl.innerHTML = '';
+      stopListeningForMessages();
+    });
 
-        matchesSection.innerHTML = `
-          <div class="match-card">
-            Matched with <strong>${match.data.teamName}</strong> from <em>${match.data.region}</em>!
-          </div>
-        `;
-      } else if (attempts >= maxAttempts) {
-        clearInterval(intervalId);
-        await removeWaiting(ownKey);
-        matchesSection.textContent = 'No matches found right now. Try again later.';
+    // Chat message send
+    chatForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      sendMessage(text);
+      chatInput.value = '';
+    });
+
+    // Firebase message listener and sender
+    let messagesRef = null;
+    let messagesListener = null;
+
+    function listenForMessages() {
+      messagesRef = db.ref(`chatrooms/${matchRoomId}/messages`);
+      messagesListener = messagesRef.on('child_added', snapshot => {
+        const msg = snapshot.val();
+        addMessage(msg);
+      });
+    }
+
+    function stopListeningForMessages() {
+      if (messagesRef && messagesListener) {
+        messagesRef.off('child_added', messagesListener);
       }
-    }, 2000);
-  });
-</script>
+      messagesRef = null;
+      messagesListener = null;
+    }
+
+    function addMessage(msg) {
+      const div = document.createElement('div');
+      div.classList.add('msg');
+      div.classList.add(msg.userId === userId ? 'self' : 'other');
+      div.textContent = msg.userId + ': ' + msg.text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function sendMessage(text) {
+      if (!messagesRef) return;
+      const newMsgRef = messagesRef.push();
+      newMsgRef.set({
+        userId,
+        text,
+        timestamp: Date.now()
+      });
+    }
+  </script>
 </body>
 </html>
