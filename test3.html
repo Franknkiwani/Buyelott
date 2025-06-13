@@ -2,192 +2,474 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Native Modal Login Loader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLS 25 HUB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@600;800&display=swap" rel="stylesheet" />
   <style>
-    /* Basic reset + font */
+    /* Reset & basics */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #121212;
-      color: #eee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+      font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      background: linear-gradient(135deg, #0e0e0e, #1a1a1a);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-
-    button {
-      background: #2979ff;
-      border: none;
-      color: white;
-      padding: 14px 28px;
-      font-weight: 600;
-      font-size: 1.1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      box-shadow: 0 6px 12px rgba(41,121,255,0.4);
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: #5393ff;
-    }
-
-    /* Modal styles */
-    #modal {
+    header {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
+      top: 0; left: 0; right: 0;
+      height: 50px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       z-index: 1000;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.25);
     }
-
-    #modal.show {
-      opacity: 1;
-      pointer-events: all;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-
-    #modalContent {
-      background: #1e1e1e;
+    .ball-emoji {
+      font-size: 20px;
+      filter: drop-shadow(0 0 2px #fff8);
+    }
+    .logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: #00ff88;
+      text-shadow: 0 0 4px #00ff8855, 0 0 8px #00ff8844;
+    }
+    .my-team-button {
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 10px;
-      padding: 30px 40px;
-      max-width: 400px;
-      width: 90vw;
-      box-shadow: 0 0 40px rgba(0,150,255,0.5);
-      position: relative;
-      color: #eee;
-      font-size: 1rem;
-      user-select: none;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
     }
-
-    /* Close button */
-    #modalClose {
+    .my-team-button:hover {
+      background: rgba(0,255,136,0.15);
+      color: #00ff88;
+      border-color: #00ff88;
+    }
+    main {
+      padding-top: 60px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .background-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at top left, #22222255, transparent);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .modal {
+      background: rgba(255,255,255,0.07);
+      border-radius: 15px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px 0 rgba(0,255,136,0.3);
+      padding: 24px 32px;
+      max-width: 420px;
+      width: 90vw;
+      color: #e0ffe0;
+      text-align: center;
+      position: relative;
+    }
+    .modal h2 {
+      margin-bottom: 12px;
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: #00ff88;
+      text-shadow: 0 0 6px #00ff8899;
+    }
+    .modal .close-btn {
       position: absolute;
       top: 12px;
-      right: 12px;
-      font-size: 1.5rem;
+      right: 16px;
       background: none;
       border: none;
-      color: #eee;
+      font-size: 24px;
+      color: #00ff88;
       cursor: pointer;
-      user-select: none;
-      transition: color 0.3s ease;
+      transition: color 0.2s ease;
+      font-weight: 900;
+      line-height: 1;
     }
-    #modalClose:hover {
-      color: #2979ff;
+    .modal .close-btn:hover {
+      color: #00bb66;
     }
-
-    /* Sample login form inside modal */
-    form {
+    .user-team {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+    .user-team .flag {
+      width: 28px;
+      height: 20px;
+      border-radius: 3px;
+      object-fit: cover;
+      filter: drop-shadow(0 0 2px #0008);
+      border: 1px solid #00ff88aa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      color: #c0ffc0cc;
+      text-align: left;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #00ff8822;
+    }
+    th {
+      border-bottom: 2px solid #00ff8866;
+      font-weight: 700;
+      color: #00ff88dd;
+    }
+    td.flag-cell img {
+      width: 22px;
+      height: 15px;
+      border-radius: 3px;
+      object-fit: cover;
+      filter: drop-shadow(0 0 1px #0006);
+      border: 1px solid #00ff88aa;
+    }
+    /* Highlight user row */
+    tr.user-row {
+      background: rgba(0, 255, 136, 0.15);
+      font-weight: 700;
+      color: #00ff88;
+      box-shadow: inset 2px 0 6px #00ff88bb;
     }
 
-    label {
-      margin: 12px 0 6px;
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
     }
-
-    input {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-    }
-
-    input:focus {
-      outline: none;
-      box-shadow: 0 0 8px #2979ff;
-      background: #121212;
-      color: #eee;
-    }
-
-    button[type="submit"] {
-      margin-top: 24px;
-      background: #00c853;
-      box-shadow: 0 6px 12px rgba(0, 200, 83, 0.6);
-    }
-
-    button[type="submit"]:hover {
-      background: #5efc82;
-    }
-
   </style>
 </head>
 <body>
 
-  <button id="openLogin">Open Login Modal</button>
+  <div class="background-overlay"></div>
 
-  <!-- Modal container -->
-  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
-    <div id="modalContent">
-      <button id="modalClose" aria-label="Close modal">&times;</button>
-      <!-- Login content will be injected here -->
-      <div id="modalBody">
-        <p style="opacity:0.6; font-style: italic;">Loading login...</p>
+  <header>
+    <div class="logo-container">
+      <div class="ball-emoji">⚽</div>
+      <div class="logo-text">DLS 25 HUB</div>
+    </div>
+    <button class="my-team-button" id="myTeamBtn">MY TEAM</button>
+  </header>
+
+  <main></main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <button class="close-btn" id="closeModalBtn" aria-label="Close">&times;</button>
+      <h2 id="modalTitle">Your Team</h2>
+      <div class="user-team" id="userTeam">
+        <!-- Flag + country name + rank here -->
       </div>
+      <table id="groupTable" aria-describedby="modalTitle">
+        <thead>
+          <tr>
+            <th>Flag</th>
+            <th>Team Name</th>
+            <th>Points</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Teams go here -->
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <script>
-    const modal = document.getElementById('modal');
-    const modalBody = document.getElementById('modalBody');
-    const openBtn = document.getElementById('openLogin');
-    const closeBtn = document.getElementById('modalClose');
+  <!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    get,
+    set,
+    update,
+    runTransaction,
+    onValue,
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // Show modal
-    function showModal() {
-      modal.classList.add('show');
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // UI elements
+  const myTeamBtn = document.getElementById("myTeamBtn");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const userTeamDiv = document.getElementById("userTeam");
+  const groupTableBody = document.querySelector("#groupTable tbody");
+
+  let userCountry = null;
+  let userPoints = 0;
+  let rankedTeams = [];
+
+  // Detect user country via ipapi
+  async function detectCountry() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (!res.ok) throw new Error("Failed to fetch country data");
+      const data = await res.json();
+      userCountry = { name: data.country_name, code: data.country_code };
+    } catch (error) {
+      console.error("Country detection error:", error);
+      userCountry = { name: "Unknown", code: "UN" };
+    }
+  }
+
+  // Fetch all teams in GroupA from Firebase dynamically, with their points and names
+  async function fetchTeamsAndPoints() {
+    const groupRef = ref(db, 'groups/GroupA');
+    try {
+      const snapshot = await get(groupRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        // Convert Firebase object to array with code, name, points
+        return Object.entries(data).map(([code, info]) => ({
+          code: code.toUpperCase(),
+          name: info.countryName || info.name || code,
+          points: info.points || 0,
+          rank: 0,
+        }));
+      }
+    } catch (e) {
+      console.error("Firebase fetch error:", e);
+    }
+    return [];
+  }
+
+  // Sort and assign ranks
+  function calculateRanks(teamsWithPoints) {
+    teamsWithPoints.sort((a, b) => b.points - a.points);
+    let currentRank = 1;
+    for (let i = 0; i < teamsWithPoints.length; i++) {
+      if (i > 0 && teamsWithPoints[i].points < teamsWithPoints[i - 1].points) {
+        currentRank = i + 1;
+      }
+      teamsWithPoints[i].rank = currentRank;
+    }
+  }
+
+  // Show modal and render real teams dynamically
+  async function showModal() {
+    if (!userCountry) {
+      userTeamDiv.textContent = "Loading your team info...";
+      return;
+    }
+    rankedTeams = await fetchTeamsAndPoints();
+    calculateRanks(rankedTeams);
+
+    const userTeamInfo = rankedTeams.find(t => t.code === userCountry.code);
+    userPoints = userTeamInfo ? userTeamInfo.points : 0;
+    const userRank = userTeamInfo ? userTeamInfo.rank : "-";
+
+    userTeamDiv.innerHTML = `
+      <img class="flag" src="https://flagcdn.com/w40/${userCountry.code.toLowerCase()}.png" alt="${userCountry.name} flag" />
+      <span>${userCountry.name}</span>
+      <span style="font-weight: 500; margin-left: 10px; font-size: 0.85rem; color: #aaffaa;">
+        (Points: ${userPoints}, Rank: ${userRank})
+      </span>
+    `;
+
+    groupTableBody.innerHTML = "";
+    rankedTeams.forEach((team) => {
+      const isUser = team.code === userCountry.code;
+      groupTableBody.innerHTML += `
+        <tr class="${isUser ? "user-row" : ""}">
+          <td class="flag-cell"><img src="https://flagcdn.com/w40/${team.code.toLowerCase()}.png" alt="${team.name} flag" /></td>
+          <td>${team.name}</td>
+          <td>${team.points}</td>
+          <td>${team.rank}</td>
+        </tr>
+      `;
+    });
+
+    modalOverlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function hideModal() {
+    modalOverlay.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  // Helper: group names for assignment
+  const MAX_GROUPS = 4;
+  const MAX_COUNTRIES_PER_GROUP = 4;
+
+  function groupNameFromIndex(index) {
+    return `Group${String.fromCharCode(65 + index)}`; // A, B, C, D
+  }
+
+  // Check if tournament ended
+  async function isTournamentEnded() {
+    const endDateRef = ref(db, "tournament/endDate");
+    try {
+      const snapshot = await get(endDateRef);
+      if (!snapshot.exists()) return false;
+      const endDateStr = snapshot.val();
+      const now = new Date();
+      const endDate = new Date(endDateStr);
+      return now >= endDate;
+    } catch (e) {
+      console.error("Error fetching tournament end date:", e);
+      return false;
+    }
+  }
+
+  // Assign user to a team in a group (dynamic)
+  async function assignUserTeam(userId) {
+    if (!userCountry) {
+      throw new Error("User country not detected");
     }
 
-    // Hide modal
-    function hideModal() {
-      modal.classList.remove('show');
-      // Clear modal content on close for clean state next open
-      modalBody.innerHTML = '<p style="opacity:0.6; font-style: italic;">Loading login...</p>';
+    const ended = await isTournamentEnded();
+    if (ended) {
+      return { error: "Tournament has ended, no more teams can be assigned." };
     }
 
-    // Load login partial and inject
-    async function loadLogin() {
-      try {
-        const response = await fetch('login.html');
-        if (!response.ok) throw new Error('Failed to fetch login partial');
-        const html = await response.text();
-        modalBody.innerHTML = html;
+    // Check if this country is already assigned anywhere
+    for (let i = 0; i < MAX_GROUPS; i++) {
+      const group = groupNameFromIndex(i);
+      const groupRef = ref(db, `groups/${group}`);
+      const snapshot = await get(groupRef);
+      const groupData = snapshot.exists() ? snapshot.val() : {};
 
-        // Call any init function inside the login partial if present
-        if (typeof initLogin === 'function') {
-          initLogin();
+      for (const [teamUserId, teamInfo] of Object.entries(groupData)) {
+        if (teamInfo.countryCode === userCountry.code) {
+          if (teamUserId === userId) {
+            return { assignedGroup: group, message: `You already represent your country in ${group}` };
+          }
+          return { error: `Another user already represents ${userCountry.name}. Try again later.` };
         }
-      } catch (error) {
-        modalBody.innerHTML = `<p style="color: #f44336;">Error loading login page: ${error.message}</p>`;
       }
     }
 
-    // Event listeners
-    openBtn.addEventListener('click', () => {
-      showModal();
-      loadLogin();
-    });
+    // Assign user to first group with space
+    for (let i = 0; i < MAX_GROUPS; i++) {
+      const group = groupNameFromIndex(i);
+      const groupRef = ref(db, `groups/${group}`);
 
-    closeBtn.addEventListener('click', hideModal);
+      const result = await runTransaction(groupRef, (currentData) => {
+        if (currentData === null) currentData = {};
 
-    // Close modal on outside click
-    modal.addEventListener('click', e => {
-      if (e.target === modal) hideModal();
-    });
+        const countriesInGroup = new Set();
+        for (const userIdKey in currentData) {
+          countriesInGroup.add(currentData[userIdKey].countryCode);
+        }
+        if (countriesInGroup.size >= MAX_COUNTRIES_PER_GROUP) {
+          return; // group full, abort transaction
+        }
 
-    // Accessibility: close modal on ESC
-    window.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && modal.classList.contains('show')) {
-        hideModal();
+        currentData[userId] = {
+          countryName: userCountry.name,
+          countryCode: userCountry.code,
+          assignedAt: new Date().toISOString(),
+        };
+
+        return currentData;
+      });
+
+      if (result.committed) {
+        return { assignedGroup: group, message: `Assigned to ${group}` };
       }
-    });
-  </script>
+      // Else try next group
+    }
 
+    return { error: "All groups are full. Maximum 16 unique countries assigned." };
+  }
+
+  // Demo usage — replace user123 with actual logged-in user ID
+  async function handleUserAssignment() {
+    const userId = "user123"; // Replace with your auth user ID in real app
+
+    try {
+      const result = await assignUserTeam(userId);
+      if (result.error) {
+        console.warn(result.error);
+        userTeamDiv.textContent = result.error;
+      } else {
+        console.log(result.message);
+        userTeamDiv.textContent = `${userCountry.name} assigned to ${result.assignedGroup}`;
+      }
+    } catch (e) {
+      console.error("Assignment error:", e);
+      userTeamDiv.textContent = "Error assigning team. Try again.";
+    }
+  }
+
+  // Init
+  window.addEventListener("load", async () => {
+    await detectCountry();
+    await handleUserAssignment();
+  });
+
+  myTeamBtn.addEventListener("click", showModal);
+  closeModalBtn.addEventListener("click", hideModal);
+
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) hideModal();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalOverlay.style.display === "flex") {
+      hideModal();
+    }
+  });
+</script>
 </body>
 </html>
