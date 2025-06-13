@@ -1,447 +1,131 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>DLS League Pro</title>  
-  <style>  
-    /* Reset and basics */  
-    html, body {  
-      margin: 0; padding: 0;  
-      background: #121212;  
-      color: #eee;  
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
-      user-select: none; /* No text selection */  
-    }  /* Sticky header, 80% width, curved edges, glassy */  
-header {  
-  position: sticky;  
-  top: 0;  
-  width: 80%;  
-  margin: 0 auto;  
-  background: rgba(20, 20, 30, 0.85);  
-  backdrop-filter: blur(12px);  
-  border-radius: 0 0 20px 20px;  
-  padding: 1rem 2rem;  
-  box-shadow: 0 4px 15px rgba(0,0,0,0.7);  
-  display: flex;  
-  justify-content: space-between;  
-  align-items: center;  
-  z-index: 1000;  
-  -webkit-tap-highlight-color: transparent; /* no blue highlight */  
-}  
-
-header h1 {  
-  font-weight: 700;  
-  font-size: 1.8rem;  
-  color: #60a5fa;  
-  margin: 0;  
-  user-select: none;  
-}  
-
-header nav {  
-  font-weight: 600;  
-  color: #bbdefb;  
-  cursor: pointer;  
-  user-select: none;  
-}  
-
-header nav:hover {  
-  color: #90caf9;  
-}  
-
-/* Big Trophy on top center */  
-.trophy-container {  
-  width: 80%;  
-  margin: 2rem auto 1rem;  
-  text-align: center;  
-  user-select: none;  
-}  
-
-.trophy-icon {  
-  font-size: 6rem;  
-  color: gold;  
-  text-shadow: 0 0 10px #ffd700cc;  
-  user-select: none;  
-}  
-
-/* Countdown glassy small border */  
-.countdown-container {  
-  width: 80%;  
-  margin: 0 auto 2rem;  
-  background: rgba(30, 30, 50, 0.7);  
-  backdrop-filter: blur(15px);  
-  border-radius: 12px;  
-  padding: 0.75rem 1.5rem;  
-  box-shadow: 0 0 15px rgba(100, 100, 255, 0.4);  
-  font-weight: 700;  
-  font-size: 1.2rem;  
-  color: #90caf9;  
-  text-align: center;  
-  user-select: none;  
-}  
-
-/* League table container 95% width */  
-#league-table {  
-  width: 95%;  
-  max-width: 900px;  
-  margin: 0 auto 3rem;  
-  background: rgba(40, 40, 60, 0.85);  
-  border-radius: 16px;  
-  box-shadow: 0 0 25px rgba(0, 0, 80, 0.6);  
-  color: #ddd;  
-  font-weight: 600;  
-  user-select: none;  
-  overflow: hidden;  
-}  
-
-/* Table header row */  
-.table-header, .table-row {  
-  display: grid;  
-  grid-template-columns: 50px 1fr 70px;  
-  padding: 0.8rem 1.5rem;  
-  align-items: center;  
-}  
-
-.table-header {  
-  background: rgba(50, 50, 80, 0.95);  
-  font-size: 1.1rem;  
-  border-bottom: 2px solid #60a5fa;  
-  text-transform: uppercase;  
-  letter-spacing: 0.05em;  
-}  
-
-/* Team cell with logo and name */  
-.team {  
-  display: flex;  
-  align-items: center;  
-  gap: 0.8rem;  
-  font-size: 1rem;  
-  color: #bbdefb;  
-}  
-
-.team-logo {  
-  width: 40px;  
-  height: 40px;  
-  border-radius: 50%;  
-  background: #3b82f6;  
-  display: flex;  
-  justify-content: center;  
-  align-items: center;  
-  color: white;  
-  font-weight: 700;  
-  font-size: 1.2rem;  
-  box-shadow: 0 0 8px #3b82f6aa;  
-  user-select: none;  
-}  
-
-/* Table rows */  
-.table-row {  
-  border-bottom: 1px solid #3a3f58;  
-  transition: background-color 0.3s ease;  
-  cursor: default;  
-}  
-
-.table-row:hover {  
-  background: rgba(60, 120, 240, 0.15);  
-}  
-
-/* Highlight current user's team */  
-.highlight {  
-  border-left: 4px solid #facc15;  
-  background: rgba(250, 204, 21, 0.15);  
-  box-shadow: 0 0 10px 2px #facc15;  
-}  
-
-/* Cells */  
-.pos {  
-  text-align: center;  
-  font-size: 1.1rem;  
-  color: #90caf9;  
-}  
-
-.points {  
-  text-align: center;  
-  font-size: 1.1rem;  
-  color: #bbdefb;  
-}  
-
-/* No teams message */  
-.no-teams-msg {  
-  padding: 2rem 1rem;  
-  font-size: 1.3rem;  
-  color: #60a5fa;  
-  text-align: center;  
-  font-weight: 600;  
-}  
-.trophy-container {  
-width: 80%;  
-margin: 2rem auto 1rem;  
-text-align: center;  
-user-select: none;
-
-}
-
-.trophy-icon {
-font-size: 8rem; /* Bigger than before */
-color: gold;
-text-shadow: 0 0 15px #ffd700cc;
-user-select: none;
-}
-
-/* Actually use the trophy-icon class on the trophy */
-.trophy-container {
-font-size: 8rem;
-color: gold;
-text-shadow: 0 0 15px #ffd700cc;
-}
-
-.trophy-desc {
-margin-top: 0.5rem;
-font-size: 1.25rem;
-font-weight: 600;
-color: #90caf9;
-user-select: none;
-}
-#my-team-btn {
-padding: 0.5rem 1.4rem;
-border-radius: 12px;
-background: rgba(255, 255, 255, 0.12); /* translucent white glass */
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-border: 1.5px solid rgba(255, 255, 255, 0.25);
-color: #60a5fa;
-font-weight: 700;
-font-size: 1rem;
-letter-spacing: 0.05em;
-user-select: none;
-transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-box-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
-cursor: pointer;
-outline-offset: 3px;
-outline-color: transparent;
-outline-style: solid;
-}
-
-#my-team-btn:hover,
-#my-team-btn:focus {
-background: rgba(96, 165, 250, 0.15);
-border-color: #60a5fa;
-color: #a5d8ff;
-box-shadow: 0 0 12px 3px #60a5faaa;
-outline-color: #60a5fa;
-}
-
-#my-team-btn:active {
-background: rgba(96, 165, 250, 0.3);
-box-shadow: 0 0 6px 1px #60a5facc;
-transform: scale(0.97);
-}
-.ios-popup {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100%);
-  background: rgba(255, 255, 255, 0.95);
-  color: #333;
-  padding: 14px 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-size: 16px;
-  max-width: 90%;
-  min-width: 250px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
-  pointer-events: none; /* disable interactions when hidden */
-}
-
-.ios-popup.show {
-  transform: translateX(-50%) translateY(0);
-  pointer-events: auto; /* enable interactions */
-}
-
-.ios-popup.hidden {
-  transform: translateX(-50%) translateY(100%);
-  pointer-events: none;
-}
-
-.ios-popup-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-}
-
-#ios-popup-close {
-  background: none;
-  border: none;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  color: #666;
-  padding: 0;
-  user-select: none;
-}
-/* Modal background overlay */
-.ios-modal {
-  position: fixed;
-  inset: 0; /* top:0; left:0; right:0; bottom:0 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.ios-modal.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Dark transparent overlay */
-.ios-modal-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(8px);
-}
-
-/* Modal content box */
-.ios-modal-content {
-  position: relative;
-  background: #fff;
-  border-radius: 20px;
-  padding: 24px 32px;
-  max-width: 320px;
-  width: 90%;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #111;
-  text-align: center;
-  z-index: 10;
-  outline: none;
-}
-
-/* Modal text */
-#ios-modal-desc {
-  font-size: 17px;
-  margin-bottom: 20px;
-  user-select: text;
-}
-
-/* Close button styled like iOS */
-#ios-modal-close {
-  background: #007aff;
-  border: none;
-  color: white;
-  font-size: 17px;
-  font-weight: 600;
-  border-radius: 14px;
-  padding: 10px 28px;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.25s ease;
-}
-
-#ios-modal-close:hover,
-#ios-modal-close:focus {
-  background: #005bb5;
-  outline: none;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DLS Match Making</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: #f5f7fa;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    border-bottom: 3px solid #0070f3;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    background: white;
+    user-select: none;
+  }
+  main {
+    flex: 1;
+    max-width: 480px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
+  }
+  label {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  input[type="text"], select {
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+  input[type="text"]:focus, select:focus {
+    border-color: #0070f3;
+    outline: none;
+  }
+  button {
+    background: #0070f3;
+    border: none;
+    color: white;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+  button:hover {
+    background: #005bb5;
+  }
+  section#matches {
+    margin-top: 2rem;
+  }
+  .match-card {
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: 7px;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 0.08);
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+  }
+  @media (max-width: 520px) {
+    main {
+      margin: 1rem;
+    }
+    form {
+      padding: 1rem 1rem;
+    }
+  }
 </style>
+</head>
+<body>
+<header>DLS Match Making</header>
+<main>
+  <form id="matchForm" autocomplete="off">
+    <label for="teamName">Your Team Name</label>
+    <input type="text" id="teamName" name="teamName" placeholder="e.g. Cape Crushers" required minlength="3" maxlength="20" />
 
-</head>  
-<body>    <header>  
-    <h1>Dls Cup</h1>  
-    <nav id="my-team-btn" tabindex="0" role="button" aria-label="My Team">My Team</nav>  
-  </header>  <div class="trophy-container" aria-hidden="true">  
-    🏆  
-    <p class="trophy-desc">WORLD CUP</p>  
-  </div>  
-  <div class="countdown-container" aria-live="polite" aria-atomic="true" role="timer">  
-    Season ends in <span id="season-timer">--:--:--</span>  
-  </div>    <section id="league-table" role="table" aria-label="League standings">  
-    <div class="table-header" role="row">  
-      <div class="pos" role="columnheader">#</div>  
-      <div role="columnheader">Team</div>  
-      <div class="points" role="columnheader">Pts</div>  
-    </div>  
-  </section>  
+    <label for="region">Region</label>
+    <select id="region" name="region" required>
+      <option value="" disabled selected>Select region</option>
+      <option value="africa">Africa</option>
+      <option value="europe">Europe</option>
+      <option value="asia">Asia</option>
+      <option value="americas">Americas</option>
+      <option value="oceania">Oceania</option>
+    </select>
 
-<!-- Modal popup container -->
-<div id="ios-modal" class="ios-modal hidden" role="alertdialog" aria-modal="true" aria-labelledby="ios-modal-title" aria-describedby="ios-modal-desc">
-  <div class="ios-modal-overlay"></div>
-  <div class="ios-modal-content" tabindex="-1">
-    <h2 id="ios-modal-title" style="display:none;">Alert</h2>
-    <p id="ios-modal-desc"></p>
-    <button id="ios-modal-close" aria-label="Close popup">OK</button>
-  </div>
-</div>
-<style>  
-  /* Simple modal styles, adjust to your vibe */  
-  #team-popup {  
-    display: none;  
-    position: fixed;  
-    z-index: 9999;  
-    left: 50%; top: 50%;  
-    transform: translate(-50%, -50%);  
-    background: rgba(30, 30, 30, 0.95);  
-    color: white;  
-    padding: 20px 30px;  
-    border-radius: 12px;  
-    box-shadow: 0 0 15px #00fff7aa;  
-    min-width: 280px;  
-    font-family: 'Urbanist', sans-serif;  
-  }  
-  #team-popup h2 {  
-    margin-top: 0;  
-    font-size: 1.4rem;  
-  }  
-  #team-popup .flag {  
-    font-size: 3rem;  
-    margin-bottom: 10px;  
-  }  
-  #team-popup .points {  
-    font-weight: bold;  
-    font-size: 1.2rem;  
-    margin-top: 10px;  
-  }  
-  #team-popup .pos {  
-    font-size: 1rem;  
-    opacity: 0.75;  
-  }  
-  #team-popup button.close-btn {  
-    margin-top: 15px;  
-    padding: 8px 15px;  
-    background: #00fff7;  
-    border: none;  
-    border-radius: 6px;  
-    cursor: pointer;  
-    font-weight: 700;  
-    color: #222;  
-    transition: background 0.3s ease;  
-  }  
-  #team-popup button.close-btn:hover {  
-    background: #00ccc9;  
-  }  
-</style>  <div id="team-popup" role="dialog" aria-modal="true" aria-labelledby="team-popup-title">  
-  <div class="flag" id="popup-flag"></div>  
-  <h2 id="team-popup-title"></h2>  
-  <div class="pos" id="popup-position"></div>  
-  <div class="points" id="popup-points"></div>  
-  <button class="close-btn" id="popup-close-btn">Close</button>  
-</div>  <!-- Firebase SDKs --> 
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-<script>
-  // Initialize Firebase
+    <button type="submit">Find Match</button>
+  </form>
+
+  <section id="matches" aria-live="polite"></section>
+</main>
+
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getDatabase, ref, push, get, query, orderByChild, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+  // Your real Firebase config:
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -453,240 +137,90 @@ transform: scale(0.97);
     measurementId: "G-LLT6F9WRKH"
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  // Track user team ID in localStorage
-  let userTeamId = localStorage.getItem('userTeamId');
+  const form = document.getElementById('matchForm');
+  const matchesSection = document.getElementById('matches');
 
-  // Store latest teams data globally for popup use
-  let latestTeamsData = null;
-
-  // Helper: Convert country code (e.g. "US") to emoji flag 🇺🇸
-  function countryCodeToEmoji(code) {
-    return code.toUpperCase().replace(/./g, char =>
-      String.fromCodePoint(127397 + char.charCodeAt())
-    );
-  }
-
-  // Render league table
-  function renderTeams(data) {
-    const container = document.getElementById('league-table');
-    // Remove all rows except header
-    while (container.children.length > 1) {
-      container.removeChild(container.lastChild);
-    }
-
-    if (!data) {
-      showNoTeams(container);
-      return;
-    }
-
-    // Convert teams object to array, sorted by points descending
-    const teamsArray = Object.entries(data)
-      .map(([key, team]) => ({ id: key, ...team }))
-      .sort((a, b) => (b.points || 0) - (a.points || 0));
-
-    if (teamsArray.length === 0) {
-      showNoTeams(container);
-      return;
-    }
-
-    teamsArray.forEach((team, index) => {
-      const isMyTeam = team.id === userTeamId;
-      const row = document.createElement('div');
-      row.className = 'table-row';
-      if (isMyTeam) row.classList.add('highlight');
-      row.setAttribute('role', 'row');
-      row.innerHTML = `
-        <div class="pos" role="cell">${index + 1}</div>
-        <div class="team" role="cell">
-          <div class="team-logo" aria-hidden="true">${team.logo || team.name[0]}</div>
-          <div class="team-name">${team.name}</div>
-        </div>
-        <div class="points" role="cell">${team.points || 0}</div>
-      `;
-      container.appendChild(row);
+  async function addToWaiting(teamName, region) {
+    const waitingRef = ref(db, 'waiting_teams');
+    const newEntryRef = await push(waitingRef, {
+      teamName,
+      region,
+      timestamp: Date.now()
     });
+    return newEntryRef.key;
   }
 
-  // Show message if no teams exist
-  function showNoTeams(container) {
-    const msg = document.createElement('div');
-    msg.className = 'no-teams-msg';
-    msg.textContent = "No teams yet. Be the first to create one!";
-    container.appendChild(msg);
-  }
+  async function findMatch(region, excludeKey) {
+    const waitingRef = ref(db, 'waiting_teams');
+    const regionQuery = query(waitingRef, orderByChild('region'));
+    const snapshot = await get(regionQuery);
+    if (!snapshot.exists()) return null;
 
-  // Listen for teams data changes and render
-  const teamsRef = db.ref('teams');
-  teamsRef.on('value', snapshot => {
-    latestTeamsData = snapshot.val();
-    renderTeams(latestTeamsData);
-  });
-
-  // Show popup with user team info
-  function showTeamPopup(team, position) {
-    const popup = document.getElementById('team-popup');
-    document.getElementById('popup-flag').textContent = team.logo || countryCodeToEmoji(team.name.slice(0,2)) || '🏳️';
-    document.getElementById('team-popup-title').textContent = team.name;
-    document.getElementById('popup-position').textContent = `Position: #${position}`;
-    document.getElementById('popup-points').textContent = `Points: ${team.points || 0}`;
-    popup.style.display = 'block';
-  }
-
-  // Hide popup on close button click
-  document.getElementById('popup-close-btn').addEventListener('click', () => {
-    document.getElementById('team-popup').style.display = 'none';
-  });
-
-  // Handle "My Team" button click
-  document.getElementById('my-team-btn').addEventListener('click', () => {
-    // If user already has a team, show popup instead of creating new
-    if (userTeamId) {
-      if (!latestTeamsData) {
-        showPopup('Teams data not loaded yet, try again in a second.');
-        return;
+    let matchKey = null;
+    let matchData = null;
+    snapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      const key = childSnap.key;
+      if (data.region === region && key !== excludeKey) {
+        matchKey = key;
+        matchData = data;
+        return true;
       }
+    });
+    if (matchKey && matchData) {
+      return { key: matchKey, data: matchData };
+    }
+    return null;
+  }
 
-      // Find user team in latest data
-      const teamsArray = Object.entries(latestTeamsData)
-        .map(([key, team]) => ({ id: key, ...team }))
-        .sort((a, b) => (b.points || 0) - (a.points || 0));
+  async function removeWaiting(key) {
+    if (!key) return;
+    const entryRef = ref(db, `waiting_teams/${key}`);
+    await remove(entryRef);
+  }
 
-      const userIndex = teamsArray.findIndex(t => t.id === userTeamId);
-      if (userIndex === -1) {
-        showPopup('Your team was not found. Try refreshing the page.');
-        return;
-      }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    matchesSection.textContent = '';
+    const teamName = form.teamName.value.trim();
+    const region = form.region.value;
 
-      const userTeam = teamsArray[userIndex];
-      showTeamPopup(userTeam, userIndex + 1);
+    if (!teamName || !region) {
+      matchesSection.textContent = 'Please fill in all fields.';
       return;
     }
 
-    // No user team: create it using free ipapi.co API to get user country
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        const countryName = data.country_name || 'Unknown Country';
-        const countryCode = data.country_code || '??';
-        const flagEmoji = countryCodeToEmoji(countryCode);
+    const ownKey = await addToWaiting(teamName, region);
 
-        // Generate new team key
-        userTeamId = db.ref().child('teams').push().key;
-        localStorage.setItem('userTeamId', userTeamId);
+    matchesSection.textContent = 'Searching for a match... ⏳';
 
-        const newTeam = {
-          name: countryName,
-          logo: flagEmoji,
-          points: 0
-        };
+    let attempts = 0;
+    const maxAttempts = 10;
 
-        db.ref('teams/' + userTeamId).set(newTeam)
-          .then(() => {
-            showPopup(`Team "${countryName}" created with flag ${flagEmoji}!`);
-          })
-          .catch(e => {
-            showPopup('Failed to create your team: ' + e.message);
-            localStorage.removeItem('userTeamId');
-            userTeamId = null;
-          });
-      })
-      .catch(() => {
-        showPopup('Failed to detect your country. Try again later.');
-      });
-  });
-
-  // Season end countdown with days, hours, minutes, seconds fixed
-  const seasonEndRef = db.ref('seasonEnd');
-
-  function startCountdown(targetTime) {
-    let intervalId;
-    function updateTimer() {
-      const now = Date.now();
-      let distance = targetTime - now;
-
-      if (distance < 0) {
-        document.getElementById('season-timer').textContent = 'Season ended';
+    const intervalId = setInterval(async () => {
+      attempts++;
+      const match = await findMatch(region, ownKey);
+      if (match) {
         clearInterval(intervalId);
-        return;
+
+        await removeWaiting(match.key);
+        await removeWaiting(ownKey);
+
+        matchesSection.innerHTML = `
+          <div class="match-card">
+            Matched with <strong>${match.data.teamName}</strong> from <em>${match.data.region}</em>!
+          </div>
+        `;
+      } else if (attempts >= maxAttempts) {
+        clearInterval(intervalId);
+        await removeWaiting(ownKey);
+        matchesSection.textContent = 'No matches found right now. Try again later.';
       }
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      distance -= days * (1000 * 60 * 60 * 24);
-
-      const hours = Math.floor(distance / (1000 * 60 * 60));
-      distance -= hours * (1000 * 60 * 60);
-
-      const minutes = Math.floor(distance / (1000 * 60));
-      distance -= minutes * (1000 * 60);
-
-      const seconds = Math.floor(distance / 1000);
-
-      const formattedTime = `${days} day${days !== 1 ? 's' : ''} ` +
-                            `${hours.toString().padStart(2, '0')}:` +
-                            `${minutes.toString().padStart(2, '0')}:` +
-                            `${seconds.toString().padStart(2, '0')}`;
-
-      document.getElementById('season-timer').textContent = formattedTime;
-    }
-
-    updateTimer();
-    intervalId = setInterval(updateTimer, 1000);
-  }
-
-  seasonEndRef.on('value', snapshot => {
-    const val = snapshot.val();
-    if (val) {
-      const targetDate = new Date(val).getTime();
-      startCountdown(targetDate);
-    } else {
-      document.getElementById('season-timer').textContent = 'No season end set';
-    }
+    }, 2000);
   });
-  const iosModal = document.getElementById('ios-modal');
-const iosModalDesc = document.getElementById('ios-modal-desc');
-const iosModalClose = document.getElementById('ios-modal-close');
-const iosModalContent = iosModal.querySelector('.ios-modal-content');
-
-function showPopup(message) {
-  iosModalDesc.textContent = message;
-  iosModal.classList.add('show');
-  iosModal.classList.remove('hidden');
-  iosModalContent.focus();
-
-  // Trap focus inside modal (basic)
-  function trapFocus(e) {
-    if (!iosModal.contains(e.target)) {
-      e.stopPropagation();
-      iosModalContent.focus();
-    }
-  }
-  document.addEventListener('focus', trapFocus, true);
-
-  function cleanup() {
-    iosModal.classList.remove('show');
-    iosModal.classList.add('hidden');
-    document.removeEventListener('focus', trapFocus, true);
-    iosModalClose.removeEventListener('click', onClose);
-    document.removeEventListener('keydown', onKeyDown);
-  }
-
-  function onClose() {
-    cleanup();
-  }
-
-  function onKeyDown(e) {
-    if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      cleanup();
-    }
-  }
-
-  iosModalClose.addEventListener('click', onClose);
-  document.addEventListener('keydown', onKeyDown);
-}
 </script>
- </body>  
+</body>
 </html>
