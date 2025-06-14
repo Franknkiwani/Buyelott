@@ -1,204 +1,725 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DLS Matchmaking + Chat</title>
-  <style>
-    body {
-      background: #0e0e0e;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    h1 {
-      margin-bottom: 1rem;
-    }
-    button {
-      padding: 0.8rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-top: 1rem;
-      cursor: pointer;
-      background: #2563eb;
-      color: #fff;
-      transition: 0.3s ease;
-    }
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-    #chatBtn {
-      margin-top: 2rem;
-    }
-    #chatModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    #chatModal.active {
-      display: flex;
-    }
-    #chatBox {
-      width: 90%;
-      max-width: 400px;
-      background: #1c1c1c;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    #chatHeader {
-      background: #2563eb;
-      padding: 1rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #chatMessages {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    .msg {
-      margin-bottom: 0.7rem;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      max-width: 70%;
-      word-wrap: break-word;
-    }
-    .self {
-      background: #2563eb;
-      margin-left: auto;
-    }
-    .other {
-      background: #4b5563;
-      margin-right: auto;
-    }
-    #chatForm {
-      display: flex;
-      padding: 1rem;
-      background: #111;
-    }
-    #chatInput {
-      flex: 1;
-      border: none;
-      padding: 0.7rem;
-      border-radius: 8px;
-    }
-    #chatInput:focus {
-      outline: none;
-    }
-    #sendBtn {
-      margin-left: 0.5rem;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>DLS Champions League</title>
+<style>
+  body {
+  margin: 0;
+  background-color: #000;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 15px;
+  background-color: #000;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, blue, cyan) 1;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.circle {
+  background-color: yellow;
+  color: black;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 5px;
+  font-size: 14px;
+}
+
+.league-text {
+  font-size: 16px;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.glass-btn {
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+#fixtureContainer,
+#tableContainer {
+  margin: 15px auto;
+  max-width: 300px;
+  background-color: #111;
+  padding: 10px;
+  border-radius: 15px; /* Curved corners */
+  border: 1px solid #333;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Optional: Adds shadow for depth */
+}
+
+#staticPrevBtn {
+  display: block;
+  margin: 0 auto 15px;
+  max-width: 300px;
+}
+
+#fixtureContainer span {
+  font-size: 14px;
+}
+
+.match-team {
+  color: white;
+  font-weight: bold;
+}
+
+.match-vs {
+  color: cyan;
+}
+
+.match-status {
+  color: lime;
+}
+
+.match-score {
+  color: gray;
+}
+
+.match-info {
+  text-align: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+}
+
+.match-info .score {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.winning-team {
+  color: green;
+}
+
+.losing-team {
+  color: red;
+}
+
+.team-owner {
+  font-size: 12px;
+  color: gray;
+}
+
+.time-ago {
+  font-size: 12px;
+  color: #888;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #fff;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, blue, cyan) 1;
+  padding-bottom: 5px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  background-color: #111;
+  color: white;
+  border-radius: 15px; /* Curved corners */
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Optional: Adds shadow for depth */
+}
+
+.leaderboard-table thead {
+  background: linear-gradient(to right, #0d47a1, #1976d2);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.leaderboard-table th {
+  padding: 10px;
+  text-align: left;
+  color: #fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.leaderboard-table tbody tr {
+  background-color: #222;
+  border-radius: 8px; /* Curved row edges */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+  transform: translateY(-2px);
+  background-color: #333;
+}
+
+.leaderboard-table td {
+  padding: 12px 10px;
+  vertical-align: top;
+  font-size: 13px;
+  border-radius: 8px; /* Curved corners for individual cells */
+}
+
+/* Optional: Curved corners for the first and last row cells */
+.leaderboard-table tbody tr:first-child td:first-child {
+  border-top-left-radius: 8px;
+}
+
+.leaderboard-table tbody tr:first-child td:last-child {
+  border-top-right-radius: 8px;
+}
+
+.leaderboard-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.leaderboard-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+/* Add light edges around the leaderboard table */
+.leaderboard-table thead, .leaderboard-table tbody tr td {
+  border: 1px solid #444; /* Light border for visibility */
+}
+
+.leaderboard-table tbody tr:first-child td {
+  border-top: 2px solid #00c8ff; /* Highlight top row */
+}
+
+.leaderboard-table tbody tr:last-child td {
+  border-bottom: 2px solid #ffcc00; /* Highlight bottom row */
+}
+
+.username {
+  color: gray;
+  font-size: 12px;
+}
+
+.points {
+  text-align: right;
+  color: yellow;
+}
+
+.prev-fixtures-btn {
+  background: linear-gradient(90deg, #007cf0, #00dfd8);
+  color: black;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.prev-fixtures-btn:hover {
+  opacity: 0.85;
+}
+
+#popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#popupContent {
+  background-color: #111;
+  padding: 15px;
+  border-radius: 8px;
+  width: 90%;
+  height: 90%;
+  overflow-y: auto;
+  border: 1px solid #333;
+  box-sizing: border-box;
+}
+
+#popupContent h3 {
+  text-align: center;
+  color: cyan;
+  margin-top: 0;
+}
+
+.closePopup {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  float: right;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Fullscreen loading screen */
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.soccer-ball {
+  width: 100px;
+  height: 100px;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: spinBall 1.2s linear infinite, glowPulse 2s ease-in-out infinite;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+@keyframes spinBall {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 15px #00ffff, 0 0 25px #ff007f, 0 0 35px #ff9900;
+  }
+
+  50% {
+    box-shadow: 0 0 25px #ff007f, 0 0 35px #00ffff, 0 0 45px #00ff00;
+  }
+}
+
+.loading-text {
+  color: white;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+  text-align: center;
+}
+
+#loadingScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Disable text selection globally */
+* {
+  user-select: none;
+}
+
+/* Focus outlines for accessibility */
+.glass-btn:focus,
+.prev-fixtures-btn:focus,
+.closePopup:focus {
+  outline: 2px solid cyan;
+  outline-offset: 2px;
+}
+
+.glass-btn.active {
+  background: linear-gradient(90deg, #00dfd8, #007cf0);
+  color: black;
+  border: 1px solid cyan;
+  box-shadow: 0 0 8px cyan, 0 0 15px #00dfd8;
+  font-weight: bold;
+}
+</style>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <h1>DLS Matchmaking</h1>
-  <div id="status">Click below to find a match</div>
-  <button id="matchBtn">🔍 Find Match</button>
-  <button id="chatBtn" disabled>💬 Message</button>  <div id="chatModal">
-    <div id="chatBox">
-      <div id="chatHeader">
-        <span id="userHeader">Chat Room</span>
-        <button onclick="closeChat()">✖</button>
-      </div>
-      <div id="chatMessages"></div>
-      <form id="chatForm">
-        <input id="chatInput" placeholder="Say something..." required />
-        <button id="sendBtn" type="submit">Send</button>
-      </form>
+  <header>
+    <div class="logo">
+      <div class="circle">DLS</div>
+      <div class="league-text">CHAMPIONS LEAGUE</div>
     </div>
-  </div>  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"></script>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+    <div class="header-buttons">
+      <a href="myteam/">
+        <button class="glass-btn active">My Team</button>
+      </a>
+    </div>
+  </header>
+</body>
+  <div class="section-title">Upcoming Fixtures</div>
+  <div id="fixtureContainer"></div>
+  <button id="staticPrevBtn" class="prev-fixtures-btn">Previous Fixtures</button>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  <!-- Container for countdown + title -->
+<div style="text-align: center; margin-bottom: 15px;">
+  <div id="seasonCountdown" style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">
+    Season ends in: <span id="countdownTimer">Loading...</span>
+  </div>
+  <div class="section-title">League Table (Top 10)</div>
+</div>
+  <div id="tableContainer"></div>
 
-    let userId = null;
-    let matchRoom = null;
+  <div id="popupOverlay">
+    <div id="popupContent">
+      <button class="closePopup">Close</button>
+      <h3>Previous Fixtures</h3>
+      <div id="previousFixturesContent" style="margin-top:10px;"></div>
+    </div>
+  </div>
+<div style="text-align: center; margin-top: 25px;">
+  <div class="section-title">Prizes for Top 3 Winners</div>
+  <table style="margin: 0 auto; border-collapse: collapse; width: 90%; max-width: 400px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background-color: #222;">
+        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Position</th>
+        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Reward</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 8px; color: yellow;">1st Place</td>
+        <td style="padding: 8px; color: white;">Season Trophy + Shoutout + 1 Year DLS Champions League Premium</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; color: silver;">2nd Place</td>
+        <td style="padding: 8px; color: white;">Silver Trophy + Shoutout</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; color: #cd7f32;">3rd Place</td>
+        <td style="padding: 8px; color: white;">Shoutout</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="loader-container">
+    <div class="soccer-ball"></div>
+    <div class="loading-text">Loading season...</div>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    auth.signInAnonymously().then(() => {
-      userId = auth.currentUser.uid;
-      document.getElementById('status').textContent = `Logged in as ${userId}`;
-    });
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-    document.getElementById('matchBtn').onclick = async () => {
-      const waitingRef = db.ref('waiting');
-      const snapshot = await waitingRef.once('value');
-      const waitingUsers = snapshot.val() || {};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-      const matchId = Object.keys(waitingUsers).find(id => id !== userId);
+// === DOM Elements ===
+const fixtureContainer = document.getElementById('fixtureContainer');
+const popupOverlay = document.getElementById('popupOverlay');
+const popupContent = document.getElementById('previousFixturesContent');
+const closePopupBtn = document.querySelector('.closePopup');
+const staticPrevBtn = document.getElementById('staticPrevBtn');
+const countdownContainer = document.getElementById('seasonCountdown');
 
-      if (matchId) {
-        matchRoom = [userId, matchId].sort().join('_');
-        await db.ref(`matches/${matchRoom}`).set({ users: [userId, matchId] });
-        await waitingRef.child(matchId).remove();
-        document.getElementById('status').textContent = `Matched with ${matchId}`;
-      } else {
-        await waitingRef.child(userId).set(true);
-        document.getElementById('status').textContent = 'Waiting for an opponent...';
+// === SEASON COUNTDOWN ===
+let countdownInterval;
+onValue(ref(db, 'seasonends'), (snapshot) => {
+  const endTime = snapshot.val();
+  if (!endTime) {
+    countdownContainer.innerHTML = "<span style='color:gray;'>Season end time not set</span>";
+    clearInterval(countdownInterval);
+    return;
+  }
 
-        db.ref('matches').on('value', snap => {
-          const matches = snap.val() || {};
-          for (let key in matches) {
-            if (matches[key].users.includes(userId)) {
-              matchRoom = key;
-              document.getElementById('status').textContent = `Matched in room ${matchRoom}`;
-              document.getElementById('chatBtn').disabled = false;
-              break;
-            }
-          }
-        });
-      }
-    };
+  const endDate = new Date(endTime);
+  clearInterval(countdownInterval);
+  updateCountdown(endDate);
+  countdownInterval = setInterval(() => updateCountdown(endDate), 1000);
+});
 
-    document.getElementById('chatBtn').onclick = () => {
-      document.getElementById('chatModal').classList.add('active');
-      loadMessages();
-    };
+function updateCountdown(endDate) {
+  const now = new Date();
+  const diff = endDate - now;
+  if (diff <= 0) {
+    countdownContainer.innerHTML = "<span style='color:red;'>Season has ended</span>";
+    clearInterval(countdownInterval);
+    return;
+  }
 
-    function closeChat() {
-      document.getElementById('chatModal').classList.remove('active');
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  countdownContainer.innerHTML = `
+    Season ends in <span style="color:#007bff;">
+    ${days}d ${hours}h ${minutes}m ${seconds}s
+    </span>
+  `;
+}
+
+// === PREVIOUS FIXTURES POPUP ===
+staticPrevBtn.addEventListener('click', () => popupOverlay.style.display = 'flex');
+closePopupBtn.addEventListener('click', () => popupOverlay.style.display = 'none');
+
+onValue(ref(db, 'previousfixtures'), (snapshot) => {
+  const previousFixtures = snapshot.val();
+  if (!previousFixtures) {
+    popupContent.innerHTML = "<div style='color:gray; text-align:center;'>No previous fixtures available</div>";
+    return;
+  }
+
+  let content = '';
+  Object.values(previousFixtures).forEach(match => {
+    const matchDate = new Date(match.date);
+    const timeAgo = getTimeAgo(matchDate);
+
+    content += `
+      <div class="match-info">
+        <div class="match-team">${match.teamA} <span class="team-owner">@${match.ownerA}</span></div>
+        <div class="match-vs">VS</div>
+        <div class="match-team">${match.teamB} <span class="team-owner">@${match.ownerB}</span></div>
+        <div class="score">
+          <span class="winning-team">${Math.max(match.scoreA, match.scoreB)}</span> - 
+          <span class="losing-team">${Math.min(match.scoreA, match.scoreB)}</span>
+        </div>
+        <div class="time-ago">Ended ${timeAgo}</div>
+      </div>
+    `;
+  });
+  popupContent.innerHTML = content;
+});
+
+// === LEADERBOARD (Pull from users) ===
+onValue(ref(db, 'users'), (snapshot) => {
+  const usersData = snapshot.val();
+  const container = document.getElementById('tableContainer');
+  if (!usersData) {
+    container.innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
+    return;
+  }
+
+  const teams = Object.values(usersData).map(user => ({
+    team: user.team,
+    owner: user.username,
+    points: user.stats?.points || 0
+  }));
+
+  teams.sort((a, b) => b.points - a.points);
+
+  let leaderboardContent = `
+    <table class="leaderboard-table">
+      <tr><th>#</th><th>Team Name</th><th>Owner</th><th>Points</th></tr>
+  `;
+  teams.slice(0, 10).forEach((team, index) => {
+    leaderboardContent += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${team.team}</td>
+        <td>@${team.owner}</td>
+        <td class="points">${team.points}</td>
+      </tr>
+    `;
+  });
+  leaderboardContent += `</table>`;
+  container.innerHTML = leaderboardContent;
+});
+
+// === UPCOMING FIXTURE ADVANCED ===
+onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
+  const upcomingFixtures = snapshot.val();
+  if (!upcomingFixtures) {
+    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    return;
+  }
+
+  const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
+    key,
+    ...fixture
+  }));
+
+  const now = new Date();
+  const validFixtures = [];
+
+  fixtureList.forEach(fixture => {
+    const fixtureDate = new Date(fixture.date);
+    if (fixtureDate >= now || (now - fixtureDate <= 15 * 60 * 1000)) {
+      validFixtures.push(fixture);
+    } else {
+      remove(ref(db, `upcomingfixtures/${fixture.key}`));
     }
+  });
 
-    document.getElementById('chatForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const text = document.getElementById('chatInput').value.trim();
-      if (!text || !matchRoom) return;
-      const msgRef = db.ref(`chatrooms/${matchRoom}`).push();
-      msgRef.set({ userId, text, timestamp: Date.now() });
-      document.getElementById('chatInput').value = '';
-    });
+  if (validFixtures.length === 0) {
+    fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
+    return;
+  }
 
-    function loadMessages() {
-      const chatRef = db.ref(`chatrooms/${matchRoom}`);
-      chatRef.on('child_added', snap => {
-        const msg = snap.val();
-        const div = document.createElement('div');
-        div.className = 'msg ' + (msg.userId === userId ? 'self' : 'other');
-        div.textContent = msg.text;
-        document.getElementById('chatMessages').appendChild(div);
-        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-      });
+  validFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const nextFixture = validFixtures[0];
+
+  if (window.upcomingCountdownInterval) clearInterval(window.upcomingCountdownInterval);
+  renderFixtureBox(nextFixture, validFixtures);
+  window.upcomingCountdownInterval = setInterval(() => renderFixtureBox(nextFixture, validFixtures), 1000);
+});
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+}
+
+function getCountdownText(prefix, date) {
+  const now = new Date();
+  const diff = date - now;
+  if (diff <= 0) return '';
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  return `${prefix} <span style="color:#007bff;">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
+}
+
+function renderFixtureBox(fixture, allFixtures) {
+  const fixtureDate = new Date(fixture.date);
+  const now = new Date();
+  const timeUntil = fixtureDate - now;
+  const timeSinceStart = now - fixtureDate;
+  const fifteenMinutes = 15 * 60 * 1000;
+
+  let content = `
+    <div class="match-info" style="border: 2px solid #444; margin-bottom: 10px; padding: 10px; border-radius: 8px; text-align:center;">
+      <div class="match-team">${fixture.teamA} <span class="team-owner">@${fixture.ownerA}</span></div>
+      <div class="match-vs">VS</div>
+      <div class="match-team">${fixture.teamB} <span class="team-owner">@${fixture.ownerB}</span></div>
+  `;
+
+  if (timeUntil > 60 * 1000) {
+    content += `<div class="time-ago">${getCountdownText('Match starts in', fixtureDate)}</div>`;
+  } else if (timeUntil > 0) {
+    content += `<div class="starting-soon" style="color: orange; font-weight:bold; animation: pulse 1s infinite;">Starting soon...</div>`;
+  } else if (timeSinceStart <= fifteenMinutes) {
+    const timeLeft = new Date(fixtureDate.getTime() + fifteenMinutes);
+    content += `
+      <div style="margin: 5px 0;">
+        <span style="color: green; font-weight:bold; border: 1px solid green; padding: 2px 6px; border-radius: 4px;">LIVE</span>
+      </div>
+      <div class="score" style="font-size: 1.5em; font-weight:bold;">0 - 0</div>
+      <div class="time-ago">${getCountdownText('Match ends in', timeLeft)}</div>
+      <div style="font-size: 0.85em; margin-top:4px; color:gray;">Scores are updated after match ends</div>
+    `;
+  } else {
+    clearInterval(window.upcomingCountdownInterval);
+    showEndedAndLoadNext(fixture.key, allFixtures);
+    return;
+  }
+
+  content += `</div>`;
+  fixtureContainer.innerHTML = content;
+}
+
+function showEndedAndLoadNext(currentKey, allFixtures) {
+  fixtureContainer.innerHTML = `
+    <div class="match-ended animate-ended" style="color: red; font-weight:bold; text-align:center; font-size: 1.2em;">
+      Match Ended
+    </div>
+  `;
+  setTimeout(() => {
+    const remainingFixtures = allFixtures.filter(f => f.key !== currentKey);
+    if (remainingFixtures.length > 0) {
+      const nextFixture = remainingFixtures[0];
+      renderFixtureBox(nextFixture, remainingFixtures);
+      window.upcomingCountdownInterval = setInterval(() => renderFixtureBox(nextFixture, remainingFixtures), 1000);
+    } else {
+      fixtureContainer.innerHTML = "<div style='color:gray; text-align:center;'>No upcoming fixtures</div>";
     }
-  </script></body>
+  }, 5000);
+}
+
+// === LOADING SCREEN ===
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loadingScreen');
+    loader.classList.add('hidden');
+    setTimeout(() => loader.style.display = 'none', 500);
+  }, 5000);
+});
+</script>
+
+<style>
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+@keyframes twitch {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+  100% { transform: rotate(0deg); }
+}
+.animate-ended {
+  animation: twitch 0.15s infinite;
+}
+</style>
+</body>
 </html>
