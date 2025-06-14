@@ -1,338 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Premier League Country Table</title>
+<title>Country & Soccer Leagues Popup</title>
 <style>
-  body {
-    margin: 0;
-    background: #121212;
-    color: #eee;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    border: 10px solid #1f1f1f;
-    height: 100vh;
-    user-select: none;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    font-size: 1.4rem;
-    padding-top: 30px;
-  }
-  #sidebar {
+  /* Fullscreen overlay */
+  #country-popup {
     position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid #eee;
-    padding: 20px 30px;
-    border-radius: 12px;
-    background: #222;
-    width: 80%;
-    max-width: 500px;
-    box-shadow: 0 0 15px rgba(255,255,255,0.15);
+    inset: 0;
+    background: rgba(0,0,0,0.85);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: white;
+    z-index: 9999;
   }
-  #country-box {
+  /* Top-left container for flag + country */
+  #country-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-weight: 700;
-    font-size: 1.3rem;
-  }
-  #flag {
-    font-size: 1.8rem;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
+    font-size: 1.4rem;
     font-weight: 600;
-    font-size: 1rem;
-    user-select: text;
+    background: rgba(255 255 255 / 0.12);
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    min-width: 280px;
   }
-  thead tr {
-    background: #333;
+  #country-flag {
+    width: 40px;
+    height: 28px;
+    object-fit: contain;
+    border-radius: 5px;
+    border: 1px solid #fff5;
   }
-  thead th {
-    padding: 8px 6px;
-    border-bottom: 3px solid #eee;
-    text-align: center;
+
+  /* Soccer leagues container */
+  #leagues-container {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 600px;
+    overflow-y: auto;
+    background: rgba(255 255 255 / 0.08);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
   }
-  tbody tr {
-    border-bottom: 1px solid #444;
-    transition: background 0.25s;
+
+  #leagues-container h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  /* League item */
+  .league-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255 255 255 / 0.15);
+    transition: background 0.2s ease;
     cursor: default;
   }
-  tbody tr:hover {
-    background: #444;
+  .league-item:hover {
+    background: rgba(255 255 255 / 0.15);
   }
-  tbody td {
-    padding: 8px 6px;
-    text-align: center;
+  .league-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: contain;
+    border: 1px solid #fff6;
+    background: white;
   }
-  tbody tr.own-country {
-    background: #4a6f4a !important;
-    box-shadow: inset 0 0 10px #6fff6f;
-  }
-  #message-box {
-    background: #300000cc;
-    color: #f88;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 700;
-    user-select: text;
-  }
-  #enter-next-season {
-    margin-top: 12px;
-    padding: 10px;
-    background: #4444aa;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: background 0.3s;
-  }
-  #enter-next-season:hover {
-    background: #6666cc;
-  }
-  #countdown {
-    margin-top: 12px;
+  .league-name {
     font-weight: 600;
-    color: #aad;
+    font-size: 1.1rem;
+    color: white;
+  }
+
+  /* Close button top-right */
+  #close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff5;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    transition: background 0.25s;
+    z-index: 10000;
+  }
+  #close-btn:hover {
+    background: white;
   }
 </style>
 </head>
 <body>
-  <div id="sidebar">
-    <div id="country-box">
-      <span id="flag">🏳️</span>
-      <span id="country-name">Loading...</span>
-    </div>
 
-    <div id="message-box" style="display:none;"></div>
-    <button id="enter-next-season" style="display:none;">Enter for Next Season</button>
-    <div id="countdown"></div>
-
-    <table id="league-table" style="display:none;">
-      <thead>
-        <tr>
-          <th>Pos</th><th>Country</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
+<div id="country-popup" role="dialog" aria-modal="true" aria-label="User country and soccer leagues">
+  <div id="country-info">
+    <img id="country-flag" src="" alt="Country Flag" />
+    <span id="country-name">Loading...</span>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  <div id="leagues-container">
+    <h2>Soccer Leagues</h2>
+    <div id="leagues-list">Loading leagues...</div>
+  </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+  <button id="close-btn" aria-label="Close popup">&times;</button>
+</div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const flagEl = document.getElementById('flag');
-  const countryNameEl = document.getElementById('country-name');
-  const messageBox = document.getElementById('message-box');
-  const enterNextBtn = document.getElementById('enter-next-season');
-  const countdownEl = document.getElementById('countdown');
-  const table = document.getElementById('league-table');
-  const tableBody = document.getElementById('table-body');
-
-  let seasonEnd = null;
-
-  // Generate or get local user ID (simple UUID)
-  function getUserId() {
-    let id = localStorage.getItem('plUserId');
-    if (!id) {
-      id = 'user_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-      localStorage.setItem('plUserId', id);
-    }
-    return id;
-  }
-  const userId = getUserId();
-
-  function countryCodeToEmoji(code) {
-    if (!code) return '🏳️';
-    const OFFSET = 127397;
-    return code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + OFFSET)).join('');
-  }
-
-  async function fetchSeasonEndDate() {
-    try {
-      const seasonRef = ref(db, 'seasonEndDate');
-      const snapshot = await get(seasonRef);
-      if (snapshot.exists()) {
-        let val = snapshot.val();
-        if(typeof val === 'string') {
-          seasonEnd = new Date(val);
-        } else if(typeof val === 'number') {
-          seasonEnd = new Date(val);
-        } else {
-          throw new Error("Invalid seasonEndDate format");
-        }
-      } else {
-        seasonEnd = new Date('2025-05-12T23:59:59Z');
-      }
-    } catch (e) {
-      console.warn("Season end date fetch failed", e);
-      seasonEnd = new Date('2025-05-12T23:59:59Z');
-    }
-  }
-
-  function updateCountdown() {
-    if(!seasonEnd) return;
-    const now = new Date();
-    let diff = seasonEnd - now;
-    if(diff < 0) {
-      countdownEl.textContent = "Season ended. New season coming soon!";
-      enterNextBtn.style.display = "none";
-      return;
-    }
-    const days = Math.floor(diff / (1000*60*60*24));
-    diff -= days*(1000*60*60*24);
-    const hrs = Math.floor(diff / (1000*60*60));
-    diff -= hrs*(1000*60*60);
-    const mins = Math.floor(diff / (1000*60));
-    diff -= mins*(1000*60);
-    const secs = Math.floor(diff / 1000);
-    countdownEl.textContent = `Season ends in: ${days}d ${hrs}h ${mins}m ${secs}s`;
-  }
-
-  function startCountdown() {
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  }
-
-  async function init() {
-    await fetchSeasonEndDate();
-
+<script>
+  async function fetchCountry() {
     try {
       const res = await fetch('https://ipapi.co/json/');
-      if (!res.ok) throw new Error('Failed to fetch IP info');
+      if (!res.ok) throw new Error('Country fetch failed');
       const data = await res.json();
 
+      const countryName = data.country_name || 'Unknown Country';
       const countryCode = data.country_code || '';
-      const countryName = data.country_name || 'Unknown';
 
-      flagEl.textContent = countryCodeToEmoji(countryCode);
-      countryNameEl.textContent = countryName;
+      const flagUrl = countryCode
+        ? `https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`
+        : '';
 
-      checkCountryInLeague(countryCode, countryName);
-      startCountdown();
-    } catch (e) {
-      countryNameEl.textContent = 'Unknown';
-      flagEl.textContent = '❓';
-      showMessage("Could not detect your country.");
-      console.warn(e);
-    }
-  }
+      document.getElementById('country-name').textContent = countryName;
+      const flagEl = document.getElementById('country-flag');
 
-  function showMessage(msg) {
-    messageBox.textContent = msg;
-    messageBox.style.display = "block";
-  }
-  function hideMessage() {
-    messageBox.style.display = "none";
-  }
-
-  async function checkCountryInLeague(countryCode, countryName) {
-    const leagueRef = ref(db, 'premierLeagueTeams');
-    const snapshot = await get(leagueRef);
-    const teams = snapshot.exists() ? snapshot.val() : {};
-
-    // Map countryCode -> team
-    const countries = {};
-    for (const key in teams) {
-      if (teams[key].countryCode) countries[teams[key].countryCode] = {...teams[key], id:key};
-    }
-
-    // Sort by points desc
-    const leagueEntries = Object.values(countries).sort((a,b) => (b.points||0)-(a.points||0));
-
-    // Check ownership
-    const existingTeam = countries[countryCode];
-    if(existingTeam) {
-      if(existingTeam.ownerId === userId) {
-        // This user owns this team - no sorry, just show table
-        hideMessage();
-        enterNextBtn.style.display = "none";
-        renderTable(leagueEntries, countryCode);
-        table.style.display = "block";
+      if(flagUrl){
+        flagEl.src = flagUrl;
+        flagEl.alt = `${countryName} Flag`;
+        flagEl.style.display = 'block';
       } else {
-        // Taken by someone else
-        showMessage(`Sorry, someone already represents your country: ${countryName}`);
-        enterNextBtn.style.display = "block";
-        renderTable(leagueEntries, countryCode);
-        table.style.display = "block";
+        flagEl.style.display = 'none';
       }
-    } else {
-      // Not taken, add user as new team owner
-      hideMessage();
-      enterNextBtn.style.display = "none";
 
-      const newTeam = {
-        countryCode,
-        countryName,
-        played: 0,
-        won: 0,
-        drawn: 0,
-        lost: 0,
-        points: 0,
-        ownerId: userId
-      };
-
-      const newTeamRef = await push(leagueRef);
-      await set(newTeamRef, newTeam);
-
-      leagueEntries.push({...newTeam, id: newTeamRef.key});
-      leagueEntries.sort((a,b) => (b.points || 0) - (a.points || 0));
-      renderTable(leagueEntries, countryCode);
-      table.style.display = "block";
+      return countryName;
+    } catch (err) {
+      console.error('Error fetching country:', err);
+      document.getElementById('country-name').textContent = 'Country not found';
+      document.getElementById('country-flag').style.display = 'none';
+      return null;
     }
   }
 
-  function renderTable(teams, userCountryCode) {
-    tableBody.innerHTML = '';
-    teams.forEach((team, i) => {
-      const tr = document.createElement('tr');
-      if(team.countryCode === userCountryCode) tr.classList.add('own-country');
+  async function fetchLeagues(country) {
+    const leaguesList = document.getElementById('leagues-list');
+    leaguesList.textContent = 'Loading leagues...';
 
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>${countryCodeToEmoji(team.countryCode)} ${team.countryName}</td>
-        <td>${team.played || 0}</td>
-        <td>${team.won || 0}</td>
-        <td>${team.drawn || 0}</td>
-        <td>${team.lost || 0}</td>
-        <td>${team.points || 0}</td>
-      `;
-      tableBody.appendChild(tr);
-    });
+    if (!country) {
+      leaguesList.textContent = 'No country detected to load leagues.';
+      return;
+    }
+
+    try {
+      // TheSportsDB free public API endpoint:
+      const url = `https://www.thesportsdb.com/api/v1/json/1/search_all_leagues.php?c=${encodeURIComponent(country)}&s=Soccer`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Leagues fetch failed');
+      const data = await res.json();
+
+      if (!data.leagues || data.leagues.length === 0) {
+        leaguesList.textContent = 'No soccer leagues found for this country.';
+        return;
+      }
+
+      // Clear previous content
+      leaguesList.textContent = '';
+
+      data.leagues.forEach(league => {
+        const leagueDiv = document.createElement('div');
+        leagueDiv.className = 'league-item';
+
+        const badge = document.createElement('img');
+        badge.className = 'league-badge';
+        badge.src = league.strBadge || 'https://via.placeholder.com/40?text=?';
+        badge.alt = `${league.strLeague} Badge`;
+
+        const name = document.createElement('span');
+        name.className = 'league-name';
+        name.textContent = league.strLeague;
+
+        leagueDiv.appendChild(badge);
+        leagueDiv.appendChild(name);
+
+        leaguesList.appendChild(leagueDiv);
+      });
+    } catch (err) {
+      console.error('Error fetching leagues:', err);
+      leaguesList.textContent = 'Failed to load leagues data.';
+    }
   }
 
-  enterNextBtn.onclick = () => {
-    alert("Thanks for your interest! You'll be notified when the next season starts.");
-    // Optionally, add user to waitlist here.
-  };
+  // Close popup handler
+  document.getElementById('close-btn').addEventListener('click', () => {
+    document.getElementById('country-popup').style.display = 'none';
+  });
 
-  init();
+  // Main execution
+  (async () => {
+    const country = await fetchCountry();
+    await fetchLeagues(country);
+  })();
 </script>
+
 </body>
 </html>
