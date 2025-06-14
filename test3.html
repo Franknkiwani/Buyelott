@@ -1,225 +1,301 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Country & Soccer Leagues Popup</title>
-<style>
-  /* Fullscreen overlay */
-  #country-popup {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    color: white;
-    z-index: 9999;
-  }
-  /* Top-left container for flag + country */
-  #country-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.4rem;
-    font-weight: 600;
-    background: rgba(255 255 255 / 0.12);
-    padding: 12px 18px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    min-width: 280px;
-  }
-  #country-flag {
-    width: 40px;
-    height: 28px;
-    object-fit: contain;
-    border-radius: 5px;
-    border: 1px solid #fff5;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Country, Team & Stats Popup</title>
+  <style>
+    /* All your existing styles kept the same */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
+    body, html {
+      height: 100%;
+      background: #121214;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+    #country-popup {
+      position: fixed;
+      top: 10vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      background: #1e1e23;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      user-select: text;
+      z-index: 9999;
+      color: #ddd;
+    }
+    #close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      font-weight: 700;
+      color: #888;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+    #close-btn:hover {
+      color: #f44336;
+    }
+    #user-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    #user-flag {
+      width: 80px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #222;
+      flex-shrink: 0;
+    }
+    #user-details {
+      flex-grow: 1;
+      user-select: text;
+    }
+    #user-city {
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+    #user-team {
+      font-size: 1.1rem;
+      color: #66ccff;
+      margin-bottom: 4px;
+    }
+    #user-uid, #opponent-uid {
+      font-size: 0.85rem;
+      color: #888;
+      cursor: pointer;
+    }
+    #user-uid:hover, #opponent-uid:hover {
+      color: #ccc;
+    }
 
-  /* Soccer leagues container */
-  #leagues-container {
-    flex-grow: 1;
-    width: 100%;
-    max-width: 600px;
-    overflow-y: auto;
-    background: rgba(255 255 255 / 0.08);
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-  }
+    /* Keep all other styles unchanged (stats, matchup, etc.) */
+    #stats { display: flex; justify-content: space-between; background: #2a2a34; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 1.1rem; box-shadow: 0 0 10px #00800066; }
+    .stat-item { display: flex; flex-direction: column; align-items: center; flex: 1; border-right: 1px solid #444; color: #bbb; }
+    .stat-item:last-child { border-right: none; }
+    .stat-value { font-size: 1.4rem; margin-top: 6px; font-weight: 700; }
+    .wins { color: #28a745; } .draws { color: #ff9800; } .losses { color: #dc3545; } .points { color: #90ee90; }
 
-  #leagues-container h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 1.5rem;
-    text-align: left;
-  }
+    #matchup-container { margin-top: 20px; }
+    #matchup { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .team-block { flex: 1; background: #2a2a34; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #444; }
+    .team-block img { width: 60px; height: 40px; object-fit: contain; border-radius: 6px; border: 1px solid #555; margin-bottom: 8px; background: #222; }
+    .team-name { font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
+    #vs-text { font-weight: 800; font-size: 1.4rem; color: #66ccff; user-select: none; align-self: center; width: 40px; text-align: center; }
 
-  /* League item */
-  .league-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 8px 10px;
-    border-bottom: 1px solid rgba(255 255 255 / 0.15);
-    transition: background 0.2s ease;
-    cursor: default;
-  }
-  .league-item:hover {
-    background: rgba(255 255 255 / 0.15);
-  }
-  .league-badge {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: contain;
-    border: 1px solid #fff6;
-    background: white;
-  }
-  .league-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: white;
-  }
+    #match-timer { font-weight: 600; font-size: 1.1rem; color: #9aff9a; text-align: center; margin-top: 12px; font-family: monospace; }
+    #enter-match-btn { margin-top: 18px; padding: 12px; background: #3399ff; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; color: white; cursor: pointer; transition: background-color 0.3s ease; }
+    #enter-match-btn:hover { background: #1e73e8; }
+    #enter-match-btn:disabled { background: #555; cursor: not-allowed; }
 
-  /* Close button top-right */
-  #close-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #fff5;
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    font-size: 24px;
-    line-height: 1;
-    cursor: pointer;
-    color: black;
-    font-weight: bold;
-    transition: background 0.25s;
-    z-index: 10000;
-  }
-  #close-btn:hover {
-    background: white;
-  }
-</style>
+    #no-matches-msg { color: #ff6f6f; text-align: center; font-weight: 600; font-size: 1.1rem; margin-top: 24px; }
+  </style>
 </head>
 <body>
 
-<div id="country-popup" role="dialog" aria-modal="true" aria-label="User country and soccer leagues">
-  <div id="country-info">
-    <img id="country-flag" src="" alt="Country Flag" />
-    <span id="country-name">Loading...</span>
+<div id="country-popup">
+  <button id="close-btn">&times;</button>
+  <div id="user-info">
+    <img id="user-flag" src="" alt="User Country Flag" />
+    <div id="user-details">
+      <div id="user-city">Loading city...</div>
+      <div id="user-team">Loading team...</div>
+      <div id="user-uid" onclick="copyToClipboard(this)">UID: Loading...</div>
+    </div>
   </div>
 
-  <div id="leagues-container">
-    <h2>Soccer Leagues</h2>
-    <div id="leagues-list">Loading leagues...</div>
+  <div id="stats">
+    <div class="stat-item">Wins <div class="stat-value wins" id="wins">0</div></div>
+    <div class="stat-item">Draws <div class="stat-value draws" id="draws">0</div></div>
+    <div class="stat-item">Losses <div class="stat-value losses" id="losses">0</div></div>
+    <div class="stat-item">Points <div class="stat-value points" id="points">0</div></div>
   </div>
 
-  <button id="close-btn" aria-label="Close popup">&times;</button>
+  <div id="matchup-container">
+    <div id="matchup">
+      <div class="team-block" id="user-team-block">
+        <img id="user-flag-match" src="" alt="User Country Flag" />
+        <div class="team-name" id="user-city-match">Loading...</div>
+      </div>
+      <div id="vs-text">VS</div>
+      <div class="team-block" id="opponent-team-block">
+        <img id="opponent-flag" src="" alt="Opponent Country Flag" />
+        <div class="team-name" id="opponent-city">Loading...</div>
+        <div id="opponent-uid" onclick="copyToClipboard(this)">UID: Unknown</div>
+      </div>
+    </div>
+    <div id="match-timer"></div>
+    <button id="enter-match-btn" disabled>Enter Match</button>
+    <div id="no-matches-msg" style="display:none;">No matches arranged yet.</div>
+  </div>
 </div>
 
-<script>
-  async function fetchCountry() {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (!res.ok) throw new Error('Country fetch failed');
-      const data = await res.json();
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-      const countryName = data.country_name || 'Unknown Country';
-      const countryCode = data.country_code || '';
+  const app = initializeApp({
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  });
 
-      const flagUrl = countryCode
-        ? `https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`
-        : '';
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-      document.getElementById('country-name').textContent = countryName;
-      const flagEl = document.getElementById('country-flag');
+  const userFlag = document.getElementById('user-flag');
+  const userCity = document.getElementById('user-city');
+  const userTeamName = document.getElementById('user-team');
+  const userUID = document.getElementById('user-uid');
 
-      if(flagUrl){
-        flagEl.src = flagUrl;
-        flagEl.alt = `${countryName} Flag`;
-        flagEl.style.display = 'block';
-      } else {
-        flagEl.style.display = 'none';
-      }
+  const userFlagMatch = document.getElementById('user-flag-match');
+  const userCityMatch = document.getElementById('user-city-match');
+  const opponentFlag = document.getElementById('opponent-flag');
+  const opponentCity = document.getElementById('opponent-city');
+  const opponentUID = document.getElementById('opponent-uid');
 
-      return countryName;
-    } catch (err) {
-      console.error('Error fetching country:', err);
-      document.getElementById('country-name').textContent = 'Country not found';
-      document.getElementById('country-flag').style.display = 'none';
-      return null;
-    }
+  const winsEl = document.getElementById('wins');
+  const drawsEl = document.getElementById('draws');
+  const lossesEl = document.getElementById('losses');
+  const pointsEl = document.getElementById('points');
+
+  const matchTimer = document.getElementById('match-timer');
+  const enterMatchBtn = document.getElementById('enter-match-btn');
+  const noMatchesMsg = document.getElementById('no-matches-msg');
+
+  document.getElementById('close-btn').onclick = () => document.getElementById('country-popup').style.display = 'none';
+
+  function formatSeconds(s) {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
   }
 
-  async function fetchLeagues(country) {
-    const leaguesList = document.getElementById('leagues-list');
-    leaguesList.textContent = 'Loading leagues...';
+  function startCountdown(seconds) {
+    let timeLeft = seconds;
+    enterMatchBtn.disabled = false;
+    const interval = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        matchTimer.textContent = 'Match started! Redirecting...';
+        setTimeout(() => {
+          // No longer redirect here, wait for user click
+          enterMatchBtn.disabled = false;
+        }, 1500);
+      } else {
+        matchTimer.textContent = `Match starts in ${formatSeconds(timeLeft)}`;
+        timeLeft--;
+      }
+    }, 1000);
+  }
 
-    if (!country) {
-      leaguesList.textContent = 'No country detected to load leagues.';
+  // Combine two UIDs in sorted order so pairId is consistent
+  function getPairId(uid1, uid2) {
+    return [uid1, uid2].sort().join('-');
+  }
+
+  async function fetchUserDataAndMatch(user) {
+    const userRef = ref(db, 'users/' + user.uid);
+    let userSnap = await get(userRef);
+    let userData;
+
+    if (!userSnap.exists()) {
+      const res = await fetch('https://ipapi.co/json/');
+      const loc = await res.json();
+      userData = {
+        country: loc.country_name || 'Unknown',
+        countryCode: loc.country_code || '',
+        city: loc.city || 'Unknown City',
+        team: (loc.city || 'Unknown') + ' FC',
+        wins: 0, draws: 0, losses: 0, points: 0
+      };
+      await set(userRef, userData);
+    } else {
+      userData = userSnap.val();
+    }
+
+    userFlag.src = `https://flagcdn.com/w80/${userData.countryCode.toLowerCase()}.png`;
+    userCity.textContent = userData.city;
+    userTeamName.textContent = userData.team;
+    userUID.textContent = `UID: ${user.uid}`;
+    userFlagMatch.src = userFlag.src;
+    userCityMatch.textContent = userData.city;
+
+    winsEl.textContent = userData.wins ?? 0;
+    drawsEl.textContent = userData.draws ?? 0;
+    lossesEl.textContent = userData.losses ?? 0;
+    pointsEl.textContent = userData.points ?? 0;
+
+    const matchRef = ref(db, 'matches/' + user.uid);
+    const matchSnap = await get(matchRef);
+
+    if (!matchSnap.exists()) {
+      document.getElementById('matchup').style.display = 'none';
+      noMatchesMsg.style.display = 'block';
       return;
     }
 
-    try {
-      // TheSportsDB free public API endpoint:
-      const url = `https://www.thesportsdb.com/api/v1/json/1/search_all_leagues.php?c=${encodeURIComponent(country)}&s=Soccer`;
+    const matchData = matchSnap.val();
+    const opponentRef = ref(db, 'users/' + matchData.opponentUID);
+    const opponentSnap = await get(opponentRef);
+    const opponent = opponentSnap.val() || { city: 'Unknown', countryCode: '', team: 'Unknown FC' };
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Leagues fetch failed');
-      const data = await res.json();
+    opponentFlag.src = `https://flagcdn.com/w80/${(opponent.countryCode || '').toLowerCase()}.png`;
+    opponentCity.textContent = opponent.city;
 
-      if (!data.leagues || data.leagues.length === 0) {
-        leaguesList.textContent = 'No soccer leagues found for this country.';
-        return;
-      }
+    // Hide the opponent UID from view
+    opponentUID.style.display = 'none';
+    opponentUID.textContent = `UID: ${matchData.opponentUID}`; // Keep for logic, just hidden
 
-      // Clear previous content
-      leaguesList.textContent = '';
+    const now = Date.now();
+    const timeLeft = Math.floor((matchData.startTime - now) / 1000);
+    if (timeLeft > 0) startCountdown(timeLeft);
+    else matchTimer.textContent = 'Match started!';
 
-      data.leagues.forEach(league => {
-        const leagueDiv = document.createElement('div');
-        leagueDiv.className = 'league-item';
+    // Enable button if match is ready
+    enterMatchBtn.disabled = false;
 
-        const badge = document.createElement('img');
-        badge.className = 'league-badge';
-        badge.src = league.strBadge || 'https://via.placeholder.com/40?text=?';
-        badge.alt = `${league.strLeague} Badge`;
-
-        const name = document.createElement('span');
-        name.className = 'league-name';
-        name.textContent = league.strLeague;
-
-        leagueDiv.appendChild(badge);
-        leagueDiv.appendChild(name);
-
-        leaguesList.appendChild(leagueDiv);
-      });
-    } catch (err) {
-      console.error('Error fetching leagues:', err);
-      leaguesList.textContent = 'Failed to load leagues data.';
-    }
+    // On click, redirect to match.html with combined pairId
+    enterMatchBtn.onclick = () => {
+      const pairId = getPairId(user.uid, matchData.opponentUID);
+      window.location.href = `match.html?pairId=${encodeURIComponent(pairId)}`;
+    };
   }
 
-  // Close popup handler
-  document.getElementById('close-btn').addEventListener('click', () => {
-    document.getElementById('country-popup').style.display = 'none';
-  });
+  function copyToClipboard(el) {
+    const uid = el.textContent.replace('UID: ', '');
+    navigator.clipboard.writeText(uid).then(() => {
+      el.textContent = `UID: ${uid} ✓`;
+      setTimeout(() => el.textContent = `UID: ${uid}`, 1000);
+    });
+  }
 
-  // Main execution
-  (async () => {
-    const country = await fetchCountry();
-    await fetchLeagues(country);
-  })();
+  signInAnonymously(auth)
+    .then(() => onAuthStateChanged(auth, user => user && fetchUserDataAndMatch(user)))
+    .catch(err => alert('Authentication failed. Reload page.'));
 </script>
-
 </body>
 </html>
