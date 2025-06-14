@@ -400,9 +400,6 @@ header {
   <div id="seasonCountdown" style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">
     Season ends in: <span id="countdownTimer">Loading...</span>
   </div>
-  <div class="section-title">League Table (Top 10)</div>
-</div>
-  <div id="tableContainer"></div>
 
   <div id="popupOverlay">
     <div id="popupContent">
@@ -411,31 +408,7 @@ header {
       <div id="previousFixturesContent" style="margin-top:10px;"></div>
     </div>
   </div>
-<div style="text-align: center; margin-top: 25px;">
-  <div class="section-title">Prizes for Top 3 Winners</div>
-  <table style="margin: 0 auto; border-collapse: collapse; width: 90%; max-width: 400px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
-    <thead>
-      <tr style="background-color: #222;">
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Position</th>
-        <th style="padding: 8px; color: cyan; border-bottom: 1px solid #444;">Reward</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 8px; color: yellow;">1st Place</td>
-        <td style="padding: 8px; color: white;">Season Trophy + Shoutout + 1 Year DLS Champions League Premium</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: silver;">2nd Place</td>
-        <td style="padding: 8px; color: white;">Silver Trophy + Shoutout</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; color: #cd7f32;">3rd Place</td>
-        <td style="padding: 8px; color: white;">Shoutout</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<div id="leagueTableContainer" style="margin-top:20px;"></div>
 <!-- Loading Screen -->
 <div id="loadingScreen">
   <div class="loader-container">
@@ -445,8 +418,10 @@ header {
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, onValue, remove, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// === Firebase Setup ===
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -460,6 +435,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 // === DOM Elements ===
 const fixtureContainer = document.getElementById('fixtureContainer');
@@ -469,7 +445,119 @@ const closePopupBtn = document.querySelector('.closePopup');
 const staticPrevBtn = document.getElementById('staticPrevBtn');
 const countdownContainer = document.getElementById('seasonCountdown');
 
-// === SEASON COUNTDOWN ===
+// === Utils ===
+
+// Generate random 5-digit string code
+function generateCode() {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+}
+
+// Convert country code to flag emoji
+function countryCodeToFlagEmoji(code) {
+  if (!code) return '🏳️';
+  return code.toUpperCase()
+    .split('')
+    .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
+    .join('');
+}
+
+// Fetch user IP info (country + country code)
+async function fetchUserCountry() {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    if (!res.ok) throw new Error('Geo API failed');
+    const data = await res.json();
+    return { country: data.country_name || "Unknown", countryCode: data.country_code || "XX" };
+  } catch (e) {
+    console.error("Geo detection failed:", e);
+    return { country: "Unknown", countryCode: "XX" };
+  }
+}
+
+// Get unique 5-digit code not used in Firebase
+async function getUniqueCode() {
+  let tries = 0;
+  while (tries < 20) {
+    const code = generateCode();
+    const snap = await get(ref(db, `userCodes/${code}`));
+    if (!snap.exists()) return code;
+    tries++;
+  }
+  throw new Error("Failed to generate unique user code after many attempts");
+}
+
+// Save user team info to Firebase & localStorage
+async function assignUserTeam(uid) {
+  // Check localStorage for saved team
+  const savedDataStr = localStorage.getItem('userTeamData');
+  if (savedDataStr) {
+    const savedData = JSON.parse(savedDataStr);
+    if (savedData && savedData.uid === uid) {
+      return savedData; // Already have team info for this UID
+    }
+  }
+
+  // Fetch user country
+  const { country, countryCode } = await fetchUserCountry();
+  const flag = countryCodeToFlagEmoji(countryCode);
+  const teamName = `${flag} ${country}`;
+
+  // Generate unique code
+  const code = await getUniqueCode();
+
+  // Reserve code atomically in Firebase
+  await set(ref(db, `userCodes/${code}`), uid);
+
+  // Save user data in /users/{uid}
+  const username = `guest${code}`;
+  const userData = {
+    username,
+    team: teamName,
+    country,
+    countryCode,
+    flag,
+    code,
+    stats: { points: 0 }
+  };
+  await set(ref(db, `users/${uid}`), userData);
+
+  // Save locally for persistence
+  localStorage.setItem('userTeamData', JSON.stringify({ uid, ...userData }));
+
+  return { uid, ...userData };
+}
+
+// === Auth & User Setup ===
+signInAnonymously(auth).catch(err => console.error("Auth error", err));
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  const uid = user.uid;
+
+  const userRef = ref(db, `users/${uid}`);
+  const snapshot = await get(userRef);
+
+  if (snapshot.exists()) {
+    // User exists, cache locally if missing
+    const existingData = snapshot.val();
+    const savedDataStr = localStorage.getItem('userTeamData');
+    if (!savedDataStr) {
+      localStorage.setItem('userTeamData', JSON.stringify({ uid, ...existingData }));
+    }
+    console.log(`Welcome back, ${existingData.team} (UID: ${uid})`);
+    return;
+  }
+
+  // New user - assign team and save
+  try {
+    const teamData = await assignUserTeam(uid);
+    console.log(`Team "${teamData.team}" created for UID ${uid}`);
+  } catch (e) {
+    console.error("Error assigning team:", e);
+  }
+});
+
+// === Season Countdown ===
 let countdownInterval;
 onValue(ref(db, 'seasonends'), (snapshot) => {
   const endTime = snapshot.val();
@@ -506,7 +594,7 @@ function updateCountdown(endDate) {
   `;
 }
 
-// === PREVIOUS FIXTURES POPUP ===
+// === Previous Fixtures Popup ===
 staticPrevBtn.addEventListener('click', () => popupOverlay.style.display = 'flex');
 closePopupBtn.addEventListener('click', () => popupOverlay.style.display = 'none');
 
@@ -538,42 +626,7 @@ onValue(ref(db, 'previousfixtures'), (snapshot) => {
   popupContent.innerHTML = content;
 });
 
-// === LEADERBOARD (Pull from users) ===
-onValue(ref(db, 'users'), (snapshot) => {
-  const usersData = snapshot.val();
-  const container = document.getElementById('tableContainer');
-  if (!usersData) {
-    container.innerHTML = "<div style='color:gray; text-align:center;'>No leaderboard data</div>";
-    return;
-  }
-
-  const teams = Object.values(usersData).map(user => ({
-    team: user.team,
-    owner: user.username,
-    points: user.stats?.points || 0
-  }));
-
-  teams.sort((a, b) => b.points - a.points);
-
-  let leaderboardContent = `
-    <table class="leaderboard-table">
-      <tr><th>#</th><th>Team Name</th><th>Owner</th><th>Points</th></tr>
-  `;
-  teams.slice(0, 10).forEach((team, index) => {
-    leaderboardContent += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${team.team}</td>
-        <td>@${team.owner}</td>
-        <td class="points">${team.points}</td>
-      </tr>
-    `;
-  });
-  leaderboardContent += `</table>`;
-  container.innerHTML = leaderboardContent;
-});
-
-// === UPCOMING FIXTURE ADVANCED ===
+// === Upcoming Fixtures ===
 onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
   const upcomingFixtures = snapshot.val();
   if (!upcomingFixtures) {
@@ -581,11 +634,7 @@ onValue(ref(db, 'upcomingfixtures'), (snapshot) => {
     return;
   }
 
-  const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({
-    key,
-    ...fixture
-  }));
-
+  const fixtureList = Object.entries(upcomingFixtures).map(([key, fixture]) => ({ key, ...fixture }));
   const now = new Date();
   const validFixtures = [];
 
@@ -629,12 +678,10 @@ function getCountdownText(prefix, date) {
   const now = new Date();
   const diff = date - now;
   if (diff <= 0) return '';
-
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
-
   return `${prefix} <span style="color:#007bff;">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
 }
 
@@ -694,16 +741,110 @@ function showEndedAndLoadNext(currentKey, allFixtures) {
   }, 5000);
 }
 
-// === LOADING SCREEN ===
+// === League Table of Teams ===
+// This will load all users and display their teams, points, and codes
+const leagueTableContainer = document.getElementById('leagueTableContainer');
+
+function renderLeagueTable(usersData) {
+  if (!usersData) {
+    leagueTableContainer.innerHTML = "<div style='color:gray; text-align:center;'>No teams found</div>";
+    return;
+  }
+
+  const sortedUsers = Object.entries(usersData).sort((a, b) => {
+    // Sort descending by points
+    return (b[1].stats?.points || 0) - (a[1].stats?.points || 0);
+  });
+
+  let html = `
+    <table style="width: 100%; border-collapse: collapse; color: #eee;">
+      <thead>
+        <tr style="border-bottom: 1px solid #444;">
+          <th style="padding: 8px; text-align: left;">Team</th>
+          <th style="padding: 8px; text-align: left;">Code</th>
+          <th style="padding: 8px; text-align: right;">Points</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  sortedUsers.forEach(([uid, user]) => {
+    const highlight = (localStorage.getItem('userTeamData') && JSON.parse(localStorage.getItem('userTeamData')).uid === uid) ? 'background: #004466;' : '';
+    html += `
+      <tr style="${highlight} border-bottom: 1px solid #333;">
+        <td style="padding: 8px;">${user.team || 'Unknown'}</td>
+        <td style="padding: 8px;">${user.code || '-----'}</td>
+        <td style="padding: 8px; text-align: right;">${user.stats?.points || 0}</td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  leagueTableContainer.innerHTML = html;
+}
+
+// Listen for all users and update league table live
+onValue(ref(db, 'users'), (snapshot) => {
+  renderLeagueTable(snapshot.val());
+});
+
+// === Loading Screen ===
 window.addEventListener('load', () => {
   setTimeout(() => {
     const loader = document.getElementById('loadingScreen');
-    loader.classList.add('hidden');
+    loader?.classList.add('hidden');
     setTimeout(() => loader.style.display = 'none', 500);
   }, 5000);
 });
-</script>
+function loadLeagueTable() {
+  const leagueTable = document.getElementById('leagueTable');
+  onValue(ref(db, 'users'), (snapshot) => {
+    const users = snapshot.val();
+    if (!users) {
+      leagueTable.innerHTML = "<div style='color:gray; text-align:center;'>No teams available yet.</div>";
+      return;
+    }
 
+    const sorted = Object.entries(users)
+      .map(([uid, data]) => ({
+        team: data.team || "Unknown 🏳️",
+        username: data.username || `guest-${uid.slice(0, 5)}`,
+        points: data.stats?.points || 0
+      }))
+      .sort((a, b) => b.points - a.points);
+
+    let tableHTML = `
+      <h2 style="text-align:center; color:#00d2ff;">🌍 Global League Table</h2>
+      <table style="width:100%; border-collapse: collapse; color:white;">
+        <thead>
+          <tr style="background:#1e1e1e;">
+            <th style="padding:10px; border-bottom:1px solid #444;">#</th>
+            <th style="padding:10px; border-bottom:1px solid #444;">Team</th>
+            <th style="padding:10px; border-bottom:1px solid #444;">User</th>
+            <th style="padding:10px; border-bottom:1px solid #444;">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    sorted.forEach((u, i) => {
+      tableHTML += `
+        <tr style="background:${i % 2 === 0 ? '#2c2c2c' : '#1e1e1e'};">
+          <td style="padding:8px; text-align:center;">${i + 1}</td>
+          <td style="padding:8px;">${u.team}</td>
+          <td style="padding:8px;">@${u.username}</td>
+          <td style="padding:8px; text-align:right;">${u.points}</td>
+        </tr>
+      `;
+    });
+
+    tableHTML += `</tbody></table>`;
+    leagueTable.innerHTML = tableHTML;
+  });
+}
+
+loadLeagueTable(); // Call it when page loads
+</script>
 <style>
 @keyframes pulse {
   0% { opacity: 1; }
