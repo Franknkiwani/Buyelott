@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Match - CyberChat</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    header {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #1db954;
+      text-align: center;
+    }
+    .match-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 720px;
+      background: rgba(30,30,30,0.8);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 0 15px #1db954aa;
+    }
+    .player {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      border-right: 2px solid #1db95455;
+      padding-right: 1rem;
+    }
+    .player:last-child {
+      border-right: none;
+      padding-right: 0;
+      padding-left: 1rem;
+    }
+    img.flag {
+      width: 80px;
+      height: 50px;
+      border-radius: 5px;
+      object-fit: cover;
+      border: 1px solid #555;
+    }
+    .team-name {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-top: 0.2rem;
+      text-align: center;
+    }
+    .city {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .stats {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #ccc;
+    }
+    .versus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #1db954;
+      margin: 0 1rem;
+      user-select: none;
+    }
+    #countdown {
+      margin-top: 2rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #f44336;
+    }
+    footer {
+      margin-top: auto;
+      padding: 1rem 0;
+      color: #555;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 600px) {
+      .match-container {
+        flex-direction: column;
+        padding: 1rem 0.5rem;
+      }
+      .player {
+        border-right: none;
+        padding-right: 0;
+        padding-left: 0;
+        border-bottom: 2px solid #1db95455;
+        margin-bottom: 1rem;
+      }
+      .player:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      .versus {
+        margin: 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Match Ready! ⚽️</header>
+
+  <div class="match-container">
+    <div class="player" id="player1">
+      <img class="flag" id="flag1" src="" alt="Player 1 Flag" />
+      <div class="team-name" id="team1"></div>
+      <div class="city" id="city1"></div>
+      <div class="stats" id="stats1"></div>
+    </div>
+
+    <div class="versus">VS</div>
+
+    <div class="player" id="player2">
+      <img class="flag" id="flag2" src="" alt="Player 2 Flag" />
+      <div class="team-name" id="team2"></div>
+      <div class="city" id="city2"></div>
+      <div class="stats" id="stats2"></div>
+    </div>
+  </div>
+
+  <div id="countdown"></div>
+
+  <footer>© 2025 CyberChat</footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.appspot.com",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Parse pairId from URL like ?pairId=uid1-uid2
+    const urlParams = new URLSearchParams(window.location.search);
+    const pairId = urlParams.get('pairId');
+
+    if (!pairId || !pairId.includes('-')) {
+      document.body.innerHTML = '<h2 style="color:red; text-align:center; margin-top:2rem;">Invalid or missing pairId in URL.</h2>';
+      throw new Error('Invalid or missing pairId');
+    }
+
+    const [uid1, uid2] = pairId.split('-');
+
+    // DOM refs
+    const flag1 = document.getElementById('flag1');
+    const flag2 = document.getElementById('flag2');
+    const team1 = document.getElementById('team1');
+    const team2 = document.getElementById('team2');
+    const city1 = document.getElementById('city1');
+    const city2 = document.getElementById('city2');
+    const stats1 = document.getElementById('stats1');
+    const stats2 = document.getElementById('stats2');
+    const countdown = document.getElementById('countdown');
+
+    async function fetchUser(uid) {
+      const userRef = ref(db, 'users/' + uid);
+      const snap = await get(userRef);
+      if (!snap.exists()) {
+        return null;
+      }
+      return snap.val();
+    }
+
+    // Show user info in player card
+    function showPlayerData(container, user, uid) {
+      container.flag.src = user.countryCode
+        ? `https://flagcdn.com/w80/${user.countryCode.toLowerCase()}.png`
+        : 'https://via.placeholder.com/80x50?text=?';
+      container.flag.alt = `Flag of ${user.country || 'Unknown'}`;
+      container.team.textContent = user.team || 'Unknown FC';
+      container.city.textContent = user.city || 'Unknown City';
+      container.stats.textContent = `W: ${user.wins ?? 0} | D: ${user.draws ?? 0} | L: ${user.losses ?? 0} | Pts: ${user.points ?? 0}`;
+    }
+
+    // Countdown logic
+    function startCountdown(endTime) {
+      function update() {
+        const now = Date.now();
+        const diff = Math.floor((endTime - now) / 1000);
+        if (diff <= 0) {
+          countdown.textContent = 'Match Started! Let the game begin!';
+          clearInterval(timer);
+          return;
+        }
+        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+        const seconds = String(diff % 60).padStart(2, '0');
+        countdown.textContent = `Match starts in ${minutes}:${seconds}`;
+      }
+      update();
+      const timer = setInterval(update, 1000);
+    }
+
+    async function loadMatch() {
+      // Fetch user data for both players
+      const [user1, user2] = await Promise.all([fetchUser(uid1), fetchUser(uid2)]);
+
+      if (!user1 || !user2) {
+        countdown.textContent = 'One or both users not found.';
+        return;
+      }
+
+      showPlayerData({ flag: flag1, team: team1, city: city1, stats: stats1 }, user1, uid1);
+      showPlayerData({ flag: flag2, team: team2, city: city2, stats: stats2 }, user2, uid2);
+
+      // Fetch match data to get start time (matches/{uid1 or uid2})
+      // We don't know which UID stores the match, so check both
+      const matchRef1 = ref(db, 'matches/' + uid1);
+      const matchRef2 = ref(db, 'matches/' + uid2);
+
+      let matchSnap1 = await get(matchRef1);
+      let matchSnap2 = await get(matchRef2);
+      let matchData = null;
+
+      if (matchSnap1.exists()) matchData = matchSnap1.val();
+      else if (matchSnap2.exists()) matchData = matchSnap2.val();
+
+      if (!matchData) {
+        countdown.textContent = 'Match data not found.';
+        return;
+      }
+
+      if (matchData.startTime) {
+        startCountdown(matchData.startTime);
+      } else {
+        countdown.textContent = 'No scheduled start time.';
+      }
+    }
+
+    loadMatch().catch(e => {
+      countdown.textContent = 'Error loading match data.';
+      console.error(e);
+    });
+  </script>
+</body>
+</html>
