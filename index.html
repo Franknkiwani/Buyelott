@@ -527,40 +527,34 @@
     }
 
     function handleTask(type) {
-      if (type === 'click') {
-        balance += 0.001;
-        updateBalanceDisplay();
-        saveBalance();
-        logHistory('One Tap Bonus', 0.001);
-      } else if (type === 'visit') {
-        balance += 0.025;
-} else if (type === 'visit') {
-        // Open partner website in a new tab and add balance after 5 seconds
-        const partnerURL = 'https://trustedpartner.example.com';
-        window.open(partnerURL, '_blank', 'noopener,noreferrer');
-        setTimeout(() => {
-          balance += 0.025;
-          updateBalanceDisplay();
-          saveBalance();
-          logHistory('Partner Website Visit', 0.025);
-        }, 5000);
-      } else if (type === 'share') {
-        if (navigator.share) {
-          navigator.share({
-            title: 'Check out Cashify!',
-            text: 'Earn real money by completing simple tasks on Cashify.',
-            url: window.location.href,
-          }).then(() => {
-            document.getElementById('referral-status').textContent = 'Thanks for sharing! Referral bonus under review.';
-            // No immediate balance increment, manual review only
-          }).catch(() => {
-            document.getElementById('referral-status').textContent = 'Share cancelled or failed.';
-          });
-        } else {
-          alert('Sharing is not supported on this device/browser.');
-        }
-      }
+  if (type === 'click') {
+    balance += 0.001;
+    updateBalanceDisplay();
+    saveBalance();
+    logHistory('One Tap Bonus', 0.001);
+  } else if (type === 'visit') {
+    const partnerURL = 'https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590';
+    window.open(partnerURL, '_blank', 'noopener,noreferrer');
+    balance += 0.025; // 💸 Add immediately without delay
+    updateBalanceDisplay();
+    saveBalance();
+    logHistory('Instant Visit Bonus', 0.025);
+  } else if (type === 'share') {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out Cashify!',
+        text: 'Earn real money by completing simple tasks on Cashify.',
+        url: window.location.href,
+      }).then(() => {
+        document.getElementById('referral-status').textContent = 'Thanks for sharing! Referral bonus under review.';
+      }).catch(() => {
+        document.getElementById('referral-status').textContent = 'Share cancelled or failed.';
+      });
+    } else {
+      alert('Sharing is not supported on this device/browser.');
     }
+  }
+}
 
     // Simple task history log for debugging or future extension
     function logHistory(taskName, amount) {
