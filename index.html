@@ -1,669 +1,220 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Cashify – Real Tasks, Real Rewards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultimate ToolBox</title>
   <style>
-    /* Reset & base */
+    :root {
+      --bg: #0b0f18;
+      --header-bg: #0e1726;
+      --card-bg: #131a2c;
+      --text: #fff;
+      --accent: #4cc9f0;
+    }
+    /* Reset and base */
     * {
-      margin: 0; padding: 0; box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       user-select: none;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f0f0f;
-      color: #e2e2e2;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px 0 50px;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding-bottom: 68px; /* leave space for footer nav */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
+
     header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 56px;
-      background: rgba(25,25,25,0.95);
-      backdrop-filter: saturate(180%) blur(12px);
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 0 1.5rem;
-      border-bottom: 1px solid #222;
+      align-items: center;
+      position: sticky;
+      top: 10px;
+      background-color: var(--header-bg);
+      border-radius: 30px;
+      padding: 14px 30px;
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
       z-index: 1000;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: #00e676;
-      letter-spacing: 0.02em;
-      user-select: auto;
-      user-drag: none;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
       user-select: none;
-      user-drag: none;
     }
-    .logo svg {
-      width: 22px;
-      height: 22px;
-      fill: #00e676;
-    }
-    .balance {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 6px 16px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      border: 1px solid rgba(255,255,255,0.12);
-      min-width: 90px;
-      text-align: center;
-      color: #76ff03;
-      font-variant-numeric: tabular-nums;
-      transition: background 0.4s ease;
-      user-select: auto;
-      user-drag: none;
-    }
-    main {
-      padding: 80px 1.5rem 2rem;
-      max-width: 600px;
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 1.6rem;
-      user-select: auto;
-      user-drag: none;
-    }
-    .task-card {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 22px;
-      padding: 1.2rem 1.6rem;
-      backdrop-filter: blur(10px);
-      box-shadow:
-        0 8px 20px rgb(0 255 118 / 0.25),
-        0 0 4px rgb(0 255 118 / 0.2);
-      border: 1.5px solid rgba(0,255,118,0.2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      font-size: 1rem;
-      color: #00e676;
-      user-select: auto;
-      user-drag: none;
-      transition: transform 0.22s ease;
-    }
-    .task-card:focus-within,
-    .task-card:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        0 12px 28px rgb(0 255 118 / 0.4),
-        0 0 8px rgb(0 255 118 / 0.3);
-      outline: none;
-    }
-    .task-desc {
-      font-weight: 400;
-      font-size: 0.9rem;
-      color: #a9a9a9;
-      margin-top: 6px;
-      max-width: 320px;
-      user-select: auto;
-      user-drag: none;
-    }
-    .task-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      user-select: auto;
-      user-drag: none;
-    }
-    .task-action {
-      display: flex;
-      gap: 1.25rem;
-      align-items: center;
-      user-select: auto;
-      user-drag: none;
-    }
-    .task-earn {
-      font-weight: 700;
-      color: #76ff03;
-      font-size: 1.05rem;
-      user-select: auto;
-      user-drag: none;
-      min-width: 65px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .task-btn {
-      background: #111;
-      border: 1.8px solid #00e676;
-      color: #00e676;
-      padding: 9px 22px;
-      border-radius: 18px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.32s ease, color 0.32s ease;
-      user-select: auto;
-      user-drag: none;
-      min-width: 90px;
-      font-weight: 600;
-      box-shadow:
-        0 0 12px rgba(0,230,118,0.6);
-    }
-    .task-btn:hover,
-    .task-btn:focus-visible {
-      background: #00e676;
-      color: #0a0a0a;
-      outline: none;
-      box-shadow:
-        0 0 18px #00ff3c,
-        0 0 30px #00ff3c;
-    }
-    .referral-status {
-      font-size: 0.75rem;
-      color: #999;
-      margin-top: 4px;
-      font-style: italic;
-      user-select: auto;
-      user-drag: none;
-    }
-    /* Stats */
-    .stats-box {
-      background: rgba(255,255,255,0.05);
-      border-radius: 18px;
-      padding: 1.2rem 1.4rem;
-      border: 1.3px solid rgba(0,255,118,0.3);
-      color: #76ff03;
-      font-weight: 700;
-      font-size: 1.15rem;
-      text-align: center;
-      user-select: auto;
-      user-drag: none;
-      box-shadow: 0 0 10px rgba(118,255,3,0.4);
-    }
-    /* Collapsible More Info */
-    #more-info-toggle {
-      background: none;
+
+    .toggle-btn {
+      background: var(--card-bg);
       border: none;
-      color: #00e676;
+      padding: 8px 16px;
+      color: var(--text);
+      border-radius: 12px;
       cursor: pointer;
-      font-weight: 700;
-      margin: 1.3rem auto 0;
-      display: block;
-      text-align: center;
-      font-size: 1.1rem;
-      user-select: auto;
-      user-drag: none;
-      transition: color 0.25s ease;
-    }
-    #more-info-toggle:hover,
-    #more-info-toggle:focus-visible {
-      color: #76ff03;
-      outline: none;
-    }
-    #more-info-content {
-      max-width: 600px;
-      margin: 0 auto 2rem;
-      background: rgba(255,255,255,0.06);
-      border-radius: 18px;
-      padding: 1.4rem 1.8rem;
-      backdrop-filter: saturate(180%) blur(14px);
-      display: none;
-      color: #bbb;
-      font-size: 0.93rem;
-      line-height: 1.5;
-      user-select: auto;
-      user-drag: none;
-    }
-    #more-info-content b {
-      color: #e0e0e0;
-    }
-    #more-info-content a {
-      color: #76ff03;
-      text-decoration: none;
-    }
-    #more-info-content a:hover,
-    #more-info-content a:focus-visible {
-      text-decoration: underline;
-      outline: none;
-    }
-    footer {
-      text-align: center;
-      padding: 1.4rem 1rem 2.2rem;
-      color: #444;
-      font-size: 0.78rem;
-      max-width: 600px;
-      margin: 0 auto 1rem;
-      width: 100%;
-      user-select: auto;
-      user-drag: none;
-    }
-
-    /* Balance animation */
-    .balance-update {
-      animation: pulse-green 0.6s ease forwards;
-    }
-    @keyframes pulse-green {
-      0% {
-        background-color: rgba(118, 255, 3, 0.7);
-      }
-      100% {
-        background-color: rgba(255, 255, 255, 0.05);
-      }
-    }
-
-    /* Sticky bottom nav for links */
-    nav#bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(10,10,10,0.95);
-      border-top: 1px solid #222;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-      height: 56px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
       font-weight: 600;
-      color: #888;
-      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+      transition: background-color 0.3s ease;
       user-select: none;
-      user-drag: none;
-      z-index: 1100;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      position: static;
     }
-    nav#bottom-nav a {
-      color: #666;
+    .toggle-btn:hover {
+      background-color: var(--accent);
+      color: #000;
+    }
+
+    /* Grid for tools */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+      gap: 16px;
+      width: 90vw;
+      max-width: 600px;
+    }
+
+    a.card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 18px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
       text-decoration: none;
-      transition: color 0.25s ease;
-      user-select: none;
-      user-drag: none;
+      color: var(--text);
+      transition: transform 0.2s ease;
     }
-    nav#bottom-nav a:hover,
-    nav#bottom-nav a:focus-visible {
-      color: #00e676;
-      outline: none;
+    a.card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px var(--accent);
     }
-    nav#bottom-nav a:active {
-      color: #00bb56;
+
+    a.card img {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 12px;
     }
-.task-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.1rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease;
-  gap: 1rem;
-  max-width: 600px;
-  width: 100%;
-}
 
-.task-card:hover,
-.task-card:focus-within {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6);
-}
+    a.card h2 {
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
 
-.task-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+    a.card p {
+      font-size: 0.85rem;
+      text-align: center;
+      color: #bbb;
+    }
 
-.task-header {
-  font-size: 1rem;
-  color: #f0f0f0;
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-}
-
-.task-desc {
-  font-size: 0.88rem;
-  color: #aaa;
-  line-height: 1.45;
-  max-width: 100%;
-}
-
-.task-action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0.5rem;
-  min-width: 90px;
-}
-
-.task-earn {
-  font-weight: 600;
-  color: #a4ff4d;
-  font-size: 0.92rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.task-btn {
-  background: #1a1a1a;
-  border: 1px solid #a4ff4d;
-  color: #a4ff4d;
-  padding: 7px 16px;
-  border-radius: 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.task-btn:hover,
-.task-btn:focus-visible {
-  background: #a4ff4d;
-  color: #0f0f0f;
-  outline: none;
-  box-shadow: 0 0 8px rgba(164, 255, 77, 0.5);
-}
-
-.referral-status {
-  font-size: 0.72rem;
-  color: #888;
-  font-style: italic;
-  margin-top: 2px;
-  text-align: right;
-  max-width: 140px;
-}
-  .stats-table {
-    background: #111;
-    color: #fff;
-    width: 90%;
-    max-width: 500px;
-    margin: 2rem auto;
-    border-radius: 16px;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-
-  .stats-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #222;
-    padding-bottom: 0.5rem;
-  }
-
-  .stats-row:last-child {
-    border-bottom: none;
-  }
-
-  .stats-label {
-    font-size: 0.95rem;
-    color: #bbb;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .stats-value {
-    font-weight: 600;
-    font-size: 1.2rem;
-    color: #00ff88;
-  }
-</style>
+    .ad-container {
+      grid-column: 1 / -1;
+      background: #111a2b;
+      border-radius: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <div class="logo" aria-label="Cashify logo and brand">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="#00e676" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false">
-        <path d="M12 1L15 5H9L12 1ZM12 23L9 19H15L12 23ZM1 12L5 15V9L1 12ZM23 12L19 9V15L23 12ZM4.222 4.222L6.343 6.343L4.222 4.222ZM19.778 19.778L17.657 17.657L19.778 19.778ZM19.778 4.222L17.657 6.343L19.778 4.222ZM4.222 19.778L6.343 17.657L4.222 19.778Z"/>
-      </svg>
-      <span>Cashify</span>
-    </div>
-    <div class="balance" id="main-balance" aria-live="polite" aria-atomic="true">$0.000</div>
+    <h1>Toolbox</h1>
+    <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
   </header>
-<main>
-<div class="stats-table">
-  <div class="stats-row">
-    <div class="stats-label">💸 Total Paid Out</div>
-    <div class="stats-value" id="total-paid">$0.00</div>
+
+  <div class="grid" id="toolsGrid">
+    <a href="/calculator.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/calculator.png" alt="Calculator icon" />
+      <h2>Calculator</h2>
+      <p>Advanced math calculator with graphing support.</p>
+    </a>
+
+    <a href="/currency-converter.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/currency-exchange.png" alt="Currency Converter icon" />
+      <h2>Currency Converter</h2>
+      <p>Real-time exchange rates for 180+ currencies.</p>
+    </a>
+
+    <div class="ad-container">
+      <script type="text/javascript">
+        atOptions = {
+          'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>
+    </div>
+
+    <a href="/youtube-analytics.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/youtube-play.png" alt="YouTube Analytics icon" />
+      <h2>YouTube Analytics</h2>
+      <p>Track channel stats & growth insights free.</p>
+    </a>
+
+    <a href="/roblox.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/roblox.png" alt="Roblox icon" />
+      <h2>Roblox</h2>
+      <p>Explore games, community, and latest updates.</p>
+    </a>
+
+    <div class="ad-container">
+      <script type="text/javascript">
+        atOptions = {
+          'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>
+    </div>
+
+    <a href="/password-generator.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/key.png" alt="Password Generator icon" />
+      <h2>Password Generator</h2>
+      <p>Create strong, secure passwords instantly.</p>
+    </a>
+
+    <a href="/qr-code-generator.html" class="card has-logo">
+      <img src="https://img.icons8.com/ios-filled/50/4cc9f0/qr-code.png" alt="QR Code Generator icon" />
+      <h2>QR Code Generator</h2>
+      <p>Generate custom QR codes for any link.</p>
+    </a>
   </div>
-  <div class="stats-row">
-    <div class="stats-label">📅 Since</div>
-    <div class="stats-value" id="since-date">Loading...</div>
-  </div>
-</div>
-<section class="task-card" role="region" aria-labelledby="task1-title" tabindex="0">
-  <div class="task-info">
-    <div id="task1-title" class="task-header">One Tap Bonus</div>
-    <div class="task-desc">Just tap and earn.</div>
-  </div>
-  <div class="task-action">
-    <button class="task-btn" onclick="handleTask('click')" aria-label="Claim one tap bonus of 0.001 dollars">+ $0.001</button>
-  </div>
-</section>
-
-<section class="task-card" role="region" aria-labelledby="task2-title" tabindex="0">
-  <div class="task-info">
-    <div id="task2-title" class="task-header">Visit Sponsor</div>
-    <div class="task-desc">Stay 7 seconds. Get paid.</div>
-  </div>
-  <div class="task-action">
-    <button class="task-btn" onclick="handleTask('visit')" aria-label="Visit sponsor site to earn 0.025 dollars">+ $0.025</button>
-  </div>
-</section>
-
-<section class="task-card" role="region" aria-labelledby="task3-title" tabindex="0">
-  <div class="task-info">
-    <div id="task3-title" class="task-header">Refer a Friend</div>
-    <div class="task-desc">Bring friends. Earn more.</div>
-  </div>
-  <div class="task-action" style="flex-direction: column; align-items: flex-end;">
-    <button class="task-btn" onclick="handleTask('share')" aria-label="Share app with friends to earn referral bonus">+ $1.000</button>
-    <div class="referral-status" id="referral-status" aria-live="polite" aria-atomic="true"></div>
-  </div>
-</section>
-
-    <button id="more-info-toggle" aria-expanded="false" aria-controls="more-info-content">More Info ▼</button>
-
-    <section id="more-info-content" aria-hidden="true">
-      <h2 style="color:#00e676; margin-bottom:0.8rem;">How Cashify Works</h2>
-      <p>Complete simple online tasks to earn money, including tapping bonuses, visiting partners, and sharing with friends.</p>
-      <p>Tasks are verified, and rewards are added to your balance instantly or reviewed if necessary.</p>
-
-      <h2 style="color:#00e676; margin:1.2rem 0 0.6rem;">Withdrawals</h2>
-      <p>Withdraw your earnings once your balance reaches a minimum of <strong>$5.00</strong>. Withdrawal requests are processed within 3-5 business days.</p>
-      <button class="task-btn" disabled style="opacity:0.5; margin-top:0.5rem; min-width:auto;">Withdraw</button>
-
-      <h2 style="color:#00e676; margin:1.2rem 0 0.6rem;">FAQ</h2>
-      <p><b>Q:</b> Is this real money?<br /> <b>A:</b> Yes, earnings come from partner ads and verified tasks.</p>
-      <p><b>Q:</b> How do referrals work?<br /> <b>A:</b> Referrals are tracked but bonuses are granted only after manual review to prevent abuse.</p>
-      <p><b>Q:</b> How often can I claim bonuses?<br /> <b>A:</b> One tap bonus can be claimed once daily. Website visits can be repeated but only count once per visit.</p>
-      <p><b>Q:</b> Can I withdraw anytime?<br /> <b>A:</b> Withdrawals are available after reaching $5 minimum balance.</p>
-
-      <h2 style="color:#00e676; margin:1.2rem 0 0.6rem;">Privacy & Security</h2>
-      <p>Your data is stored locally and securely. We don’t sell your info or spam you with ads.</p>
-      <p>Sharing requires user permission via your device's native share API.</p>
-    </section>
-  </main>
-
-  <footer>
-    Cashify © 2025 • Built responsibly to offer simple earnings.<br />
-    <small>All trademarks belong to their respective owners.</small>
-  </footer>
-
-  <nav id="bottom-nav" aria-label="Primary navigation">
-    <a href="https://cyberchat.online/privacy.html" target="_self" rel="noopener noreferrer" aria-label="Privacy Policy page">Privacy</a>
-    <a href="https://cyberchat.online/contact.html" target="_self" rel="noopener noreferrer" aria-label="Contact Us page">Contact Us</a>
-    <a href="withdraw.html" target="_self" rel="noopener noreferrer" aria-label="Withdraw page">Withdraw</a>
-  </nav>
 
   <script>
-    let balance = parseFloat(localStorage.getItem('cashify-balance')) || 0;
-
-    function updateBalanceDisplay() {
-      const balanceEl = document.getElementById('main-balance');
-      balanceEl.textContent = `$${balance.toFixed(3)}`;
-      balanceEl.classList.add('balance-update');
-      setTimeout(() => balanceEl.classList.remove('balance-update'), 600);
-    }
-
-    function saveBalance() {
-      localStorage.setItem('cashify-balance', balance.toFixed(3));
-    }
-
-    function handleTask(type) {
-  if (type === 'click') {
-    balance += 0.001;
-    updateBalanceDisplay();
-    saveBalance();
-    logHistory('One Tap Bonus', 0.001);
-  } else if (type === 'visit') {
-    const partnerURL = 'https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590';
-    window.open(partnerURL, '_blank', 'noopener,noreferrer');
-    balance += 0.025; // 💸 Add immediately without delay
-    updateBalanceDisplay();
-    saveBalance();
-    logHistory('Instant Visit Bonus', 0.025);
-  } else if (type === 'share') {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Check out Cashify!',
-        text: 'Earn real money by completing simple tasks on Cashify.',
-        url: window.location.href,
-      }).then(() => {
-        document.getElementById('referral-status').textContent = 'Thanks for sharing! Referral bonus under review.';
-      }).catch(() => {
-        document.getElementById('referral-status').textContent = 'Share cancelled or failed.';
-      });
-    } else {
-      alert('Sharing is not supported on this device/browser.');
-    }
-  }
-}
-
-    // Simple task history log for debugging or future extension
-    function logHistory(taskName, amount) {
-      console.log(`Task completed: ${taskName} +$${amount.toFixed(3)}`);
-    }
-
-    // More info toggle
-    const moreInfoToggle = document.getElementById('more-info-toggle');
-    const moreInfoContent = document.getElementById('more-info-content');
-    moreInfoToggle.addEventListener('click', () => {
-      const expanded = moreInfoToggle.getAttribute('aria-expanded') === 'true';
-      moreInfoToggle.setAttribute('aria-expanded', !expanded);
-      moreInfoContent.style.display = expanded ? 'none' : 'block';
-      moreInfoContent.setAttribute('aria-hidden', expanded);
-      moreInfoToggle.textContent = expanded ? 'More Info ▼' : 'Less Info ▲';
-    });
-
-    // Initialize balance display on page load
-    updateBalanceDisplay();
-
-  </script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const totalPaidEl = document.getElementById("total-paid");
-  const sinceEl = document.getElementById("since-date");
-
-  const payoutRef = ref(db, "payoutStats");
-  onValue(payoutRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      totalPaidEl.textContent = `$${Number(data.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-      sinceEl.textContent = data.since || "N/A";
-    }
-  });
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Adsterra Loop</title>
-</head>
-<body>
-  <div id="ads-container" style="display: none;"></div>
-
-  <script>
-    const adSources = [
-      "//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js",
-      "//pl26857223.profitableratecpm.com/a8/a7/b1/a8a7b1389678bf2846d808769e5f078f.js"
-    ];
-
-    // Duplicate each ad 3x
-    const adScripts = [];
-    adSources.forEach(src => {
-      for (let i = 0; i < 3; i++) {
-        adScripts.push(src);
+    function toggleDarkMode() {
+      if (document.documentElement.style.getPropertyValue('--bg') === '#0b0f18') {
+        document.documentElement.style.setProperty('--bg', '#f5f5f5');
+        document.documentElement.style.setProperty('--header-bg', '#e0e0e0');
+        document.documentElement.style.setProperty('--card-bg', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#111');
+        document.documentElement.style.setProperty('--accent', '#0077ff');
+      } else {
+        document.documentElement.style.setProperty('--bg', '#0b0f18');
+        document.documentElement.style.setProperty('--header-bg', '#0e1726');
+        document.documentElement.style.setProperty('--card-bg', '#131a2c');
+        document.documentElement.style.setProperty('--text', '#fff');
+        document.documentElement.style.setProperty('--accent', '#4cc9f0');
       }
-    });
-
-    function loadAds() {
-      const container = document.getElementById("ads-container");
-      container.innerHTML = ""; // Clean slate
-
-      adScripts.forEach(src => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.type = "text/javascript";
-        container.appendChild(script);
-      });
-
-      container.style.display = "block";
     }
-
-    function removeAds() {
-      const container = document.getElementById("ads-container");
-      container.innerHTML = "";
-      container.style.display = "none";
-    }
-
-    function toggleAdsCycle() {
-      setTimeout(() => {
-        loadAds();
-
-        setTimeout(() => {
-          removeAds();
-          toggleAdsCycle(); // Loop it forever
-        }, 5000); // Show for 5s
-
-      }, 15000); // Wait 15s before showing
-    }
-
-    toggleAdsCycle();
   </script>
 </body>
 </html>
