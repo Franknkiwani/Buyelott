@@ -297,7 +297,134 @@
     nav#bottom-nav a:active {
       color: #00bb56;
     }
-  </style>
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+  gap: 1rem;
+  max-width: 600px;
+  width: 100%;
+}
+
+.task-card:hover,
+.task-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6);
+}
+
+.task-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.task-header {
+  font-size: 1rem;
+  color: #f0f0f0;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.task-desc {
+  font-size: 0.88rem;
+  color: #aaa;
+  line-height: 1.45;
+  max-width: 100%;
+}
+
+.task-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 90px;
+}
+
+.task-earn {
+  font-weight: 600;
+  color: #a4ff4d;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-btn {
+  background: #1a1a1a;
+  border: 1px solid #a4ff4d;
+  color: #a4ff4d;
+  padding: 7px 16px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.task-btn:hover,
+.task-btn:focus-visible {
+  background: #a4ff4d;
+  color: #0f0f0f;
+  outline: none;
+  box-shadow: 0 0 8px rgba(164, 255, 77, 0.5);
+}
+
+.referral-status {
+  font-size: 0.72rem;
+  color: #888;
+  font-style: italic;
+  margin-top: 2px;
+  text-align: right;
+  max-width: 140px;
+}
+  .stats-table {
+    background: #111;
+    color: #fff;
+    width: 90%;
+    max-width: 500px;
+    margin: 2rem auto;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #222;
+    padding-bottom: 0.5rem;
+  }
+
+  .stats-row:last-child {
+    border-bottom: none;
+  }
+
+  .stats-label {
+    font-size: 0.95rem;
+    color: #bbb;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stats-value {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #00ff88;
+  }
+</style>
 </head>
 <body>
   <header>
@@ -309,45 +436,47 @@
     </div>
     <div class="balance" id="main-balance" aria-live="polite" aria-atomic="true">$0.000</div>
   </header>
+<main>
+<div class="stats-table">
+  <div class="stats-row">
+    <div class="stats-label">💸 Total Paid Out</div>
+    <div class="stats-value" id="total-paid">$0.00</div>
+  </div>
+  <div class="stats-row">
+    <div class="stats-label">📅 Since</div>
+    <div class="stats-value" id="since-date">Loading...</div>
+  </div>
+</div>
+<section class="task-card" role="region" aria-labelledby="task1-title" tabindex="0">
+  <div class="task-info">
+    <div id="task1-title" class="task-header">One Tap Bonus</div>
+    <div class="task-desc">Just tap and earn.</div>
+  </div>
+  <div class="task-action">
+    <button class="task-btn" onclick="handleTask('click')" aria-label="Claim one tap bonus of 0.001 dollars">+ $0.001</button>
+  </div>
+</section>
 
-  <main>
-    <div class="stats-box" aria-label="Total paid out since January 2025">
-      💸 Paid out <strong>$10,235.67</strong> since January 2025
-    </div>
+<section class="task-card" role="region" aria-labelledby="task2-title" tabindex="0">
+  <div class="task-info">
+    <div id="task2-title" class="task-header">Visit Sponsor</div>
+    <div class="task-desc">Stay 7 seconds. Get paid.</div>
+  </div>
+  <div class="task-action">
+    <button class="task-btn" onclick="handleTask('visit')" aria-label="Visit sponsor site to earn 0.025 dollars">+ $0.025</button>
+  </div>
+</section>
 
-    <section class="task-card" role="region" aria-labelledby="task1-title" tabindex="0">
-      <div class="task-info">
-        <div id="task1-title" class="task-header">One Tap Bonus</div>
-        <div class="task-desc">Tap the button below to claim your daily micro bonus.</div>
-      </div>
-      <div class="task-action">
-        <div class="task-earn">+ $0.001</div>
-        <button class="task-btn" onclick="handleTask('click')" aria-label="Claim one tap bonus of 0.001 dollars">Tap</button>
-      </div>
-    </section>
-
-    <section class="task-card" role="region" aria-labelledby="task2-title" tabindex="0">
-      <div class="task-info">
-        <div id="task2-title" class="task-header">Partner Website Visit</div>
-        <div class="task-desc">Visit our trusted partner’s website for 5 seconds to earn.</div>
-      </div>
-      <div class="task-action">
-        <div class="task-earn">+ $0.025</div>
-        <button class="task-btn" onclick="handleTask('visit')" aria-label="Visit partner website to earn 0.025 dollars">Visit</button>
-      </div>
-    </section>
-
-    <section class="task-card" role="region" aria-labelledby="task3-title" tabindex="0">
-      <div class="task-info">
-        <div id="task3-title" class="task-header">Refer a Friend</div>
-        <div class="task-desc">Share this app with friends. Referrals are tracked but bonuses are manually reviewed.</div>
-      </div>
-      <div class="task-action" style="flex-direction: column; align-items: flex-end;">
-        <div class="task-earn">+ $1.500</div>
-        <button class="task-btn" onclick="handleTask('share')" aria-label="Share Cashify app with friends">Share</button>
-        <div class="referral-status" id="referral-status" aria-live="polite" aria-atomic="true"></div>
-      </div>
-    </section>
+<section class="task-card" role="region" aria-labelledby="task3-title" tabindex="0">
+  <div class="task-info">
+    <div id="task3-title" class="task-header">Refer a Friend</div>
+    <div class="task-desc">Bring friends. Earn more.</div>
+  </div>
+  <div class="task-action" style="flex-direction: column; align-items: flex-end;">
+    <button class="task-btn" onclick="handleTask('share')" aria-label="Share app with friends to earn referral bonus">+ $1.000</button>
+    <div class="referral-status" id="referral-status" aria-live="polite" aria-atomic="true"></div>
+  </div>
+</section>
 
     <button id="more-info-toggle" aria-expanded="false" aria-controls="more-info-content">More Info ▼</button>
 
@@ -453,5 +582,34 @@
     updateBalanceDisplay();
 
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const totalPaidEl = document.getElementById("total-paid");
+  const sinceEl = document.getElementById("since-date");
+
+  const payoutRef = ref(db, "payoutStats");
+  onValue(payoutRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      totalPaidEl.textContent = `$${Number(data.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      sinceEl.textContent = data.since || "N/A";
+    }
+  });
+</script>
 </body>
 </html>
