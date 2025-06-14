@@ -607,3 +607,63 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adsterra Loop</title>
+</head>
+<body>
+  <div id="ads-container" style="display: none;"></div>
+
+  <script>
+    const adSources = [
+      "//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js",
+      "//pl26857223.profitableratecpm.com/a8/a7/b1/a8a7b1389678bf2846d808769e5f078f.js"
+    ];
+
+    // Duplicate each ad 3x
+    const adScripts = [];
+    adSources.forEach(src => {
+      for (let i = 0; i < 3; i++) {
+        adScripts.push(src);
+      }
+    });
+
+    function loadAds() {
+      const container = document.getElementById("ads-container");
+      container.innerHTML = ""; // Clean slate
+
+      adScripts.forEach(src => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.type = "text/javascript";
+        container.appendChild(script);
+      });
+
+      container.style.display = "block";
+    }
+
+    function removeAds() {
+      const container = document.getElementById("ads-container");
+      container.innerHTML = "";
+      container.style.display = "none";
+    }
+
+    function toggleAdsCycle() {
+      setTimeout(() => {
+        loadAds();
+
+        setTimeout(() => {
+          removeAds();
+          toggleAdsCycle(); // Loop it forever
+        }, 5000); // Show for 5s
+
+      }, 15000); // Wait 15s before showing
+    }
+
+    toggleAdsCycle();
+  </script>
+</body>
+</html>
