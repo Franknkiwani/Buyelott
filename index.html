@@ -290,3 +290,81 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracking...</title>
+</head>
+<body>
+
+  <!-- Firebase SDKs + Tracking Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, set, push, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    let sessionId = localStorage.getItem("sessionId");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("sessionId", sessionId);
+    }
+
+    const userRef = ref(db, "userLogs/" + sessionId);
+
+    if (!localStorage.getItem("userLogged")) {
+      fetch("https://ipapi.co/json/")
+        .then(res => res.json())
+        .then(data => {
+          const info = {
+            ip: data.ip,
+            city: data.city,
+            region: data.region,
+            country: data.country_name,
+            timezone: data.timezone,
+            localTime: new Date().toLocaleString("en-US", { timeZone: data.timezone }),
+            device: getDeviceType(),
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+            views: 1,
+            clicks: 0
+          };
+          set(userRef, info)
+            .then(() => localStorage.setItem("userLogged", "true"))
+            .catch(err => console.error("Firebase error:", err));
+        })
+        .catch(err => console.error("IP Fetch error:", err));
+    } else {
+      update(userRef, { views: increment(1) });
+    }
+
+    document.addEventListener("click", () => {
+      update(userRef, { clicks: increment(1) });
+    });
+
+    function getDeviceType() {
+      const ua = navigator.userAgent;
+      if (/android/i.test(ua)) return "Android";
+      if (/iPad|iPhone|iPod/.test(ua)) return "iOS";
+      if (/Windows/.test(ua)) return "Windows PC";
+      if (/Macintosh/.test(ua)) return "Mac";
+      if (/Linux/.test(ua)) return "Linux";
+      return "Unknown";
+    }
+  </script>
+</body>
+</html>
