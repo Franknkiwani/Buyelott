@@ -239,7 +239,8 @@
     return { groupEnded, topTwo: teams.slice(0, 2) };
   }
 
-  function createCountdownElement(id, targetTime) {
+  // Updated countdown with LIVE, 10min match timer, ENDED + winner display
+  function createCountdownElement(id, targetTime, match) {
     const el = document.createElement('div');
     el.id = id;
     el.className = "countdown";
@@ -247,19 +248,61 @@
     el.style.color = "#ccc";
     el.style.fontSize = "0.85em";
 
+    let liveStarted = false;
+    let ended = false;
+
     function updateCountdown() {
       const now = Date.now();
       const diff = targetTime - now;
-      if (diff <= 0) {
+
+      if (diff <= 0 && !liveStarted) {
+        liveStarted = true;
         el.textContent = "LIVE";
         clearInterval(countdownIntervals.get(id));
         countdownIntervals.delete(id);
+
+        // Initialize scores to 0:0 if not set (meaning match started)
+        if (match) {
+          match.score1 = (typeof match.score1 === 'number') ? match.score1 : 0;
+          match.score2 = (typeof match.score2 === 'number') ? match.score2 : 0;
+        }
+
+        // Update the score display on the UI immediately
+        const scoreDiv = el.parentElement.querySelector('.score');
+        if(scoreDiv) {
+          scoreDiv.textContent = `${match.score1} : ${match.score2}`;
+        }
+
+        // Start 10 minute match timer to mark as ended
+        setTimeout(() => {
+          ended = true;
+          el.textContent = "ENDED";
+
+          // Determine winner or draw
+          let winner = "Draw";
+          if (match.score1 > match.score2) winner = match.team1 || "Team 1";
+          else if (match.score2 > match.score1) winner = match.team2 || "Team 2";
+
+          // Show winner below countdown
+          const winnerEl = document.createElement('div');
+          winnerEl.style.marginTop = "4px";
+          winnerEl.style.fontWeight = "bold";
+          winnerEl.style.color = "#4CAF50";
+          winnerEl.textContent = `Winner: ${winner}`;
+          el.appendChild(winnerEl);
+
+          // TODO: Update Firebase or trigger logic to promote winner to next round (Semi Finals)
+        }, 10 * 60 * 1000);
+
         return;
       }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      el.textContent = `${h}h ${m}m ${s}s`;
+
+      if (!liveStarted && !ended) {
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${h}h ${m}m ${s}s`;
+      }
     }
 
     updateCountdown();
@@ -291,19 +334,18 @@
     t2.textContent = team2;
     container.appendChild(t2);
 
-    // Score display, fallback 0:0
+    // Score display, fallback "-"
     const scoreDiv = document.createElement('div');
     scoreDiv.className = 'score';
-    const score1 = (typeof match.score1 === 'number') ? match.score1 : 0;
-    const score2 = (typeof match.score2 === 'number') ? match.score2 : 0;
+    const score1 = (typeof match.score1 === 'number') ? match.score1 : "-";
+    const score2 = (typeof match.score2 === 'number') ? match.score2 : "-";
     scoreDiv.textContent = `${score1} : ${score2}`;
     container.appendChild(scoreDiv);
 
-    // Only show countdown if date exists in Firebase
+    // Show countdown only if date exists
     if (match.date) {
       const targetTime = new Date(match.date).getTime();
-      const countdown = createCountdownElement(`countdown-${idx}`, targetTime);
-      countdown.classList.add('countdown');
+      const countdown = createCountdownElement(`countdown-${idx}`, targetTime, match);
       container.appendChild(countdown);
     }
 
@@ -355,41 +397,41 @@
       // Get scores from knockout stage if exist
       const knockoutScores = data.knockout || {};
 
-      // Quarter Finals
+      // Quarter Finals - no fallback dates here, only show countdown if date exists
       let qf = [];
       if (qualifiedTeams.length >= 8) {
         qf = [
           {
             team1: qualifiedTeams[0]?.name,
             team2: qualifiedTeams[3]?.name,
-            date: knockoutScores.qf?.match1?.date || "2025-06-21T18:00:00Z",
-            score1: knockoutScores.qf?.match1?.score1 || 0,
-            score2: knockoutScores.qf?.match1?.score2 || 0
+            date: knockoutScores.qf?.match1?.date || null,
+            score1: knockoutScores.qf?.match1?.score1 ?? null,
+            score2: knockoutScores.qf?.match1?.score2 ?? null
           },
           {
             team1: qualifiedTeams[2]?.name,
             team2: qualifiedTeams[1]?.name,
-            date: knockoutScores.qf?.match2?.date || "2025-06-22T18:00:00Z",
-            score1: knockoutScores.qf?.match2?.score1 || 0,
-            score2: knockoutScores.qf?.match2?.score2 || 0
+            date: knockoutScores.qf?.match2?.date || null,
+            score1: knockoutScores.qf?.match2?.score1 ?? null,
+            score2: knockoutScores.qf?.match2?.score2 ?? null
           },
           {
             team1: qualifiedTeams[4]?.name,
             team2: qualifiedTeams[7]?.name,
-            date: knockoutScores.qf?.match3?.date || "2025-06-23T18:00:00Z",
-            score1: knockoutScores.qf?.match3?.score1 || 0,
-            score2: knockoutScores.qf?.match3?.score2 || 0
+            date: knockoutScores.qf?.match3?.date || null,
+            score1: knockoutScores.qf?.match3?.score1 ?? null,
+            score2: knockoutScores.qf?.match3?.score2 ?? null
           },
           {
             team1: qualifiedTeams[6]?.name,
             team2: qualifiedTeams[5]?.name,
-            date: knockoutScores.qf?.match4?.date || "2025-06-24T18:00:00Z",
-            score1: knockoutScores.qf?.match4?.score1 || 0,
-            score2: knockoutScores.qf?.match4?.score2 || 0
+            date: knockoutScores.qf?.match4?.date || null,
+            score1: knockoutScores.qf?.match4?.score1 ?? null,
+            score2: knockoutScores.qf?.match4?.score2 ?? null
           }
         ];
       } else {
-        qf = [{ team1: "TBA", team2: "TBA", score1: 0, score2: 0 }];
+        qf = [{ team1: "TBA", team2: "TBA", score1: null, score2: null }];
       }
       renderKnockout("Quarter Finals", qf);
 
@@ -398,16 +440,16 @@
         {
           team1: knockoutScores.sf?.match1?.team1 || "TBA",
           team2: knockoutScores.sf?.match1?.team2 || "TBA",
-          date: knockoutScores.sf?.match1?.date || "2025-06-26T18:00:00Z",
-          score1: knockoutScores.sf?.match1?.score1 || 0,
-          score2: knockoutScores.sf?.match1?.score2 || 0
+          date: knockoutScores.sf?.match1?.date || null,
+          score1: knockoutScores.sf?.match1?.score1 ?? null,
+          score2: knockoutScores.sf?.match1?.score2 ?? null
         },
         {
           team1: knockoutScores.sf?.match2?.team1 || "TBA",
           team2: knockoutScores.sf?.match2?.team2 || "TBA",
-          date: knockoutScores.sf?.match2?.date || "2025-06-27T18:00:00Z",
-          score1: knockoutScores.sf?.match2?.score1 || 0,
-          score2: knockoutScores.sf?.match2?.score2 || 0
+          date: knockoutScores.sf?.match2?.date || null,
+          score1: knockoutScores.sf?.match2?.score1 ?? null,
+          score2: knockoutScores.sf?.match2?.score2 ?? null
         }
       ];
       renderKnockout("Semi Finals", sf);
@@ -416,9 +458,9 @@
       const finalMatch = {
         team1: knockoutScores.final?.team1 || "TBA",
         team2: knockoutScores.final?.team2 || "TBA",
-        date: knockoutScores.final?.date || "2025-06-30T20:00:00Z",
-        score1: knockoutScores.final?.score1 || 0,
-        score2: knockoutScores.final?.score2 || 0
+        date: knockoutScores.final?.date || null,
+        score1: knockoutScores.final?.score1 ?? null,
+        score2: knockoutScores.final?.score2 ?? null
       };
       renderKnockout("Final", [finalMatch]);
 
