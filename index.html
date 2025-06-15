@@ -1,194 +1,201 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UEFA Style Tournament Table</title>
+  <title>CyberChat — Jobs Made Easier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    body {
-      background: #121212;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    :root {
+      --bg: #1c1c1e;
+      --text: #f2f2f7;
+      --primary: #0a84ff;
+      --border: #3a3a3c;
+      --glass-bg: rgba(28, 28, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
       margin: 0;
-      padding: 10px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
-    h2 {
-      margin: 24px 0 12px;
-      font-weight: 700;
-      border-bottom: 2px solid #444;
-      padding-bottom: 6px;
-      font-size: 1.3rem;
-    }
-    .table-wrapper {
-      overflow-x: auto;
-      margin-bottom: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 320px;
-    }
-    th, td {
-      text-align: center;
-      padding: 10px 6px;
-      border: 1px solid #333;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-    th {
-      background: #222;
-    }
-    td {
-      background: #1a1a1a;
-    }
-    tr:nth-child(even) td {
-      background: #222;
-    }
-    section.stage {
-      margin-top: 36px;
-    }
-    .match {
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin: 10px 0;
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: #ccc;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      backdrop-filter: saturate(180%) blur(8px);
     }
-    .match .date {
-      font-weight: 400;
-      font-size: 0.85rem;
-      color: #666;
+
+    .left-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
-    .lock-msg {
-      color: #a00;
-      font-weight: 700;
+
+    .left-header h1 {
       font-size: 1.1rem;
-      margin-top: 16px;
-      text-align: center;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.2px;
+      margin-bottom: 0.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .locked .match {
-      color: #555 !important;
-      background: #111 !important;
-      pointer-events: none;
+
+    .left-header .logo {
+      stroke: var(--primary);
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
     }
-    @media (min-width: 600px) {
-      th, td {
-        font-size: 1rem;
-        padding: 12px 10px;
+
+    .left-header p {
+      font-size: 0.70rem;
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      opacity: 0;
+      animation: slideFadeIn 1.2s forwards;
+      animation-delay: 0.4s;
+      margin-left: 0;
+      padding-left: 28px;
+    }
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
       }
-      .match {
-        font-size: 1.2rem;
+      100% {
+        opacity: 1;
+        transform: translateX(0);
       }
     }
 
+    .earnings-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: default;
+      user-select: none;
+      backdrop-filter: saturate(180%) blur(8px);
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.4);
+      transition: background 0.3s ease;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .earnings-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
+    }
+
+    .location-time-bar {
+      margin: 1rem auto 0;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      backdrop-filter: saturate(180%) blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    .location-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .time-ios {
+      font-family: 'SF Pro Display', 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      transition: all 0.2s ease;
+      min-width: 100px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
-  <div id="tournament-stage"></div>
-<style>
-  /* Group Table Styling */
-  .table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 30px;
-  }
-  .group-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #eee;
-    background: #121212;
-  }
-  .group-table th, .group-table td {
-    padding: 8px 12px;
-    border: 1px solid #444;
-    text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-  .group-table th {
-    background: #222;
-  }
-  .group-table tr:nth-child(even) {
-    background: #1e1e1e;
-  }
+<header>
+  <div class="left-header">
+    <h1>
+      <svg
+        class="logo"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 12v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM9 10V7a3 3 0 016 0v3" />
+      </svg>
+      CYBERCHAT
+    </h1>
+    <p>JOBS MADE EASIER</p>
+  </div>
 
-  /* Knockout match container */
-  .stage {
-    margin-bottom: 40px;
-  }
-  .stage > h2 {
-    color: #ff4d4d;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: 700;
-    margin-bottom: 15px;
-  }
-  .match {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 15px 20px;
-    margin: 10px auto;
-    max-width: 260px;
-    background: #1a1a1a;
-    color: #eee;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    box-shadow: 0 0 12px rgba(0,0,0,0.7);
-  }
+  <button class="earnings-btn" aria-label="Current earnings">$0.000</button>
+</header>
 
-  .team {
-    width: 100%;
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.15em;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    margin: 5px 0;
-    white-space: normal;
-  }
+<div class="location-time-bar">
+  <div class="location-box" id="locationBox">Detecting location...</div>
+  <div class="time-ios" id="timeBox">00:00:00</div>
+</div>
 
-  .vs {
-    font-weight: 700;
-    margin: 6px 0;
-    color: #ff4d4d;
-    font-size: 1.2em;
-  }
-
-  .score {
-    margin-top: 8px;
-    font-size: 1.3em;
-    font-weight: 700;
-    color: #4caf50;
-  }
-
-  .countdown {
-    margin-top: 6px;
-    font-size: 0.9em;
-    color: #aaa;
-    font-family: monospace;
-  }
-</style>
 
 <script type="module">
+  // Firebase imports & config
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
     projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
     measurementId: "G-LLT6F9WRKH"
@@ -196,281 +203,130 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
 
-  const stageDiv = document.getElementById("tournament-stage");
-  const GROUPS = ['A', 'B', 'C', 'D'];
-  const TEAMS_PER_GROUP = 4;
+  let use24Hour = true;
 
-  const countdownIntervals = new Map();
+  const exchangeRates = {
+    USD: 1,
+    EUR: 0.91,
+    GBP: 0.79,
+    JPY: 135.5,
+    INR: 83.2,
+    CAD: 1.35,
+    AUD: 1.48,
+    CNY: 7.1,
+    BRL: 5.2,
+    MXN: 17.1,
+  };
 
-  function renderGroup(groupName, teams) {
-    while (teams.length < TEAMS_PER_GROUP) {
-      teams.push({ name: "TO BE ANNOUNCED", p: "-", w: "-", d: "-", l: "-", pts: "-" });
-    }
+  const currencySymbols = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    INR: "₹",
+    CAD: "CA$",
+    AUD: "A$",
+    CNY: "¥",
+    BRL: "R$",
+    MXN: "MX$",
+  };
 
-    teams.sort((a, b) => (b.pts || 0) - (a.pts || 0));
-    const groupEnded = teams.every(team => (team.p || 0) >= 5);
-
-    let html = `<div style="display:flex; align-items:center; justify-content:space-between;">
-      <h2>Group ${groupName}</h2>
-      ${groupEnded ? '<span style="color:red; font-weight:bold;">🔴 GROUP ENDED</span>' : ''}
-    </div>
-    <div class="table-wrapper"><table class="group-table">
-      <thead><tr>
-        <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th>
-      </tr></thead><tbody>`;
-
-    teams.forEach((team, index) => {
-      const highlight = index < 2 ? 'style="font-weight:bold;"' : '';
-      html += `<tr ${highlight}>
-        <td>${team.name}</td>
-        <td>${team.p}</td>
-        <td>${team.w}</td>
-        <td>${team.d}</td>
-        <td>${team.l}</td>
-        <td>${team.pts}</td>
-      </tr>`;
-    });
-
-    html += `</tbody></table></div>`;
-    stageDiv.innerHTML += html;
-
-    return { groupEnded, topTwo: teams.slice(0, 2) };
+  function getCurrencyCode(countryCode) {
+    const mapping = {
+      US: "USD",
+      GB: "GBP",
+      FR: "EUR",
+      DE: "EUR",
+      IN: "INR",
+      JP: "JPY",
+      CA: "CAD",
+      AU: "AUD",
+      CN: "CNY",
+      BR: "BRL",
+      MX: "MXN",
+    };
+    return mapping[countryCode] || "USD";
   }
 
-  // Updated countdown with LIVE, 10min match timer, ENDED + winner display
-  function createCountdownElement(id, targetTime, match) {
-    const el = document.createElement('div');
-    el.id = id;
-    el.className = "countdown";
-    el.style.marginTop = "8px";
-    el.style.color = "#ccc";
-    el.style.fontSize = "0.85em";
-
-    let liveStarted = false;
-    let ended = false;
-
-    function updateCountdown() {
-      const now = Date.now();
-      const diff = targetTime - now;
-
-      if (diff <= 0 && !liveStarted) {
-        liveStarted = true;
-        el.textContent = "LIVE";
-        clearInterval(countdownIntervals.get(id));
-        countdownIntervals.delete(id);
-
-        // Initialize scores to 0:0 if not set (meaning match started)
-        if (match) {
-          match.score1 = (typeof match.score1 === 'number') ? match.score1 : 0;
-          match.score2 = (typeof match.score2 === 'number') ? match.score2 : 0;
-        }
-
-        // Update the score display on the UI immediately
-        const scoreDiv = el.parentElement.querySelector('.score');
-        if(scoreDiv) {
-          scoreDiv.textContent = `${match.score1} : ${match.score2}`;
-        }
-
-        // Start 10 minute match timer to mark as ended
-        setTimeout(() => {
-          ended = true;
-          el.textContent = "ENDED";
-
-          // Determine winner or draw
-          let winner = "Draw";
-          if (match.score1 > match.score2) winner = match.team1 || "Team 1";
-          else if (match.score2 > match.score1) winner = match.team2 || "Team 2";
-
-          // Show winner below countdown
-          const winnerEl = document.createElement('div');
-          winnerEl.style.marginTop = "4px";
-          winnerEl.style.fontWeight = "bold";
-          winnerEl.style.color = "#4CAF50";
-          winnerEl.textContent = `Winner: ${winner}`;
-          el.appendChild(winnerEl);
-
-          // TODO: Update Firebase or trigger logic to promote winner to next round (Semi Finals)
-        }, 10 * 60 * 1000);
-
-        return;
-      }
-
-      if (!liveStarted && !ended) {
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        el.textContent = `${h}h ${m}m ${s}s`;
-      }
-    }
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    countdownIntervals.set(id, interval);
-
-    return el;
-  }
-
-  function renderMatch(match, idx) {
-    const team1 = match.team1 || "TBA";
-    const team2 = match.team2 || "TBA";
-
-    const container = document.createElement('div');
-    container.className = 'match';
-
-    const t1 = document.createElement('div');
-    t1.className = 'team';
-    t1.textContent = team1;
-    container.appendChild(t1);
-
-    const vs = document.createElement('div');
-    vs.className = 'vs';
-    vs.textContent = 'vs';
-    container.appendChild(vs);
-
-    const t2 = document.createElement('div');
-    t2.className = 'team';
-    t2.textContent = team2;
-    container.appendChild(t2);
-
-    // Score display, fallback "-"
-    const scoreDiv = document.createElement('div');
-    scoreDiv.className = 'score';
-    const score1 = (typeof match.score1 === 'number') ? match.score1 : "-";
-    const score2 = (typeof match.score2 === 'number') ? match.score2 : "-";
-    scoreDiv.textContent = `${score1} : ${score2}`;
-    container.appendChild(scoreDiv);
-
-    // Show countdown only if date exists
-    if (match.date) {
-      const targetTime = new Date(match.date).getTime();
-      const countdown = createCountdownElement(`countdown-${idx}`, targetTime, match);
-      container.appendChild(countdown);
-    }
-
-    return container;
-  }
-
-  function renderKnockout(stageName, matches) {
-    const section = document.createElement('section');
-    section.className = 'stage';
-
-    const h2 = document.createElement('h2');
-    h2.textContent = stageName;
-    section.appendChild(h2);
-
-    if (!matches.length) {
-      section.appendChild(renderMatch({ team1: "TBA", team2: "TBA" }, 0));
-    } else {
-      matches.forEach((match, i) => {
-        section.appendChild(renderMatch(match, i));
-      });
-    }
-
-    stageDiv.appendChild(section);
-  }
-
-  async function loadTournament() {
-    const dbRef = ref(db);
+  async function updateTimeFromIP() {
     try {
-      const snapshot = await get(child(dbRef, 'tournament'));
-      if (!snapshot.exists()) {
-        stageDiv.innerHTML = "<p>No tournament data found.</p>";
-        return;
-      }
-
-      const data = snapshot.val();
-      const groupsData = data.groups || {};
-      const qualifiedTeams = [];
-
-      stageDiv.innerHTML = ""; // Clear existing content
-
-      // Render groups and gather qualified teams (top 2)
-      GROUPS.forEach(groupName => {
-        const teamObj = groupsData[groupName] || {};
-        const teams = Object.values(teamObj);
-        const result = renderGroup(groupName, teams);
-        qualifiedTeams.push(...result.topTwo);
-      });
-
-      // Get scores from knockout stage if exist
-      const knockoutScores = data.knockout || {};
-
-      // Quarter Finals - no fallback dates here, only show countdown if date exists
-      let qf = [];
-      if (qualifiedTeams.length >= 8) {
-        qf = [
-          {
-            team1: qualifiedTeams[0]?.name,
-            team2: qualifiedTeams[3]?.name,
-            date: knockoutScores.qf?.match1?.date || null,
-            score1: knockoutScores.qf?.match1?.score1 ?? null,
-            score2: knockoutScores.qf?.match1?.score2 ?? null
-          },
-          {
-            team1: qualifiedTeams[2]?.name,
-            team2: qualifiedTeams[1]?.name,
-            date: knockoutScores.qf?.match2?.date || null,
-            score1: knockoutScores.qf?.match2?.score1 ?? null,
-            score2: knockoutScores.qf?.match2?.score2 ?? null
-          },
-          {
-            team1: qualifiedTeams[4]?.name,
-            team2: qualifiedTeams[7]?.name,
-            date: knockoutScores.qf?.match3?.date || null,
-            score1: knockoutScores.qf?.match3?.score1 ?? null,
-            score2: knockoutScores.qf?.match3?.score2 ?? null
-          },
-          {
-            team1: qualifiedTeams[6]?.name,
-            team2: qualifiedTeams[5]?.name,
-            date: knockoutScores.qf?.match4?.date || null,
-            score1: knockoutScores.qf?.match4?.score1 ?? null,
-            score2: knockoutScores.qf?.match4?.score2 ?? null
-          }
-        ];
-      } else {
-        qf = [{ team1: "TBA", team2: "TBA", score1: null, score2: null }];
-      }
-      renderKnockout("Quarter Finals", qf);
-
-      // Semi Finals
-      const sf = [
-        {
-          team1: knockoutScores.sf?.match1?.team1 || "TBA",
-          team2: knockoutScores.sf?.match1?.team2 || "TBA",
-          date: knockoutScores.sf?.match1?.date || null,
-          score1: knockoutScores.sf?.match1?.score1 ?? null,
-          score2: knockoutScores.sf?.match1?.score2 ?? null
-        },
-        {
-          team1: knockoutScores.sf?.match2?.team1 || "TBA",
-          team2: knockoutScores.sf?.match2?.team2 || "TBA",
-          date: knockoutScores.sf?.match2?.date || null,
-          score1: knockoutScores.sf?.match2?.score1 ?? null,
-          score2: knockoutScores.sf?.match2?.score2 ?? null
-        }
-      ];
-      renderKnockout("Semi Finals", sf);
-
-      // Final
-      const finalMatch = {
-        team1: knockoutScores.final?.team1 || "TBA",
-        team2: knockoutScores.final?.team2 || "TBA",
-        date: knockoutScores.final?.date || null,
-        score1: knockoutScores.final?.score1 ?? null,
-        score2: knockoutScores.final?.score2 ?? null
-      };
-      renderKnockout("Final", [finalMatch]);
-
-    } catch (e) {
-      console.error(e);
-      stageDiv.innerHTML = "<p>Error loading tournament data.</p>";
+      const res = await fetch("https://worldtimeapi.org/api/ip");
+      const data = await res.json();
+      const { datetime } = data;
+      const now = new Date(datetime);
+      displayTime(now);
+    } catch (err) {
+      console.error("Time fetch failed, falling back to local time.");
+      displayTime(new Date());
     }
   }
 
-  loadTournament();
+  function displayTime(date) {
+    const timeOptions = use24Hour
+      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const timeStr = date.toLocaleTimeString('en-US', timeOptions);
+    document.getElementById('timeBox').textContent = timeStr;
+  }
+
+  // Toggle 12/24 hour on click
+  document.getElementById("timeBox").addEventListener("click", () => {
+    use24Hour = !use24Hour;
+    updateTimeFromIP();
+  });
+
+  // Main: fetch user location and earnings balance from Firebase
+  async function fetchUserBalanceAndLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      const { country_name, country_code } = data;
+      const flag = country_code
+        ? country_code
+            .toUpperCase()
+            .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()))
+        : '🌐';
+
+      document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${country_name}`;
+
+      onAuthStateChanged(auth, async (user) => {
+        const earningsBtn = document.querySelector('.earnings-btn');
+
+        if (user) {
+          // Grab user balance in USD from Firebase at /users/{uid}/balance
+          const userBalanceRef = ref(db, `users/${user.uid}/balance`);
+          const snapshot = await get(userBalanceRef);
+          const baseUSD = snapshot.exists() ? snapshot.val() : 0.000;
+
+          const currencyCode = getCurrencyCode(country_code);
+          const rate = exchangeRates[currencyCode] || 1;
+          const symbol = currencySymbols[currencyCode] || '$';
+          const localAmount = (baseUSD * rate).toFixed(3);
+
+          earningsBtn.textContent = `${symbol}${localAmount}`;
+          earningsBtn.title = `Earnings in ${currencyCode}`;
+        } else {
+          earningsBtn.textContent = "$0.000";
+          earningsBtn.title = "Not logged in";
+        }
+      });
+
+    } catch (err) {
+      console.error("Location fetch failed, showing default.");
+      document.getElementById("locationBox").textContent = "🌐 Unknown Location";
+    }
+  }
+
+  // Initial calls
+  fetchUserBalanceAndLocation();
+  updateTimeFromIP();
+
+  // Live clock update every second using local time (to avoid heavy IP API calls)
+  setInterval(() => {
+    displayTime(new Date());
+  }, 1000);
 </script>
 </body>
 </html>
