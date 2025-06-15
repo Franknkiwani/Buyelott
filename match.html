@@ -1,321 +1,387 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>DLS Matchmaker & Chat</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #121212;
-      color: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
-      gap: 1rem;
-    }
-    h1 {
-      color: #1db954;
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 0.2rem;
-      display: block;
-    }
-    input[type=text] {
-      width: 280px;
-      padding: 0.5rem;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      outline-offset: 2px;
-    }
-    button {
-      margin-top: 0.8rem;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #1db954;
-      color: #000;
-      font-weight: 700;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #17a44d;
-    }
-    #status {
-      margin-top: 0.5rem;
-      font-style: italic;
-      color: #bbb;
-      min-height: 1.2rem;
-    }
-    #chat {
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 400px;
-      background: #222;
-      border-radius: 12px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      height: 300px;
-      overflow: hidden;
-    }
-    #messages {
-      flex-grow: 1;
-      overflow-y: auto;
-      margin-bottom: 0.8rem;
-      font-size: 0.9rem;
-      line-height: 1.3;
-    }
-    .msg {
-      margin-bottom: 0.5rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 8px;
-      max-width: 75%;
-      word-wrap: break-word;
-    }
-    .msg.self {
-      background: #1db954;
-      color: #000;
-      align-self: flex-end;
-    }
-    .msg.other {
-      background: #333;
-      color: #ddd;
-      align-self: flex-start;
-    }
-    #input-area {
-      display: flex;
-      gap: 0.5rem;
-    }
-    #message-input {
-      flex-grow: 1;
-      padding: 0.5rem;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      outline-offset: 2px;
-      background: #111;
-      color: #eee;
-    }
-    #message-input::placeholder {
-      color: #666;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel - Matches & Wins</title>
+<style>
+  body {
+    background: #121212;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    padding: 1rem;
+    max-width: 900px;
+    margin: auto;
+  }
+  h2 {
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.3rem;
+  }
+  label {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  input, select, button {
+    background: #222;
+    border: 1px solid #444;
+    color: #eee;
+    padding: 0.3rem 0.5rem;
+    margin-top: 0.2rem;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  button {
+    cursor: pointer;
+    background: #007bff;
+    border-color: #0056b3;
+    margin-top: 0.8rem;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  .item {
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.8rem 0;
+  }
+  .item > div {
+    margin-bottom: 0.4rem;
+  }
+  .flex {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .flex > * {
+    flex: 1 1 200px;
+  }
+  .btn-delete {
+    background: #ff4444 !important;
+    border-color: #cc0000 !important;
+  }
+  .btn-edit {
+    background: #28a745 !important;
+    border-color: #1e7e34 !important;
+  }
+  .inline-btns {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.6rem;
+  }
+  small {
+    color: #999;
+  }
+</style>
 </head>
 <body>
-  <h1>DLS Matchmaker & Chat</h1>
 
-  <label for="code-input">Enter Match Code:</label>
-  <input id="code-input" type="text" placeholder="e.g. TEAM1234" autocomplete="off" spellcheck="false" />
+<h1>Admin Panel</h1>
 
-  <button id="join-btn">Join Match</button>
-  <button id="create-btn">Create New Match</button>
+<section id="matches-section">
+  <h2>Manage Matches</h2>
 
-  <div id="status"></div>
+  <form id="match-form">
+    <input type="hidden" id="match-key" value="" />
+    <label>Team 1
+      <input type="text" id="team1-input" required />
+    </label>
+    <label>Team 2
+      <input type="text" id="team2-input" required />
+    </label>
+    <label>Kickoff (ISO date/time)
+      <input type="datetime-local" id="kickoff-input" required />
+      <small>Use UTC time (ISO format)</small>
+    </label>
+    <button type="submit" id="match-submit-btn">Add Match</button>
+    <button type="button" id="match-cancel-btn" style="display:none; background:#999; border-color:#666;">Cancel Edit</button>
+  </form>
 
-  <div id="chat" style="display:none;">
-    <div id="messages" aria-live="polite" aria-relevant="additions"></div>
-    <div id="input-area">
-      <input id="message-input" type="text" placeholder="Type message..." autocomplete="off" />
-      <button id="send-btn">Send</button>
-    </div>
-  </div>
+  <div id="matches-list"></div>
+</section>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get, set, onChildAdded, push, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<hr style="margin:2rem 0; border-color:#333;" />
 
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+<section id="wins-section">
+  <h2>Manage Team Wins</h2>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  <form id="wins-form">
+    <input type="hidden" id="wins-team-key" value="" />
+    <label>Team Name
+      <input type="text" id="wins-team-input" required />
+    </label>
+    <label>Wins Count
+      <input type="number" id="wins-count-input" min="0" required />
+    </label>
+    <button type="submit" id="wins-submit-btn">Add Team Wins</button>
+    <button type="button" id="wins-cancel-btn" style="display:none; background:#999; border-color:#666;">Cancel Edit</button>
+  </form>
 
-    // UI elements
-    const codeInput = document.getElementById('code-input');
-    const joinBtn = document.getElementById('join-btn');
-    const createBtn = document.getElementById('create-btn');
-    const statusEl = document.getElementById('status');
-    const chatEl = document.getElementById('chat');
-    const messagesEl = document.getElementById('messages');
-    const messageInput = document.getElementById('message-input');
-    const sendBtn = document.getElementById('send-btn');
+  <div id="wins-list"></div>
+</section>
 
-    let currentUID = null;
-    let currentMatchCode = null;
-    let chatListener = null;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, update, remove, set, child, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    // Utility: sanitize and uppercase code
-    function cleanCode(code) {
-      return code.trim().toUpperCase();
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // Auto anonymous login
+  signInAnonymously(auth).catch(console.error);
+
+  // Elements - Matches
+  const matchesListEl = document.getElementById('matches-list');
+  const matchForm = document.getElementById('match-form');
+  const matchKeyInput = document.getElementById('match-key');
+  const team1Input = document.getElementById('team1-input');
+  const team2Input = document.getElementById('team2-input');
+  const kickoffInput = document.getElementById('kickoff-input');
+  const matchSubmitBtn = document.getElementById('match-submit-btn');
+  const matchCancelBtn = document.getElementById('match-cancel-btn');
+
+  // Elements - Wins
+  const winsListEl = document.getElementById('wins-list');
+  const winsForm = document.getElementById('wins-form');
+  const winsTeamKeyInput = document.getElementById('wins-team-key');
+  const winsTeamInput = document.getElementById('wins-team-input');
+  const winsCountInput = document.getElementById('wins-count-input');
+  const winsSubmitBtn = document.getElementById('wins-submit-btn');
+  const winsCancelBtn = document.getElementById('wins-cancel-btn');
+
+  // Load and render Matches
+  function renderMatches(matches) {
+    matchesListEl.innerHTML = '';
+    if (!matches) {
+      matchesListEl.textContent = 'No matches found.';
+      return;
     }
-
-    function logStatus(msg) {
-      statusEl.textContent = msg;
-    }
-
-    // Render a chat message bubble
-    function renderMessage({ sender, text }) {
+    Object.entries(matches).forEach(([key, match]) => {
       const div = document.createElement('div');
-      div.classList.add('msg');
-      div.classList.add(sender === currentUID ? 'self' : 'other');
-      div.textContent = text;
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+      div.className = 'item';
 
-    // Listen to chat messages on Firebase
-    function listenChat(matchCode) {
-      if (chatListener) off(ref(db, `matches/${matchCode}/chat`), 'child_added', chatListener);
-      messagesEl.innerHTML = '';
-
-      const chatRef = ref(db, `matches/${matchCode}/chat`);
-      chatListener = onChildAdded(chatRef, (snap) => {
-        const msg = snap.val();
-        renderMessage(msg);
-      });
-    }
-
-    // Send chat message
-    async function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-
-      const chatRef = ref(db, `matches/${currentMatchCode}/chat`);
-      await push(chatRef, {
-        sender: currentUID,
-        text,
-        timestamp: serverTimestamp()
-      });
-      messageInput.value = '';
-    }
-
-    // Join existing match by code
-    async function joinMatch(code) {
-      const matchCode = cleanCode(code);
-      if (!matchCode) {
-        logStatus('Enter a valid match code.');
-        return;
-      }
-
-      const matchRef = ref(db, `matches/${matchCode}`);
-      const snap = await get(matchRef);
-
-      if (!snap.exists()) {
-        logStatus('Match code not found. Create new match or try again.');
-        return;
-      }
-
-      const matchData = snap.val();
-
-      // Save players array or object, add current user if not present
-      const players = matchData.players || {};
-      if (Object.values(players).includes(currentUID)) {
-        logStatus('You are already in this match.');
-      } else if (Object.keys(players).length >= 2) {
-        logStatus('Match is full.');
-        return;
-      } else {
-        // Add user to players
-        players[currentUID] = true;
-        await set(ref(db, `matches/${matchCode}/players`), players);
-        logStatus('Joined match! Chat enabled.');
-      }
-
-      currentMatchCode = matchCode;
-      chatEl.style.display = 'flex';
-      listenChat(matchCode);
-    }
-
-    // Create new match with random 6-letter uppercase code
-    async function createMatch() {
-      function randomCode(length = 6) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < length; i++) {
-          code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
-      }
-
-      // Generate code until unique
-      let code;
-      while (true) {
-        code = randomCode();
-        const snap = await get(ref(db, `matches/${code}`));
-        if (!snap.exists()) break;
-      }
-
-      // Create match entry with current user as player1
-      const players = {};
-      players[currentUID] = true;
-
-      await set(ref(db, `matches/${code}`), {
-        players,
-        createdAt: Date.now()
-      });
-
-      logStatus(`Match created! Share this code with your opponent: ${code}`);
-      currentMatchCode = code;
-      chatEl.style.display = 'flex';
-      listenChat(code);
-    }
-
-    // Init: sign in anon and enable buttons
-    signInAnonymously(auth).then(() => {
-      onAuthStateChanged(auth, (user) => {
-        if (!user) return;
-        currentUID = user.uid;
-        logStatus('Signed in. Enter or create a match.');
-        joinBtn.disabled = false;
-        createBtn.disabled = false;
-      });
-    }).catch(() => {
-      logStatus('Failed to authenticate. Reload page.');
-      joinBtn.disabled = true;
-      createBtn.disabled = true;
+      div.innerHTML = `
+        <div><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></div>
+        <div>Kickoff: ${new Date(match.kickoff).toLocaleString()}</div>
+        <div class="inline-btns">
+          <button class="btn-edit" data-key="${key}">Edit</button>
+          <button class="btn-delete" data-key="${key}">Delete</button>
+        </div>
+      `;
+      matchesListEl.appendChild(div);
     });
+  }
 
-    joinBtn.onclick = () => {
-      joinMatch(codeInput.value).catch(e => {
-        console.error(e);
-        logStatus('Error joining match.');
-      });
-    };
-
-    createBtn.onclick = () => {
-      createMatch().catch(e => {
-        console.error(e);
-        logStatus('Error creating match.');
-      });
-    };
-
-    sendBtn.onclick = () => {
-      sendMessage().catch(console.error);
-    };
-
-    messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage().catch(console.error);
+  // Load and render Wins
+  function renderWins(wins) {
+    winsListEl.innerHTML = '';
+    if (!wins) {
+      winsListEl.textContent = 'No team wins data found.';
+      return;
+    }
+    Object.entries(wins).forEach(([team, count]) => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <div><strong>${team}</strong>: ${count} wins</div>
+        <div class="inline-btns">
+          <button class="btn-edit" data-team="${team}">Edit</button>
+          <button class="btn-delete" data-team="${team}">Delete</button>
+        </div>
+      `;
+      winsListEl.appendChild(div);
     });
-  </script>
+  }
+
+  // Listen to Firebase data
+  onValue(ref(db, 'matches'), snapshot => {
+    renderMatches(snapshot.val());
+  });
+
+  onValue(ref(db, 'wins'), snapshot => {
+    renderWins(snapshot.val());
+  });
+
+  // Match form submit (create or update)
+  matchForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const team1 = team1Input.value.trim();
+    const team2 = team2Input.value.trim();
+    const kickoff = kickoffInput.value;
+
+    if (!team1 || !team2 || !kickoff) {
+      alert('Please fill all match fields.');
+      return;
+    }
+
+    const key = matchKeyInput.value;
+
+    if (key) {
+      // Update existing match
+      try {
+        await update(ref(db, `matches/${key}`), { team1, team2, kickoff: new Date(kickoff).toISOString() });
+        resetMatchForm();
+      } catch (err) {
+        alert('Failed to update match: ' + err.message);
+      }
+    } else {
+      // Add new match
+      try {
+        const newMatchRef = push(ref(db, 'matches'));
+        await set(newMatchRef, { team1, team2, kickoff: new Date(kickoff).toISOString() });
+        resetMatchForm();
+      } catch (err) {
+        alert('Failed to add match: ' + err.message);
+      }
+    }
+  });
+
+  // Match cancel edit button
+  matchCancelBtn.addEventListener('click', e => {
+    e.preventDefault();
+    resetMatchForm();
+  });
+
+  // Wins form submit (create or update)
+  winsForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const team = winsTeamInput.value.trim();
+    const winsCount = Number(winsCountInput.value);
+
+    if (!team || isNaN(winsCount) || winsCount < 0) {
+      alert('Please enter valid team name and wins count.');
+      return;
+    }
+
+    const key = winsTeamKeyInput.value;
+
+    if (key) {
+      // Update existing wins
+      try {
+        await update(ref(db, `wins/${key}`), winsCount);
+        resetWinsForm();
+      } catch (err) {
+        alert('Failed to update wins: ' + err.message);
+      }
+    } else {
+      // Add new wins
+      try {
+        await set(ref(db, `wins/${team}`), winsCount);
+        resetWinsForm();
+      } catch (err) {
+        alert('Failed to add wins: ' + err.message);
+      }
+    }
+  });
+
+  // Wins cancel edit button
+  winsCancelBtn.addEventListener('click', e => {
+    e.preventDefault();
+    resetWinsForm();
+  });
+
+  // Click handlers for Edit/Delete buttons (matches)
+  matchesListEl.addEventListener('click', e => {
+    if (e.target.matches('.btn-edit')) {
+      const key = e.target.dataset.key;
+      if (!key) return;
+      loadMatchForEdit(key);
+    } else if (e.target.matches('.btn-delete')) {
+      const key = e.target.dataset.key;
+      if (!key) return;
+      if (confirm('Delete this match?')) {
+        remove(ref(db, `matches/${key}`)).catch(err => alert('Delete failed: ' + err.message));
+      }
+    }
+  });
+
+  // Click handlers for Edit/Delete buttons (wins)
+  winsListEl.addEventListener('click', e => {
+    if (e.target.matches('.btn-edit')) {
+      const team = e.target.dataset.team;
+      if (!team) return;
+      loadWinsForEdit(team);
+    } else if (e.target.matches('.btn-delete')) {
+      const team = e.target.dataset.team;
+      if (!team) return;
+      if (confirm(`Delete wins for team "${team}"?`)) {
+        remove(ref(db, `wins/${team}`)).catch(err => alert('Delete failed: ' + err.message));
+      }
+    }
+  });
+
+  // Load match data into form for editing
+  async function loadMatchForEdit(key) {
+    try {
+      const snap = await get(ref(db, `matches/${key}`));
+      if (!snap.exists()) return alert('Match not found');
+      const data = snap.val();
+      matchKeyInput.value = key;
+      team1Input.value = data.team1;
+      team2Input.value = data.team2;
+      kickoffInput.value = new Date(data.kickoff).toISOString().slice(0,16); // datetime-local expects YYYY-MM-DDTHH:mm
+      matchSubmitBtn.textContent = 'Update Match';
+      matchCancelBtn.style.display = 'inline-block';
+      team1Input.focus();
+    } catch (err) {
+      alert('Failed to load match: ' + err.message);
+    }
+  }
+
+  // Load wins data into form for editing
+  async function loadWinsForEdit(team) {
+    try {
+      const snap = await get(ref(db, `wins/${team}`));
+      if (!snap.exists()) return alert('Team wins not found');
+      const count = snap.val();
+      winsTeamKeyInput.value = team;
+      winsTeamInput.value = team;
+      winsCountInput.value = count;
+      winsSubmitBtn.textContent = 'Update Wins';
+      winsCancelBtn.style.display = 'inline-block';
+      winsTeamInput.focus();
+    } catch (err) {
+      alert('Failed to load wins: ' + err.message);
+    }
+  }
+
+  // Reset match form
+  function resetMatchForm() {
+    matchKeyInput.value = '';
+    team1Input.value = '';
+    team2Input.value = '';
+    kickoffInput.value = '';
+    matchSubmitBtn.textContent = 'Add Match';
+    matchCancelBtn.style.display = 'none';
+  }
+
+  // Reset wins form
+  function resetWinsForm() {
+    winsTeamKeyInput.value = '';
+    winsTeamInput.value = '';
+    winsCountInput.value = '';
+    winsSubmitBtn.textContent = 'Add Team Wins';
+    winsCancelBtn.style.display = 'none';
+  }
+</script>
+
 </body>
 </html>
