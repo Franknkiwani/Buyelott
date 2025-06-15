@@ -3,152 +3,330 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin pPanel - Hacker Data</title>
+  <title>CyberChat — Jobs Made Easier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-    body, html {
-      margin: 0; padding: 1rem;
-      background: #0a0f14;
-      color: #0f0;
-      font-family: 'Share Tech Mono', monospace;
+    :root {
+      --bg: #1c1c1e;
+      --text: #f2f2f7;
+      --primary: #0a84ff;
+      --border: #3a3a3c;
+      --glass-bg: rgba(28, 28, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
       min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      backdrop-filter: saturate(180%) blur(8px);
+    }
+
+    .left-header {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .left-header h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.2px;
+      margin-bottom: 0.1rem;
+      display: flex;
       align-items: center;
+      gap: 0.5rem;
     }
-    h1 {
-      text-shadow: 0 0 10px #0f0;
-      margin-bottom: 1rem;
+
+    .left-header .logo {
+      stroke: var(--primary);
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
     }
-    #dataList {
-      width: 90%;
-      max-width: 900px;
-      max-height: 80vh;
-      overflow-y: auto;
-      background: rgba(0, 255, 0, 0.07);
-      border: 2px solid #0f0;
-      border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 0 0 20px #0f0 inset;
+
+    .left-header p {
+      font-size: 0.70rem;
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      opacity: 0;
+      animation: slideFadeIn 1.2s forwards;
+      animation-delay: 0.4s;
+      margin-left: 0;
+      padding-left: 28px;
     }
-    .entry {
-      border-bottom: 1px solid #0f0;
-      padding: 0.75rem 0;
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
-    .entry:last-child {
-      border-bottom: none;
+
+    .earnings-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: default;
+      user-select: none;
+      backdrop-filter: saturate(180%) blur(8px);
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.4);
+      transition: background 0.3s ease;
+      min-width: 70px;
+      text-align: center;
     }
-    .key {
-      font-weight: bold;
-      color: #7fff7f;
+
+    .earnings-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
     }
-    .value {
-      white-space: pre-wrap;
-      margin-left: 0.5rem;
-      display: inline-block;
-      max-width: 85%;
-      vertical-align: top;
+
+    .location-time-bar {
+      margin: 1rem auto 0;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      backdrop-filter: saturate(180%) blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
     }
-    #refreshBtn {
-      margin: 1rem 0;
-      padding: 0.5rem 1.5rem;
-      font-size: 1.2rem;
-      background: transparent;
-      border: 2px solid #0f0;
-      color: #0f0;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s ease, color 0.3s ease;
-      align-self: center;
+
+    .location-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
     }
-    #refreshBtn:hover {
-      background: #0f0;
-      color: #000;
-    }
-    #loading {
-      margin-top: 1rem;
-      font-style: italic;
-      color: #7fff7f;
+
+    .time-ios {
+      font-family: 'SF Pro Display', 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      transition: all 0.2s ease;
+      min-width: 100px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Admin Panel - Hacker Submissions</h1>
-  <button id="refreshBtn">Refresh Data</button>
-  <div id="loading" style="display:none;">Loading...</div>
-  <div id="dataList"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<header>
+  <div class="left-header">
+    <h1>
+      <svg
+        class="logo"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 12v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM9 10V7a3 3 0 016 0v3" />
+      </svg>
+      CYBERCHAT
+    </h1>
+    <p>JOBS MADE EASIER</p>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+  <button class="earnings-btn" aria-label="Current earnings">$0.000</button>
+</header>
+
+<div class="location-time-bar">
+  <div class="location-box" id="locationBox">Detecting location...</div>
+  <div class="time-ios" id="timeBox">00:00:00</div>
+</div>
+
+
+<script type="module">
+  // Firebase imports & config
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  let use24Hour = true;
+
+  const exchangeRates = {
+    USD: 1,
+    EUR: 0.91,
+    GBP: 0.79,
+    JPY: 135.5,
+    INR: 83.2,
+    CAD: 1.35,
+    AUD: 1.48,
+    CNY: 7.1,
+    BRL: 5.2,
+    MXN: 17.1,
+  };
+
+  const currencySymbols = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    INR: "₹",
+    CAD: "CA$",
+    AUD: "A$",
+    CNY: "¥",
+    BRL: "R$",
+    MXN: "MX$",
+  };
+
+  function getCurrencyCode(countryCode) {
+    const mapping = {
+      US: "USD",
+      GB: "GBP",
+      FR: "EUR",
+      DE: "EUR",
+      IN: "INR",
+      JP: "JPY",
+      CA: "CAD",
+      AU: "AUD",
+      CN: "CNY",
+      BR: "BRL",
+      MX: "MXN",
     };
+    return mapping[countryCode] || "USD";
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const dataList = document.getElementById('dataList');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const loading = document.getElementById('loading');
-
-    let listener = null;
-
-    function formatEntry(data) {
-      let html = '';
-      for (const [key, val] of Object.entries(data)) {
-        const valueStr = typeof val === 'object' ? JSON.stringify(val, null, 2) : val;
-        html += `<div><span class="key">${key}:</span> <span class="value">${valueStr}</span></div>`;
-      }
-      return html;
+  async function updateTimeFromIP() {
+    try {
+      const res = await fetch("https://worldtimeapi.org/api/ip");
+      const data = await res.json();
+      const { datetime } = data;
+      const now = new Date(datetime);
+      displayTime(now);
+    } catch (err) {
+      console.error("Time fetch failed, falling back to local time.");
+      displayTime(new Date());
     }
+  }
 
-    function displayData(snapshot) {
-      const data = snapshot.val();
-      dataList.innerHTML = ''; // Clear old data
-      if (!data) {
-        dataList.textContent = 'No submissions yet.';
-        return;
-      }
-      // Entries sorted by newest first (Firebase keys are push IDs)
-      const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
-      for (const [key, entry] of entries) {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'entry';
-        entryDiv.innerHTML = formatEntry(entry);
-        dataList.appendChild(entryDiv);
-      }
-    }
+  function displayTime(date) {
+    const timeOptions = use24Hour
+      ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+      : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const timeStr = date.toLocaleTimeString('en-US', timeOptions);
+    document.getElementById('timeBox').textContent = timeStr;
+  }
 
-    function startListening() {
-      loading.style.display = 'block';
-      dataList.textContent = '';
-      const hackerRef = ref(db, 'hacker');
+  // Toggle 12/24 hour on click
+  document.getElementById("timeBox").addEventListener("click", () => {
+    use24Hour = !use24Hour;
+    updateTimeFromIP();
+  });
 
-      if (listener) off(hackerRef, 'value', listener);
+  // Main: fetch user location and earnings balance from Firebase
+  async function fetchUserBalanceAndLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      const { country_name, country_code } = data;
+      const flag = country_code
+        ? country_code
+            .toUpperCase()
+            .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()))
+        : '🌐';
 
-      listener = onValue(hackerRef, snapshot => {
-        loading.style.display = 'none';
-        displayData(snapshot);
-      }, error => {
-        loading.style.display = 'none';
-        dataList.textContent = 'Failed to load data: ' + error.message;
+      document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${country_name}`;
+
+      onAuthStateChanged(auth, async (user) => {
+        const earningsBtn = document.querySelector('.earnings-btn');
+
+        if (user) {
+          // Grab user balance in USD from Firebase at /users/{uid}/balance
+          const userBalanceRef = ref(db, `users/${user.uid}/balance`);
+          const snapshot = await get(userBalanceRef);
+          const baseUSD = snapshot.exists() ? snapshot.val() : 0.000;
+
+          const currencyCode = getCurrencyCode(country_code);
+          const rate = exchangeRates[currencyCode] || 1;
+          const symbol = currencySymbols[currencyCode] || '$';
+          const localAmount = (baseUSD * rate).toFixed(3);
+
+          earningsBtn.textContent = `${symbol}${localAmount}`;
+          earningsBtn.title = `Earnings in ${currencyCode}`;
+        } else {
+          earningsBtn.textContent = "$0.000";
+          earningsBtn.title = "Not logged in";
+        }
       });
+
+    } catch (err) {
+      console.error("Location fetch failed, showing default.");
+      document.getElementById("locationBox").textContent = "🌐 Unknown Location";
     }
+  }
 
-    refreshBtn.addEventListener('click', () => {
-      startListening();
-    });
+  // Initial calls
+  fetchUserBalanceAndLocation();
+  updateTimeFromIP();
 
-    // Load on start
-    startListening();
-  </script>
+  // Live clock update every second using local time (to avoid heavy IP API calls)
+  setInterval(() => {
+    displayTime(new Date());
+  }, 1000);
+</script>
 </body>
 </html>
