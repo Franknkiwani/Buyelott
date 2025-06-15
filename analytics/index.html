@@ -1,405 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>User Location Analytics</title>
-<style>
-  body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 20px;
-  background: #f9fafc;
-  color: #1c1c1e;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
-
-header {
-  margin-bottom: 25px;
-  text-align: center;
-  border-bottom: 1px solid #e1e3e6;
-  padding-bottom: 10px;
-}
-
-header h1 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 1.25rem;
-  color: #2c2c2e;
-  letter-spacing: 0.03em;
-}
-
-#stats {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 25px 30px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
-}
-
-.summary {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: #3a3a3c;
-}
-
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-  margin-bottom: 30px;
-  font-size: 0.9rem;
-}
-
-th, td {
-  padding: 12px 15px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-th {
-  background: #f4f5f7;
-  font-weight: 600;
-  color: #636366;
-  border-radius: 6px 6px 0 0;
-  user-select: none;
-}
-
-tr {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-tr:hover {
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.12);
-}
-
-td {
-  border-bottom: none;
-  color: #2c2c2e;
-}
-
-td.visits-count {
-  font-weight: 600;
-  color: #007aff;
-  min-width: 50px;
-  text-align: center;
-}
-
-.options {
-  position: relative;
-  display: inline-block;
-}
-
-.options button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #007aff;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-.options button:hover {
-  background-color: rgba(0, 122, 255, 0.1);
-}
-
-.options-menu {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  background: #fff;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  border-radius: 8px;
-  padding: 8px 0;
-  min-width: 140px;
-  z-index: 100;
-  display: none;
-  flex-direction: column;
-}
-
-.options-menu.show {
-  display: flex;
-}
-
-.options-menu button {
-  background: none;
-  border: none;
-  padding: 8px 15px;
-  text-align: left;
-  font-weight: 500;
-  font-size: 0.9rem;
-  color: #1c1c1e;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.options-menu button:hover {
-  background-color: #f0f0f5;
-}
-
-canvas {
-  max-width: 100%;
-  height: 320px;
-  margin-bottom: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.06);
-}
-
-footer {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #8e8e93;
-  margin-top: 40px;
-  user-select: none;
-}
-
-/* Responsive tweaks */
-@media (max-width: 480px) {
-  body {
-    padding: 15px 10px;
-  }
-  header h1 {
-    font-size: 1rem;
-  }
-  #stats {
-    padding: 20px 15px;
-  }
-  table {
-    font-size: 0.8rem;
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Site Analytics Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-weight: 700;
+      color: #0af;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .stat {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 12px #0af44d44;
+    }
+    .stat h2 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #0af;
+    }
+    .stat p {
+      margin: 6px 0 0 0;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    h2.countries-title {
+      margin-bottom: 12px;
+      color: #0af;
+      font-weight: 700;
+      border-bottom: 2px solid #0af;
+      padding-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    ul.country-list {
+      list-style: none;
+      padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #0af55;
+      border-radius: 8px;
+      background: #222;
+    }
+    ul.country-list li {
+      padding: 8px 12px;
+      border-bottom: 1px solid #0af44;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    ul.country-list li:last-child {
+      border-bottom: none;
+    }
+    .loading {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #0af;
+      margin-top: 100px;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <h1>CyberChat User Location Analytics</h1>
-</header>
+  <h1>Site Analytics</h1>
 
-<section id="stats">
-  <div class="summary" id="totalVisits">Loading data...</div>
+  <div class="stats">
+    <div class="stat">
+      <h2 id="totalViews">-</h2>
+      <p>Total Views</p>
+    </div>
+    <div class="stat">
+      <h2 id="totalClicks">-</h2>
+      <p>Total Clicks</p>
+    </div>
+    <div class="stat">
+      <h2 id="uniqueUsers">-</h2>
+      <p>Unique Users</p>
+    </div>
+  </div>
 
-  <h2>Users by Country</h2>
-  <canvas id="countryChart"></canvas>
+  <h2 class="countries-title">Visits by Country</h2>
+  <ul class="country-list" id="countryList">
+    <li>Loading countries...</li>
+  </ul>
 
-  <h2>Users by Region / State</h2>
-  <canvas id="regionChart"></canvas>
+  <!-- Firebase SDK v11 modular -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  <h2>Raw Data Table (Latest 100 visits)</h2>
-  <table id="rawDataTable">
-   <thead>
-  <tr>
-    <th></th> <!-- info icon column -->
-    <th>Country</th>
-    <th>Region</th>
-    <th>City</th>
-  </tr>
-</thead>
-    <tbody></tbody>
-  </table>
-</section>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
 
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-<footer>
-  &copy; 2025 CyberChat Analytics
-</footer>
+    const totalViewsEl = document.getElementById('totalViews');
+    const totalClicksEl = document.getElementById('totalClicks');
+    const uniqueUsersEl = document.getElementById('uniqueUsers');
+    const countryListEl = document.getElementById('countryList');
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    async function fetchVisitorData() {
+      try {
+        const visitorsRef = ref(db, 'visitors');
+        const snapshot = await get(visitorsRef);
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        if (!snapshot.exists()) {
+          totalViewsEl.textContent = '0';
+          totalClicksEl.textContent = '0';
+          uniqueUsersEl.textContent = '0';
+          countryListEl.innerHTML = '<li>No visitor data found.</li>';
+          return;
+        }
 
-<script>
-  // Your Firebase config (replace with yours)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
+        const visitors = snapshot.val();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+        let totalViews = 0;
+        let totalClicks = 0;
+        let uniqueUsers = 0;
+        const countryCounts = {};
 
-  // Track start time when user arrives
-  const startTime = Date.now();
+        for (const key in visitors) {
+          if (Object.hasOwnProperty.call(visitors, key)) {
+            const visitor = visitors[key];
+            totalViews += visitor.views || 0;
+            totalClicks += visitor.clicks || 0;
+            uniqueUsers++;
 
-  // Utility: Format timestamp nicely
-  function formatDate(ts) {
-    const d = new Date(ts);
-    return d.toLocaleString();
-  }
+            const country = visitor.country || 'Unknown';
+            countryCounts[country] = (countryCounts[country] || 0) + 1;
+          }
+        }
 
-  // Utility: Format duration from ms to "Xm Ys"
-  function formatDuration(ms) {
-    if (!ms) return 'N/A';
-    const totalSeconds = Math.floor(ms / 1000);
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins}m ${secs}s`;
-  }
+        // Update totals on page
+        totalViewsEl.textContent = totalViews;
+        totalClicksEl.textContent = totalClicks;
+        uniqueUsersEl.textContent = uniqueUsers;
 
-  // Save analytics on page unload with timeSpentMs
-  window.addEventListener('beforeunload', () => {
-    const endTime = Date.now();
-    const timeSpentMs = endTime - startTime;
+        // Sort countries by visits descending
+        const sortedCountries = Object.entries(countryCounts)
+          .sort((a,b) => b[1] - a[1]);
 
-    // Capture other data you track (for example IP etc. if available from your logic)
-    // For demonstration, we only save timestamp and timeSpent
-    db.ref('analytics').push({
-      timestamp: startTime,
-      timeSpentMs: timeSpentMs,
-      // IP, country, region, city should be added here if you have the info
-      // e.g., ip: 'userIP', country: 'userCountry', etc.
-    });
-  });
-
-  async function loadAnalytics() {
-    const snapshot = await db.ref('analytics').orderByKey().limitToLast(100).once('value');
-    const data = snapshot.val();
-    if (!data) {
-      document.getElementById('totalVisits').textContent = 'No data available.';
-      return;
-    }
-
-    const rawRows = [];
-    const countryCounts = {};
-    const regionCounts = {};
-    let totalVisits = 0;
-
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const entry = data[key];
-        totalVisits++;
-
-        const country = entry.country || "Unknown";
-        const region = entry.region || "Unknown";
-
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
-        regionCounts[region] = (regionCounts[region] || 0) + 1;
-
-        rawRows.push(`
-          <tr class="main-row" style="border-bottom: 1px solid #ddd;">
-            <td class="info-icon" style="cursor:pointer; text-align:center; width:30px; font-weight:bold; color:#007bff;">&#8505;</td>
-            <td>${country}</td>
-            <td>${region}</td>
-            <td>${entry.city || '-'}</td>
-          </tr>
-          <tr class="extra-info-row" style="display:none; background:#f9f9fb; font-size:0.85rem; color:#555;">
-            <td colspan="4" style="padding:8px 15px;">
-              <strong>Timestamp:</strong> ${formatDate(entry.timestamp)} &nbsp;&nbsp; | &nbsp;&nbsp; <strong>IP:</strong> ${entry.ip || '-'} <br>
-              <strong>Time Spent:</strong> ${formatDuration(entry.timeSpentMs)}
-            </td>
-          </tr>
-        `);
-      }
-    }
-
-    document.getElementById('totalVisits').textContent = `Total Visits Recorded: ${totalVisits}`;
-
-    document.querySelector('#rawDataTable tbody').innerHTML = rawRows.join('');
-
-    document.querySelectorAll('#rawDataTable tbody tr.main-row .info-icon').forEach(icon => {
-      icon.addEventListener('click', () => {
-        const mainRow = icon.closest('tr');
-        const extraRow = mainRow.nextElementSibling;
-        if (extraRow.style.display === 'none') {
-          extraRow.style.display = 'table-row';
-          icon.style.color = '#0056b3'; // Darker on open
+        // Render countries list
+        if (sortedCountries.length === 0) {
+          countryListEl.innerHTML = '<li>No country data.</li>';
         } else {
-          extraRow.style.display = 'none';
-          icon.style.color = '#007bff'; // Original color
+          countryListEl.innerHTML = '';
+          for (const [country, count] of sortedCountries) {
+            const li = document.createElement('li');
+            li.textContent = `${country}`;
+            const span = document.createElement('span');
+            span.textContent = count;
+            li.appendChild(span);
+            countryListEl.appendChild(li);
+          }
         }
-      });
-    });
 
-    function prepareChartData(counts) {
-      const labels = Object.keys(counts).sort((a,b) => counts[b]-counts[a]);
-      const values = labels.map(label => counts[label]);
-      return { labels, values };
+      } catch (error) {
+        console.error('Error fetching visitor data:', error);
+        totalViewsEl.textContent = '-';
+        totalClicksEl.textContent = '-';
+        uniqueUsersEl.textContent = '-';
+        countryListEl.innerHTML = '<li>Error loading data</li>';
+      }
     }
 
-    const countryData = prepareChartData(countryCounts);
-    const regionData = prepareChartData(regionCounts);
-
-    new Chart(document.getElementById('countryChart'), {
-      type: 'bar',
-      data: {
-        labels: countryData.labels,
-        datasets: [{
-          label: 'Users',
-          data: countryData.values,
-          backgroundColor: 'rgba(54, 162, 235, 0.7)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          maxBarThickness: 40
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-      }
-    });
-
-    new Chart(document.getElementById('regionChart'), {
-      type: 'bar',
-      data: {
-        labels: regionData.labels,
-        datasets: [{
-          label: 'Users',
-          data: regionData.values,
-          backgroundColor: 'rgba(255, 159, 64, 0.7)',
-          borderColor: 'rgba(255, 159, 64, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          maxBarThickness: 40
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-      }
-    });
-
-  }
-
-  loadAnalytics().catch(e => {
-    console.error('Failed to load analytics:', e);
-    document.getElementById('totalVisits').textContent = 'Error loading data.';
-  });
-</script>
+    fetchVisitorData();
+  </script>
 
 </body>
 </html>
