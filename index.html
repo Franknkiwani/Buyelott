@@ -1,651 +1,454 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Penalty Shootout Native App</title>
+  <title>CyberChat — Jobs Made Easier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* Reset + basics */
+    :root {
+      --bg: #1c1c1e;
+      --text: #f2f2f7;
+      --primary: #0a84ff;
+      --border: #3a3a3c;
+      --glass-bg: rgba(28, 28, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
     * {
-      margin: 0; padding: 0; box-sizing: border-box;
-      user-select: none;
-    }
-    html, body {
-      height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #071c1a;
-      color: #0fdb0f;
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    /* Container for all pages horizontally scrollable */
-    #app {
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
       display: flex;
-      width: 400vw; /* 4 pages */
-      height: 100vh;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-      transition: transform 0.4s ease;
-      will-change: transform;
-      background: linear-gradient(45deg, #082f2c, #0b3d91);
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      backdrop-filter: saturate(180%) blur(8px);
     }
 
-    /* Each page takes full viewport width & height */
-    .page {
-      flex: 0 0 100vw;
-      height: 100vh;
-      padding: 40px 20px 70px;
+    .left-header {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      scroll-snap-align: start;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      align-items: flex-start;
     }
 
-    /* Page headings */
-    h1, h2 {
-      text-shadow: 0 0 10px #0fdb0faa;
-      margin-bottom: 24px;
-      font-weight: 900;
-      letter-spacing: 0.1em;
-    }
-    h1 {
-      font-size: 2.8rem;
-      margin-top: 10px;
-    }
-    h2 {
-      font-size: 1.8rem;
-    }
-
-    /* Bottom navigation bar */
-    #navBar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100vw;
-      height: 60px;
-      background: #0fdb0f11;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 2px solid #0fdb0f66;
-      backdrop-filter: blur(10px);
-      user-select: none;
-      z-index: 10;
-    }
-
-    /* Nav buttons */
-    #navBar button {
-      background: none;
-      border: none;
-      color: #0fdb0faa;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    #navBar button.active,
-    #navBar button:hover {
-      background: #0fdb0f33;
-      color: #003300;
-      box-shadow: 0 0 12px #0fdb0fff;
-    }
-
-    /* ----- Home Page ----- */
-    #homePage p {
-      font-size: 1.3rem;
-      max-width: 350px;
-      line-height: 1.5;
-      text-align: center;
-      margin-bottom: 15px;
-      color: #a4f8a4cc;
-      user-select: text;
-    }
-
-    /* ----- Game Page ----- */
-    #gamePage #game {
-      position: relative;
-      width: 320px;
-      height: 480px;
-      border-radius: 14px;
-      background: #065a2f;
-      border: 3px solid white;
-      box-shadow: 0 0 25px #0fdb0fbb;
-      margin-bottom: 20px;
-      user-select: none;
-    }
-    #gamePage #goal {
-      position: absolute;
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 240px;
-      height: 100px;
-      border: 3px solid white;
-      border-bottom: none;
-      border-radius: 0 0 100px 100px / 0 0 60px 60px;
-      background: rgba(255,255,255,0.12);
-      filter: drop-shadow(0 0 5px #0fdb0f);
-      box-sizing: border-box;
-      pointer-events: none;
-    }
-    #gamePage #keeper {
-      position: absolute;
-      top: 20px;
-      width: 60px;
-      height: 80px;
-      background: linear-gradient(145deg, #222, #444);
-      border-radius: 20px 20px 5px 5px;
-      border: 3px solid #0fdb0f;
-      box-shadow: 0 0 10px #0fdb0f;
-      left: 130px;
-      z-index: 2;
-      will-change: left;
-      transition: box-shadow 0.3s ease;
-      pointer-events: none;
-    }
-    #gamePage #keeper.saved {
-      box-shadow: 0 0 25px #db0000;
-      border-color: #db0000;
-    }
-    #gamePage #ball {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 40px;
-      background: radial-gradient(circle at center, #fff 60%, #000 95%);
-      border-radius: 50%;
-      border: 2px solid black;
-      box-shadow: inset 0 0 6px #000;
-      z-index: 3;
-      will-change: bottom, left, transform;
-      pointer-events: none;
-    }
-    #gamePage #controls {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      max-width: 340px;
-      margin-bottom: 16px;
-      user-select: none;
-    }
-    #gamePage button {
-      background: #0fdb0f;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #003300;
-      box-shadow: 0 0 8px #0fdb0faa;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      user-select: none;
-      flex: 1 1 80px;
-    }
-    #gamePage button:hover:not(:disabled) {
-      background: #0cae0c;
-      box-shadow: 0 0 15px #0fdb0fff;
-    }
-    #gamePage button:disabled {
-      background: #444;
-      box-shadow: none;
-      cursor: not-allowed;
-      color: #888;
-    }
-    #gamePage #message {
-      font-size: 20px;
-      font-weight: 700;
-      text-align: center;
-      text-shadow: 0 0 8px #0fdb0f88;
-      min-height: 32px;
-      user-select: none;
-    }
-
-    /* ----- Shop Page ----- */
-    #shopPage {
-      width: 100%;
-      max-width: 380px;
-      user-select: none;
-    }
-    #shopPage h2 {
-      margin-bottom: 18px;
-      user-select: none;
-    }
-    .player-card {
-      background: #0b561e;
-      border-radius: 10px;
-      padding: 12px 15px;
-      margin-bottom: 14px;
+    .left-header h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.2px;
+      margin-bottom: 0.1rem;
       display: flex;
       align-items: center;
-      gap: 18px;
-      box-shadow: 0 0 10px #0fdb0faa;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      user-select: none;
+      gap: 0.5rem;
     }
-    .player-card:hover {
-      background: #0d7325;
-    }
-    .player-img {
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background-color: #0fdb0f;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: 900;
-      color: #004400;
-      text-shadow: 0 0 6px #006600;
+
+    .left-header .logo {
+      stroke: var(--primary);
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
-      user-select: none;
     }
-    .player-info {
-      flex-grow: 1;
-      user-select: none;
-    }
-    .player-name {
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 4px;
-      letter-spacing: 0.05em;
-      user-select: none;
-    }
-    .player-price {
-      font-size: 15px;
-      color: #a0f0a0;
+
+    .left-header p {
+      font-size: 0.70rem;
+      color: var(--primary);
       font-weight: 600;
-      user-select: none;
+      letter-spacing: 0.8px;
+      opacity: 0;
+      animation: slideFadeIn 1.2s forwards;
+      animation-delay: 0.4s;
+      margin-left: 0;
+      padding-left: 28px;
     }
-    .buy-btn {
-      background: #0fdb0fdd;
-      border: none;
-      padding: 8px 14px;
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .earnings-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--primary);
       font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #003300;
-      box-shadow: 0 0 10px #0fdb0faa;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: default;
       user-select: none;
-      flex-shrink: 0;
+      backdrop-filter: saturate(180%) blur(8px);
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.4);
       transition: background 0.3s ease;
-    }
-    .buy-btn:hover {
-      background: #0baf0b;
-      box-shadow: 0 0 18px #0fdb0fff;
-    }
-    .buy-btn:disabled {
-      background: #444;
-      box-shadow: none;
-      cursor: not-allowed;
-      color: #888;
+      min-width: 70px;
+      text-align: center;
     }
 
-    #wallet, #owned-player {
-      margin-top: 20px;
+    .earnings-btn:hover {
+      background: rgba(10, 132, 255, 0.15);
+    }
+
+    .location-time-bar {
+      margin: 1rem auto 0;
+      max-width: 960px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      backdrop-filter: saturate(180%) blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    .location-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .time-ios {
+      font-family: 'SF Pro Display', 'Inter', sans-serif;
+      font-size: 1.25rem;
       font-weight: 700;
-      font-size: 18px;
-      letter-spacing: 0.1em;
-      color: #0fdb0fdd;
-      user-select: none;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      transition: all 0.2s ease;
+      min-width: 100px;
       text-align: center;
     }
+    /* Prevent text selection globally */
+body, 
+* {
+  user-select: none;       /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE10+ */
+}
+/* Earnings button */
+.earnings-btn {
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: default;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transition: background 0.3s ease;
+}
 
-    /* ----- Profile Page ----- */
-    #profilePage p {
-      font-size: 1.2rem;
-      max-width: 350px;
-      line-height: 1.5;
-      text-align: center;
-      margin-bottom: 20px;
-      color: #a4f8a4cc;
-      user-select: text;
-    }
-    #profilePage strong {
-      color: #0fdb0fff;
-      user-select: none;
-    }
+.earnings-btn:hover {
+  background: linear-gradient(135deg, #3b82f6, #4f46e5);
+}
+
+/* Alert for task limits */
+.alert {
+  background-color: #f87171; /* Tailwind red-400 vibe */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  max-width: 320px;
+  margin: 1rem auto;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(248, 113, 113, 0.5);
+}
+
+/* Task completion button (if you add any in future) */
+.task-btn {
+  background-color: #10b981; /* Emerald green */
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
+  transition: background-color 0.25s ease;
+}
+
+.task-btn:hover {
+  background-color: #059669;
+}
+
+/* Disabled state for buttons */
+.task-btn:disabled {
+  background-color: #94a3b8; /* gray-ish */
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* Subtle fade-in for alerts */
+@keyframes fadeInAlert {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert {
+  animation: fadeInAlert 0.3s ease forwards;
+}
+#tasksContainer {
+  text-align: center;
+}
+
+#tasksContainer h2 {
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  user-select: none;
+  color: #fff;
+}
   </style>
 </head>
 <body>
-  <div id="app">
+  <header>
+    <div class="left-header">
+      <h1>
+        <svg
+          class="logo"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          width="24"
+          height="24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 12v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM9 10V7a3 3 0 016 0v3" />
+        </svg>
+        CYBERCHAT
+      </h1>
+      <p>JOBS MADE EASIER</p>
+    </div>
 
-    <!-- Game -->
-    <section id="gamePage" class="page" tabindex="0" aria-label="Game">
-      <h2>Penalty Shootout</h2>
-      <div id="game">
-        <div id="goal"></div>
-        <div id="keeper"></div>
-        <div id="ball"></div>
-      </div>
-      <div id="controls">
-        <button data-direction="left">Left</button>
-        <button data-direction="center">Center</button>
-        <button data-direction="right">Right</button>
-        <button id="shootBtn" disabled>Shoot!</button>
-      </div>
-      <div id="message" aria-live="polite"></div>
-    </section>
+    <button class="earnings-btn" aria-label="Current earnings">$0.000</button>
+  </header>
 
-    <!-- Shop -->
-    <section id="shopPage" class="page" tabindex="0" aria-label="Shop">
-      <h2>Legendary Player Shop</h2>
-      <div class="player-card" data-player="ronaldo">
-        <div class="player-img" aria-hidden="true">⚽️</div>
-        <div class="player-info">
-          <div class="player-name">Cristiano Ronaldo</div>
-          <div class="player-price">Price: 300 coins</div>
-        </div>
-        <button class="buy-btn">Buy</button>
-      </div>
-      <div class="player-card" data-player="messi">
-        <div class="player-img" aria-hidden="true">🐐</div>
-        <div class="player-info">
-          <div class="player-name">Lionel Messi</div>
-          <div class="player-price">Price: 350 coins</div>
-        </div>
-        <button class="buy-btn">Buy</button>
-      </div>
-      <div class="player-card" data-player="mbappe">
-        <div class="player-img" aria-hidden="true">⚡️</div>
-        <div class="player-info">
-          <div class="player-name">Kylian Mbappé</div>
-          <div class="player-price">Price: 250 coins</div>
-        </div>
-        <button class="buy-btn">Buy</button>
-      </div>
-      <div id="wallet" aria-live="polite"></div>
-      <div id="owned-player"></div>
-    </section>
-
-    <!-- Profile -->
-    <section id="profilePage" class="page" tabindex="0" aria-label="Profile">
-      <h2>Your Profile</h2>
-      <p><strong>Coins:</strong> <span id="profile-coins"></span></p>
-      <p><strong>Owned Player:</strong> <span id="profile-player"></span></p>
-    </section>
+  <div class="location-time-bar">
+    <div class="location-box" id="locationBox">Detecting location...</div>
+    <div class="time-ios" id="timeBox">00:00:00</div>
   </div>
 
-  <!-- Bottom nav -->
-  <nav id="navBar" role="navigation" aria-label="Main Navigation">
-    <button class="nav-btn active" data-page="homePage" aria-current="page" aria-label="Home">Home</button>
-    <button class="nav-btn" data-page="gamePage" aria-label="Play Game">Game</button>
-    <button class="nav-btn" data-page="shopPage" aria-label="Shop">Shop</button>
-    <button class="nav-btn" data-page="profilePage" aria-label="Profile">Profile</button>
-  </nav>
+  <div id="tasksContainer">
+    <h2>Available Tasks</h2>
+    <ul id="tasksList">
+      <li>Loading tasks...</li>
+    </ul>
+  </div>
 
-  <script>
-    // App core variables
-    const app = document.getElementById('app');
-    const pages = document.querySelectorAll('.page');
-    const navButtons = document.querySelectorAll('#navBar .nav-btn');
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    // Game elements
-    const keeper = document.getElementById('keeper');
-    const ball = document.getElementById('ball');
-    const shootBtn = document.getElementById('shootBtn');
-    const message = document.getElementById('message');
-    const directionButtons = document.querySelectorAll('#controls button[data-direction]');
-
-    // Shop elements
-    const buyButtons = document.querySelectorAll('.buy-btn');
-    const walletDisplay = document.getElementById('wallet');
-    const ownedPlayerDisplay = document.getElementById('owned-player');
-
-    // Profile elements
-    const profileCoins = document.getElementById('profile-coins');
-    const profilePlayer = document.getElementById('profile-player');
-
-    // Keeper positions for animation
-    const keeperPositions = { left: 50, center: 130, right: 210 };
-
-    // State variables
-    let currentPageIndex = 0;
-    let selectedDirection = null;
-    let keeperCurrent = 'center';
-    let keeperTarget = 'center';
-    let keeperX = keeperPositions.center;
-    let keeperMoving = false;
-    let keeperAnimationId;
-    let keeperMovementInterval;
-
-    let coins = 500;
-    let ownedPlayer = null;
-
-    // Player perks data
-    const players = {
-      ronaldo: { name: "Cristiano Ronaldo", price: 300, perk: 'betterShot' },
-      messi: { name: "Lionel Messi", price: 350, perk: 'keeperDistract' },
-      mbappe: { name: "Kylian Mbappé", price: 250, perk: 'fastShot' }
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
-    // Utilities for smooth keeper animation
-    function easeInOutQuad(t) {
-      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    function animateKeeper() {
-      let startX = keeperX;
-      let endX = keeperPositions[keeperTarget];
-      let duration = 1000;
-      let startTime = null;
+    let use24Hour = true;
 
-      function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        let elapsed = timestamp - startTime;
-        let progress = Math.min(elapsed / duration, 1);
-        let easeProgress = easeInOutQuad(progress);
-        keeperX = startX + (endX - startX) * easeProgress;
-        keeper.style.left = keeperX + 'px';
-
-        if (progress < 1) {
-          keeperAnimationId = requestAnimationFrame(step);
-        } else {
-          keeperCurrent = keeperTarget;
-          keeperMoving = false;
-        }
+    async function updateTimeFromIP() {
+      try {
+        const res = await fetch("https://worldtimeapi.org/api/ip");
+        const data = await res.json();
+        const now = new Date(data.datetime);
+        displayTime(now);
+      } catch {
+        displayTime(new Date());
       }
-      keeperMoving = true;
-      keeperAnimationId = requestAnimationFrame(step);
     }
 
-    function moveKeeperRandom() {
-      if (keeperMoving) return;
-      let options = Object.keys(keeperPositions).filter(pos => pos !== keeperCurrent);
-      keeperTarget = options[Math.floor(Math.random() * options.length)];
-      animateKeeper();
+    function displayTime(date) {
+      const options = use24Hour
+        ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
+        : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      document.getElementById('timeBox').textContent = date.toLocaleTimeString('en-US', options);
     }
 
-    function startKeeperMovement() {
-      moveKeeperRandom();
-      keeperMovementInterval = setInterval(() => {moveKeeperRandom();
-      }, 2500);
-    }
-
-    function stopKeeperMovement() {
-      clearInterval(keeperMovementInterval);
-      cancelAnimationFrame(keeperAnimationId);
-      keeperMoving = false;
-    }
-
-    // Handle direction button selection
-    directionButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        directionButtons.forEach(b => b.disabled = false);
-        btn.disabled = true;
-        selectedDirection = btn.getAttribute('data-direction');
-        shootBtn.disabled = false;
-        message.textContent = `Selected direction: ${selectedDirection.toUpperCase()}`;
-      });
+    document.getElementById("timeBox").addEventListener("click", () => {
+      use24Hour = !use24Hour;
+      updateTimeFromIP();
     });
 
-    // Shoot action logic
-    shootBtn.addEventListener('click', () => {
-      if (!selectedDirection) return;
-
-      shootBtn.disabled = true;
-      directionButtons.forEach(b => b.disabled = true);
-
-      // Stop keeper movement to lock keeper position
-      stopKeeperMovement();
-
-      // Animate ball shooting to selected direction
-      let ballX;
-      if (selectedDirection === 'left') ballX = keeperPositions.left;
-      else if (selectedDirection === 'center') ballX = keeperPositions.center;
-      else ballX = keeperPositions.right;
-
-      let startTime = null;
-      const duration = 800;
-      const startBottom = 40;
-      const endBottom = 380;
-
-      // Determine if keeper saves - base 33% chance to save
-      let saveChance = 0.33;
-
-      // Player perks can modify save chance
-      if (ownedPlayer) {
-        if (players[ownedPlayer].perk === 'betterShot') {
-          saveChance -= 0.15; // Harder to save
-        } else if (players[ownedPlayer].perk === 'keeperDistract') {
-          saveChance -= 0.10;
-        } else if (players[ownedPlayer].perk === 'fastShot') {
-          saveChance -= 0.12;
-        }
-        if (saveChance < 0.05) saveChance = 0.05; // minimum save chance
+    async function fetchLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        const flag = data.country_code
+          ? [...data.country_code.toUpperCase()]
+              .map(c => String.fromCodePoint(127397 + c.charCodeAt()))
+              .join('')
+          : '🌐';
+        document.getElementById("locationBox").innerHTML = `<span>${flag}</span> ${data.country_name}`;
+      } catch {
+        document.getElementById("locationBox").textContent = "🌐 Unknown Location";
       }
-
-      // Keeper saves if keeperCurrent matches selectedDirection and random < saveChance
-      let keeperSaves = (keeperCurrent === selectedDirection) && (Math.random() < saveChance);
-
-      // Animate ball flying
-      function animateBall(timestamp) {
-        if (!startTime) startTime = timestamp;
-        let elapsed = timestamp - startTime;
-        let progress = Math.min(elapsed / duration, 1);
-        let currentBottom = startBottom + (endBottom - startBottom) * progress;
-        ball.style.bottom = currentBottom + 'px';
-
-        // Move ball horizontally towards chosen direction
-        // Ball starts at 50% left (approx 160px), moves to ballX
-        let ballStartLeft = 160;
-        let ballCurrentLeft = ballStartLeft + (ballX - ballStartLeft) * progress;
-        ball.style.left = ballCurrentLeft + 'px';
-
-        if (progress < 1) {
-          requestAnimationFrame(animateBall);
-        } else {
-          // Show result message
-          if (keeperSaves) {
-            message.textContent = 'Saved! Keeper caught it!';
-            keeper.classList.add('saved');
-          } else {
-            message.textContent = 'Goal! You scored!';
-            keeper.classList.remove('saved');
-            coins += 50; // Reward for scoring
-            updateWallet();
-          }
-
-          // Reset ball after short delay
-          setTimeout(() => {
-            ball.style.bottom = startBottom + 'px';
-            ball.style.left = '50%';
-            keeper.classList.remove('saved');
-            message.textContent = 'Pick a direction and shoot!';
-            selectedDirection = null;
-            shootBtn.disabled = true;
-            directionButtons.forEach(b => b.disabled = false);
-
-            // Restart keeper movement
-            startKeeperMovement();
-          }, 2000);
-        }
-      }
-      requestAnimationFrame(animateBall);
-    });
-
-    // Update wallet display
-    function updateWallet() {
-      walletDisplay.textContent = `Coins: ${coins}`;
-      profileCoins.textContent = coins;
     }
 
-    // Buy player logic
-    buyButtons.forEach(btn => {
-      btn.addEventListener('click', e => {
-        const card = e.target.closest('.player-card');
-        const playerKey = card.getAttribute('data-player');
-        const playerData = players[playerKey];
+    const earningsBtn = document.querySelector('.earnings-btn');
+    const tasksListEl = document.getElementById('tasksList');
 
-        if (coins >= playerData.price) {
-          coins -= playerData.price;
-          ownedPlayer = playerKey;
-          updateWallet();
-          updateOwnedPlayer();
-          alert(`You bought ${playerData.name}!`);
-        } else {
-          alert("You don't have enough coins!");
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
+          const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+          earningsBtn.textContent = `$${balance.toFixed(3)}`;
+          earningsBtn.title = "Your balance in USD";
+
+          loadTasks();
+        } catch (err) {
+          earningsBtn.textContent = "$0.000";
+          earningsBtn.title = "Failed to load balance";
+          console.error(err);
         }
-      });
-    });
-
-    // Update owned player displays
-    function updateOwnedPlayer() {
-      if (ownedPlayer) {
-        ownedPlayerDisplay.textContent = `Owned Player: ${players[ownedPlayer].name}`;
-        profilePlayer.textContent = players[ownedPlayer].name;
       } else {
-        ownedPlayerDisplay.textContent = 'No player owned.';
-        profilePlayer.textContent = 'None';
-      }
-    }
-
-    // Navigation logic
-    function goToPage(index) {
-      if (index < 0 || index >= pages.length) return;
-      currentPageIndex = index;
-      app.style.transform = `translateX(${-index * 100}vw)`;
-      navButtons.forEach((btn, idx) => {
-        btn.classList.toggle('active', idx === index);
-        btn.setAttribute('aria-current', idx === index ? 'page' : 'false');
-      });
-      // Focus first element on page for accessibility
-      pages[index].focus();
-    }
-
-    navButtons.forEach((btn, idx) => {
-      btn.addEventListener('click', () => goToPage(idx));
-    });
-
-    // Keyboard navigation: left/right arrows to switch pages
-    window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') {
-        goToPage((currentPageIndex + 1) % pages.length);
-      } else if (e.key === 'ArrowLeft') {
-        goToPage((currentPageIndex - 1 + pages.length) % pages.length);
+        earningsBtn.textContent = "$0.000";
+        earningsBtn.title = "Not logged in";
+        tasksListEl.innerHTML = '<li>Please log in to see tasks.</li>';
       }
     });
 
-    // Initialize app state
-    function init() {
-      updateWallet();
-      updateOwnedPlayer();
-      message.textContent = 'Pick a direction and shoot!';
-      goToPage(0);
-      startKeeperMovement();
+    fetchLocation();
+    updateTimeFromIP();
+    setInterval(() => displayTime(new Date()), 1000);
+
+    async function loadTasks() {
+      const tasksSnap = await get(ref(db, 'tasks'));
+      if (!tasksSnap.exists()) {
+        tasksListEl.innerHTML = '<li>No tasks available.</li>';
+        return;
+      }
+      const tasks = tasksSnap.val();
+      tasksListEl.innerHTML = ''; // clear "Loading"
+
+      for (const [id, task] of Object.entries(tasks)) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${task.title}</strong> - Earn $${task.reward.toFixed(2)}
+          <p>${task.description || ''}</p>
+        `;
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Complete';
+        btn.dataset.taskId = id;
+        li.appendChild(btn);
+        tasksListEl.appendChild(li);
+      }
     }
 
-    init();
+    tasksListEl.addEventListener('click', async (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      const user = auth.currentUser;
+      if (!user) return alert('You must be logged in to complete tasks.');
+
+      const btn = e.target;
+      const taskId = btn.dataset.taskId;
+
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      try {
+        await completeTask(user.uid, taskId);
+
+        btn.textContent = 'Done!';
+        btn.disabled = true;
+
+        // update balance display after task done
+        const balanceSnap = await get(ref(db, `users/${user.uid}/balance`));
+        const balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+        earningsBtn.textContent = `$${balance.toFixed(3)}`;
+      } catch (err) {
+        alert(err.message || 'Failed to complete task, try again.');
+        btn.disabled = false;
+        btn.textContent = 'Complete';
+        console.error(err);
+      }
+    });
+
+    async function completeTask(userId, taskId) {
+      const today = new Date().toISOString().slice(0, 10);
+      const taskSnap = await get(ref(db, `tasks/${taskId}`));
+      if (!taskSnap.exists()) throw new Error('Task does not exist.');
+
+      const task = taskSnap.val();
+
+      const userTaskRef = ref(db, `users/${userId}/tasksCompleted/${taskId}`);
+      const userTaskSnap = await get(userTaskRef);
+
+      let countToday = 0;
+      if (userTaskSnap.exists()) {
+        const userTask = userTaskSnap.val();
+        if (userTask.date === today) countToday = userTask.count;
+      }
+
+      if (task.maxPerDay && countToday >= task.maxPerDay) {
+        throw new Error("Daily limit reached for this task.");
+      }
+
+      // increment task completion count for today
+      await set(userTaskRef, { date: today, count: countToday + 1 });
+
+      // add reward to user balance
+      const balanceRef = ref(db, `users/${userId}/balance`);
+      const balanceSnap = await get(balanceRef);
+      let balance = balanceSnap.exists() ? balanceSnap.val() : 0;
+      balance += task.reward;
+      await set(balanceRef, balance);
+
+      alert(`Task completed! You earned $${task.reward.toFixed(2)}`);
+    }
   </script>
 </body>
 </html>
