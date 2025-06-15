@@ -1,307 +1,265 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UCL Round of 16 - Kickoffs & Votes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checking Page...</title>
   <style>
-    :root {
-      --bg: #0c0c0c;
-      --card: rgba(255, 255, 255, 0.05);
-      --team: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.12);
-      --text: #fff;
-      --accent: #00bfff;
-    }
-
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body {
-      margin: 0;
-      padding: 2rem 1rem;
-      background-color: var(--bg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--text);
+      height: 100vh;
+      background: radial-gradient(circle at center, #101010, #000);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
     }
 
     h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-      color: var(--accent);
-      font-size: 1.6rem;
-    }
-
-    #matches {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .match {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      box-shadow: 0 0 10px rgba(0, 191, 255, 0.1);
-    }
-
-    .teams-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .team {
-      background: var(--team);
-      padding: 0.6rem 1rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 500;
-      flex: 1;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      position: relative;
-    }
-
-    .vs {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .vote-btn {
-      margin-left: 8px;
-      padding: 0.3rem 0.7rem;
-      background: #00bfff;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.85rem;
-      user-select: none;
-      transition: background-color 0.3s ease;
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-    }
-
-    .vote-btn:hover:not(:disabled) {
-      background-color: #0099cc;
-    }
-
-    .vote-btn:disabled {
-      background-color: #555;
-      cursor: not-allowed;
-    }
-
-    .votes {
-      font-size: 0.75rem;
-      color: #00d8ff;
-      margin-top: 3px;
-      user-select: none;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #0ff, #0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-align: center;
     }
 
     .countdown {
-      font-family: monospace;
-      font-size: 0.95rem;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    button {
+      background: #00ff99;
+      color: #000;
+      border: none;
+      padding: 1rem;
+      font-size: 1.1rem;
+      border-radius: 999px;
+      cursor: not-allowed;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+      width: 90%;
+      max-width: 500px;
       text-align: center;
-      color: #00d8ff;
-      font-weight: 600;
     }
 
-    .leg-info {
-      font-size: 0.85rem;
+    button.ready {
+      opacity: 1;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ff99a0, 0 0 25px #00ff9960;
+    }
+
+    #ageGate {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 320px;
       text-align: center;
-      color: #aaa;
-      font-style: italic;
-      user-select: none;
     }
 
-    @media (max-width: 400px) {
-      .team {
-        font-size: 0.9rem;
-        padding: 0.5rem 0.6rem;
-      }
-
-      .vote-btn {
-        right: 5px;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-      }
-
-      .vs {
-        font-size: 0.8rem;
-      }
-
-      .countdown {
-        font-size: 0.9rem;
-      }
+    #ageGate h1 {
+      font-size: 2rem;
+      background: linear-gradient(90deg, #0ff, #0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
     }
+
+    .btn-container {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-container button {
+      background: #00ff99;
+      border: none;
+      color: #000;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ff99aa;
+      flex: 1;
+      max-width: 140px;
+      transition: background 0.3s ease;
+    }
+
+    .btn-container button:hover {
+      background: #00cc77;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    #loadingScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  height: 100vh; /* full screen height */
+}
+
+.countdown {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+
+#proceedBtn {
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
   </style>
+  <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
+  <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
 </head>
 <body>
 
-<h1>🏆 DLS ROUND OF 16 🏆</h1>
+  <!-- Initial loading screen -->
+  <div id="loadingScreen">
+    <h1>Preparing Your Content</h1>
+    <div id="countdown" class="countdown">6</div>
+    <button id="proceedBtn" disabled>Continue</button>
+  </div>
 
-<div id="matches"></div>
+  <!-- Age gate hidden by default -->
+  <div id="ageGate" aria-live="polite">
+    <h1>Are you 18 or older?</h1>
+    <div class="btn-container">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+  </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  <canvas id="bg"></canvas>
+<style>
+  .ad-container {
+    width: 300px;        /* Ad width */
+    height: 250px;       /* Ad height */
+    margin: 20px auto;   /* Center horizontally with some vertical spacing */
+    padding: 10px;       /* Padding around the ad */
+    background: #111;    /* Dark clean background */
+    border-radius: 12px; /* Smooth rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.3); /* subtle neon glow */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Optional: style the ad container's inner div */
+  #container-8f9075afd782b06bf3767fa2b0dd5775 {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+</style>
 
-  // Firebase config (yours)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
+<div class="ad-container">
+  <script async="async" data-cfasync="false" src="//pl26795976.profitableratecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js"></script>
+  <div id="container-8f9075afd782b06bf3767fa2b0dd5775"></div>
+</div>
+  <script>
+    const adultLink = "https://www.profitableratecpm.com/w20f1fz4?key=8b17c79ea0234cf12a8d366d2ac5b590";
+    const nonAdultLink = "https://www.profitableratecpm.com/d1u65c0a3?key=1ec183e9ff70ce6858d6d1ef7fa62f08";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+    const proceedBtn = document.getElementById('proceedBtn');
+    const countdownText = document.getElementById('countdown');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const ageGate = document.getElementById('ageGate');
 
-  // Auto anonymous login
-  signInAnonymously(auth).catch(e => {
-    console.error("Anonymous login failed:", e);
-  });
+    let timeLeft = 6;
+    const countdownInterval = setInterval(() => {
+      timeLeft--;
+      countdownText.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        proceedBtn.disabled = false;
+        proceedBtn.classList.add('ready');
+        proceedBtn.textContent = "Click to Continue";
+        countdownText.style.display = "none";
+      }
+    }, 1000);
 
-  onAuthStateChanged(auth, user => {
-    if (user) console.log("Logged in anonymously with uid:", user.uid);
-  });
+    proceedBtn.addEventListener('click', () => {
+      loadingScreen.style.display = 'none';
+      ageGate.style.display = 'flex';
+    });
 
-  const matchesRef = ref(db, 'matches');
-  const winsRef = ref(db, 'wins');  // wins data for teams
-  const matchesContainer = document.getElementById('matches');
+    document.getElementById('yesBtn').addEventListener('click', () => {
+      window.location.href = adultLink;
+    });
 
-  // Create match element with commentary colored by wins and wins count under team name
-  function createMatchElement(key, match, winsData) {
-    const div = document.createElement('div');
-    div.classList.add('match');
-    div.setAttribute('data-kickoff', match.kickoff);
+    document.getElementById('noBtn').addEventListener('click', () => {
+      window.location.href = nonAdultLink;
+    });
 
-    const winsTeam1 = winsData?.[match.team1] ?? 0;
-    const winsTeam2 = winsData?.[match.team2] ?? 0;
+    // Particle animation
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 
-    // Colors based on wins
-    let colorTeam1, colorTeam2;
-    if (winsTeam1 > winsTeam2) {
-      colorTeam1 = '#00ff00'; // green winner
-      colorTeam2 = '#ff3300'; // red loser
-    } else if (winsTeam2 > winsTeam1) {
-      colorTeam1 = '#ff3300';
-      colorTeam2 = '#00ff00';
-    } else {
-      colorTeam1 = '#ffa500'; // orange tie
-      colorTeam2 = '#ffa500';
+    let particles = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      dx: (Math.random() - 0.5) * 1.2,
+      dy: (Math.random() - 0.5) * 1.2,
+      r: Math.random() * 2 + 1
+    }));
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#00ffcc';
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x <= 0 || p.x >= canvas.width) p.dx *= -1;
+        if (p.y <= 0 || p.y >= canvas.height) p.dy *= -1;
+      });
+      requestAnimationFrame(animate);
     }
 
-    const commentary = `
-      Watch <span style="color:${colorTeam1}; font-weight:bold;">${match.team1}</span> 
-      play against 
-      <span style="color:${colorTeam2}; font-weight:bold;">${match.team2}</span>!
-    `;
+    animate();
 
-    div.innerHTML = `
-      <div class="commentary" style="text-align:center; font-style:italic; margin-bottom:0.5rem; user-select:none;">
-        ${commentary}
-      </div>
-      <div class="teams-row" style="display:flex; justify-content:center; align-items:center; gap:1rem; flex-wrap:wrap;">
-        <div class="team" style="flex:1; max-width:150px; background:rgba(255 255 255 / 0.05); border-radius:12px; padding:0.6rem; text-align:center; user-select:none;">
-          ${match.team1}
-          <div class="wins" style="margin-top:6px; font-size:0.85rem; color:#00d8ff;">Wins: ${winsTeam1}</div>
-        </div>
-        <div class="vs" style="font-weight:bold; color:#00bfff; user-select:none;">VS</div>
-        <div class="team" style="flex:1; max-width:150px; background:rgba(255 255 255 / 0.05); border-radius:12px; padding:0.6rem; text-align:center; user-select:none;">
-          ${match.team2}
-          <div class="wins" style="margin-top:6px; font-size:0.85rem; color:#00d8ff;">Wins: ${winsTeam2}</div>
-        </div>
-      </div>
-      <div class="countdown" style="text-align:center; margin-top:0.6rem; font-weight:600; color:#33caff;">Loading countdown...</div>
-      <div class="leg-info" style="text-align:center; margin-top:0.2rem; color:#aaa;">Leg 1 of 1</div>
-    `;
-
-    return div;
-  }
-
-  // Countdown updater
-  function updateCountdowns() {
-    const now = new Date();
-
-    document.querySelectorAll('.match').forEach(match => {
-      const kickoffISO = match.getAttribute('data-kickoff');
-      const countdownEl = match.querySelector('.countdown');
-
-      if (!kickoffISO) {
-        countdownEl.textContent = 'Kickoff time missing';
-        return;
-      }
-
-      const kickoffDate = new Date(kickoffISO);
-      const diff = kickoffDate - now;
-
-      if (diff <= 0) {
-        countdownEl.textContent = 'Match is LIVE or Finished';
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      countdownEl.textContent =
-        (days > 0 ? days + 'd ' : '') +
-        String(hours).padStart(2, '0') + ':' +
-        String(minutes).padStart(2, '0') + ':' +
-        String(seconds).padStart(2, '0');
+    window.addEventListener('resize', () => {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
     });
-  }
-
-  // Load both wins and matches, then render
-  onValue(winsRef, winsSnap => {
-    const winsData = winsSnap.val() || {};
-
-    onValue(matchesRef, matchesSnap => {
-      matchesContainer.innerHTML = '';
-      const matches = matchesSnap.val();
-
-      if (!matches) {
-        matchesContainer.textContent = 'No matches found.';
-        return;
-      }
-
-      for (const key in matches) {
-        const match = matches[key];
-        const matchEl = createMatchElement(key, match, winsData);
-        matchesContainer.appendChild(matchEl);
-      }
-      updateCountdowns();
-    });
-  });
-
-  // Refresh countdown every second
-  setInterval(updateCountdowns, 1000);
-</script>
+  </script>
 </body>
 </html>
