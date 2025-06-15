@@ -244,5 +244,49 @@
 
     window.addEventListener('resize', resizeCanvas);
   </script>
+<script type="module">
+  import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const db = getDatabase();
+
+  // Only log once per session
+  if (!localStorage.getItem("userLogged")) {
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        const userInfo = {
+          ip: data.ip,
+          city: data.city,
+          region: data.region,
+          country: data.country_name,
+          timezone: data.timezone,
+          localTime: new Date().toLocaleString("en-US", { timeZone: data.timezone }),
+          device: getDeviceType(),
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        };
+
+        const userRef = push(ref(db, "userLogs"));
+        set(userRef, userInfo)
+          .then(() => {
+            console.log("User info logged 🎯", userInfo);
+            localStorage.setItem("userLogged", "true");
+          })
+          .catch(err => console.error("Firebase error:", err));
+      })
+      .catch(err => console.error("IP Fetch error:", err));
+  }
+
+  // Device detection helper
+  function getDeviceType() {
+    const ua = navigator.userAgent;
+    if (/android/i.test(ua)) return "Android";
+    if (/iPad|iPhone|iPod/.test(ua)) return "iOS";
+    if (/Windows/.test(ua)) return "Windows PC";
+    if (/Macintosh/.test(ua)) return "Mac";
+    if (/Linux/.test(ua)) return "Linux";
+    return "Unknown";
+  }
+</script>
 </body>
 </html>
