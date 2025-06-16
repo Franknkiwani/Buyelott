@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLS 25 Mods APK Download – Latest Kits, Stadiums & Transfers</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background: linear-gradient(145deg, #0e0e0e, #1a1a1a);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      height: 40px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(40, 40, 40, 0.4);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        inset 0 0 0.5px rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      z-index: 999;
+      transform: perspective(800px) translateZ(10px);
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+
+    .logo .dls {
+      color: hotpink;
+    }
+
+    .logo .num {
+      color: white;
+    }
+
+    .logo .mods {
+      color: cyan;
+    }
+
+    .glass-btn {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero {
+      margin-top: 50px;
+      width: 95%;
+      padding: 60px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0099ff, #005fbb);
+      color: white;
+      text-align: center;
+      box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.7),
+        inset 0 0 40px rgba(0, 0, 0, 0.9);
+      border-radius: 14px;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: none;
+      max-width: none;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 8px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 0, 0, 0.6);
+      margin-bottom: 12px;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      font-weight: 500;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 30px;
+    }
+
+    /* Custom Tinder-style fire icon */
+    .fire-icon {
+      display: inline-block;
+      width: 20px;
+      height: 28px;
+      background: linear-gradient(45deg, #ff5f6d, #ffc371);
+      clip-path: polygon(
+        50% 0%,
+        65% 25%,
+        80% 40%,
+        85% 55%,
+        70% 70%,
+        75% 85%,
+        60% 100%,
+        40% 85%,
+        30% 70%,
+        15% 50%,
+        30% 30%
+      );
+      filter: drop-shadow(0 0 5px #ff5f6d);
+      position: relative;
+      animation: flicker 1.5s infinite ease-in-out;
+    }
+
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 7px #ff5f6d);
+        transform: translateY(0);
+      }
+      50% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 12px #ff4a56);
+        transform: translateY(-2px);
+      }
+    }
+
+    .cta-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+   .cta-btn {
+      flex: 1;
+      padding: 12px 0;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 2px solid black;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      background: rgba(255 255 255 / 0.1);
+      color: white;
+    }
+
+    .cta-btn.download {
+      background: rgba(0, 153, 255, 0.8);
+      box-shadow:
+        0 4px 12px rgba(0, 153, 255, 0.6);
+      border-color: black;
+    }
+
+    .cta-btn.download:hover {
+      background: rgba(0, 153, 255, 1);
+      border-color: black;
+    }
+
+    .cta-btn.create {
+      background: rgba(0, 255, 204, 0.8);
+      box-shadow:
+        0 4px 12px rgba(0, 255, 204, 0.6);
+      color: black;
+      font-weight: 800;
+      border-color: black;
+    }
+
+    .cta-btn.create:hover {
+      background: rgba(0, 255, 204, 1);
+      border-color: black;
+    }
+
+    /* Loading screen styles */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      user-select: none;
+    }
+
+    /* Soccer ball SVG container */
+    .soccer-ball {
+      width: 80px;
+      height: 80px;
+      animation: spin 2s linear infinite;
+      filter: drop-shadow(0 0 6px #00aaff);
+      margin-bottom: 16px;
+    }
+
+    /* Spin animation */
+    @keyframes spin {
+      from { transform: rotate(0deg);}
+      to { transform: rotate(360deg);}
+    }
+
+    /* Loading text */
+    #loading-text {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #00aaff;
+      text-shadow: 0 0 10px #00aaff;
+      letter-spacing: 1.2px;
+    }
+ .container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  .mod-card {
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.7);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+  }
+  .mod-card:hover {
+    transform: translateY(-5px);
+  }
+  .mod-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .mod-info {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mod-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex: 1;
+  }
+  button.download-btn {
+    background: #007aff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    width: 120px;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button.download-btn:active {
+    background-color: #005bb5;
+  }
+  #loadMore {
+    display: block;
+    margin: 2rem auto;
+    background: #00cc88;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    color: #121212;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+  }
+  #loadMore:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+
+  /* Glassy popup styles */
+  #loadingPopup {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255 255 255 / 0.1);
+    backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    color: #00cc88;
+    font-weight: 700;
+    font-size: 3rem;
+    user-select: none;
+  }
+  #loadingPopup .spinner {
+    margin-bottom: 1rem;
+    width: 64px;
+    height: 64px;
+    border: 6px solid rgba(0,204,136,0.3);
+    border-top-color: #00cc88;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  </style>
+<script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+</head>
+<head>
+  <meta charset="UTF-8" />
+  <title>DLS 25 Mods APK Download – Latest Kits, Unlimited Coins & CyberChat App</title>
+  <meta name="description" content="Get the latest DLS 25 mods with updated kits, unlimited coins, real stadiums, and transfers. Safe APK download – no ads, no BS. Try the CyberChat app to stay connected." />
+  <meta name="keywords" content="realmadrid, barcelona, dls25, dls25hack, cyberchat, cyberchat app, soccer mods, dream league soccer, dls 2025, soccer hack, unlimited coins dls, football mods, fifa mods, cyberchat messenger" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Other necessary tags -->
+</head>
+<body>
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-label="Loading content" role="alert" aria-live="assertive">
+    <svg class="soccer-ball" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <circle cx="32" cy="32" r="30" fill="#fff" stroke="#000" stroke-width="2"/>
+      <!-- Black pentagons -->
+      <polygon fill="#000" points="32,12 39,22 34,34 26,34 21,22"/>
+      <polygon fill="#000" points="44,20 50,28 43,34 34,34 39,22"/>
+      <polygon fill="#000" points="20,22 26,34 18,36 12,26 14,18"/>
+      <polygon fill="#000" points="50,28 56,36 50,44 43,34 44,20"/>
+      <polygon fill="#000" points="26,34 34,34 32,46 25,44 18,36"/>
+      <!-- White hexagons formed by gaps -->
+      <polygon fill="#fff" points="39,22 44,20 50,28 56,36 50,44 43,34"/>
+      <polygon fill="#fff" points="21,22 26,34 25,44 18,36 14,18"/>
+    </svg>
+    <div id="loading-text">Loading...</div>
+  </div>
+
+  <header>
+    <div class="logo">
+      <span class="dls">DLS</span>
+      <span class="num"> 25 </span>
+      <span class="mods">MODS</span>
+    </div>
+ <button class="glass-btn" onclick="redirectToReferral()">EARN $100/DAY</button>
+
+<script>
+  function redirectToReferral() {
+    window.location.href = 'referandearn.html';
+  }
+</script>
+  </header>
+
+  <section class="hero">
+    <h1>
+      <span class="fire-icon"></span>
+      DLS25 MODS
+      <span class="fire-icon"></span>
+    </h1>
+    <p>
+      The best mods for Dream League Soccer are here.
+      <span class="fire-icon"></span>
+    </p>
+    <div class="cta-container">
+    <button class="cta-btn download" onclick="window.location.href='https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041'">
+  DOWNLOAD NOW
+</button>
+    <button class="cta-btn create" onclick="window.location.href='createmods.html'">
+  CREATE NOW
+</button>
+    </div>
+  </section>
+<div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">    
+    atOptions = {    
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',    
+      'format' : 'iframe',    
+      'height' : 50,    
+      'width' : 320,    
+      'params' : {}    
+    };    
+  </script>    
+  <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>    
+</div>
+  <div class="container">
+    <!-- Your main app content goes here -->
+  </div>
+<div class="container" id="modContainer">
+<h1 style="text-align: center;">🔥MODS🔥</h1>
+  <div id="mods"></div>
+  <div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">    
+    atOptions = {    
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',    
+      'format' : 'iframe',    
+      'height' : 50,    
+      'width' : 320,    
+      'params' : {}    
+    };    
+  </script>    
+  <script type="text/javascript" src="//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"></script>    
+</div>
+  <button id="loadMore">Load More Mods</button>
+<div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
+</div>
+
+<!-- Glassy loading popup -->
+<div id="loadingPopup">
+  <div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
+  <div class="spinner"></div>
+
+  <div>Loading... <span id="countdown">6</span>s</div>
+<div style="margin: 1rem auto; text-align: center;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+</div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>  
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const BATCH_SIZE = 5;
+const LOCAL_STORAGE_KEY = "loadedMods";
+const REFRESH_COUNT_KEY = "modsRefreshCount";
+const MAX_REFRESHES = 3;
+
+const modsEl = document.getElementById("mods");
+const loadMoreBtn = document.getElementById("loadMore");
+const popup = document.getElementById("loadingPopup");
+const countdownEl = document.getElementById("countdown");
+
+let allMods = [];
+let currentIndex = 0;
+
+// Your exact high CPM ad snippet wrapped cleanly
+function createHighCPMAdElement() {
+  const container = document.createElement("div");
+  container.style.margin = "1rem auto";
+  container.style.textAlign = "center";
+
+  const script1 = document.createElement('script');
+  script1.type = 'text/javascript';
+  script1.text = `
+    atOptions = {
+      'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+  `;
+
+  const script2 = document.createElement('script');
+  script2.type = 'text/javascript';
+  script2.src = "//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js";
+
+  container.appendChild(script1);
+  container.appendChild(script2);
+
+  return container;
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+async function loadMods() {
+  let refreshCount = parseInt(localStorage.getItem(REFRESH_COUNT_KEY) || "0", 10);
+  refreshCount++;
+  localStorage.setItem(REFRESH_COUNT_KEY, refreshCount.toString());
+
+  let useCache = false;
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  if (refreshCount < MAX_REFRESHES && saved) {
+    try {
+      allMods = JSON.parse(saved);
+      useCache = true;
+      console.log(`Loaded mods from localStorage. Refresh count: ${refreshCount}`);
+    } catch (e) {
+      console.warn("Failed parsing localStorage, fetching fresh:", e);
+      allMods = [];
+    }
+  }
+
+  if (!useCache) {
+    console.log("Fetching mods from Firebase fresh...");
+    const snapshot = await get(ref(db, "/mods"));
+    if (!snapshot.exists()) {
+      modsEl.innerHTML = "<p>No mods found.</p>";
+      loadMoreBtn.disabled = true;
+      return;
+    }
+    allMods = Object.entries(snapshot.val()).map(([key, val]) => ({
+      id: key,
+      ...val,
+    }));
+    shuffleArray(allMods);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+    localStorage.setItem(REFRESH_COUNT_KEY, "0");
+    console.log("Saved fresh mods to localStorage and reset refresh count.");
+  }
+
+  displayNextBatch();
+}
+
+function createModCard(mod) {
+  const card = document.createElement("div");
+  card.className = "mod-card";
+
+  const img = document.createElement("img");
+  img.className = "mod-image";
+  img.src = mod.screenshotUrl || "https://via.placeholder.com/300x180?text=No+Image";
+  img.alt = mod.title || "Mod image";
+  card.appendChild(img);
+
+  const info = document.createElement("div");
+  info.className = "mod-info";
+
+  const title = document.createElement("div");
+  title.className = "mod-title";
+  title.textContent = mod.title || "Untitled Mod";
+  info.appendChild(title);
+
+  const btn = document.createElement("button");
+  btn.className = "download-btn";
+  btn.textContent = `Download Now (${mod.downloads || 0})`;
+
+  btn.onclick = () => {
+    let secondsLeft = 7;
+    popup.style.display = "flex";
+    countdownEl.textContent = secondsLeft;
+
+    const intervalId = setInterval(() => {
+      secondsLeft--;
+      countdownEl.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(intervalId);
+        popup.style.display = "none";
+        window.location.href = mod.downloadUrl || "downloadnow.html";
+      }
+    }, 1000);
+
+    mod.downloads = (mod.downloads || 0) + 1;
+    btn.textContent = `Download Now (${mod.downloads})`;
+
+    set(ref(db, `/mods/${mod.id}/downloads`), mod.downloads).catch(e => {
+      console.error("Failed to update downloads count:", e);
+    });
+
+    const modIndex = allMods.findIndex(m => m.id === mod.id);
+    if (modIndex > -1) {
+      allMods[modIndex].downloads = mod.downloads;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allMods));
+    }
+  };
+
+  info.appendChild(btn);
+  card.appendChild(info);
+
+  return card;
+}
+
+function displayNextBatch() {
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+    return;
+  }
+
+  const nextBatch = allMods.slice(currentIndex, currentIndex + BATCH_SIZE);
+
+  nextBatch.forEach((mod, idx) => {
+    const card = createModCard(mod);
+    modsEl.appendChild(card);
+
+    // Inject ad after the 3rd mod (idx === 2)
+    if (idx === 2) {
+      const adElement = createHighCPMAdElement();
+      modsEl.appendChild(adElement);
+    }
+  });
+
+  currentIndex += nextBatch.length;
+
+  if (currentIndex >= allMods.length) {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = "No more mods";
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadMoreBtn.addEventListener("click", () => {
+    displayNextBatch();
+  });
+
+  loadMods().catch(err => {
+    console.error("Error loading mods:", err);
+    modsEl.innerHTML = "<p>Failed to load mods. Try refreshing.</p>";
+    loadMoreBtn.disabled = true;
+  });
+});
+</script>
+<script>
+    // Hide loading screen after 5 seconds
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 500);
+        }
+      }, 5000); // 5000 ms = 5 seconds
+    });
+const urlParams = new URLSearchParams(window.location.search);
+const referUid = urlParams.get('referuid');
+
+async function rewardUser(uid) {
+  if (!uid) return;
+  const userBalanceRef = ref(db, `users/${uid}/balance`);
+  try {
+    await runTransaction(userBalanceRef, (currentBalance) => {
+      if (currentBalance === null) return 0.10;
+      return currentBalance + 0.10;
+    });
+    console.log(`Added $0.10 to user ${uid} balance.`);
+  } catch (error) {
+    console.error('Error updating balance:', error);
+  }
+}
+
+if (referUid) {
+  rewardUser(referUid);
+}
+  </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, runTransaction, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Track view count
+  runTransaction(ref(db, "analytics/views"), v => (v || 0) + 1);
+
+  // Track global clicks
+  document.addEventListener("click", () => {
+    runTransaction(ref(db, "analytics/clicks"), c => (c || 0) + 1);
+  });
+
+  // Track country via ipapi.co (no key)
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      const country = data.country_name || "Unknown";
+      runTransaction(ref(db, `analytics/countries/${country}`), count => (count || 0) + 1);
+
+      const logRef = push(ref(db, "analytics/logs"));
+      set(logRef, {
+        ip: data.ip,
+        country: country,
+        city: data.city || "Unknown",
+        timestamp: Date.now()
+      });
+    })
+    .catch(err => console.error("GeoIP Error:", err));
+</script>
+</body>
+</html>
