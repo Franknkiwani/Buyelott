@@ -557,3 +557,169 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>User Data Collector (silent)</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, set, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  // Your Firebase config (same as before)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Track clicks and session start time
+  let clicks = 0;
+  let sessionStart = Date.now();
+
+  // Listen to clicks anywhere on document
+  document.addEventListener('click', () => {
+    clicks++;
+  });
+
+  // Helper: get referrer safely
+  const referrer = document.referrer || null;
+
+  // Helper: get device info
+  function getDeviceInfo() {
+    return {
+      userAgent: navigator.userAgent || null,
+      platform: navigator.platform || null,
+      language: navigator.language || null,
+      screen: {
+        width: window.screen.width,
+        height: window.screen.height,
+        colorDepth: window.screen.colorDepth,
+      },
+      hardwareConcurrency: navigator.hardwareConcurrency || null,
+      deviceMemory: navigator.deviceMemory || null,
+    };
+  }
+
+  // Helper: get network info (may be null)
+  function getNetworkInfo() {
+    const nav = navigator;
+    if ('connection' in nav) {
+      return {
+        effectiveType: nav.connection.effectiveType || null,
+        downlink: nav.connection.downlink || null,
+        rtt: nav.connection.rtt || null,
+        saveData: nav.connection.saveData || null,
+      };
+    }
+    return null;
+  }
+
+  // Fetch IP info from free API (ip-api.com)
+  async function fetchIPInfo() {
+    try {
+      const res = await fetch('https://ip-api.com/json/?fields=status,message,country,regionName,city,zip,lat,lon,timezone,isp,org,query');
+      const data = await res.json();
+      if (data.status === 'success') {
+        return {
+          ip: data.query || null,
+          country: data.country || null,
+          region: data.regionName || null,
+          city: data.city || null,
+          zip: data.zip || null,
+          lat: data.lat || null,
+          lon: data.lon || null,
+          timezone: data.timezone || null,
+          isp: data.isp || null,
+          org: data.org || null,
+        };
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Send or update session data to Firebase
+  async function sendSessionData(sessionKey, ipInfo) {
+    const now = Date.now();
+    const sessionSeconds = Math.floor((now - sessionStart) / 1000);
+
+    const sessionData = {
+      timestamp: sessionStart,
+      lastUpdate: now,
+      clicks,
+      sessionSeconds,
+      referrer,
+      device: getDeviceInfo(),
+      network: getNetworkInfo(),
+      ip: ipInfo?.ip || null,
+      country: ipInfo?.country || null,
+      region: ipInfo?.region || null,
+      city: ipInfo?.city || null,
+      zip: ipInfo?.zip || null,
+      lat: ipInfo?.lat || null,
+      lon: ipInfo?.lon || null,
+      timezone: ipInfo?.timezone || null,
+      isp: ipInfo?.isp || null,
+      org: ipInfo?.org || null,
+    };
+
+    if (!sessionKey) {
+      // Create new session entry
+      const newRef = push(ref(db, 'userSessions'));
+      sessionKey = newRef.key;
+      await set(newRef, sessionData);
+      return sessionKey;
+    } else {
+      // Update existing session data (heartbeat)
+      await update(ref(db, `userSessions/${sessionKey}`), sessionData);
+      return sessionKey;
+    }
+  }
+
+  async function init() {
+    const ipInfo = await fetchIPInfo();
+    let sessionKey = null;
+
+    // Send initial session data
+    sessionKey = await sendSessionData(sessionKey, ipInfo);
+
+    // Update session data every 15 seconds as heartbeat
+    const intervalId = setInterval(() => {
+      sendSessionData(sessionKey, ipInfo).catch(console.error);
+    }, 15000);
+
+    // On page unload, send final session data
+    window.addEventListener('beforeunload', (e) => {
+      clearInterval(intervalId);
+      // Send final update synchronously if possible
+      navigator.sendBeacon(
+        `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/userSessions/${sessionKey}.json`,
+        JSON.stringify({
+          clicks,
+          sessionSeconds: Math.floor((Date.now() - sessionStart) / 1000),
+          lastUpdate: Date.now()
+        })
+      );
+    });
+  }
+
+  // Run silently
+  init().catch(console.error);
+
+</script>
+</head>
+<body>
+<!-- No visible UI -->
+</body>
+</html>
