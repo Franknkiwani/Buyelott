@@ -35,6 +35,13 @@
 
 <!-- ✅ Favicon -->
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
+ <style>
+  .cyberchat-container {
+    width: 90%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+</style>
   <style>
     :root {
       --bg: #000;
@@ -832,7 +839,7 @@ body.dark {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-  .chat-container {
+  .cyberchat-container {
     display: flex;
     flex-direction: column;
     width: 420px;
@@ -846,7 +853,7 @@ body.dark {
     font-family: 'Share Tech Mono', monospace;
   }
 
-  .chat-container .chat-header {
+  .cyberchat-container .chat-header {
     padding: 1rem;
     border-bottom: 2px solid #00f0ff;
     font-size: 1.4rem;
@@ -859,7 +866,7 @@ body.dark {
     background: transparent;
   }
 
-  .chat-container .messages {
+  .cyberchat-container .messages {
     flex-grow: 1;
     padding: 1rem 1.5rem;
     overflow-y: auto;
@@ -870,7 +877,7 @@ body.dark {
     scrollbar-color: #7b00ff55 transparent;
   }
 
-  .chat-container .message {
+  .cyberchat-container .message {
     background: rgba(0, 240, 255, 0.12);
     padding: 0.8rem 1.2rem;
     border-radius: 16px;
@@ -888,7 +895,7 @@ body.dark {
     white-space: pre-wrap;
   }
 
-  .chat-container .message.own {
+  .cyberchat-container .message.own {
     align-self: flex-end;
     background: rgba(123, 0, 255, 0.25);
     color: #ddd;
@@ -897,7 +904,7 @@ body.dark {
     font-weight: 600;
   }
 
-  .chat-container .meta {
+  .cyberchat-container .meta {
     font-size: 0.7rem;
     opacity: 0.55;
     margin-bottom: 0.25rem;
@@ -906,29 +913,29 @@ body.dark {
     font-family: 'Courier New', monospace;
   }
 
-  .chat-container .username-flag {
+  .cyberchat-container .username-flag {
     display: flex;
     align-items: center;
     gap: 0.4rem;
   }
 
-  .chat-container .username {
+  .cyberchat-container .username {
     font-weight: 700;
     letter-spacing: 0.05em;
   }
 
-  .chat-container .flag {
+  .cyberchat-container .flag {
     width: 18px;
     height: 12px;
     border-radius: 2px;
     box-shadow: 0 0 3px #00f0ff77;
   }
 
-  .chat-container .timestamp {
+  .cyberchat-container .timestamp {
     font-family: monospace;
   }
 
-  .chat-container .input-container {
+  .cyberchat-container .input-container {
     display: flex;
     border-top: 2px solid #7b00ff;
     padding: 0.5rem 1.2rem;
@@ -937,7 +944,7 @@ body.dark {
     position: relative;
   }
 
-  .chat-container .input-container input[type="text"] {
+  .cyberchat-container .input-container input[type="text"] {
     flex-grow: 1;
     font-size: 1.05rem;
     padding: 0.6rem 1rem;
@@ -950,11 +957,12 @@ body.dark {
     transition: box-shadow 0.2s ease;
   }
 
-  .chat-container .input-container input[type="text"]:focus {
+  .cyberchat-container .input-container input[type="text"]:focus {
     box-shadow: inset 0 0 14px #00f0ffcc;
   }
 
-  .chat-container .input-container button {
+  .cyberchat-container .input-container button {
+    flex: 0 0 30%;
     background: #7b00ff;
     border: none;
     color: #00f0ff;
@@ -967,11 +975,11 @@ body.dark {
     letter-spacing: 0.12em;
   }
 
-  .chat-container .input-container button:hover {
+  .cyberchat-container .input-container button:hover {
     background: #5300b7;
   }
 
-  .chat-container .loading-overlay {
+  .cyberchat-container .loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -985,7 +993,7 @@ body.dark {
     pointer-events: none;
   }
 
-  .chat-container .loading-spinner {
+  .cyberchat-container .loading-spinner {
     border: 4px solid #7b00ff44;
     border-top: 4px solid #00f0ff;
     border-radius: 50%;
@@ -994,7 +1002,7 @@ body.dark {
     animation: spin 1s linear infinite;
   }
 
-  .chat-container .popup-overlay {
+  .cyberchat-container .popup-overlay {
     position: absolute;
     top: 20%;
     left: 50%;
@@ -1010,7 +1018,7 @@ body.dark {
     user-select: none;
   }
 
-  .chat-container .popup-overlay label {
+  .cyberchat-container .popup-overlay label {
     color: #00f0ff;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1019,7 +1027,7 @@ body.dark {
     font-size: 1rem;
   }
 
-  .chat-container .popup-overlay input[type="text"] {
+  .cyberchat-container .popup-overlay input[type="text"] {
     width: 90%;
     font-size: 1.1rem;
     padding: 0.5rem 0.8rem;
@@ -1032,7 +1040,7 @@ body.dark {
     margin-bottom: 1rem;
   }
 
-  .chat-container .popup-overlay button {
+  .cyberchat-container .popup-overlay button {
     background: #7b00ff;
     border: none;
     color: #00f0ff;
@@ -1046,20 +1054,20 @@ body.dark {
     transition: background 0.3s ease;
   }
 
-  .chat-container .popup-overlay button:hover {
+  .cyberchat-container .popup-overlay button:hover {
     background: #5300b7;
   }
 
-  .chat-container .messages::-webkit-scrollbar {
+  .cyberchat-container .messages::-webkit-scrollbar {
     width: 10px;
   }
 
-  .chat-container .messages::-webkit-scrollbar-thumb {
+  .cyberchat-container .messages::-webkit-scrollbar-thumb {
     background: #7b00ff99;
     border-radius: 6px;
   }
 
-  .chat-container .messages::-webkit-scrollbar-track {
+  .cyberchat-container .messages::-webkit-scrollbar-track {
     background: transparent;
   }
 
@@ -1074,21 +1082,28 @@ body.dark {
   }
 
   @media (max-width: 460px) {
-    .chat-container {
+    .cyberchat-container {
       width: 95vw;
       height: 75vh;
     }
   }
-.chat-container .input-container {
+  .chat-container {
+  width: 100%;
+  max-width: 420px; /* Keep a max width so it doesn't stretch too wide on big screens */
+  margin: 2rem auto; /* centers horizontally with some vertical breathing room */
+  /* height stays as is, or you can tweak if needed */
+}
+
+.input-container {
   display: flex;
-  align-items: center;
+  gap: 0.5rem; /* keeps a little space between input and button */
+  padding: 0.5rem 1.2rem;
   border-top: 2px solid #7b00ff;
-  padding: 0.5rem 1rem;
-  gap: 0.6rem;
   background: rgba(10, 10, 25, 0.9);
 }
 
-.chat-container .input-container input[type="text"] {
+.input-container input[type="text"] {
+  flex-basis: 70%;
   width: 70%;
   font-size: 1.05rem;
   padding: 0.6rem 1rem;
@@ -1101,24 +1116,25 @@ body.dark {
   transition: box-shadow 0.2s ease;
 }
 
-.chat-container .input-container button {
+.input-container button {
+  flex-basis: 30%;
   width: 30%;
   background: #7b00ff;
   border: none;
   color: #00f0ff;
   font-weight: 700;
   border-radius: 12px;
-  padding: 0.6rem 1.2rem;
   cursor: pointer;
   transition: background 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 
-.chat-container .input-container button:hover {
+.input-container button:hover {
   background: #5300b7;
 }
 </style>
+
 </head>
 <body>
   <header>
@@ -1232,7 +1248,7 @@ body.dark {
   </select>
 
   <div id="tool-list"></div>
-  <div class="chat-container" role="region" aria-label="AI Community Chat">
+<div class="cyberchat-container" role="region" aria-label="AI Community Chat">
   <div class="chat-header" aria-live="polite">CyberChat Community</div>
   <div class="messages" id="messages" aria-live="polite" aria-relevant="additions"></div>
 
