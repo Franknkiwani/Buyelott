@@ -631,6 +631,203 @@ body.dark {
   -moz-user-select: none !important;    /* Firefox */
   -ms-user-select: none !important;     /* IE/Edge */
 }
+#ai-tools-chat .response {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  text-align: left;
+  line-height: 1.6;
+  user-select: text;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  letter-spacing: 0.02em;
+  border-left: 4px solid #1e90ff;
+  min-height: 140px;
+  color: #ddd;
+  overflow-y: auto;
+  max-height: 320px;
+  box-sizing: border-box;
+}
+
+#ai-tools-chat .response .tool-item {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+#ai-tools-chat .response .tool-number {
+  color: #1e90ff;
+  font-weight: 700;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  width: 24px;
+  user-select: none;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+#ai-tools-chat .response .tool-name {
+  font-weight: 700;
+  color: white;
+  flex-grow: 1;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+#ai-tools-chat .response .tool-desc {
+  font-weight: 400;
+  font-size: 0.88rem;
+  color: #a8a8a8;
+  margin-left: 0.25rem;
+  font-style: italic;
+  flex-grow: 2;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+/* Optional: Scrollbar styling just for this container */
+#ai-tools-chat .response::-webkit-scrollbar {
+  width: 6px;
+}
+
+#ai-tools-chat .response::-webkit-scrollbar-thumb {
+  background-color: #1e90ffaa;
+  border-radius: 3px;
+}
+.chat-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  background: rgba(30, 144, 255, 0.05);
+  border-radius: 20px;
+  padding: 1.8rem 2rem;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #ddd;
+  box-shadow: 0 0 30px rgba(30, 144, 255, 0.15);
+}
+
+.chat-container h2 {
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: #1e90ff;
+  margin-bottom: 0.25rem;
+  user-select: none;
+  font-family: "SF Pro Rounded", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.chat-container p {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  color: #b0dfff;
+  user-select: none;
+  font-style: italic;
+}
+
+.chat-container select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 14px;
+  border: 2px solid #1e90ff;
+  background: rgba(255 255 255 / 0.1);
+  color: #eee;
+  font-weight: 600;
+  font-size: 1rem;
+  outline-offset: 2px;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.chat-container select:hover,
+.chat-container select:focus {
+  border-color: #60aaff;
+  background: rgba(255 255 255 / 0.15);
+  color: white;
+}
+
+.chat-container button {
+  width: 100%;
+  padding: 0.75rem 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  background: #1e90ff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 20px #1e90ffaa;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+.chat-container button:hover,
+.chat-container button:focus {
+  background: #60aaff;
+  box-shadow: 0 0 30px #60aaffcc;
+}
+
+.chat-container .response {
+  margin-top: 2rem;
+  background: rgba(255 255 255 / 0.05);
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  text-align: left;
+  line-height: 1.6;
+  user-select: text;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+  letter-spacing: 0.02em;
+  border-left: 4px solid #1e90ff;
+  min-height: 140px;
+  color: #ddd;
+  overflow-y: auto;
+  max-height: 320px;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+.chat-container .tool-item {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.chat-container .tool-number {
+  color: #1e90ff;
+  font-weight: 700;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  width: 24px;
+  user-select: none;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+.chat-container .tool-name {
+  font-weight: 700;
+  color: white;
+  flex-grow: 1;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+.chat-container .tool-desc {
+  font-weight: 400;
+  font-size: 0.88rem;
+  color: #a8a8a8;
+  margin-left: 0.25rem;
+  font-style: italic;
+  flex-grow: 2;
+  font-family: "SF Mono", Consolas, Monaco, monospace;
+}
+
+/* Scrollbar styling just inside response */
+.chat-container .response::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container .response::-webkit-scrollbar-thumb {
+  background-color: #1e90ffaa;
+  border-radius: 3px;
+}
   </style>
 </head>
 <body>
@@ -703,6 +900,25 @@ body.dark {
     CyberChat helps creators, YouTubers, and developers access powerful tools powered by real artificial intelligence. Whether you're optimizing videos, generating content ideas, or automating tasks — everything here is 100% free and AI-backed.
   </p>
 </section>
+  <div class="chat-container" role="main" aria-label="AI Tool Master chat interface">
+    <h2>🧠 AI Tool Master</h2>
+    <p>Pick what you need and I’ll drop the top 5 tools instantly.</p>
+
+    <select id="category" aria-label="Select AI tool category">
+      <option disabled selected value="">Choose a task...</option>
+      <option value="homework">📘 Homework Help</option>
+      <option value="youtube">🎬 YouTube Automation</option>
+      <option value="image">🎨 Image Generation</option>
+      <option value="writing">✍️ Writing Assistance</option>
+      <option value="seo">🔍 SEO Optimization</option>
+      <option value="social">📱 Social Media Growth</option>
+    </select>
+
+    <button onclick="showTools()" aria-label="Show recommended AI tools">Reveal the Tools</button>
+
+    <div class="response" id="tool-response" role="region" aria-live="polite" style="display:none;"></div>
+  </div>
+
 <div class="ai-header">
   <h1>100+ Free AI Tools</h1>
   <div class="typing-container">
@@ -917,5 +1133,120 @@ document.addEventListener("DOMContentLoaded", () => {
   if (phrases.length) setTimeout(type, typingSpeed);
 });
 </script>
+<script>
+  function showTools() {
+    const value = document.getElementById("category").value;
+    const output = document.getElementById("tool-response");
+    output.style.display = "block";
+
+    const toolsData = {
+      homework: [
+        "ChatGPT – general homework help",
+        "Perplexity AI – smart research + sources",
+        "Wolfram Alpha – math + science solving",
+        "Smodin – essays + citation generator",
+        "Grammarly – grammar + writing boost",
+        "Khan Academy – free tutorials & practice",
+        "Google Lens – scan homework with camera",
+        "Photomath – math problem solver",
+        "Chegg Study – textbook solutions",
+        "Quizlet – flashcards and study sets"
+      ],
+      youtube: [
+        "Opus Clip – long vid to Shorts",
+        "TubeBuddy – SEO + growth tools",
+        "Pictory – turns scripts into videos",
+        "Descript – edit by text",
+        "VidIQ – video strategy dashboard",
+        "Lumen5 – text to animated video",
+        "BigVu – AI teleprompter + edits",
+        "Canva – video thumbnails and design",
+        "Hootsuite – social media scheduler",
+        "Epidemic Sound – royalty-free music"
+      ],
+      image: [
+        "Midjourney – advanced image prompts",
+        "DALL·E – OpenAI image generation",
+        "Leonardo AI – high-def art",
+        "Runway ML – image/video AI",
+        "Canva AI – smart templates",
+        "Playground AI – remixable images",
+        "Remove.bg – delete backgrounds",
+        "Deep Dream Generator – trippy art",
+        "Artbreeder – AI portrait morphing",
+        "Fotor – AI photo editor"
+      ],
+      writing: [
+        "Jasper AI – long-form writing",
+        "Copy.ai – catchy short-form",
+        "Quillbot – rewrite and polish",
+        "Grammarly – grammar fixer",
+        "Smodin – AI school essays",
+        "Writesonic – fast blog articles",
+        "INK AI – SEO + writer combo",
+        "ProWritingAid – style editor",
+        "Wordtune – rewrite with tone",
+        "Hemingway Editor – readability checker"
+      ],
+      seo: [
+        "Surfer SEO – real-time SEO scoring",
+        "NeuronWriter – NLP keyword writing",
+        "Ahrefs AI – backlink analyzer",
+        "Ubersuggest – keyword finder",
+        "Semrush AI – deep SEO audit",
+        "Scalenut – AI content briefs",
+        "Outranking – optimized outlines",
+        "Moz Pro – SEO tools suite",
+        "Screaming Frog – site crawler",
+        "Google Search Console – performance"
+      ],
+      social: [
+        "Buffer – post scheduler",
+        "Hootsuite – full SMM dashboard",
+        "Opus Clip – TikTok/Shorts repurpose",
+        "Notion AI – caption generator",
+        "Canva AI – design social graphics",
+        "ContentStudio – AI social tools",
+        "Flick – AI hashtag tools",
+        "Later – Instagram planner",
+        "SocialBee – content automation",
+        "BuzzSumo – social analytics"
+      ]
+    };
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    const selectedTools = toolsData[value];
+    if (!selectedTools) {
+      output.textContent = "Pick a category first, boss.";
+      return;
+    }
+
+    const shuffled = shuffle([...selectedTools]).slice(0, 5);
+
+    const formattedHTML = shuffled.map((tool, i) => {
+      const [name, desc] = tool.split(' – ');
+      return `
+        <div class="tool-item">
+          <div class="tool-number">${i + 1}.</div>
+          <div class="tool-name">${name}</div>
+          <div class="tool-desc">– ${desc}</div>
+        </div>
+      `;
+    }).join('');
+
+    output.innerHTML = `
+      <div style="font-weight:700; margin-bottom:1rem; color:#1e90ff;">🔎 Recommended Tools:</div>
+      ${formattedHTML}
+    `;
+  }
+</script>
+
 </body>
 </html>
