@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Meta -->
+  <title>YouTube Tags Generator – Free AI Tool for Creators</title>
+  <meta name="title" content="YouTube Tags Generator – Free AI Tool for Creators">
+  <meta name="description" content="Generate optimized YouTube tags instantly for better reach and SEO. Free, fast, and mobile-friendly tool for creators.">
+  <meta name="keywords" content="YouTube tags generator, YouTube SEO, free YouTube tools, AI YouTube tools, tags for YouTube videos">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="CyberChat">
+  <meta property="og:title" content="YouTube Tags Generator – Free AI Tool for Creators">
+  <meta property="og:description" content="Boost your YouTube SEO with auto-generated tags. No login required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cyberchat.online/youtube-tags-generator">
+  <meta property="og:image" content="https://cyberchat.online/assets/tags-generator-preview.jpg">
+
+  <!-- Style -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Share Tech Mono', monospace;
+      background-color: #0e0e0e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      user-select: none;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .generator-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 600px;
+      padding: 2rem;
+      box-shadow: 0 0 15px #000000aa;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    button {
+      background-color: #9146FF;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7c3aed;
+    }
+
+    .tags-output {
+      margin-top: 1rem;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      background: #121212;
+      padding: 1rem;
+      border-radius: 8px;
+      word-break: break-word;
+    }
+
+    .ads {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🎯 YouTube Tags Generator</h1>
+
+  <div class="generator-box">
+    <input type="text" id="titleInput" placeholder="Enter your YouTube title..." />
+    <button onclick="generateTags()">Generate Tags</button>
+
+    <div class="tags-output" id="tagsOutput"></div>
+  </div>
+
+  <div class="ads">
+    <!-- Ad 1 -->
+    <script type="text/javascript">
+      atOptions = {
+        'key': '8bc823ec399f5e1ecb5ccbf5ad69e231',
+        'format': 'iframe',
+        'height': 250,
+        'width': 300,
+        'params': {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/8bc823ec399f5e1ecb5ccbf5ad69e231/invoke.js"></script>
+
+    <!-- Ad 2 -->
+    <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
+  </div>
+
+  <script>
+    function generateTags() {
+      const title = document.getElementById("titleInput").value.trim();
+      if (!title) return alert("Enter a title first, boss.");
+
+      const keywords = title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !["the", "and", "for", "how", "you"].includes(w));
+
+      const tags = [...new Set(keywords)].map(k => `#${k}`).join(' ');
+
+      document.getElementById("tagsOutput").innerText = tags || "No valid tags generated.";
+    }
+  </script>
+</body>
+</html>
