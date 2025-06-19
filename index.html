@@ -1249,6 +1249,8 @@ body.dark {
   </select>
 
   <div id="tool-list"></div>
+  </div>
+  </div>
 <div class="cyberchat-container" role="region" aria-label="AI Community Chat">
   <div class="chat-header" aria-live="polite">CyberChat Community</div>
   <div class="messages" id="messages" aria-live="polite" aria-relevant="additions"></div>
@@ -1269,6 +1271,8 @@ body.dark {
     <button id="saveUsernameBtn">Continue</button>
   </div>
 </div>
+ <div id="ai-tools-section">
+
   <script>
     const toggle = document.getElementById('theme-toggle');
     toggle.addEventListener('change', () => {
@@ -1861,297 +1865,1202 @@ document.addEventListener("DOMContentLoaded", () => {
       hideLoading();
     }, 2000); // Fake delay
   });
+
+    // Data for AI tools - add or edit as you like
+const tools = [
+  // Your original + real links or fallback for SEO & Content
+  {
+    title: "YouTube Money Calculator",
+    desc: "Estimate how much your channel could earn based on views and CPM.",
+    url: "https://cyberchat.online/youtube-money-calculator",
+    categories: ["seo", "content"]
+  },
+  {
+    title: "YouTube Tags Generator",
+    desc: "Generate powerful tags for your YouTube videos to rank better and get more views.",
+    url: "http://cyberchat.online/youtube-tags-generator",
+    categories: ["seo"]
+  },
+  {
+    title: "Title & Hook Optimizer",
+    desc: "Generate YouTube titles with emotional triggers and viral hooks — tested to increase clicks.",
+    url: "https://writesonic.com/blog/youtube-title-generator", // legit real link
+    categories: ["seo", "content"]
+  },
+  {
+    title: "AI Video Idea Generator",
+    desc: "Get viral content ideas based on your niche, stats & trends.",
+    url: "https://copy.ai/tools/video-idea-generator", // legit real link
+    categories: ["content", "seo"]
+  },
+  {
+    title: "SEO Keyword Analyzer",
+    desc: "Find best keywords to target on YouTube and Google for max traffic.",
+    url: "https://ahrefs.com/keywords-explorer", // real
+    categories: ["seo"]
+  },
+  {
+    title: "Video Script Generator",
+    desc: "Generate high-converting video scripts for any niche with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["content"]
+  },
+  {
+    title: "Blog Post AI Writer",
+    desc: "Instantly write SEO-optimized blog posts that rank and convert.",
+    url: "https://writesonic.com/blog/ai-blog-writer",
+    categories: ["content", "seo"]
+  },
+  {
+    title: "AI Meta Description Creator",
+    desc: "Craft meta descriptions that boost CTR and SEO rankings.",
+    url: "https://copy.ai/tools/meta-description-generator",
+    categories: ["seo"]
+  },
+  {
+    title: "Headline Analyzer",
+    desc: "Score your headlines and get improvement tips for better clicks.",
+    url: "https://coschedule.com/headline-analyzer",
+    categories: ["seo", "content"]
+  },
+  {
+    title: "Content Plagiarism Checker",
+    desc: "Ensure your content is 100% original before publishing.",
+    url: "https://www.grammarly.com/plagiarism-checker",
+    categories: ["seo", "content"]
+  },
+
+  // Video tools
+  {
+    title: "YouTube Video Downloader",
+    desc: "Download any YouTube video in high quality fast and free.",
+    url: "https://www.clipto.com/media-downloader/youtube-downloader",
+    categories: ["video"]
+  },
+  {
+    title: "Shorts Auto Generator",
+    desc: "Turn long-form YouTube videos into viral Shorts with AI scene-cutting & captions.",
+    url: "https://www.opus.pro/tools/youtube-shorts-maker",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Thumbnail Maker",
+    desc: "Generate YouTube thumbnails with killer clickbait styles using AI art and design prompts.",
+    url: "https://designs.ai/tools/thumbnail-maker",
+    categories: ["video", "content"]
+  },
+  {
+    title: "Text to Shorts (Auto Caption + Cut)",
+    desc: "Input any script — get an instant Short with auto captions, sound effects, and music synced.",
+    url: "https://kapwing.com/tools/auto-subtitle",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Video Enhancer",
+    desc: "Upscale, denoise, and improve video quality with AI magic.",
+    url: "https://topazlabs.com/video-enhance-ai/",
+    categories: ["video"]
+  },
+  {
+    title: "Video Background Remover",
+    desc: "Remove or change your video background without a green screen.",
+    url: "https://unscreen.com/",
+    categories: ["video"]
+  },
+  {
+    title: "Auto Video Subtitler",
+    desc: "Automatically generate subtitles and closed captions for your videos.",
+    url: "https://rev.com/captioning",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Video Summarizer",
+    desc: "Get concise summaries of long videos to create highlight reels.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "content"]
+  },
+  {
+    title: "AI Video Script Generator",
+    desc: "Create full video scripts from simple prompts.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "content"]
+  },
+  {
+    title: "Video Meme Generator",
+    desc: "Make viral memes from your videos with AI-powered editing.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "social"]
+  },
+
+  // Voice tools
+  {
+    title: "AI Voice Cloner",
+    desc: "Clone any voice and create AI-generated speech — perfect for storytelling, memes, or brand content.",
+    url: "https://listnr.tech/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Text to Speech",
+    desc: "Convert text to natural-sounding speech in multiple languages.",
+    url: "https://play.ht/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Voice Changer AI",
+    desc: "Transform your voice in real-time with different effects.",
+    url: "https://voicemod.net/",
+    categories: ["voice", "social"]
+  },
+  {
+    title: "Podcast AI Editor",
+    desc: "Automatically clean, enhance, and edit your podcast audio.",
+    url: "https://audioburst.com/",
+    categories: ["voice", "automation"]
+  },
+  {
+    title: "AI Audio Transcriber",
+    desc: "Convert audio and podcasts to text with high accuracy.",
+    url: "https://otter.ai/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Speech Emotion Detector",
+    desc: "Analyze emotions in speech for better content creation.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Voiceover Generator",
+    desc: "Create professional voiceovers for videos or ads using AI voices.",
+    url: "https://wellsaidlabs.com/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Multilingual Voice Synthesizer",
+    desc: "Generate speech in multiple languages with localized accents.",
+    url: "https://respeecher.com/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Audio Denoiser",
+    desc: "Clean up background noise from your audio clips automatically.",
+    url: "https://krisp.ai/",
+    categories: ["voice", "automation"]
+  },
+  {
+    title: "Real-Time Voice Translator",
+    desc: "Translate your speech live into other languages with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["voice", "automation"]
+  },
+
+  // Social tools
+  {
+    title: "Social Media Auto Poster",
+    desc: "Upload once and auto-post your content across YouTube, TikTok, IG Reels & Facebook with scheduling.",
+    url: "https://buffer.com/",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "Instagram Hashtag Generator",
+    desc: "Find trending hashtags to get more reach on your posts.",
+    url: "https://displaypurposes.com/",
+    categories: ["social", "seo"]
+  },
+  {
+    title: "Social Analytics Dashboard",
+    desc: "Track all your social media stats in one place with AI insights.",
+    url: "https://sprout.social/",
+    categories: ["social"]
+  },
+  {
+    title: "AI Caption Writer",
+    desc: "Generate catchy captions for Instagram, Twitter, TikTok & more.",
+    url: "https://writesonic.com/ai-caption-generator",
+    categories: ["social", "content"]
+  },
+  {
+    title: "TikTok Trend Analyzer",
+    desc: "Find hot trending TikTok sounds, hashtags, and challenges.",
+    url: "https://trendpop.com/",
+    categories: ["social", "seo"]
+  },
+  {
+    title: "Facebook Ads AI Optimizer",
+    desc: "Automatically optimize your Facebook ad campaigns using AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "Social Content Calendar",
+    desc: "Plan and schedule your posts with AI suggestions for timing.",
+    url: "https://later.com/",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "YouTube Comment Analyzer",
+    desc: "Analyze audience sentiment and get reply suggestions.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "content"]
+  },
+  {
+    title: "Influencer Finder",
+    desc: "Find influencers in your niche for collaborations using AI.",
+    url: "https://buzzsumo.com/influencers/",
+    categories: ["social"]
+  },
+  {
+    title: "Viral Post Generator",
+    desc: "Create viral post ideas and templates for social media platforms.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "content"]
+  },
+
+  // Automation tools
+  {
+    title: "Chatbot Builder for Websites",
+    desc: "Add a ChatGPT-powered chatbot to your site in 5 mins — boost engagement and conversions.",
+    url: "https://landbot.io/",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Auto Video Upload Scheduler",
+    desc: "Schedule YouTube uploads and social posts with AI time optimization.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Workflow Automator",
+    desc: "Create automated workflows between your favorite apps and tools.",
+    url: "https://zapier.com/",
+    categories: ["automation"]
+  },
+  {
+    title: "Auto Caption Generator",
+    desc: "Automatically add captions to videos across all platforms.",
+    url: "https://kapwing.com/tools/auto-subtitle",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Content Scheduler",
+    desc: "Plan and automate publishing of blog posts, videos & social.",
+    url: "https://hootsuite.com/",
+    categories: ["automation", "content"]
+  },
+  {
+    title: "AI Email Responder",
+    desc: "Automate responses to emails and customer inquiries.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation"]
+  },
+  {
+    title: "AI Data Scraper",
+    desc: "Scrape and gather data automatically from websites for research.",
+    url: "https://import.io/",
+    categories: ["automation"]
+  },
+  {
+    title: "AI Ad Campaign Manager",
+    desc: "Create and optimize ad campaigns automatically with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "social"]
+  },
+  {
+    title: "Auto Video Thumbnail Creator",
+    desc: "Generate thumbnails for videos automatically on upload.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Task Manager",
+    desc: "Keep track of tasks and deadlines with AI prioritization.",
+    url: "https://clickup.com/",
+    categories: ["automation"]
+  },
+
+  // Chatbot tools
+  {
+    title: "ChatGPT API Integrator",
+    desc: "Integrate ChatGPT into your app or website with easy API access.",
+    url: "https://platform.openai.com/docs/api-reference/chat",
+    categories: ["chatbot"]
+  },
+  {
+    title: "Voice-Enabled Chatbots",
+    desc: "Build chatbots that respond to voice commands with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "voice"]
+  },
+  {
+    title: "Customer Support Bot",
+    desc: "24/7 AI-powered chat support for your customers.",
+    url: "https://freshdesk.com/ai-chatbot",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "FAQ Bot Builder",
+    desc: "Create AI bots that answer FAQs instantly.",
+    url: "https://botpress.com/",
+    categories: ["chatbot"]
+  },
+  {
+    title: "E-commerce Chatbot",
+    desc: "Boost sales by guiding customers with AI chatbots on your store.",
+    url: "https://tidio.com/chatbots/",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "AI Lead Gen Bot",
+    desc: "Automate lead generation and qualification with chatbots.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Multilingual Chatbots",
+    desc: "Support multiple languages with AI-powered multilingual bots.",
+    url: "https://botscrew.com/chatbots-for-business/multilingual-chatbot/",
+    categories: ["chatbot", "voice"]
+  },
+  {
+    title: "Appointment Scheduling Bot",
+    desc: "Automate appointment bookings via chatbot interaction.",
+    url: "https://www.vcita.com/appointment-scheduling-software",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Chatbot Analytics",
+    desc: "Get insights and performance reports for your chatbots.",
+    url: "https://dashbot.io/",
+    categories: ["chatbot"]
+  },
+  {
+    title: "AI Personal Assistant Bot",
+    desc: "A chatbot that manages personal tasks and reminders.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "automation"]
+  },
+
+  // Storytelling tools
+  {
+    title: "AI Story Generator",
+    desc: "Type 1 line and get full stories with characters, dialogue, and plot.",
+    url: "https://writesonic.com/ai-story-generator",
+    categories: ["storytelling", "content"]
+  },
+  {
+    title: "Character Creator AI",
+    desc: "Generate unique characters for stories or games.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Plot Outline Generator",
+    desc: "Get detailed plot outlines based on your story idea.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Dialogue Writer AI",
+    desc: "Create realistic dialogues for scripts and stories.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Story Idea Brainstormer",
+    desc: "Generate fresh story ideas with AI brainstorming.",
+    url: "https://copy.ai/tools/idea-generator",
+    categories: ["storytelling"]
+  },
+  {
+    title: "World Building AI",
+    desc: "Create rich worlds and settings for your stories.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Poetry Generator",
+    desc: "Write beautiful poems in any style with AI assistance.",
+    url: "https://poe.com/poetry",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Interactive Story Creator",
+    desc: "Build branching stories for games or apps.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Narration Script Generator",
+    desc: "Create scripts optimized for audio narration.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling", "voice"]
+  },
+  {
+    title: "AI Comic Script Writer",
+    desc: "Generate comic book scripts with scenes and dialogues.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling", "content"]
+  }
+];
+
+    const container = document.getElementById("tools-grid");
+    const searchInput = document.getElementById("search");
+    const categoryButtons = document.querySelectorAll(".category-btn");
+
+    // Render tools function
+    function renderTools(filteredTools) {
+      container.innerHTML = "";
+      if (filteredTools.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ff5555; font-weight:bold;">No tools found matching your criteria.</p>';
+        return;
+      }
+      filteredTools.forEach(tool => {
+        const toolDiv = document.createElement("div");
+        toolDiv.className = "tool";
+        toolDiv.tabIndex = 0; // for keyboard navigation
+        toolDiv.innerHTML = `
+          <div class="tool-title">${tool.title}</div>
+          <div class="tool-desc">${tool.desc}</div>
+          <a href="${tool.url}" target="_blank" rel="noopener noreferrer" aria-label="Open ${tool.title}">${tool.title.includes("YouTube") ? "Go to Tool" : "Try It"}</a>
+        `;
+        container.appendChild(toolDiv);
+      });
+    }
+
+    // Initial render all
+    renderTools(tools);
+
+    // Search + filter logic
+    function filterTools() {
+      const query = searchInput.value.toLowerCase();
+      const activeCategoryBtn = document.querySelector(".category-btn.active");
+      const activeCategory = activeCategoryBtn ? activeCategoryBtn.dataset.category : "all";
+
+      const filtered = tools.filter(tool => {
+        const matchesCategory = activeCategory === "all" || tool.categories.includes(activeCategory);
+        const matchesQuery =
+          tool.title.toLowerCase().includes(query) ||
+          tool.desc.toLowerCase().includes(query) ||
+          tool.categories.some(cat => cat.includes(query));
+        return matchesCategory && matchesQuery;
+      });
+
+      renderTools(filtered);
+    }
+
+    // Event listeners
+    searchInput.addEventListener("input", filterTools);
+
+    categoryButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        categoryButtons.forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
+        filterTools();
+      });
+    });
+  </script>
 </script>
+ <script>
+    // Data for AI tools - add or edit as you like
+const tools = [
+  // Your original + real links or fallback for SEO & Content
+  {
+    title: "YouTube Money Calculator",
+    desc: "Estimate how much your channel could earn based on views and CPM.",
+    url: "https://cyberchat.online/youtube-money-calculator",
+    categories: ["seo", "content"]
+  },
+  {
+    title: "YouTube Tags Generator",
+    desc: "Generate powerful tags for your YouTube videos to rank better and get more views.",
+    url: "http://cyberchat.online/youtube-tags-generator",
+    categories: ["seo"]
+  },
+  {
+    title: "Title & Hook Optimizer",
+    desc: "Generate YouTube titles with emotional triggers and viral hooks — tested to increase clicks.",
+    url: "https://writesonic.com/blog/youtube-title-generator", // legit real link
+    categories: ["seo", "content"]
+  },
+  {
+    title: "AI Video Idea Generator",
+    desc: "Get viral content ideas based on your niche, stats & trends.",
+    url: "https://copy.ai/tools/video-idea-generator", // legit real link
+    categories: ["content", "seo"]
+  },
+  {
+    title: "SEO Keyword Analyzer",
+    desc: "Find best keywords to target on YouTube and Google for max traffic.",
+    url: "https://ahrefs.com/keywords-explorer", // real
+    categories: ["seo"]
+  },
+  {
+    title: "Video Script Generator",
+    desc: "Generate high-converting video scripts for any niche with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["content"]
+  },
+  {
+    title: "Blog Post AI Writer",
+    desc: "Instantly write SEO-optimized blog posts that rank and convert.",
+    url: "https://writesonic.com/blog/ai-blog-writer",
+    categories: ["content", "seo"]
+  },
+  {
+    title: "AI Meta Description Creator",
+    desc: "Craft meta descriptions that boost CTR and SEO rankings.",
+    url: "https://copy.ai/tools/meta-description-generator",
+    categories: ["seo"]
+  },
+  {
+    title: "Headline Analyzer",
+    desc: "Score your headlines and get improvement tips for better clicks.",
+    url: "https://coschedule.com/headline-analyzer",
+    categories: ["seo", "content"]
+  },
+  {
+    title: "Content Plagiarism Checker",
+    desc: "Ensure your content is 100% original before publishing.",
+    url: "https://www.grammarly.com/plagiarism-checker",
+    categories: ["seo", "content"]
+  },
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tracker</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  // Video tools
+  {
+    title: "YouTube Video Downloader",
+    desc: "Download any YouTube video in high quality fast and free.",
+    url: "https://www.clipto.com/media-downloader/youtube-downloader",
+    categories: ["video"]
+  },
+  {
+    title: "Shorts Auto Generator",
+    desc: "Turn long-form YouTube videos into viral Shorts with AI scene-cutting & captions.",
+    url: "https://www.opus.pro/tools/youtube-shorts-maker",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Thumbnail Maker",
+    desc: "Generate YouTube thumbnails with killer clickbait styles using AI art and design prompts.",
+    url: "https://designs.ai/tools/thumbnail-maker",
+    categories: ["video", "content"]
+  },
+  {
+    title: "Text to Shorts (Auto Caption + Cut)",
+    desc: "Input any script — get an instant Short with auto captions, sound effects, and music synced.",
+    url: "https://kapwing.com/tools/auto-subtitle",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Video Enhancer",
+    desc: "Upscale, denoise, and improve video quality with AI magic.",
+    url: "https://topazlabs.com/video-enhance-ai/",
+    categories: ["video"]
+  },
+  {
+    title: "Video Background Remover",
+    desc: "Remove or change your video background without a green screen.",
+    url: "https://unscreen.com/",
+    categories: ["video"]
+  },
+  {
+    title: "Auto Video Subtitler",
+    desc: "Automatically generate subtitles and closed captions for your videos.",
+    url: "https://rev.com/captioning",
+    categories: ["video", "automation"]
+  },
+  {
+    title: "AI Video Summarizer",
+    desc: "Get concise summaries of long videos to create highlight reels.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "content"]
+  },
+  {
+    title: "AI Video Script Generator",
+    desc: "Create full video scripts from simple prompts.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "content"]
+  },
+  {
+    title: "Video Meme Generator",
+    desc: "Make viral memes from your videos with AI-powered editing.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["video", "social"]
+  },
 
-    // ✅ Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  // Voice tools
+  {
+    title: "AI Voice Cloner",
+    desc: "Clone any voice and create AI-generated speech — perfect for storytelling, memes, or brand content.",
+    url: "https://listnr.tech/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Text to Speech",
+    desc: "Convert text to natural-sounding speech in multiple languages.",
+    url: "https://play.ht/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Voice Changer AI",
+    desc: "Transform your voice in real-time with different effects.",
+    url: "https://voicemod.net/",
+    categories: ["voice", "social"]
+  },
+  {
+    title: "Podcast AI Editor",
+    desc: "Automatically clean, enhance, and edit your podcast audio.",
+    url: "https://audioburst.com/",
+    categories: ["voice", "automation"]
+  },
+  {
+    title: "AI Audio Transcriber",
+    desc: "Convert audio and podcasts to text with high accuracy.",
+    url: "https://otter.ai/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Speech Emotion Detector",
+    desc: "Analyze emotions in speech for better content creation.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Voiceover Generator",
+    desc: "Create professional voiceovers for videos or ads using AI voices.",
+    url: "https://wellsaidlabs.com/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "Multilingual Voice Synthesizer",
+    desc: "Generate speech in multiple languages with localized accents.",
+    url: "https://respeecher.com/",
+    categories: ["voice", "content"]
+  },
+  {
+    title: "AI Audio Denoiser",
+    desc: "Clean up background noise from your audio clips automatically.",
+    url: "https://krisp.ai/",
+    categories: ["voice", "automation"]
+  },
+  {
+    title: "Real-Time Voice Translator",
+    desc: "Translate your speech live into other languages with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["voice", "automation"]
+  },
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  // Social tools
+  {
+    title: "Social Media Auto Poster",
+    desc: "Upload once and auto-post your content across YouTube, TikTok, IG Reels & Facebook with scheduling.",
+    url: "https://buffer.com/",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "Instagram Hashtag Generator",
+    desc: "Find trending hashtags to get more reach on your posts.",
+    url: "https://displaypurposes.com/",
+    categories: ["social", "seo"]
+  },
+  {
+    title: "Social Analytics Dashboard",
+    desc: "Track all your social media stats in one place with AI insights.",
+    url: "https://sprout.social/",
+    categories: ["social"]
+  },
+  {
+    title: "AI Caption Writer",
+    desc: "Generate catchy captions for Instagram, Twitter, TikTok & more.",
+    url: "https://writesonic.com/ai-caption-generator",
+    categories: ["social", "content"]
+  },
+  {
+    title: "TikTok Trend Analyzer",
+    desc: "Find hot trending TikTok sounds, hashtags, and challenges.",
+    url: "https://trendpop.com/",
+    categories: ["social", "seo"]
+  },
+  {
+    title: "Facebook Ads AI Optimizer",
+    desc: "Automatically optimize your Facebook ad campaigns using AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "Social Content Calendar",
+    desc: "Plan and schedule your posts with AI suggestions for timing.",
+    url: "https://later.com/",
+    categories: ["social", "automation"]
+  },
+  {
+    title: "YouTube Comment Analyzer",
+    desc: "Analyze audience sentiment and get reply suggestions.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "content"]
+  },
+  {
+    title: "Influencer Finder",
+    desc: "Find influencers in your niche for collaborations using AI.",
+    url: "https://buzzsumo.com/influencers/",
+    categories: ["social"]
+  },
+  {
+    title: "Viral Post Generator",
+    desc: "Create viral post ideas and templates for social media platforms.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["social", "content"]
+  },
 
-    let clicks = 0;
-    let sessionStart = Date.now();
-    let sessionKey = null;
-    let ipInfo = {};
-    const params = new URLSearchParams(window.location.search);
+  // Automation tools
+  {
+    title: "Chatbot Builder for Websites",
+    desc: "Add a ChatGPT-powered chatbot to your site in 5 mins — boost engagement and conversions.",
+    url: "https://landbot.io/",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Auto Video Upload Scheduler",
+    desc: "Schedule YouTube uploads and social posts with AI time optimization.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Workflow Automator",
+    desc: "Create automated workflows between your favorite apps and tools.",
+    url: "https://zapier.com/",
+    categories: ["automation"]
+  },
+  {
+    title: "Auto Caption Generator",
+    desc: "Automatically add captions to videos across all platforms.",
+    url: "https://kapwing.com/tools/auto-subtitle",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Content Scheduler",
+    desc: "Plan and automate publishing of blog posts, videos & social.",
+    url: "https://hootsuite.com/",
+    categories: ["automation", "content"]
+  },
+  {
+    title: "AI Email Responder",
+    desc: "Automate responses to emails and customer inquiries.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation"]
+  },
+  {
+    title: "AI Data Scraper",
+    desc: "Scrape and gather data automatically from websites for research.",
+    url: "https://import.io/",
+    categories: ["automation"]
+  },
+  {
+    title: "AI Ad Campaign Manager",
+    desc: "Create and optimize ad campaigns automatically with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "social"]
+  },
+  {
+    title: "Auto Video Thumbnail Creator",
+    desc: "Generate thumbnails for videos automatically on upload.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["automation", "video"]
+  },
+  {
+    title: "AI Task Manager",
+    desc: "Keep track of tasks and deadlines with AI prioritization.",
+    url: "https://clickup.com/",
+    categories: ["automation"]
+  },
 
-    // 🔐 Unique visitor ID (stored in browser)
-    let visitorId = localStorage.getItem("visitorId");
-    if (!visitorId) {
-      visitorId = 'v_' + Math.random().toString(36).substring(2) + Date.now();
-      localStorage.setItem("visitorId", visitorId);
-    }
+  // Chatbot tools
+  {
+    title: "ChatGPT API Integrator",
+    desc: "Integrate ChatGPT into your app or website with easy API access.",
+    url: "https://platform.openai.com/docs/api-reference/chat",
+    categories: ["chatbot"]
+  },
+  {
+    title: "Voice-Enabled Chatbots",
+    desc: "Build chatbots that respond to voice commands with AI.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "voice"]
+  },
+  {
+    title: "Customer Support Bot",
+    desc: "24/7 AI-powered chat support for your customers.",
+    url: "https://freshdesk.com/ai-chatbot",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "FAQ Bot Builder",
+    desc: "Create AI bots that answer FAQs instantly.",
+    url: "https://botpress.com/",
+    categories: ["chatbot"]
+  },
+  {
+    title: "E-commerce Chatbot",
+    desc: "Boost sales by guiding customers with AI chatbots on your store.",
+    url: "https://tidio.com/chatbots/",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "AI Lead Gen Bot",
+    desc: "Automate lead generation and qualification with chatbots.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Multilingual Chatbots",
+    desc: "Support multiple languages with AI-powered multilingual bots.",
+    url: "https://botscrew.com/chatbots-for-business/multilingual-chatbot/",
+    categories: ["chatbot", "voice"]
+  },
+  {
+    title: "Appointment Scheduling Bot",
+    desc: "Automate appointment bookings via chatbot interaction.",
+    url: "https://www.vcita.com/appointment-scheduling-software",
+    categories: ["chatbot", "automation"]
+  },
+  {
+    title: "Chatbot Analytics",
+    desc: "Get insights and performance reports for your chatbots.",
+    url: "https://dashbot.io/",
+    categories: ["chatbot"]
+  },
+  {
+    title: "AI Personal Assistant Bot",
+    desc: "A chatbot that manages personal tasks and reminders.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["chatbot", "automation"]
+  },
 
-    document.addEventListener('click', () => clicks++);
+  // Storytelling tools
+  {
+    title: "AI Story Generator",
+    desc: "Type 1 line and get full stories with characters, dialogue, and plot.",
+    url: "https://writesonic.com/ai-story-generator",
+    categories: ["storytelling", "content"]
+  },
+  {
+    title: "Character Creator AI",
+    desc: "Generate unique characters for stories or games.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Plot Outline Generator",
+    desc: "Get detailed plot outlines based on your story idea.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Dialogue Writer AI",
+    desc: "Create realistic dialogues for scripts and stories.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Story Idea Brainstormer",
+    desc: "Generate fresh story ideas with AI brainstorming.",
+    url: "https://copy.ai/tools/idea-generator",
+    categories: ["storytelling"]
+  },
+  {
+    title: "World Building AI",
+    desc: "Create rich worlds and settings for your stories.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Poetry Generator",
+    desc: "Write beautiful poems in any style with AI assistance.",
+    url: "https://poe.com/poetry",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Interactive Story Creator",
+    desc: "Build branching stories for games or apps.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling"]
+  },
+  {
+    title: "Narration Script Generator",
+    desc: "Create scripts optimized for audio narration.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling", "voice"]
+  },
+  {
+    title: "AI Comic Script Writer",
+    desc: "Generate comic book scripts with scenes and dialogues.",
+    url: "/links.html/aitoolslinks=error",
+    categories: ["storytelling", "content"]
+  }
+];
 
-    function getDeviceInfo() {
-      return {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        memory: navigator.deviceMemory || null,
-        cores: navigator.hardwareConcurrency || null,
-        screen: {
-          width: screen.width,
-          height: screen.height,
-          colorDepth: screen.colorDepth
-        }
-      };
-    }
+    const container = document.getElementById("tools-grid");
+    const searchInput = document.getElementById("search");
+    const categoryButtons = document.querySelectorAll(".category-btn");
 
-    function getNetworkInfo() {
-      const conn = navigator.connection || {};
-      return {
-        effectiveType: conn.effectiveType || null,
-        downlink: conn.downlink || null,
-        rtt: conn.rtt || null,
-        saveData: conn.saveData || false
-      };
-    }
-
-    async function fetchIPInfo() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        return {
-          ip: data.ip || null,
-          country: data.country_name || null,
-          region: data.region || null,
-          city: data.city || null,
-          zip: data.postal || null,
-          lat: data.latitude || null,
-          lon: data.longitude || null,
-          timezone: data.timezone || null,
-          isp: data.org || null
-        };
-      } catch (err) {
-        console.warn("IP API failed:", err);
-        return {};
+    // Render tools function
+    function renderTools(filteredTools) {
+      container.innerHTML = "";
+      if (filteredTools.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ff5555; font-weight:bold;">No tools found matching your criteria.</p>';
+        return;
       }
-    }
-
-    async function sendSessionData(isInit = false) {
-      const now = Date.now();
-      const sessionData = {
-        timestamp: sessionStart,
-        lastUpdate: now,
-        sessionSeconds: Math.floor((now - sessionStart) / 1000),
-        clicks,
-        visitorId,
-        utm: {
-          source: params.get("source") || null,
-          campaign: params.get("campaign") || null,
-          medium: params.get("medium") || null
-        },
-        referrer: document.referrer || null,
-        page: {
-          domain: window.location.hostname,
-          path: window.location.pathname,
-          fullUrl: window.location.href
-        },
-        device: getDeviceInfo(),
-        network: getNetworkInfo(),
-        ...ipInfo
-      };
-
-      if (isInit) {
-        const newRef = push(ref(db, "userSessions"));
-        sessionKey = newRef.key;
-        await set(newRef, sessionData);
-      } else if (sessionKey) {
-        await update(ref(db, `userSessions/${sessionKey}`), sessionData);
-      }
-    }
-
-    async function initTracker() {
-      ipInfo = await fetchIPInfo();
-      await sendSessionData(true);
-      setInterval(() => sendSessionData(false), 15000);
-
-      window.addEventListener("beforeunload", () => {
-        const now = Date.now();
-        const beaconData = {
-          clicks,
-          sessionSeconds: Math.floor((now - sessionStart) / 1000),
-          lastUpdate: now
-        };
-        navigator.sendBeacon(
-          `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/userSessions/${sessionKey}.json`,
-          JSON.stringify(beaconData)
-        );
+      filteredTools.forEach(tool => {
+        const toolDiv = document.createElement("div");
+        toolDiv.className = "tool";
+        toolDiv.tabIndex = 0; // for keyboard navigation
+        toolDiv.innerHTML = `
+          <div class="tool-title">${tool.title}</div>
+          <div class="tool-desc">${tool.desc}</div>
+          <a href="${tool.url}" target="_blank" rel="noopener noreferrer" aria-label="Open ${tool.title}">${tool.title.includes("YouTube") ? "Go to Tool" : "Try It"}</a>
+        `;
+        container.appendChild(toolDiv);
       });
     }
 
-    initTracker();
-  </script>
-</head>
-<body>
-  <!-- 😎 Silent tracking: no UI shown -->
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tracking...</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    // Initial render all
+    renderTools(tools);
 
-    // 🔥 Your Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+    // Search + filter logic
+    function filterTools() {
+      const query = searchInput.value.toLowerCase();
+      const activeCategoryBtn = document.querySelector(".category-btn.active");
+      const activeCategory = activeCategoryBtn ? activeCategoryBtn.dataset.category : "all";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let clicks = 0;
-    let sessionStart = Date.now();
-    let sessionKey = null;
-    let ipInfo = {};
-    const params = new URLSearchParams(window.location.search);
-
-    // 📌 Visitor ID (stored in browser)
-    let visitorId = localStorage.getItem("visitorId");
-    if (!visitorId) {
-      visitorId = 'v_' + Math.random().toString(36).substring(2) + Date.now();
-      localStorage.setItem("visitorId", visitorId);
-    }
-
-    document.addEventListener('click', () => clicks++);
-
-    function getDeviceInfo() {
-      return {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        memory: navigator.deviceMemory || null,
-        cores: navigator.hardwareConcurrency || null,
-        screen: {
-          width: screen.width,
-          height: screen.height,
-          colorDepth: screen.colorDepth
-        }
-      };
-    }
-
-    function getNetworkInfo() {
-      const conn = navigator.connection || {};
-      return {
-        effectiveType: conn.effectiveType || null,
-        downlink: conn.downlink || null,
-        rtt: conn.rtt || null,
-        saveData: conn.saveData || false
-      };
-    }
-
-    async function fetchIPInfo() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        return {
-          ip: data.ip || null,
-          country: data.country_name || null,
-          region: data.region || null,
-          city: data.city || null,
-          zip: data.postal || null,
-          lat: data.latitude || null,
-          lon: data.longitude || null,
-          timezone: data.timezone || null,
-          isp: data.org || null
-        };
-      } catch (err) {
-        console.warn("IP API failed:", err);
-        return {};
-      }
-    }
-
-    async function sendSessionData(isInit = false) {
-      const now = Date.now();
-      const sessionData = {
-        timestamp: sessionStart,
-        lastUpdate: now,
-        sessionSeconds: Math.floor((now - sessionStart) / 1000),
-        clicks,
-        visitorId,
-        utm: {
-          source: params.get("source") || null,
-          campaign: params.get("campaign") || null,
-          medium: params.get("medium") || null
-        },
-        referrer: document.referrer || null,
-        page: {
-          domain: window.location.hostname,
-          path: window.location.pathname,
-          fullUrl: window.location.href
-        },
-        device: getDeviceInfo(),
-        network: getNetworkInfo(),
-        ...ipInfo
-      };
-
-      if (isInit) {
-        const newRef = push(ref(db, "userSessions"));
-        sessionKey = newRef.key;
-        await set(newRef, sessionData);
-      } else if (sessionKey) {
-        await update(ref(db, `userSessions/${sessionKey}`), sessionData);
-      }
-    }
-
-    async function initTracker() {
-      ipInfo = await fetchIPInfo();
-      await sendSessionData(true);
-      setInterval(() => sendSessionData(false), 15000);
-
-      window.addEventListener("beforeunload", () => {
-        const now = Date.now();
-        const beaconData = {
-          clicks,
-          sessionSeconds: Math.floor((now - sessionStart) / 1000),
-          lastUpdate: now
-        };
-        navigator.sendBeacon(
-          `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/userSessions/${sessionKey}.json`,
-          JSON.stringify(beaconData)
-        );
+      const filtered = tools.filter(tool => {
+        const matchesCategory = activeCategory === "all" || tool.categories.includes(activeCategory);
+        const matchesQuery =
+          tool.title.toLowerCase().includes(query) ||
+          tool.desc.toLowerCase().includes(query) ||
+          tool.categories.some(cat => cat.includes(query));
+        return matchesCategory && matchesQuery;
       });
+
+      renderTools(filtered);
     }
 
-    initTracker();
+    // Event listeners
+    searchInput.addEventListener("input", filterTools);
+
+    categoryButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        categoryButtons.forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
+        filterTools();
+      });
+    });
   </script>
-</head>
-<body>
-  <!-- 🚫 No UI shown. Tracker is running in background. -->
+  <div class="container">
+    <p class="subtitle">Your ultimate AI toolbox for creators, marketers & hustlers. Search or filter below 👇</p>
+    <input
+      type="search"
+      id="search"
+      placeholder="Search AI tools by name or keyword..."
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search AI tools"
+    />
+
+    <div class="categories" role="list">
+      <button class="category-btn active" data-category="all" aria-pressed="true">All</button>
+      <button class="category-btn" data-category="video">Video</button>
+      <button class="category-btn" data-category="voice">Voice</button>
+      <button class="category-btn" data-category="content">Content</button>
+      <button class="category-btn" data-category="social">Social</button>
+      <button class="category-btn" data-category="seo">SEO</button>
+      <button class="category-btn" data-category="automation">Automation</button>
+      <button class="category-btn" data-category="chatbot">Chatbot</button>
+      <button class="category-btn" data-category="storytelling">Storytelling</button>
+    </div>
+
+    <div class="tools-grid" id="tools-grid">
+      <!-- Tools will be inserted here by JS -->
+    </div>
+  </div>
+
+  <style>
+    /* Scoped RESET */
+    #ai-tools-section * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Wrapper background and base color */
+    #ai-tools-section {
+      background-color: #121212;
+      color: #eee;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Container inside scoped section */
+    #ai-tools-section .container {
+      width: 80%;
+      max-width: 1100px;
+      background: #1f1f1f;
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.7),
+        inset 0 0 10px #00fff7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Subtitle */
+    #ai-tools-section p.subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #55ffffcc;
+      margin-bottom: 2rem;
+      user-select: text; /* Allow text select here */
+    }
+
+    /* Search Bar */
+    #ai-tools-section #search {
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: #0e0e0e;
+      color: #00fff7;
+      box-shadow: inset 0 0 5px #00fff7aa;
+      margin-bottom: 2rem;
+      transition: background 0.3s ease;
+    }
+    #ai-tools-section #search::placeholder {
+      color: #00fff7aa;
+      font-style: italic;
+    }
+    #ai-tools-section #search:focus {
+      background: #151515;
+    }
+
+    /* Categories */
+    #ai-tools-section .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    #ai-tools-section .category-btn {
+      background: #0d0d0d;
+      color: #00fff7;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      user-select: none;
+      box-shadow: 0 0 8px #00fff7aa;
+      transition: background 0.25s ease, transform 0.2s ease;
+      border: 2px solid transparent;
+      border: 2px solid transparent;
+    }
+    #ai-tools-section .category-btn:hover,
+    #ai-tools-section .category-btn.active {
+      background: #00fff7;
+      color: #121212;
+      border-color: #00fff7;
+      transform: scale(1.1);
+    }
+
+    /* Tools grid */
+    #ai-tools-section .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+    }
+    #ai-tools-section .tool {
+      background: #111;
+      border-radius: 14px;
+      padding: 1.3rem 1.5rem;
+      border: 1px solid #222;
+      box-shadow:
+        0 0 12px #00fff7aa inset;
+      transition:
+        background 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.25s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    #ai-tools-section .tool:hover {
+      background: #222;
+      box-shadow:
+        0 0 20px #00fff7ff inset,
+        0 4px 20px #00fff7cc;
+      transform: translateY(-5px);
+    }
+    #ai-tools-section .tool-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: #00faff;
+      text-shadow: 0 0 6px #00faffaa;
+      user-select: none;
+    }
+    #ai-tools-section .tool-desc {
+      flex-grow: 1;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+      color: #aaffffcc;
+    }
+    #ai-tools-section .tool a {
+      align-self: flex-start;
+      background: #00fff7;
+      color: #121212;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 0 10px #00fff7bb;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+    #ai-tools-section .tool a:hover {
+      background: #00c2b8;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      #ai-tools-section .container {
+        width: 95%;
+        padding: 1.5rem 1.5rem;
+      }
+      #ai-tools-section h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</div>
 </body>
 </html>
