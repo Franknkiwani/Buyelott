@@ -1233,7 +1233,16 @@ body.dark {
     <span id="typed-text"></span><span class="cursor">|</span>
   </div>
 </div>
-
+<div style="text-align: center; margin: 20px auto;">
+  <ins style="width: 300px; height: 250px"
+       class="r42a6b2e3f7"
+       data-width="300"
+       data-height="250"
+       data-domain="//data963.click"
+       data-affquery="/e0d3230b70e38024067f/42a6b2e3f7/?placementName=default">
+  </ins>
+  <script src="//data963.click/js/responsive.js" async></script>
+</div>
   <select id="category-filter">
     <option value="all">🔍 All Categories</option>
     <option value="chat">💬 Chat</option>
@@ -2819,23 +2828,53 @@ const tools = [
 
     // Render tools function
     function renderTools(filteredTools) {
-      container.innerHTML = "";
-      if (filteredTools.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ff5555; font-weight:bold;">No tools found matching your criteria.</p>';
-        return;
-      }
-      filteredTools.forEach(tool => {
-        const toolDiv = document.createElement("div");
-        toolDiv.className = "tool";
-        toolDiv.tabIndex = 0; // for keyboard navigation
-        toolDiv.innerHTML = `
-          <div class="tool-title">${tool.title}</div>
-          <div class="tool-desc">${tool.desc}</div>
-          <a href="${tool.url}" target="_blank" rel="noopener noreferrer" aria-label="Open ${tool.title}">${tool.title.includes("YouTube") ? "Go to Tool" : "Try It"}</a>
-        `;
-        container.appendChild(toolDiv);
-      });
+  container.innerHTML = "";
+
+  if (filteredTools.length === 0) {
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ff5555; font-weight:bold;">No tools found matching your criteria.</p>';
+    return;
+  }
+
+  let counter = 0;
+  filteredTools.forEach((tool, index) => {
+    const toolDiv = document.createElement("div");
+    toolDiv.className = "tool";
+    toolDiv.tabIndex = 0;
+    toolDiv.innerHTML = `
+      <div class="tool-title">${tool.title}</div>
+      <div class="tool-desc">${tool.desc}</div>
+      <a href="${tool.url}" target="_blank" rel="noopener noreferrer" aria-label="Open ${tool.title}">
+        ${tool.title.includes("YouTube") ? "Go to Tool" : "Try It"}
+      </a>
+    `;
+    container.appendChild(toolDiv);
+    counter++;
+
+    // 👇 Insert ad every 2–3 tools randomly
+    const insertAdAfter = 2 + Math.floor(Math.random() * 2); // 2 or 3
+    if (counter % insertAdAfter === 0) {
+      const adDiv = document.createElement("div");
+      adDiv.innerHTML = `
+        <div style="text-align: center; margin: 20px auto;">
+          <ins style="width: 300px; height: 250px"
+               class="r42a6b2e3f7"
+               data-width="300"
+               data-height="250"
+               data-domain="//data963.click"
+               data-affquery="/e0d3230b70e38024067f/42a6b2e3f7/?placementName=default">
+          </ins>
+        </div>
+      `;
+      container.appendChild(adDiv);
+
+      // Re-run ad script so it picks up the new <ins> tags
+      const script = document.createElement("script");
+      script.src = "//data963.click/js/responsive.js";
+      script.async = true;
+      document.body.appendChild(script);
     }
+  });
+}
 
     // Initial render all
     renderTools(tools);
