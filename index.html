@@ -2627,6 +2627,23 @@ const tools = [
       });
     });
   </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  });
+
+  const db = getDatabase(app);
+  const viewsRef = ref(db, "pageViews");
+
+  push(viewsRef, {
+    viewedAt: serverTimestamp()
+  });
+</script>
 </script>
 
 </body>
