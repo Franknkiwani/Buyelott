@@ -1134,6 +1134,7 @@ body.dark {
   background: #5300b7;
 }
 </style>
+
 <script type="text/javascript" src="//cdn-server.live/fb936f8fb81f05d944af/18def17b81/?placementName=default"></script>
 <script type="text/javascript" src="//data963.click/f719804e2da0f908d713/fced3cc09f/?placementName=default"></script>
 </head>
@@ -1641,6 +1642,74 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatTime(date) {
     return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   }
+
+  // ----------- AD IMPRESSION TRACKING START --------------
+
+  // CPM by country (USD) — customize as needed
+  const cpmByCountry = {
+    'US': 1.00,
+    'GB': 0.80,
+    'CA': 0.80,
+    'DE': 0.60,
+    'FR': 0.60,
+    'IN': 0.15,
+    'PK': 0.15,
+    'ZA': 0.20
+  };
+
+  async function getCountry() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      return data.country_code || 'XX';
+    } catch {
+      return 'XX';
+    }
+  }
+
+  function estimateCpm(countryCode) {
+    return cpmByCountry[countryCode] || 0.10;
+  }
+
+  // Only track impression after user is signed in anonymously
+  async function trackAdImpression() {
+    // Avoid duplicate impression in same session
+    if (sessionStorage.getItem('ad_impression_logged')) return;
+
+    const country = await getCountry();
+    const cpm = estimateCpm(country);
+    const userAgent = navigator.userAgent;
+
+    // Push impression to Firebase under your chosen path
+    await push(ref(db, 'ads/42a6b2e3f7/impressions'), {
+      timestamp: Date.now(),
+      country,
+      estimatedCPM: cpm,
+      userAgent,
+      userId,  // associate with current anon user if available
+      userName
+    });
+
+    sessionStorage.setItem('ad_impression_logged', 'true');
+    console.log(`Ad impression logged: Country=${country}, CPM=$${cpm}`);
+  }
+
+  // Initialize anonymous auth and track impression on auth ready
+  signInAnonymously(auth).catch(console.error);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userId = user.uid;
+      // If you have username logic, set userName accordingly here
+
+      // Now track the ad impression once user is authenticated
+      // (You can also hook this to IntersectionObserver or page load)
+      trackAdImpression();
+    } else {
+      userId = null;
+      userName = null;
+    }
+  });
 
   // Render a message bubble with username + flag + time + text
   function addMessageToDOM({ username, text, timestamp, uid, countryCode }) {
