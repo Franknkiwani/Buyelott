@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLS25 MOD APK - Unlock Download</title>
+  <style>
+    :root {
+      --bg: #0e0e0e;
+      --text: #f0f0f0;
+      --accent: #00ffe0;
+      --radius: 20px;
+      --button-bg: #161616;
+      --button-hover: #00ffe0;
+      --button-text: #0e0e0e;
+      --modal-bg: #121212dd;
+      --disabled-color: #555;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 0 60px;
+      user-select: none;
+    }
+
+    .title {
+      font-size: 2.4rem;
+      margin-bottom: 20px;
+      color: var(--accent);
+      animation: colorCycle 10s infinite ease-in-out;
+      user-select: text;
+    }
+
+    @keyframes colorCycle {
+      0%   { color: #00ffe0; }
+      25%  { color: #ff0077; }
+      50%  { color: #ffcc00; }
+      75%  { color: #00ff88; }
+      100% { color: #00ffe0; }
+    }
+
+    .hero {
+      width: 90%;
+      max-width: 1000px;
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+      overflow: hidden;
+      border: 6px solid;
+      border-color: #00ffe0;
+      animation: borderColorChange 10s infinite ease-in-out;
+      user-select: none;
+    }
+
+    .hero img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+    }
+
+    @keyframes borderColorChange {
+      0%   { border-color: #00ffe0; }
+      25%  { border-color: #ff0077; }
+      50%  { border-color: #ffcc00; }
+      75%  { border-color: #00ff88; }
+      100% { border-color: #00ffe0; }
+    }
+
+    .description {
+      width: 90%;
+      max-width: 1000px;
+      margin: 20px auto 40px;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: #bbb;
+      text-align: center;
+      user-select: text;
+    }
+
+    .download-btn {
+      width: 80%;
+      max-width: 600px;
+      background-color: var(--button-bg);
+      color: var(--button-hover);
+      border-radius: var(--radius);
+      padding: 16px 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: 3px solid var(--button-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      margin: 0 auto;
+      box-shadow: 0 0 10px #00ffe0aa;
+    }
+
+    .download-btn:hover {
+      background-color: var(--button-hover);
+      color: var(--button-text);
+      box-shadow: 0 0 20px #00ffe0dd;
+    }
+
+    .download-btn svg {
+      margin-left: 12px;
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .download-btn:hover svg {
+      transform: translateX(6px);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--modal-bg);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: #1a1a1a;
+      border-radius: var(--radius);
+      padding: 30px 30px 40px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 30px #00ffe0aa;
+      color: #ddd;
+      position: relative;
+      user-select: text;
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .tasks {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 30px;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      font-size: 1rem;
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 12px 16px;
+      background: #222;
+      transition: border-color 0.3s ease;
+    }
+
+    .task.completed {
+      border-color: var(--accent);
+      background: #002822;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .task button {
+      background: var(--button-bg);
+      border: 2px solid var(--button-hover);
+      color: var(--button-hover);
+      padding: 8px 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .task button:disabled {
+      background: #333;
+      border-color: #666;
+      color: var(--disabled-color);
+      cursor: default;
+    }
+
+    .task button:hover:not(:disabled) {
+      background: var(--button-hover);
+      color: var(--button-text);
+    }
+
+    .real-download-btn {
+      width: 100%;
+      padding: 14px 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      border-radius: var(--radius);
+      border: none;
+      cursor: not-allowed;
+      background-color: #555;
+      color: #999;
+      display: block;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      box-shadow: none;
+    }
+
+    .real-download-btn.enabled {
+      background-color: var(--accent);
+      color: var(--bg);
+      cursor: pointer;
+      box-shadow: 0 0 15px var(--accent);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .real-download-btn.enabled:hover {
+      background-color: #00b28a;
+      box-shadow: 0 0 25px #00b28acc;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #999;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+
+    .close-modal:hover {
+      color: var(--accent);
+    }
+  </style>
+  <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
+</head>
+<body>
+
+  <h1 class="title">DLS25 MOD APK</h1>
+
+  <div class="hero">
+    <img
+      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzeSJsyhVJWmBkUWr1JZXhgCfrNVs3E7K9SGF2IWVA3T6dn1OU6Vonz8M&s=10"
+      alt="Hero Image"
+    />
+  </div>
+
+  <p class="description">
+    Download the latest DLS25 MOD APK with all unlocked features and unlimited coins.
+    Experience the ultimate soccer game modded for an unbeatable experience.
+  </p>
+
+  <button class="download-btn" id="openTasksBtn" aria-haspopup="dialog" aria-controls="taskModal" aria-expanded="false">
+    Download Now
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" >
+      <path d="M5 20h14v-2H5v2zm7-18v12l4-4h-3V2h-2v8H8l4 4z"/>
+    </svg>
+  </button>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+    <div class="modal">
+      <button class="close-modal" aria-label="Close modal" id="closeModalBtn">&times;</button>
+      <h2 id="modalTitle">Complete Tasks to Unlock Download</h2>
+      <ul class="tasks">
+        <li class="task" id="task1">
+          <span>Open <a href="https://otieu.com/4/9479124" target="_blank" rel="noopener noreferrer">Task Site 1</a> for 10 seconds</span>
+          <button class="open-task-btn" data-task="1">Open</button>
+        </li>
+        <li class="task" id="task2">
+          <span>Open <a href="https://otieu.com/4/9479134" target="_blank" rel="noopener noreferrer">Task Site 2</a> for 10 seconds</span>
+          <button class="open-task-btn" data-task="2">Open</button>
+        </li>
+      </ul>
+      <button class="real-download-btn" id="realDownloadBtn" disabled aria-disabled="true" aria-label="Download real APK (locked)">
+        Download Real APK
+      </button>
+    </div>
+  </div>
+<script type="text/javascript">
+	atOptions = {
+		'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+		'format' : 'iframe',
+		'height' : 250,
+		'width' : 300,
+		'params' : {}
+	};
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+<script>
+  const openTasksBtn = document.getElementById('openTasksBtn');
+  const modal = document.getElementById('taskModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const realDownloadBtn = document.getElementById('realDownloadBtn');
+  const tasks = {
+    1: false,
+    2: false
+  };
+  const taskButtons = document.querySelectorAll('.open-task-btn');
+
+  const links = [
+    'https://otieu.com/4/9479124',
+    'https://otieu.com/4/9479134'
+  ];
+
+  // Update UI based on task completion
+  function updateTasksUI() {
+    for (const [id, completed] of Object.entries(tasks)) {
+      const taskEl = document.getElementById('task' + id);
+      const btn = taskEl.querySelector('button');
+      if (completed) {
+        taskEl.classList.add('completed');
+        btn.disabled = true;
+        btn.textContent = 'Completed';
+      }
+    }
+    // Enable real download button only if all tasks done
+    const allDone = Object.values(tasks).every(done => done);
+    if (allDone) {
+      realDownloadBtn.disabled = false;
+      realDownloadBtn.classList.add('enabled');
+      realDownloadBtn.setAttribute('aria-disabled', 'false');
+      realDownloadBtn.style.cursor = 'pointer';
+    } else {
+      realDownloadBtn.disabled = true;
+      realDownloadBtn.classList.remove('enabled');
+      realDownloadBtn.setAttribute('aria-disabled', 'true');
+      realDownloadBtn.style.cursor = 'not-allowed';
+    }
+  }
+
+  // Handle opening task site and timer
+  function openTaskSite(taskId, url) {
+    const win = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!win) {
+      alert('Please allow popups for this site to proceed.');
+      return;
+    }
+    const btn = document.querySelector(`.open-task-btn[data-task="${taskId}"]`);
+    btn.disabled = true;
+    btn.textContent = 'Open (10s)';
+
+    // After 10 seconds, mark task complete regardless of tab closed or not
+    setTimeout(() => {
+      tasks[taskId] = true;
+      updateTasksUI();
+    }, 10000);
+  }
+
+  // Event listeners
+  openTasksBtn.addEventListener('click', () => {
+    modal.classList.add('active');
+    openTasksBtn.setAttribute('aria-expanded', 'true');
+  });
+
+  closeModalBtn.addEventListener('click', () => {
+    modal.classList.remove('active');
+    openTasksBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  taskButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const taskId = btn.getAttribute('data-task');
+      const url = links[taskId - 1];
+      openTaskSite(taskId, url);
+    });
+  });
+
+  realDownloadBtn.addEventListener('click', () => {
+    if (realDownloadBtn.disabled) return; // safety
+
+    const randomIndex = Math.floor(Math.random() * links.length);
+    window.open(links[randomIndex], '_blank', 'noopener,noreferrer');
+    modal.classList.remove('active');
+    openTasksBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+      openTasksBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Initialize UI state
+  updateTasksUI();
+</script>
