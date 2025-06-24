@@ -1,48 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Install Tracker Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stats Dashboard</title>
   <style>
+    /* Reset & base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #000;
-      color: #fff;
-      padding: 20px;
+      background: #0f111a;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
+    header {
+      padding: 1rem;
+      background: #181c2a;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      color: #4ef4ff;
+      user-select: none;
     }
-
-    .entry {
-      background: #111;
-      border: 1px solid #222;
-      padding: 12px 16px;
-      margin-bottom: 16px;
+    main {
+      flex: 1;
+      padding: 1rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media (min-width: 600px) {
+      main {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .card {
+      background: #1e2235;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(78, 244, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-
-    .entry p {
-      margin: 4px 0;
-      font-size: 15px;
-      line-height: 1.4;
+    .card h2 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: #4ef4ff;
     }
-
-    .entry strong {
-      color: #0af;
+    .card p {
+      margin: 0.25rem 0 0;
+      font-weight: 600;
+      color: #a0a6b9;
+    }
+    section.graphs {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 600px) {
+      section.graphs {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    canvas {
+      background: #1e2235;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(78, 244, 255, 0.15);
+    }
+    footer {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      user-select: none;
     }
   </style>
+</head>
+<body>
+  <header>📊 CyberChat Stats</header>
+  <main>
+    <div class="card" id="sessionsCard">
+      <h2>0</h2>
+      <p>Total Sessions</p>
+    </div>
+    <div class="card" id="clicksCard">
+      <h2>0</h2>
+      <p>Total Clicks</p>
+    </div>
+    <div class="card" id="avgSessionCard">
+      <h2>0s</h2>
+      <p>Avg. Session Duration</p>
+    </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-  <script>
-    // Your Firebase config
+    <section class="graphs">
+      <canvas id="dailySessionsChart" aria-label="Daily Sessions" role="img"></canvas>
+      <canvas id="topCountriesChart" aria-label="Top Countries" role="img"></canvas>
+    </section>
+  </main>
+  <footer>Made for Frank — Powered by Firebase & Chart.js</footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -53,41 +125,144 @@
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
       measurementId: "G-LLT6F9WRKH"
     };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-</head>
 
-<body>
-  <h1>📊 Install Tracking Dashboard</h1>
-  <div id="log"></div>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  <script>
-    const db = firebase.database();
-    const log = document.getElementById("log");
+    // Chart.js via CDN
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    document.head.appendChild(script);
 
-    db.ref("installs").on("value", (snapshot) => {
-      const data = snapshot.val();
-      log.innerHTML = ""; // Clear old list
+    script.onload = () => {
+      const ctxSessions = document.getElementById('dailySessionsChart').getContext('2d');
+      const ctxCountries = document.getElementById('topCountriesChart').getContext('2d');
 
-      if (!data) {
-        log.innerHTML = "<p>No installs yet.</p>";
-        return;
+      let dailySessionsChart, topCountriesChart;
+
+      function createDailySessionsChart(labels, data) {
+        if (dailySessionsChart) dailySessionsChart.destroy();
+        dailySessionsChart = new Chart(ctxSessions, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Sessions',
+              data,
+              borderColor: '#4ef4ff',
+              backgroundColor: 'rgba(78, 244, 255, 0.3)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointHoverRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#a0a6b9' } } },
+            scales: {
+              x: { ticks: { color: '#a0a6b9' } },
+              y: { ticks: { color: '#a0a6b9' }, beginAtZero: true }
+            }
+          }
+        });
       }
 
-      // Loop through sessions
-      Object.entries(data).reverse().forEach(([sessionId, info]) => {
-        const div = document.createElement("div");
-        div.className = "entry";
-        div.innerHTML = `
-          <p><strong>Session:</strong> ${info.sessionId || sessionId}</p>
-          <p><strong>Location:</strong> ${info.location || "N/A"}</p>
-          <p><strong>IP:</strong> ${info.ip || "Hidden"}</p>
-          <p><strong>Clicks:</strong> ${info.clicks || 0}</p>
-          <p><strong>Time:</strong> ${new Date(info.timestamp).toLocaleString()}</p>
-        `;
-        log.appendChild(div);
+      function createTopCountriesChart(labels, data) {
+        if (topCountriesChart) topCountriesChart.destroy();
+        topCountriesChart = new Chart(ctxCountries, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Sessions',
+              data,
+              backgroundColor: '#4ef4ff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: '#a0a6b9' } },
+              y: { ticks: { color: '#a0a6b9' }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // Util: format date to YYYY-MM-DD
+      function formatDate(date) {
+        const d = new Date(date);
+        return d.toISOString().split('T')[0];
+      }
+
+      // Get last N days labels
+      function getLastNDates(n) {
+        const dates = [];
+        for (let i = n - 1; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          dates.push(formatDate(d));
+        }
+        return dates;
+      }
+
+      // Main Firebase listener & data processing
+      onValue(ref(db, 'statsdls25'), snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        // Stats
+        const sessionsCount = Object.keys(data).length;
+        let totalClicks = 0;
+        let totalSessionSeconds = 0;
+
+        // For graphs
+        const dailySessions = {};
+        const countryCounts = {};
+
+        const last7Days = getLastNDates(7);
+        last7Days.forEach(day => dailySessions[day] = 0);
+
+        for (const sessionId in data) {
+          const session = data[sessionId];
+          totalClicks += session.clicks || 0;
+          totalSessionSeconds += session.sessionSeconds || 0;
+
+          // Count daily sessions
+          if (session.timestamp) {
+            const day = formatDate(session.timestamp);
+            if (dailySessions.hasOwnProperty(day)) dailySessions[day]++;
+          }
+
+          // Count by country
+          const country = session.country || 'Unknown';
+          countryCounts[country] = (countryCounts[country] || 0) + 1;
+        }
+
+        // Update cards
+        document.querySelector('#sessionsCard h2').textContent = sessionsCount.toLocaleString();
+        document.querySelector('#clicksCard h2').textContent = totalClicks.toLocaleString();
+        const avgSession = sessionsCount ? Math.round(totalSessionSeconds / sessionsCount) : 0;
+        document.querySelector('#avgSessionCard h2').textContent = avgSession + 's';
+
+        // Update graphs
+        createDailySessionsChart(
+          Object.keys(dailySessions),
+          Object.values(dailySessions)
+        );
+
+        const sortedCountries = Object.entries(countryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 7);
+
+        createTopCountriesChart(
+          sortedCountries.map(e => e[0]),
+          sortedCountries.map(e => e[1])
+        );
       });
-    });
+    };
   </script>
 </body>
 </html>
