@@ -494,7 +494,7 @@ body, html, * {
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -510,180 +510,139 @@ body, html, * {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  await new Promise((res) => {
-    const s = document.createElement('script');
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
-    s.onload = res;
-    document.head.appendChild(s);
-  });
+  // Session vars
+  let clickCount = 0;
+  let maxScrollPercent = 0;
+  const sessionStart = Date.now();
+  const referrer = document.referrer || 'Direct / Unknown';
+  const pageUrl = window.location.href;
+  const userAgent = navigator.userAgent;
 
-  const ctx = document.getElementById('statsChart').getContext('2d');
-  let chart;
+  // Visitor location cache
+  let visitorCity = 'Unknown', visitorCountry = 'Unknown';
 
-  const visitsEl = document.getElementById('stat-visits');
-  const clicksEl = document.getElementById('stat-clicks');
-  const durationEl = document.getElementById('stat-duration');
-  const scrollEl = document.getElementById('stat-scroll');
-  const sessionListEl = document.getElementById('sessionList');
-  const periodButtons = document.querySelectorAll('.period-buttons button');
-
-  function getDateRange(period) {
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    switch (period) {
-      case 'today':
-        return { start: todayStart, end: new Date(todayStart.getTime() + 86400000) };
-      case 'yesterday':
-        const yest = new Date(todayStart.getTime() - 86400000);
-        return { start: yest, end: todayStart };
-      case 'week': {
-        const day = todayStart.getDay();
-        const diff = (day === 0 ? 6 : day - 1);
-        const weekStart = new Date(todayStart.getTime() - diff * 86400000);
-        const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
-        return { start: weekStart, end: weekEnd };
-      }
-      case 'month':
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        return { start: monthStart, end: nextMonth };
-      default:
-        return { start: todayStart, end: new Date(todayStart.getTime() + 86400000) };
+  // Fetch legit visitor location
+  async function fetchVisitorLocation() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      visitorCity = data.city || 'Unknown';
+      visitorCountry = data.country_name || 'Unknown';
+    } catch (err) {
+      console.warn('Location fetch failed:', err);
     }
   }
 
-  function filterVisitsByDate(visits, start, end) {
-    return visits.filter(v => v.timestampStart >= start.getTime() && v.timestampStart < end.getTime());
+  // Scroll depth tracker
+  function updateScrollDepth() {
+    const scrollTop = window.scrollY || window.pageYOffset;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const scrollPercent = Math.min(100, Math.floor((scrollTop / docHeight) * 100));
+    if (scrollPercent > maxScrollPercent) maxScrollPercent = scrollPercent;
   }
 
-  function aggregateByDate(visits) {
-    const grouped = {};
-    visits.forEach(v => {
-      const dateKey = v.date || new Date(v.timestampStart).toISOString().slice(0, 10);
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = { visits: 0, clicks: 0, duration: 0, scroll: 0 };
-      }
-      grouped[dateKey].visits++;
-      grouped[dateKey].clicks += v.clickCount || 0;
-      grouped[dateKey].duration += v.sessionDuration || 0;
-      grouped[dateKey].scroll += v.maxScrollPercent || 0;
-    });
-    return grouped;
-  }
-
-  function createChartData(grouped) {
-    const labels = Object.keys(grouped).sort();
+  // Format date/time helper
+  function getFormattedDateTime(timestamp) {
+    const d = new Date(timestamp);
+    const pad = (n) => n.toString().padStart(2, '0');
     return {
-      labels,
-      visitsData: labels.map(d => grouped[d].visits),
-      clicksData: labels.map(d => grouped[d].clicks),
-      avgDurationData: labels.map(d => grouped[d].duration / grouped[d].visits),
-      avgScrollData: labels.map(d => grouped[d].scroll / grouped[d].visits),
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
     };
   }
 
-  function renderChart(data) {
-    if (chart) {
-      chart.data.labels = data.labels;
-      chart.data.datasets[0].data = data.visitsData;
-      chart.data.datasets[1].data = data.clicksData;
-      chart.data.datasets[2].data = data.avgDurationData;
-      chart.data.datasets[3].data = data.avgScrollData;
-      chart.update();
-      return;
-    }
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: data.labels,
-        datasets: [
-          { label: 'Visits', data: data.visitsData, borderColor: '#4285F4', backgroundColor: 'rgba(66,133,244,0.2)', fill: true, tension: 0.3 },
-          { label: 'Clicks', data: data.clicksData, borderColor: '#DB4437', backgroundColor: 'rgba(219,68,55,0.2)', fill: true, tension: 0.3 },
-          { label: 'Avg Duration (s)', data: data.avgDurationData, borderColor: '#F4B400', backgroundColor: 'rgba(244,180,0,0.2)', fill: true, tension: 0.3 },
-          { label: 'Avg Scroll (%)', data: data.avgScrollData, borderColor: '#0F9D58', backgroundColor: 'rgba(15,157,88,0.2)', fill: true, tension: 0.3 }
-        ]
-      },
-      options: {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-      }
-    });
-  }
+  // Firebase session ref key
+  let sessionKey = null;
 
-  function updateSummaryStats(visits) {
-    const totalVisits = visits.length;
-    const totalClicks = visits.reduce((sum, v) => sum + (v.clickCount || 0), 0);
-    const avgDuration = totalVisits ? Math.round(visits.reduce((sum, v) => sum + (v.sessionDuration || 0), 0) / totalVisits) : 0;
-    const avgScroll = totalVisits ? Math.round(visits.reduce((sum, v) => sum + (v.maxScrollPercent || 0), 0) / totalVisits) : 0;
+  async function saveSessionData() {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
 
-    visitsEl.textContent = totalVisits;
-    clicksEl.textContent = totalClicks;
-    durationEl.textContent = avgDuration;
-    scrollEl.textContent = avgScroll;
-  }
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
 
-  async function loadVisits() {
     try {
-      const snap = await get(ref(db, 'visits'));
-      const obj = snap.val() || {};
-      return Object.entries(obj).map(([key, val]) => ({ key, ...val }));
+      if (!sessionKey) {
+        const sessionRef = ref(db, 'visits');
+        const newSessionRef = await push(sessionRef, sessionData);
+        sessionKey = newSessionRef.key;
+      } else {
+        const sessionRef = ref(db, `visits/${sessionKey}`);
+        await update(sessionRef, sessionData);
+      }
     } catch (err) {
-      console.error('Failed to load visits:', err);
-      return [];
+      console.error('Failed to save session data:', err);
     }
   }
 
-  function renderSessionList(sessions) {
-    if (!sessions.length) {
-      sessionListEl.innerHTML = `<p style="text-align:center; padding: 20px; color: #94a3b8;">No sessions found for this period.</p>`;
-      return;
-    }
-
-    sessions.sort((a, b) => b.timestampStart - a.timestampStart);
-    sessionListEl.innerHTML = sessions.map(s => `
-      <div class="session-card">
-        <div class="session-item"><div class="session-label">Date</div><div class="session-value">${s.date || new Date(s.timestampStart).toLocaleDateString()}</div></div>
-        <div class="session-item"><div class="session-label">Time</div><div class="session-value">${s.time || new Date(s.timestampStart).toLocaleTimeString()}</div></div>
-        <div class="session-item"><div class="session-label">City</div><div class="session-value">${s.city || 'Unknown'}</div></div>
-        <div class="session-item"><div class="session-label">Country</div><div class="session-value">${s.country || 'Unknown'}</div></div>
-        <div class="session-item"><div class="session-label">Clicks</div><div class="session-value">${s.clickCount || 0}</div></div>
-        <div class="session-item"><div class="session-label">Duration (s)</div><div class="session-value">${s.sessionDuration || 0}</div></div>
-        <div class="session-item"><div class="session-label">Scroll (%)</div><div class="session-value">${s.maxScrollPercent || 0}</div></div>
-        <div class="session-item" style="flex-basis:100%;"><div class="session-label">Referrer</div><div class="session-value">${s.referrer || 'Direct / Unknown'}</div></div>
-        <div class="session-item" style="flex-basis:100%;"><div class="session-label">User Agent</div><div class="session-value" style="font-size: 0.85rem;">${s.userAgent || 'N/A'}</div></div>
-      </div>
-    `).join('');
-  }
-
-  async function renderDashboard(period) {
-    periodButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.period === period));
-
-    const visits = await loadVisits();
-    const { start, end } = getDateRange(period);
-    const filtered = filterVisitsByDate(visits, start, end);
-    const grouped = aggregateByDate(filtered);
-    const chartData = createChartData(grouped);
-
-    updateSummaryStats(filtered);
-    renderChart(chartData);
-    renderSessionList(filtered);
-  }
-
-  renderDashboard('today');
-
-  periodButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      renderDashboard(btn.dataset.period);
-    });
+  // Count clicks
+  document.addEventListener('click', () => {
+    clickCount++;
   });
+
+  // Scroll depth throttle
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) return;
+    scrollTimeout = setTimeout(() => {
+      updateScrollDepth();
+      scrollTimeout = null;
+    }, 500);
+  });
+
+  // On unload, try sendBeacon final save
+  window.addEventListener('unload', () => {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    if (sessionKey) {
+      const firebaseUrl = `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits/${sessionKey}.json`;
+
+      const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
+
+      navigator.sendBeacon(firebaseUrl, blob);
+    }
+  });
+
+  // Initialize tracking
+  (async () => {
+    await fetchVisitorLocation();
+    await saveSessionData(); // Initial save
+  })();
+
+  // Autosave every 10 seconds
+  setInterval(saveSessionData, 10_000);
 </script>
 </body>
 </html>
