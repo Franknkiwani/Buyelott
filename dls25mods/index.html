@@ -208,190 +208,157 @@ button, .install-button {
       window.location.href = "https://cyberchat.online/lockedcontentdls";
     });
   </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-</body>
-<script>
-(function () {
-  const sessionId = 'sess_' + Math.random().toString(36).substring(2, 10);
-  const timestamp = new Date().toISOString();
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Session vars
   let clickCount = 0;
-  let saved = false;
+  let maxScrollPercent = 0;
+  const sessionStart = Date.now();
+  const referrer = document.referrer || 'Direct / Unknown';
+  const pageUrl = window.location.href;
+  const userAgent = navigator.userAgent;
 
-  const dbRef = firebase.database().ref('installs/' + sessionId);
+  // Visitor location cache
+  let visitorCity = 'Unknown', visitorCountry = 'Unknown';
 
-  // Default session data
-  const sessionData = {
-    sessionId,
-    timestamp,
-    userAgent: navigator.userAgent,
-    clicks: 0,
-    location: "unknown",
-    ip: "unknown"
-  };
+  // Fetch legit visitor location
+  async function fetchVisitorLocation() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      visitorCity = data.city || 'Unknown';
+      visitorCountry = data.country_name || 'Unknown';
+    } catch (err) {
+      console.warn('Location fetch failed:', err);
+    }
+  }
 
-  // Fetch IP and location from ipapi.co (free, no key)
-  fetch("https://ipapi.co/json/")
-    .then((res) => res.json())
-    .then((data) => {
-      sessionData.location = `${data.city}, ${data.country_name}`;
-      sessionData.ip = data.ip;
+  // Scroll depth tracker
+  function updateScrollDepth() {
+    const scrollTop = window.scrollY || window.pageYOffset;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const scrollPercent = Math.min(100, Math.floor((scrollTop / docHeight) * 100));
+    if (scrollPercent > maxScrollPercent) maxScrollPercent = scrollPercent;
+  }
 
-      if (!saved) {
-        dbRef.set(sessionData);
-        saved = true;
-      }
-    })
-    .catch((err) => {
-      console.warn("Failed to get location", err);
-      // Still save view without location
-      if (!saved) {
-        dbRef.set(sessionData);
-        saved = true;
-      }
-    });
+  // Format date/time helper
+  function getFormattedDateTime(timestamp) {
+    const d = new Date(timestamp);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return {
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    };
+  }
 
-  // Track clicks on the install button
-  window.trackInstallClick = function () {
-    clickCount++;
-    sessionData.clicks = clickCount;
-    dbRef.update({ clicks: clickCount });
-  };
-})();
-</script>
+  // Firebase session ref key
+  let sessionKey = null;
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  async function saveSessionData() {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
 
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let clicks = 0;
-    let sessionStart = Date.now();
-    let sessionKey = null;
-    let ipInfo = {};
-    const params = new URLSearchParams(window.location.search);
-
-    // Visitor ID to link sessions from same device
-    let visitorId = localStorage.getItem("visitorId");
-    if (!visitorId) {
-      visitorId = 'v_' + Math.random().toString(36).substring(2) + Date.now();
-      localStorage.setItem("visitorId", visitorId);
-    }
-
-    document.addEventListener('click', () => clicks++);
-
-    function getDeviceInfo() {
-      return {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        memory: navigator.deviceMemory || null,
-        cores: navigator.hardwareConcurrency || null,
-        screen: {
-          width: screen.width,
-          height: screen.height,
-          colorDepth: screen.colorDepth
-        }
-      };
-    }
-
-    function getNetworkInfo() {
-      const conn = navigator.connection || {};
-      return {
-        effectiveType: conn.effectiveType || null,
-        downlink: conn.downlink || null,
-        rtt: conn.rtt || null,
-        saveData: conn.saveData || false
-      };
-    }
-
-    async function fetchIPInfo() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        return {
-          ip: data.ip || null,
-          country: data.country_name || null,
-          region: data.region || null,
-          city: data.city || null,
-          zip: data.postal || null,
-          lat: data.latitude || null,
-          lon: data.longitude || null,
-          timezone: data.timezone || null,
-          isp: data.org || null
-        };
-      } catch (err) {
-        console.warn("IP API failed:", err);
-        return {};
+    try {
+      if (!sessionKey) {
+        const sessionRef = ref(db, 'visits');
+        const newSessionRef = await push(sessionRef, sessionData);
+        sessionKey = newSessionRef.key;
+      } else {
+        const sessionRef = ref(db, `visits/${sessionKey}`);
+        await update(sessionRef, sessionData);
       }
+    } catch (err) {
+      console.error('Failed to save session data:', err);
     }
+  }
 
-    async function sendSessionData(isInit = false) {
-      const now = Date.now();
-      const sessionData = {
-        timestamp: sessionStart,
-        lastUpdate: now,
-        sessionSeconds: Math.floor((now - sessionStart) / 1000),
-        clicks,
-        visitorId,
-        utm: {
-          source: params.get("source") || null,
-          campaign: params.get("campaign") || null,
-          medium: params.get("medium") || null
-        },
-        referrer: document.referrer || null,
-        page: {
-          domain: window.location.hostname,
-          path: window.location.pathname,
-          fullUrl: window.location.href
-        },
-        device: getDeviceInfo(),
-        network: getNetworkInfo(),
-        ...ipInfo
-      };
+  // Count clicks
+  document.addEventListener('click', () => {
+    clickCount++;
+  });
 
-      if (isInit) {
-        const newRef = push(ref(db, "statsdls25"));
-        sessionKey = newRef.key;
-        await set(newRef, sessionData);
-      } else if (sessionKey) {
-        await update(ref(db, `statsdls25/${sessionKey}`), sessionData);
-      }
+  // Scroll depth throttle
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) return;
+    scrollTimeout = setTimeout(() => {
+      updateScrollDepth();
+      scrollTimeout = null;
+    }, 500);
+  });
+
+  // On unload, try sendBeacon final save
+  window.addEventListener('unload', () => {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    if (sessionKey) {
+      const firebaseUrl = `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits/${sessionKey}.json`;
+
+      const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
+
+      navigator.sendBeacon(firebaseUrl, blob);
     }
+  });
 
-    async function initTracker() {
-      ipInfo = await fetchIPInfo();
-      await sendSessionData(true);
-      setInterval(() => sendSessionData(false), 15000);
+  // Initialize tracking
+  (async () => {
+    await fetchVisitorLocation();
+    await saveSessionData(); // Initial save
+  })();
 
-      window.addEventListener("beforeunload", () => {
-        const now = Date.now();
-        const beaconData = {
-          clicks,
-          sessionSeconds: Math.floor((now - sessionStart) / 1000),
-          lastUpdate: now
-        };
-        navigator.sendBeacon(
-          `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/statsdls25/${sessionKey}.json`,
-          JSON.stringify(beaconData)
-        );
-      });
-    }
-
-    initTracker();
-  </script>
+  // Autosave every 10 seconds
+  setInterval(saveSessionData, 10_000);
+</script>
 </body>
 </html>
