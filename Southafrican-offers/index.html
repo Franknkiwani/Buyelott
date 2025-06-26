@@ -492,5 +492,198 @@ body, html, * {
   }
 });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  await new Promise((res) => {
+    const s = document.createElement('script');
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.onload = res;
+    document.head.appendChild(s);
+  });
+
+  const ctx = document.getElementById('statsChart').getContext('2d');
+  let chart;
+
+  const visitsEl = document.getElementById('stat-visits');
+  const clicksEl = document.getElementById('stat-clicks');
+  const durationEl = document.getElementById('stat-duration');
+  const scrollEl = document.getElementById('stat-scroll');
+  const sessionListEl = document.getElementById('sessionList');
+  const periodButtons = document.querySelectorAll('.period-buttons button');
+
+  function getDateRange(period) {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (period) {
+      case 'today':
+        return { start: todayStart, end: new Date(todayStart.getTime() + 86400000) };
+      case 'yesterday':
+        const yest = new Date(todayStart.getTime() - 86400000);
+        return { start: yest, end: todayStart };
+      case 'week': {
+        const day = todayStart.getDay();
+        const diff = (day === 0 ? 6 : day - 1);
+        const weekStart = new Date(todayStart.getTime() - diff * 86400000);
+        const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
+        return { start: weekStart, end: weekEnd };
+      }
+      case 'month':
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return { start: monthStart, end: nextMonth };
+      default:
+        return { start: todayStart, end: new Date(todayStart.getTime() + 86400000) };
+    }
+  }
+
+  function filterVisitsByDate(visits, start, end) {
+    return visits.filter(v => v.timestampStart >= start.getTime() && v.timestampStart < end.getTime());
+  }
+
+  function aggregateByDate(visits) {
+    const grouped = {};
+    visits.forEach(v => {
+      const dateKey = v.date || new Date(v.timestampStart).toISOString().slice(0, 10);
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = { visits: 0, clicks: 0, duration: 0, scroll: 0 };
+      }
+      grouped[dateKey].visits++;
+      grouped[dateKey].clicks += v.clickCount || 0;
+      grouped[dateKey].duration += v.sessionDuration || 0;
+      grouped[dateKey].scroll += v.maxScrollPercent || 0;
+    });
+    return grouped;
+  }
+
+  function createChartData(grouped) {
+    const labels = Object.keys(grouped).sort();
+    return {
+      labels,
+      visitsData: labels.map(d => grouped[d].visits),
+      clicksData: labels.map(d => grouped[d].clicks),
+      avgDurationData: labels.map(d => grouped[d].duration / grouped[d].visits),
+      avgScrollData: labels.map(d => grouped[d].scroll / grouped[d].visits),
+    };
+  }
+
+  function renderChart(data) {
+    if (chart) {
+      chart.data.labels = data.labels;
+      chart.data.datasets[0].data = data.visitsData;
+      chart.data.datasets[1].data = data.clicksData;
+      chart.data.datasets[2].data = data.avgDurationData;
+      chart.data.datasets[3].data = data.avgScrollData;
+      chart.update();
+      return;
+    }
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Visits', data: data.visitsData, borderColor: '#4285F4', backgroundColor: 'rgba(66,133,244,0.2)', fill: true, tension: 0.3 },
+          { label: 'Clicks', data: data.clicksData, borderColor: '#DB4437', backgroundColor: 'rgba(219,68,55,0.2)', fill: true, tension: 0.3 },
+          { label: 'Avg Duration (s)', data: data.avgDurationData, borderColor: '#F4B400', backgroundColor: 'rgba(244,180,0,0.2)', fill: true, tension: 0.3 },
+          { label: 'Avg Scroll (%)', data: data.avgScrollData, borderColor: '#0F9D58', backgroundColor: 'rgba(15,157,88,0.2)', fill: true, tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  function updateSummaryStats(visits) {
+    const totalVisits = visits.length;
+    const totalClicks = visits.reduce((sum, v) => sum + (v.clickCount || 0), 0);
+    const avgDuration = totalVisits ? Math.round(visits.reduce((sum, v) => sum + (v.sessionDuration || 0), 0) / totalVisits) : 0;
+    const avgScroll = totalVisits ? Math.round(visits.reduce((sum, v) => sum + (v.maxScrollPercent || 0), 0) / totalVisits) : 0;
+
+    visitsEl.textContent = totalVisits;
+    clicksEl.textContent = totalClicks;
+    durationEl.textContent = avgDuration;
+    scrollEl.textContent = avgScroll;
+  }
+
+  async function loadVisits() {
+    try {
+      const snap = await get(ref(db, 'visits'));
+      const obj = snap.val() || {};
+      return Object.entries(obj).map(([key, val]) => ({ key, ...val }));
+    } catch (err) {
+      console.error('Failed to load visits:', err);
+      return [];
+    }
+  }
+
+  function renderSessionList(sessions) {
+    if (!sessions.length) {
+      sessionListEl.innerHTML = `<p style="text-align:center; padding: 20px; color: #94a3b8;">No sessions found for this period.</p>`;
+      return;
+    }
+
+    sessions.sort((a, b) => b.timestampStart - a.timestampStart);
+    sessionListEl.innerHTML = sessions.map(s => `
+      <div class="session-card">
+        <div class="session-item"><div class="session-label">Date</div><div class="session-value">${s.date || new Date(s.timestampStart).toLocaleDateString()}</div></div>
+        <div class="session-item"><div class="session-label">Time</div><div class="session-value">${s.time || new Date(s.timestampStart).toLocaleTimeString()}</div></div>
+        <div class="session-item"><div class="session-label">City</div><div class="session-value">${s.city || 'Unknown'}</div></div>
+        <div class="session-item"><div class="session-label">Country</div><div class="session-value">${s.country || 'Unknown'}</div></div>
+        <div class="session-item"><div class="session-label">Clicks</div><div class="session-value">${s.clickCount || 0}</div></div>
+        <div class="session-item"><div class="session-label">Duration (s)</div><div class="session-value">${s.sessionDuration || 0}</div></div>
+        <div class="session-item"><div class="session-label">Scroll (%)</div><div class="session-value">${s.maxScrollPercent || 0}</div></div>
+        <div class="session-item" style="flex-basis:100%;"><div class="session-label">Referrer</div><div class="session-value">${s.referrer || 'Direct / Unknown'}</div></div>
+        <div class="session-item" style="flex-basis:100%;"><div class="session-label">User Agent</div><div class="session-value" style="font-size: 0.85rem;">${s.userAgent || 'N/A'}</div></div>
+      </div>
+    `).join('');
+  }
+
+  async function renderDashboard(period) {
+    periodButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.period === period));
+
+    const visits = await loadVisits();
+    const { start, end } = getDateRange(period);
+    const filtered = filterVisitsByDate(visits, start, end);
+    const grouped = aggregateByDate(filtered);
+    const chartData = createChartData(grouped);
+
+    updateSummaryStats(filtered);
+    renderChart(chartData);
+    renderSessionList(filtered);
+  }
+
+  renderDashboard('today');
+
+  periodButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      renderDashboard(btn.dataset.period);
+    });
+  });
+</script>
 </body>
 </html>
