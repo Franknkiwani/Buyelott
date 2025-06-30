@@ -627,8 +627,8 @@
   }
 
   function updateScore() {
-    // Change label to "Points" if 100 or more, else "Score"
-    if (score >= 100) {
+    // Change label to "Points" if 1 or more, else "Score"
+    if (score >= 1) {
       scoreLabel.textContent = `Points: ${score}`;
     } else {
       scoreLabel.textContent = `Score: ${score}`;
@@ -760,7 +760,7 @@
 
   if (timestamp - lastSpawn > spawnInterval) {
     // If score between 80 and 100, spawn 2 enemies at once for extra chaos
-    if (score >= 80 && score < 100) {
+    if (score >= 70 && score < 100) {
       spawnEnemy();
       spawnEnemy();
     } else {
@@ -769,7 +769,7 @@
     lastSpawn = timestamp;
 
     // Increase difficulty faster in final stretch
-    if (score >= 80 && score < 100) {
+    if (score >= 70 && score < 100) {
       spawnInterval = Math.max(300, spawnInterval - 30); // drop interval faster, but never below 300ms
       enemySpeed += 0.1; // boost speed more aggressively
     } else if (spawnInterval > 500) {
