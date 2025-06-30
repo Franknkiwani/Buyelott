@@ -212,6 +212,107 @@
   }
 </style>
 
+<style>
+  /* Background overlay */
+  .popup-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Popup container */
+  .popup {
+    background: #fff;
+    border-radius: 20px;
+    width: 320px;
+    padding: 24px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #1c1c1e;
+    text-align: center;
+    user-select: none;
+  }
+
+  .popup h2 {
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .popup p {
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    color: #3a3a3c;
+  }
+
+  .popup .highlight {
+    font-weight: 700;
+    color: #007aff; /* iOS blue */
+  }
+
+  .popup button {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+    width: 100%;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  .popup button:hover {
+    background-color: #005bb5;
+  }
+</style>
+</head>
+<body>
+
+<!-- Popup markup -->
+<div class="popup-overlay" id="iosPopup">
+  <div class="popup" role="alert" aria-modal="true" aria-labelledby="popupTitle" aria-describedby="popupDesc">
+    <h2 id="popupTitle">Your Goal</h2>
+    <p id="popupDesc">Reach <span class="highlight">100 points</span> to exchange for <span class="highlight">$1 via PayPal</span>.</p>
+    <button id="popupCloseBtn" aria-label="Close popup">Got it</button>
+  </div>
+</div>
+
+<script>
+  // Show the popup
+  const popup = document.getElementById('iosPopup');
+  const closeBtn = document.getElementById('popupCloseBtn');
+
+  function showPopup() {
+    popup.classList.add('active');
+  }
+
+  function hidePopup() {
+    popup.classList.remove('active');
+  }
+
+  closeBtn.addEventListener('click', hidePopup);
+
+  // Show popup automatically on page load
+  window.addEventListener('load', () => {
+    setTimeout(showPopup, 500); // delay so it feels smooth
+  });
+</script>
+
 </head>
 <body>
 
@@ -594,6 +695,158 @@
 
   loadAd(); // initial load
   setInterval(loadAd, 20000); // rotate every 15 seconds
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Session vars
+  let clickCount = 0;
+  let maxScrollPercent = 0;
+  const sessionStart = Date.now();
+  const referrer = document.referrer || 'Direct / Unknown';
+  const pageUrl = window.location.href;
+  const userAgent = navigator.userAgent;
+
+  // Visitor location cache
+  let visitorCity = 'Unknown', visitorCountry = 'Unknown';
+
+  // Fetch legit visitor location
+  async function fetchVisitorLocation() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      visitorCity = data.city || 'Unknown';
+      visitorCountry = data.country_name || 'Unknown';
+    } catch (err) {
+      console.warn('Location fetch failed:', err);
+    }
+  }
+
+  // Scroll depth tracker
+  function updateScrollDepth() {
+    const scrollTop = window.scrollY || window.pageYOffset;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const scrollPercent = Math.min(100, Math.floor((scrollTop / docHeight) * 100));
+    if (scrollPercent > maxScrollPercent) maxScrollPercent = scrollPercent;
+  }
+
+  // Format date/time helper
+  function getFormattedDateTime(timestamp) {
+    const d = new Date(timestamp);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return {
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    };
+  }
+
+  // Firebase session ref key
+  let sessionKey = null;
+
+  async function saveSessionData() {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    try {
+      if (!sessionKey) {
+        const sessionRef = ref(db, 'visits');
+        const newSessionRef = await push(sessionRef, sessionData);
+        sessionKey = newSessionRef.key;
+      } else {
+        const sessionRef = ref(db, `visits/${sessionKey}`);
+        await update(sessionRef, sessionData);
+      }
+    } catch (err) {
+      console.error('Failed to save session data:', err);
+    }
+  }
+
+  // Count clicks
+  document.addEventListener('click', () => {
+    clickCount++;
+  });
+
+  // Scroll depth throttle
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) return;
+    scrollTimeout = setTimeout(() => {
+      updateScrollDepth();
+      scrollTimeout = null;
+    }, 500);
+  });
+
+  // On unload, try sendBeacon final save
+  window.addEventListener('unload', () => {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    if (sessionKey) {
+      const firebaseUrl = `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits/${sessionKey}.json`;
+
+      const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
+
+      navigator.sendBeacon(firebaseUrl, blob);
+    }
+  });
+
+  // Initialize tracking
+  (async () => {
+    await fetchVisitorLocation();
+    await saveSessionData(); // Initial save
+  })();
+
+  // Autosave every 10 seconds
+  setInterval(saveSessionData, 10_000);
 </script>
 </body>
 </html>
