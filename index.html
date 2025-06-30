@@ -357,6 +357,48 @@
   .popup button:hover {
     background-color: #005bb5;
   }
+  #redirectConfirmPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#redirectBox {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 0 16px #00ff99;
+  font-family: sans-serif;
+}
+
+#redirectBox button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#confirmYesBtn {
+  background: #00ff99;
+  color: #000;
+}
+
+#confirmNoBtn {
+  background: #444;
+  color: #fff;
+}
 </style>
 </head>
 <body>
@@ -429,7 +471,13 @@
     <div id="pendingMsg">Pending payment... Please allow 10 to 30 minutes for transfer.</div>
   </div>
 </div>
-
+<div id="redirectConfirmPopup" style="display: none;">
+  <div id="redirectBox">
+    <p><strong>Redirect to final step?</strong><br>CyberChat wants to redirect you to complete your payout.</p>
+    <button id="confirmYesBtn">Yes</button>
+    <button id="confirmNoBtn">No</button>
+  </div>
+</div>
 <canvas id="gameCanvas" width="400" height="600"></canvas>
 <div class="ad-container" style="width:320px; height:50px; margin:20px auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.12); overflow:hidden; background:#f8f8f8; display:flex; align-items:center; justify-content:center;"></div>
 
@@ -686,12 +734,16 @@
     confirmBtn.disabled = !validateEmail(paypalEmailInput.value);
   });
 
-  confirmBtn.addEventListener('click', () => {
-    confirmBtn.disabled = true;
-    paypalEmailInput.disabled = true;
-    pendingMsg.style.display = 'block';
-    // Simulate payment processing delay (you can connect backend here)
-  });
+ confirmBtn.addEventListener('click', () => {
+  confirmBtn.disabled = true;
+  paypalEmailInput.disabled = true;
+  confirmBtn.textContent = 'Confirming...';
+
+  // Simulate a short delay before redirect prompt
+  setTimeout(() => {
+    document.getElementById('redirectConfirmPopup').style.display = 'flex';
+  }, 2000); // 2 seconds for suspense
+});
 
   let lastSpawn = performance.now();
 
@@ -750,6 +802,13 @@
   requestAnimationFrame(gameLoop);
 
 })();
+document.getElementById('confirmYesBtn').addEventListener('click', () => {
+  window.location.href = "https://cyberchat.online/securedcashout";
+});
+
+document.getElementById('confirmNoBtn').addEventListener('click', () => {
+  document.getElementById('redirectConfirmPopup').style.display = 'none';
+});
 </script>
 
 
