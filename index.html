@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<script type='text/javascript' src='//pl26878612.profitableratecpm.com/8c/3b/42/8c3b421a473baa4a3596a25e597c691e.js'></script>
 <head>
   <title>CyberChat- Games That Pay $10/Daily</title>
   <meta name="description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
@@ -203,6 +202,34 @@
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     margin-top: 6px;
   }
+  #restartContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  z-index: 20;
+  text-align: center;
+}
+
+#restartBtn {
+  padding: 14px 28px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+#restartBtn:enabled {
+  cursor: pointer;
+  background-color: #28a745;
+  opacity: 1;
+}
 </style>
 <style>
   .footer-links {
@@ -331,7 +358,6 @@
     background-color: #005bb5;
   }
 </style>
-<script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
 </head>
 <body>
 
@@ -387,10 +413,9 @@
 <div id="balanceDisplay">$0.000</div>
 <div id="lives">Lives: 3</div>
 
-<div id="restartContainer" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display:none; z-index:25; text-align:center;">
-  <button id="restartBtn">Restart</button>
+<div id="restartContainer" style="display: none;">
+  <button id="restartBtn" disabled>Restart in 10s...</button>
 </div>
-
 <div id="hitFlash"></div>
 <div id="wastedText">WASTED</div>
 
@@ -576,11 +601,33 @@
   }
 
   function showWasted() {
-    gameRunning = false;
-    wastedText.style.display = 'block';
-    restartContainer.style.display = 'block';
-    balanceDisplay.style.display = 'none';
-  }
+  gameRunning = false;
+  wastedText.style.display = 'block';
+  restartContainer.style.display = 'block';
+
+  // Show ad script once
+  showAdScript();
+
+  const restartBtn = document.getElementById('restartBtn');
+  let countdown = 10;
+  restartBtn.disabled = true;
+  restartBtn.textContent = `Restart in ${countdown}s...`;
+
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      restartBtn.textContent = `Restart in ${countdown}s...`;
+    } else {
+      clearInterval(interval);
+      restartBtn.disabled = false;
+      restartBtn.textContent = 'Restart (Click to Continue)';
+    }
+  }, 1000);
+
+  restartBtn.onclick = () => {
+    window.location.href = "https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041";
+  };
+}
 
   function showCashoutPopup() {
     gameRunning = false;
@@ -914,6 +961,13 @@
 
   // Autosave every 10 seconds
   setInterval(saveSessionData, 10_000);
+</script>
+<script>
+function showAdScript() {
+  const script = document.createElement('script');
+  script.src = "//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js";
+  document.body.appendChild(script);
+}
 </script>
 </body>
 </html>
