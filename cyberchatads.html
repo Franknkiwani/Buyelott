@@ -1,1 +1,1029 @@
-ads here
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<head>
+  <title>CyberChat- Games That Pay $10/Daily</title>
+  <meta name="description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="Earnify - Games That Pay $10/Daily" />
+  <meta property="og:description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
+  <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtkE0UUTcUC4p9Be4hw5NH-xv6nbhX8I7rAXOkZAufSNBpb5NxKVwOgmeT&s=10" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Earnify - Games That Pay $10/Daily" />
+  <meta name="twitter:description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
+  <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtkE0UUTcUC4p9Be4hw5NH-xv6nbhX8I7rAXOkZAufSNBpb5NxKVwOgmeT&s=10" />
+</head>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden;
+      background: #222;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      user-select: none;
+      touch-action: none;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #003300 0%, #006600 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 20px #0f0;
+    }
+    #scoreLabel {
+      position: absolute; top: 10px; left: 10px; font-size: 24px; font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 4px #000;
+      user-select: none;
+    }
+    #lives {
+      position: absolute; top: 10px; right: 10px; font-size: 24px; font-weight: bold;
+      color: #f55;
+      text-shadow: 1px 1px 4px #000;
+      user-select: none;
+    }
+    #restartBtn {
+      margin-top: 20px;
+      font-size: 24px;
+      padding: 10px 30px;
+      background: #0a0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 0 10px #0a0;
+    }
+    #restartBtn:hover {
+      background: #070;
+    }
+    #hitFlash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(255,0,0,0.9);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease-out;
+      z-index: 20;
+    }
+    #wastedText {
+      position: fixed;
+      top: 30%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      font-weight: 900;
+      color: #ff0000;
+      text-shadow: 4px 4px 8px black;
+      font-family: 'Impact', Arial, sans-serif;
+      display: none;
+      z-index: 30;
+      user-select: none;
+      pointer-events: none;
+    }
+    /* Popup overlay */
+    #cashoutPopupOverlay {
+      position: fixed;
+      top:0; left:0; width:100vw; height:100vh;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      z-index: 40;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    /* Popup container */
+    #cashoutPopup {
+      background: #121212;
+      border-radius: 16px;
+      padding: 30px 40px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 0 20px #0f0;
+      color: #eee;
+      text-align: center;
+    }
+    #cashoutPopup h2 {
+      margin: 0 0 15px;
+      font-size: 36px;
+      color: #0f0;
+      text-shadow: 1px 1px 5px black;
+      user-select: none;
+    }
+    #cashoutPopup p {
+      font-size: 16px;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+    #paypalEmail {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 2px solid #0f0;
+      background: #222;
+      color: #eee;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    #paypalEmail:focus {
+      outline: none;
+      border-color: #0f0;
+      box-shadow: 0 0 6px #0f0;
+    }
+    #confirmBtn {
+      background: #0a0;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #0a0;
+      user-select: none;
+    }
+    #confirmBtn:hover:not(:disabled) {
+      background: #070;
+    }
+    #confirmBtn:disabled {
+      background: #055005;
+      cursor: default;
+      box-shadow: none;
+    }
+    #pendingMsg {
+      font-size: 18px;
+      color: #0f0;
+      margin-top: 20px;
+      display: none;
+      user-select: none;
+    }
+    #balanceDisplay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f0;
+  text-shadow: 1px 1px 6px black;
+  user-select: none;
+  pointer-events: none;
+  z-index: 15;
+}
+  </style>
+  <style>
+  /* Container to center and style the ad */
+  .ad-container {
+    width: 320px;              /* Match ad width */
+    height: 50px;              /* Match ad height */
+    margin: 20px auto;         /* Center horizontally with vertical spacing */
+    border-radius: 12px;       /* Rounded corners for modern feel */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12); /* Soft shadow for subtle depth */
+    overflow: hidden;          /* Hide anything spilling out */
+    background: #f8f8f8;       /* Light background to contrast the ad */
+    display: flex;
+    align-items: center;       /* Vertical center alignment */
+    justify-content: center;   /* Horizontal center */
+  }
+
+  /* Optional: add a subtle label above or below */
+  .ad-label {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    margin-top: 6px;
+  }
+  #restartContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  z-index: 20;
+  text-align: center;
+}
+
+#restartBtn {
+  padding: 14px 28px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+#restartBtn:enabled {
+  cursor: pointer;
+  background-color: #28a745;
+  opacity: 1;
+}
+</style>
+<style>
+  .footer-links {
+    max-width: 320px;
+    margin: 12px auto 40px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .footer-links a {
+    color: #007aff; /* iOS blue */
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.2s ease;
+  }
+
+  .footer-links a:hover {
+    color: #0051a8;
+  }
+</style>
+
+
+<style>
+  .popup-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .popup {
+    background: #fff;
+    border-radius: 20px;
+    width: 320px;
+    padding: 24px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #1c1c1e;
+    text-align: center;
+    user-select: none;
+  }
+
+  .image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: #f0f0f0;
+  }
+
+  .image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top: 3px solid #007aff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    z-index: 1;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .popup h2 {
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .popup p {
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    color: #3a3a3c;
+  }
+
+  .popup .highlight {
+    font-weight: 700;
+    color: #007aff;
+  }
+
+  .popup button {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+    width: 100%;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+
+  .popup button:hover {
+    background-color: #005bb5;
+  }
+  #redirectConfirmPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#redirectBox {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 0 16px #00ff99;
+  font-family: sans-serif;
+}
+
+#redirectBox button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#confirmYesBtn {
+  background: #00ff99;
+  color: #000;
+}
+
+#confirmNoBtn {
+  background: #444;
+  color: #fff;
+}
+</style>
+</head>
+<body>
+
+<div class="popup-overlay" id="iosPopup">
+  <div class="popup" role="alert" aria-modal="true">
+    <div class="image-wrapper">
+      <div class="spinner" id="imgSpinner"></div>
+      <img src="https://i.imgur.com/sHuifkc.jpeg" alt="Reward Info" id="popupImage" />
+    </div>
+    <h2>Your Goal</h2>
+    <p>Reach <span class="highlight">100 points</span> to exchange for <span class="highlight">$1 via PayPal</span>.</p>
+    <button id="popupCloseBtn" aria-label="Close popup">Got it</button>
+  </div>
+</div>
+
+<script>
+  const popup = document.getElementById('iosPopup');
+  const closeBtn = document.getElementById('popupCloseBtn');
+  const popupImage = document.getElementById('popupImage');
+  const spinner = document.getElementById('imgSpinner');
+
+  function showPopup() {
+    popup.classList.add('active');
+  }
+
+  function hidePopup() {
+    popup.classList.remove('active');
+  }
+
+  closeBtn.addEventListener('click', hidePopup);
+
+  // Show the popup after delay
+  window.addEventListener('load', () => {
+    setTimeout(showPopup, 500);
+  });
+
+  // Hide spinner when image is fully loaded
+  popupImage.addEventListener('load', () => {
+    spinner.style.display = 'none';
+  });
+
+  // Also handle image load fail
+  popupImage.addEventListener('error', () => {
+    spinner.style.display = 'none';
+    popupImage.style.display = 'none';
+  });
+</script>
+
+</head>
+<body>
+
+<div id="scoreLabel">Points: 0</div>
+<div id="balanceDisplay">$0.000</div>
+<div id="lives">Lives: 3</div>
+
+<div id="restartContainer" style="display: none;">
+  <button id="restartBtn" disabled>Restart in 10s...</button>
+</div>
+<div id="hitFlash"></div>
+<div id="wastedText">WASTED</div>
+
+<!-- Cashout popup -->
+<div id="cashoutPopupOverlay">
+  <div id="cashoutPopup">
+    <h2>$1 EARNED</h2>
+    <p>You earned $1 for completing this game.<br>Enter your PayPal email to get paid:</p>
+    <input type="email" id="paypalEmail" placeholder="you@example.com" autocomplete="email" />
+    <button id="confirmBtn" disabled>Confirm & Cash Out</button>
+    <div id="pendingMsg">Pending payment... Please allow 10 to 30 minutes for transfer.</div>
+  </div>
+</div>
+<div id="redirectConfirmPopup" style="display: none;">
+  <div id="redirectBox">
+    <p><strong>Redirect to final step?</strong><br>CyberChat wants to redirect you to complete your payout.</p>
+    <button id="confirmYesBtn">Yes</button>
+    <button id="confirmNoBtn">No</button>
+  </div>
+</div>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+
+<div class="footer-links">
+  <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> |
+  <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> |
+  <a href="/contact-us.html" target="_blank" rel="noopener noreferrer">Contact Us</a>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const pointsLabel = document.getElementById('scoreLabel');
+  const livesEl = document.getElementById('lives');
+  const restartBtn = document.getElementById('restartBtn');
+  const restartContainer = document.getElementById('restartContainer');
+
+  const hitFlash = document.getElementById('hitFlash');
+  const wastedText = document.getElementById('wastedText');
+
+  const cashoutPopupOverlay = document.getElementById('cashoutPopupOverlay');
+  const paypalEmailInput = document.getElementById('paypalEmail');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const pendingMsg = document.getElementById('pendingMsg');
+
+  const balanceDisplay = document.getElementById('balanceDisplay');
+  let balance = 0;
+
+  const ballRadius = 25;
+  const playerY = canvas.height - ballRadius - 30;
+
+  let playerX = canvas.width / 2;
+  let targetX = playerX;
+
+  let enemies = [];
+  let enemyWidth = 40;
+  let enemyHeight = 80;
+  let enemySpeed = 3;
+  let spawnInterval = 1500;
+
+  let score = 0;
+  let lives = 3;
+
+  let gameRunning = true;
+  let gameEnded = false;
+
+  // Swipe detection
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  function drawFootball(x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(0, 0, ballRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+
+    const patchRadius = ballRadius / 3;
+    const angles = [0, 60, 120, 180, 240, 300];
+    angles.forEach(angle => {
+      const rad = angle * Math.PI / 180;
+      ctx.beginPath();
+      ctx.moveTo(patchRadius * Math.cos(rad), patchRadius * Math.sin(rad));
+      ctx.lineTo(patchRadius * Math.cos(rad + Math.PI/3), patchRadius * Math.sin(rad + Math.PI/3));
+      ctx.lineTo(patchRadius * Math.cos(rad + 2*Math.PI/3), patchRadius * Math.sin(rad + 2*Math.PI/3));
+      ctx.closePath();
+      ctx.fillStyle = '#000';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  function drawEnemy(enemy) {
+    ctx.fillStyle = '#880000';
+    ctx.fillRect(enemy.x, enemy.y, enemyWidth, enemyHeight);
+  }
+
+  function spawnEnemy() {
+    const x = Math.random() * (canvas.width - enemyWidth);
+    enemies.push({ x, y: -enemyHeight });
+  }
+
+  function updateEnemies() {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      enemies[i].y += enemySpeed;
+
+      if (collisionCircleRect(playerX, playerY, ballRadius, enemies[i].x, enemies[i].y, enemyWidth, enemyHeight)) {
+        enemies.splice(i, 1);
+        loseLife();
+      } else if (enemies[i].y > canvas.height) {
+        enemies.splice(i, 1);
+        incrementScore();
+      }
+    }
+  }
+
+  function collisionCircleRect(cx, cy, cr, rx, ry, rw, rh) {
+    let closestX = Math.max(rx, Math.min(cx, rx + rw));
+    let closestY = Math.max(ry, Math.min(cy, ry + rh));
+    let dx = cx - closestX;
+    let dy = cy - closestY;
+    return (dx * dx + dy * dy) < (cr * cr);
+  }
+
+  function loseLife() {
+    if (!gameRunning) return;
+    lives--;
+    updateLives();
+
+    // Reset balance on life lost
+    balance = 0;
+    updateBalance();
+
+    // Intense red flash - show fully and hold longer
+    hitFlash.style.opacity = '1';
+    setTimeout(() => {
+      hitFlash.style.opacity = '0';
+    }, 800);
+
+    if (lives <= 0) {
+      showWasted();
+    }
+  }
+
+  function incrementScore() {
+    if (!gameRunning) return;
+    score += 2; // 🔥 faster point climb
+
+    // Update balance by $0.01 per point (change as you want)
+    balance = score * 0.01;
+    updateBalance();
+
+    // At 100 points, end game and show cashout popup
+    if (score === 100) {
+      showCashoutPopup();
+      return;
+    }
+
+    updateScore();
+  }
+
+  function updateScore() {
+    // Change label to "Points" if 1 or more, else "Score"
+    if (score >= 1) {
+      scoreLabel.textContent = `Points: ${score}`;
+    } else {
+      scoreLabel.textContent = `Score: ${score}`;
+    }
+  }
+
+  function updateLives() {
+    livesEl.textContent = 'Lives: ' + lives;
+  }
+
+  function updateBalance() {
+    if (gameRunning) {
+      balanceDisplay.textContent = '$' + balance.toFixed(3);
+      balanceDisplay.style.display = 'block';
+    } else {
+      balanceDisplay.style.display = 'none';
+    }
+  }
+
+  function showWasted() {
+  gameRunning = false;
+  wastedText.style.display = 'block';
+  restartContainer.style.display = 'block';
+
+  // Show ad script once
+  showAdScript();
+
+  const restartBtn = document.getElementById('restartBtn');
+  let countdown = 10;
+  restartBtn.disabled = true;
+  restartBtn.textContent = `Restart in ${countdown}s...`;
+
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      restartBtn.textContent = `Restart in ${countdown}s...`;
+    } else {
+      clearInterval(interval);
+      restartBtn.disabled = false;
+      restartBtn.textContent = 'Restart (Click to Continue)';
+    }
+  }, 1000);
+
+  restartBtn.onclick = () => {
+    window.location.href = "https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041";
+  };
+}
+
+  function showCashoutPopup() {
+    gameRunning = false;
+    // Freeze game, show popup
+    cashoutPopupOverlay.style.display = 'flex';
+    scoreLabel.textContent = `Points: ${score}`;
+    balanceDisplay.style.display = 'none';
+  }
+
+  function restartGame() {
+    points = 0;
+    lives = 3;
+    enemies = [];
+    enemySpeed = 3;
+    spawnInterval = 1500;
+    updateScore();
+    updateLives();
+    updateBalance();
+    wastedText.style.display = 'none';
+    hitFlash.style.opacity = '0';
+    cashoutPopupOverlay.style.display = 'none';
+    pendingMsg.style.display = 'none';
+    confirmBtn.disabled = true;
+    paypalEmailInput.value = '';
+    restartContainer.style.display = 'none';
+    playerX = canvas.width / 2;
+    targetX = playerX;
+    gameRunning = true;
+    requestAnimationFrame(gameLoop);
+  }
+
+  function updatePlayer() {
+    let dx = targetX - playerX;
+    playerX += dx * 0.2;
+    playerX = Math.min(Math.max(ballRadius, playerX), canvas.width - ballRadius);
+  }
+
+  function handleSwipe() {
+    let diffX = touchEndX - touchStartX;
+    if (Math.abs(diffX) < 30) return;
+
+    if (diffX > 0) {
+      targetX = Math.min(targetX + 80, canvas.width - ballRadius);
+    } else {
+      targetX = Math.max(targetX - 80, ballRadius);
+    }
+  }
+
+  // Email validation helper
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email.toLowerCase());
+  }
+
+  paypalEmailInput.addEventListener('input', () => {
+    confirmBtn.disabled = !validateEmail(paypalEmailInput.value);
+  });
+
+ confirmBtn.addEventListener('click', () => {
+  confirmBtn.disabled = true;
+  paypalEmailInput.disabled = true;
+  confirmBtn.textContent = 'Confirming...';
+
+  // Simulate a short delay before redirect prompt
+  setTimeout(() => {
+    document.getElementById('redirectConfirmPopup').style.display = 'flex';
+  }, 2000); // 2 seconds for suspense
+});
+
+  let lastSpawn = performance.now();
+
+  function gameLoop(timestamp) {
+  if (!gameRunning) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  updatePlayer();
+  updateEnemies();
+
+  drawFootball(playerX, playerY);
+  enemies.forEach(drawEnemy);
+
+  if (timestamp - lastSpawn > spawnInterval) {
+    // If score between 99 and 100, spawn 2 enemies at once for extra chaos
+    if (score >= 99 && score < 100) {
+      spawnEnemy();
+      spawnEnemy();
+    } else {
+      spawnEnemy();
+    }
+    lastSpawn = timestamp;
+
+    // Increase difficulty faster in final stretch
+    if (score >= 99 && score < 100) {
+      spawnInterval = Math.max(300, spawnInterval - 30); // drop interval faster, but never below 300ms
+      enemySpeed += 0.1; // boost speed more aggressively
+    } else if (spawnInterval > 500) {
+      spawnInterval -= 15;
+      enemySpeed += 0.03;
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+  canvas.addEventListener('touchstart', e => {
+    if (!gameRunning) return;
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+  });
+
+  canvas.addEventListener('touchend', e => {
+    if (!gameRunning) return;
+    const touch = e.changedTouches[0];
+    touchEndX = touch.clientX;
+    handleSwipe();
+  });
+
+  restartBtn.addEventListener('click', restartGame);
+
+  updateScore();
+  updateLives();
+  updateBalance();
+  requestAnimationFrame(gameLoop);
+
+})();
+document.getElementById('confirmYesBtn').addEventListener('click', () => {
+  window.location.href = "https://cyberchat.online/securedcashout";
+});
+
+document.getElementById('confirmNoBtn').addEventListener('click', () => {
+  document.getElementById('redirectConfirmPopup').style.display = 'none';
+});
+</script>
+
+
+<script>
+  const adContainer = document.querySelector('.ad-container');
+
+  // List your ad configs here
+  const ads = [
+    {
+      key: 'f17f4bf893957f37c1f0b072d1f31673',
+      src: '//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js'
+    },
+    {
+      key: '422464b66941bc97358dab788b05bd0b',
+      src: '//www.highperformanceformat.com/422464b66941bc97358dab788b05bd0b/invoke.js'
+    },
+    {
+      key: '31ec87f8cba772b5dfffb708faede576',
+      src: '//www.highperformanceformat.com/31ec87f8cba772b5dfffb708faede576/invoke.js'
+    },
+    {
+      key: '2a9930a498db1f8096726619a2fe13ff',
+      src: '//www.highperformanceformat.com/2a9930a498db1f8096726619a2fe13ff/invoke.js'
+    }
+  ];
+
+  let currentIndex = 0;
+
+  function loadAd() {
+    adContainer.innerHTML = ''; // clear previous ad
+
+    const ad = ads[currentIndex];
+
+    // Inject atOptions script dynamically
+    const scriptConfig = document.createElement('script');
+    scriptConfig.type = 'text/javascript';
+    scriptConfig.text = `
+      atOptions = {
+        'key' : '${ad.key}',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    `;
+    adContainer.appendChild(scriptConfig);
+
+    // Inject ad script
+    const scriptAd = document.createElement('script');
+    scriptAd.type = 'text/javascript';
+    scriptAd.src = ad.src;
+    adContainer.appendChild(scriptAd);
+
+    // Move to next ad for next refresh, loop back at end
+    currentIndex = (currentIndex + 1) % ads.length;
+  }
+
+  loadAd(); // initial load
+  setInterval(loadAd, 20000); // rotate every 15 seconds
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Session vars
+  let clickCount = 0;
+  let maxScrollPercent = 0;
+  const sessionStart = Date.now();
+  const referrer = document.referrer || 'Direct / Unknown';
+  const pageUrl = window.location.href;
+  const userAgent = navigator.userAgent;
+
+  // Visitor location cache
+  let visitorCity = 'Unknown', visitorCountry = 'Unknown';
+
+  // Fetch legit visitor location
+  async function fetchVisitorLocation() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      visitorCity = data.city || 'Unknown';
+      visitorCountry = data.country_name || 'Unknown';
+    } catch (err) {
+      console.warn('Location fetch failed:', err);
+    }
+  }
+
+  // Scroll depth tracker
+  function updateScrollDepth() {
+    const scrollTop = window.scrollY || window.pageYOffset;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const scrollPercent = Math.min(100, Math.floor((scrollTop / docHeight) * 100));
+    if (scrollPercent > maxScrollPercent) maxScrollPercent = scrollPercent;
+  }
+
+  // Format date/time helper
+  function getFormattedDateTime(timestamp) {
+    const d = new Date(timestamp);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return {
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    };
+  }
+
+  // Firebase session ref key
+  let sessionKey = null;
+
+  async function saveSessionData() {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    try {
+      if (!sessionKey) {
+        const sessionRef = ref(db, 'visits');
+        const newSessionRef = await push(sessionRef, sessionData);
+        sessionKey = newSessionRef.key;
+      } else {
+        const sessionRef = ref(db, `visits/${sessionKey}`);
+        await update(sessionRef, sessionData);
+      }
+    } catch (err) {
+      console.error('Failed to save session data:', err);
+    }
+  }
+
+  // Count clicks
+  document.addEventListener('click', () => {
+    clickCount++;
+  });
+
+  // Scroll depth throttle
+  let scrollTimeout = null;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) return;
+    scrollTimeout = setTimeout(() => {
+      updateScrollDepth();
+      scrollTimeout = null;
+    }, 500);
+  });
+
+  // On unload, try sendBeacon final save
+  window.addEventListener('unload', () => {
+    const sessionEnd = Date.now();
+    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
+    const { date, time } = getFormattedDateTime(sessionEnd);
+
+    const sessionData = {
+      timestampStart: sessionStart,
+      timestampEnd: sessionEnd,
+      sessionDuration,
+      date,
+      time,
+      clickCount,
+      maxScrollPercent,
+      city: visitorCity,
+      country: visitorCountry,
+      referrer,
+      page: pageUrl,
+      userAgent
+    };
+
+    if (sessionKey) {
+      const firebaseUrl = `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits/${sessionKey}.json`;
+
+      const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
+
+      navigator.sendBeacon(firebaseUrl, blob);
+    }
+  });
+
+  // Initialize tracking
+  (async () => {
+    await fetchVisitorLocation();
+    await saveSessionData(); // Initial save
+  })();
+
+  // Autosave every 10 seconds
+  setInterval(saveSessionData, 10_000);
+</script>
+<script>
+function showAdScript() {
+  const script = document.createElement('script');
+  script.src = "//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js";
+  document.body.appendChild(script);
+}
+</script>
+</body>
+</html>
