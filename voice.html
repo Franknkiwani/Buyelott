@@ -1,59 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VoiceVibe — Final Fixed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VoiceVibe Pro - Smart Transcriber</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0d0d0d;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #121212;
       color: white;
-      margin: 0;
-      padding: 2rem;
+      margin: 0; padding: 2rem;
       text-align: center;
+      -webkit-font-smoothing: antialiased;
     }
     .container {
-      max-width: 600px;
+      max-width: 650px;
       margin: auto;
     }
     textarea {
       width: 100%;
-      min-height: 120px;
+      min-height: 150px;
       padding: 1rem;
-      font-size: 1rem;
+      font-size: 1.1rem;
       border: none;
-      border-radius: 12px;
-      background: #1a1a1a;
+      border-radius: 14px;
+      background: #1e1e1e;
       color: white;
       resize: vertical;
       margin-top: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transition: box-shadow 0.2s ease;
+    }
+    textarea:focus {
+      outline: none;
+      box-shadow: 0 0 15px #007aff;
     }
     button {
       background: #007aff;
       color: white;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
       border: none;
       border-radius: 999px;
       cursor: pointer;
-      margin: 1rem 0;
-      transition: 0.2s;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease;
+      user-select: none;
     }
-    button:hover {
-      opacity: 0.9;
+    button:hover:not(:disabled) {
+      background: #005bb5;
+    }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
     }
     .status {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #aaa;
+      margin-top: 0.7rem;
+      font-size: 0.95rem;
+      color: #999;
+      min-height: 1.2rem;
+      user-select: none;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 VoiceVibe</h1>
-    <p>Tap to speak. Edit your thoughts. No rush.</p>
+    <h1>🎤 VoiceVibe Pro</h1>
+    <p>Speak freely. We catch your words smartly — no repeats, no spam.</p>
 
     <button id="startBtn">Start Listening</button>
     <div class="status" id="status">Not listening...</div>
@@ -62,6 +77,41 @@
   </div>
 
   <script>
+    // Levenshtein Distance for fuzzy similarity
+    function levenshtein(a, b) {
+      const matrix = [];
+      let i;
+      for (i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+      }
+      let j;
+      for (j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+      }
+      for (i = 1; i <= b.length; i++) {
+        for (j = 1; j <= a.length; j++) {
+          if (b.charAt(i - 1) === a.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function similarity(a, b) {
+      const longer = a.length > b.length ? a : b;
+      const shorter = a.length > b.length ? b : a;
+      const longerLength = longer.length;
+      if (longerLength === 0) return 1.0;
+      return (longerLength - levenshtein(longer, shorter)) / longerLength;
+    }
+
     const startBtn = document.getElementById('startBtn');
     const transcriptArea = document.getElementById('transcript');
     const status = document.getElementById('status');
@@ -69,15 +119,27 @@
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Speech Recognition not supported. Try Chrome.");
+      alert("Speech Recognition not supported. Please use Chrome or Edge.");
       startBtn.disabled = true;
+      status.textContent = "Speech Recognition not supported.";
     } else {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false; // We restart manually for smoother control
+      recognition.continuous = false; // We'll manually restart
       recognition.interimResults = false;
       recognition.lang = 'en-US';
 
       let listening = false;
+      let lastSentence = '';
+      let lastTimestamp = 0;
+      const repeatThreshold = 0.8; // 80% similarity
+      const minInterval = 1000; // ms
+      const stopWords = new Set(["uh", "um", "yeah", "ok", "okay", "ah", "oh", "hmm", "hi"]);
+
+      function isStopWordOnly(text) {
+        // Remove punctuation, lowercase, split words
+        const words = text.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/);
+        return words.every(w => stopWords.has(w));
+      }
 
       recognition.onstart = () => {
         status.textContent = "Listening...";
@@ -90,19 +152,41 @@
         startBtn.textContent = "Start Listening";
         startBtn.style.background = "#007aff";
 
-        // Auto-restart if still listening
         if (listening) {
+          // Restart after 500ms to avoid rapid restart spam
           setTimeout(() => recognition.start(), 500);
         }
       };
 
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition error", event.error);
+        status.textContent = `Error: ${event.error}`;
+      };
+
       recognition.onresult = (event) => {
+        const now = Date.now();
+        if (now - lastTimestamp < minInterval) {
+          // Too fast, skip
+          return;
+        }
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            const newSentence = event.results[i][0].transcript.trim();
-            if (newSentence.length > 1) {
-              transcriptArea.value += newSentence + ". ";
+            const newSentenceRaw = event.results[i][0].transcript.trim();
+            const newSentence = newSentenceRaw.toLowerCase();
+
+            if (
+              newSentence.length < 3 ||                 // Too short
+              isStopWordOnly(newSentence) ||             // Just filler words
+              similarity(newSentence, lastSentence.toLowerCase()) > repeatThreshold // Too similar
+            ) {
+              // Skip it
+              continue;
             }
+
+            // Append nicely with a period and space
+            transcriptArea.value += newSentenceRaw + ". ";
+            lastSentence = newSentenceRaw;
+            lastTimestamp = now;
           }
         }
       };
@@ -111,9 +195,11 @@
         if (!listening) {
           recognition.start();
           listening = true;
+          status.textContent = "Starting...";
         } else {
           recognition.stop();
           listening = false;
+          status.textContent = "Stopped.";
         }
       };
     }
