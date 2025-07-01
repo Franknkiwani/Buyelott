@@ -308,17 +308,50 @@
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
 
-  // 🔥 Add listener to the login button
-  document.querySelector('.google-login').addEventListener('click', () => {
+  const loginBtn = document.querySelector('.google-login');
+  const statusDiv = document.createElement('div');
+  statusDiv.style.color = "#fff";
+  statusDiv.style.fontWeight = "600";
+  statusDiv.style.marginBottom = "2rem";
+  statusDiv.style.fontSize = "1rem";
+
+  loginBtn.parentElement.insertBefore(statusDiv, loginBtn);
+
+  // 🔁 Check if user is already signed in (via localStorage)
+  const savedUser = JSON.parse(localStorage.getItem('soloshopper_user'));
+
+  if (savedUser) {
+    loginBtn.style.display = "none";
+    const fullName = savedUser.displayName;
+    if (fullName && fullName.trim().includes(" ")) {
+      const firstLast = fullName.trim().split(" ").slice(0, 2).join(" ");
+      statusDiv.textContent = `@${firstLast}`;
+    } else {
+      statusDiv.textContent = "Logged in";
+    }
+  }
+
+  // 🧠 On Login
+  loginBtn.addEventListener('click', () => {
     signInWithPopup(auth, provider)
       .then((result) => {
         const user = result.user;
-        alert(`Welcome, ${user.displayName}!`);
-        console.log('User info:', {
-          name: user.displayName,
+        const userInfo = {
+          displayName: user.displayName || null,
           email: user.email,
           photo: user.photoURL
-        });
+        };
+        localStorage.setItem('soloshopper_user', JSON.stringify(userInfo));
+
+        loginBtn.style.display = "none";
+        if (user.displayName && user.displayName.trim().includes(" ")) {
+          const name = user.displayName.trim().split(" ").slice(0, 2).join(" ");
+          statusDiv.textContent = `@${name}`;
+        } else {
+          statusDiv.textContent = "Logged in";
+        }
+
+        console.log("Logged in as:", userInfo);
       })
       .catch((error) => {
         console.error('Google sign-in failed:', error.message);
