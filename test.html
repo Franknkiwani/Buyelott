@@ -1,343 +1,220 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>VoiceVibe Pro</title>
+  <title>SongVibe Recorder</title>
+  <script src="https://cdn.jsdelivr.net/npm/ml5@0.12.2/dist/ml5.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display&display=swap');
     body {
-      margin: 0;
-      background: linear-gradient(135deg, #1e1e2f, #12121b);
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #12121b;
       color: #eee;
-      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0 1rem;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      height: 100vh;
+      margin: 0;
+      padding: 1rem;
     }
 
     h1 {
-      font-weight: 600;
-      font-size: 2.5rem;
       margin-bottom: 1rem;
-      text-shadow: 0 0 6px #00c8ff99;
+      font-weight: 600;
+      text-shadow: 0 0 8px #0ff;
     }
 
-    .button {
+    button {
       background: rgba(255 255 255 / 0.1);
-      border: 1.5px solid rgba(255 255 255 / 0.3);
-      color: #00c8ff;
-      font-size: 1.2rem;
-      padding: 0.8rem 2rem;
-      border-radius: 15px;
+      border: 1.5px solid #0ff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 12px;
+      color: #0ff;
+      font-size: 1.1rem;
+      margin: 0.5rem;
       cursor: pointer;
       user-select: none;
-      transition: background 0.3s ease, color 0.3s ease;
-      margin: 0.5rem;
-      font-weight: 600;
-      box-shadow: 0 0 6px #00c8ff55;
-      backdrop-filter: saturate(180%) blur(12px);
+      transition: background 0.3s ease;
     }
 
-    .button:disabled {
-      color: #555;
+    button:disabled {
+      color: #222;
       border-color: #222;
       cursor: not-allowed;
-      box-shadow: none;
-      background: rgba(0 0 0 / 0.4);
-    }
-
-    #timer {
-      font-size: 1.2rem;
-      margin-top: 0.5rem;
-      color: #0ff;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      text-shadow: 0 0 8px #00c8ff99;
-    }
-
-    #waveform {
-      margin-top: 1rem;
-      width: 300px;
-      height: 80px;
-      background: rgba(255 255 255 / 0.05);
-      border-radius: 15px;
-      box-shadow: inset 0 0 10px #00c8ff22;
+      background: transparent;
     }
 
     #result {
-      margin-top: 2rem;
-      width: 320px;
-      background: rgba(255 255 255 / 0.1);
-      border-radius: 25px;
-      padding: 1.5rem 2rem;
-      text-align: center;
-      box-shadow: 0 0 20px #00c8ff88;
-      backdrop-filter: saturate(180%) blur(15px);
-      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 600;
-      user-select: none;
-      transition: all 0.4s ease;
-      position: relative;
+      min-height: 2rem;
     }
 
-    #result.energetic {
-      color: #00ffea;
-      text-shadow: 0 0 12px #00fff6cc;
-      animation: pulseGlow 2s infinite alternate;
-    }
-
-    #result.calm {
-      color: #7afcff;
-      text-shadow: 0 0 10px #7afcffaa;
-      animation: slowGlow 3s infinite alternate;
-    }
-
-    #result.nervous {
-      color: #ff5577;
-      text-shadow: 0 0 12px #ff5577cc;
-      animation: shake 0.5s infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      0% {text-shadow: 0 0 6px #00fff6cc, 0 0 12px #00fff6cc;}
-      100% {text-shadow: 0 0 14px #00fff6cc, 0 0 24px #00fff6cc;}
-    }
-
-    @keyframes slowGlow {
-      0% {text-shadow: 0 0 10px #7afcffaa;}
-      100% {text-shadow: 0 0 20px #7afcffee;}
-    }
-
-    @keyframes shake {
-      0% {transform: translateX(-2px);}
-      100% {transform: translateX(2px);}
-    }
-
-    audio {
+    select {
       margin-top: 1rem;
-      outline: none;
-      width: 320px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #00c8ff77;
-      background: rgba(0,0,0,0.15);
+      background: #222;
+      color: #0ff;
+      border: 1px solid #0ff;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>🎙️ VoiceVibe Pro</h1>
+  <h1>🎤 SongVibe Recorder</h1>
+  <button id="recordBtn">Start Recording</button>
+  <button id="stopBtn" disabled>Stop Recording</button>
 
-  <div>
-    <button id="recordBtn" class="button">Start Recording</button>
-    <button id="playBtn" class="button" disabled>▶️ Play Recording</button>
-  </div>
-
-  <div id="timer">00:00</div>
-
-  <canvas id="waveform"></canvas>
+  <audio id="audioPlayback" controls style="margin-top:1rem; display:none"></audio>
 
   <div id="result"></div>
-
-  <audio id="audioPlayback" controls style="display:none"></audio>
+  <div id="manualVibe" style="display:none;">
+    <label for="vibeSelect">Pick your vibe if unclear:</label>
+    <select id="vibeSelect">
+      <option value="Happy">Happy</option>
+      <option value="Sad">Sad</option>
+      <option value="Calm">Calm</option>
+      <option value="Energetic">Energetic</option>
+      <option value="Angry">Angry</option>
+      <option value="Chill">Chill</option>
+    </select>
+    <button id="confirmVibe">Confirm Vibe</button>
+  </div>
 
   <script>
-    const recordBtn = document.getElementById("recordBtn");
-    const playBtn = document.getElementById("playBtn");
-    const timerEl = document.getElementById("timer");
-    const resultDiv = document.getElementById("result");
-    const audioPlayback = document.getElementById("audioPlayback");
-    const canvas = document.getElementById("waveform");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = 300;
-    canvas.height = 80;
-
     let mediaRecorder;
     let audioChunks = [];
     let audioBlob;
     let audioUrl;
-    let audioContext;
-    let analyser;
-    let dataArray;
-    let source;
-    let animationId;
 
-    let recording = false;
-    let timer = 0;
-    let timerInterval;
+    const recordBtn = document.getElementById("recordBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const audioPlayback = document.getElementById("audioPlayback");
+    const resultDiv = document.getElementById("result");
+    const manualVibeDiv = document.getElementById("manualVibe");
+    const vibeSelect = document.getElementById("vibeSelect");
+    const confirmVibeBtn = document.getElementById("confirmVibe");
 
-    function resetUI() {
-      resultDiv.textContent = "";
-      timerEl.textContent = "00:00";
-      playBtn.disabled = true;
-      audioPlayback.style.display = "none";
-      clearCanvas();
-    }
+    let classifier;
+    let isClassifying = false;
 
-    function clearCanvas() {
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function drawWaveform() {
-      analyser.getFloatTimeDomainData(dataArray);
-
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#00c8ff";
-      ctx.beginPath();
-
-      const sliceWidth = canvas.width / dataArray.length;
-      let x = 0;
-
-      for (let i = 0; i < dataArray.length; i++) {
-        let y = (dataArray[i] + 1) * canvas.height / 2;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-        x += sliceWidth;
-      }
-
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
-
-      animationId = requestAnimationFrame(drawWaveform);
-    }
-
-    recordBtn.addEventListener("click", async () => {
-      if (recording) return;
-
-      resetUI();
-      recording = true;
+    recordBtn.onclick = async () => {
+      resultDiv.textContent = "🎙️ Recording...";
       recordBtn.disabled = true;
-      recordBtn.textContent = "Recording...";
+      stopBtn.disabled = false;
+      manualVibeDiv.style.display = "none";
+      audioPlayback.style.display = "none";
 
       audioChunks = [];
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
-        audioContext = new AudioContext();
-        source = audioContext.createMediaStreamSource(stream);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048;
-        dataArray = new Float32Array(analyser.fftSize);
-
-        source.connect(analyser);
-        drawWaveform();
-
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.start();
 
-        // Timer count
-        timer = 0;
-        timerEl.textContent = "00:00";
-        timerInterval = setInterval(() => {
-          timer++;
-          timerEl.textContent = `00:${timer < 10 ? "0" + timer : timer}`;
-          if (timer >= 10) {
-            stopRecording();
-          }
-        }, 1000);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+        mediaRecorder.onstop = async () => {
+          audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+          audioUrl = URL.createObjectURL(audioBlob);
+          audioPlayback.src = audioUrl;
+          audioPlayback.style.display = "block";
+
+          resultDiv.textContent = "Analyzing vibe...";
+          await analyzeVibe(audioBlob);
+        };
       } catch (err) {
-        resultDiv.textContent = "⚠️ Microphone permission denied or error.";
+        resultDiv.textContent = "⚠️ Error accessing microphone.";
         recordBtn.disabled = false;
-        recording = false;
-        cancelAnimationFrame(animationId);
+        stopBtn.disabled = true;
       }
-    });
+    };
 
-    function stopRecording() {
-      if (!recording) return;
+    stopBtn.onclick = () => {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        recordBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    };
 
-      recording = false;
-      recordBtn.disabled = false;
-      recordBtn.textContent = "Start Recording";
+    async function analyzeVibe(blob) {
+      if (!classifier) {
+        resultDiv.textContent = "Loading ML model...";
+        classifier = await ml5.soundClassifier('SpeechCommands18w', { probabilityThreshold: 0.1 });
+      }
 
-      mediaRecorder.stop();
-      mediaRecorder.onstop = () => {
-        clearInterval(timerInterval);
-        cancelAnimationFrame(animationId);
+      isClassifying = true;
 
-        // Stop audio context & mic
-        audioContext.close();
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      // ml5 soundClassifier works on live mic or audio stream, not blob, so trick time:
+      // We will use Web Audio API to decode blob, play silently, and classify live stream.
 
-        audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        audioUrl = URL.createObjectURL(audioBlob);
-        audioPlayback.src = audioUrl;
-        audioPlayback.style.display = "block";
-        playBtn.disabled = false;
-
-        analyzeAudio(audioBlob);
-      };
-    }
-
-    playBtn.addEventListener("click", () => {
-      if (!audioPlayback.src) return;
-      audioPlayback.play();
-    });
-
-    // Analyze pitch & speed from the Blob
-    async function analyzeAudio(blob) {
-      const arrayBuffer = await blob.arrayBuffer();
+      // Decode blob to AudioBuffer
       const audioCtx = new AudioContext();
+      const arrayBuffer = await blob.arrayBuffer();
       const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-      const rawData = audioBuffer.getChannelData(0);
 
-      // Calculate pitch by zero crossing
-      const pitch = getPitch(rawData, audioBuffer.sampleRate);
+      // Play the audio silently through AudioContext
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
 
-      // Calculate speed by energy bursts
-      const speed = estimateSpeechSpeed(rawData);
+      const dest = audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      source.start();
 
-      let tone = "😐 Neutral";
-      let className = "";
-
-      if (pitch > 200 && speed > 1.8) {
-        tone = "⚡ Energetic";
-        className = "energetic";
-      } else if (pitch < 150 && speed < 1.2) {
-        tone = "😌 Calm";
-        className = "calm";
-      } else if (pitch > 250 && speed < 1.0) {
-        tone = "😰 Nervous";
-        className = "nervous";
-      }
-
-      resultDiv.innerHTML = `
-        <p><strong>Pitch:</strong> ${Math.round(pitch)} Hz</p>
-        <p><strong>Speed:</strong> ${speed.toFixed(1)} (approx.)</p>
-        <p><strong>Vibe:</strong> ${tone}</p>
-      `;
-
-      resultDiv.className = className;
-    }
-
-    function getPitch(data, sampleRate) {
-      let crossings = 0;
-      for (let i = 1; i < data.length; i++) {
-        if ((data[i - 1] < 0 && data[i] >= 0) || (data[i - 1] > 0 && data[i] <= 0)) {
-          crossings++;
+      // Classify from dest.stream
+      classifier.classify(dest.stream, (error, results) => {
+        if (error) {
+          console.error(error);
+          resultDiv.textContent = "⚠️ Error classifying audio.";
+          isClassifying = false;
+          return;
         }
-      }
-      const frequency = (crossings * sampleRate) / (2 * data.length);
-      return frequency || 0;
+        if (!results || results.length === 0) {
+          resultDiv.textContent = "No vibe detected.";
+          isClassifying = false;
+          manualVibeDiv.style.display = "block";
+          return;
+        }
+
+        // Pick highest confidence result
+        const top = results[0];
+        // For demo, treat these labels as vibes:
+        const vibesMap = {
+          'happy': "😊 Happy",
+          'sad': "😢 Sad",
+          'neutral': "😐 Neutral",
+          'angry': "😠 Angry",
+          'calm': "😌 Calm",
+          'excited': "⚡ Energetic",
+        };
+
+        // ml5 model labels are limited, so fallback to manual
+        let vibeText = vibesMap[top.label.toLowerCase()] || null;
+
+        if (top.confidence > 0.7 && vibeText) {
+          resultDiv.textContent = `Detected Vibe: ${vibeText} (Confidence: ${(top.confidence * 100).toFixed(1)}%)`;
+          manualVibeDiv.style.display = "none";
+        } else {
+          resultDiv.textContent = "Vibe unclear, please select manually.";
+          manualVibeDiv.style.display = "block";
+        }
+
+        isClassifying = false;
+        audioCtx.close();
+        source.stop();
+      });
     }
 
-    function estimateSpeechSpeed(data) {
-      let energyBursts = 0;
-      for (let i = 0; i < data.length; i++) {
-        if (Math.abs(data[i]) > 0.2) energyBursts++;
-      }
-      return energyBursts / 50;
-    }
+    confirmVibeBtn.onclick = () => {
+      const chosen = vibeSelect.value;
+      resultDiv.textContent = `Manual Vibe Selected: ${chosen}`;
+      manualVibeDiv.style.display = "none";
+    };
   </script>
 </body>
 </html>
