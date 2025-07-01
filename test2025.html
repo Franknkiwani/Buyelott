@@ -681,6 +681,50 @@ a:focus {
   height: 0;
   background: transparent;
 }
+.ios-settings-block {
+  width: 90%;
+  max-width: 480px;
+  margin: 2rem auto;
+  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+.ios-section {
+  background: #1c1c1e;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 1px rgba(255,255,255,0.1), 0 12px 20px rgba(0,0,0,0.2);
+}
+
+.ios-link {
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  color: #fff;
+  border: none;
+  text-align: left;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.2s;
+}
+
+.ios-link:last-child {
+  border-bottom: none;
+}
+
+.ios-link:active {
+  background: rgba(255,255,255,0.08);
+}
+
+body {
+  background: #000; /* Dark mode background */
+  color: #fff;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
   </style>
 </head>
 <body>
@@ -722,6 +766,18 @@ a:focus {
     <a href="#">About</a>
     <a href="#">Contact</a>
   </nav>
+<div class="ios-settings-block">
+  <div class="ios-section">
+    <button class="ios-link">Privacy Policy</button>
+    <button class="ios-link">Terms of Service</button>
+    <button class="ios-link">Contact Us</button>
+  </div>
+  <div class="ios-section">
+    <button class="ios-link">About</button>
+    <button class="ios-link">Help Center</button>
+    <button class="ios-link">Report a Problem</button>
+  </div>
+</div>
 </div>
 </div>
 
