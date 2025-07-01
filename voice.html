@@ -3,522 +3,156 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VoiceVibe Pro 2.0 - Smart Transcriber + TTS + Save</title>
+  <title>YouTube Channel Lite Analytics</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #121212;
-      color: white;
-      margin: 0; padding: 2rem;
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-    }
-    .container {
-      max-width: 650px;
+      color: #eee;
+      max-width: 480px;
       margin: auto;
-    }
-    textarea {
-      width: 90%;
-      min-height: 150px;
       padding: 1rem;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 14px;
-      background: #1e1e1e;
-      color: white;
-      resize: vertical;
-      margin-top: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      transition: box-shadow 0.2s ease;
     }
-    textarea:focus {
-      outline: none;
-      box-shadow: 0 0 15px #007aff;
+    h1 {
+      color: #0ff;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      outline-offset: 2px;
     }
     button {
-      background: #007aff;
-      color: white;
-      padding: 0.7rem 1.6rem;
-      font-size: 1.05rem;
+      background: #0ff;
+      color: #121212;
+      font-weight: bold;
+      padding: 0.7rem 1rem;
       border: none;
-      border-radius: 999px;
+      border-radius: 8px;
       cursor: pointer;
-      margin: 0.6rem 0.4rem 0 0.4rem;
-      transition: background-color 0.3s ease;
-      user-select: none;
-      min-width: 130px;
+      font-size: 1.1rem;
+      transition: background 0.2s;
     }
-    button:hover:not(:disabled) {
-      background: #005bb5;
+    button:hover {
+      background: #0cc;
     }
-    button:disabled {
-      background: #444;
-      cursor: not-allowed;
+    #results {
+      background: #222;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #0ff33a44;
+      min-height: 100px;
     }
-    .status {
-      margin-top: 0.7rem;
-      font-size: 0.95rem;
-      color: #999;
-      min-height: 1.2rem;
-      user-select: none;
-      font-style: italic;
+    .label {
+      font-weight: 600;
+      margin-top: 0.5rem;
+      color: #0f0;
     }
-    .btn-row {
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
     }
-    .btn-row {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px; /* space between buttons */
-}
-
-#moreBtn {
-  background: #007aff;
-  color: white;
-  padding: 12px 28px;
-  font-size: 18px;
-  border-radius: 9999px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,122,255,0.5);
-  user-select: none;
-  margin-top: 1rem;
-}
-
-#moreMenu {
-  position: absolute;
-  background: #f2f2f7;
-  color: #007aff;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 180px;
-  top: 60px; /* adjust to position below the button */
-  right: 20px;
-  z-index: 1000;
-}
-
-#moreMenu button {
-  background: transparent;
-  border: none;
-  font-size: 16px;
-  padding: 10px 8px;
-  cursor: pointer;
-  border-radius: 10px;
-  text-align: left;
-  transition: background-color 0.2s ease;
-}
-
-#moreMenu button:hover:not(:disabled) {
-  background: #007aff;
-  color: white;
-}
-
-#moreMenu button:disabled {
-  color: #8e8e93;
-  cursor: not-allowed;
-}
-#moreMenu {
-  position: absolute;
-  background: #f2f2f7;
-  color: #007aff;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 180px;
-  top: 60px; 
-  right: 20px;
-  z-index: 1000;
-
-  /* Start hidden and transparent */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-#moreMenu.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-#moreMenu {
-  position: absolute;
-  top: 50px;  /* adjust so it’s below the button */
-  right: 20px;
-  width: 200px;
-  background: #1e1e1e;           /* dark charcoal */
-  color: #f2f2f7;                /* light iOS off-white */
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  padding: 16px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  font-size: 16px;
-  font-weight: 500;
-  user-select: none;
-  z-index: 9999;
-  backdrop-filter: blur(10px); /* glassy blur effect */
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-#moreMenu.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-#moreMenu button {
-  background: transparent;
-  border: none;
-  color: #0a84ff;               /* iOS bright blue */
-  padding: 10px 8px;
-  border-radius: 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-weight: 600;
-}
-
-#moreMenu button:hover:not(:disabled) {
-  background: rgba(10, 132, 255, 0.15);
-  color: #40a9ff;
-}
-
-#moreMenu button:disabled {
-  color: #444;
-  cursor: not-allowed;
-}
-@keyframes borderPulse {
-  0% {
-    border-color: #0a84ff;    /* iOS blue */
-    box-shadow: 0 0 8px #0a84ff88;
-  }
-  25% {
-    border-color: #5ac8fa;    /* lighter blue */
-    box-shadow: 0 0 12px #5ac8fa88;
-  }
-  50% {
-    border-color: #64d2ff;    /* even lighter cyan */
-    box-shadow: 0 0 16px #64d2ff88;
-  }
-  75% {
-    border-color: #0a84ff;
-    box-shadow: 0 0 12px #0a84ff88;
-  }
-  100% {
-    border-color: #0a84ff;
-    box-shadow: 0 0 8px #0a84ff88;
-  }
-}
-
-#moreMenu {
-  /* existing styles... */
-  border: 2px solid #0a84ff;    /* initial border color */
-  animation: borderPulse 4s infinite alternate ease-in-out;
-  /* keep your backdrop-filter, bg, etc */
-}
+    .error {
+      color: #f33;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎤 VoiceVibe Pro 2.0</h1>
-    <p>Speak freely. Smart transcription + share + read aloud.</p>
-
-    <button id="startBtn">Start Listening</button>
-    <div class="status" id="status">Not listening...</div>
-
-    <textarea id="transcript" placeholder="Your words will appear here..."></textarea>
-
-  <button id="moreBtn" aria-haspopup="true" aria-expanded="false">••• More</button>
-
-<div id="moreMenu" role="menu" hidden>
-  <button id="downloadBtn" role="menuitem">⬇️ Download</button>
-  <button id="printBtn" role="menuitem">🖨️ Print</button>
-  <button id="shareBtn" role="menuitem">📤 Share</button>
-  <button id="readBtn" role="menuitem">🔊 Read Aloud</button>
-  <button id="stopReadBtn" role="menuitem" disabled>⏹️ Stop Reading</button>
-</div>
+  <h1>YouTube Channel Lite Analytics</h1>
+  <form id="channelForm">
+    <input
+      type="text"
+      id="channelInput"
+      placeholder="Enter channel URL, ID or @handle"
+      required
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button type="submit">Check</button>
+  </form>
+  <div id="results" aria-live="polite"></div>
 
   <script>
-    // Levenshtein Distance for fuzzy similarity
-    function levenshtein(a, b) {
-      const matrix = [];
-      let i;
-      for (i = 0; i <= b.length; i++) {
-        matrix[i] = [i];
+    function extractChannelId(input) {
+      try {
+        const url = new URL(input);
+        const path = url.pathname.split("/").filter(Boolean);
+        // Support @handle URLs
+        if (path[0] && path[0].startsWith("@")) return path[0];
+        if (path[0] === "channel") return path[1];
+        if (path[0] === "user" || path[0] === "c") return path[1];
+        return null;
+      } catch {
+        return input;
       }
-      let j;
-      for (j = 0; j <= a.length; j++) {
-        matrix[0][j] = j;
-      }
-      for (i = 1; i <= b.length; i++) {
-        for (j = 1; j <= a.length; j++) {
-          if (b.charAt(i - 1) === a.charAt(j - 1)) {
-            matrix[i][j] = matrix[i - 1][j - 1];
-          } else {
-            matrix[i][j] = Math.min(
-              matrix[i - 1][j - 1] + 1,
-              matrix[i][j - 1] + 1,
-              matrix[i - 1][j] + 1
-            );
-          }
-        }
-      }
-      return matrix[b.length][a.length];
     }
 
-    function similarity(a, b) {
-      const longer = a.length > b.length ? a : b;
-      const shorter = a.length > b.length ? b : a;
-      const longerLength = longer.length;
-      if (longerLength === 0) return 1.0;
-      return (longerLength - levenshtein(longer, shorter)) / longerLength;
-    }
-
-    const startBtn = document.getElementById('startBtn');
-    const transcriptArea = document.getElementById('transcript');
-    const status = document.getElementById('status');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const printBtn = document.getElementById('printBtn');
-    const shareBtn = document.getElementById('shareBtn');
-    const readBtn = document.getElementById('readBtn');
-    const stopReadBtn = document.getElementById('stopReadBtn');
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert("Speech Recognition not supported. Please use Chrome or Edge.");
-      startBtn.disabled = true;
-      status.textContent = "Speech Recognition not supported.";
-    } else {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false; // We'll manually restart
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      let listening = false;
-      let lastSentence = '';
-      let lastTimestamp = 0;
-      const repeatThreshold = 0.8; // 80% similarity
-      const minInterval = 1000; // ms
-      const stopWords = new Set(["uh", "um", "yeah", "ok", "okay", "ah", "oh", "hmm", "hi"]);
-
-      function isStopWordOnly(text) {
-        // Remove punctuation, lowercase, split words
-        const words = text.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/);
-        return words.every(w => stopWords.has(w));
-      }
-
-      recognition.onstart = () => {
-        status.textContent = "Listening...";
-        startBtn.textContent = "Stop Listening";
-        startBtn.style.background = "#ff3b30";
-      };
-
-      recognition.onend = () => {
-        status.textContent = "Stopped listening.";
-        startBtn.textContent = "Start Listening";
-        startBtn.style.background = "#007aff";
-
-        if (listening) {
-          setTimeout(() => recognition.start(), 500);
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.warn("Speech recognition error", event.error);
-        status.textContent = `Error: ${event.error}`;
-      };
-
-      recognition.onresult = (event) => {
-        const now = Date.now();
-        if (now - lastTimestamp < minInterval) {
-          return;
-        }
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            const newSentenceRaw = event.results[i][0].transcript.trim();
-            const newSentence = newSentenceRaw.toLowerCase();
-
-            if (
-              newSentence.length < 3 ||
-              isStopWordOnly(newSentence) ||
-              similarity(newSentence, lastSentence.toLowerCase()) > repeatThreshold
-            ) {
-              continue;
-            }
-
-            transcriptArea.value += newSentenceRaw + ". ";
-            lastSentence = newSentenceRaw;
-            lastTimestamp = now;
-          }
-        }
-      };
-
-      startBtn.onclick = () => {
-        if (!listening) {
-          recognition.start();
-          listening = true;
-          status.textContent = "Starting...";
-        } else {
-          recognition.stop();
-          listening = false;
-          status.textContent = "Stopped.";
-        }
-      };
-    }
-
-    // Download transcript as text file
-    function downloadText(filename, text) {
-      const blob = new Blob([text], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = URL.createObjectURL(blob);
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
-
-    downloadBtn.onclick = () => {
-      const text = transcriptArea.value.trim();
-      if (!text) return alert('Nothing to download!');
-      downloadText('VoiceVibe_Transcript.txt', text);
-    };
-
-    // Print transcript
-    function printTranscript(text) {
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <pre style="font-family: monospace; font-size:16px; padding:1rem; white-space: pre-wrap;">${text}</pre>
-        <script>window.print(); window.onafterprint = () => window.close();<\/script>
-      `);
-      printWindow.document.close();
-    }
-
-    printBtn.onclick = () => {
-      const text = transcriptArea.value.trim();
-      if (!text) return alert('Nothing to print!');
-      printTranscript(text);
-    };
-
-    // Share transcript via Web Share API (mobile supported)
-    shareBtn.onclick = async () => {
-      const text = transcriptArea.value.trim();
-      if (!text) return alert('Nothing to share!');
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'My VoiceVibe Transcript',
-            text,
-          });
-        } catch (err) {
-          alert('Share failed: ' + err.message);
-        }
+    async function fetchChannelMobileHtml(channelId) {
+      let url = "";
+      if (channelId.startsWith("@")) {
+        url = `https://m.youtube.com/${channelId}`;
       } else {
-        alert('Sharing not supported on this device.');
+        url = `https://m.youtube.com/channel/${channelId}`;
       }
-    };
+      const res = await fetch(url, { mode: "cors" });
+      if (!res.ok) throw new Error("Failed to fetch channel page");
+      return res.text();
+    }
 
-    // Text-to-speech (read aloud)
-    function readAloud(text) {
-      if (!window.speechSynthesis) {
-        alert("Sorry, your browser doesn't support Text-to-Speech.");
+    function parseChannelStats(html) {
+      // Attempt to parse subscriber count (could be like "1.2M subscribers" or "No subscribers")
+      const subMatch = html.match(/"subscriberCountText":{"simpleText":"([^"]+) subscribers"}/);
+      // Video count appears like "123 videos"
+      const videoMatch = html.match(/"videoCountText":{"runs":\[{"text":"([\d,]+) videos?"}\]/);
+      // Channel name from title tag: "ChannelName - YouTube"
+      const nameMatch = html.match(/<title>([^<]+)<\/title>/);
+
+      const subscriberCount = subMatch ? subMatch[1] : "N/A";
+      const videoCount = videoMatch ? videoMatch[1] : "N/A";
+      const channelName = nameMatch ? nameMatch[1].replace(" - YouTube", "") : "N/A";
+
+      return { subscriberCount, videoCount, channelName };
+    }
+
+    document.getElementById("channelForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("channelInput").value.trim();
+      if (!input) return;
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.textContent = "Fetching data...";
+
+      const channelId = extractChannelId(input);
+      if (!channelId) {
+        resultsDiv.innerHTML = `<p class="error">Invalid channel URL, ID, or handle.</p>`;
         return;
       }
 
-      if (speechSynthesis.speaking) {
-        speechSynthesis.cancel(); // Stop current speech if any
+      try {
+        const html = await fetchChannelMobileHtml(channelId);
+        const stats = parseChannelStats(html);
+
+        resultsDiv.innerHTML = `
+          <div><span class="label">Channel Name:</span> <span class="value">${stats.channelName}</span></div>
+          <div><span class="label">Subscribers:</span> <span class="value">${stats.subscriberCount}</span></div>
+          <div><span class="label">Total Videos:</span> <span class="value">${stats.videoCount}</span></div>
+        `;
+      } catch (err) {
+        resultsDiv.innerHTML = `<p class="error">Error fetching or parsing data: ${err.message}</p>`;
       }
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.pitch = 1;
-      utterance.rate = 1;
-
-      utterance.onstart = () => {
-        readBtn.disabled = true;
-        stopReadBtn.disabled = false;
-        status.textContent = "Reading aloud...";
-      };
-      utterance.onend = () => {
-        readBtn.disabled = false;
-        stopReadBtn.disabled = true;
-        status.textContent = listening ? "Listening..." : "Idle";
-      };
-      utterance.onerror = (e) => {
-        alert("Speech synthesis error: " + e.error);
-        readBtn.disabled = false;
-        stopReadBtn.disabled = true;
-        status.textContent = "Idle";
-      };
-
-      speechSynthesis.speak(utterance);
-    }
-
-    readBtn.onclick = () => {
-      const text = transcriptArea.value.trim();
-      if (!text) return alert("Nothing to read!");
-      readAloud(text);
-    };
-
-    stopReadBtn.onclick = () => {
-      if (speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-      }
-      readBtn.disabled = false;
-      stopReadBtn.disabled = true;
-      status.textContent = listening ? "Listening..." : "Idle";
-    };
-    const moreBtn = document.getElementById('moreBtn');
-const moreMenu = document.getElementById('moreMenu');
-
-moreBtn.addEventListener('click', () => {
-  const isShown = moreMenu.classList.contains('show');
-  if (isShown) {
-    hideMenu();
-  } else {
-    showMenu();
-  }
-});
-
-function showMenu() {
-  moreMenu.classList.add('show');
-  moreBtn.setAttribute('aria-expanded', 'true');
-}
-
-function hideMenu() {
-  moreMenu.classList.remove('show');
-  moreBtn.setAttribute('aria-expanded', 'false');
-}
-
-// Hide menu when clicking outside
-document.addEventListener('click', (e) => {
-  if (!moreBtn.contains(e.target) && !moreMenu.contains(e.target)) {
-    hideMenu();
-  }
-});
-
-// Hide menu on action button click inside the menu
-moreMenu.querySelectorAll('button').forEach(button => {
-  button.addEventListener('click', () => {
-    hideMenu();
-  });
-});
+    });
   </script>
 </body>
 </html>
