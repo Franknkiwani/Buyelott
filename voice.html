@@ -19,7 +19,7 @@
       margin: auto;
     }
     textarea {
-      width: 100%;
+      width: 90%;
       min-height: 150px;
       padding: 1rem;
       font-size: 1.1rem;
@@ -70,6 +70,169 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+    .btn-row {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px; /* space between buttons */
+}
+
+#moreBtn {
+  background: #007aff;
+  color: white;
+  padding: 12px 28px;
+  font-size: 18px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,122,255,0.5);
+  user-select: none;
+  margin-top: 1rem;
+}
+
+#moreMenu {
+  position: absolute;
+  background: #f2f2f7;
+  color: #007aff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 180px;
+  top: 60px; /* adjust to position below the button */
+  right: 20px;
+  z-index: 1000;
+}
+
+#moreMenu button {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  padding: 10px 8px;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+#moreMenu button:hover:not(:disabled) {
+  background: #007aff;
+  color: white;
+}
+
+#moreMenu button:disabled {
+  color: #8e8e93;
+  cursor: not-allowed;
+}
+#moreMenu {
+  position: absolute;
+  background: #f2f2f7;
+  color: #007aff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 180px;
+  top: 60px; 
+  right: 20px;
+  z-index: 1000;
+
+  /* Start hidden and transparent */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+#moreMenu.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+#moreMenu {
+  position: absolute;
+  top: 50px;  /* adjust so it’s below the button */
+  right: 20px;
+  width: 200px;
+  background: #1e1e1e;           /* dark charcoal */
+  color: #f2f2f7;                /* light iOS off-white */
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
+  user-select: none;
+  z-index: 9999;
+  backdrop-filter: blur(10px); /* glassy blur effect */
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#moreMenu.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#moreMenu button {
+  background: transparent;
+  border: none;
+  color: #0a84ff;               /* iOS bright blue */
+  padding: 10px 8px;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+}
+
+#moreMenu button:hover:not(:disabled) {
+  background: rgba(10, 132, 255, 0.15);
+  color: #40a9ff;
+}
+
+#moreMenu button:disabled {
+  color: #444;
+  cursor: not-allowed;
+}
+@keyframes borderPulse {
+  0% {
+    border-color: #0a84ff;    /* iOS blue */
+    box-shadow: 0 0 8px #0a84ff88;
+  }
+  25% {
+    border-color: #5ac8fa;    /* lighter blue */
+    box-shadow: 0 0 12px #5ac8fa88;
+  }
+  50% {
+    border-color: #64d2ff;    /* even lighter cyan */
+    box-shadow: 0 0 16px #64d2ff88;
+  }
+  75% {
+    border-color: #0a84ff;
+    box-shadow: 0 0 12px #0a84ff88;
+  }
+  100% {
+    border-color: #0a84ff;
+    box-shadow: 0 0 8px #0a84ff88;
+  }
+}
+
+#moreMenu {
+  /* existing styles... */
+  border: 2px solid #0a84ff;    /* initial border color */
+  animation: borderPulse 4s infinite alternate ease-in-out;
+  /* keep your backdrop-filter, bg, etc */
+}
   </style>
 </head>
 <body>
@@ -82,14 +245,15 @@
 
     <textarea id="transcript" placeholder="Your words will appear here..."></textarea>
 
-    <div class="btn-row">
-      <button id="downloadBtn" title="Download transcript as .txt">⬇️ Download</button>
-      <button id="printBtn" title="Print transcript">🖨️ Print</button>
-      <button id="shareBtn" title="Share transcript">📤 Share</button>
-      <button id="readBtn" title="Read transcript aloud">🔊 Read My Vibe</button>
-      <button id="stopReadBtn" title="Stop reading" disabled>⏹️ Stop Reading</button>
-    </div>
-  </div>
+  <button id="moreBtn" aria-haspopup="true" aria-expanded="false">••• More</button>
+
+<div id="moreMenu" role="menu" hidden>
+  <button id="downloadBtn" role="menuitem">⬇️ Download</button>
+  <button id="printBtn" role="menuitem">🖨️ Print</button>
+  <button id="shareBtn" role="menuitem">📤 Share</button>
+  <button id="readBtn" role="menuitem">🔊 Read Aloud</button>
+  <button id="stopReadBtn" role="menuitem" disabled>⏹️ Stop Reading</button>
+</div>
 
   <script>
     // Levenshtein Distance for fuzzy similarity
@@ -320,6 +484,41 @@
       stopReadBtn.disabled = true;
       status.textContent = listening ? "Listening..." : "Idle";
     };
+    const moreBtn = document.getElementById('moreBtn');
+const moreMenu = document.getElementById('moreMenu');
+
+moreBtn.addEventListener('click', () => {
+  const isShown = moreMenu.classList.contains('show');
+  if (isShown) {
+    hideMenu();
+  } else {
+    showMenu();
+  }
+});
+
+function showMenu() {
+  moreMenu.classList.add('show');
+  moreBtn.setAttribute('aria-expanded', 'true');
+}
+
+function hideMenu() {
+  moreMenu.classList.remove('show');
+  moreBtn.setAttribute('aria-expanded', 'false');
+}
+
+// Hide menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!moreBtn.contains(e.target) && !moreMenu.contains(e.target)) {
+    hideMenu();
+  }
+});
+
+// Hide menu on action button click inside the menu
+moreMenu.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    hideMenu();
+  });
+});
   </script>
 </body>
 </html>
