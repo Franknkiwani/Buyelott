@@ -317,21 +317,43 @@
 
   loginBtn.parentElement.insertBefore(statusDiv, loginBtn);
 
-  // 🔁 Check if user is already signed in (via localStorage)
   const savedUser = JSON.parse(localStorage.getItem('soloshopper_user'));
 
-  if (savedUser) {
+  function setLoggedInUI(nameText) {
     loginBtn.style.display = "none";
+    statusDiv.innerHTML = `
+      ${nameText}
+      <button id="logoutBtn" style="
+        background: #ff3b3b;
+        color: white;
+        border: none;
+        padding: 4px 10px;
+        margin-left: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      ">Logout</button>
+    `;
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        localStorage.removeItem('soloshopper_user');
+        location.reload();
+      });
+    });
+  }
+
+  // If already logged in
+  if (savedUser) {
     const fullName = savedUser.displayName;
     if (fullName && fullName.trim().includes(" ")) {
       const firstLast = fullName.trim().split(" ").slice(0, 2).join(" ");
-      statusDiv.textContent = `@${firstLast}`;
+      setLoggedInUI(`@${firstLast}`);
     } else {
-      statusDiv.textContent = "Logged in";
+      setLoggedInUI("Logged in");
     }
   }
 
-  // 🧠 On Login
+  // On Google login click
   loginBtn.addEventListener('click', () => {
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -343,12 +365,11 @@
         };
         localStorage.setItem('soloshopper_user', JSON.stringify(userInfo));
 
-        loginBtn.style.display = "none";
         if (user.displayName && user.displayName.trim().includes(" ")) {
           const name = user.displayName.trim().split(" ").slice(0, 2).join(" ");
-          statusDiv.textContent = `@${name}`;
+          setLoggedInUI(`@${name}`);
         } else {
-          statusDiv.textContent = "Logged in";
+          setLoggedInUI("Logged in");
         }
 
         console.log("Logged in as:", userInfo);
