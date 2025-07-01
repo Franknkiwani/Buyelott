@@ -620,66 +620,15 @@
 }
 
 /* Smooth scrolling & no overscroll glow on iOS */
-html, body {
-  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
-  overscroll-behavior: contain;       /* Prevent scroll chaining */
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased; /* Better font rendering */
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #121217; /* Your dark bg */
-  color: #e0e0e0;
+.sidebar {
+  overflow-y: auto;
+  max-height: 100vh;
+  -webkit-overflow-scrolling: touch; /* smooth iOS-like scroll */
+  scrollbar-width: none; /* Firefox */
 }
 
-/* Make buttons feel native and avoid weird tap highlight */
-button, input, a {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation; /* Improves tap responsiveness */
-  cursor: pointer;
-  border-radius: 8px;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* Disable drag on images and prevent ghosting */
-img {
-  user-drag: none;
-  -webkit-user-drag: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  pointer-events: none; /* If you want to disable image interactions completely */
-}
-
-/* Prevent text input fields from being unselectable */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  user-select: text !important; /* Allow text selection here */
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-  outline-offset: 2px; /* Optional focus styling */
-  outline-color: #00ccff;
-  outline-style: solid;
-  outline-width: 1.5px;
-}
-
-/* Optional: Remove focus outline on buttons, but keep accessibility in mind */
-button:focus,
-a:focus {
-  outline: none;
-}
-
-/* Hide scrollbars (optional for native feel) */
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  background: transparent;
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 .ios-settings-block {
   width: 90%;
@@ -768,14 +717,32 @@ body {
   </nav>
 <div class="ios-settings-block">
   <div class="ios-section">
-    <button class="ios-link">Privacy Policy</button>
-    <button class="ios-link">Terms of Service</button>
-    <button class="ios-link">Contact Us</button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/privacypolicy'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 21c-4.41-1.14-7-5.15-7-10V6.3l7-3.11 7 3.11V11c0 4.85-2.59 8.86-7 10z"/></svg>
+      <span>Privacy Policy</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/termsofservice'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      <span>Terms of Service</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/contactus'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 8V7l-3 2-2-2-2 2-2-2-2 2-2-2-3 2v1l3-2 2 2 2-2 2 2 2-2 2 2 3-2z"/><path d="M3 8v13h18V8H3zm2 2h14v9H5v-9z"/></svg>
+      <span>Contact Us</span>
+    </button>
   </div>
   <div class="ios-section">
-    <button class="ios-link">About</button>
-    <button class="ios-link">Help Center</button>
-    <button class="ios-link">Report a Problem</button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/about'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c.83 0 1.5.67 1.5 1.5S12.83 8 12 8s-1.5-.67-1.5-1.5S11.17 5 12 5zm1 14h-2v-6h2v6z"/></svg>
+      <span>About</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/helpcenter'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 17c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm.88-10.29c-.49-.28-1.08-.46-1.88-.46-1.38 0-2.5.56-2.5 2h2c0-.38.33-.5.5-.5.34 0 .5.11.66.2.29.17.46.36.46.8 0 .54-.34.73-.88 1.12-.65.45-1.14 1.03-1.14 2.18h2c0-.72.19-1.01.71-1.4.5-.36 1.29-.89 1.29-2.1 0-.84-.4-1.49-1.22-1.84z"/></svg>
+      <span>Help Center</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/reportaproblem'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      <span>Report a Problem</span>
+    </button>
   </div>
 </div>
 </div>
@@ -818,8 +785,6 @@ body {
     });
   });
 </script>
-<!-- Firebase Module Script -->
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
@@ -847,7 +812,7 @@ body {
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
 
-  // Make auth functions global for non-module scripts (like email login/register handler)
+  // Make auth functions global for non-module scripts
   window.firebase = {
     auth,
     GoogleAuthProvider,
@@ -870,13 +835,23 @@ body {
     googleLoginBtn.parentElement.insertBefore(statusDiv, googleLoginBtn);
   }
 
-  // Set logged in UI: hide all login/register buttons & show username + logout
-  window.setLoggedInUI = function(nameText) {
+  // Your custom default avatar
+  const fallbackAvatar = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXnftKcD6788gpR1vsPRfGFA4T2DJbI8OENd-Gk3pOwFQXna77PBqzBgx&s=10';
+
+  // Set logged in UI: hide all login/register buttons & show profile pic + username + logout
+  window.setLoggedInUI = function(nameText, photoURL) {
     if (googleLoginBtn) googleLoginBtn.style.display = "none";
     if (authButtonsContainer) authButtonsContainer.style.display = "none";
 
+    // Replace empty or pravatar.cc URLs with fallback avatar
+    if (!photoURL || photoURL.includes('pravatar.cc')) {
+      photoURL = fallbackAvatar;
+    }
+
     statusDiv.innerHTML = `
-      ${nameText}
+      <img src="${photoURL}" alt="Profile picture" 
+        style="width:40px; height:40px; border-radius:50%; vertical-align:middle; margin-right:10px; object-fit:cover;">
+      <span style="vertical-align:middle;">${nameText}</span>
       <button id="logoutBtn" style="
         background: #ff3b3b;
         color: white;
@@ -897,17 +872,18 @@ body {
     });
   };
 
-  // On page load: check if user info saved in localStorage, if yes, set UI accordingly
+  // On page load: check saved user info from localStorage, update UI if exists
   const savedUser = JSON.parse(localStorage.getItem('soloshopper_user'));
   if (savedUser) {
     const fullName = savedUser.displayName || savedUser.email || '';
     const displayName = fullName.includes(" ")
       ? fullName.trim().split(" ").slice(0, 2).join(" ")
       : fullName.split("@")[0];
-    window.setLoggedInUI(`@${displayName}`);
+
+    window.setLoggedInUI(`@${displayName}`, savedUser.photo || null);
   }
 
-  // Google sign-in click
+  // Google sign-in button click
   if (googleLoginBtn) {
     googleLoginBtn.addEventListener('click', () => {
       signInWithPopup(auth, provider)
@@ -923,7 +899,7 @@ body {
           const displayName = user.displayName
             ? user.displayName.split(" ").slice(0, 2).join(" ")
             : user.email.split("@")[0];
-          window.setLoggedInUI(`@${displayName}`);
+          window.setLoggedInUI(`@${displayName}`, user.photoURL);
         })
         .catch(error => {
           console.error("Google sign-in failed:", error.message);
