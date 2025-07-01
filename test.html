@@ -1,226 +1,343 @@
 <!DOCTYPE html>
-<html>
-<div id="cpa-locker-f45bb07a-50d8-11f0-b388-c2a106037d45"></div><script type="text/javascript" id="cpljs-f45bb07a-50d8-11f0-b388-c2a106037d45" src="https://bestlocker.eu/iframeLoader/f45bb07a-50d8-11f0-b388-c2a106037d45"></script>
+<html lang="en" >
 <head>
-  <title>Profile Page</title>
+  <meta charset="UTF-8" />
+  <title>VoiceVibe Pro</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display&display=swap');
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f9f9f9;
       margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 0 18px rgba(0,0,0,0.05);
-    }
-
-    .avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .username {
-      font-size: 24px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .bio {
-      font-size: 14px;
-      color: #555;
-      margin-top: 8px;
-    }
-
-    .stats {
-      margin-top: 12px;
-      color: #777;
-    }
-
-    .follow-btn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #00c853;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .follow-btn:disabled {
-      background: #888;
-      cursor: default;
-    }
-
-    .posts-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 30px 0 10px;
-      text-align: left;
-    }
-
-    .posts {
+      background: linear-gradient(135deg, #1e1e2f, #12121b);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: #eee;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 1rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .post-card {
-      text-align: left;
-      background: #fafafa;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    h1 {
+      font-weight: 600;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 6px #00c8ff99;
     }
 
-    .post-img {
-      width: 100%;
-      border-radius: 8px;
-      object-fit: cover;
-      max-height: 250px;
+    .button {
+      background: rgba(255 255 255 / 0.1);
+      border: 1.5px solid rgba(255 255 255 / 0.3);
+      color: #00c8ff;
+      font-size: 1.2rem;
+      padding: 0.8rem 2rem;
+      border-radius: 15px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s ease, color 0.3s ease;
+      margin: 0.5rem;
+      font-weight: 600;
+      box-shadow: 0 0 6px #00c8ff55;
+      backdrop-filter: saturate(180%) blur(12px);
     }
 
-    .post-title {
-      margin-top: 8px;
-      font-weight: bold;
-      font-size: 16px;
+    .button:disabled {
+      color: #555;
+      border-color: #222;
+      cursor: not-allowed;
+      box-shadow: none;
+      background: rgba(0 0 0 / 0.4);
     }
 
-    .not-found {
-      margin-top: 100px;
-      font-size: 20px;
-      color: #888;
+    #timer {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      color: #0ff;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 8px #00c8ff99;
+    }
+
+    #waveform {
+      margin-top: 1rem;
+      width: 300px;
+      height: 80px;
+      background: rgba(255 255 255 / 0.05);
+      border-radius: 15px;
+      box-shadow: inset 0 0 10px #00c8ff22;
+    }
+
+    #result {
+      margin-top: 2rem;
+      width: 320px;
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 25px;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 0 20px #00c8ff88;
+      backdrop-filter: saturate(180%) blur(15px);
+      font-size: 1.1rem;
+      font-weight: 600;
+      user-select: none;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    #result.energetic {
+      color: #00ffea;
+      text-shadow: 0 0 12px #00fff6cc;
+      animation: pulseGlow 2s infinite alternate;
+    }
+
+    #result.calm {
+      color: #7afcff;
+      text-shadow: 0 0 10px #7afcffaa;
+      animation: slowGlow 3s infinite alternate;
+    }
+
+    #result.nervous {
+      color: #ff5577;
+      text-shadow: 0 0 12px #ff5577cc;
+      animation: shake 0.5s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% {text-shadow: 0 0 6px #00fff6cc, 0 0 12px #00fff6cc;}
+      100% {text-shadow: 0 0 14px #00fff6cc, 0 0 24px #00fff6cc;}
+    }
+
+    @keyframes slowGlow {
+      0% {text-shadow: 0 0 10px #7afcffaa;}
+      100% {text-shadow: 0 0 20px #7afcffee;}
+    }
+
+    @keyframes shake {
+      0% {transform: translateX(-2px);}
+      100% {transform: translateX(2px);}
+    }
+
+    audio {
+      margin-top: 1rem;
+      outline: none;
+      width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00c8ff77;
+      background: rgba(0,0,0,0.15);
     }
   </style>
 </head>
 <body>
-<div id="cpa-locker-7f945870-50ef-11f0-a905-c2a106037d45"></div><script type="text/javascript" id="cpljs-7f945870-50ef-11f0-a905-c2a106037d45" src="https://bestlocker.eu/iframeLoader/7f945870-50ef-11f0-a905-c2a106037d45"></script>
-  <div id="profile"></div>
+  <h1>🎙️ VoiceVibe Pro</h1>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  <div>
+    <button id="recordBtn" class="button">Start Recording</button>
+    <button id="playBtn" class="button" disabled>▶️ Play Recording</button>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+  <div id="timer">00:00</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    const container = document.getElementById("profile");
+  <canvas id="waveform"></canvas>
 
-    const urlParts = window.location.pathname.split("/");
-    const uid = urlParts[urlParts.length - 1];
+  <div id="result"></div>
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loadProfile(uid, user.uid);
-      } else {
-        container.innerHTML = `<div class="not-found">You must be signed in to view profiles.</div>`;
+  <audio id="audioPlayback" controls style="display:none"></audio>
+
+  <script>
+    const recordBtn = document.getElementById("recordBtn");
+    const playBtn = document.getElementById("playBtn");
+    const timerEl = document.getElementById("timer");
+    const resultDiv = document.getElementById("result");
+    const audioPlayback = document.getElementById("audioPlayback");
+    const canvas = document.getElementById("waveform");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 300;
+    canvas.height = 80;
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob;
+    let audioUrl;
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let source;
+    let animationId;
+
+    let recording = false;
+    let timer = 0;
+    let timerInterval;
+
+    function resetUI() {
+      resultDiv.textContent = "";
+      timerEl.textContent = "00:00";
+      playBtn.disabled = true;
+      audioPlayback.style.display = "none";
+      clearCanvas();
+    }
+
+    function clearCanvas() {
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawWaveform() {
+      analyser.getFloatTimeDomainData(dataArray);
+
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#00c8ff";
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / dataArray.length;
+      let x = 0;
+
+      for (let i = 0; i < dataArray.length; i++) {
+        let y = (dataArray[i] + 1) * canvas.height / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        x += sliceWidth;
+      }
+
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      animationId = requestAnimationFrame(drawWaveform);
+    }
+
+    recordBtn.addEventListener("click", async () => {
+      if (recording) return;
+
+      resetUI();
+      recording = true;
+      recordBtn.disabled = true;
+      recordBtn.textContent = "Recording...";
+
+      audioChunks = [];
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioContext = new AudioContext();
+        source = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        dataArray = new Float32Array(analyser.fftSize);
+
+        source.connect(analyser);
+        drawWaveform();
+
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.start();
+
+        // Timer count
+        timer = 0;
+        timerEl.textContent = "00:00";
+        timerInterval = setInterval(() => {
+          timer++;
+          timerEl.textContent = `00:${timer < 10 ? "0" + timer : timer}`;
+          if (timer >= 10) {
+            stopRecording();
+          }
+        }, 1000);
+      } catch (err) {
+        resultDiv.textContent = "⚠️ Microphone permission denied or error.";
+        recordBtn.disabled = false;
+        recording = false;
+        cancelAnimationFrame(animationId);
       }
     });
 
-    async function loadProfile(profileUid, currentUid) {
-      if (!profileUid || profileUid.includes(".")) return show404();
+    function stopRecording() {
+      if (!recording) return;
 
-      try {
-        const userRef = ref(db, `users/${profileUid}`);
-        const snapshot = await get(userRef);
-        if (!snapshot.exists()) return show404();
+      recording = false;
+      recordBtn.disabled = false;
+      recordBtn.textContent = "Start Recording";
 
-        const user = snapshot.val();
-        const avatar = user.avatar || "https://i.imgur.com/4ZQZ4ZL.jpg";
-        const username = user.username || "Anonymous";
-        const bio = user.bio || "No bio yet.";
-        const followers = user.followers ? Object.keys(user.followers).length : 0;
-        const isFollowing = user.followers && user.followers[currentUid];
+      mediaRecorder.stop();
+      mediaRecorder.onstop = () => {
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationId);
 
-        container.innerHTML = `
-          <div class="container">
-            <img src="${avatar}" class="avatar" />
-            <div class="username">@${username}</div>
-            <div class="bio">${bio}</div>
-            <div class="stats">Followers: <span id="followersCount">${followers}</span></div>
-            <button class="follow-btn" id="followBtn" ${isFollowing ? 'disabled' : ''}>
-              ${isFollowing ? "Following" : "Follow"}
-            </button>
-            <div class="posts-title">Posts</div>
-            <div class="posts" id="userPosts"></div>
-          </div>
-        `;
+        // Stop audio context & mic
+        audioContext.close();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
 
-        const followBtn = document.getElementById("followBtn");
-        if (!isFollowing) {
-          followBtn.onclick = async () => {
-            await set(ref(db, `users/${profileUid}/followers/${currentUid}`), true);
-            await set(ref(db, `users/${currentUid}/following/${profileUid}`), true);
+        audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioUrl;
+        audioPlayback.style.display = "block";
+        playBtn.disabled = false;
 
-            document.getElementById("followersCount").textContent = followers + 1;
-            followBtn.textContent = "Following";
-            followBtn.disabled = true;
-            followBtn.style.background = "#888";
-          };
-        }
-
-        loadUserPosts(profileUid);
-
-      } catch (err) {
-        show404();
-      }
+        analyzeAudio(audioBlob);
+      };
     }
 
-    async function loadUserPosts(profileUid) {
-      const postsContainer = document.getElementById("userPosts");
-      postsContainer.innerHTML = "<div>Loading posts...</div>";
+    playBtn.addEventListener("click", () => {
+      if (!audioPlayback.src) return;
+      audioPlayback.play();
+    });
 
-      try {
-        const postsSnap = await get(ref(db, "post"));
-        if (!postsSnap.exists()) {
-          postsContainer.innerHTML = "<div>No posts found.</div>";
-          return;
-        }
+    // Analyze pitch & speed from the Blob
+    async function analyzeAudio(blob) {
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioCtx = new AudioContext();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const rawData = audioBuffer.getChannelData(0);
 
-        const allPosts = postsSnap.val();
-        const userPosts = Object.entries(allPosts).filter(([_, post]) => post.uid === profileUid);
+      // Calculate pitch by zero crossing
+      const pitch = getPitch(rawData, audioBuffer.sampleRate);
 
-        if (userPosts.length === 0) {
-          postsContainer.innerHTML = "<div>This user hasn't posted anything yet.</div>";
-          return;
-        }
+      // Calculate speed by energy bursts
+      const speed = estimateSpeechSpeed(rawData);
 
-        postsContainer.innerHTML = userPosts.map(([id, post]) => `
-          <div class="post-card">
-            <img src="${post.image}" class="post-img" />
-            <div class="post-title">${post.title}</div>
-          </div>
-        `).join("");
-      } catch (e) {
-        postsContainer.innerHTML = "<div>Error loading posts.</div>";
+      let tone = "😐 Neutral";
+      let className = "";
+
+      if (pitch > 200 && speed > 1.8) {
+        tone = "⚡ Energetic";
+        className = "energetic";
+      } else if (pitch < 150 && speed < 1.2) {
+        tone = "😌 Calm";
+        className = "calm";
+      } else if (pitch > 250 && speed < 1.0) {
+        tone = "😰 Nervous";
+        className = "nervous";
       }
+
+      resultDiv.innerHTML = `
+        <p><strong>Pitch:</strong> ${Math.round(pitch)} Hz</p>
+        <p><strong>Speed:</strong> ${speed.toFixed(1)} (approx.)</p>
+        <p><strong>Vibe:</strong> ${tone}</p>
+      `;
+
+      resultDiv.className = className;
     }
 
-    function show404() {
-      container.innerHTML = `<div class="not-found">404 — Profile Not Found</div>`;
+    function getPitch(data, sampleRate) {
+      let crossings = 0;
+      for (let i = 1; i < data.length; i++) {
+        if ((data[i - 1] < 0 && data[i] >= 0) || (data[i - 1] > 0 && data[i] <= 0)) {
+          crossings++;
+        }
+      }
+      const frequency = (crossings * sampleRate) / (2 * data.length);
+      return frequency || 0;
+    }
+
+    function estimateSpeechSpeed(data) {
+      let energyBursts = 0;
+      for (let i = 0; i < data.length; i++) {
+        if (Math.abs(data[i]) > 0.2) energyBursts++;
+      }
+      return energyBursts / 50;
     }
   </script>
-<div id="cpa-locker-7f945870-50ef-11f0-a905-c2a106037d45"></div><script type="text/javascript" id="cpljs-7f945870-50ef-11f0-a905-c2a106037d45" src="https://bestlocker.eu/iframeLoader/7f945870-50ef-11f0-a905-c2a106037d45"></script>
 </body>
 </html>
