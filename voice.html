@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VoiceVibe — Speak & Edit</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0e0e0e;
+      color: white;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      background: #1c1c1c;
+      color: white;
+      resize: vertical;
+      margin-top: 1rem;
+    }
+    button {
+      background: #007aff;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      margin: 1rem 0;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 VoiceVibe</h1>
+    <p>Tap to speak. Edit your vibe if needed.</p>
+    
+    <button id="startBtn">Start Listening</button>
+    <div class="status" id="status">Not listening...</div>
+
+    <textarea id="transcript" placeholder="Your words will appear here..."></textarea>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const transcriptArea = document.getElementById('transcript');
+    const status = document.getElementById('status');
+
+    // Check if browser supports SpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support Speech Recognition. Try Chrome.");
+      startBtn.disabled = true;
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      let finalTranscript = '';
+
+      recognition.onstart = () => {
+        status.textContent = "Listening...";
+        startBtn.textContent = "Stop Listening";
+        startBtn.style.background = "#ff3b30";
+      };
+
+      recognition.onend = () => {
+        status.textContent = "Stopped listening.";
+        startBtn.textContent = "Start Listening";
+        startBtn.style.background = "#007aff";
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interim += transcript;
+          }
+        }
+        transcriptArea.value = finalTranscript + interim;
+      };
+
+      let listening = false;
+
+      startBtn.onclick = () => {
+        if (!listening) {
+          recognition.start();
+        } else {
+          recognition.stop();
+        }
+        listening = !listening;
+      };
+    }
+  </script>
+</body>
+</html>
