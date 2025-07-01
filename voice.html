@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VoiceVibe — Speak & Edit</title>
+  <title>VoiceVibe — Final Fixed</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0e0e0e;
+      background: #0d0d0d;
       color: white;
       margin: 0;
       padding: 2rem;
@@ -24,7 +24,7 @@
       font-size: 1rem;
       border: none;
       border-radius: 12px;
-      background: #1c1c1c;
+      background: #1a1a1a;
       color: white;
       resize: vertical;
       margin-top: 1rem;
@@ -38,10 +38,10 @@
       border-radius: 999px;
       cursor: pointer;
       margin: 1rem 0;
+      transition: 0.2s;
     }
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
+    button:hover {
+      opacity: 0.9;
     }
     .status {
       margin-top: 0.5rem;
@@ -53,8 +53,8 @@
 <body>
   <div class="container">
     <h1>🎤 VoiceVibe</h1>
-    <p>Tap to speak. Edit your vibe if needed.</p>
-    
+    <p>Tap to speak. Edit your thoughts. No rush.</p>
+
     <button id="startBtn">Start Listening</button>
     <div class="status" id="status">Not listening...</div>
 
@@ -66,19 +66,18 @@
     const transcriptArea = document.getElementById('transcript');
     const status = document.getElementById('status');
 
-    // Check if browser supports SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognition) {
-      alert("Your browser doesn't support Speech Recognition. Try Chrome.");
+      alert("Speech Recognition not supported. Try Chrome.");
       startBtn.disabled = true;
     } else {
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
+      recognition.continuous = false; // We restart manually for smoother control
+      recognition.interimResults = false;
       recognition.lang = 'en-US';
 
-      let finalTranscript = '';
+      let listening = false;
 
       recognition.onstart = () => {
         status.textContent = "Listening...";
@@ -90,30 +89,32 @@
         status.textContent = "Stopped listening.";
         startBtn.textContent = "Start Listening";
         startBtn.style.background = "#007aff";
+
+        // Auto-restart if still listening
+        if (listening) {
+          setTimeout(() => recognition.start(), 500);
+        }
       };
 
       recognition.onresult = (event) => {
-        let interim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interim += transcript;
+            const newSentence = event.results[i][0].transcript.trim();
+            if (newSentence.length > 1) {
+              transcriptArea.value += newSentence + ". ";
+            }
           }
         }
-        transcriptArea.value = finalTranscript + interim;
       };
-
-      let listening = false;
 
       startBtn.onclick = () => {
         if (!listening) {
           recognition.start();
+          listening = true;
         } else {
           recognition.stop();
+          listening = false;
         }
-        listening = !listening;
       };
     }
   </script>
