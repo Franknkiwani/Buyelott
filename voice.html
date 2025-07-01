@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VoiceVibe Pro - Smart Transcriber</title>
+  <title>VoiceVibe Pro 2.0 - Smart Transcriber + TTS + Save</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
@@ -39,14 +39,15 @@
     button {
       background: #007aff;
       color: white;
-      padding: 0.8rem 2rem;
-      font-size: 1.1rem;
+      padding: 0.7rem 1.6rem;
+      font-size: 1.05rem;
       border: none;
       border-radius: 999px;
       cursor: pointer;
-      margin-top: 1rem;
+      margin: 0.6rem 0.4rem 0 0.4rem;
       transition: background-color 0.3s ease;
       user-select: none;
+      min-width: 130px;
     }
     button:hover:not(:disabled) {
       background: #005bb5;
@@ -63,17 +64,31 @@
       user-select: none;
       font-style: italic;
     }
+    .btn-row {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 VoiceVibe Pro</h1>
-    <p>Speak freely. We catch your words smartly — no repeats, no spam.</p>
+    <h1>🎤 VoiceVibe Pro 2.0</h1>
+    <p>Speak freely. Smart transcription + share + read aloud.</p>
 
     <button id="startBtn">Start Listening</button>
     <div class="status" id="status">Not listening...</div>
 
     <textarea id="transcript" placeholder="Your words will appear here..."></textarea>
+
+    <div class="btn-row">
+      <button id="downloadBtn" title="Download transcript as .txt">⬇️ Download</button>
+      <button id="printBtn" title="Print transcript">🖨️ Print</button>
+      <button id="shareBtn" title="Share transcript">📤 Share</button>
+      <button id="readBtn" title="Read transcript aloud">🔊 Read My Vibe</button>
+      <button id="stopReadBtn" title="Stop reading" disabled>⏹️ Stop Reading</button>
+    </div>
   </div>
 
   <script>
@@ -115,6 +130,11 @@
     const startBtn = document.getElementById('startBtn');
     const transcriptArea = document.getElementById('transcript');
     const status = document.getElementById('status');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const printBtn = document.getElementById('printBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const readBtn = document.getElementById('readBtn');
+    const stopReadBtn = document.getElementById('stopReadBtn');
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -153,7 +173,6 @@
         startBtn.style.background = "#007aff";
 
         if (listening) {
-          // Restart after 500ms to avoid rapid restart spam
           setTimeout(() => recognition.start(), 500);
         }
       };
@@ -166,7 +185,6 @@
       recognition.onresult = (event) => {
         const now = Date.now();
         if (now - lastTimestamp < minInterval) {
-          // Too fast, skip
           return;
         }
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -175,15 +193,13 @@
             const newSentence = newSentenceRaw.toLowerCase();
 
             if (
-              newSentence.length < 3 ||                 // Too short
-              isStopWordOnly(newSentence) ||             // Just filler words
-              similarity(newSentence, lastSentence.toLowerCase()) > repeatThreshold // Too similar
+              newSentence.length < 3 ||
+              isStopWordOnly(newSentence) ||
+              similarity(newSentence, lastSentence.toLowerCase()) > repeatThreshold
             ) {
-              // Skip it
               continue;
             }
 
-            // Append nicely with a period and space
             transcriptArea.value += newSentenceRaw + ". ";
             lastSentence = newSentenceRaw;
             lastTimestamp = now;
@@ -203,6 +219,107 @@
         }
       };
     }
+
+    // Download transcript as text file
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    downloadBtn.onclick = () => {
+      const text = transcriptArea.value.trim();
+      if (!text) return alert('Nothing to download!');
+      downloadText('VoiceVibe_Transcript.txt', text);
+    };
+
+    // Print transcript
+    function printTranscript(text) {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <pre style="font-family: monospace; font-size:16px; padding:1rem; white-space: pre-wrap;">${text}</pre>
+        <script>window.print(); window.onafterprint = () => window.close();<\/script>
+      `);
+      printWindow.document.close();
+    }
+
+    printBtn.onclick = () => {
+      const text = transcriptArea.value.trim();
+      if (!text) return alert('Nothing to print!');
+      printTranscript(text);
+    };
+
+    // Share transcript via Web Share API (mobile supported)
+    shareBtn.onclick = async () => {
+      const text = transcriptArea.value.trim();
+      if (!text) return alert('Nothing to share!');
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'My VoiceVibe Transcript',
+            text,
+          });
+        } catch (err) {
+          alert('Share failed: ' + err.message);
+        }
+      } else {
+        alert('Sharing not supported on this device.');
+      }
+    };
+
+    // Text-to-speech (read aloud)
+    function readAloud(text) {
+      if (!window.speechSynthesis) {
+        alert("Sorry, your browser doesn't support Text-to-Speech.");
+        return;
+      }
+
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel(); // Stop current speech if any
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.pitch = 1;
+      utterance.rate = 1;
+
+      utterance.onstart = () => {
+        readBtn.disabled = true;
+        stopReadBtn.disabled = false;
+        status.textContent = "Reading aloud...";
+      };
+      utterance.onend = () => {
+        readBtn.disabled = false;
+        stopReadBtn.disabled = true;
+        status.textContent = listening ? "Listening..." : "Idle";
+      };
+      utterance.onerror = (e) => {
+        alert("Speech synthesis error: " + e.error);
+        readBtn.disabled = false;
+        stopReadBtn.disabled = true;
+        status.textContent = "Idle";
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+
+    readBtn.onclick = () => {
+      const text = transcriptArea.value.trim();
+      if (!text) return alert("Nothing to read!");
+      readAloud(text);
+    };
+
+    stopReadBtn.onclick = () => {
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+      readBtn.disabled = false;
+      stopReadBtn.disabled = true;
+      status.textContent = listening ? "Listening..." : "Idle";
+    };
   </script>
 </body>
 </html>
