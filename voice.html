@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple Upload with Preview</title>
+  <title>Upload with Video Color Change</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
@@ -53,7 +53,24 @@
       max-width: 350px;
       border-radius: 14px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      display: none; /* hidden initially */
+      display: none;
+      border: 5px solid transparent;
+      transition: border-color 0.5s ease;
+    }
+    video.uploading {
+      border-color: #ff9500;
+      box-shadow: 0 0 20px 5px #ff9500;
+      animation: pulse 2s infinite;
+    }
+    video.done {
+      border-color: #34c759;
+      box-shadow: 0 0 20px 5px #34c759;
+      animation: none;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px 3px #ff9500; }
+      50% { box-shadow: 0 0 25px 8px #ff9500; }
+      100% { box-shadow: 0 0 10px 3px #ff9500; }
     }
   </style>
 </head>
@@ -72,6 +89,7 @@
       if (!videoInput.files.length) {
         videoPreview.style.display = 'none';
         uploadBtn.disabled = true;
+        videoPreview.classList.remove('uploading', 'done');
         return;
       }
 
@@ -81,6 +99,8 @@
 
       videoPreview.src = url;
       videoPreview.style.display = 'block';
+      videoPreview.classList.remove('uploading', 'done');
+      videoPreview.style.borderColor = 'transparent';
     });
 
     uploadBtn.addEventListener('click', () => {
@@ -90,10 +110,16 @@
       uploadBtn.classList.add('uploading');
       uploadBtn.textContent = 'Uploading...';
 
+      videoPreview.classList.remove('done');
+      videoPreview.classList.add('uploading');
+
       setTimeout(() => {
         uploadBtn.classList.remove('uploading');
         uploadBtn.classList.add('done');
         uploadBtn.textContent = 'Uploaded!';
+
+        videoPreview.classList.remove('uploading');
+        videoPreview.classList.add('done');
       }, 2000);
     });
   </script>
