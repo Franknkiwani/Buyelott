@@ -2,96 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Language Detector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>VoiceVibe Upload</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #111;
-      color: #fff;
-      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #000;
+      margin: 0;
+      padding: 16px;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: start;
+      gap: 12px;
     }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-    input, button {
-      display: block;
-      margin-top: 1rem;
-      font-size: 1rem;
-    }
-    button {
-      background: #0a84ff;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 12px;
-      color: white;
+    input[type="file"] {
+      margin-top: 12px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 17px;
+      border: 1px solid #ccc;
       cursor: pointer;
     }
     video {
-      max-width: 100%;
-      margin-top: 1rem;
-      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      margin-top: 12px;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    button {
+      margin-top: 20px;
+      background-color: #007aff;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+      padding: 14px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button:active {
+      background-color: #0051a8;
     }
     #result {
-      margin-top: 2rem;
-      background: #1c1c1e;
-      padding: 1rem;
-      border-radius: 10px;
-      font-family: monospace;
+      margin-top: 20px;
+      max-width: 400px;
+      padding: 16px;
+      border-radius: 14px;
+      background-color: #f2f2f7;
+      color: #000;
+      font-size: 16px;
+      white-space: pre-wrap;
+      text-align: left;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      min-height: 80px;
     }
   </style>
 </head>
 <body>
-  <h1>🎙️ Upload a Video to Detect Spoken Language</h1>
-  <input type="file" id="videoInput" accept="video/*">
+  <input type="file" id="videoInput" accept="video/*" />
   <video id="videoPreview" controls style="display:none;"></video>
-  <button onclick="uploadVideo()">Upload & Detect</button>
-
-  <div id="result" style="display:none;"></div>
+  <button id="uploadBtn" disabled>Upload & Detect</button>
+  <div id="result" aria-live="polite"></div>
 
   <script>
-    const input = document.getElementById("videoInput");
-    const preview = document.getElementById("videoPreview");
+    const videoInput = document.getElementById("videoInput");
+    const videoPreview = document.getElementById("videoPreview");
+    const uploadBtn = document.getElementById("uploadBtn");
     const resultBox = document.getElementById("result");
 
-    input.addEventListener("change", () => {
-      const file = input.files[0];
-      if (file) {
-        const url = URL.createObjectURL(file);
-        preview.src = url;
-        preview.style.display = "block";
+    let selectedFile = null;
+
+    videoInput.addEventListener("change", () => {
+      selectedFile = videoInput.files[0];
+      if (!selectedFile) {
+        videoPreview.style.display = "none";
+        uploadBtn.disabled = true;
+        resultBox.textContent = "";
+        return;
       }
+      const url = URL.createObjectURL(selectedFile);
+      videoPreview.src = url;
+      videoPreview.style.display = "block";
+      uploadBtn.disabled = false;
+      resultBox.textContent = "";
     });
 
-    async function uploadVideo() {
-      const file = input.files[0];
-      if (!file) return alert("Choose a video first!");
+    uploadBtn.addEventListener("click", async () => {
+      if (!selectedFile) return;
+      uploadBtn.disabled = true;
+      resultBox.textContent = "Detecting language... 🎙️";
 
       const formData = new FormData();
-      formData.append("video", file);
-
-      resultBox.style.display = "none";
-      resultBox.textContent = "";
+      formData.append("video", selectedFile);
 
       try {
         const res = await fetch("/upload-video", {
           method: "POST",
-          body: formData
+          body: formData,
         });
 
-        const data = await res.json();
-
         if (!res.ok) {
-          throw new Error(data.error || "Upload failed");
+          const err = await res.json();
+          throw new Error(err.error || "Upload failed");
         }
 
-        resultBox.style.display = "block";
-        resultBox.textContent = `🧠 Detected Transcript:\n\n${data.transcript || JSON.stringify(data)}`;
-      } catch (err) {
-        resultBox.style.display = "block";
-        resultBox.textContent = `❌ Error: ${err.message}`;
+        const data = await res.json();
+        resultBox.textContent = data.transcript || "No speech detected.";
+      } catch (e) {
+        resultBox.textContent = "❌ " + e.message;
+      } finally {
+        uploadBtn.disabled = false;
       }
-    }
+    });
   </script>
 </body>
 </html>
