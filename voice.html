@@ -3,124 +3,134 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upload with Video Color Change</title>
+  <title>Local Video Editor - ffmpeg.wasm</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #fff;
       color: #000;
       margin: 0;
-      padding: 16px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      height: 100vh;
+      min-height: 100vh;
       justify-content: center;
     }
     input[type="file"] {
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px;
       font-size: 17px;
       border: 1px solid #ccc;
       width: 100%;
-      max-width: 350px;
+      max-width: 360px;
       cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #f2f2f2;
+      color: #333;
     }
     button {
-      margin-top: 10px;
+      margin-top: 12px;
       width: 100%;
-      max-width: 350px;
+      max-width: 360px;
       padding: 14px;
       font-size: 18px;
       font-weight: 600;
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
       background-color: #007aff;
       color: white;
       cursor: pointer;
       transition: background-color 0.3s ease;
       user-select: none;
     }
-    button.uploading {
-      background-color: #ff9500;
-    }
-    button.done {
-      background-color: #34c759;
+    button:disabled {
+      background-color: #aaa;
+      cursor: default;
     }
     video {
       margin-top: 20px;
-      max-width: 350px;
+      max-width: 360px;
       border-radius: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      display: none;
-      border: 5px solid transparent;
-      transition: border-color 0.5s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      background-color: #000;
     }
-    video.uploading {
-      border-color: #ff9500;
-      box-shadow: 0 0 20px 5px #ff9500;
-      animation: pulse 2s infinite;
-    }
-    video.done {
-      border-color: #34c759;
-      box-shadow: 0 0 20px 5px #34c759;
-      animation: none;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 10px 3px #ff9500; }
-      50% { box-shadow: 0 0 25px 8px #ff9500; }
-      100% { box-shadow: 0 0 10px 3px #ff9500; }
+    #downloadLink {
+      margin-top: 12px;
+      font-weight: 600;
+      color: #007aff;
+      text-decoration: none;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
   <input type="file" id="videoInput" accept="video/*" />
-  <button id="uploadBtn" disabled>Upload</button>
-  <video id="videoPreview" controls></video>
+  <button id="processBtn" disabled>Process Video</button>
+  <video id="videoPlayer" controls></video>
+  <a id="downloadLink" style="display:none;" download>Download Edited Video</a>
 
-  <script>
+  <script type="module">
+    import { createFFmpeg, fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.1/dist/ffmpeg.min.js";
+
+    const ffmpeg = createFFmpeg({ log: true });
     const videoInput = document.getElementById('videoInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const videoPreview = document.getElementById('videoPreview');
+    const processBtn = document.getElementById('processBtn');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const downloadLink = document.getElementById('downloadLink');
+    let fileName = null;
 
     videoInput.addEventListener('change', () => {
       if (!videoInput.files.length) {
-        videoPreview.style.display = 'none';
-        uploadBtn.disabled = true;
-        videoPreview.classList.remove('uploading', 'done');
+        processBtn.disabled = true;
+        videoPlayer.src = "";
+        downloadLink.style.display = "none";
         return;
       }
-
-      uploadBtn.disabled = false;
-      const file = videoInput.files[0];
-      const url = URL.createObjectURL(file);
-
-      videoPreview.src = url;
-      videoPreview.style.display = 'block';
-      videoPreview.classList.remove('uploading', 'done');
-      videoPreview.style.borderColor = 'transparent';
+      fileName = videoInput.files[0].name;
+      videoPlayer.src = URL.createObjectURL(videoInput.files[0]);
+      processBtn.disabled = false;
+      downloadLink.style.display = "none";
+      downloadLink.href = "";
+      downloadLink.textContent = "";
     });
 
-    uploadBtn.addEventListener('click', () => {
-      if (!videoInput.files.length) return;
+    processBtn.addEventListener('click', async () => {
+      processBtn.disabled = true;
+      processBtn.textContent = "Loading FFmpeg...";
 
-      uploadBtn.classList.remove('done');
-      uploadBtn.classList.add('uploading');
-      uploadBtn.textContent = 'Uploading...';
+      if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+      }
 
-      videoPreview.classList.remove('done');
-      videoPreview.classList.add('uploading');
+      processBtn.textContent = "Processing Video...";
 
-      setTimeout(() => {
-        uploadBtn.classList.remove('uploading');
-        uploadBtn.classList.add('done');
-        uploadBtn.textContent = 'Uploaded!';
+      // Write file to ffmpeg FS
+      ffmpeg.FS('writeFile', fileName, await fetchFile(videoInput.files[0]));
 
-        videoPreview.classList.remove('uploading');
-        videoPreview.classList.add('done');
-      }, 2000);
+      // Run ffmpeg command: apply grayscale filter (hue=s=0)
+      await ffmpeg.run('-i', fileName, '-vf', 'hue=s=0', 'output.mp4');
+
+      // Read processed file
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+
+      // Create a Blob URL for the output video
+      const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+      const url = URL.createObjectURL(videoBlob);
+
+      // Update video player and download link
+      videoPlayer.src = url;
+      downloadLink.href = url;
+      downloadLink.download = 'edited-' + fileName;
+      downloadLink.textContent = 'Download Edited Video';
+      downloadLink.style.display = 'inline';
+
+      processBtn.textContent = "Process Video";
+      processBtn.disabled = false;
     });
   </script>
 
