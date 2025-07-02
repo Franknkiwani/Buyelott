@@ -697,7 +697,8 @@ body {
     position: fixed;
     left: 0 !important;
     top: 0;
-    height: 100vh;
+    height: auto;
+position: absolute; /* instead of fixed if you want it to scroll with content */
     transform: none !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -719,6 +720,11 @@ body {
 @media (min-width: 900px) {
   .logo {
     margin-left: 280px; /* same width as the sidebar */
+  }
+}
+@media (min-width: 900px) {
+  .logo {
+    margin-left: 280px; /* shift the brand text past the sidebar */
   }
 }
   </style>
