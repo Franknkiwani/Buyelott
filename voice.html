@@ -4,107 +4,168 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI ANALYZER</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-      color: #f0f0f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1rem;
-      min-height: 100vh;
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: env(safe-area-inset-top) 1rem env(safe-area-inset-bottom);
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0;
+    padding: 3rem 1.5rem 4rem;
+    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(40px);
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  h1 {
+    font-weight: 500;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    color: #ff3b30;
+    text-shadow:
+      0 0 8px #ff3b30,
+      0 0 12px #ff3b30,
+      0 0 18px #ff3b30;
+    user-select: none;
+  }
+
+  p {
+    font-weight: 400;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: #bbb;
+  }
+
+  input,
+  button,
+  textarea {
+    width: 100%;
+    max-width: 600px;
+    padding: 0.9rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 14px;
+    border: none;
+    outline: none;
+    margin: 0 auto 1.2rem;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  input,
+  textarea {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 500;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  input:focus,
+  textarea:focus {
+    border-color: #ff3b30;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  button {
+    background: #ff3b30;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+  }
+
+  button:hover:not(:disabled) {
+    background: #ff1e17;
+  }
+
+  button:disabled {
+    background: #aa2923;
+    cursor: not-allowed;
+  }
+
+  #result {
+    margin-top: 1rem;
+    min-height: 120px;
+    color: #ddd;
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
-    .container {
-      width: 100%;
-      max-width: 450px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 24px;
-      padding: 2rem 2rem 3rem;
-      box-shadow: 0 0 20px rgba(255,59,48,0.3);
-      backdrop-filter: blur(25px);
-      text-align: center;
+  }
+
+  .spinner {
+    margin: 2rem auto;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid #ff3b30;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 1s linear infinite;
+  }
+
+  img.thumb {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 14px;
+    margin-top: 1rem;
+    user-select: none;
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
     }
-    h1 {
-      font-weight: 900;
-      font-size: 2.8rem;
-      letter-spacing: 0.15em;
-      margin: 0 0 0.4rem;
-      color: #ff3b30;
-      text-shadow:
-        0 0 8px #ff3b30,
-        0 0 12px #ff3b30,
-        0 0 18px #ff3b30;
-      user-select: none;
+    100% {
+      opacity: 1;
+      transform: translateY(0);
     }
-    p {
-      font-weight: 400;
-      font-size: 1rem;
-      margin: 0 0 1.8rem;
-      color: #bbb;
-    }
-    input, button {
-      width: 100%;
-      padding: 0.9rem 1rem;
-      font-size: 1.1rem;
-      border-radius: 14px;
-      border: none;
-      outline: none;
-      margin-bottom: 1.2rem;
-      box-sizing: border-box;
-    }
-    input {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      font-weight: 500;
-      border: 1.5px solid rgba(255,255,255,0.2);
-      transition: border-color 0.3s;
-    }
-    input:focus {
-      border-color: #ff3b30;
-      background: rgba(255,255,255,0.15);
-    }
-    button {
-      background: #ff3b30;
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s;
-    }
-    button:hover:not(:disabled) {
-      background: #ff1e17;
-    }
-    button:disabled {
-      background: #aa2923;
-      cursor: not-allowed;
-    }
-    #result {
-      margin-top: 1rem;
-      min-height: 120px;
-      color: #ddd;
-    }
-    /* Spinner animation */
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .spinner {
-      margin: 2rem auto;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top: 4px solid #ff3b30;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-    }
-    img.thumb {
-      width: 100%;
-      border-radius: 14px;
-      margin-top: 1rem;
-      user-select: none;
-    }
-  </style>
+  }
+  h1 {
+  font-weight: 700; /* Still bold but not Hulk-level */
+  font-size: clamp(1.8rem, 5vw, 2.8rem); /* Smaller, cleaner scaling */
+  letter-spacing: 0.07em; /* Tighten it up */
+  margin-bottom: 0.6rem;
+  color: #ff3b30; /* Keep your signature red */
+  text-shadow: none; /* Drop the neon glow */
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+h1:hover {
+  color: #ff1e17; /* Slight hover effect for interactivity */
+  cursor: default;
+}
+</style>
 </head>
 <body>
   <div class="container">
@@ -120,17 +181,10 @@
   const result = document.getElementById('result');
   const button = document.querySelector('button[onclick="fetchVideo()"]');
 
-  // Sanitize text to avoid HTML injection in inputs
   function escapeHtml(text) {
-    return text.replace(/[&<>"']/g, function(m) {
-      return ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[m];
-    });
+    return text.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m]);
   }
 
   function getVideoID(inputVal) {
@@ -138,44 +192,41 @@
       const url = new URL(inputVal);
       return url.searchParams.get("v") || url.pathname.split("/").pop();
     } catch {
-      return inputVal; // assume ID
+      return inputVal;
     }
   }
 
-  function analyzeTitle(title) {
-    const lowered = title.toLowerCase();
-    if (lowered.includes("how to") || lowered.includes("tutorial")) return "Educational";
-    if (lowered.includes("shocking") || lowered.includes("you won’t believe")) return "Clickbait";
-    if (lowered.includes("review") || lowered.includes("unboxing")) return "Product-Based";
-    if (lowered.includes("trending") || lowered.includes("viral")) return "Trendy";
-    return "General";
+  function generateHashtags(title) {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 3)
+      .slice(0, 5)
+      .map(w => `#${w}`)
+      .join(' ');
   }
 
   function createSpinner() {
     return `<div class="spinner" style="
-      margin: 2rem auto; 
-      border: 4px solid rgba(255,255,255,0.1); 
-      border-top: 4px solid #ff3b30; 
-      border-radius: 50%; 
-      width: 36px; 
-      height: 36px; 
-      animation: spin 1s linear infinite;
-      ">
-      </div>`;
+      margin: 2rem auto;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #ff3b30;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;">
+    </div>`;
   }
 
   async function fetchVideo() {
     const val = input.value.trim();
-    if (!val) {
-      alert("Please enter a YouTube video URL or ID.");
-      return;
-    }
+    if (!val) return alert("Enter a YouTube URL or ID.");
 
     let percent = 0;
     button.disabled = true;
     input.disabled = true;
-
-    button.textContent = `Analyzing... 0%`;
+    button.textContent = "Analyzing... 0%";
     const interval = setInterval(() => {
       if (percent < 90) {
         percent += Math.floor(Math.random() * 5) + 1;
@@ -184,18 +235,24 @@
       }
     }, 100);
 
-    result.innerHTML = createSpinner();
-
     const videoID = getVideoID(val);
     const thumbs = {
       max: `https://img.youtube.com/vi/${videoID}/maxresdefault.jpg`,
     };
 
+    result.innerHTML = createSpinner();
+
     try {
       const res = await fetch(`https://corsproxy.io/?https://www.youtube.com/watch?v=${videoID}`);
       const html = await res.text();
-      const title = html.match(/<title>(.*?)<\/title>/)?.[1]?.replace(" - YouTube", "") || "Unknown Title";
-      const label = analyzeTitle(title);
+
+      const match = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});/s);
+      if (!match) throw new Error("ytInitialPlayerResponse not found");
+      const data = JSON.parse(match[1]);
+
+      const title = data.videoDetails?.title || "Unknown Title";
+      const description = data.videoDetails?.shortDescription || "No description available";
+      const hashtags = generateHashtags(title);
 
       clearInterval(interval);
       button.textContent = "Analyzing... 100%";
@@ -207,52 +264,71 @@
 
         result.innerHTML = `
           <div style="margin-top: 1rem; text-align: center;">
+
+            <img src="${thumbs.max}" alt="Thumbnail" style="width: 100%; border-radius: 12px;" onerror="this.style.display='none'" />
+
+            <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+              <button id="downloadBtn" style="
+                background:#ff3b30; color:#fff; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
+              ">Download Thumbnail</button>
+
+              <button id="copyDescBtn" style="
+                background:#444; color:#eee; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
+              ">Copy Description</button>
+
+              <a href="https://www.youtube.com/watch?v=${videoID}" target="_blank" style="
+                background:#2c2c2c; color:#fff; text-decoration:none; padding:0.6rem 1rem; border-radius:10px; display:inline-block;
+              ">Watch on YouTube</a>
+            </div>
+
             <input 
               id="titleInput" 
               type="text" 
               value="${escapeHtml(title)}" 
-              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); margin-bottom: 1rem; background: rgba(255,255,255,0.1); color: #fff;"
+              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); margin: 1rem 0; background: rgba(255,255,255,0.1); color: #fff;"
               placeholder="Edit title here"
             />
             <textarea
               id="descriptionInput"
-              rows="3"
-              placeholder="Add your description here"
+              rows="5"
               style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; resize: vertical;"
-            ></textarea>
+              placeholder="Edit description"
+            >${escapeHtml(description)}</textarea>
 
-            <img src="${thumbs.max}" alt="Thumbnail" style="width: 100%; border-radius: 12px; margin-top: 1rem;" onerror="this.style.display='none'" />
+            <div style="margin-top: 0.8rem; color: #aaa; font-size: 0.9rem; font-style: italic;">${hashtags}</div>
 
-            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem;">
-              <button id="downloadBtn" style="
-                background:#ff3b30; color:#fff; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
-              ">Download Thumbnail</button>
-            </div>
           </div>
         `;
 
         document.getElementById('downloadBtn').onclick = () => {
+          const titleVal = document.getElementById('titleInput').value.trim() || 'thumbnail';
+          const safeName = titleVal.replace(/[^\w\d_-]/g, '_');
           const a = document.createElement('a');
           a.href = thumbs.max;
-          const filenameTitle = document.getElementById('titleInput').value.trim() || 'thumbnail';
-          const safeFilename = filenameTitle.replace(/[^\w\d_-]/g, '_');
-          a.download = `${safeFilename}_thumbnail.jpg`;
+          a.download = `${safeName}_thumbnail.jpg`;
           document.body.appendChild(a);
           a.click();
           a.remove();
         };
 
+        document.getElementById('copyDescBtn').onclick = () => {
+          const desc = document.getElementById('descriptionInput').value;
+          navigator.clipboard.writeText(desc)
+            .then(() => alert("Description copied!"))
+            .catch(() => alert("Failed to copy."));
+        };
+
       }, 300);
-    } catch (e) {
+    } catch (err) {
       clearInterval(interval);
       button.textContent = "Analyze Now";
       button.disabled = false;
       input.disabled = false;
+      console.error(err);
 
       result.innerHTML = `<p style="color: #ff3b30; text-align:center; margin-top: 1rem;">
-        ⚠️ Could not load data. Check video ID or URL.
+        ⚠️ Couldn't fetch video data. Double-check the URL or try a different video.
       </p>`;
-      console.error(e);
     }
   }
 </script>
