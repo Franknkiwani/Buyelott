@@ -686,6 +686,36 @@ body {
   opacity: 1;
   visibility: visible;
 }
+@media (min-width: 900px) {
+  /* Hide hamburger button */
+  .menu-button {
+    display: none;
+  }
+
+  /* Sidebar visible and fixed on the left always */
+  .sidebar {
+    position: fixed;
+    left: 0 !important;
+    top: 0;
+    height: 100vh;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    box-shadow: none;
+    transition: none;
+    width: 280px; /* keep your width */
+  }
+
+  /* Push page content (if any) to the right to avoid sidebar overlap */
+  body {
+    margin-left: 280px;
+  }
+
+  /* Hide overlay on desktop */
+  .overlay {
+    display: none !important;
+  }
+}
   </style>
 </head>
 <body>
