@@ -674,6 +674,18 @@ body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+.sidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar.active {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+}
   </style>
 </head>
 <body>
