@@ -1,346 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI ANALYZER</title>
-  <script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
-<style>
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: env(safe-area-inset-top) 1rem env(safe-area-inset-bottom);
-    min-height: 100vh;
-  }
-
-  .container {
-    width: 100%;
-    max-width: 900px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0;
-    padding: 3rem 1.5rem 4rem;
-    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(40px);
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  h1 {
-    font-weight: 500;
-    font-size: clamp(2.2rem, 6vw, 3.5rem);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-    color: #ff3b30;
-    text-shadow:
-      0 0 8px #ff3b30,
-      0 0 12px #ff3b30,
-      0 0 18px #ff3b30;
-    user-select: none;
-  }
-
-  p {
-    font-weight: 400;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    color: #bbb;
-  }
-
-  input,
-  button,
-  textarea {
-    width: 100%;
-    max-width: 600px;
-    padding: 0.9rem 1rem;
-    font-size: 1.1rem;
-    border-radius: 14px;
-    border: none;
-    outline: none;
-    margin: 0 auto 1.2rem;
-    display: block;
-    box-sizing: border-box;
-  }
-
-  input,
-  textarea {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    font-weight: 500;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    transition: border-color 0.3s, background 0.3s;
-  }
-
-  input:focus,
-  textarea:focus {
-    border-color: #ff3b30;
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  button {
-    background: #ff3b30;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s;
-  }
-
-  button:hover:not(:disabled) {
-    background: #ff1e17;
-  }
-
-  button:disabled {
-    background: #aa2923;
-    cursor: not-allowed;
-  }
-
-  #result {
-    margin-top: 1rem;
-    min-height: 120px;
-    color: #ddd;
-    animation: fadeInUp 0.5s ease-out;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
+  <title>CyberChat Inbox</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
     }
-  }
-
-  .spinner {
-    margin: 2rem auto;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top: 4px solid #ff3b30;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    animation: spin 1s linear infinite;
-  }
-
-  img.thumb {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 14px;
-    margin-top: 1rem;
-    user-select: none;
-  }
-
-  @keyframes fadeInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
     }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  h1 {
-  font-weight: 700; /* Still bold but not Hulk-level */
-  font-size: clamp(1.8rem, 5vw, 2.8rem); /* Smaller, cleaner scaling */
-  letter-spacing: 0.07em; /* Tighten it up */
-  margin-bottom: 0.6rem;
-  color: #ff3b30; /* Keep your signature red */
-  text-shadow: none; /* Drop the neon glow */
-  user-select: none;
-  transition: color 0.3s ease;
-}
 
-h1:hover {
-  color: #ff1e17; /* Slight hover effect for interactivity */
-  cursor: default;
-}
-</style>
+    /* Container for everything */
+    .app-container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Small email display container */
+    .email-container {
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 15px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      user-select: all;
+      box-shadow:
+        0 4px 15px rgba(255 255 255 / 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Big inbox container */
+    .inbox-container {
+      background: rgba(255 255 255 / 0.08);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      height: 70vh;
+      overflow-y: auto;
+      box-shadow:
+        0 8px 25px rgba(0 0 0 / 0.4);
+      backdrop-filter: saturate(180%) blur(20px);
+    }
+
+    /* Individual email card */
+    .email-card {
+      background: rgba(255 255 255 / 0.12);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow:
+        0 3px 8px rgba(0 0 0 / 0.3);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .email-card:hover {
+      background: rgba(255 255 255 / 0.25);
+    }
+
+    /* Email subject */
+    .email-subject {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Email sender */
+    .email-sender {
+      font-size: 0.9rem;
+      color: #a0c4ff;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Email snippet */
+    .email-snippet {
+      font-size: 0.9rem;
+      color: #cfd8dc;
+      line-height: 1.3;
+      max-height: 3.9em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Scrollbar style for inbox */
+    .inbox-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    .inbox-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .inbox-container::-webkit-scrollbar-thumb {
+      background: #7193ff88;
+      border-radius: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .app-container {
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✨ AI ANALYZER ✨</h1>
-    <p>Enter YouTube video URL to analyze title & thumbnails</p>
-    <input type="text" id="videoInput" placeholder="Paste YouTube link or ID" />
-    <button onclick="fetchVideo()">Analyze Now</button>
-    <div id="result"></div>
-    <script type="text/javascript">
-	atOptions = {
-		'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-		'format' : 'iframe',
-		'height' : 250,
-		'width' : 300,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"></script>
+  <div class="app-container">
+    <div class="email-container" id="userEmail">
+      Loading your email...
+    </div>
+
+    <div class="inbox-container" id="inbox">
+      <p style="color:#999; text-align:center; margin-top: 2rem;">Loading your inbox...</p>
+    </div>
   </div>
-<script>
-  const input = document.getElementById('videoInput');
-  const result = document.getElementById('result');
-  const button = document.querySelector('button[onclick="fetchVideo()"]');
 
-  function escapeHtml(text) {
-    return text.replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[m]);
-  }
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
 
-  function getVideoID(inputVal) {
-    try {
-      const url = new URL(inputVal);
-      return url.searchParams.get("v") || url.pathname.split("/").pop();
-    } catch {
-      return inputVal;
-    }
-  }
-
-  function generateHashtags(title) {
-    return title
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter(w => w.length > 3)
-      .slice(0, 5)
-      .map(w => `#${w}`)
-      .join(' ');
-  }
-
-  function createSpinner() {
-    return `<div class="spinner" style="
-      margin: 2rem auto;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top: 4px solid #ff3b30;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;">
-    </div>`;
-  }
-
-  async function fetchVideo() {
-    const val = input.value.trim();
-    if (!val) return alert("Enter a YouTube URL or ID.");
-
-    let percent = 0;
-    button.disabled = true;
-    input.disabled = true;
-    button.textContent = "Analyzing... 0%";
-    const interval = setInterval(() => {
-      if (percent < 90) {
-        percent += Math.floor(Math.random() * 5) + 1;
-        if (percent > 90) percent = 90;
-        button.textContent = `Analyzing... ${percent}%`;
-      }
-    }, 100);
-
-    const videoID = getVideoID(val);
-    const thumbs = {
-      max: `https://img.youtube.com/vi/${videoID}/maxresdefault.jpg`,
+  <script>
+    // Your real Firebase config:
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
     };
 
-    result.innerHTML = createSpinner();
+    // Init Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    try {
-      const res = await fetch(`https://corsproxy.io/?https://www.youtube.com/watch?v=${videoID}`);
-      const html = await res.text();
+    // Sign in anonymously
+    auth.signInAnonymously().catch(console.error);
 
-      const match = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});/s);
-      if (!match) throw new Error("ytInitialPlayerResponse not found");
-      const data = JSON.parse(match[1]);
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        const userEmail = user.uid + "@cyberchat.online";
+        document.getElementById("userEmail").textContent = userEmail;
 
-      const title = data.videoDetails?.title || "Unknown Title";
-      const description = data.videoDetails?.shortDescription || "No description available";
-      const hashtags = generateHashtags(title);
+        const inboxRef = db.ref(`/inbox/${user.uid}`);
+        const inboxDiv = document.getElementById("inbox");
+        inboxDiv.innerHTML = ""; // clear loading text
 
-      clearInterval(interval);
-      button.textContent = "Analyzing... 100%";
+        inboxRef.on("child_added", snapshot => {
+          const msg = snapshot.val();
 
-      setTimeout(() => {
-        button.textContent = "Analyze Now";
-        button.disabled = false;
-        input.disabled = false;
+          const card = document.createElement("div");
+          card.className = "email-card";
 
-        result.innerHTML = `
-          <div style="margin-top: 1rem; text-align: center;">
+          card.innerHTML = `
+            <div class="email-subject">${escapeHtml(msg.subject || "No Subject")}</div>
+            <div class="email-sender">From: ${escapeHtml(msg.from || "Unknown")}</div>
+            <div class="email-snippet">${stripHtml(msg.html || msg.text || "").slice(0, 150)}...</div>
+          `;
 
-            <img src="${thumbs.max}" alt="Thumbnail" style="width: 100%; border-radius: 12px;" onerror="this.style.display='none'" />
+          inboxDiv.prepend(card);
+        });
+      } else {
+        document.getElementById("userEmail").textContent = "Please login to see your inbox";
+      }
+    });
 
-            <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-              <button id="downloadBtn" style="
-                background:#ff3b30; color:#fff; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
-              ">Download Thumbnail</button>
-
-              <button id="copyDescBtn" style="
-                background:#444; color:#eee; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
-              ">Copy Description</button>
-
-              <a href="https://www.youtube.com/watch?v=${videoID}" target="_blank" style="
-                background:#2c2c2c; color:#fff; text-decoration:none; padding:0.6rem 1rem; border-radius:10px; display:inline-block;
-              ">Watch on YouTube</a>
-            </div>
-
-            <input 
-              id="titleInput" 
-              type="text" 
-              value="${escapeHtml(title)}" 
-              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); margin: 1rem 0; background: rgba(255,255,255,0.1); color: #fff;"
-              placeholder="Edit title here"
-            />
-            <textarea
-              id="descriptionInput"
-              rows="5"
-              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; resize: vertical;"
-              placeholder="Edit description"
-            >${escapeHtml(description)}</textarea>
-
-            <div style="margin-top: 0.8rem; color: #aaa; font-size: 0.9rem; font-style: italic;">${hashtags}</div>
-
-          </div>
-        `;
-
-        document.getElementById('downloadBtn').onclick = () => {
-          const titleVal = document.getElementById('titleInput').value.trim() || 'thumbnail';
-          const safeName = titleVal.replace(/[^\w\d_-]/g, '_');
-          const a = document.createElement('a');
-          a.href = thumbs.max;
-          a.download = `${safeName}_thumbnail.jpg`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        };
-
-        document.getElementById('copyDescBtn').onclick = () => {
-          const desc = document.getElementById('descriptionInput').value;
-          navigator.clipboard.writeText(desc)
-            .then(() => alert("Description copied!"))
-            .catch(() => alert("Failed to copy."));
-        };
-
-      }, 300);
-    } catch (err) {
-      clearInterval(interval);
-      button.textContent = "Analyze Now";
-      button.disabled = false;
-      input.disabled = false;
-      console.error(err);
-
-      result.innerHTML = `<p style="color: #ff3b30; text-align:center; margin-top: 1rem;">
-        ⚠️ Couldn't fetch video data. Double-check the URL or try a different video.
-      </p>`;
+    // Escape HTML text to prevent injection
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
     }
-  }
-</script>
+
+    // Strip HTML tags for snippet preview
+    function stripHtml(html) {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    }
+  </script>
 </body>
 </html>
