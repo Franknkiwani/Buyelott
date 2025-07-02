@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple Upload</title>
+  <title>Simple Upload with Preview</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
@@ -48,32 +48,48 @@
     button.done {
       background-color: #34c759;
     }
+    video {
+      margin-top: 20px;
+      max-width: 350px;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: none; /* hidden initially */
+    }
   </style>
 </head>
 <body>
 
   <input type="file" id="videoInput" accept="video/*" />
   <button id="uploadBtn" disabled>Upload</button>
+  <video id="videoPreview" controls></video>
 
   <script>
     const videoInput = document.getElementById('videoInput');
     const uploadBtn = document.getElementById('uploadBtn');
+    const videoPreview = document.getElementById('videoPreview');
 
     videoInput.addEventListener('change', () => {
-      uploadBtn.disabled = !videoInput.files.length;
-      uploadBtn.classList.remove('done', 'uploading');
-      uploadBtn.textContent = 'Upload';
+      if (!videoInput.files.length) {
+        videoPreview.style.display = 'none';
+        uploadBtn.disabled = true;
+        return;
+      }
+
+      uploadBtn.disabled = false;
+      const file = videoInput.files[0];
+      const url = URL.createObjectURL(file);
+
+      videoPreview.src = url;
+      videoPreview.style.display = 'block';
     });
 
     uploadBtn.addEventListener('click', () => {
       if (!videoInput.files.length) return;
 
-      // Change button color to orange (uploading)
       uploadBtn.classList.remove('done');
       uploadBtn.classList.add('uploading');
       uploadBtn.textContent = 'Uploading...';
 
-      // Simulate upload delay (like 2 sec)
       setTimeout(() => {
         uploadBtn.classList.remove('uploading');
         uploadBtn.classList.add('done');
