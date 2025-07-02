@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>VoiceVibe Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Upload</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
@@ -11,121 +11,76 @@
       color: #000;
       margin: 0;
       padding: 16px;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-font-smoothing: antialiased;
-      text-align: center;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      gap: 16px;
       height: 100vh;
-      justify-content: start;
-      gap: 12px;
+      justify-content: center;
     }
     input[type="file"] {
-      margin-top: 12px;
-      width: 100%;
-      max-width: 400px;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 12px;
       font-size: 17px;
       border: 1px solid #ccc;
+      width: 100%;
+      max-width: 350px;
       cursor: pointer;
     }
-    video {
-      width: 100%;
-      max-width: 400px;
-      margin-top: 12px;
-      border-radius: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
     button {
-      margin-top: 20px;
-      background-color: #007aff;
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 18px;
-      padding: 14px;
+      margin-top: 10px;
       width: 100%;
-      max-width: 400px;
+      max-width: 350px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
       border-radius: 14px;
+      background-color: #007aff;
+      color: white;
       cursor: pointer;
       transition: background-color 0.3s ease;
       user-select: none;
     }
-    button:active {
-      background-color: #0051a8;
+    button.uploading {
+      background-color: #ff9500;
     }
-    #result {
-      margin-top: 20px;
-      max-width: 400px;
-      padding: 16px;
-      border-radius: 14px;
-      background-color: #f2f2f7;
-      color: #000;
-      font-size: 16px;
-      white-space: pre-wrap;
-      text-align: left;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      min-height: 80px;
+    button.done {
+      background-color: #34c759;
     }
   </style>
 </head>
 <body>
+
   <input type="file" id="videoInput" accept="video/*" />
-  <video id="videoPreview" controls style="display:none;"></video>
-  <button id="uploadBtn" disabled>Upload & Detect</button>
-  <div id="result" aria-live="polite"></div>
+  <button id="uploadBtn" disabled>Upload</button>
 
   <script>
-    const videoInput = document.getElementById("videoInput");
-    const videoPreview = document.getElementById("videoPreview");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const resultBox = document.getElementById("result");
+    const videoInput = document.getElementById('videoInput');
+    const uploadBtn = document.getElementById('uploadBtn');
 
-    let selectedFile = null;
-
-    videoInput.addEventListener("change", () => {
-      selectedFile = videoInput.files[0];
-      if (!selectedFile) {
-        videoPreview.style.display = "none";
-        uploadBtn.disabled = true;
-        resultBox.textContent = "";
-        return;
-      }
-      const url = URL.createObjectURL(selectedFile);
-      videoPreview.src = url;
-      videoPreview.style.display = "block";
-      uploadBtn.disabled = false;
-      resultBox.textContent = "";
+    videoInput.addEventListener('change', () => {
+      uploadBtn.disabled = !videoInput.files.length;
+      uploadBtn.classList.remove('done', 'uploading');
+      uploadBtn.textContent = 'Upload';
     });
 
-    uploadBtn.addEventListener("click", async () => {
-      if (!selectedFile) return;
-      uploadBtn.disabled = true;
-      resultBox.textContent = "Detecting language... 🎙️";
+    uploadBtn.addEventListener('click', () => {
+      if (!videoInput.files.length) return;
 
-      const formData = new FormData();
-      formData.append("video", selectedFile);
+      // Change button color to orange (uploading)
+      uploadBtn.classList.remove('done');
+      uploadBtn.classList.add('uploading');
+      uploadBtn.textContent = 'Uploading...';
 
-      try {
-        const res = await fetch("/upload-video", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Upload failed");
-        }
-
-        const data = await res.json();
-        resultBox.textContent = data.transcript || "No speech detected.";
-      } catch (e) {
-        resultBox.textContent = "❌ " + e.message;
-      } finally {
-        uploadBtn.disabled = false;
-      }
+      // Simulate upload delay (like 2 sec)
+      setTimeout(() => {
+        uploadBtn.classList.remove('uploading');
+        uploadBtn.classList.add('done');
+        uploadBtn.textContent = 'Uploaded!';
+      }, 2000);
     });
   </script>
+
 </body>
 </html>
