@@ -1,138 +1,260 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Local Video Editor - ffmpeg.wasm</title>
+  <title>AI ANALYZER</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #fff;
-      color: #000;
       margin: 0;
-      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      color: #f0f0f0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      padding: 3rem 1rem;
       min-height: 100vh;
-      justify-content: center;
     }
-    input[type="file"] {
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 17px;
-      border: 1px solid #ccc;
+    .container {
       width: 100%;
-      max-width: 360px;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-      background-color: #f2f2f2;
-      color: #333;
+      max-width: 450px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      padding: 2rem 2rem 3rem;
+      box-shadow: 0 0 20px rgba(255,59,48,0.3);
+      backdrop-filter: blur(25px);
+      text-align: center;
     }
-    button {
-      margin-top: 12px;
-      width: 100%;
-      max-width: 360px;
-      padding: 14px;
-      font-size: 18px;
-      font-weight: 600;
-      border: none;
-      border-radius: 16px;
-      background-color: #007aff;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+    h1 {
+      font-weight: 900;
+      font-size: 2.8rem;
+      letter-spacing: 0.15em;
+      margin: 0 0 0.4rem;
+      color: #ff3b30;
+      text-shadow:
+        0 0 8px #ff3b30,
+        0 0 12px #ff3b30,
+        0 0 18px #ff3b30;
       user-select: none;
     }
-    button:disabled {
-      background-color: #aaa;
-      cursor: default;
+    p {
+      font-weight: 400;
+      font-size: 1rem;
+      margin: 0 0 1.8rem;
+      color: #bbb;
     }
-    video {
-      margin-top: 20px;
-      max-width: 360px;
+    input, button {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      font-size: 1.1rem;
       border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      background-color: #000;
+      border: none;
+      outline: none;
+      margin-bottom: 1.2rem;
+      box-sizing: border-box;
     }
-    #downloadLink {
-      margin-top: 12px;
-      font-weight: 600;
-      color: #007aff;
-      text-decoration: none;
+    input {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-weight: 500;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      border-color: #ff3b30;
+      background: rgba(255,255,255,0.15);
+    }
+    button {
+      background: #ff3b30;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background: #ff1e17;
+    }
+    button:disabled {
+      background: #aa2923;
+      cursor: not-allowed;
+    }
+    #result {
+      margin-top: 1rem;
+      min-height: 120px;
+      color: #ddd;
+    }
+    /* Spinner animation */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      margin: 2rem auto;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #ff3b30;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+    }
+    img.thumb {
+      width: 100%;
+      border-radius: 14px;
+      margin-top: 1rem;
       user-select: none;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>✨ AI ANALYZER ✨</h1>
+    <p>Enter YouTube video URL to analyze title & thumbnails</p>
+    <input type="text" id="videoInput" placeholder="Paste YouTube link or ID" />
+    <button onclick="fetchVideo()">Analyze Now</button>
+    <div id="result"></div>
+  </div>
 
-  <input type="file" id="videoInput" accept="video/*" />
-  <button id="processBtn" disabled>Process Video</button>
-  <video id="videoPlayer" controls></video>
-  <a id="downloadLink" style="display:none;" download>Download Edited Video</a>
+<script>
+  const input = document.getElementById('videoInput');
+  const result = document.getElementById('result');
+  const button = document.querySelector('button[onclick="fetchVideo()"]');
 
-  <script type="module">
-    import { createFFmpeg, fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.1/dist/ffmpeg.min.js";
-
-    const ffmpeg = createFFmpeg({ log: true });
-    const videoInput = document.getElementById('videoInput');
-    const processBtn = document.getElementById('processBtn');
-    const videoPlayer = document.getElementById('videoPlayer');
-    const downloadLink = document.getElementById('downloadLink');
-    let fileName = null;
-
-    videoInput.addEventListener('change', () => {
-      if (!videoInput.files.length) {
-        processBtn.disabled = true;
-        videoPlayer.src = "";
-        downloadLink.style.display = "none";
-        return;
-      }
-      fileName = videoInput.files[0].name;
-      videoPlayer.src = URL.createObjectURL(videoInput.files[0]);
-      processBtn.disabled = false;
-      downloadLink.style.display = "none";
-      downloadLink.href = "";
-      downloadLink.textContent = "";
+  // Sanitize text to avoid HTML injection in inputs
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, function(m) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[m];
     });
+  }
 
-    processBtn.addEventListener('click', async () => {
-      processBtn.disabled = true;
-      processBtn.textContent = "Loading FFmpeg...";
+  function getVideoID(inputVal) {
+    try {
+      const url = new URL(inputVal);
+      return url.searchParams.get("v") || url.pathname.split("/").pop();
+    } catch {
+      return inputVal; // assume ID
+    }
+  }
 
-      if (!ffmpeg.isLoaded()) {
-        await ffmpeg.load();
+  function analyzeTitle(title) {
+    const lowered = title.toLowerCase();
+    if (lowered.includes("how to") || lowered.includes("tutorial")) return "Educational";
+    if (lowered.includes("shocking") || lowered.includes("you won’t believe")) return "Clickbait";
+    if (lowered.includes("review") || lowered.includes("unboxing")) return "Product-Based";
+    if (lowered.includes("trending") || lowered.includes("viral")) return "Trendy";
+    return "General";
+  }
+
+  function createSpinner() {
+    return `<div class="spinner" style="
+      margin: 2rem auto; 
+      border: 4px solid rgba(255,255,255,0.1); 
+      border-top: 4px solid #ff3b30; 
+      border-radius: 50%; 
+      width: 36px; 
+      height: 36px; 
+      animation: spin 1s linear infinite;
+      ">
+      </div>`;
+  }
+
+  async function fetchVideo() {
+    const val = input.value.trim();
+    if (!val) {
+      alert("Please enter a YouTube video URL or ID.");
+      return;
+    }
+
+    let percent = 0;
+    button.disabled = true;
+    input.disabled = true;
+
+    button.textContent = `Analyzing... 0%`;
+    const interval = setInterval(() => {
+      if (percent < 90) {
+        percent += Math.floor(Math.random() * 5) + 1;
+        if (percent > 90) percent = 90;
+        button.textContent = `Analyzing... ${percent}%`;
       }
+    }, 100);
 
-      processBtn.textContent = "Processing Video...";
+    result.innerHTML = createSpinner();
 
-      // Write file to ffmpeg FS
-      ffmpeg.FS('writeFile', fileName, await fetchFile(videoInput.files[0]));
+    const videoID = getVideoID(val);
+    const thumbs = {
+      max: `https://img.youtube.com/vi/${videoID}/maxresdefault.jpg`,
+    };
 
-      // Run ffmpeg command: apply grayscale filter (hue=s=0)
-      await ffmpeg.run('-i', fileName, '-vf', 'hue=s=0', 'output.mp4');
+    try {
+      const res = await fetch(`https://corsproxy.io/?https://www.youtube.com/watch?v=${videoID}`);
+      const html = await res.text();
+      const title = html.match(/<title>(.*?)<\/title>/)?.[1]?.replace(" - YouTube", "") || "Unknown Title";
+      const label = analyzeTitle(title);
 
-      // Read processed file
-      const data = ffmpeg.FS('readFile', 'output.mp4');
+      clearInterval(interval);
+      button.textContent = "Analyzing... 100%";
 
-      // Create a Blob URL for the output video
-      const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
-      const url = URL.createObjectURL(videoBlob);
+      setTimeout(() => {
+        button.textContent = "Analyze Now";
+        button.disabled = false;
+        input.disabled = false;
 
-      // Update video player and download link
-      videoPlayer.src = url;
-      downloadLink.href = url;
-      downloadLink.download = 'edited-' + fileName;
-      downloadLink.textContent = 'Download Edited Video';
-      downloadLink.style.display = 'inline';
+        result.innerHTML = `
+          <div style="margin-top: 1rem; text-align: center;">
+            <input 
+              id="titleInput" 
+              type="text" 
+              value="${escapeHtml(title)}" 
+              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); margin-bottom: 1rem; background: rgba(255,255,255,0.1); color: #fff;"
+              placeholder="Edit title here"
+            />
+            <textarea
+              id="descriptionInput"
+              rows="3"
+              placeholder="Add your description here"
+              style="width: 100%; padding: 0.6rem 1rem; font-size: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; resize: vertical;"
+            ></textarea>
 
-      processBtn.textContent = "Process Video";
-      processBtn.disabled = false;
-    });
-  </script>
+            <img src="${thumbs.max}" alt="Thumbnail" style="width: 100%; border-radius: 12px; margin-top: 1rem;" onerror="this.style.display='none'" />
 
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem;">
+              <button id="downloadBtn" style="
+                background:#ff3b30; color:#fff; border:none; border-radius:10px; padding:0.6rem 1rem; cursor:pointer;
+              ">Download Thumbnail</button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('downloadBtn').onclick = () => {
+          const a = document.createElement('a');
+          a.href = thumbs.max;
+          const filenameTitle = document.getElementById('titleInput').value.trim() || 'thumbnail';
+          const safeFilename = filenameTitle.replace(/[^\w\d_-]/g, '_');
+          a.download = `${safeFilename}_thumbnail.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        };
+
+      }, 300);
+    } catch (e) {
+      clearInterval(interval);
+      button.textContent = "Analyze Now";
+      button.disabled = false;
+      input.disabled = false;
+
+      result.innerHTML = `<p style="color: #ff3b30; text-align:center; margin-top: 1rem;">
+        ⚠️ Could not load data. Check video ID or URL.
+      </p>`;
+      console.error(e);
+    }
+  }
+</script>
 </body>
 </html>
