@@ -2,219 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SongVibe Recorder</title>
-  <script src="https://cdn.jsdelivr.net/npm/ml5@0.12.2/dist/ml5.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat App</title>
   <style>
     body {
-      background: #12121b;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #121212;
+      color: white;
       margin: 0;
-      padding: 1rem;
+      padding: 0;
     }
-
-    h1 {
-      margin-bottom: 1rem;
-      font-weight: 600;
-      text-shadow: 0 0 8px #0ff;
+    .chat-container {
+      max-width: 600px;
+      margin: auto;
+      padding: 16px;
     }
-
-    button {
-      background: rgba(255 255 255 / 0.1);
-      border: 1.5px solid #0ff;
-      padding: 0.8rem 1.5rem;
+    .message {
+      background: #1f1f1f;
+      margin: 8px 0;
+      padding: 10px;
       border-radius: 12px;
-      color: #0ff;
-      font-size: 1.1rem;
-      margin: 0.5rem;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.3s ease;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
     }
-
-    button:disabled {
-      color: #222;
-      border-color: #222;
-      cursor: not-allowed;
-      background: transparent;
+    .message img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
     }
-
-    #result {
-      margin-top: 1.5rem;
-      font-size: 1.3rem;
-      font-weight: 600;
-      min-height: 2rem;
+    .message-content {
+      flex: 1;
     }
-
-    select {
-      margin-top: 1rem;
-      background: #222;
-      color: #0ff;
-      border: 1px solid #0ff;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      cursor: pointer;
+    .message-content h4 {
+      margin: 0 0 4px;
+      font-size: 14px;
+    }
+    .message-content p {
+      margin: 0;
+    }
+    .input-area {
+      display: flex;
+      margin-top: 12px;
+    }
+    #msgInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+    }
+    button {
+      margin-left: 8px;
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    #loginBtn {
+      background: #32d74b;
+      margin-top: 20px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>🎤 SongVibe Recorder</h1>
-  <button id="recordBtn">Start Recording</button>
-  <button id="stopBtn" disabled>Stop Recording</button>
+  <div class="chat-container">
+    <h2>🔥 Chat Room</h2>
+    <div id="messages"></div>
 
-  <audio id="audioPlayback" controls style="margin-top:1rem; display:none"></audio>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
 
-  <div id="result"></div>
-  <div id="manualVibe" style="display:none;">
-    <label for="vibeSelect">Pick your vibe if unclear:</label>
-    <select id="vibeSelect">
-      <option value="Happy">Happy</option>
-      <option value="Sad">Sad</option>
-      <option value="Calm">Calm</option>
-      <option value="Energetic">Energetic</option>
-      <option value="Angry">Angry</option>
-      <option value="Chill">Chill</option>
-    </select>
-    <button id="confirmVibe">Confirm Vibe</button>
+    <button id="loginBtn" onclick="login()">Sign In with Google</button>
   </div>
 
-  <script>
-    let mediaRecorder;
-    let audioChunks = [];
-    let audioBlob;
-    let audioUrl;
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Firebase v11.4.0
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onChildAdded,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const recordBtn = document.getElementById("recordBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const audioPlayback = document.getElementById("audioPlayback");
-    const resultDiv = document.getElementById("result");
-    const manualVibeDiv = document.getElementById("manualVibe");
-    const vibeSelect = document.getElementById("vibeSelect");
-    const confirmVibeBtn = document.getElementById("confirmVibe");
-
-    let classifier;
-    let isClassifying = false;
-
-    recordBtn.onclick = async () => {
-      resultDiv.textContent = "🎙️ Recording...";
-      recordBtn.disabled = true;
-      stopBtn.disabled = false;
-      manualVibeDiv.style.display = "none";
-      audioPlayback.style.display = "none";
-
-      audioChunks = [];
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
-        mediaRecorder.onstop = async () => {
-          audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-          audioUrl = URL.createObjectURL(audioBlob);
-          audioPlayback.src = audioUrl;
-          audioPlayback.style.display = "block";
-
-          resultDiv.textContent = "Analyzing vibe...";
-          await analyzeVibe(audioBlob);
-        };
-      } catch (err) {
-        resultDiv.textContent = "⚠️ Error accessing microphone.";
-        recordBtn.disabled = false;
-        stopBtn.disabled = true;
-      }
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
-    stopBtn.onclick = () => {
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
-        recordBtn.disabled = false;
-        stopBtn.disabled = true;
-      }
-    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    async function analyzeVibe(blob) {
-      if (!classifier) {
-        resultDiv.textContent = "Loading ML model...";
-        classifier = await ml5.soundClassifier('SpeechCommands18w', { probabilityThreshold: 0.1 });
-      }
+    const loginBtn = document.getElementById("loginBtn");
+    const msgInput = document.getElementById("msgInput");
+    const messagesDiv = document.getElementById("messages");
 
-      isClassifying = true;
+    let currentUser = null;
 
-      // ml5 soundClassifier works on live mic or audio stream, not blob, so trick time:
-      // We will use Web Audio API to decode blob, play silently, and classify live stream.
-
-      // Decode blob to AudioBuffer
-      const audioCtx = new AudioContext();
-      const arrayBuffer = await blob.arrayBuffer();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-      // Play the audio silently through AudioContext
-      const source = audioCtx.createBufferSource();
-      source.buffer = audioBuffer;
-
-      const dest = audioCtx.createMediaStreamDestination();
-      source.connect(dest);
-      source.start();
-
-      // Classify from dest.stream
-      classifier.classify(dest.stream, (error, results) => {
-        if (error) {
-          console.error(error);
-          resultDiv.textContent = "⚠️ Error classifying audio.";
-          isClassifying = false;
-          return;
-        }
-        if (!results || results.length === 0) {
-          resultDiv.textContent = "No vibe detected.";
-          isClassifying = false;
-          manualVibeDiv.style.display = "block";
-          return;
-        }
-
-        // Pick highest confidence result
-        const top = results[0];
-        // For demo, treat these labels as vibes:
-        const vibesMap = {
-          'happy': "😊 Happy",
-          'sad': "😢 Sad",
-          'neutral': "😐 Neutral",
-          'angry': "😠 Angry",
-          'calm': "😌 Calm",
-          'excited': "⚡ Energetic",
-        };
-
-        // ml5 model labels are limited, so fallback to manual
-        let vibeText = vibesMap[top.label.toLowerCase()] || null;
-
-        if (top.confidence > 0.7 && vibeText) {
-          resultDiv.textContent = `Detected Vibe: ${vibeText} (Confidence: ${(top.confidence * 100).toFixed(1)}%)`;
-          manualVibeDiv.style.display = "none";
-        } else {
-          resultDiv.textContent = "Vibe unclear, please select manually.";
-          manualVibeDiv.style.display = "block";
-        }
-
-        isClassifying = false;
-        audioCtx.close();
-        source.stop();
-      });
+    function login() {
+      signInWithPopup(auth, new GoogleAuthProvider()).catch(console.error);
     }
 
-    confirmVibeBtn.onclick = () => {
-      const chosen = vibeSelect.value;
-      resultDiv.textContent = `Manual Vibe Selected: ${chosen}`;
-      manualVibeDiv.style.display = "none";
-    };
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        loginBtn.style.display = "none";
+        msgInput.disabled = false;
+      } else {
+        currentUser = null;
+        loginBtn.style.display = "block";
+        msgInput.disabled = true;
+      }
+    });
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text || !currentUser) return;
+
+      const msgRef = ref(db, "messages");
+      push(msgRef, {
+        text,
+        uid: currentUser.uid,
+        username: currentUser.displayName,
+        profilePic: currentUser.photoURL,
+        timestamp: Date.now()
+      });
+
+      msgInput.value = "";
+    }
+
+    const msgRef = ref(db, "messages");
+    onChildAdded(msgRef, snap => {
+      const data = snap.val();
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `
+        <img src="${data.profilePic}" alt="pfp"/>
+        <div class="message-content">
+          <h4>${data.username} • <small>${new Date(data.timestamp).toLocaleString()}</small></h4>
+          <p>${data.text}</p>
+        </div>
+      `;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
   </script>
 </body>
 </html>
