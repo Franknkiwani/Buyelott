@@ -3,156 +3,1498 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>YouTube Channel Lite Analytics</title>
+  <title>SoloShopper</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #121212;
-      color: #eee;
-      max-width: 480px;
-      margin: auto;
-      padding: 1rem;
+      margin: 0;
+      background-color: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
     }
-    h1 {
-      color: #0ff;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    form {
+
+    .header {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #121212;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    input[type="text"] {
-      flex: 1;
-      padding: 0.7rem;
-      border-radius: 8px;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ffffff;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
+      flex-shrink: 0;
+    }
+
+    /* BIG BOLD hamburger button */
+    .menu-button {
+      background: none;
       border: none;
-      font-size: 1rem;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 36px;
+      height: 28px;
+      user-select: none;
+    }
+
+    /* Hamburger lines with different widths */
+    .menu-button span {
+      display: block;
+      height: 6px;
+      background: #ffffff;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .menu-button span:nth-child(1) {
+      width: 100%;
+    }
+
+    .menu-button span:nth-child(2) {
+      width: 85%;
+    }
+
+    .menu-button span:nth-child(3) {
+      width: 70%;
+    }
+
+    .menu-button:focus {
+      outline: 2px solid #00ccff;
       outline-offset: 2px;
     }
-    button {
-      background: #0ff;
-      color: #121212;
-      font-weight: bold;
-      padding: 0.7rem 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      transition: background 0.2s;
+
+    /* Sidebar styling - slide in from left */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px; /* hidden by default on the left */
+      width: 280px;
+      height: 100vh;
+      background-color: #181818;
+      box-shadow: 3px 0 12px rgba(0,0,0,0.8);
+      padding: 2rem 1.5rem;
+      transition: left 0.3s ease;
+      z-index: 1500;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
-    button:hover {
-      background: #0cc;
+
+    .sidebar.active {
+      left: 0;
     }
-    #results {
-      background: #222;
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 0 12px #0ff33a44;
-      min-height: 100px;
+
+    /* Overlay for sidebar */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1400;
     }
-    .label {
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Google login button on top */
+    .google-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: #fff;
+      color: #000;
       font-weight: 600;
-      margin-top: 0.5rem;
-      color: #0f0;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s ease;
+      margin-bottom: 2rem;
     }
-    .value {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-top: 0.2rem;
+
+    .google-login:hover {
+      background: #f1f1f1;
     }
-    .error {
-      color: #f33;
-      font-weight: 700;
+
+    .google-login svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
     }
+
+    /* Sidebar nav links */
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sidebar nav a {
+      color: #eee;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #333;
+      transition: color 0.2s ease;
+    }
+
+    .sidebar nav a:hover {
+      color: #00ccff;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .logo {
+        font-size: 1.25rem;
+        gap: 0.5rem;
+      }
+
+      .logo svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .menu-button {
+        width: 40px;
+        height: 32px;
+      }
+
+      .menu-button span {
+        height: 7px;
+      }
+
+      .menu-button span:nth-child(1) {
+        width: 100%;
+      }
+
+      .menu-button span:nth-child(2) {
+        width: 85%;
+      }
+
+      .menu-button span:nth-child(3) {
+        width: 70%;
+      }
+
+      .sidebar {
+        width: 240px;
+        padding: 1.5rem 1rem;
+      }
+
+      .google-login {
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
+        margin-bottom: 1.5rem;
+      }
+    }
+    .auth-buttons {
+  display: flex;
+  gap: 0; /* no gap, they share width exactly */
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.auth-buttons button {
+  flex: 1; /* each takes half width */
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px 0 0 6px; /* default rounded corners for left btn */
+  user-select: none;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+.auth-buttons button:focus {
+  outline: 2px solid #00ccff;
+  outline-offset: 2px;
+}
+
+.login-btn {
+  background-color: #ffb6c1; /* light pink */
+  color: #000;
+  border-radius: 6px 0 0 6px; /* round left corners */
+}
+
+.register-btn {
+  background-color: #0a3d91; /* dark blue */
+  border-radius: 0 6px 6px 0; /* round right corners */
+}
+
+.login-btn:hover {
+  background-color: #ff9eb2;
+}
+
+.register-btn:hover {
+  background-color: #062b63;
+}
+.google-login {
+  /* ...existing styles... */
+  margin-bottom: 0; /* remove bottom margin if you don’t need it */
+  margin-top: 0.25rem; /* add a little breathing room */
+}
+.auth-buttons {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.75rem; /* was 1.5rem – shrink it */
+  width: 100%;
+}
+.auth-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* ✨ Kill the gap */
+  margin-bottom: 2rem;
+}
+
+.auth-buttons {
+  display: flex;
+  width: 100%;
+}
+
+.auth-buttons button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+  color: white;
+  border-radius: 0; /* no rounding here — we’ll control that */
+}
+
+/* Pink Login */
+.login-btn {
+  background-color: #ffb6c1;
+  color: #000;
+  border-radius: 6px 0 0 0; /* only top-left corner */
+}
+
+/* Dark Blue Register */
+.register-btn {
+  background-color: #0a3d91;
+  border-radius: 0 6px 0 0; /* only top-right corner */
+}
+
+/* Google button right below */
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.90rem 1rem;
+  border-radius: 0 0 6px 6px; /* only bottom corners */
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  user-select: none;
+}
+.auth-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* no spacing at all */
+  margin-bottom: 2rem;
+  border-radius: 6px;
+  overflow: hidden; /* clips the rounded corners together */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.google-login:hover {
+  background: #f1f1f1;
+}
+
+.google-login svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.auth-buttons {
+  display: flex;
+  width: 100%;
+}
+
+.auth-buttons button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+/* Pink Login */
+.login-btn {
+  background-color: #ffb6c1;
+  color: #000;
+}
+
+/* Dark Blue Register */
+.register-btn {
+  background-color: #0a3d91;
+}
+
+/* Hover styles */
+.login-btn:hover {
+  background-color: #ff9eb2;
+}
+
+.register-btn:hover {
+  background-color: #062b63;
+}
+.auth-buttons {
+  display: flex;
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.auth-buttons button {
+  flex: none;
+  width: 120px;
+  height: 45px;
+  border-radius: 9999px; /* full pill shape */
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Light pink login */
+.login-btn {
+  background-color: #ffb6c1;
+  color: #000; /* black text */
+}
+
+/* Dark blue register */
+.register-btn {
+  background-color: #0a3d91;
+  color: #fff;
+}
+
+/* Hover polish */
+.login-btn:hover {
+  background-color: #ffa8b5;
+  transform: scale(1.05);
+}
+
+.register-btn:hover {
+  background-color: #083071;
+  transform: scale(1.05);
+}
+.auth-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0; /* no padding */
+  margin: 0;   /* no margin */
+}
+
+.auth-buttons button {
+  width: 100px;
+  height: 38px;
+  border-radius: 9999px; /* pill shape */
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Login - light pink with black text ✅ */
+.login-btn {
+  background-color: #ffb6c1;
+  color: #000; /* black text */
+}
+
+/* Register - dark blue with white text */
+.register-btn {
+  background-color: #0a3d91;
+  color: #fff;
+}
+
+/* Hover */
+.login-btn:hover {
+  background-color: #ffa8b5;
+}
+
+.register-btn:hover {
+  background-color: #083071;
+}
+
+.auth-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.auth-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.auth-modal-content {
+  background: #121217; /* darker, sleek background */
+  color: #e0e0e0;
+  padding: 2.5rem 2rem 3rem;
+  border-radius: 16px;
+  width: 80%;
+  max-width: 400px;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.3),
+    0 0 10px rgba(0,204,255,0.25); /* subtle cyan glow */
+  animation: popin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes popin {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.auth-modal-content h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.75rem;
+  text-align: center;
+  color: #00ccff;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.auth-modal-content input {
+  width: 88%;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: #272a3a;
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  outline-offset: 2px;
+  outline-color: transparent;
+}
+.auth-modal-content input::placeholder {
+  color: #888;
+  font-style: italic;
+}
+.auth-modal-content input:focus {
+  background: #1a1c2a;
+  box-shadow: 0 0 8px 2px #00ccff;
+  outline-color: #00ccff;
+}
+
+.auth-modal-content button[type="submit"] {
+  width: 100%;
+  padding: 0.9rem 0;
+  background: linear-gradient(90deg, #00ccff 0%, #0099cc 100%);
+  color: #000;
+  border: none;
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-radius: 14px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 6px 15px rgba(0, 204, 255, 0.6);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.auth-modal-content button[type="submit"]:hover {
+  background: linear-gradient(90deg, #0099cc 0%, #006688 100%);
+  box-shadow: 0 8px 20px rgba(0, 153, 204, 0.9);
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: transparent;
+  color: #aaa;
+  font-size: 2rem;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.25s ease;
+}
+.close-modal:hover {
+  color: #00ccff;
+}
+/* Prevent all text selection globally */
+*,
+*::before,
+*::after {
+  user-select: none;           /* Disable text selection */
+  -webkit-user-select: none;   /* Safari */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE10+ */
+}
+
+/* Remove blue highlight on tap / focus */
+* {
+  -webkit-tap-highlight-color: transparent; /* Safari, Chrome mobile */
+  outline: none;                            /* Remove focus outline */
+  -webkit-focus-ring-color: transparent;  /* Some browsers */
+}
+
+/* Smooth scrolling & no overscroll glow on iOS */
+.sidebar {
+  overflow-y: auto;
+  max-height: 100vh;
+  -webkit-overflow-scrolling: touch; /* smooth iOS-like scroll */
+  scrollbar-width: none; /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+.ios-settings-block {
+  width: 90%;
+  max-width: 480px;
+  margin: 2rem auto;
+  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+.ios-section {
+  background: #1c1c1e;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 1px rgba(255,255,255,0.1), 0 12px 20px rgba(0,0,0,0.2);
+}
+
+.ios-link {
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  color: #fff;
+  border: none;
+  text-align: left;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.2s;
+}
+
+.ios-link:last-child {
+  border-bottom: none;
+}
+
+.ios-link:active {
+  background: rgba(255,255,255,0.08);
+}
+
+body {
+  background: #000; /* Dark mode background */
+  color: #fff;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Global box-sizing (safe to keep global) */
+* { box-sizing: border-box; }
+
+/* Scoped container with variables & styles */
+#unique-app-container {
+  /* Scoped CSS variables — unique to this container only */
+  --blue: #0a84ff;
+  --bg: #1c1c1e;
+  --bg-dark: #121213;
+  --text: #f2f2f7;
+  --text-secondary: #8e8e93;
+  --border: #3a3a3c;
+  --glow: #3a82ff80;
+
+  font-family: -apple-system, 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Now prefix EVERYTHING with #unique-app-container */
+#unique-app-container h1 {
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: var(--blue);
+  text-align: center;
+  user-select: text;
+  margin-bottom: 0;
+}
+
+#unique-app-container #drop-zone {
+  border: 2px dashed var(--blue);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: var(--blue);
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  background-color: var(--bg-dark);
+  box-shadow: 0 0 8px transparent;
+}
+#unique-app-container #drop-zone.dragover {
+  background-color: #0a84ff22;
+  box-shadow: 0 0 12px var(--glow);
+}
+
+#unique-app-container textarea#manual-html {
+  width: 100%;
+  height: 140px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background-color: var(--bg-dark);
+  color: var(--text);
+  font-family: monospace;
+  font-size: 15px;
+  padding: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+#unique-app-container textarea#manual-html:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 8px var(--glow);
+  background-color: #252527;
+}
+
+#unique-app-container #parse-btn {
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 18px;
+  cursor: pointer;
+  align-self: center;
+  user-select: none;
+  box-shadow: 0 4px 10px #0a84ff99;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+#unique-app-container #parse-btn:hover:not(:disabled) {
+  background-color: #0066ff;
+  box-shadow: 0 6px 14px #0a84ffcc;
+}
+#unique-app-container #parse-btn:disabled {
+  background-color: #444449;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#unique-app-container .section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+#unique-app-container .section-tab {
+  flex: 1;
+  background-color: var(--bg-dark);
+  color: var(--blue);
+  font-weight: 600;
+  text-align: center;
+  padding: 0.75rem 0;
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 6px transparent;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+#unique-app-container .section-tab.active {
+  background-color: var(--blue);
+  color: white;
+  box-shadow: 0 0 12px var(--glow);
+}
+
+#unique-app-container pre.output-section {
+  background-color: #252527;
+  border-radius: 16px;
+  padding: 1rem;
+  max-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--text);
+  box-shadow: 0 0 6px var(--glow);
+  user-select: text;
+  display: none;
+}
+
+#unique-app-container pre.output-section.active {
+  display: block;
+}
+
+#unique-app-container .spinner {
+  border: 3px solid #eee;
+  border-top: 3px solid white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#unique-app-container #recommendations {
+  background-color: var(--bg-dark);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 0 8px var(--glow);
+  font-size: 14px;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+  #unique-app-container {
+    padding: 1rem 0.7rem;
+  }
+  #unique-app-container #parse-btn {
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+  }
+  #unique-app-container h1 {
+    font-size: 1.4rem;
+  }
+  #unique-app-container textarea#manual-html {
+    height: 130px;
+    font-size: 13px;
+  }
+  #unique-app-container pre.output-section {
+    max-height: 200px;
+    font-size: 13px;
+  }
+  #unique-app-container #recommendations {
+    max-height: 120px;
+  }
+}
+
+#unique-app-container .inline-style-flze74 {
+  margin-top:1rem; 
+  font-weight:600; 
+  color: var(--blue);
+}
   </style>
 </head>
 <body>
-  <h1>YouTube Channel Lite Analytics</h1>
-  <form id="channelForm">
-    <input
-      type="text"
-      id="channelInput"
-      placeholder="Enter channel URL, ID or @handle"
-      required
-      autocomplete="off"
-      spellcheck="false"
-    />
-    <button type="submit">Check</button>
+
+<header class="header" role="banner">
+  <a href="#" class="logo" aria-label="SoloShopper home">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zm0 2h12l1.5 2H4.5L6 4zm-2 4h16v12H4V8z"/>
+    </svg>
+    SoloShopper
+  </a>
+
+  <button class="menu-button" aria-label="Open menu" type="button" aria-expanded="false" aria-controls="sidebar">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</header>
+<div id="unique-app-container">
+  <div id="drop-zone" tabindex="0" aria-label="Drop HTML file here or click to browse">
+    Drop your HTML file here or tap to select
+  </div>
+
+  <label for="manual-html">Or paste your HTML code here:</label>
+  <textarea id="manual-html" spellcheck="false" autocorrect="off" autocomplete="off" placeholder="Paste your HTML here..."></textarea>
+
+  <button id="parse-btn" aria-live="polite" aria-busy="false">Separate Code</button>
+
+  <div class="section-tabs">
+    <div class="section-tab active" data-section="css">CSS</div>
+    <div class="section-tab" data-section="js">JavaScript</div>
+    <div class="section-tab" data-section="html">HTML</div>
+  </div>
+
+  <pre id="css-output" class="output-section active" tabindex="0" aria-label="Extracted CSS code"></pre>
+  <pre id="js-output" class="output-section" tabindex="0" aria-label="Extracted JavaScript code"></pre>
+  <pre id="html-output" class="output-section" tabindex="0" aria-label="Cleaned HTML code"></pre>
+
+  <label class="inline-style-flze74">Recommended Domains / Previews:</label>
+  <div id="recommendations" tabindex="0" aria-live="polite" aria-atomic="true">
+    <!-- API-powered domain & preview recommendations will show here -->
+    Waiting for input...
+  </div>
+</div>
+<div id="sidebar" class="sidebar" role="navigation" aria-hidden="true">
+<div class="auth-buttons" id="authButtons">
+  <button type="button" class="login-btn" id="loginBtnEmail">Login</button>
+  <button type="button" class="register-btn" id="registerBtnEmail">Register</button>
+  </div>
+  <a href="#" id="googleBtn" class="google-login" aria-label="Sign in with Google">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 533.5 544.3" aria-hidden="true" focusable="false">
+      <path fill="#4285F4" d="M533.5 278.4c0-18.4-1.5-36-4.7-53.1H272.1v100.7h146.9c-6.4 34.3-26.1 63.3-55.9 82.9v68h90.4c52.8-48.7 83-120.2 83-198.5z"/>
+      <path fill="#34A853" d="M272.1 544.3c75.9 0 139.7-25.1 186.3-68.3l-90.4-68c-25.2 17-57.4 27-95.9 27-73.6 0-136-49.7-158.3-116.5H18.3v72.8c46.2 91.2 141 152 253.8 152z"/>
+      <path fill="#FBBC05" d="M113.8 320.5c-7-20.8-11-43-11-65.5s4-44.7 11-65.5v-72.8H18.3c-23.9 46.7-23.9 102.2 0 148.9l95.5 54.9z"/>
+      <path fill="#EA4335" d="M272.1 107.7c41.3 0 78.4 14.2 107.6 42l80.5-80.5C409.6 24 346 0 272.1 0 159.3 0 64.5 60.8 18.3 152l95.5 54.9c22.3-66.8 84.7-116.5 158.3-116.5z"/>
+    </svg>
+    Sign in with Google
+  </a>
+    <nav>
+    <a href="#">my sites</a>
+    <a href="#">sites Shop</a>
+    <a href="#">Categories</a>
+    <a href="#">Deals</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+<div class="ios-settings-block">
+  <div class="ios-section">
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/privacypolicy'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 21c-4.41-1.14-7-5.15-7-10V6.3l7-3.11 7 3.11V11c0 4.85-2.59 8.86-7 10z"/></svg>
+      <span>Privacy Policy</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/termsofservice'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      <span>Terms of Service</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/contactus'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 8V7l-3 2-2-2-2 2-2-2-2 2-2-2-3 2v1l3-2 2 2 2-2 2 2 2-2 2 2 3-2z"/><path d="M3 8v13h18V8H3zm2 2h14v9H5v-9z"/></svg>
+      <span>Contact Us</span>
+    </button>
+  </div>
+  <div class="ios-section">
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/about'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c.83 0 1.5.67 1.5 1.5S12.83 8 12 8s-1.5-.67-1.5-1.5S11.17 5 12 5zm1 14h-2v-6h2v6z"/></svg>
+      <span>About</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/helpcenter'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 17c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm.88-10.29c-.49-.28-1.08-.46-1.88-.46-1.38 0-2.5.56-2.5 2h2c0-.38.33-.5.5-.5.34 0 .5.11.66.2.29.17.46.36.46.8 0 .54-.34.73-.88 1.12-.65.45-1.14 1.03-1.14 2.18h2c0-.72.19-1.01.71-1.4.5-.36 1.29-.89 1.29-2.1 0-.84-.4-1.49-1.22-1.84z"/></svg>
+      <span>Help Center</span>
+    </button>
+    <button class="ios-link" onclick="location.href='https://cyberchat.online/reportaproblem'">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      <span>Report a Problem</span>
+    </button>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="overlay"></div>
+<div id="authModal" class="auth-modal hidden">
+  <div class="auth-modal-content">
+    <button class="close-modal" aria-label="Close">&times;</button>
+    <h2 id="modalTitle">Login</h2>
+    <form id="authForm">
+      <input type="email" id="authEmail" placeholder="Email" required />
+      <input type="password" id="authPassword" placeholder="Password" required />
+      <button type="submit" id="authSubmit">Login</button>
+    </form>
+  </div>
+</div>
+<script>
+  const menuBtn = document.querySelector('.menu-button');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.querySelector('.overlay');
+
+  function toggleMenu() {
+    const expanded = menuBtn.getAttribute('aria-expanded') === 'true' || false;
+    menuBtn.setAttribute('aria-expanded', !expanded);
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    sidebar.setAttribute('aria-hidden', expanded);
+  }
+
+  menuBtn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  sidebar.querySelectorAll('a:not(.google-login)').forEach(link => {
+    link.addEventListener('click', () => {
+      menuBtn.setAttribute('aria-expanded', false);
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+      sidebar.setAttribute('aria-hidden', true);
+    });
+  });
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.firebasestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
+
+  // Make auth functions global for non-module scripts
+  window.firebase = {
+    auth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
+  };
+
+  // Elements
+  const googleLoginBtn = document.querySelector('.google-login');
+  const authButtonsContainer = document.getElementById('authButtons');
+
+  // Create status div for logged in user display
+  const statusDiv = document.createElement('div');
+  statusDiv.style.color = "#fff";
+  statusDiv.style.fontWeight = "600";
+  statusDiv.style.marginBottom = "2rem";
+  statusDiv.style.fontSize = "1rem";
+  if (googleLoginBtn && googleLoginBtn.parentElement) {
+    googleLoginBtn.parentElement.insertBefore(statusDiv, googleLoginBtn);
+  }
+
+  // Your custom default avatar
+  const fallbackAvatar = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXnftKcD6788gpR1vsPRfGFA4T2DJbI8OENd-Gk3pOwFQXna77PBqzBgx&s=10';
+
+  // Set logged in UI: hide all login/register buttons & show profile pic + username + logout
+  window.setLoggedInUI = function(nameText, photoURL) {
+    if (googleLoginBtn) googleLoginBtn.style.display = "none";
+    if (authButtonsContainer) authButtonsContainer.style.display = "none";
+
+    // Replace empty or pravatar.cc URLs with fallback avatar
+    if (!photoURL || photoURL.includes('pravatar.cc')) {
+      photoURL = fallbackAvatar;
+    }
+
+    statusDiv.innerHTML = `
+      <img src="${photoURL}" alt="Profile picture" 
+        style="width:40px; height:40px; border-radius:50%; vertical-align:middle; margin-right:10px; object-fit:cover;">
+      <span style="vertical-align:middle;">${nameText}</span>
+      <button id="logoutBtn" style="
+        background: #ff3b3b;
+        color: white;
+        border: none;
+        padding: 4px 10px;
+        margin-left: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      ">Logout</button>
+    `;
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut().then(() => {
+        localStorage.removeItem('soloshopper_user');
+        location.reload();
+      });
+    });
+  };
+
+  // On page load: check saved user info from localStorage, update UI if exists
+  const savedUser = JSON.parse(localStorage.getItem('soloshopper_user'));
+  if (savedUser) {
+    const fullName = savedUser.displayName || savedUser.email || '';
+    const displayName = fullName.includes(" ")
+      ? fullName.trim().split(" ").slice(0, 2).join(" ")
+      : fullName.split("@")[0];
+
+    window.setLoggedInUI(`@${displayName}`, savedUser.photo || null);
+  }
+
+  // Google sign-in button click
+  if (googleLoginBtn) {
+    googleLoginBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider)
+        .then(result => {
+          const user = result.user;
+          const userInfo = {
+            displayName: user.displayName || null,
+            email: user.email,
+            photo: user.photoURL || null
+          };
+          localStorage.setItem('soloshopper_user', JSON.stringify(userInfo));
+
+          const displayName = user.displayName
+            ? user.displayName.split(" ").slice(0, 2).join(" ")
+            : user.email.split("@")[0];
+          window.setLoggedInUI(`@${displayName}`, user.photoURL);
+        })
+        .catch(error => {
+          console.error("Google sign-in failed:", error.message);
+          alert("Google sign-in failed.");
+        });
+    });
+  }
+</script>
+<!-- Email Login/Register Modal HTML -->
+<div id="authModal" class="hidden" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  width: 320px;
+  z-index: 2000;
+">
+  <button class="close-modal" style="
+    position: absolute; top: 8px; right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+  " aria-label="Close">&times;</button>
+  <h2 id="modalTitle" style="margin-bottom: 1rem;">Login</h2>
+  <form id="authForm" style="display: flex; flex-direction: column; gap: 1rem;">
+    <input id="authEmail" type="email" placeholder="Email" required style="
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: none;
+      font-size: 1rem;
+    ">
+    <input id="authPassword" type="password" placeholder="Password" required minlength="6" style="
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: none;
+      font-size: 1rem;
+    ">
+    <button type="submit" id="authSubmit" style="
+      background: #00ccff;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+    ">Login</button>
   </form>
-  <div id="results" aria-live="polite"></div>
+</div>
 
-  <script>
-    function extractChannelId(input) {
-      try {
-        const url = new URL(input);
-        const path = url.pathname.split("/").filter(Boolean);
-        // Support @handle URLs
-        if (path[0] && path[0].startsWith("@")) return path[0];
-        if (path[0] === "channel") return path[1];
-        if (path[0] === "user" || path[0] === "c") return path[1];
-        return null;
-      } catch {
-        return input;
-      }
+<style>
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+<!-- Email Login/Register Modal JS -->
+<script>
+  const loginBtnEmail = document.querySelector('.login-btn');
+  const registerBtnEmail = document.querySelector('.register-btn');
+  const modal = document.getElementById('authModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const authSubmit = document.getElementById('authSubmit');
+  const closeModal = document.querySelector('.close-modal');
+  const authForm = document.getElementById('authForm');
+  const emailInput = document.getElementById('authEmail');
+  const passInput = document.getElementById('authPassword');
+
+  let currentMode = "login";
+
+  function showModal(mode) {
+    currentMode = mode;
+    modal.classList.remove('hidden');
+    modalTitle.textContent = mode === "login" ? "Login" : "Register";
+    authSubmit.textContent = mode === "login" ? "Login" : "Register";
+    authForm.reset();
+  }
+
+  loginBtnEmail.addEventListener('click', () => showModal('login'));
+  registerBtnEmail.addEventListener('click', () => showModal('register'));
+  closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') modal.classList.add('hidden');
+  });
+
+  authForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
     }
 
-    async function fetchChannelMobileHtml(channelId) {
-      let url = "";
-      if (channelId.startsWith("@")) {
-        url = `https://m.youtube.com/${channelId}`;
-      } else {
-        url = `https://m.youtube.com/channel/${channelId}`;
-      }
-      const res = await fetch(url, { mode: "cors" });
-      if (!res.ok) throw new Error("Failed to fetch channel page");
-      return res.text();
+    const {
+      auth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } = window.firebase;
+
+    const action = currentMode === 'login' ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
+
+    action(auth, email, password)
+      .then((result) => {
+        const user = result.user;
+        const userInfo = {
+          displayName: user.displayName || null,
+          email: user.email,
+          photo: user.photoURL || null
+        };
+        localStorage.setItem('soloshopper_user', JSON.stringify(userInfo));
+        const name = user.email.split("@")[0];
+        window.setLoggedInUI(`@${name}`);
+        modal.classList.add('hidden');
+        console.log(`${currentMode} success:`, userInfo);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        alert(err.message);
+      });
+  });
+  const dropZone = document.getElementById('drop-zone');
+  const manualInput = document.getElementById('manual-html');
+  const parseBtn = document.getElementById('parse-btn');
+  const cssOutput = document.getElementById('css-output');
+  const jsOutput = document.getElementById('js-output');
+  const htmlOutput = document.getElementById('html-output');
+  const recommendations = document.getElementById('recommendations');
+  const tabs = document.querySelectorAll('.section-tab');
+
+  // Drag & drop effects
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', e => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (!files.length) return;
+    const file = files[0];
+    if (!file.type.includes('html')) {
+      alert('Please drop an HTML file.');
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      manualInput.value = reader.result;
+    };
+    reader.readAsText(file);
+  });
 
-    function parseChannelStats(html) {
-      // Attempt to parse subscriber count (could be like "1.2M subscribers" or "No subscribers")
-      const subMatch = html.match(/"subscriberCountText":{"simpleText":"([^"]+) subscribers"}/);
-      // Video count appears like "123 videos"
-      const videoMatch = html.match(/"videoCountText":{"runs":\[{"text":"([\d,]+) videos?"}\]/);
-      // Channel name from title tag: "ChannelName - YouTube"
-      const nameMatch = html.match(/<title>([^<]+)<\/title>/);
-
-      const subscriberCount = subMatch ? subMatch[1] : "N/A";
-      const videoCount = videoMatch ? videoMatch[1] : "N/A";
-      const channelName = nameMatch ? nameMatch[1].replace(" - YouTube", "") : "N/A";
-
-      return { subscriberCount, videoCount, channelName };
-    }
-
-    document.getElementById("channelForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const input = document.getElementById("channelInput").value.trim();
-      if (!input) return;
-
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.textContent = "Fetching data...";
-
-      const channelId = extractChannelId(input);
-      if (!channelId) {
-        resultsDiv.innerHTML = `<p class="error">Invalid channel URL, ID, or handle.</p>`;
+  dropZone.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'text/html, .html, .htm';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.includes('html')) {
+        alert('Please select an HTML file.');
         return;
       }
+      const reader = new FileReader();
+      reader.onload = () => {
+        manualInput.value = reader.result;
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
 
-      try {
-        const html = await fetchChannelMobileHtml(channelId);
-        const stats = parseChannelStats(html);
+  // Section tab toggling
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const section = tab.dataset.section;
+      cssOutput.classList.toggle('active', section === 'css');
+      jsOutput.classList.toggle('active', section === 'js');
+      htmlOutput.classList.toggle('active', section === 'html');
+    });
+  });
 
-        resultsDiv.innerHTML = `
-          <div><span class="label">Channel Name:</span> <span class="value">${stats.channelName}</span></div>
-          <div><span class="label">Subscribers:</span> <span class="value">${stats.subscriberCount}</span></div>
-          <div><span class="label">Total Videos:</span> <span class="value">${stats.videoCount}</span></div>
-        `;
-      } catch (err) {
-        resultsDiv.innerHTML = `<p class="error">Error fetching or parsing data: ${err.message}</p>`;
+  // Simple parser + extractor with inline styles & event handlers
+  function separateCode(htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+
+    // Extract style tags
+    const styleTags = Array.from(doc.querySelectorAll('style'));
+    const cssParts = styleTags.map(s => s.textContent.trim());
+    styleTags.forEach(s => s.remove());
+
+    // Extract script tags
+    const scriptTags = Array.from(doc.querySelectorAll('script'));
+    const jsParts = scriptTags.map(s => s.textContent.trim());
+    scriptTags.forEach(s => s.remove());
+
+    // Extract inline styles and move to CSS block
+    const inlineStyles = [];
+    const allElements = Array.from(doc.querySelectorAll('*'));
+    allElements.forEach(el => {
+      if (el.hasAttribute('style')) {
+        const styleContent = el.getAttribute('style').trim();
+        if (styleContent) {
+          // generate a unique class name
+          const className = `inline-style-${Math.random().toString(36).substring(2, 8)}`;
+          el.classList.add(className);
+          inlineStyles.push(`.${className} { ${styleContent} }`);
+          el.removeAttribute('style');
+        }
       }
     });
-  </script>
+
+    if (inlineStyles.length) cssParts.push(inlineStyles.join('\n'));
+
+    // Extract inline JS event handlers (onclick, onload, etc)
+    const eventAttrs = ['onclick', 'onload', 'onmouseover', 'onmouseout', 'onchange', 'onsubmit', 'onfocus', 'onblur'];
+    const inlineJs = [];
+    allElements.forEach(el => {
+      eventAttrs.forEach(attr => {
+        if (el.hasAttribute(attr)) {
+          const jsCode = el.getAttribute(attr).trim();
+          if (jsCode) {
+            const id = el.id || (el.id = `event-el-${Math.random().toString(36).substring(2, 8)}`);
+            inlineJs.push(`document.getElementById('${id}').${attr} = function(event) { ${jsCode} }`);
+            el.removeAttribute(attr);
+          }
+        }
+      });
+    });
+
+    if (inlineJs.length) jsParts.push(inlineJs.join('\n'));
+
+    // Serialize cleaned html
+    const cleanedHtml = doc.documentElement.outerHTML;
+
+    return {
+      css: cssParts.join('\n\n') || '/* No CSS found. */',
+      js: jsParts.join('\n\n') || '// No JavaScript found.',
+      html: cleanedHtml || '<!-- No HTML found -->'
+    };
+  }
+
+  // Fake AI delay & parse button loading spinner
+  function setLoading(isLoading) {
+    if (isLoading) {
+      parseBtn.disabled = true;
+      parseBtn.innerHTML = `<div class="spinner" aria-hidden="true"></div> Analyzing...`;
+      parseBtn.setAttribute('aria-busy', 'true');
+    } else {
+      parseBtn.disabled = false;
+      parseBtn.textContent = 'Separate Code';
+      parseBtn.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  // === KEYLESS APIs (starter ideas) ===
+  // NOTE: These are placeholders - you'll need to add real working calls or mock for now
+
+  // Example: Use https://api.domainsdb.info/ to get domain suggestions (keyless public API)
+  async function fetchDomainSuggestions(keyword) {
+    if (!keyword) return [];
+    try {
+      // DomainsDB API has a limit and CORS issues, so usually you need a proxy
+      // Here's a placeholder fetch to show intent
+      const res = await fetch(`https://api.domainsdb.info/v1/domains/search?domain=${keyword}&zone=com`);
+      const data = await res.json();
+      if (!data.domains) return [];
+      return data.domains.slice(0,5).map(d => d.domain);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Example: Fetch preview metadata (title, description) from an open metadata API (keyless)
+  async function fetchSitePreview(domain) {
+    // Placeholder: returns fake preview data
+    return {
+      title: `Preview for ${domain}`,
+      description: `This is a recommended domain based on your code keywords: ${domain}`,
+      url: `https://${domain}`
+    };
+  }
+
+  // Extract keywords from the HTML content for domain recommendation (basic)
+  function extractKeywords(htmlText) {
+    // Very simple keyword extraction: extract words from <title> or body text
+    const titleMatch = htmlText.match(/<title>(.*?)<\/title>/i);
+    let keywords = [];
+    if (titleMatch && titleMatch[1]) {
+      keywords = titleMatch[1].split(/\W+/).filter(Boolean);
+    } else {
+      // fallback: extract from body text, limit to first 10 words
+      const bodyMatch = htmlText.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      if (bodyMatch && bodyMatch[1]) {
+        keywords = bodyMatch[1].replace(/<[^>]*>/g, '').split(/\W+/).filter(Boolean).slice(0,10);
+      }
+    }
+    return keywords;
+  }
+
+  // Update recommendations UI with fetched domains & previews
+  async function updateRecommendations(htmlString) {
+    recommendations.textContent = 'Analyzing keywords for domain suggestions...';
+    const keywords = extractKeywords(htmlString);
+    if (keywords.length === 0) {
+      recommendations.textContent = 'No meaningful keywords found for domain recommendations.';
+      return;
+    }
+
+    // Use first keyword to query domain suggestions (limit to 1 for demo)
+    const keyword = keywords[0].toLowerCase();
+    recommendations.textContent = `Fetching domain suggestions for "${keyword}"...`;
+
+    const domains = await fetchDomainSuggestions(keyword);
+    if (!domains.length) {
+      recommendations.textContent = 'No domain suggestions found.';
+      return;
+    }
+
+    // Fetch previews (fake for now)
+    let previewsHtml = '';
+    for (const domain of domains) {
+      const preview = await fetchSitePreview(domain);
+      previewsHtml += `
+        <div style="margin-bottom:0.8rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
+          <strong style="color: var(--blue);">${preview.title}</strong><br />
+          <small>${preview.description}</small><br />
+          <a href="${preview.url}" target="_blank" rel="noopener noreferrer" style="color: #0af; text-decoration: underline;">Visit</a>
+        </div>
+      `;
+    }
+    recommendations.innerHTML = previewsHtml;
+  }
+
+  // Main separation + recommendation flow
+  parseBtn.addEventListener('click', async () => {
+    const htmlString = manualInput.value.trim();
+    if (!htmlString) {
+      alert('Please provide HTML input by dropping a file or pasting code.');
+      return;
+    }
+
+    setLoading(true);
+
+    // Separate code parts
+    const { css, js, html } = separateCode(htmlString);
+    cssOutput.textContent = css;
+    jsOutput.textContent = js;
+    htmlOutput.textContent = html;
+
+    // Fetch & update domain recommendations and previews (async)
+    await updateRecommendations(htmlString);
+
+    setLoading(false);
+  });
+</script>
 </body>
 </html>
