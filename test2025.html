@@ -775,6 +775,30 @@ position: absolute; /* instead of fixed if you want it to scroll with content */
 .desktop-brand {
   display: none;
 }
+.desktop-brand {
+  display: none; /* default hidden on mobile */
+}
+
+@media (min-width: 900px) {
+  .desktop-brand {
+    display: block;
+    position: fixed;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #00ccff;
+    background: #121212e0;
+    padding: 0.6rem 1.25rem;
+    border-radius: 14px;
+    z-index: 2000;
+    user-select: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 204, 255, 0.25);
+  }
+}
   </style>
 </head>
 <body>
@@ -786,6 +810,7 @@ position: absolute; /* instead of fixed if you want it to scroll with content */
     </svg>
     SoloShopper
   </a>
+  <div class="desktop-brand">SoloShopper</div>
 <div class="desktop-brand">SoloShopper</div>
   <button class="menu-button" aria-label="Open menu" type="button" aria-expanded="false" aria-controls="sidebar">
     <span></span>
