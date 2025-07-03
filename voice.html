@@ -570,13 +570,13 @@ body.desktop .product-page {
 }
 
 /* Optional tweaks */
-body.desktop .product-page,
-body.tablet .product-page {
-  display: flex; /* ❌ Remove this */
-  flex-direction: column; /* ❌ Remove this */
-  align-items: center; /* ❌ Remove this */
+body.desktop .product-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  justify-content: center;
+  padding: 40px 20px;
 }
-
 /* ✅ New addition */
 body.desktop #productList,
 body.tablet #productList {
