@@ -345,14 +345,24 @@ header::after {
   max-width: 370px;
   margin-bottom: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+
+  /* 3D layered shadows for depth & edges */
+  box-shadow:
+    4px 4px 10px rgba(0, 0, 0, 0.7),
+    inset 1px 1px 4px rgba(255, 255, 255, 0.1),
+    inset -1px -1px 6px rgba(0, 0, 0, 0.8);
+
   position: relative;
   overflow: hidden;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
 }
 
 .product-page .card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
+  box-shadow:
+    8px 8px 18px rgba(0, 0, 0, 0.9),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.15),
+    inset -2px -2px 8px rgba(0, 0, 0, 0.9);
 }
 
 /* Card Image */
@@ -522,6 +532,7 @@ header::after {
 .message-btn:hover {
   background: rgba(0, 255, 255, 0.3);
 }
+
 /* Load More Button */
 #loadMoreBtn {
   background: #1da1f2;
@@ -583,7 +594,6 @@ header::after {
 .close-modal:hover {
   background: #222;
 }
-
 /* Responsive tweaks */
 @media (max-width: 500px) {
   .product-page {
@@ -712,6 +722,135 @@ body.tablet #productList {
     margin-top: 20px;
   }
 }
+.login-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.login-modal-content {
+  background: rgba(30,30,30,0.9);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 30px 24px;
+  border-radius: 18px;
+  max-width: 90%;
+  width: 360px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+}
+
+.login-modal-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #00ffff;
+}
+
+.login-modal-content p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-login, .modal-close {
+  flex: 1;
+  padding: 10px 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-login {
+  background: #00d68f;
+  color: #000;
+}
+
+.modal-login:hover {
+  background: #00b57d;
+}
+
+.modal-close {
+  background: #222;
+  color: white;
+}
+
+.modal-close:hover {
+  background: #444;
+}
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.google-login img {
+  width: 20px;
+  height: 20px;
+}
+
+.google-login:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.product-card {
+  background: linear-gradient(145deg, #1e1e1e, #2a2a2a); /* dark glassy vibe */
+  border-radius: 12px;
+  box-shadow:
+    4px 4px 8px rgba(0,0,0,0.7),       /* dark outer shadow for depth */
+    inset 2px 2px 4px rgba(255,255,255,0.05), /* subtle highlight edge */
+    inset -2px -2px 6px rgba(0,0,0,0.7);       /* inset shadow for 3D feel */
+  padding: 20px;
+  color: #eee;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    8px 8px 16px rgba(0,0,0,0.9),
+    inset 3px 3px 5px rgba(255,255,255,0.1),
+    inset -3px -3px 8px rgba(0,0,0,0.8);
+}
+
+/* Optional: smooth text */
+.product-card * {
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 </style>
 
 </head>
@@ -741,61 +880,136 @@ body.tablet #productList {
   </div>
 </div>
 </main>
+<!-- 🔐 Login Modal -->
+<div id="loginModal" class="login-modal" onclick="closeLoginModal()">
+  <div class="login-modal-content" onclick="event.stopPropagation()">
+    <h2>Please Log In</h2>
+    <p>We require each user to be logged in for the safety of our community and to uniquely identify every action made.</p>
 
-<script type="module">  
-// Firebase imports  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
-  
-// Your real Firebase config here  
-const firebaseConfig = {  
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
-  projectId: "itzhoyoo-f9f7e",  
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
-  messagingSenderId: "1094792075584",  
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",  
-  measurementId: "G-LLT6F9WRKH"  
-};  
-  
-// Initialize Firebase  
-const app = initializeApp(firebaseConfig);  
-const auth = getAuth(app);  
-const provider = new GoogleAuthProvider();  
-  
-const userArea = document.getElementById('userArea');  
-const loginBtn = document.getElementById('loginBtn');  
-  
-loginBtn.addEventListener('click', () => {  
-  signInWithPopup(auth, provider).catch(console.error);  
-});  
-  
-onAuthStateChanged(auth, user => {  
-  if(user) {  
-    // User logged in: show profile pic  
-    userArea.innerHTML = '';  
-    const img = document.createElement('img');  
-    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';  
-    img.alt = user.displayName || 'User';  
-    img.title = user.displayName || 'User';  
-    img.className = 'profile-pic';  
-    img.addEventListener('click', () => {  
-      if(confirm('Sign out?')) signOut(auth);  
-    });  
-    userArea.appendChild(img);  
-  } else {  
-    // Not logged in: show login button  
-    userArea.innerHTML = '';  
-    userArea.appendChild(loginBtn);  
-  }  
-});  
+    <!-- Google Login Button -->
+    <button id="loginBtn" class="google-login" onclick="triggerLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
+      <span>Continue with Google</span>
+    </button>
+
+    <!-- Close Button -->
+    <button onclick="closeLoginModal()" class="modal-close">Close</button>
+  </div>
+</div>
+<script type="module">
+// ✅ Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+// ✅ Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// ✅ Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ✅ Handle login/logout UI in #userArea
+const userArea = document.getElementById('userArea');
+const loginBtn = document.getElementById('loginBtn');
+
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider).catch(console.error);
+});
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // 🔓 Logged in: show profile pic
+    userArea.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
+    img.alt = user.displayName || 'User';
+    img.title = user.displayName || 'User';
+    img.className = 'profile-pic';
+    img.addEventListener('click', () => {
+      if (confirm('Sign out?')) signOut(auth);
+    });
+    userArea.appendChild(img);
+
+    // 🧹 Auto-close modal if open
+    closeLoginModal();
+  } else {
+    // 🚫 Not logged in: show login button
+    userArea.innerHTML = '';
+    userArea.appendChild(loginBtn);
+  }
+});
+
+// 🚨 Show login modal if user not logged in and clicked anywhere
+document.body.addEventListener('click', (e) => {
+  const user = auth.currentUser;
+  const isModal = e.target.closest('#loginModal') !== null;
+  const isLoginBtn = e.target.closest('#loginBtn');
+
+  if (!user && !isModal && !isLoginBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const modal = document.getElementById("loginModal");
+    if (modal) modal.style.display = "flex";
+  }
+});
+
+// 🟢 Login trigger from modal
+window.triggerLogin = function () {
+  signInWithPopup(auth, provider).catch(console.error);
+  closeLoginModal();
+};
+
+// ❌ Close modal manually or on backdrop click
+window.closeLoginModal = function () {
+  const modal = document.getElementById("loginModal");
+  if (modal) modal.style.display = "none";
+};
+document.body.addEventListener('click', (e) => {
+  const user = auth.currentUser;
+
+  // Allowed clicks even if not logged in:
+  // - Inside login modal (#loginModal)
+  // - Login button (#loginBtn or .google-login)
+  // - Modal close button (class .modal-close)
+
+  const clickedEl = e.target;
+
+  // Check if click is on allowed elements or inside modal
+  const isAllowedClick =
+    user || // if logged in, allow everything
+    clickedEl.closest('#loginModal') || 
+    clickedEl.closest('#loginBtn') ||
+    clickedEl.closest('.google-login') ||
+    clickedEl.classList.contains('modal-close');
+
+  if (!isAllowedClick) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Show the login modal if not already visible
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal.style.display !== 'flex') {
+      loginModal.style.display = 'flex';
+    }
+
+    // Optionally, flash a warning or shake the modal for UX
+    // You can add that later if you want
+  }
+});
 </script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-
-
 <script>
   // Firebase config
   const firebaseConfig = {
