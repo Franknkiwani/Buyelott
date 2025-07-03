@@ -910,5 +910,35 @@ onAuthStateChanged(auth, user => {
   // Run on resize too (responsive AF)
   window.addEventListener('resize', detectDeviceAndApplyClasses);
 </script>
+<script>
+// 🔥 Kill duplicate <style> rules based on selector
+(function removeDuplicateCSS() {
+  const seen = new Map();
+  const sheets = [...document.styleSheets];
+
+  sheets.forEach(sheet => {
+    try {
+      const rules = [...sheet.cssRules];
+      rules.forEach((rule, i) => {
+        if (!rule.selectorText) return;
+
+        const selector = rule.selectorText;
+        const content = rule.cssText;
+
+        const key = selector.trim();
+        if (seen.has(key)) {
+          // Remove the earlier rule — keep only the last
+          const prevSheet = seen.get(key).sheet;
+          const prevIndex = seen.get(key).index;
+          try { prevSheet.deleteRule(prevIndex); } catch (e) {}
+        }
+        seen.set(key, { sheet, index: i });
+      });
+    } catch (err) {
+      // cross-origin styleSheet, skip silently
+    }
+  });
+})();
+</script>
 </body>
 </html>
