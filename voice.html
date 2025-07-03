@@ -114,12 +114,19 @@ header::after {
     color: #a0ffff;
   }
   main {
-    flex: 1;
-    background-color: #000000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 1;
+  background-color: #000000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 60px; /* space for fixed header */
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* slightly smaller header on mobile */
   }
+}
   /* Prevent text selection and copying everywhere */
 * {
   -webkit-user-select: none; /* Safari */
