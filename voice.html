@@ -1,281 +1,770 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DLs Account Card</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dlsaccounts</title>
 <style>
-  body {
+  html, body {
+    height: 100%;
     margin: 0;
-    padding: 20px;
-    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: white;
+    background-color: #000000;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
     display: flex;
     flex-direction: column;
-    align-items: center;
   }
+  header {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
 
-  .card {
-    background: rgba(30, 30, 30, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    width: 100%;
-    max-width: 370px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      0 8px 15px rgba(0, 0, 0, 0.6),
-      0 15px 30px rgba(0, 0, 0, 0.3),
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 4px rgba(0, 0, 0, 0.4);
-    position: relative;
-  }
+  height: 60px;
+  width: 100%;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
 
-  .card img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.6);
-  }
-
-  .view-all-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: #000;
-    color: #fff;
-    font-size: 0.75rem;
-    padding: 6px 14px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.2s ease;
-    z-index: 2;
-  }
-
-  .card-content {
-    padding: 20px;
-  }
-
-  .card-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-
-  .card-description {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    margin-bottom: 16px;
-    line-height: 1.4;
-  }
-
-  .rating {
+header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
+}
+  .logo {
     display: flex;
     align-items: center;
-    font-size: 0.85rem;
-    margin-bottom: 10px;
-    color: #ffcc33;
-  }
-
-  .rating span {
-    margin-left: 6px;
-    color: #aaa;
-  }
-
-  .seller-profile {
-    display: flex;
-    align-items: center;
-    margin-bottom: 14px;
     gap: 10px;
   }
-
-  .seller-profile img {
+  .logo-icon-wrapper {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(145deg, #ff000033, #0000ff33);
+    box-shadow:
+      0 0 6px rgba(255, 0, 255, 0.3),
+      0 0 12px rgba(0, 255, 255, 0.15),
+      inset 0 0 6px rgba(0, 255, 255, 0.1);
+    animation: colorChange 7s linear infinite;
+  }
+  .logo-icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #00000088;
+  }
+  @keyframes colorChange {
+    0%   { box-shadow: 0 0 6px #ff0000aa, 0 0 12px #ff000055, inset 0 0 6px #ff000033; }
+    20%  { box-shadow: 0 0 6px #ff7f00aa, 0 0 12px #ff7f0055, inset 0 0 6px #ff7f0033; }
+    40%  { box-shadow: 0 0 6px #ffff00aa, 0 0 12px #ffff0055, inset 0 0 6px #ffff0033; }
+    60%  { box-shadow: 0 0 6px #00ff00aa, 0 0 12px #00ff0055, inset 0 0 6px #00ff0033; }
+    80%  { box-shadow: 0 0 6px #0000ffaa, 0 0 12px #0000ff55, inset 0 0 6px #0000ff33; }
+    100% { box-shadow: 0 0 6px #ff00ffaa, 0 0 12px #ff00ff55, inset 0 0 6px #ff00ff33; }
+  }
+  .logo-text {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    user-select: none;
+  }
+  .user-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .profile-pic {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 2px solid #00d68f;
-  }
-
-  .seller-username {
-    font-size: 0.85rem;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .verified-badge {
-    font-size: 0.7rem;
-    background: #00d68f;
-    color: #000;
-    padding: 2px 6px;
-    border-radius: 12px;
-    font-weight: bold;
-  }
-
-  .info-bar {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    opacity: 0.6;
-    margin-bottom: 14px;
-  }
-
-  .price {
-    font-size: 1.1em;
-    color: #1da1f2;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .buy-btn {
-    background: #00d68f;
-    color: #000;
-    border: none;
-    padding: 12px 18px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    border-radius: 16px;
+    object-fit: cover;
     cursor: pointer;
-    width: 100%;
-    transition: 0.2s;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
   }
-
-  .buy-btn:hover {
-    background: #00b57d;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  .login-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(0, 255, 255, 0.12);
+    border: 1.5px solid rgba(0, 255, 255, 0.35);
+    color: #00ffff;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    backdrop-filter: blur(6px);
+    transition: background 0.3s ease, color 0.3s ease;
   }
-
-  .fullscreen-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(10, 10, 10, 0.9);
-    display: none;
+  .login-btn:hover {
+    background: rgba(0, 255, 255, 0.25);
+    color: #a0ffff;
+  }
+  main {
+    flex: 1;
+    background-color: #000000;
+    display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    z-index: 999;
-    padding: 20px;
   }
-
-  .fullscreen-modal img {
-    max-width: 90%;
-    max-height: 80vh;
-    margin-bottom: 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  }
-
-  .close-modal {
-    background: #00d68f;
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    border-radius: 20px;
-    cursor: pointer;
-    color: #000;
-  }
-
-  #loadMoreBtn {
-    background: #1da1f2;
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    max-width: 370px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    margin: 20px 0;
-  }
-/* Disable text selection on the whole page */
-body, * {
-  user-select: none;           /* Standard */
-  -webkit-user-select: none;   /* Safari */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* IE/Edge */
-}
-
-/* Remove tap highlight on mobile browsers */
+  /* Prevent text selection and copying everywhere */
 * {
-  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+  user-select: none;         /* Standard */
+  -webkit-touch-callout: none; /* Disable callout on iOS */
+  -webkit-user-drag: none;     /* Disable dragging images/text */
 }
-#imageModal {
-  display: none; /* hide by default */
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(10, 10, 10, 0.9);
-  z-index: 9999;
-  overflow-y: auto; /* scroll if too tall */
-  padding: 20px;
-  box-sizing: border-box;
 
-  /* flex container */
+/* Responsive header tweaks */
+@media (max-width: 480px) {
+  header {
+    height: 50px !important; /* smaller height on mobile */
+    padding: 0 12px !important; /* less horizontal padding */
+  }
+
+  .logo-icon-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem !important;
+  }
+
+  .profile-pic {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.9rem !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;  /* full width always */
+    height: 50px !important; /* shorter height */
+    padding: 0 12px !important;
+    box-sizing: border-box;  /* avoid overflow */
+  }
+
+  /* rest remains the same */
+  .logo-icon-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem !important;
+  }
+
+  .profile-pic {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.9rem !important;
+  }
+}
+.profile-pic {
+  outline: none;          /* remove default focus ring */
+  -webkit-tap-highlight-color: transparent; /* remove highlight on mobile */
+}
+
+.profile-pic:focus,
+.profile-pic:active {
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.5); /* optional: custom subtle glow for focus */
+}
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;
+    height: 46px !important; /* slightly shorter header */
+    padding: 0 8px !important;
+    box-sizing: border-box;
+  }
+
+  .logo {
+    gap: 6px !important;
+  }
+
+  .logo-icon-wrapper {
+    width: 22px !important;
+    height: 22px !important;
+    padding: 1px !important;
+  }
+
+  .logo-text {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+
+  .profile-pic {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .login-btn {
+    padding: 5px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 16px !important;
+  }
+
+  .user-area {
+    gap: 10px !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 42px !important;       /* tighter height */
+    padding: 0 6px !important;     /* minimal padding */
+    gap: 0;
+  }
+
+  .logo {
+    gap: 4px !important;
+  }
+
+  .logo-icon-wrapper {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0px !important;
+  }
+
+  .logo-text {
+    font-size: 0.75rem !important;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .user-area {
+    gap: 6px !important;
+  }
+
+  .profile-pic {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .login-btn {
+    padding: 4px 10px !important;
+    font-size: 0.75rem !important;
+    border-radius: 14px !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 56px !important;         /* ✅ More height for visibility */
+    padding: 0 12px !important;      /* ✅ Room for breathing */
+    box-sizing: border-box;
+  }
+
+  .logo {
+    gap: 8px !important;
+    align-items: center;
+  }
+
+  .logo-icon-wrapper {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 2px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem !important;      /* ✅ Bigger font on mobile */
+    font-weight: 700;
+  }
+
+  .user-area {
+    gap: 10px !important;
+  }
+
+  .profile-pic {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 18px !important;
+  }
+}
+</style>
+<style>
+.product-page * {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.product-page {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;  /* horizontal center */
-  justify-content: flex-start; /* start from top vertically */
-  gap: 20px; /* spacing between images */
+  align-items: center;
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: white;
 }
-#imageModal img {
-  max-width: 90%;
-  max-height: 80vh;
+
+.product-page .card {
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 370px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 15px rgba(0, 0, 0, 0.6),
+    0 15px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-page .card img {
+  width: 100%;
+  object-fit: cover;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  background: transparent;
+  animation: none;
+}
+
+.product-page .view-all-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #000;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border: none;
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s ease;
 }
-.card-title {
+
+.product-page .view-all-btn:hover {
+  background: #222;
+}
+
+.product-page .card-content {
+  padding: 20px;
+}
+
+.product-page .card-title {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 8px;
   text-align: center;
 }
 
-.card-description {
+.product-page .card-description {
   font-size: 0.95rem;
   line-height: 1.4;
   opacity: 0.9;
   text-align: center;
+  margin-bottom: 16px;
 }
-.card img {
+
+.product-page .rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: #ffcc33;
+  margin-bottom: 10px;
+}
+
+.product-page .rating span {
+  margin-left: 6px;
+  color: #aaa;
+}
+
+.product-page .seller-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.product-page .seller-profile img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #00d68f;
+}
+
+.product-page .seller-username {
+  font-size: 0.85rem;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.product-page .verified-badge {
+  font-size: 0.7rem;
+  background: #00d68f;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.product-page .info-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-bottom: 14px;
+}
+
+.product-page .price {
+  font-size: 1.1rem;
+  color: #1da1f2;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.product-page .buy-btn {
+  background: #00d68f;
+  color: #000;
+  border: none;
+  padding: 12px 18px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 16px;
+  cursor: pointer;
   width: 100%;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.product-page .buy-btn:hover {
+  background: #00b57d;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Load More Button */
+.product-page #loadMoreBtn {
+  background: #1da1f2;
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  max-width: 370px;
   border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: background 0.2s ease;
+}
+
+.product-page #loadMoreBtn:hover {
+  background: #0d8ddb;
+}
+
+/* Fullscreen Modal */
+.product-page .fullscreen-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.9);
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.product-page .fullscreen-modal img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: block;
+}
+
+.product-page .close-modal {
+  background: black;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.product-page .close-modal:hover {
+  background: #222;
+}
+
+/* Responsive tweaks */
+@media (max-width: 500px) {
+  .product-page {
+    padding: 10px;
+  }
+
+  .product-page .card {
+    border-radius: 16px;
+  }
+
+  .product-page .card img {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+}
+</style>
+<style>
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   object-fit: cover;
-  background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  position: relative;
-  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.seller-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: white;
+}
+
+.badge {
+  background: #2ecc71;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 6px;
+}
+
+.message-btn {
+  background: #007aff;
+  color: white;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.message-btn:hover {
+  background: #005ce6;
+}
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  object-fit: cover;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+}
+
+.seller-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.message-btn {
+  background: #111;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.message-btn:hover {
+  background: #222;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
 }
 </style>
 </head>
 <body>
 
+<header>
+  <div class="logo">
+    <div class="logo-icon-wrapper">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
+    </div>
+    <div class="logo-text">DLSACCOUNTS</div>
+  </div>
+  <div class="user-area" id="userArea">
+    <!-- Profile pic or login button shows here -->
+    <button class="login-btn" id="loginBtn">Login</button>
+  </div>
+</header>
+
+<main>
+<div class="product-page">
   <div id="productList"></div>
   <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
 
   <!-- Fullscreen Modal -->
-  <div class="fullscreen-modal" id="imageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:99; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px;">
-    <button class="close-modal" onclick="closeModal()" style="background:black; color:white; padding:10px 20px; border:none; border-radius:8px;">Close</button>
+  <div class="fullscreen-modal" id="imageModal">
+    <button class="close-modal" onclick="closeModal()">Close</button>
   </div>
+</div>
+</main>
 
+<script type="module">
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// Init
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const db = getDatabase(app);
+
+// DOM refs
+const userArea = document.getElementById('userArea');
+const loginBtn = document.getElementById('loginBtn');
+const sellerArea = document.getElementById('sellerArea'); // must exist in your HTML
+
+// Google login
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider).catch(console.error);
+});
+
+// Auth handler
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const uid = user.uid;
+    const userRef = ref(db, 'users/' + uid);
+
+    // Check if sellerId exists
+    const snapshot = await get(child(ref(db), `users/${uid}/sellerId`));
+    let sellerId;
+    if (!snapshot.exists()) {
+      sellerId = user.email.replaceAll('.', '_'); // Clean ID
+      await set(userRef, {
+        displayName: user.displayName,
+        email: user.email,
+        sellerId: sellerId,
+        photoURL: user.photoURL || ''
+      });
+      console.log("✅ New sellerId created:", sellerId);
+    } else {
+      sellerId = snapshot.val();
+      console.log("🔄 Existing sellerId found:", sellerId);
+    }
+
+    // Show profile pic
+    userArea.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
+    img.alt = user.displayName || 'User';
+    img.title = user.displayName || 'User';
+    img.className = 'profile-pic';
+    img.loading = 'lazy';
+    img.addEventListener('click', () => {
+      if (confirm('Sign out?')) signOut(auth);
+    });
+    userArea.appendChild(img);
+
+    // ✅ Render "Message Now" button for product (if not owner)
+    if (window.productSellerId && window.productSellerId !== sellerId) {
+      renderMessageButton(window.productSellerId, window.productSellerName || "Seller");
+    }
+
+  } else {
+    // Not logged in: clone login button
+    const cloneBtn = loginBtn.cloneNode(true);
+    cloneBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(console.error);
+    });
+    userArea.innerHTML = '';
+    userArea.appendChild(cloneBtn);
+  }
+});
+
+// ====== Message Now Button Renderer ======
+function renderMessageButton(sellerId, sellerName = 'Seller') {
+  if (!sellerArea) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'seller-info';
+
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = sellerName;
+
+  const msgBtn = document.createElement('button');
+  msgBtn.textContent = 'Message Now';
+  msgBtn.className = 'message-btn';
+  msgBtn.addEventListener('click', () => {
+    window.location.href = `/messages/${sellerId}`;
+  });
+
+  wrapper.appendChild(nameSpan);
+  wrapper.appendChild(msgBtn);
+  sellerArea.appendChild(wrapper);
+}
+</script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+
 
 <script>
   // Firebase config
@@ -391,6 +880,5 @@ body, * {
   // Initial load
   loadMore();
 </script>
-</body>
 </body>
 </html>
