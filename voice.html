@@ -185,6 +185,75 @@
   #closeProfileBtn:hover {
     background: rgba(0,255,255,0.35);
   }
+  /* Full screen profile page style */
+#profileOverlay {
+  position: fixed;
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0 */
+  background: linear-gradient(135deg, #000000ee, #000000cc);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 40px 50px;
+  gap: 25px;
+  color: #e0e0e0;
+  user-select: none;
+  z-index: 9999;
+}
+
+/* Container for profile pic and username on top-left */
+#profileContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* Profile pic styling */
+#profilePicLarge {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 20px #00ffffcc;
+  border: 2px solid #00ffffaa;
+}
+
+/* Username styling */
+#usernameDisplay {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: text; /* so user can copy username */
+  color: #00ffff;
+}
+
+/* Red logout button next to username */
+#logoutBtn {
+  margin-top: 15px;
+  padding: 12px 28px;
+  border-radius: 30px;
+  background-color: #ff3b3b;
+  border: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 10px #ff3b3baa;
+  transition: background-color 0.3s ease;
+}
+
+#logoutBtn:hover {
+  background-color: #e03131;
+}
+
+/* Hide close button since it's full page */
+#closeProfileBtn {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -212,6 +281,13 @@
     <img id="profilePicLarge" src="" alt="Profile Picture" />
     <div id="usernameDisplay"></div>
   </div>
+  <div id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="usernameDisplay">
+  <div id="profileContent">
+    <img id="profilePicLarge" src="" alt="Profile Picture" />
+    <div id="usernameDisplay"></div>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
 </div>
 
 <script type="module">
@@ -286,6 +362,11 @@ onAuthStateChanged(auth, user => {
     userArea.innerHTML = '';
     userArea.appendChild(loginBtn);
   }
+});
+const logoutBtn = document.getElementById('logoutBtn');
+logoutBtn.addEventListener('click', () => {
+  signOut(auth);
+  profileOverlay.classList.remove('show');
 });
 </script>
 
