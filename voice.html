@@ -570,13 +570,32 @@ body.desktop .product-page {
 }
 
 /* Optional tweaks */
-body.desktop .product-page .card {
-  max-width: none;
+body.desktop .product-page,
+body.tablet .product-page {
+  display: flex; /* ❌ Remove this */
+  flex-direction: column; /* ❌ Remove this */
+  align-items: center; /* ❌ Remove this */
 }
 
-body.mobile .product-page .card {
+/* ✅ New addition */
+body.desktop #productList,
+body.tablet #productList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
   width: 100%;
-  max-width: 370px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.product-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+#loadMoreBtn {
+  display: block;
+  margin: 30px auto 50px;
+  width: 100%;
+  max-width: 400px;
 }
 </style>
 <style>
@@ -649,6 +668,22 @@ body.mobile .product-page .card {
 .message-btn:hover {
   background: #222;
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+.card {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInCard 0.5s ease forwards;
+}
+
+@keyframes fadeInCard {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.product-page {
+  width: 100%;
+  overflow-x: hidden;
 }
 </style>
 </head>
