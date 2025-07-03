@@ -653,113 +653,54 @@ header::after {
 </div>
 </main>
 
-<script type="module">
-// Firebase imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-// Init
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-const db = getDatabase(app);
-
-// DOM refs
-const userArea = document.getElementById('userArea');
-const loginBtn = document.getElementById('loginBtn');
-const sellerArea = document.getElementById('sellerArea'); // must exist in your HTML
-
-// Google login
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider).catch(console.error);
-});
-
-// Auth handler
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const uid = user.uid;
-    const userRef = ref(db, 'users/' + uid);
-
-    // Check if sellerId exists
-    const snapshot = await get(child(ref(db), `users/${uid}/sellerId`));
-    let sellerId;
-    if (!snapshot.exists()) {
-      sellerId = user.email.replaceAll('.', '_'); // Clean ID
-      await set(userRef, {
-        displayName: user.displayName,
-        email: user.email,
-        sellerId: sellerId,
-        photoURL: user.photoURL || ''
-      });
-      console.log("✅ New sellerId created:", sellerId);
-    } else {
-      sellerId = snapshot.val();
-      console.log("🔄 Existing sellerId found:", sellerId);
-    }
-
-    // Show profile pic
-    userArea.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
-    img.alt = user.displayName || 'User';
-    img.title = user.displayName || 'User';
-    img.className = 'profile-pic';
-    img.loading = 'lazy';
-    img.addEventListener('click', () => {
-      if (confirm('Sign out?')) signOut(auth);
-    });
-    userArea.appendChild(img);
-
-    // ✅ Render "Message Now" button for product (if not owner)
-    if (window.productSellerId && window.productSellerId !== sellerId) {
-      renderMessageButton(window.productSellerId, window.productSellerName || "Seller");
-    }
-
-  } else {
-    // Not logged in: clone login button
-    const cloneBtn = loginBtn.cloneNode(true);
-    cloneBtn.addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(console.error);
-    });
-    userArea.innerHTML = '';
-    userArea.appendChild(cloneBtn);
-  }
-});
-
-// ====== Message Now Button Renderer ======
-function renderMessageButton(sellerId, sellerName = 'Seller') {
-  if (!sellerArea) return;
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'seller-info';
-
-  const nameSpan = document.createElement('span');
-  nameSpan.textContent = sellerName;
-
-  const msgBtn = document.createElement('button');
-  msgBtn.textContent = 'Message Now';
-  msgBtn.className = 'message-btn';
-  msgBtn.addEventListener('click', () => {
-    window.location.href = `/messages/${sellerId}`;
-  });
-
-  wrapper.appendChild(nameSpan);
-  wrapper.appendChild(msgBtn);
-  sellerArea.appendChild(wrapper);
-}
+<script type="module">  
+// Firebase imports  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
+  
+// Your real Firebase config here  
+const firebaseConfig = {  
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+  projectId: "itzhoyoo-f9f7e",  
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+  messagingSenderId: "1094792075584",  
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",  
+  measurementId: "G-LLT6F9WRKH"  
+};  
+  
+// Initialize Firebase  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const provider = new GoogleAuthProvider();  
+  
+const userArea = document.getElementById('userArea');  
+const loginBtn = document.getElementById('loginBtn');  
+  
+loginBtn.addEventListener('click', () => {  
+  signInWithPopup(auth, provider).catch(console.error);  
+});  
+  
+onAuthStateChanged(auth, user => {  
+  if(user) {  
+    // User logged in: show profile pic  
+    userArea.innerHTML = '';  
+    const img = document.createElement('img');  
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';  
+    img.alt = user.displayName || 'User';  
+    img.title = user.displayName || 'User';  
+    img.className = 'profile-pic';  
+    img.addEventListener('click', () => {  
+      if(confirm('Sign out?')) signOut(auth);  
+    });  
+    userArea.appendChild(img);  
+  } else {  
+    // Not logged in: show login button  
+    userArea.innerHTML = '';  
+    userArea.appendChild(loginBtn);  
+  }  
+});  
 </script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
