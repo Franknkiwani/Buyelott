@@ -1,306 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet" />
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>dlsaccounts</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLs Account Card</title>
 <style>
-  html, body {
-    height: 100%;
+  body {
     margin: 0;
-    background-color: #000000;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
+    padding: 20px;
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: white;
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
-  header {
+
+  .card {
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 370px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 8px 15px rgba(0, 0, 0, 0.6),
+      0 15px 30px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 4px rgba(0, 0, 0, 0.4);
     position: relative;
-    height: 60px;
-    width: 100%;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-sizing: border-box;
   }
-  header::after {
-    content: "";
+
+  .card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  }
+
+  .view-all-btn {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
-    box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
+    top: 12px;
+    right: 12px;
+    background: #000;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    z-index: 2;
   }
-  .logo {
+
+  .card-content {
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .card-description {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .rating {
     display: flex;
     align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    color: #ffcc33;
+  }
+
+  .rating span {
+    margin-left: 6px;
+    color: #aaa;
+  }
+
+  .seller-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
     gap: 10px;
   }
-  .logo-icon-wrapper {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(145deg, #ff000033, #0000ff33);
-    box-shadow:
-      0 0 6px rgba(255, 0, 255, 0.3),
-      0 0 12px rgba(0, 255, 255, 0.15),
-      inset 0 0 6px rgba(0, 255, 255, 0.1);
-    animation: colorChange 7s linear infinite;
-  }
-  .logo-icon-wrapper img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #00000088;
-  }
-  @keyframes colorChange {
-    0%   { box-shadow: 0 0 6px #ff0000aa, 0 0 12px #ff000055, inset 0 0 6px #ff000033; }
-    20%  { box-shadow: 0 0 6px #ff7f00aa, 0 0 12px #ff7f0055, inset 0 0 6px #ff7f0033; }
-    40%  { box-shadow: 0 0 6px #ffff00aa, 0 0 12px #ffff0055, inset 0 0 6px #ffff0033; }
-    60%  { box-shadow: 0 0 6px #00ff00aa, 0 0 12px #00ff0055, inset 0 0 6px #00ff0033; }
-    80%  { box-shadow: 0 0 6px #0000ffaa, 0 0 12px #0000ff55, inset 0 0 6px #0000ff33; }
-    100% { box-shadow: 0 0 6px #ff00ffaa, 0 0 12px #ff00ff55, inset 0 0 6px #ff00ff33; }
-  }
-  .logo-text {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e0e0e0;
-    user-select: none;
-  }
-  .user-area {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  .profile-pic {
+
+  .seller-profile img {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    object-fit: cover;
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .login-btn {
-    padding: 8px 18px;
-    border-radius: 20px;
-    background: rgba(0, 255, 255, 0.12);
-    border: 1.5px solid rgba(0, 255, 255, 0.35);
-    color: #00ffff;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
-    backdrop-filter: blur(6px);
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-  .login-btn:hover {
-    background: rgba(0, 255, 255, 0.25);
-    color: #a0ffff;
+    border: 2px solid #00d68f;
   }
 
-  main {
-    flex: 1;
-    background-color: #000000;
+  .seller-username {
+    font-size: 0.85rem;
+    color: #ccc;
     display: flex;
-    justify-content: center;
     align-items: center;
+    gap: 5px;
   }
 
-  /* Profile overlay styles */
-  #profileOverlay {
+  .verified-badge {
+    font-size: 0.7rem;
+    background: #00d68f;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+
+  .info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-bottom: 14px;
+  }
+
+  .price {
+    font-size: 1.1em;
+    color: #1da1f2;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .buy-btn {
+    background: #00d68f;
+    color: #000;
+    border: none;
+    padding: 12px 18px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-radius: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+
+  .buy-btn:hover {
+    background: #00b57d;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  }
+
+  .fullscreen-modal {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.9);
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
     flex-direction: column;
-    color: #00ffff;
-    user-select: none;
+    z-index: 999;
+    padding: 20px;
   }
-  #profileOverlay.show {
-    display: flex;
-    animation: fadeIn 0.3s ease forwards;
+
+  .fullscreen-modal img {
+    max-width: 90%;
+    max-height: 80vh;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   }
-  @keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
-  }
-  #profileContent {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 30px 40px;
-    border-radius: 14px;
-    box-shadow: 0 0 12px #00ffffaa;
-  }
-  #profileContent img {
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0 0 15px #00ffffcc;
-  }
-  #usernameDisplay {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: text; /* allow selecting username */
-  }
-  #closeProfileBtn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0,255,255,0.15);
+
+  .close-modal {
+    background: #00d68f;
     border: none;
-    color: #00ffff;
-    font-size: 1.8rem;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-radius: 20px;
     cursor: pointer;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    line-height: 36px;
-    user-select: none;
-    transition: background 0.3s ease;
+    color: #000;
   }
-  #closeProfileBtn:hover {
-    background: rgba(0,255,255,0.35);
+
+  #loadMoreBtn {
+    background: #1da1f2;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    max-width: 370px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 20px 0;
   }
-.logo-text {
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 900;       /* ultra bold */
-  font-size: 0.9rem;      /* small but impactful */
-  color: #ffffff;
-  letter-spacing: 0.03em; /* tight but readable */
-  user-select: none;
-  text-transform: uppercase;
-  line-height: 1;
-  white-space: nowrap;
+/* Disable text selection on the whole page */
+body, * {
+  user-select: none;           /* Standard */
+  -webkit-user-select: none;   /* Safari */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE/Edge */
+}
+
+/* Remove tap highlight on mobile browsers */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+#imageModal {
+  display: none; /* hide by default */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.9);
+  z-index: 9999;
+  overflow-y: auto; /* scroll if too tall */
+  padding: 20px;
+  box-sizing: border-box;
+
+  /* flex container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* horizontal center */
+  justify-content: flex-start; /* start from top vertically */
+  gap: 20px; /* spacing between images */
+}
+#imageModal img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.card-description {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  opacity: 0.9;
+  text-align: center;
+}
+.card img {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.card img.loaded {
+  animation: none;
+  background: none;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon-wrapper">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
-    </div>
-    <div class="logo-text">Dls-accounts</div>
+  <div id="productList"></div>
+  <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
+
+  <!-- Fullscreen Modal -->
+  <div class="fullscreen-modal" id="imageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:99; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px;">
+    <button class="close-modal" onclick="closeModal()" style="background:black; color:white; padding:10px 20px; border:none; border-radius:8px;">Close</button>
   </div>
-  <div class="user-area" id="userArea">
-    <button class="login-btn" id="loginBtn">Login</button>
-  </div>
-</header>
 
-<main>
-  <!-- Your main content -->
-</main>
+  <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
-<!-- Profile Overlay -->
-<div id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="usernameDisplay">
-  <button id="closeProfileBtn" aria-label="Close profile overlay">&times;</button>
-  <div id="profileContent">
-    <img id="profilePicLarge" src="" alt="Profile Picture" />
-    <div id="usernameDisplay"></div>
-  </div>
-</div>
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-<script type="module">
-// Firebase imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-// Your real Firebase config here
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
+  const LIMIT = 5;
+  let lastKey = null;
+  let loading = false;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-const userArea = document.getElementById('userArea');
-const loginBtn = document.getElementById('loginBtn');
-const profileOverlay = document.getElementById('profileOverlay');
-const profilePicLarge = document.getElementById('profilePicLarge');
-const usernameDisplay = document.getElementById('usernameDisplay');
-const closeProfileBtn = document.getElementById('closeProfileBtn');
-
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider).catch(console.error);
-});
-
-function openProfile(user) {
-  profilePicLarge.src = user.photoURL || 'https://via.placeholder.com/96?text=U';
-  usernameDisplay.textContent = '@' + (user.displayName || 'user').replace(/\s+/g, '').toLowerCase();
-  profileOverlay.classList.add('show');
-}
-
-closeProfileBtn.addEventListener('click', () => {
-  profileOverlay.classList.remove('show');
-});
-
-profileOverlay.addEventListener('click', e => {
-  if(e.target === profileOverlay) {
-    profileOverlay.classList.remove('show');
+  // Utility: Fisher-Yates shuffle
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
-});
 
-onAuthStateChanged(auth, user => {
-  if(user) {
-    // Show profile pic with click to open profile overlay
-    userArea.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
-    img.alt = user.displayName || 'User';
-    img.title = user.displayName || 'User';
-    img.className = 'profile-pic';
-    img.tabIndex = 0;
-    img.addEventListener('click', () => openProfile(user));
-    img.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openProfile(user);
-      }
+  function renderProduct(product, id) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${product.image}" alt="Product Image" loading="lazy">
+      <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>
+      <div class="card-content">
+        <div class="card-title">${product.title}</div>
+        <div class="card-description">${product.description}</div>
+        <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+          <img src="${product.seller.avatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy">
+          <div>
+            ${product.seller.username}
+            ${product.seller.verified ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : ''}
+          </div>
+        </div>
+        <div class="price">$${product.price}</div>
+        <button class="buy-btn" onclick="buyProduct('${id}')">Buy Now</button>
+      </div>
+    `;
+    document.getElementById("productList").appendChild(card);
+  }
+
+  function openModal(images) {
+    const modal = document.getElementById("imageModal");
+    modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
+    images.forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.maxWidth = "90%";
+      img.style.maxHeight = "80vh";
+      img.style.borderRadius = "20px";
+      img.style.marginBottom = "20px";
+      modal.appendChild(img);
     });
-    userArea.appendChild(img);
-  } else {
-    // Show login button
-    userArea.innerHTML = '';
-    userArea.appendChild(loginBtn);
+    modal.style.display = 'flex';
   }
-});
-</script>
 
+  function closeModal() {
+    document.getElementById("imageModal").style.display = 'none';
+  }
+
+  function buyProduct(id) {
+    window.location.href = `/product?id=${id}`;
+  }
+
+  async function loadMore() {
+    if (loading) return;
+    loading = true;
+
+    let ref = db.ref("/dlsaccounts").orderByKey().limitToFirst(LIMIT + 1);
+    if (lastKey) {
+      ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);
+    }
+
+    const snapshot = await ref.once("value");
+    const data = snapshot.val();
+
+    if (!data) {
+      document.getElementById("loadMoreBtn").style.display = "none";
+      loading = false;
+      return;
+    }
+
+    let entries = Object.entries(data);
+    if (entries.length > LIMIT) {
+      lastKey = entries[LIMIT - 1][0];
+      entries.length = LIMIT;
+    } else {
+      document.getElementById("loadMoreBtn").style.display = "none";
+    }
+
+    // 🔀 Shuffle before rendering
+    entries = shuffleArray(entries);
+
+    for (const [id, product] of entries) {
+      renderProduct(product, id);
+      lastKey = id;
+    }
+
+    loading = false;
+  }
+
+  // Initial load
+  loadMore();
+</script>
+</body>
 </body>
 </html>
