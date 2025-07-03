@@ -28,6 +28,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
+    box-sizing: border-box;
   }
   header::after {
     content: "";
@@ -91,6 +92,8 @@
     object-fit: cover;
     cursor: pointer;
     box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .login-btn {
     padding: 8px 18px;
@@ -108,6 +111,7 @@
     background: rgba(0, 255, 255, 0.25);
     color: #a0ffff;
   }
+
   main {
     flex: 1;
     background-color: #000000;
@@ -115,72 +119,72 @@
     justify-content: center;
     align-items: center;
   }
-  /* Prevent text selection and copying everywhere */
-* {
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* IE10+ */
-  user-select: none;         /* Standard */
-  -webkit-touch-callout: none; /* Disable callout on iOS */
-  -webkit-user-drag: none;     /* Disable dragging images/text */
-}
 
-/* Responsive header tweaks */
-@media (max-width: 480px) {
-  header {
-    height: 50px !important; /* smaller height on mobile */
-    padding: 0 12px !important; /* less horizontal padding */
+  /* Profile overlay styles */
+  #profileOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+    color: #00ffff;
+    user-select: none;
   }
-
-  .logo-icon-wrapper {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 2px !important;
+  #profileOverlay.show {
+    display: flex;
+    animation: fadeIn 0.3s ease forwards;
   }
-
-  .logo-text {
-    font-size: 1rem !important;
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
   }
-
-  .profile-pic {
-    width: 28px !important;
-    height: 28px !important;
+  #profileContent {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 30px 40px;
+    border-radius: 14px;
+    box-shadow: 0 0 12px #00ffffaa;
   }
-
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.9rem !important;
+  #profileContent img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 15px #00ffffcc;
   }
-}
-@media (max-width: 480px) {
-  header {
-    width: 100% !important;  /* full width always */
-    height: 50px !important; /* shorter height */
-    padding: 0 12px !important;
-    box-sizing: border-box;  /* avoid overflow */
+  #usernameDisplay {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: text; /* allow selecting username */
   }
-
-  /* rest remains the same */
-  .logo-icon-wrapper {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 2px !important;
+  #closeProfileBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,255,255,0.15);
+    border: none;
+    color: #00ffff;
+    font-size: 1.8rem;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    line-height: 36px;
+    user-select: none;
+    transition: background 0.3s ease;
   }
-
-  .logo-text {
-    font-size: 1rem !important;
+  #closeProfileBtn:hover {
+    background: rgba(0,255,255,0.35);
   }
-
-  .profile-pic {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.9rem !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -193,7 +197,6 @@
     <div class="logo-text">DLSACCOUNTS</div>
   </div>
   <div class="user-area" id="userArea">
-    <!-- Profile pic or login button shows here -->
     <button class="login-btn" id="loginBtn">Login</button>
   </div>
 </header>
@@ -201,6 +204,15 @@
 <main>
   <!-- Your main content -->
 </main>
+
+<!-- Profile Overlay -->
+<div id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="usernameDisplay">
+  <button id="closeProfileBtn" aria-label="Close profile overlay">&times;</button>
+  <div id="profileContent">
+    <img id="profilePicLarge" src="" alt="Profile Picture" />
+    <div id="usernameDisplay"></div>
+  </div>
+</div>
 
 <script type="module">
 // Firebase imports
@@ -226,26 +238,51 @@ const provider = new GoogleAuthProvider();
 
 const userArea = document.getElementById('userArea');
 const loginBtn = document.getElementById('loginBtn');
+const profileOverlay = document.getElementById('profileOverlay');
+const profilePicLarge = document.getElementById('profilePicLarge');
+const usernameDisplay = document.getElementById('usernameDisplay');
+const closeProfileBtn = document.getElementById('closeProfileBtn');
 
 loginBtn.addEventListener('click', () => {
   signInWithPopup(auth, provider).catch(console.error);
 });
 
+function openProfile(user) {
+  profilePicLarge.src = user.photoURL || 'https://via.placeholder.com/96?text=U';
+  usernameDisplay.textContent = '@' + (user.displayName || 'user').replace(/\s+/g, '').toLowerCase();
+  profileOverlay.classList.add('show');
+}
+
+closeProfileBtn.addEventListener('click', () => {
+  profileOverlay.classList.remove('show');
+});
+
+profileOverlay.addEventListener('click', e => {
+  if(e.target === profileOverlay) {
+    profileOverlay.classList.remove('show');
+  }
+});
+
 onAuthStateChanged(auth, user => {
   if(user) {
-    // User logged in: show profile pic
+    // Show profile pic with click to open profile overlay
     userArea.innerHTML = '';
     const img = document.createElement('img');
     img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
     img.alt = user.displayName || 'User';
     img.title = user.displayName || 'User';
     img.className = 'profile-pic';
-    img.addEventListener('click', () => {
-      if(confirm('Sign out?')) signOut(auth);
+    img.tabIndex = 0;
+    img.addEventListener('click', () => openProfile(user));
+    img.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openProfile(user);
+      }
     });
     userArea.appendChild(img);
   } else {
-    // Not logged in: show login button
+    // Show login button
     userArea.innerHTML = '';
     userArea.appendChild(loginBtn);
   }
