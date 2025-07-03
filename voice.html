@@ -552,6 +552,32 @@ header::after {
     border-top-right-radius: 16px;
   }
 }
+/* Layout Reset */
+body.mobile .product-page {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.tablet .product-page,
+body.desktop .product-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* Optional tweaks */
+body.desktop .product-page .card {
+  max-width: none;
+}
+
+body.mobile .product-page .card {
+  width: 100%;
+  max-width: 370px;
+}
 </style>
 <style>
 .profile-pic {
@@ -820,6 +846,31 @@ onAuthStateChanged(auth, user => {
 
   // Initial load
   loadMore();
+</script>
+<script>
+  function detectDeviceAndApplyClasses() {
+    const width = window.innerWidth;
+    const ua = navigator.userAgent.toLowerCase();
+
+    const isMobile = /android|iphone|ipod/.test(ua);
+    const isTablet = /ipad|tablet/.test(ua) || (width > 500 && width < 1024);
+
+    document.body.classList.remove('mobile', 'tablet', 'desktop');
+
+    if (isMobile || width < 500) {
+      document.body.classList.add('mobile');
+    } else if (isTablet) {
+      document.body.classList.add('tablet');
+    } else {
+      document.body.classList.add('desktop');
+    }
+  }
+
+  // Run on load
+  detectDeviceAndApplyClasses();
+
+  // Run on resize too (responsive AF)
+  window.addEventListener('resize', detectDeviceAndApplyClasses);
 </script>
 </body>
 </html>
