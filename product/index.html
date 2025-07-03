@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CyberChat Product</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/styles/product.css" />
+</head>
+<body>
+  <div class="product-container">
+    <div id="loading">Loading product...</div>
+    <div id="productDetails" style="display: none;">
+      <img id="productImage" />
+      <h1 id="productTitle"></h1>
+      <p id="productDescription"></p>
+      <div class="price" id="productPrice"></div>
+      <button class="buy-btn" id="buyNowBtn">Buy Now</button>
+    </div>
+  </div>
+
+  <!-- Firebase logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+
+    if (productId) {
+      const productRef = ref(db, 'products/' + productId);
+      get(productRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("productTitle").textContent = data.title || "No Title";
+          document.getElementById("productDescription").textContent = data.description || "No Description";
+          document.getElementById("productPrice").textContent = `R${data.price || '0.00'}`;
+          document.getElementById("productImage").src = data.image || "https://via.placeholder.com/400x300";
+          
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("productDetails").style.display = "block";
+        } else {
+          document.getElementById("loading").textContent = "Product not found.";
+        }
+      }).catch((error) => {
+        console.error(error);
+        document.getElementById("loading").textContent = "Error loading product.";
+      });
+    } else {
+      document.getElementById("loading").textContent = "Invalid product ID.";
+    }
+
+    // Future enhancement: buyNowBtn onclick logic
+  </script>
+</body>
+</html>
