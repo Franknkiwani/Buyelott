@@ -312,8 +312,6 @@ header::after {
     border-radius: 18px !important;
   }
 }
-</style>
-<style>
 .product-page * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -638,122 +636,31 @@ body.tablet #productList {
     padding: 10px;
   }
 }
-</style>
-<style>
-.profile-pic {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-}
-
-.seller-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: white;
-}
-
-.badge {
-  background: #2ecc71;
-  color: white;
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 12px;
-  margin-left: 6px;
-}
-
-.message-btn {
-  background: #007aff;
-  color: white;
-  font-size: 0.75rem;
-  padding: 6px 12px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.message-btn:hover {
-  background: #005ce6;
-}
-.profile-pic {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  object-fit: cover;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-}
-
-.seller-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.message-btn {
-  background: #111;
-  color: white;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.message-btn:hover {
-  background: #222;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
-}
-.card {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInCard 0.5s ease forwards;
-}
-
-@keyframes fadeInCard {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 .product-page {
-  width: 100%;
-  overflow-x: hidden;
+  width: 80%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: white;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-@media (min-width: 1600px) {
-  header {
-    height: 40px !important;
-    padding: 0 20px !important;
-  }
-  
-  .logo-icon-wrapper {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 2px !important;
-  }
-  
-  .logo-text {
-    font-size: 1rem !important;
-  }
-  
-  .profile-pic {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.9rem !important;
-    border-radius: 16px !important;
+
+/* Make sure mobile stays full width */
+@media (max-width: 767px) {
+  .product-page {
+    width: 100%;
+    padding: 10px;
   }
 }
 </style>
+</style>
+</style>
+
 </head>
 <body>
 
