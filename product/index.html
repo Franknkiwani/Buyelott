@@ -1,213 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Product Detail - DLSACCOUNTS</title>
-<style>
-  /* Basic reset & font */
-  body, html {
-    margin: 0; padding: 0;
-    background: #000;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  header {
-    position: sticky;
-    top: 0;
-    background: rgba(255 255 255 / 0.05);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255 255 255 / 0.05);
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: 1000;
-  }
-  .logo-icon-wrapper {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #ff000033, #0000ff33);
-    box-shadow:
-      0 0 6px rgba(255, 0, 255, 0.3),
-      0 0 12px rgba(0, 255, 255, 0.15),
-      inset 0 0 6px rgba(0, 255, 255, 0.1);
-    animation: colorChange 7s linear infinite;
-  }
-  .logo-icon-wrapper img {
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #00000088;
-  }
-  @keyframes colorChange {
-    0%   { box-shadow: 0 0 6px #ff0000aa, 0 0 12px #ff000055, inset 0 0 6px #ff000033; }
-    20%  { box-shadow: 0 0 6px #ff7f00aa, 0 0 12px #ff7f0055, inset 0 0 6px #ff7f0033; }
-    40%  { box-shadow: 0 0 6px #ffff00aa, 0 0 12px #ffff0055, inset 0 0 6px #ffff0033; }
-    60%  { box-shadow: 0 0 6px #00ff00aa, 0 0 12px #00ff0055, inset 0 0 6px #00ff0033; }
-    80%  { box-shadow: 0 0 6px #0000ffaa, 0 0 12px #0000ff55, inset 0 0 6px #0000ff33; }
-    100% { box-shadow: 0 0 6px #ff00ffaa, 0 0 12px #ff00ff55, inset 0 0 6px #ff00ff33; }
-  }
-  .logo-text {
-    font-weight: 700;
-    font-size: 1.4rem;
-    color: #0ff;
-    letter-spacing: 1px;
-    user-select: none;
-  }
-  main {
-    flex: 1;
-    padding: 24px 20px;
-    max-width: 700px;
-    margin: 0 auto 40px;
-  }
-  .card {
-    background: rgba(30,30,30,0.8);
-    border-radius: 20px;
-    box-shadow:
-      0 4px 12px rgba(0,0,0,0.8),
-      inset 1px 1px 6px rgba(255,255,255,0.05),
-      inset -1px -1px 8px rgba(0,0,0,0.9);
-    overflow: hidden;
-    user-select: none;
-  }
-  .card img {
-    width: 100%;
-    height: 280px;
-    object-fit: cover;
-    border-bottom: 2px solid #00fff7;
-  }
-  .card-content {
-    padding: 20px;
-    text-align: center;
-  }
-  .card-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #00fff7;
-    margin-bottom: 8px;
-    text-shadow: 0 0 8px #00fff7bb;
-  }
-  .card-description {
-    font-size: 1rem;
-    line-height: 1.4;
-    margin-bottom: 16px;
-    color: #ccc;
-  }
-  .price {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #00d68f;
-    text-shadow: 0 0 12px #00d68faa;
-    margin-bottom: 24px;
-  }
-  .buy-btn {
-    background: #00d68f;
-    color: #000;
-    border: none;
-    padding: 16px 0;
-    font-weight: 700;
-    font-size: 1.2rem;
-    border-radius: 28px;
-    width: 100%;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.25s ease, box-shadow 0.25s ease;
-    box-shadow: 0 6px 18px rgba(0, 214, 143, 0.6);
-  }
-  .buy-btn:hover {
-    background: #00b57d;
-    box-shadow: 0 8px 22px rgba(0, 181, 125, 0.8);
-  }
-  .error-message {
-    text-align: center;
-    color: #ff4d4f;
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: 40px 20px;
-  }
-  @media (max-width: 500px) {
-    main {
-      padding: 16px 12px;
-      margin-bottom: 24px;
+  <meta charset="UTF-8">
+  <title>Product</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-    .card img {
-      height: 220px;
+
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
     }
-  }
-</style>
+
+    .product-container {
+      max-width: 600px;
+      width: 100%;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      padding: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .product-container img {
+      width: 100%;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .price {
+      font-size: 20px;
+      font-weight: 600;
+      color: #00ff9d;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .seller {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .seller img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .not-found {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 18px;
+      color: #888;
+    }
+
+    .buy-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #1da1f2;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .buy-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-icon-wrapper">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
-  </div>
-  <div class="logo-text">DLSACCOUNTS</div>
-</header>
+  <div id="product" class="product-container" style="display: none;"></div>
+  <div id="notFound" class="not-found" style="display: none;">🚫 No product found.</div>
 
-<main>
-  <div id="productList">
-    <!-- Product content will load here -->
-  </div>
-</main>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const dbRef = ref(db);
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get("id");
-
-  const productContainer = document.getElementById("productList");
-
-  if (!productId) {
-    productContainer.innerHTML = `<div class="error-message">❌ Invalid product link</div>`;
-  } else {
-    get(child(dbRef, `products/${productId}`))
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const product = snapshot.val();
-
-          productContainer.innerHTML = `
-            <div class="card">
-              <img src="${product.image || 'https://via.placeholder.com/600x280?text=No+Image'}" alt="${product.title}" />
-              <div class="card-content">
-                <h1 class="card-title">${product.title}</h1>
-                <p class="card-description">${product.description || 'No description available.'}</p>
-                <div class="price">$${product.price?.toFixed(2) || 'N/A'}</div>
-                <button class="buy-btn" onclick="location.href='/checkout?id=${productId}'">Buy Now</button>
-              </div>
-            </div>
-          `;
-        } else {
-          productContainer.innerHTML = `<div class="error-message">❌ No product found.</div>`;
+    if (!productId) {
+      document.getElementById("notFound").style.display = "block";
+    } else {
+      db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          document.getElementById("notFound").style.display = "block";
+          return;
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching product:", error);
-        productContainer.innerHTML = `<div class="error-message">⚠️ Failed to load product.</div>`;
+
+        const container = document.getElementById("product");
+        const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
+        const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';
+        const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';
+        const verifiedBadge = (data.seller && data.seller.verified) ? '✔️' : '';
+        const price = parseFloat(data.price);
+        const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
+
+        container.innerHTML = `
+          <img src="${mainImage}" alt="Product Image" loading="lazy">
+          <div class="title">${data.title || "Untitled"}</div>
+          <div class="price">$${formattedPrice}</div>
+          <div class="description">${data.description || "No description available."}</div>
+          <div class="seller">
+            <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy">
+            <span>${sellerUsername} ${verifiedBadge}</span>
+          </div>
+          <button class="buy-btn">Continue to Buy</button>
+        `;
+
+        container.style.display = "block";
+      }).catch(error => {
+        console.error(error);
+        document.getElementById("notFound").innerText = "⚠️ Error loading product.";
+        document.getElementById("notFound").style.display = "block";
       });
-  }
-</script>
+    }
+  </script>
 
 </body>
 </html>
