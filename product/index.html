@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Default OG tags (used if JS can't set dynamic content) -->
+<meta property="og:title" content="Check out this product on CyberChat!" />
+<meta property="og:description" content="Buy and sell verified DLS accounts securely." />
+<meta property="og:image" content="https://yourcdn.com/default-preview.png" />
+<meta property="og:url" content="https://cyberchat.online" />
+<meta name="twitter:card" content="summary_large_image">
   <meta charset="UTF-8">
   <title>Product</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -243,7 +249,6 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
 
@@ -401,22 +406,22 @@
       });
     }
     function shareProduct() {
-  const url = window.location.href;
   const title = document.querySelector('.title')?.textContent || 'Check this out!';
+  const description = document.querySelector('.description')?.textContent || 'Awesome product on CyberChat!';
+  const image = document.querySelector('.main-image')?.src || 'https://yourcdn.com/default-preview.png';
+  const url = window.location.href;
 
   if (navigator.share) {
     navigator.share({
       title: title,
+      text: description,
       url: url
-    }).catch(err => {
-      console.error("Sharing failed:", err);
+    }).catch((err) => {
+      console.error("Share failed:", err);
     });
   } else {
-    // Fallback: Copy to clipboard
     navigator.clipboard.writeText(url).then(() => {
       alert("📎 Link copied to clipboard!");
-    }).catch(() => {
-      prompt("Couldn't auto-copy. Copy manually:", url);
     });
   }
 }
