@@ -31,29 +31,42 @@
     }
 
     /* Sticky header with glass effect */
-    header {
-      position: sticky;
-      top: 0; left: 0; right: 0;
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: saturate(180%) blur(14px);
-      border-bottom: 1px solid #222;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      z-index: 9999;
-      user-select: none;
-    }
-    header h1 {
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #1da1f2;
-      letter-spacing: 0.04em;
-      margin: 0;
-      white-space: nowrap;
-      user-select: text;
-    }
+header {
+  position: sticky;
+  top: 0; left: 0; right: 0;
+  width: 100%;         /* Make header full width of its parent (likely body) */
+  max-width: 100vw;    /* Prevent horizontal overflow on mobile */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid #222;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;      /* padding inside for content spacing */
+  z-index: 9999;
+  user-select: none;
+  box-sizing: border-box;
+  margin: 0;            /* remove any default margin */
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+body, html {
+  margin: 0; /* remove default body/html margin to avoid gaps */
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* prevent horizontal scroll caused by oversize */
+}
+
+header h1 {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1da1f2;
+  letter-spacing: 0.04em;
+  margin: 0;
+  white-space: nowrap;
+  user-select: text;
+}
     button#logoutBtn {
       background: #e03e3e;
       border: none;
@@ -229,7 +242,168 @@
       0% {transform: rotate(0deg);}
       100% {transform: rotate(360deg);}
     }
+header {
+  position: sticky;
+  top: 0; left: 0; right: 0;
+  width: 100%;
+  max-width: 100vw;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid #222;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 9999;
+  user-select: none;
+  box-sizing: border-box;
+  margin: 0;
 
+  border-radius: 0 0 24px 24px; /* CURVED bottom edges */
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4); /* smooth shadow */
+  overflow: hidden; /* clip the blur and content to the rounded edges */
+}
+button#logoutBtn {
+  background: #d32f2f;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 22px;
+  font-size: 0.95rem;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+button#logoutBtn:hover,
+button#logoutBtn:focus {
+  background: #a62828;
+  outline: none;
+}
+
+/* Profile section: clean, flat, no card */
+#profileContainer {
+  margin: 20px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: none;
+  user-select: none;
+}
+
+/* Avatar: crisp, pro look */
+#profileAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #1da1f2;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+/* Username text */
+#profileName {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: text;
+}
+
+/* Sections container layout */
+.sections {
+  margin: 32px 24px 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Glassmorphic card style */
+.section-card {
+  background: rgba(40, 40, 40, 0.6);
+  border-radius: 16px;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow:
+    0 0 10px rgba(29, 161, 242, 0.12),
+    inset 0 0 8px rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #cdd6f4;
+}
+
+.section-card:hover,
+.section-card:focus {
+  background: rgba(29, 161, 242, 0.15);
+  box-shadow:
+    0 4px 20px rgba(29, 161, 242, 0.45),
+    inset 0 0 14px rgba(29, 161, 242, 0.22);
+  outline: none;
+}
+
+/* Icons smaller, crisp */
+.section-icon {
+  width: 28px;
+  height: 28px;
+  stroke: #1da1f2;
+  stroke-width: 1.2;
+  fill: none;
+  flex-shrink: 0;
+  user-select: none;
+  transition: stroke 0.3s ease;
+}
+
+.section-card:hover .section-icon,
+.section-card:focus .section-icon {
+  stroke: #0a8cd2;
+}
+
+/* Responsive horizontal layout on tablets+ */
+@media (min-width: 600px) {
+  .sections {
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 32px 48px 0 48px;
+  }
+
+  .section-card {
+    flex: 1;
+    max-width: 260px;
+    font-size: 1.1rem;
+    padding: 24px 30px;
+  }
+}
+
+@media (min-width: 900px) {
+  .sections {
+    margin: 48px auto 0;
+    max-width: 900px;
+  }
+
+  .section-card {
+    font-size: 1.15rem;
+    padding: 26px 36px;
+  }
+
+  #profileContainer {
+    margin: 24px auto 0;
+    max-width: 900px;
+  }
+}
+</style>
   </style>
 </head>
 <body>
@@ -297,6 +471,7 @@
     const auth = firebase.auth();
     const overlay = document.getElementById("overlay");
     const overlayText = document.getElementById("overlayText");
+    test
     const logoutBtn = document.getElementById("logoutBtn");
 
     const profileAvatar = document.getElementById("profileAvatar");
