@@ -15,7 +15,7 @@
     display: flex;
     flex-direction: column;
   }
- header {
+header {
   position: sticky;
   top: 0;
   z-index: 9999;
@@ -32,6 +32,7 @@
   justify-content: space-between;
   padding: 0 20px;
 }
+
 header::after {
   content: "";
   position: absolute;
@@ -41,6 +42,29 @@ header::after {
   height: 1.5px;
   background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
   box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
+}
+
+/* Ensure content starts directly below header */
+main {
+  padding-top: 60px; /* match the header height */
+  background-color: #000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure product cards sit neatly under main */
+#productList {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 60px;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  box-sizing: border-box;
 }
   .logo {
     display: flex;
@@ -541,26 +565,6 @@ main {
   background: rgba(0, 255, 255, 0.3);
 }
 
-/* Load More Button */
-#loadMoreBtn {
-  background: #1da1f2;
-  color: white;
-  border: none;
-  padding: 14px;
-  width: 100%;
-  max-width: 370px;
-  border-radius: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  margin: 30px 0 50px;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-
-#loadMoreBtn:hover {
-  background: #0d8ddb;
-}
-
 /* Fullscreen Modal */
 .fullscreen-modal {
   position: fixed;
@@ -995,72 +999,6 @@ body.loading {
   background: #000;
   z-index: 999;
 }
-</style>
-
-<style>
-  body {
-    margin: 0;
-    background-color: #000;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
-    color: #fff;
-  }
-
-  .product-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-  }
-
-  .card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 16px;
-    width: 90vw;
-    max-width: 360px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s ease;
-  }
-
-  .card:hover {
-    transform: scale(1.02);
-  }
-
-  .card-title {
-    font-size: 1.2em;
-    font-weight: 600;
-    margin: 12px 0 6px;
-  }
-
-  .card-description {
-    font-size: 0.95em;
-    color: #ccc;
-    margin-bottom: 10px;
-  }
-
-  .price {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #30d158;
-    margin-top: 8px;
-  }
-
-  .view-all-btn,
-  .message-btn,
-  .buy-btn,
-  .load-btn {
-    background: #0a84ff;
-    border: none;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 10px;
-    display: inline-block;
-  }
 
   #imageModal {
     position: fixed;
@@ -1100,6 +1038,24 @@ body.loading {
     0% { background-position: -400% 0; }
     100% { background-position: 400% 0; }
   }
+main {
+  padding-top: 64px; /* same height as header */
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* shorter on mobile if your header is smaller there */
+  }
+}
+
+#productList {
+  margin-top: 0 !important; /* kill top margin */
+  padding-top: 0 !important; /* kill padding */
+}
+#productList {
+  margin-top: 0 !important;
+  padding: 0 12px !important; /* keep horizontal padding if needed */
+}
 </style>
 </head>
 <body>
@@ -1126,9 +1082,6 @@ body.loading {
     <!-- ✅ Skeleton Loading Placeholder -->
     <div id="skeletonContainer"></div>
 
-    <!-- ✅ Load More Button -->
-    <button id="loadMoreBtn" class="load-btn">Load More</button>
-
     <!-- ✅ Fullscreen Image Modal -->
     <div class="fullscreen-modal" id="imageModal">
       <button class="close-modal" onclick="closeModal()">Close</button>
@@ -1152,26 +1105,6 @@ body.loading {
     <button onclick="closeLoginModal()" class="modal-close">Close</button>
   </div>
 </div>
-<div style="
-  width: 90%;
-  max-width: 360px;
-  margin: 20px auto;
-  padding: 16px 20px;
-  background: rgba(255, 77, 77, 0.1);
-  color: #ff4d4f;
-  border: 1px solid rgba(255, 77, 77, 0.3);
-  border-radius: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  text-align: center;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-">
-  ⚠️ DONT PAY SELLERS DIRECT
-</div>
-
 <script type="module">
 // ✅ Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -1304,8 +1237,9 @@ document.body.addEventListener('click', (e) => {
   let lastKey = null;
   let loading = false;
 
+  // Show skeleton loaders under header, no scroll allowed while loading
   function showSkeletons() {
-    document.body.classList.add("loading");
+    document.body.classList.add("loading"); // disables scroll if you add CSS for it
     const container = document.getElementById("skeletonContainer");
     container.innerHTML = '';
     container.style.display = 'flex';
@@ -1317,6 +1251,7 @@ document.body.addEventListener('click', (e) => {
     }
   }
 
+  // Remove skeletons & enable scrolling
   function hideSkeletons() {
     document.body.classList.remove("loading");
     const container = document.getElementById("skeletonContainer");
@@ -1324,6 +1259,7 @@ document.body.addEventListener('click', (e) => {
     container.style.display = 'none';
   }
 
+  // Fisher-Yates shuffle
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1332,6 +1268,7 @@ document.body.addEventListener('click', (e) => {
     return array;
   }
 
+  // Render a single product card
   function renderProduct(product, id) {
     const mainImage = product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image';
     const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
@@ -1360,6 +1297,7 @@ document.body.addEventListener('click', (e) => {
     document.getElementById("productList").appendChild(card);
   }
 
+  // Open fullscreen modal with images
   function openModal(images) {
     const modal = document.getElementById("imageModal");
     modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
@@ -1402,7 +1340,9 @@ document.body.addEventListener('click', (e) => {
     hideSkeletons();
 
     if (!data) {
-      document.getElementById("loadMoreBtn").style.display = "none";
+      // No more data — you can show a "No more products" message here if you want
+      window.removeEventListener('scroll', onScroll); // Stop infinite scroll if needed
+      loading = false;
       return;
     }
 
@@ -1411,7 +1351,8 @@ document.body.addEventListener('click', (e) => {
       lastKey = entries[LIMIT - 1][0];
       entries.length = LIMIT;
     } else {
-      document.getElementById("loadMoreBtn").style.display = "none";
+      // No more pages — detach scroll event or hide load more UI if existed
+      window.removeEventListener('scroll', onScroll);
     }
 
     entries = shuffleArray(entries);
@@ -1423,7 +1364,21 @@ document.body.addEventListener('click', (e) => {
     loading = false;
   }
 
-  loadMore();
+  // Scroll handler triggers loadMore when near bottom
+  function onScroll() {
+    if (
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 &&
+      !loading
+    ) {
+      loadMore();
+    }
+  }
+
+  // Initialize on window load
+  window.onload = () => {
+    loadMore();
+    window.addEventListener('scroll', onScroll);
+  };
 </script>
 <script>
   function detectDeviceAndApplyClasses() {
