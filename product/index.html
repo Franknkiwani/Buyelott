@@ -1,24 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CyberChat Product</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/styles/product.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | DLSAccounts</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+    }
+
+    .checkout-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 10px rgba(0,255,255,0.1);
+    }
+
+    .product-preview img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .product-info h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #00ffff;
+    }
+
+    .price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 10px 0;
+      color: #00d68f;
+    }
+
+    .pay-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      background: #00d68f;
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .pay-btn:hover {
+      background: #00b57d;
+    }
+
+    .disclaimer {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 16px;
+      line-height: 1.4;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <div class="product-container">
-    <div id="loading">Loading product...</div>
-    <div id="productDetails" style="display: none;">
-      <img id="productImage" />
-      <h1 id="productTitle"></h1>
-      <p id="productDescription"></p>
-      <div class="price" id="productPrice"></div>
-      <button class="buy-btn" id="buyNowBtn">Buy Now</button>
+  <div class="checkout-container">
+    <div class="product-preview">
+      <img id="productImage" src="" alt="Product Preview">
+    </div>
+    <div class="product-info">
+      <h2 id="productTitle">Loading...</h2>
+      <div class="price" id="productPrice">$0</div>
+    </div>
+    <button class="pay-btn" id="payNowBtn">Pay & Get Login Info</button>
+
+    <div class="disclaimer">
+      ⚠️ No refunds. You will receive your account credentials after successful payment.
     </div>
   </div>
 
-  <!-- Firebase logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -30,41 +97,40 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Get ID from URL
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    const titleEl = document.getElementById("productTitle");
+    const priceEl = document.getElementById("productPrice");
+    const imgEl = document.getElementById("productImage");
 
     if (productId) {
-      const productRef = ref(db, 'products/' + productId);
-      get(productRef).then(snapshot => {
+      get(child(ref(db), `/post/${productId}`)).then((snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          document.getElementById("productTitle").textContent = data.title || "No Title";
-          document.getElementById("productDescription").textContent = data.description || "No Description";
-          document.getElementById("productPrice").textContent = `R${data.price || '0.00'}`;
-          document.getElementById("productImage").src = data.image || "https://via.placeholder.com/400x300";
-          
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("productDetails").style.display = "block";
+          titleEl.textContent = data.title || "DLS Account";
+          priceEl.textContent = data.price ? `R ${data.price}` : "R 0";
+          imgEl.src = data.image || "https://via.placeholder.com/400x300";
         } else {
-          document.getElementById("loading").textContent = "Product not found.";
+          titleEl.textContent = "Product not found.";
         }
       }).catch((error) => {
+        titleEl.textContent = "Error loading product.";
         console.error(error);
-        document.getElementById("loading").textContent = "Error loading product.";
       });
     } else {
-      document.getElementById("loading").textContent = "Invalid product ID.";
+      titleEl.textContent = "Invalid product ID.";
     }
 
-    // Future enhancement: buyNowBtn onclick logic
+    document.getElementById("payNowBtn").addEventListener("click", () => {
+      window.location.href = `https://wa.me/1234567890?text=I'm%20interested%20in%20buying%20DLS%20account%20${productId}`;
+    });
   </script>
 </body>
 </html>
