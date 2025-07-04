@@ -1056,6 +1056,66 @@ main {
   margin-top: 0 !important;
   padding: 0 12px !important; /* keep horizontal padding if needed */
 }
+/* Container styling for ads row */
+#adContainer {
+  display: flex;
+  gap: 16px; /* space between ads */
+  justify-content: center; /* center the row */
+  flex-wrap: nowrap; /* no wrapping, keep in one row */
+  margin: 20px 0;
+}
+
+/* Individual ad cards inside the container */
+.ad-card {
+  flex: 1 1 30%; /* each ad takes about 30% width, flexibly */
+  max-width: 320px; /* cap max width for bigger screens */
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  color: #ddd;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.ad-card:hover {
+  transform: scale(1.03);
+}
+
+.ad-card img {
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  display: block;
+}
+
+/* Ad content inside card */
+.ad-content {
+  padding: 10px;
+}
+
+.ad-title {
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.ad-sponsored {
+  color: #888;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Responsive: on small screens, stack ads vertically */
+@media (max-width: 600px) {
+  #adContainer {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ad-card {
+    max-width: 100%;
+    flex: none;
+  }
+}
+</style>
 </style>
 </head>
 <body>
@@ -1234,16 +1294,15 @@ document.body.addEventListener('click', (e) => {
   const db = firebase.database();
 
   const LIMIT = 5;
+  const ADS_LIMIT = 1;
   let lastKey = null;
   let loading = false;
 
-  // Show skeleton loaders under header, no scroll allowed while loading
   function showSkeletons() {
-    document.body.classList.add("loading"); // disables scroll if you add CSS for it
+    document.body.classList.add("loading");
     const container = document.getElementById("skeletonContainer");
     container.innerHTML = '';
     container.style.display = 'flex';
-
     for (let i = 0; i < LIMIT; i++) {
       const skel = document.createElement("div");
       skel.className = "skeleton";
@@ -1251,7 +1310,6 @@ document.body.addEventListener('click', (e) => {
     }
   }
 
-  // Remove skeletons & enable scrolling
   function hideSkeletons() {
     document.body.classList.remove("loading");
     const container = document.getElementById("skeletonContainer");
@@ -1259,7 +1317,6 @@ document.body.addEventListener('click', (e) => {
     container.style.display = 'none';
   }
 
-  // Fisher-Yates shuffle
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1268,7 +1325,6 @@ document.body.addEventListener('click', (e) => {
     return array;
   }
 
-  // Render a single product card
   function renderProduct(product, id) {
     const mainImage = product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image';
     const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
@@ -1297,7 +1353,34 @@ document.body.addEventListener('click', (e) => {
     document.getElementById("productList").appendChild(card);
   }
 
-  // Open fullscreen modal with images
+  async function loadAds() {
+    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
+    const adsData = adsSnapshot.val();
+    if (!adsData) return;
+
+    const adsEntries = shuffleArray(Object.entries(adsData));
+    const container = document.createElement('div');
+    container.id = 'adContainer'; // styling targets this
+    for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
+      const adCard = document.createElement("div");
+      adCard.className = "ad-card";
+      const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
+      const adTitle = ad.title || "Sponsored Ad";
+      const adUrl = ad.url || "#";
+      adCard.innerHTML = `
+        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit; display:block;">
+          <img src="${adImage}" alt="Ad Image" loading="lazy" style="width:100%; border-radius:12px 12px 0 0;">
+          <div class="ad-content" style="padding:10px;">
+            <div class="ad-title" style="font-weight:600; font-size:1.1em;">${adTitle}</div>
+            <div class="ad-sponsored" style="color:#888; font-size:12px; margin-top:4px;">Sponsored</div>
+          </div>
+        </a>
+      `;
+      container.appendChild(adCard);
+    }
+    document.getElementById("productList").appendChild(container);
+  }
+
   function openModal(images) {
     const modal = document.getElementById("imageModal");
     modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
@@ -1340,8 +1423,7 @@ document.body.addEventListener('click', (e) => {
     hideSkeletons();
 
     if (!data) {
-      // No more data — you can show a "No more products" message here if you want
-      window.removeEventListener('scroll', onScroll); // Stop infinite scroll if needed
+      window.removeEventListener('scroll', onScroll);
       loading = false;
       return;
     }
@@ -1351,7 +1433,6 @@ document.body.addEventListener('click', (e) => {
       lastKey = entries[LIMIT - 1][0];
       entries.length = LIMIT;
     } else {
-      // No more pages — detach scroll event or hide load more UI if existed
       window.removeEventListener('scroll', onScroll);
     }
 
@@ -1361,10 +1442,12 @@ document.body.addEventListener('click', (e) => {
       lastKey = id;
     }
 
+    // Insert ads after every batch
+    await loadAds();
+
     loading = false;
   }
 
-  // Scroll handler triggers loadMore when near bottom
   function onScroll() {
     if (
       window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 &&
@@ -1374,7 +1457,6 @@ document.body.addEventListener('click', (e) => {
     }
   }
 
-  // Initialize on window load
   window.onload = () => {
     loadMore();
     window.addEventListener('scroll', onScroll);
