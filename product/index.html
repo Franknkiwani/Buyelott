@@ -434,6 +434,7 @@
   const productId = params.get('id');
 
   let currentUser = null;
+  let sellerId = null; // <-- We'll set this after loading product data
 
   firebase.auth().onAuthStateChanged(user => {
     currentUser = user;
@@ -448,6 +449,8 @@
         document.getElementById("notFound").style.display = "block";
         return;
       }
+
+      sellerId = (data.seller && data.seller.id) ? data.seller.id : null; // Save seller ID here
 
       const container = document.getElementById("product");
       const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
@@ -605,7 +608,7 @@
 
 
   /*
-   * NEW: Purchase Modal Multi-Step Flow for email + phone + payment
+   * Purchase Modal Multi-Step Flow for email + phone + payment
    */
 
   // Grab modal elements, assuming modal markup is present in your HTML
@@ -683,9 +686,10 @@
       return;
     }
 
-    // Prepare purchase data to save
+    // Prepare purchase data to save, now includes sellerId
     const purchaseData = {
       productId,
+      sellerId,
       email: emailInput.value.trim(),
       phone: phoneInput.value.trim(),
       paymentMethod: paymentMethod.value,
