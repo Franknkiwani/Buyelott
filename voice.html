@@ -1300,5 +1300,21 @@ document.body.addEventListener('click', (e) => {
     });
   }
 </script>
+<script>
+  // You can tweak the width if needed (e.g., 768px, 1024px depending on your layout)
+  const hideAdsOn = window.innerWidth >= 800; // large screens and faked desktop mode
+
+  if (hideAdsOn) {
+    const el = document.getElementById('mobileOnly');
+    if (el) el.style.display = 'none';
+
+    // Also optionally trigger auto-load
+    window.addEventListener('scroll', () => {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+        if (typeof loadMore === 'function') loadMore();
+      }
+    });
+  }
+</script>
 </body>
 </html>
