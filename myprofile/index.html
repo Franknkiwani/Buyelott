@@ -5,15 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Panel - CyberChat</title>
   <style>
-    /* Reset & basics */
-    * {
+    /* Reset & base */
+    *, *::before, *::after {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    html, body {
+      margin: 0; padding: 0; height: 100%;
       background: linear-gradient(135deg, #000000cc 0%, #121212cc 100%);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
         Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
@@ -21,131 +19,187 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
+
+    /* Container: fluid with max width and padding */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
     /* Sticky header with glass effect */
     header {
       position: sticky;
-      top: 0;
-      z-index: 999;
-      backdrop-filter: blur(14px);
-      background: rgba(0, 0, 0, 0.4);
+      top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: saturate(180%) blur(14px);
       border-bottom: 1px solid #222;
-      height: 56px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
+      padding: 0 20px;
+      z-index: 9999;
       user-select: none;
     }
     header h1 {
       font-weight: 700;
-      font-size: 1.25rem;
-      margin: 0;
+      font-size: 1.5rem;
       color: #1da1f2;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
+      margin: 0;
+      white-space: nowrap;
+      user-select: text;
     }
     button#logoutBtn {
       background: #e03e3e;
       border: none;
       color: #fff;
       font-weight: 600;
-      padding: 8px 14px;
+      padding: 8px 18px;
       font-size: 1rem;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
       transition: background-color 0.25s ease;
       user-select: none;
+      white-space: nowrap;
     }
-    button#logoutBtn:hover {
+    button#logoutBtn:hover,
+    button#logoutBtn:focus {
       background: #b33030;
+      outline: none;
     }
 
-    /* Profile container under header */
+    /* Profile section: flex row on mobile and desktop */
     #profileContainer {
+      margin-top: 16px;
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      gap: 14px;
       background: rgba(29, 161, 242, 0.1);
-      border-bottom: 1px solid #222;
-      gap: 12px;
+      border-radius: 16px;
+      padding: 12px 20px;
       max-width: 480px;
-      margin: 0 auto;
       user-select: none;
+      transition: background 0.3s ease;
+    }
+    #profileContainer:hover {
+      background: rgba(29, 161, 242, 0.15);
     }
     #profileAvatar {
-      width: 44px;
-      height: 44px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #1da1f2;
+      border: 2.5px solid #1da1f2;
       background: #222;
       flex-shrink: 0;
+      user-select: none;
     }
     #profileName {
-      font-weight: 600;
-      font-size: 1.1rem;
+      font-weight: 700;
+      font-size: 1.25rem;
       color: #1da1f2;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    /* Container for sections */
-    main {
-      padding: 20px 12px 40px;
-      max-width: 480px;
-      margin: 0 auto;
+      user-select: text;
     }
 
     /* Sections container */
     .sections {
+      margin-top: 30px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
+      max-width: 480px;
     }
 
-    /* Single section card */
+    /* Section card */
     .section-card {
       background: rgba(29, 161, 242, 0.1);
-      border-radius: 14px;
-      padding: 14px 18px;
+      border-radius: 18px;
+      padding: 18px 22px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 18px;
       box-shadow:
-        0 1px 4px rgba(29,161,242,0.25),
-        inset 0 0 8px rgba(29,161,242,0.1);
+        0 2px 6px rgba(29,161,242,0.25),
+        inset 0 0 12px rgba(29,161,242,0.1);
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
       user-select: none;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #1da1f2;
     }
-    .section-card:hover {
-      background: rgba(29, 161, 242, 0.2);
+    .section-card:hover,
+    .section-card:focus {
+      background: rgba(29, 161, 242, 0.22);
       box-shadow:
-        0 4px 8px rgba(29,161,242,0.45),
-        inset 0 0 12px rgba(29,161,242,0.15);
+        0 4px 12px rgba(29,161,242,0.45),
+        inset 0 0 16px rgba(29,161,242,0.18);
+      outline: none;
     }
 
-    /* Icon container */
+    /* Section icons */
     .section-icon {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       stroke: #1da1f2;
       stroke-width: 1.5;
       fill: none;
       flex-shrink: 0;
+      user-select: none;
+      transition: stroke 0.3s ease;
+    }
+    .section-card:hover .section-icon,
+    .section-card:focus .section-icon {
+      stroke: #0a8cd2;
     }
 
-    /* Section label */
-    .section-label {
-      font-weight: 600;
-      font-size: 1.1rem;
-      color: #1da1f2;
+    /* Responsive - tablet & desktop: make sections horizontal grid */
+    @media (min-width: 600px) {
+      .sections {
+        flex-direction: row;
+        justify-content: space-between;
+        max-width: 720px;
+      }
+      .section-card {
+        flex: 1;
+        font-size: 1.15rem;
+        padding: 20px 24px;
+        max-width: 220px;
+      }
     }
 
-    /* Full screen transparent overlay for loading/logging out */
+    @media (min-width: 900px) {
+      .container {
+        max-width: 960px;
+      }
+      #profileContainer {
+        max-width: 960px;
+        margin: 16px auto 0;
+        padding: 14px 28px;
+      }
+      .sections {
+        max-width: 960px;
+        margin: 32px auto 0;
+      }
+      .section-card {
+        max-width: none;
+        font-size: 1.25rem;
+        padding: 24px 30px;
+      }
+    }
+
+    /* Overlay for loading/logging out */
     #overlay {
       position: fixed;
-      top:0; left:0; right:0; bottom:0;
+      inset: 0;
       background: rgba(0,0,0,0.75);
       display: flex;
       align-items: center;
@@ -158,9 +212,10 @@
       display: none;
       flex-direction: column;
       gap: 14px;
+      text-align: center;
+      padding: 0 20px;
     }
-
-    /* Simple spinner */
+    /* Spinner */
     #spinner {
       border: 4px solid rgba(29, 161, 242, 0.25);
       border-top: 4px solid #1da1f2;
@@ -168,6 +223,7 @@
       width: 44px;
       height: 44px;
       animation: spin 1s linear infinite;
+      user-select: none;
     }
     @keyframes spin {
       0% {transform: rotate(0deg);}
@@ -177,41 +233,45 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Admin Panel</h1>
-    <button id="logoutBtn" aria-label="Logout">Logout</button>
-  </header>
+  <div class="container" role="main" aria-label="Admin panel container">
+    <header>
+      <h1>Admin Panel</h1>
+      <button id="logoutBtn" aria-label="Logout">Logout</button>
+    </header>
 
-  <!-- Profile section -->
-  <section id="profileContainer" aria-label="User Profile">
-    <img id="profileAvatar" src="https://via.placeholder.com/44?text=👤" alt="User Avatar" />
-    <span id="profileName">Loading...</span>
-  </section>
+    <!-- Profile Section -->
+    <section id="profileContainer" aria-label="User Profile">
+      <img id="profileAvatar" src="https://via.placeholder.com/56?text=👤" alt="User Avatar" />
+      <span id="profileName">Loading...</span>
+    </section>
 
-  <main>
-    <div class="sections">
-      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('Sell Accounts clicked')">
-        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M3 7h18M3 12h18M3 17h18" />
-        </svg>
-        <span class="section-label">Sell Accounts</span>
+    <!-- Main Sections -->
+    <main>
+      <div class="sections" role="list">
+        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('Sell Accounts clicked')" onkeypress="if(event.key==='Enter') this.click()">
+          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 7h18M3 12h18M3 17h18" />
+          </svg>
+          <span class="section-label">Sell Accounts</span>
+        </div>
+        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('My Orders clicked')" onkeypress="if(event.key==='Enter') this.click()">
+          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 3h18v18H3z" />
+            <path d="M3 8h18M8 3v18" />
+          </svg>
+          <span class="section-label">My Orders</span>
+        </div>
+        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('Messages clicked')" onkeypress="if(event.key==='Enter') this.click()">
+          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span class="section-label">Messages</span>
+        </div>
       </div>
-      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('My Orders clicked')">
-        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M3 3h18v18H3z" />
-          <path d="M3 8h18M8 3v18" />
-        </svg>
-        <span class="section-label">My Orders</span>
-      </div>
-      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('Messages clicked')">
-        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span class="section-label">Messages</span>
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
+  <!-- Loading overlay -->
   <div id="overlay" aria-live="polite" role="alert" aria-atomic="true">
     <div id="spinner"></div>
     <div id="overlayText">Loading...</div>
@@ -259,7 +319,7 @@
         hideOverlay();
 
         // Update profile avatar & name
-        profileAvatar.src = user.photoURL || `https://i.pravatar.cc/44?u=${user.uid}`;
+        profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${user.uid}`;
         profileAvatar.alt = `${user.displayName || "User"} Avatar`;
         profileName.textContent = user.displayName || user.email || "User";
       } else {
