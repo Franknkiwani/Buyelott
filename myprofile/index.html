@@ -403,6 +403,25 @@ button#logoutBtn:focus {
     max-width: 900px;
   }
 }
+#messagesBadge {
+  background: #ff3b30; /* iOS red */
+  color: white;
+  font-weight: 700;
+  font-size: 0.75rem;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9999px;
+  padding: 0 6px;
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  user-select: none;
+  pointer-events: none;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(255,59,48,0.6);
+}
 </style>
   </style>
 </head>
@@ -419,32 +438,43 @@ button#logoutBtn:focus {
       <span id="profileName">Loading...</span>
     </section>
 
-    <!-- Main Sections -->
-    <main>
-      <div class="sections" role="list">
-        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('Sell Accounts clicked')" onkeypress="if(event.key==='Enter') this.click()">
-          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M3 7h18M3 12h18M3 17h18" />
-          </svg>
-          <span class="section-label">Sell Accounts</span>
-        </div>
-        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('My Orders clicked')" onkeypress="if(event.key==='Enter') this.click()">
-          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M3 3h18v18H3z" />
-            <path d="M3 8h18M8 3v18" />
-          </svg>
-          <span class="section-label">My Orders</span>
-        </div>
-        <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" onclick="alert('Messages clicked')" onkeypress="if(event.key==='Enter') this.click()">
-          <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <span class="section-label">Messages</span>
-        </div>
-      </div>
-    </main>
-  </div>
+<!-- Main Sections -->
+<main>
+  <div class="sections" role="list">
+    <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
+         onclick="alert('Sell Accounts clicked')" onkeypress="if(event.key==='Enter') this.click()">
+      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 7h18M3 12h18M3 17h18" />
+      </svg>
+      <span class="section-label">Sell Accounts</span>
+    </div>
 
+    <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
+         onclick="alert('My Orders clicked')" onkeypress="if(event.key==='Enter') this.click()">
+      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 3h18v18H3z" />
+        <path d="M3 8h18M8 3v18" />
+      </svg>
+      <span class="section-label">My Orders</span>
+    </div>
+
+    <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
+         onclick="alert('Messages clicked')" onkeypress="if(event.key==='Enter') this.click()"
+         style="position: relative;">
+      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+      <span class="section-label">Messages</span>
+      <span id="messagesBadge" aria-label="Unread messages count" role="status" 
+            style="position: absolute; top: 12px; right: 20px;
+                   background: #ff3b30; color: white; font-weight: 700; font-size: 0.75rem;
+                   min-width: 18px; height: 18px; line-height: 18px; border-radius: 9999px;
+                   padding: 0 6px; user-select: none; pointer-events: none; text-align: center;
+                   box-shadow: 0 0 6px rgba(255,59,48,0.6); white-space: nowrap;"></span>
+    </div>
+  </div>
+</main>
+</div>
   <!-- Loading overlay -->
   <div id="overlay" aria-live="polite" role="alert" aria-atomic="true">
     <div id="spinner"></div>
@@ -511,6 +541,40 @@ button#logoutBtn:focus {
         alert("Logout failed: " + err.message);
       });
     });
+    function updateUnreadMessagesCount(uid) {
+  const messagesRef = firebase.database().ref('messages');
+
+  messagesRef.orderByChild('to').equalTo(uid).on('value', snapshot => {
+    let unreadCount = 0;
+    snapshot.forEach(msgSnap => {
+      const msg = msgSnap.val();
+      if (msg.read === false) unreadCount++;
+    });
+
+    const badge = document.getElementById('messagesBadge');
+
+    if (unreadCount > 0) {
+      badge.style.background = '#ff3b30';  // bright red badge for unread
+      badge.style.color = 'white';
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.style.display = 'inline-block';
+      badge.style.boxShadow = '0 0 6px rgba(255,59,48,0.6)';
+    } else {
+      // No unread messages — show 'No messages' in gray, smaller and subtle
+      badge.style.background = 'transparent';
+      badge.style.color = '#999';
+      badge.textContent = 'No messages';
+      badge.style.display = 'inline-block';
+      badge.style.boxShadow = 'none';
+      badge.style.minWidth = 'auto';
+      badge.style.height = 'auto';
+      badge.style.lineHeight = 'normal';
+      badge.style.padding = '0 4px';
+      badge.style.fontWeight = '400';
+      badge.style.fontSize = '0.75rem';
+    }
+  });
+}
   </script>
 </body>
 </html>
