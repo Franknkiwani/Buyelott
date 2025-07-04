@@ -111,18 +111,20 @@ header::after {
     background: rgba(0, 255, 255, 0.25);
     color: #a0ffff;
   }
-  main {
+main {
   flex: 1;
   background-color: #000000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 60px; /* space for fixed header */
+  padding-top: 64px; /* match desktop header height */
+  display: block; /* no flex to avoid centering */
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 @media (max-width: 500px) {
   main {
-    padding-top: 56px; /* slightly smaller header on mobile */
+    padding-top: 56px; /* match mobile header height */
   }
 }
   /* Prevent text selection and copying everywhere */
@@ -956,7 +958,25 @@ main {
   line-height: normal;
   box-sizing: border-box;
 }
-
+@media (max-width: 500px) {
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85); /* stronger background for visibility */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+main {
+  flex: 1;
+  background-color: #000000;
+  padding-top: 64px; /* same as header height */
+}
+main {
+  height: 100%;
+  overflow: auto;
+}
 </style>
 
 </head>
@@ -1018,7 +1038,7 @@ main {
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 ">
-  ⚠️ No more accounts found
+  ⚠️ DONT PAY SELLERS DIRECT
 </div>
 
 <script type="module">
@@ -1315,6 +1335,14 @@ document.body.addEventListener('click', (e) => {
       }
     });
   }
+  window.addEventListener('scroll', () => {
+  const header = document.querySelector('header');
+  if (window.scrollY > 10) {
+    header.style.boxShadow = '0 2px 10px rgba(0,255,255,0.15)';
+  } else {
+    header.style.boxShadow = 'none';
+  }
+});
 </script>
 </body>
 </html>
