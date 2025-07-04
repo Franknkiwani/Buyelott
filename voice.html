@@ -16,13 +16,12 @@
     flex-direction: column;
   }
  header {
-  position: fixed; /* 💥 Always visible */
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
   z-index: 9999;
 
   height: 60px;
+  width: 100%;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
@@ -33,7 +32,6 @@
   justify-content: space-between;
   padding: 0 20px;
 }
-
 header::after {
   content: "";
   position: absolute;
@@ -975,13 +973,6 @@ main {
   box-sizing: border-box;
 }
 
-/* 3) Make Load More button a block below products */
-#loadMoreBtn {
-  display: block;
-  width: 100%;
-  max-width: 700px; /* or same as product list */
-  margin: 24px auto 40px;
-}
 </style>
 
 </head>
