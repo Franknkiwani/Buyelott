@@ -1015,3 +1015,264 @@ body.tablet #productList {
   // Initial load  
   loadMore();  
 </script>
+
+<script type="module">
+// ✅ Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+// ✅ Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// ✅ Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ✅ Handle login/logout UI in #userArea
+const userArea = document.getElementById('userArea');
+const loginBtn = document.getElementById('loginBtn');
+
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider).catch(console.error);
+});
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // 🔓 Logged in: show profile pic
+    userArea.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
+    img.alt = user.displayName || 'User';
+    img.title = user.displayName || 'User';
+    img.className = 'profile-pic';
+    img.addEventListener('click', () => {
+      if (confirm('Sign out?')) signOut(auth);
+    });
+    userArea.appendChild(img);
+
+    // 🧹 Auto-close modal if open
+    closeLoginModal();
+  } else {
+    // 🚫 Not logged in: show login button
+    userArea.innerHTML = '';
+    userArea.appendChild(loginBtn);
+  }
+});
+
+// 🚨 Show login modal if user not logged in and clicked anywhere
+document.body.addEventListener('click', (e) => {
+  const user = auth.currentUser;
+  const isModal = e.target.closest('#loginModal') !== null;
+  const isLoginBtn = e.target.closest('#loginBtn');
+
+  if (!user && !isModal && !isLoginBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const modal = document.getElementById("loginModal");
+    if (modal) modal.style.display = "flex";
+  }
+});
+
+// 🟢 Login trigger from modal
+window.triggerLogin = function () {
+  signInWithPopup(auth, provider).catch(console.error);
+  closeLoginModal();
+};
+
+// ❌ Close modal manually or on backdrop click
+window.closeLoginModal = function () {
+  const modal = document.getElementById("loginModal");
+  if (modal) modal.style.display = "none";
+};
+document.body.addEventListener('click', (e) => {
+  const user = auth.currentUser;
+
+  // Allowed clicks even if not logged in:
+  // - Inside login modal (#loginModal)
+  // - Login button (#loginBtn or .google-login)
+  // - Modal close button (class .modal-close)
+
+  const clickedEl = e.target;
+
+  // Check if click is on allowed elements or inside modal
+  const isAllowedClick =
+    user || // if logged in, allow everything
+    clickedEl.closest('#loginModal') || 
+    clickedEl.closest('#loginBtn') ||
+    clickedEl.closest('.google-login') ||
+    clickedEl.classList.contains('modal-close');
+
+  if (!isAllowedClick) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Show the login modal if not already visible
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal.style.display !== 'flex') {
+      loginModal.style.display = 'flex';
+    }
+
+    // Optionally, flash a warning or shake the modal for UX
+    // You can add that later if you want
+  }
+});
+</script>
+  <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+<script>  
+  // Firebase config  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+    projectId: "itzhoyoo-f9f7e",  
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+    messagingSenderId: "1094792075584",  
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"  
+  };  
+  
+  firebase.initializeApp(firebaseConfig);  
+  const db = firebase.database();  
+  
+  const LIMIT = 5;  
+  let lastKey = null;  
+  let loading = false;  
+  
+  // Utility: Fisher-Yates shuffle  
+  function shuffleArray(array) {  
+    for (let i = array.length - 1; i > 0; i--) {  
+      const j = Math.floor(Math.random() * (i + 1));  
+      [array[i], array[j]] = [array[j], array[i]];  
+    }  
+    return array;  
+  }  
+  
+  function renderProduct(product, id) {  
+    const mainImage = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/300x200?text=No+Image';  
+    const sellerAvatar = (product.seller && product.seller.avatar) ? product.seller.avatar : 'https://via.placeholder.com/32?text=👤';  
+    const sellerUsername = (product.seller && product.seller.username) ? product.seller.username : 'Unknown Seller';  
+    const verifiedBadge = (product.seller && product.seller.verified) ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : '';  
+  
+    const card = document.createElement("div");  
+    card.className = "card";  
+    card.innerHTML = `  
+      <img src="${mainImage}" alt="Product Image" loading="lazy" style="width:100%; border-radius: 12px;">  
+      <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>  
+      <div class="card-content">  
+        <div class="card-title">${product.title || 'Untitled'}</div>  
+        <div class="card-description">${product.description || ''}</div>  
+        <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">  
+          <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy">  
+          <div style="display:flex; align-items:center; gap:10px;">  
+            <span>${sellerUsername} ${verifiedBadge}</span>  
+            <button class="message-btn" onclick="messageUser('${sellerUsername}')">Message</button>  
+          </div>  
+        </div>  
+      </div>  
+      <div class="price">$${product.price !== undefined ? product.price.toFixed(2) : '0.00'}</div>  
+      <button class="buy-btn" onclick="buyProduct('${id}')">Buy Now</button>  
+    `;  
+    document.getElementById("productList").appendChild(card);  
+  }  
+  
+  function openModal(images) {  
+    const modal = document.getElementById("imageModal");  
+    modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;  
+    images.forEach(url => {  
+      const img = document.createElement("img");  
+      img.src = url;  
+      img.style.maxWidth = "90%";  
+      img.style.maxHeight = "80vh";  
+      img.style.borderRadius = "20px";  
+      img.style.marginBottom = "20px";  
+      modal.appendChild(img);  
+    });  
+    modal.style.display = 'flex';  
+  }  
+  
+  function closeModal() {  
+    document.getElementById("imageModal").style.display = 'none';  
+  }  
+  
+  function buyProduct(id) {  
+    window.location.href = `/product?id=${id}`;  
+  }  
+  
+  async function loadMore() {  
+    if (loading) return;  
+    loading = true;  
+  
+    let ref = db.ref("/dlsaccounts").orderByKey().limitToFirst(LIMIT + 1);  
+    if (lastKey) {  
+      ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);  
+    }  
+  
+    const snapshot = await ref.once("value");  
+    const data = snapshot.val();  
+  
+    if (!data) {  
+      document.getElementById("loadMoreBtn").style.display = "none";  
+      loading = false;  
+      return;  
+    }  
+  
+    let entries = Object.entries(data);  
+    if (entries.length > LIMIT) {  
+      lastKey = entries[LIMIT - 1][0];  
+      entries.length = LIMIT;  
+    } else {  
+      document.getElementById("loadMoreBtn").style.display = "none";  
+    }  
+  
+    // 🔀 Shuffle before rendering  
+    entries = shuffleArray(entries);  
+  
+    for (const [id, product] of entries) {  
+      renderProduct(product, id);  
+      lastKey = id;  
+    }  
+  
+    loading = false;  
+  }  
+  
+  // Initial load  
+  loadMore();  
+</script>
+<script>
+  function detectDeviceAndApplyClasses() {
+    const width = window.innerWidth;
+    const ua = navigator.userAgent.toLowerCase();
+
+    const isMobile = /android|iphone|ipod/.test(ua);
+    const isTablet = /ipad|tablet/.test(ua) || (width > 500 && width < 1024);
+
+    document.body.classList.remove('mobile', 'tablet', 'desktop');
+
+    if (isMobile || width < 500) {
+      document.body.classList.add('mobile');
+    } else if (isTablet) {
+      document.body.classList.add('tablet');
+    } else {
+      document.body.classList.add('desktop');
+    }
+  }
+
+  // Run on load
+  detectDeviceAndApplyClasses();
+
+  // Run on resize too (responsive AF)
+  window.addEventListener('resize', detectDeviceAndApplyClasses);
+</script>
+</body>
+</html>
