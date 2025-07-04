@@ -1,154 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CyberChat Admin Panel</title>
+  <title>Admin Panel - CyberChat</title>
   <style>
+    /* Reset & basics */
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    html, body {
+    body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      color: white;
+      background: linear-gradient(135deg, #000000cc 0%, #121212cc 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      color: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-
-    #authLoader {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(16px);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: #1da1f2;
-    }
-
+    /* Sticky header with glass effect */
     header {
       position: sticky;
       top: 0;
-      background: rgba(255, 255, 255, 0.05);
+      z-index: 999;
       backdrop-filter: blur(14px);
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid #222;
+      height: 56px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 16px 20px;
-      z-index: 99;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      justify-content: space-between;
+      padding: 0 16px;
+      user-select: none;
+    }
+    header h1 {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0;
+      color: #1da1f2;
+      letter-spacing: 0.02em;
+    }
+    button#logoutBtn {
+      background: #e03e3e;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 14px;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      user-select: none;
+    }
+    button#logoutBtn:hover {
+      background: #b33030;
     }
 
-    header h1 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin: 0;
+    /* Container for sections */
+    main {
+      padding: 20px 12px 40px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Sections container */
+    .sections {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Single section card */
+    .section-card {
+      background: rgba(29, 161, 242, 0.1);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow:
+        0 1px 4px rgba(29,161,242,0.25),
+        inset 0 0 8px rgba(29,161,242,0.1);
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+    .section-card:hover {
+      background: rgba(29, 161, 242, 0.2);
+      box-shadow:
+        0 4px 8px rgba(29,161,242,0.45),
+        inset 0 0 12px rgba(29,161,242,0.15);
+    }
+
+    /* Icon container */
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      stroke: #1da1f2;
+      stroke-width: 1.5;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    /* Section label */
+    .section-label {
+      font-weight: 600;
+      font-size: 1.1rem;
       color: #1da1f2;
     }
 
-    .logout-btn {
-      background: #ff3b30;
-      border: none;
-      padding: 8px 14px;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    .quick-links {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin: 30px 16px;
-    }
-
-    .quick-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
+    /* Full screen transparent overlay for loading/logging out */
+    #overlay {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.75);
       display: flex;
       align-items: center;
-      padding: 14px;
+      justify-content: center;
+      color: #1da1f2;
+      font-weight: 700;
+      font-size: 1.5rem;
+      z-index: 10000;
+      user-select: none;
+      display: none;
+      flex-direction: column;
       gap: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
     }
 
-    .quick-card:hover {
-      background: rgba(255, 255, 255, 0.08);
+    /* Simple spinner */
+    #spinner {
+      border: 4px solid rgba(29, 161, 242, 0.25);
+      border-top: 4px solid #1da1f2;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% {transform: rotate(0deg);}
+      100% {transform: rotate(360deg);}
     }
 
-    .quick-card svg {
-      width: 24px;
-      height: 24px;
-      stroke: #1da1f2;
-      stroke-width: 2;
-      fill: none;
-    }
-
-    .quick-card span {
-      font-size: 1rem;
-      font-weight: 500;
-    }
-
-    footer {
-      text-align: center;
-      color: #666;
-      padding: 40px 0;
-      font-size: 0.85rem;
-    }
   </style>
 </head>
 <body>
-
-  <div id="authLoader">Checking authentication...</div>
-
-  <header style="display:none;">
+  <header>
     <h1>Admin Panel</h1>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button id="logoutBtn" aria-label="Logout">Logout</button>
   </header>
 
-  <div class="quick-links" style="display:none;">
-    <div class="quick-card" onclick="alert('Sell Account - Feature coming soon')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M3 3h18M3 6h18M4 10h16l-2 9H6l-2-9zM9 13v3m6-3v3" />
-      </svg>
-      <span>Sell Account</span>
+  <main>
+    <div class="sections">
+      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('Sell Accounts clicked')">
+        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M3 7h18M3 12h18M3 17h18" />
+        </svg>
+        <span class="section-label">Sell Accounts</span>
+      </div>
+      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('My Orders clicked')">
+        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M3 3h18v18H3z" />
+          <path d="M3 8h18M8 3v18" />
+        </svg>
+        <span class="section-label">My Orders</span>
+      </div>
+      <div class="section-card" tabindex="0" role="button" aria-pressed="false" onclick="alert('Messages clicked')">
+        <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span class="section-label">Messages</span>
+      </div>
     </div>
+  </main>
 
-    <div class="quick-card" onclick="alert('Orders - Feature coming soon')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M3 6h18l-1.5 13.5a1 1 0 0 1-1 .5H6a1 1 0 0 1-1-.5L3 6zm4 0V4a2 2 0 0 1 4 0v2" />
-      </svg>
-      <span>My Orders</span>
-    </div>
-
-    <div class="quick-card" onclick="alert('Messages - Feature coming soon')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4 5h16v12H5.17L4 19V5z" />
-      </svg>
-      <span>Messages</span>
-    </div>
+  <div id="overlay" aria-live="polite" role="alert" aria-atomic="true">
+    <div id="spinner"></div>
+    <div id="overlayText">Loading...</div>
   </div>
 
-  <footer style="display:none;">
-    CyberChat Admin © 2025
-  </footer>
-
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -162,29 +198,41 @@
 
     firebase.initializeApp(firebaseConfig);
 
-    firebase.auth().onAuthStateChanged(user => {
-      const loader = document.getElementById("authLoader");
+    const auth = firebase.auth();
+    const overlay = document.getElementById("overlay");
+    const overlayText = document.getElementById("overlayText");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-      if (!user) {
-        loader.textContent = "Redirecting to login...";
-        setTimeout(() => {
-          window.location.href = "/index.html";
-        }, 1500);
-        return;
+    function showOverlay(text) {
+      overlayText.textContent = text;
+      overlay.style.display = "flex";
+    }
+
+    function hideOverlay() {
+      overlay.style.display = "none";
+    }
+
+    // Check auth state on page load
+    showOverlay("Checking authentication...");
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // User logged in, hide overlay
+        hideOverlay();
+      } else {
+        // Not logged in, redirect to homepage (login)
+        window.location.href = "/";
       }
-
-      // Show content
-      loader.style.display = "none";
-      document.querySelector("header").style.display = "flex";
-      document.querySelector(".quick-links").style.display = "flex";
-      document.querySelector("footer").style.display = "block";
     });
 
-    function logout() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "/index.html";
+    logoutBtn.addEventListener("click", () => {
+      showOverlay("Logging out...");
+      auth.signOut().then(() => {
+        window.location.href = "/";
+      }).catch(err => {
+        hideOverlay();
+        alert("Logout failed: " + err.message);
       });
-    }
+    });
   </script>
 </body>
 </html>
