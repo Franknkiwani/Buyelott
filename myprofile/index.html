@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CyberChat Admin Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      color: white;
+    }
+
+    #authLoader {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(16px);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #1da1f2;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(14px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      z-index: 99;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0;
+      color: #1da1f2;
+    }
+
+    .logout-btn {
+      background: #ff3b30;
+      border: none;
+      padding: 8px 14px;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 30px 16px;
+    }
+
+    .quick-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+
+    .quick-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .quick-card svg {
+      width: 24px;
+      height: 24px;
+      stroke: #1da1f2;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .quick-card span {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    footer {
+      text-align: center;
+      color: #666;
+      padding: 40px 0;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="authLoader">Checking authentication...</div>
+
+  <header style="display:none;">
+    <h1>Admin Panel</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="quick-links" style="display:none;">
+    <div class="quick-card" onclick="alert('Sell Account - Feature coming soon')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M3 3h18M3 6h18M4 10h16l-2 9H6l-2-9zM9 13v3m6-3v3" />
+      </svg>
+      <span>Sell Account</span>
+    </div>
+
+    <div class="quick-card" onclick="alert('Orders - Feature coming soon')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M3 6h18l-1.5 13.5a1 1 0 0 1-1 .5H6a1 1 0 0 1-1-.5L3 6zm4 0V4a2 2 0 0 1 4 0v2" />
+      </svg>
+      <span>My Orders</span>
+    </div>
+
+    <div class="quick-card" onclick="alert('Messages - Feature coming soon')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M4 5h16v12H5.17L4 19V5z" />
+      </svg>
+      <span>Messages</span>
+    </div>
+  </div>
+
+  <footer style="display:none;">
+    CyberChat Admin © 2025
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged(user => {
+      const loader = document.getElementById("authLoader");
+
+      if (!user) {
+        loader.textContent = "Redirecting to login...";
+        setTimeout(() => {
+          window.location.href = "/index.html";
+        }, 1500);
+        return;
+      }
+
+      // Show content
+      loader.style.display = "none";
+      document.querySelector("header").style.display = "flex";
+      document.querySelector(".quick-links").style.display = "flex";
+      document.querySelector("footer").style.display = "block";
+    });
+
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "/index.html";
+      });
+    }
+  </script>
+</body>
+</html>
