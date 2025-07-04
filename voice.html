@@ -949,6 +949,39 @@ main {
     padding-top: 56px;
   }
 }
+/* 1) Increase header height & fix vertical alignment */
+header {
+  height: 64px; /* a bit taller */
+  padding: 0 20px;
+}
+
+/* Adjust main padding-top accordingly */
+main {
+  padding-top: 64px; /* match header height */
+}
+
+/* 2) Ensure user-area items fit inside header */
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  height: 100%; /* make sure they don't overflow */
+}
+
+/* Profile pic and login button tweaks */
+.profile-pic, .login-btn {
+  max-height: 40px; /* slightly smaller than header */
+  line-height: normal;
+  box-sizing: border-box;
+}
+
+/* 3) Make Load More button a block below products */
+#loadMoreBtn {
+  display: block;
+  width: 100%;
+  max-width: 700px; /* or same as product list */
+  margin: 24px auto 40px;
+}
 </style>
 
 </head>
