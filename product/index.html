@@ -262,201 +262,459 @@
 </div>
   <div id="commentsList" style="margin-top: 30px;"></div>
 
+<style>
+  /* Modal backdrop */
+  #purchaseModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Modal content container */
+  #purchaseModal .modal-content {
+    background: rgba(255 255 255 / 0.08);
+    border-radius: 24px;
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px 24px;
+    color: #fff;
+    box-shadow: 0 10px 40px rgb(29 161 242 / 0.2);
+    backdrop-filter: saturate(180%) blur(25px);
+  }
+
+  #purchaseModal h2 {
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  #purchaseModal label {
+    display: block;
+    font-weight: 600;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #cbd5e1;
+  }
+
+  #purchaseModal input, #purchaseModal select {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    background: rgba(255 255 255 / 0.15);
+    color: white;
+    outline-offset: 2px;
+    outline-color: #1da1f2;
+    transition: outline-color 0.3s ease;
+  }
+
+  #purchaseModal input:focus, #purchaseModal select:focus {
+    outline-color: #0d8ddb;
+  }
+
+  #purchaseModal button {
+    margin-top: 28px;
+    width: 100%;
+    padding: 14px 0;
+    background: #1da1f2;
+    border: none;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+
+  #purchaseModal button:disabled {
+    background: #4aa3f3;
+    cursor: not-allowed;
+  }
+
+  /* Back button */
+  #purchaseModal .back-btn {
+    background: transparent;
+    color: #1da1f2;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: left;
+    margin-top: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Step hidden */
+  #purchaseModal .step {
+    display: none;
+  }
+
+  #purchaseModal .step.active {
+    display: block;
+  }
+
+  /* Error text */
+  #purchaseModal .error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+</style>
+
+<div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle">
+  <div class="modal-content">
+    <!-- Step 1: Email + Phone -->
+    <div class="step active" id="step1">
+      <h2 id="purchaseTitle">Enter your contact info</h2>
+
+      <label for="emailInput">Email address</label>
+      <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required>
+
+      <label for="phoneInput">Phone number</label>
+      <input type="tel" id="phoneInput" placeholder="+1 555 555 5555" autocomplete="tel" required>
+
+      <div class="error" id="step1Error"></div>
+
+      <button id="step1NextBtn">Proceed</button>
+    </div>
+
+    <!-- Step 2: Payment Method -->
+    <div class="step" id="step2">
+      <h2>Select payment method</h2>
+
+      <select id="paymentMethod" required>
+        <option value="" disabled selected>Choose a payment option</option>
+        <option value="paypal">PayPal</option>
+        <option value="card">Credit/Debit Card</option>
+        <option value="manual">Manual payment (contact seller)</option>
+      </select>
+
+      <div class="error" id="step2Error"></div>
+
+      <button id="step2NextBtn">Confirm</button>
+      <button class="back-btn" id="step2BackBtn">&larr; Back</button>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div class="step" id="step3">
+      <h2>Thank you!</h2>
+      <p>Your purchase request has been received.<br>Seller will contact you shortly.</p>
+      <button id="closeModalBtn">Close</button>
+    </div>
+  </div>
+</div>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
 
-    let currentUser = null;
+  let currentUser = null;
 
-    firebase.auth().onAuthStateChanged(user => {
-      currentUser = user;
-    });
+  firebase.auth().onAuthStateChanged(user => {
+    currentUser = user;
+  });
 
-    if (!productId) {
-      document.getElementById("notFound").style.display = "block";
-    } else {
-      db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
-        const data = snapshot.val();
-        if (!data) {
-          document.getElementById("notFound").style.display = "block";
-          return;
-        }
-
-        const container = document.getElementById("product");
-        const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
-        const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';
-        const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';
-        const verifiedBadge = (data.seller && data.seller.verified) ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : '';
-        const price = parseFloat(data.price);
-        const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
-
-        let viewAllBtn = '';
-        if (data.images && data.images.length > 1) {
-          viewAllBtn = `<div class="view-all" onclick='openImageGallery(${JSON.stringify(data.images)})' style="cursor:pointer; position:absolute; top:10px; right:10px; background:#1da1f2; color:#fff; padding:6px 12px; border-radius:12px; font-weight:bold; user-select:none;">View All</div>`;
-        }
-
-        container.innerHTML = `
-          <div class="product-image-wrapper" style="position: relative;">
-            ${viewAllBtn}
-            <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy" style="width:100%; border-radius: 16px;">
-          </div>
-          <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">${data.title || "Untitled"}</div>
-          <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">${data.description || "No description available."}</div>
-          <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">$${formattedPrice}</div>
-          <div id="reviewsSummary" style="text-align: center; font-size: 16px; color: #888; margin-top: 6px;">Loading reviews...</div>
-          <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
-            <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">
-            <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>
-          </div>
-          <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>
-        `;
-
-        container.style.display = "block";
-
-        loadComments(productId);
-        loadReviewsSummary(productId);
-      }).catch(error => {
-        console.error(error);
-        document.getElementById("notFound").innerText = "⚠️ Error loading product.";
+  if (!productId) {
+    document.getElementById("notFound").style.display = "block";
+  } else {
+    db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+      const data = snapshot.val();
+      if (!data) {
         document.getElementById("notFound").style.display = "block";
-      });
-    }
-
-    function confirmPurchase() {
-      alert("✅ Purchase request received! The seller will contact you soon.");
-      // Add logic here to notify seller, or redirect to chat/payment etc.
-    }
-
-    function openImageGallery(images) {
-      let gallery = window.open('', '_blank');
-      gallery.document.write('<title>Product Images</title><style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}img{max-width:90%;margin-bottom:20px;border-radius:12px;}</style>');
-      images.forEach(img => {
-        gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);
-      });
-    }
-
-    // Load detailed comments and update comment stats in form header
-    function loadComments(productId) {
-      db.ref(`/comments/${productId}`).on("value", (snapshot) => {
-        const comments = snapshot.val();
-        const container = document.getElementById("commentsList");
-        const stats = document.getElementById("commentStats");
-
-        if (!comments) {
-          container.innerHTML = "<p style='color:#aaa; text-align:center;'>No reviews yet.</p>";
-          stats.textContent = "(0 comments)";
-          return;
-        }
-
-        let entries = Object.entries(comments);
-        let totalRating = 0;
-        let html = "";
-
-        entries.forEach(([id, comment]) => {
-          const rating = parseInt(comment.rating || 0);
-          totalRating += rating;
-
-          const username = comment.username || "Anonymous";
-          const avatar = comment.avatar || `https://i.pravatar.cc/150?u=${id}`;
-
-          html += `
-            <div style="margin-bottom: 20px; display: flex; gap: 12px;">
-              <img src="${avatar}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
-              <div>
-                <div style="font-weight: bold;">${username}</div>
-                <div style="color: gold;">${"⭐️".repeat(rating)}</div>
-                <div style="color: #ccc;">${comment.text}</div>
-              </div>
-            </div>
-          `;
-        });
-
-        const avg = totalRating / entries.length;
-        stats.textContent = `(${entries.length} reviews • ${avg.toFixed(1)} ⭐️ | ${(avg / 5 * 100).toFixed(0)}%)`;
-        container.innerHTML = html;
-      });
-    }
-
-    // Load summary (number of reviews + average rating) under price
-    function loadReviewsSummary(productId) {
-      db.ref(`/comments/${productId}`).once("value").then(snapshot => {
-        const comments = snapshot.val();
-        const summaryElem = document.getElementById("reviewsSummary");
-        if (!comments) {
-          summaryElem.innerText = "(0 reviews • No ratings yet)";
-          return;
-        }
-
-        const entries = Object.values(comments);
-        const count = entries.length;
-        const totalRating = entries.reduce((sum, c) => sum + (parseInt(c.rating) || 0), 0);
-        const avgRating = count ? (totalRating / count) : 0;
-
-        summaryElem.innerText = `(${count} review${count > 1 ? 's' : ''} • ${avgRating.toFixed(1)}⭐️ | ${(avgRating / 5 * 100).toFixed(0)}%)`;
-      });
-    }
-
-    function submitComment() {
-      const rating = parseInt(document.getElementById("ratingSelect").value);
-      const text = document.getElementById("commentInput").value.trim();
-
-      if (!rating || !text) {
-        alert("Please select a rating and enter your comment.");
         return;
       }
 
-      const uid = currentUser?.uid || "anon_" + Math.random().toString(36).slice(2, 8);
-      const commentData = {
-        rating,
-        text,
-        username: currentUser?.displayName || "Anonymous",
-        avatar: currentUser?.photoURL || `https://i.pravatar.cc/150?u=${uid}`,
-        timestamp: Date.now()
-      };
+      const container = document.getElementById("product");
+      const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
+      const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';
+      const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';
+      const verifiedBadge = (data.seller && data.seller.verified) ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : '';
+      const price = parseFloat(data.price);
+      const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
 
-      db.ref(`/comments/${productId}/${uid}`).set(commentData).then(() => {
-        document.getElementById("ratingSelect").value = "";
-        document.getElementById("commentInput").value = "";
-      });
-    }
-    function shareProduct() {
-  const title = document.querySelector('.title')?.textContent || 'Check this out!';
-  const description = document.querySelector('.description')?.textContent || 'Awesome product on CyberChat!';
-  const image = document.querySelector('.main-image')?.src || 'https://yourcdn.com/default-preview.png';
-  const url = window.location.href;
+      let viewAllBtn = '';
+      if (data.images && data.images.length > 1) {
+        viewAllBtn = `<div class="view-all" onclick='openImageGallery(${JSON.stringify(data.images)})' style="cursor:pointer; position:absolute; top:10px; right:10px; background:#1da1f2; color:#fff; padding:6px 12px; border-radius:12px; font-weight:bold; user-select:none;">View All</div>`;
+      }
 
-  if (navigator.share) {
-    navigator.share({
-      title: title,
-      text: description,
-      url: url
-    }).catch((err) => {
-      console.error("Share failed:", err);
-    });
-  } else {
-    navigator.clipboard.writeText(url).then(() => {
-      alert("📎 Link copied to clipboard!");
+      container.innerHTML = `
+        <div class="product-image-wrapper" style="position: relative;">
+          ${viewAllBtn}
+          <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy" style="width:100%; border-radius: 16px;">
+        </div>
+        <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">${data.title || "Untitled"}</div>
+        <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">${data.description || "No description available."}</div>
+        <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">$${formattedPrice}</div>
+        <div id="reviewsSummary" style="text-align: center; font-size: 16px; color: #888; margin-top: 6px;">Loading reviews...</div>
+        <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
+          <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">
+          <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>
+        </div>
+        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>
+      `;
+
+      container.style.display = "block";
+
+      loadComments(productId);
+      loadReviewsSummary(productId);
+    }).catch(error => {
+      console.error(error);
+      document.getElementById("notFound").innerText = "⚠️ Error loading product.";
+      document.getElementById("notFound").style.display = "block";
     });
   }
-}
-  </script>
-  
+
+  function openImageGallery(images) {
+    let gallery = window.open('', '_blank');
+    gallery.document.write('<title>Product Images</title><style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}img{max-width:90%;margin-bottom:20px;border-radius:12px;}</style>');
+    images.forEach(img => {
+      gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);
+    });
+  }
+
+  // Load detailed comments and update comment stats in form header
+  function loadComments(productId) {
+    db.ref(`/comments/${productId}`).on("value", (snapshot) => {
+      const comments = snapshot.val();
+      const container = document.getElementById("commentsList");
+      const stats = document.getElementById("commentStats");
+
+      if (!comments) {
+        container.innerHTML = "<p style='color:#aaa; text-align:center;'>No reviews yet.</p>";
+        stats.textContent = "(0 comments)";
+        return;
+      }
+
+      let entries = Object.entries(comments);
+      let totalRating = 0;
+      let html = "";
+
+      entries.forEach(([id, comment]) => {
+        const rating = parseInt(comment.rating || 0);
+        totalRating += rating;
+
+        const username = comment.username || "Anonymous";
+        const avatar = comment.avatar || `https://i.pravatar.cc/150?u=${id}`;
+
+        html += `
+          <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+            <img src="${avatar}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+            <div>
+              <div style="font-weight: bold;">${username}</div>
+              <div style="color: gold;">${"⭐️".repeat(rating)}</div>
+              <div style="color: #ccc;">${comment.text}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      const avg = totalRating / entries.length;
+      stats.textContent = `(${entries.length} reviews • ${avg.toFixed(1)} ⭐️ | ${(avg / 5 * 100).toFixed(0)}%)`;
+      container.innerHTML = html;
+    });
+  }
+
+  // Load summary (number of reviews + average rating) under price
+  function loadReviewsSummary(productId) {
+    db.ref(`/comments/${productId}`).once("value").then(snapshot => {
+      const comments = snapshot.val();
+      const summaryElem = document.getElementById("reviewsSummary");
+      if (!comments) {
+        summaryElem.innerText = "(0 reviews • No ratings yet)";
+        return;
+      }
+
+      const entries = Object.values(comments);
+      const count = entries.length;
+      const totalRating = entries.reduce((sum, c) => sum + (parseInt(c.rating) || 0), 0);
+      const avgRating = count ? (totalRating / count) : 0;
+
+      summaryElem.innerText = `(${count} review${count > 1 ? 's' : ''} • ${avgRating.toFixed(1)}⭐️ | ${(avgRating / 5 * 100).toFixed(0)}%)`;
+    });
+  }
+
+  function submitComment() {
+    const rating = parseInt(document.getElementById("ratingSelect").value);
+    const text = document.getElementById("commentInput").value.trim();
+
+    if (!rating || !text) {
+      alert("Please select a rating and enter your comment.");
+      return;
+    }
+
+    const uid = currentUser?.uid || "anon_" + Math.random().toString(36).slice(2, 8);
+    const commentData = {
+      rating,
+      text,
+      username: currentUser?.displayName || "Anonymous",
+      avatar: currentUser?.photoURL || `https://i.pravatar.cc/150?u=${uid}`,
+      timestamp: Date.now()
+    };
+
+    db.ref(`/comments/${productId}/${uid}`).set(commentData).then(() => {
+      document.getElementById("ratingSelect").value = "";
+      document.getElementById("commentInput").value = "";
+    });
+  }
+
+  function shareProduct() {
+    const title = document.querySelector('.title')?.textContent || 'Check this out!';
+    const description = document.querySelector('.description')?.textContent || 'Awesome product on CyberChat!';
+    const image = document.querySelector('.main-image')?.src || 'https://yourcdn.com/default-preview.png';
+    const url = window.location.href;
+
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        text: description,
+        url: url
+      }).catch((err) => {
+        console.error("Share failed:", err);
+      });
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        alert("📎 Link copied to clipboard!");
+      });
+    }
+  }
+
+
+  /*
+   * NEW: Purchase Modal Multi-Step Flow for email + phone + payment
+   */
+
+  // Grab modal elements, assuming modal markup is present in your HTML
+  const modal = document.getElementById("purchaseModal");
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const step3 = document.getElementById("step3");
+
+  const emailInput = document.getElementById("emailInput");
+  const phoneInput = document.getElementById("phoneInput");
+  const paymentMethod = document.getElementById("paymentMethod");
+
+  const step1Error = document.getElementById("step1Error");
+  const step2Error = document.getElementById("step2Error");
+
+  // Show modal on buy button click
+  function confirmPurchase() {
+    modal.style.display = "block";
+    // Reset all
+    step1.classList.add("active");
+    step2.classList.remove("active");
+    step3.classList.remove("active");
+    step1Error.textContent = "";
+    step2Error.textContent = "";
+    emailInput.value = "";
+    phoneInput.value = "";
+    paymentMethod.value = "";
+  }
+
+  // Validation for email + phone (basic)
+  function validateStep1() {
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    step1Error.textContent = "";
+
+    if (!email || !phone) {
+      step1Error.textContent = "Please enter both email and phone number.";
+      return false;
+    }
+    // Basic email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      step1Error.textContent = "Please enter a valid email address.";
+      return false;
+    }
+    // Basic phone validation (digits + +, min 6 chars)
+    const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
+    if (!phoneRegex.test(phone)) {
+      step1Error.textContent = "Please enter a valid phone number.";
+      return false;
+    }
+    return true;
+  }
+
+  // Step 1 next button handler
+  document.getElementById("step1NextBtn").onclick = () => {
+    if (validateStep1()) {
+      step1.classList.remove("active");
+      step2.classList.add("active");
+      step2Error.textContent = "";
+    }
+  };
+
+  // Step 2 back button
+  document.getElementById("step2BackBtn").onclick = () => {
+    step2.classList.remove("active");
+    step1.classList.add("active");
+  };
+
+  // Step 2 next/confirm button
+  document.getElementById("step2NextBtn").onclick = () => {
+    if (!paymentMethod.value) {
+      step2Error.textContent = "Please select a payment method.";
+      return;
+    }
+
+    // Prepare purchase data to save
+    const purchaseData = {
+      productId,
+      email: emailInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      paymentMethod: paymentMethod.value,
+      timestamp: Date.now(),
+      userId: currentUser?.uid || null,
+    };
+
+    // Save purchase request in Firebase under /purchases
+    db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData).then(() => {
+      step2.classList.remove("active");
+      step3.classList.add("active");
+    }).catch((err) => {
+      step2Error.textContent = "Error saving purchase. Please try again.";
+      console.error(err);
+    });
+  };
+
+  // Close modal button
+  document.getElementById("closeModalBtn").onclick = () => {
+    modal.style.display = "none";
+  };
+
+  // Optional: close modal on clicking outside content
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+</script>
 </body>
 
 </body>
