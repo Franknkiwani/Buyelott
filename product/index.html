@@ -194,19 +194,43 @@
         }
 
         container.innerHTML = `
-          <div class="product-image-wrapper">
-            ${viewAllBtn}
-            <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy">
-          </div>
-          <div class="title">${data.title || "Untitled"}</div>
-          <div class="description">${data.description || "No description available."}</div>
-          <div class="price">$${formattedPrice}</div>
-          <div class="seller">
-            <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy">
-            <span>${sellerUsername} ${verifiedBadge}</span>
-          </div>
-          <button class="buy-btn" onclick="confirmPurchase()">Confirm to Buy</button>
-        `;
+  <div class="product-image-wrapper">
+    ${viewAllBtn}
+    <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy">
+  </div>
+  <div class="title">${data.title || "Untitled"}</div>
+  <div class="description">${data.description || "No description available."}</div>
+  <div class="price">$${formattedPrice}</div>
+
+  <!-- Reviews section under price -->
+  <div id="commentHeader" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+    <div style="font-size: 18px; font-weight: bold;">Reviews</div>
+    <div id="commentStats" style="font-size: 14px; color: #aaa;"></div>
+  </div>
+
+  <div id="commentsList" style="margin-top: 12px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #1da1f2 transparent;"></div>
+
+  <div id="commentForm" style="margin-top: 20px;">
+    <label style="display: block; margin-bottom: 6px;">Your Rating:</label>
+    <select id="ratingSelect" style="padding: 8px; border-radius: 8px;">
+      <option value="">Select rating</option>
+      <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+      <option value="4">⭐️⭐️⭐️⭐️</option>
+      <option value="3">⭐️⭐️⭐️</option>
+      <option value="2">⭐️⭐️</option>
+      <option value="1">⭐️</option>
+    </select>
+
+    <textarea id="commentInput" placeholder="Write your comment..." rows="3" style="width: 100%; margin-top: 10px; border-radius: 12px; padding: 10px;"></textarea>
+    <button onclick="submitComment()" style="margin-top: 10px; padding: 12px; border-radius: 12px; background: #1da1f2; border: none; color: white; font-size: 16px;">Submit Review</button>
+  </div>
+
+  <div class="seller" style="margin-top: 30px;">
+    <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy">
+    <span>${sellerUsername} ${verifiedBadge}</span>
+  </div>
+  <button class="buy-btn" onclick="confirmPurchase()">Confirm to Buy</button>
+`;
 
         container.style.display = "block";
       }).catch(error => {
