@@ -29,30 +29,53 @@
       backdrop-filter: blur(12px);
       padding: 16px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      position: relative;
     }
 
-    .product-container img {
+    .product-image-wrapper {
+      position: relative;
+    }
+
+    .product-container img.main-image {
       width: 100%;
       border-radius: 16px;
       margin-bottom: 16px;
     }
 
+    .view-all {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .title, .description, .price {
+      text-align: center;
+    }
+
     .title {
       font-size: 24px;
       font-weight: bold;
-      margin-bottom: 12px;
-    }
-
-    .price {
-      font-size: 20px;
-      font-weight: 600;
-      color: #00ff9d;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .description {
       font-size: 16px;
       line-height: 1.5;
+      margin-bottom: 12px;
+      color: #ccc;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 600;
+      color: #00ff9d;
       margin-bottom: 16px;
     }
 
@@ -60,7 +83,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 16px;
     }
 
     .seller img {
@@ -69,27 +92,36 @@
       border-radius: 50%;
     }
 
+    .verified-badge {
+      color: #1da1f2;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+
+    .buy-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #1da1f2, #00c6ff);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 17px;
+      margin-top: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .buy-btn:active {
+      transform: scale(0.97);
+    }
+
     .not-found {
       text-align: center;
       margin-top: 50px;
       font-size: 18px;
       color: #888;
-    }
-
-    .buy-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      background: #1da1f2;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-
-    .buy-btn:active {
-      transform: scale(0.98);
     }
   </style>
 </head>
@@ -132,20 +164,28 @@
         const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
         const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';
         const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';
-        const verifiedBadge = (data.seller && data.seller.verified) ? '✔️' : '';
+        const verifiedBadge = (data.seller && data.seller.verified) ? '<span class="verified-badge">✔</span>' : '';
         const price = parseFloat(data.price);
         const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
 
+        let viewAllBtn = '';
+        if (data.images && data.images.length > 1) {
+          viewAllBtn = `<div class="view-all" onclick='openImageGallery(${JSON.stringify(data.images)})'>View All</div>`;
+        }
+
         container.innerHTML = `
-          <img src="${mainImage}" alt="Product Image" loading="lazy">
+          <div class="product-image-wrapper">
+            ${viewAllBtn}
+            <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy">
+          </div>
           <div class="title">${data.title || "Untitled"}</div>
-          <div class="price">$${formattedPrice}</div>
           <div class="description">${data.description || "No description available."}</div>
+          <div class="price">$${formattedPrice}</div>
           <div class="seller">
             <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy">
             <span>${sellerUsername} ${verifiedBadge}</span>
           </div>
-          <button class="buy-btn">Continue to Buy</button>
+          <button class="buy-btn" onclick="confirmPurchase()">Confirm to Buy</button>
         `;
 
         container.style.display = "block";
@@ -153,6 +193,19 @@
         console.error(error);
         document.getElementById("notFound").innerText = "⚠️ Error loading product.";
         document.getElementById("notFound").style.display = "block";
+      });
+    }
+
+    function confirmPurchase() {
+      alert("✅ Purchase request received! The seller will contact you soon.");
+      // Add logic here to notify seller, or redirect to chat/payment etc.
+    }
+
+    function openImageGallery(images) {
+      let gallery = window.open('', '_blank');
+      gallery.document.write('<title>Product Images</title><style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}img{max-width:90%;margin-bottom:20px;border-radius:12px;}</style>');
+      images.forEach(img => {
+        gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);
       });
     }
   </script>
