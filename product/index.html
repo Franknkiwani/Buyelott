@@ -132,7 +132,27 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<div id="commentHeader" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+  <div style="font-size: 18px; font-weight: bold;">Reviews</div>
+  <div id="commentStats" style="font-size: 14px; color: #aaa;"></div>
+</div>
 
+<div id="commentForm" style="margin-top: 20px;">
+  <label style="display: block; margin-bottom: 6px;">Your Rating:</label>
+  <select id="ratingSelect" style="padding: 8px; border-radius: 8px;">
+    <option value="">Select rating</option>
+    <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+    <option value="4">⭐️⭐️⭐️⭐️</option>
+    <option value="3">⭐️⭐️⭐️</option>
+    <option value="2">⭐️⭐️</option>
+    <option value="1">⭐️</option>
+  </select>
+
+  <textarea id="commentInput" placeholder="Write your comment..." rows="3" style="width: 100%; margin-top: 10px; border-radius: 12px; padding: 10px;"></textarea>
+  <button onclick="submitComment()" style="margin-top: 10px; padding: 12px; border-radius: 12px; background: #1da1f2; border: none; color: white; font-size: 16px;">Submit Review</button>
+</div>
+
+<div id="commentsList" style="margin-top: 30px;"></div>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -208,6 +228,77 @@
         gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);
       });
     }
+    let currentUser = null;
+
+firebase.auth().onAuthStateChanged(user => {
+  currentUser = user;
+});
+
+// Load comments
+function loadComments(productId) {
+  db.ref(`/comments/${productId}`).on("value", (snapshot) => {
+    const comments = snapshot.val();
+    const container = document.getElementById("commentsList");
+    const stats = document.getElementById("commentStats");
+
+    if (!comments) {
+      container.innerHTML = "<p style='color:#aaa;'>No reviews yet.</p>";
+      stats.textContent = "(0 comments)";
+      return;
+    }
+
+    let entries = Object.entries(comments);
+    let totalRating = 0;
+    let html = "";
+
+    entries.forEach(([id, comment]) => {
+      const rating = parseInt(comment.rating || 0);
+      totalRating += rating;
+
+      const username = comment.username || "Anonymous";
+      const avatar = comment.avatar || `https://i.pravatar.cc/150?u=${id}`;
+
+      html += `
+        <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+          <img src="${avatar}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+          <div>
+            <div style="font-weight: bold;">${username}</div>
+            <div style="color: gold;">${"⭐️".repeat(rating)}</div>
+            <div style="color: #ccc;">${comment.text}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    const avg = totalRating / entries.length;
+    stats.textContent = `(${entries.length} reviews • ${avg.toFixed(1)} ⭐️ | ${(avg/5*100).toFixed(0)}%)`;
+    container.innerHTML = html;
+  });
+}
+
+function submitComment() {
+  const rating = parseInt(document.getElementById("ratingSelect").value);
+  const text = document.getElementById("commentInput").value.trim();
+
+  if (!rating || !text) {
+    alert("Please select a rating and enter your comment.");
+    return;
+  }
+
+  const uid = currentUser?.uid || "anon_" + Math.random().toString(36).slice(2, 8);
+  const commentData = {
+    rating,
+    text,
+    username: currentUser?.displayName || "Anonymous",
+    avatar: currentUser?.photoURL || `https://i.pravatar.cc/150?u=${uid}`,
+    timestamp: Date.now()
+  };
+
+  db.ref(`/comments/${productId}/${uid}`).set(commentData).then(() => {
+    document.getElementById("ratingSelect").value = "";
+    document.getElementById("commentInput").value = "";
+  });
+}
   </script>
 
 </body>
