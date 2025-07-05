@@ -697,23 +697,30 @@ return;
   }
 });
 (function() {
-  // Create the modal HTML only once and append it to body
+  // Create the modal element once
   const alertEl = document.createElement('div');
   alertEl.id = 'customAlert';
   alertEl.setAttribute('aria-modal', 'true');
   alertEl.setAttribute('role', 'alertdialog');
   alertEl.style.cssText = `
-    display:none;position:fixed;inset:0;z-index:9999;
-    backdrop-filter:blur(6px);background:rgba(0,0,0,0.4);
-    display:flex;justify-content:center;align-items:center;
+    display:none; position:fixed; inset:0; z-index:9999;
+    backdrop-filter:blur(6px); background:rgba(0,0,0,0.4);
+    justify-content:center; align-items:center; 
   `;
   alertEl.innerHTML = `
-    <div style="background:#fff;color:#111;padding:24px;max-width:320px;width:90%;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,0.15);font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
-      <h2 id="alertTitle" style="margin-top:0;font-size:1.25rem;">Alert</h2>
+    <div style="
+      background:#fff; color:#111; padding:24px; max-width:320px; width:90%;
+      border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.15);
+      font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+      Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    ">
+      <h2 id="alertTitle" style="margin-top:0; font-size:1.25rem;">Alert</h2>
       <p id="alertMessage" style="margin-bottom:24px; font-size:1rem; line-height:1.4;"></p>
-      <button id="alertOkBtn" style="width:100%;padding:12px 0;background:#007AFF;color:#fff;border:none;border-radius:12px;font-weight:600;font-size:1rem;cursor:pointer;user-select:none;transition:background-color 0.3s ease;">
-        OK
-      </button>
+      <button id="alertOkBtn" style="
+        width:100%; padding:12px 0; background:#007AFF; color:#fff; border:none;
+        border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer;
+        user-select:none; transition:background-color 0.3s ease;
+      ">OK</button>
     </div>
   `;
   document.body.appendChild(alertEl);
@@ -722,19 +729,23 @@ return;
   const alertMessage = alertEl.querySelector('#alertMessage');
   const okBtn = alertEl.querySelector('#alertOkBtn');
 
-  // Override global alert function
+  // Flag to prevent multiple clicks or re-entrance
+  let isOpen = false;
+
   window.alert = function(message) {
+    if (isOpen) return; // Prevent multiple alerts stacking
+
     alertTitle.textContent = 'Alert';
     alertMessage.textContent = message;
     alertEl.style.display = 'flex';
 
-    // Disable multiple clicks while open
-    okBtn.disabled = false;
+    isOpen = true;
 
     return new Promise((resolve) => {
       function closeAlert() {
         alertEl.style.display = 'none';
         okBtn.removeEventListener('click', closeAlert);
+        isOpen = false;
         resolve();
       }
       okBtn.addEventListener('click', closeAlert);
