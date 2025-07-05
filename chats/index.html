@@ -47,8 +47,10 @@
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
-    .chat-item:hover {
+    .chat-item:hover,
+    .chat-item:focus {
       background-color: #2a2a2a;
+      outline: none;
     }
     .chat-item img {
       width: 48px;
@@ -132,6 +134,7 @@
   const chatListEl = document.getElementById('chatList');
 
   function formatTime(ts) {
+    if (!ts) return '';
     const d = new Date(ts);
     const now = Date.now();
     const diff = now - ts;
@@ -156,17 +159,17 @@
     }
     const currentUid = user.uid;
 
-    // Listen for chats involving current user (meta.users)
     const chatsRef = db.ref('/chats');
-    chatsRef.on('value', snapshot => {
+    chatsRef.on('value', async snapshot => {
       const chats = snapshot.val();
+
       if (!chats) {
         chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
         return;
       }
 
-      // Filter chats currentUser is part of
-      const userChats = Object.entries(chats).filter(([chatId, chatData]) => {
+      // Filter chats where current user is a participant
+      let userChats = Object.entries(chats).filter(([chatId, chatData]) => {
         return chatData.meta?.users?.[currentUid];
       });
 
@@ -175,38 +178,46 @@
         return;
       }
 
+      // Sort chats by lastTimestamp descending (newest first)
+      userChats.sort((a, b) => {
+        const aTime = a[1].meta?.lastTimestamp || 0;
+        const bTime = b[1].meta?.lastTimestamp || 0;
+        return bTime - aTime;
+      });
+
       chatListEl.innerHTML = '';
 
-      userChats.forEach(async ([chatId, chatData]) => {
+      // Fetch user data in parallel for all chats to avoid waterfall
+      const chatItemsPromises = userChats.map(async ([chatId, chatData]) => {
         const users = chatData.meta.users;
         const otherUid = Object.keys(users).find(uid => uid !== currentUid);
-        if(!otherUid) return;
+        if(!otherUid) return null;
 
-        // Get other user info
         const userSnap = await db.ref(`/users/${otherUid}`).once('value');
         const otherUser = userSnap.val() || {};
 
-        // Get last message
         const messages = chatData.messages;
-        if(!messages) return;
+        if(!messages) return null;
+
+        // Get last message sorted by timestamp descending
         const lastMessageEntry = Object.entries(messages).sort((a,b) => b[1].timestamp - a[1].timestamp)[0];
-        if(!lastMessageEntry) return;
+        if(!lastMessageEntry) return null;
         const [lastMsgId, lastMsg] = lastMessageEntry;
 
-        // Check unread count: messages sent by other user after currentUser's lastReadTime
+        // Unread count = messages from other user after last read time
         const lastReadTimes = chatData.meta.lastReadTimes || {};
         const lastRead = lastReadTimes[currentUid] || 0;
         const unreadCount = Object.values(messages).filter(m => m.timestamp > lastRead && m.sender !== currentUid).length;
 
-        // Create chat list item
+        // Build list item HTML
         const li = document.createElement('li');
         li.className = 'chat-item';
         li.tabIndex = 0;
         li.setAttribute('role', 'button');
         li.setAttribute('aria-label', `Chat with ${otherUser.username || 'Unknown user'}`);
         li.addEventListener('click', () => {
-          // Redirect to chat page with otherUid param
-          window.location.href = `/chat.html?uid=${otherUid}`;
+          // Redirect using chatId for consistent chat page param
+          window.location.href = `/chat.html?chatId=${encodeURIComponent(chatId)}`;
         });
         li.addEventListener('keydown', e => {
           if(e.key === 'Enter' || e.key === ' ') {
@@ -227,8 +238,16 @@
           ${unreadCount > 0 ? `<span class="unread-badge" aria-label="${unreadCount} unread messages">${unreadCount}</span>` : ''}
         `;
 
-        chatListEl.appendChild(li);
+        return li;
       });
+
+      // Wait for all chat items to be created, filter nulls, then append
+      const chatItems = (await Promise.all(chatItemsPromises)).filter(Boolean);
+      if(chatItems.length === 0) {
+        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
+        return;
+      }
+      chatItems.forEach(item => chatListEl.appendChild(item));
     });
   });
 </script>
