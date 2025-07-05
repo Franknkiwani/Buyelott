@@ -944,60 +944,16 @@
       modal.style.display = "none";
     }
   };
-</script>
-
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-<script>
-  // Your Firebase config - keep it tight, keep it right
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  // Initialize Firebase app & database
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // Hardcoded productId for simulation
-  const productId = "-N12345ExampleProductId";
-
-  // Show loading, hide product container initially
-  const loadingScreen = document.getElementById("loadingScreen");
-  const productContainer = document.getElementById("product");
-
-  loadingScreen.style.display = "flex";
-  productContainer.style.display = "none";
-
-  // Fetch product data once
   db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
-    const data = snapshot.val();
+  // Show 2nd checkpoint
+  document.querySelectorAll('.checkpoint')[1].classList.add('active');
 
-    // Artificial delay for demo vibes (1.5 sec)
-    setTimeout(() => {
-      loadingScreen.style.display = "none";
-
-      if (data) {
-        productContainer.textContent = "Product loaded! 🎉";
-      } else {
-        productContainer.textContent = "Product not found.";
-      }
-
-      productContainer.style.display = "block";
-    }, 1500);
-  }).catch(err => {
-    console.error("Firebase error:", err);
-    loadingScreen.style.display = "none";
-    productContainer.textContent = "Error loading product.";
-    productContainer.style.display = "block";
-  });
+  // After rendering product:
+  document.querySelectorAll('.checkpoint')[2].classList.add('active');
+  setTimeout(() => {
+    document.getElementById("loadingScreen").style.display = "none";
+  }, 1000);
+});
 </script>
 </body>
 </html>
