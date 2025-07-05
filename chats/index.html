@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chats - CyberChat</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #000;
+      color: #eee;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #0a0a0a;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 1.3rem;
+      border-bottom: 1px solid #222;
+      position: fixed;
+      width: 100%;
+      top: 0; left: 0;
+      z-index: 1000;
+    }
+    main {
+      flex: 1;
+      margin-top: 56px;
+      overflow-y: auto;
+      background: #111;
+    }
+    .chat-list-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #222;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .chat-list-item:hover {
+      background: #222;
+    }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 14px;
+      border: 1.5px solid #333;
+      flex-shrink: 0;
+    }
+    .chat-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .username {
+      font-weight: 600;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .last-message {
+      font-size: 0.85rem;
+      color: #aaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .timestamp {
+      font-size: 0.75rem;
+      color: #666;
+      margin-left: 8px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <header>Chats</header>
+  <main id="chatList"></main>
+
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const chatListEl = document.getElementById('chatList');
+    let currentUser = null;
+
+    function formatTimestamp(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Given chatId (uid1_uid2), get the other uid in the chat for current user
+    function getOtherUid(chatId, currentUid) {
+      const parts = chatId.split('_');
+      return parts[0] === currentUid ? parts[1] : parts[0];
+    }
+
+    // Escape HTML to prevent injection
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Create a chat list item DOM element
+    function createChatListItem(user, lastMsg, lastMsgTime, chatId) {
+      const item = document.createElement('div');
+      item.className = 'chat-list-item';
+
+      item.onclick = () => {
+        // Redirect to chat page with the other user's uid (or your chat url scheme)
+        window.location.href = `/chat?uid=${user.uid}`;
+      };
+
+      item.innerHTML = `
+        <img class="avatar" src="${user.avatar || 'https://via.placeholder.com/48?text=👤'}" alt="${escapeHtml(user.username)}'s avatar" />
+        <div class="chat-info">
+          <div class="username">@${escapeHtml(user.username || 'unknown')}</div>
+          <div class="last-message">${escapeHtml(lastMsg || '')}</div>
+        </div>
+        <div class="timestamp">${formatTimestamp(lastMsgTime)}</div>
+      `;
+      return item;
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        alert('Please log in to view your chats.');
+        window.location.href = '/login';
+        return;
+      }
+      currentUser = user;
+
+      // Now load chats where currentUser is a participant
+      // Our chats are keyed like uid1_uid2 with messages underneath
+
+      db.ref('/chats').once('value').then(snapshot => {
+        const chats = snapshot.val() || {};
+        chatListEl.innerHTML = '';
+
+        const promises = [];
+
+        // Filter chats where currentUser.uid is in chatId
+        Object.entries(chats).forEach(([chatId, chatData]) => {
+          if (!chatId.includes(currentUser.uid)) return;
+
+          // Get other user uid
+          const otherUid = getOtherUid(chatId, currentUser.uid);
+
+          // Last message info
+          const messages = chatData.messages || {};
+          const lastMsgKey = Object.keys(messages).pop();
+          const lastMsg = messages[lastMsgKey];
+
+          // Fetch other user data from your user database
+          const p = db.ref(`/users/${otherUid}`).once('value').then(userSnap => {
+            const otherUser = userSnap.val() || { username: 'unknown', avatar: '' };
+            otherUser.uid = otherUid;
+
+            const lastText = lastMsg?.text || '';
+            const lastTime = lastMsg?.timestamp || 0;
+
+            const chatItem = createChatListItem(otherUser, lastText, lastTime, chatId);
+            chatListEl.appendChild(chatItem);
+          });
+          promises.push(p);
+        });
+
+        return Promise.all(promises);
+      }).catch(err => {
+        console.error('Failed to load chats:', err);
+      });
+    });
+  </script>
+</body>
+</html>
