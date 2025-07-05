@@ -3,115 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Inbox - Chat</title>
+  <title>Your Inbox</title>
   <style>
     body {
       margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background-color: #121212;
+      background: #121212;
       color: #eee;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex; flex-direction: column; height: 100vh;
     }
     header {
-      background-color: #007aff;
-      color: white;
-      padding: 14px 16px;
-      font-weight: 600;
-      font-size: 20px;
-      user-select: none;
+      background: #1da1f2;
+      color: #fff;
+      padding: 16px;
+      font-weight: 700;
+      font-size: 1.4rem;
       position: fixed;
       width: 100%;
       top: 0; left: 0;
-      z-index: 10000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+      border-bottom: 1px solid #0c7ddb;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      user-select: none;
     }
     main {
-      margin-top: 56px; /* header height */
+      margin-top: 64px;
       flex: 1;
       overflow-y: auto;
-      background-color: #181818;
-    }
-    .chat-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
+      background: #121212;
     }
     .chat-item {
       display: flex;
       align-items: center;
       padding: 12px 16px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #222;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background 0.15s ease;
     }
-    .chat-item:hover,
-    .chat-item:focus {
-      background-color: #2a2a2a;
-      outline: none;
+    .chat-item:hover {
+      background: #1a1a1a;
     }
-    .chat-item img {
-      width: 48px;
-      height: 48px;
+    .chat-avatar {
+      width: 48px; height: 48px;
       border-radius: 50%;
       object-fit: cover;
-      flex-shrink: 0;
+      background: #333;
       margin-right: 12px;
-      border: 1.5px solid #007aff;
+      flex-shrink: 0;
+      border: 2px solid #1da1f2;
     }
     .chat-info {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      min-width: 0;
     }
-    .chat-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .chat-username {
-      font-weight: 600;
-      font-size: 17px;
+    .chat-name {
+      font-weight: 700;
+      font-size: 1.1rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .chat-time {
-      font-size: 13px;
-      color: #888;
-      flex-shrink: 0;
-      user-select: none;
-    }
     .chat-last-message {
-      font-size: 14px;
+      font-size: 0.9rem;
       color: #bbb;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      user-select: text;
+      margin-top: 2px;
     }
-    .unread-badge {
-      background-color: #34c759; /* WhatsApp green */
-      color: white;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 9999px;
+    .chat-timestamp {
+      font-size: 0.8rem;
+      color: #555;
       margin-left: 8px;
-      user-select: none;
       flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .no-chats {
+      margin: 24px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
-<header>Inbox</header>
-<main>
-  <ul class="chat-list" id="chatList"></ul>
+
+<header>Your Inbox</header>
+
+<main id="inboxContainer">
+  <div class="no-chats">Loading chats...</div>
 </main>
 
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
@@ -131,125 +114,148 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const chatListEl = document.getElementById('chatList');
+  const inboxContainer = document.getElementById('inboxContainer');
 
-  function formatTime(ts) {
+  let currentUser = null;
+  let chatsData = {};  // cache chats data
+
+  // Format timestamp (just like messaging page)
+  function formatTimestamp(ts) {
     if (!ts) return '';
-    const d = new Date(ts);
-    const now = Date.now();
-    const diff = now - ts;
-
-    if(diff < 60000) return 'Just now';
-    if(diff < 3600000) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    if(diff < 86400000) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    return d.toLocaleDateString();
+    const date = new Date(ts);
+    // Show time if today, else show date
+    const now = new Date();
+    if (date.toDateString() === now.toDateString()) {
+      return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+    return date.toLocaleDateString();
   }
 
+  // Escape HTML for safety
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  auth.onAuthStateChanged(async user => {
-    if (!user) {
-      alert('Please log in to see your chats.');
-      window.location.href = '/login'; 
+  // Fetch user profile (username + avatar) for given uid
+  async function fetchUserProfile(uid) {
+    try {
+      const userSnap = await db.ref(`/users/${uid}`).once('value');
+      const user = userSnap.val();
+      if (user) {
+        return {
+          username: user.username || 'Unknown',
+          avatar: user.avatar || 'https://via.placeholder.com/48?text=👤'
+        };
+      } else {
+        return {
+          username: 'Unknown',
+          avatar: 'https://via.placeholder.com/48?text=👤'
+        };
+      }
+    } catch {
+      return {
+        username: 'Unknown',
+        avatar: 'https://via.placeholder.com/48?text=👤'
+      };
+    }
+  }
+
+  // Render the inbox list
+  async function renderInbox() {
+    inboxContainer.innerHTML = '';
+
+    // If no chats, show empty state
+    if (Object.keys(chatsData).length === 0) {
+      inboxContainer.innerHTML = `<div class="no-chats">No chats yet. Start a conversation!</div>`;
       return;
     }
-    const currentUid = user.uid;
 
+    // For each chat, fetch the other user's profile and show chat item
+    const chatEntries = Object.entries(chatsData);
+
+    for (const [chatId, chatMeta] of chatEntries) {
+      // Determine other user id in chat
+      const usersInChat = chatMeta.users || {};
+      const otherUserUid = Object.keys(usersInChat).find(uid => uid !== currentUser.uid);
+
+      // Fetch profile data
+      const { username, avatar } = await fetchUserProfile(otherUserUid);
+
+      // Last message snippet
+      const lastMsg = chatMeta.lastMessage || '';
+      const lastTimestamp = chatMeta.lastTimestamp || 0;
+
+      // Create chat item div
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item';
+      chatDiv.title = username + '\n' + lastMsg;
+      chatDiv.tabIndex = 0;
+      chatDiv.setAttribute('role', 'button');
+
+      chatDiv.innerHTML = `
+        <img class="chat-avatar" src="${avatar}" alt="${username} avatar" />
+        <div class="chat-info">
+          <div class="chat-name">${escapeHtml(username)}</div>
+          <div class="chat-last-message">${escapeHtml(lastMsg)}</div>
+        </div>
+        <div class="chat-timestamp">${formatTimestamp(lastTimestamp)}</div>
+      `;
+
+      // Click or enter opens the chat page with that user
+      chatDiv.addEventListener('click', () => {
+        // Open your chat page with the other user by encoding product id or chatId
+        // Since your chatId is uid1_uid2, let's open messages with ?product=productId
+        // But inbox doesn't know productId, so open messages page with chatId param
+        // You might want to adjust messages page to accept chatId directly.
+        // For now, open chat page passing chatId as query param
+
+        // Redirect to messages page with chatId param (you need to support this in your messages page)
+        window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;
+      });
+
+      // Keyboard accessible
+      chatDiv.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          chatDiv.click();
+        }
+      });
+
+      inboxContainer.appendChild(chatDiv);
+    }
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      alert('You must log in to view your inbox.');
+      window.location.href = '/login';
+      return;
+    }
+    currentUser = user;
+
+    // Listen for chats where currentUser is a participant in /chats
     const chatsRef = db.ref('/chats');
-    chatsRef.on('value', async snapshot => {
-      const chats = snapshot.val();
 
-      if (!chats) {
-        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
-        return;
-      }
+    // Using 'value' event here for demo simplicity — for large data, better use queries or pagination
+    chatsRef.on('value', (snapshot) => {
+      const allChats = snapshot.val() || {};
 
-      // Filter chats where current user is a participant
-      let userChats = Object.entries(chats).filter(([chatId, chatData]) => {
-        return chatData.meta?.users?.[currentUid];
-      });
+      // Filter chats that include current user
+      chatsData = Object.entries(allChats)
+        .filter(([chatId, chatMeta]) => {
+          return chatMeta?.users && chatMeta.users[currentUser.uid];
+        })
+        .reduce((acc, [chatId, chatMeta]) => {
+          acc[chatId] = chatMeta;
+          return acc;
+        }, {});
 
-      if(userChats.length === 0) {
-        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
-        return;
-      }
-
-      // Sort chats by lastTimestamp descending (newest first)
-      userChats.sort((a, b) => {
-        const aTime = a[1].meta?.lastTimestamp || 0;
-        const bTime = b[1].meta?.lastTimestamp || 0;
-        return bTime - aTime;
-      });
-
-      chatListEl.innerHTML = '';
-
-      // Fetch user data in parallel for all chats to avoid waterfall
-      const chatItemsPromises = userChats.map(async ([chatId, chatData]) => {
-        const users = chatData.meta.users;
-        const otherUid = Object.keys(users).find(uid => uid !== currentUid);
-        if(!otherUid) return null;
-
-        const userSnap = await db.ref(`/users/${otherUid}`).once('value');
-        const otherUser = userSnap.val() || {};
-
-        const messages = chatData.messages;
-        if(!messages) return null;
-
-        // Get last message sorted by timestamp descending
-        const lastMessageEntry = Object.entries(messages).sort((a,b) => b[1].timestamp - a[1].timestamp)[0];
-        if(!lastMessageEntry) return null;
-        const [lastMsgId, lastMsg] = lastMessageEntry;
-
-        // Unread count = messages from other user after last read time
-        const lastReadTimes = chatData.meta.lastReadTimes || {};
-        const lastRead = lastReadTimes[currentUid] || 0;
-        const unreadCount = Object.values(messages).filter(m => m.timestamp > lastRead && m.sender !== currentUid).length;
-
-        // Build list item HTML
-        const li = document.createElement('li');
-        li.className = 'chat-item';
-        li.tabIndex = 0;
-        li.setAttribute('role', 'button');
-        li.setAttribute('aria-label', `Chat with ${otherUser.username || 'Unknown user'}`);
-        li.addEventListener('click', () => {
-          // Redirect using chatId for consistent chat page param
-          window.location.href = `/chat.html?chatId=${encodeURIComponent(chatId)}`;
-        });
-        li.addEventListener('keydown', e => {
-          if(e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            li.click();
-          }
-        });
-
-        li.innerHTML = `
-          <img src="${otherUser.avatar || 'https://via.placeholder.com/48?text=👤'}" alt="Profile picture of ${escapeHtml(otherUser.username || 'User')}" />
-          <div class="chat-info">
-            <div class="chat-header">
-              <span class="chat-username">${escapeHtml(otherUser.username || 'Unknown')}</span>
-              <span class="chat-time">${formatTime(lastMsg.timestamp)}</span>
-            </div>
-            <div class="chat-last-message">${escapeHtml(lastMsg.text || '')}</div>
-          </div>
-          ${unreadCount > 0 ? `<span class="unread-badge" aria-label="${unreadCount} unread messages">${unreadCount}</span>` : ''}
-        `;
-
-        return li;
-      });
-
-      // Wait for all chat items to be created, filter nulls, then append
-      const chatItems = (await Promise.all(chatItemsPromises)).filter(Boolean);
-      if(chatItems.length === 0) {
-        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
-        return;
-      }
-      chatItems.forEach(item => chatListEl.appendChild(item));
+      renderInbox();
     });
   });
 </script>
+
 </body>
 </html>
