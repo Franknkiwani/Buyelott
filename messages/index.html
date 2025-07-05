@@ -326,16 +326,7 @@
   <div class="loadingText">Loading chat…</div>
 </div>
 <div id="newMessageBadge" aria-live="assertive" aria-atomic="true">+0</div>
-<div id="modernAlert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); 
-  display:flex; justify-content:center; align-items:center; z-index:9999;">
-  <div style="background:#fff; border-radius:20px; padding:24px; width:90%; max-width:320px; 
-    box-shadow:0 8px 30px rgba(0,0,0,0.25); text-align:center; font-family:-apple-system, BlinkMacSystemFont, sans-serif;">
-    <div style="font-size:18px; font-weight:600; margin-bottom:10px;">Notice</div>
-    <div id="modernAlertMsg" style="font-size:15px; color:#444; margin-bottom:20px;">You must log in to chat.</div>
-    <button id="modernAlertBtn" style="padding:10px 20px; font-size:16px; background:#1da1f2; color:white;
-      border:none; border-radius:12px; cursor:pointer;">OK</button>
-  </div>
-</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
@@ -556,8 +547,8 @@
 
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      showModernAlert("You must log in to chat.", "/login");
-      window.location.href = '/';
+      alert('You must log in to chat.');
+      window.location.href = '/login';
       return;
     }
     currentUser = user;
@@ -705,21 +696,6 @@
     document.getElementById('loadingScreen').classList.add('hide');
   }
 });
-function showModernAlert(message, redirectUrl) {
-  const alertBox = document.getElementById('modernAlert');
-  const msg = document.getElementById('modernAlertMsg');
-  const btn = document.getElementById('modernAlertBtn');
-
-  msg.textContent = message;
-  alertBox.style.display = 'flex';
-
-  btn.onclick = () => {
-    alertBox.style.display = 'none';
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
-    }
-  };
-}
 </script>
 
 </body>
