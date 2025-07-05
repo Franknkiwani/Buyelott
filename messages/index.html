@@ -484,6 +484,22 @@
     lastReadTimestamp = lastReadTimes[currentUser.uid] || 0;
   }
 
+  // --- New function to ensure user profile saved in /users ---
+  async function ensureUserInUsersDb(user) {
+    if (!user || !user.uid) return;
+
+    const userRef = db.ref(`/users/${user.uid}`);
+    const snapshot = await userRef.once('value');
+    if (!snapshot.exists()) {
+      await userRef.set({
+        username: user.displayName || `User_${user.uid.slice(0,6)}`,
+        avatar: user.photoURL || 'https://via.placeholder.com/40?text=👤',
+        email: user.email || '',
+        createdAt: Date.now(),
+      });
+    }
+  }
+
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
       alert('You must log in to chat.');
@@ -504,7 +520,6 @@
           addMessageBubble(msg.text, msg.sender, msg.timestamp);
           scrollToBottom();
 
-          // If message from other user and window not focused, increment unread count
           if (msg.sender !== currentUser.uid && document.visibilityState !== 'visible') {
             unreadCount++;
             updateUnreadBadge();
@@ -512,12 +527,10 @@
         }
       });
 
-      // Mark messages as read on window focus
       window.addEventListener('focus', () => {
         markAllRead();
       });
 
-      // Initial mark as read
       markAllRead();
 
       sendBtn.disabled = false;
@@ -534,18 +547,32 @@
     const text = messageInput.value.trim();
     if (!text) return;
 
-    const messagesRef = db.ref(`/chats/${chatId}/messages`);
-    const newMsgRef = messagesRef.push();
-    const timestamp = Date.now();
-
     try {
+      // Save current user profile to /users if missing
+      await ensureUserInUsersDb(currentUser);
+
+      // Check if seller exists, if not save minimal profile (fallback)
+      if (sellerUid && sellerUid !== currentUser.uid) {
+        const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
+        if (!sellerSnap.exists()) {
+          await db.ref(`/users/${sellerUid}`).set({
+            username: sellerName || `Seller_${sellerUid.slice(0,6)}`,
+            avatar: sellerAvatar || 'https://via.placeholder.com/40?text=👤',
+            createdAt: Date.now(),
+          });
+        }
+      }
+
+      const messagesRef = db.ref(`/chats/${chatId}/messages`);
+      const newMsgRef = messagesRef.push();
+      const timestamp = Date.now();
+
       await newMsgRef.set({
         sender: currentUser.uid,
         text,
         timestamp
       });
 
-      // Update chat meta with last message and timestamps
       const metaRef = db.ref(`/chats/${chatId}/meta`);
       await metaRef.transaction((meta) => {
         if (!meta) {
@@ -576,6 +603,7 @@
       messageInput.value = '';
       messageInput.focus();
       sendBtn.disabled = true;
+
     } catch (err) {
       alert('Error sending message. Try again.');
       console.error(err);
@@ -586,7 +614,6 @@
     sendBtn.disabled = messageInput.value.trim().length === 0;
   });
 
-  // Open product page on click or keyboard enter/space
   productPreviewEl.addEventListener('click', () => {
     const link = productPreviewEl.querySelector('a');
     if (link) window.open(link.href, '_blank');
