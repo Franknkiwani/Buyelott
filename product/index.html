@@ -920,8 +920,8 @@ header {
   const step2Error = document.getElementById("step2Error");
 
   // Show modal on buy button click
-  function confirmPurchase() {
-  modal.style.display = "flex"; // flex for centered layout
+function confirmPurchase() {
+  modal.style.display = "flex"; // centered flex modal
   step1.classList.add("active");
   step2.classList.remove("active");
   step3.classList.remove("active");
@@ -957,7 +957,7 @@ function validateStep1() {
   return true;
 }
 
-// Handle "Send Request" button
+// Handle "Send Request" button (Step 1)
 document.getElementById("step1NextBtn").onclick = () => {
   if (!validateStep1()) return;
 
@@ -969,12 +969,12 @@ document.getElementById("step1NextBtn").onclick = () => {
     sellerId,
     email: emailInput.value.trim(),
     phone: phoneInput.value.trim(),
-    paymentMethod: "manual",
+    paymentMethod: "manual", // default to manual
     timestamp: Date.now(),
     userId: currentUser?.uid || null,
   };
 
-  // Simulated delay + saving to Firebase
+  // Simulate loading (to show the loader animation)
   setTimeout(() => {
     db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
       .then(() => {
@@ -990,78 +990,25 @@ document.getElementById("step1NextBtn").onclick = () => {
   }, 1200);
 };
 
-// Close modal
+// Close modal logic
 document.getElementById("closeModalBtn").onclick = () => {
   modal.style.display = "none";
 };
 
-// Close modal on background click
 modal.onclick = (e) => {
   if (e.target === modal) {
     modal.style.display = "none";
   }
 };
 
-  // Step 1 next button handler
-  document.getElementById("step1NextBtn").onclick = () => {
-    if (validateStep1()) {
-      step1.classList.remove("active");
-      step2.classList.add("active");
-      step2Error.textContent = "";
-    }
-  };
-
-  // Step 2 back button
-  document.getElementById("step2BackBtn").onclick = () => {
-    step2.classList.remove("active");
-    step1.classList.add("active");
-  };
-
-  // Step 2 next/confirm button
-  document.getElementById("step2NextBtn").onclick = () => {
-    if (!paymentMethod.value) {
-      step2Error.textContent = "Please select a payment method.";
-      return;
-    }
-
-    // Prepare purchase data to save, now includes sellerId
-    const purchaseData = {
-      productId,
-      sellerId,
-      email: emailInput.value.trim(),
-      phone: phoneInput.value.trim(),
-      paymentMethod: paymentMethod.value,
-      timestamp: Date.now(),
-      userId: currentUser?.uid || null,
-    };
-
-    // Save purchase request in Firebase under /purchases
-    db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData).then(() => {
-      step2.classList.remove("active");
-      step3.classList.add("active");
-    }).catch((err) => {
-      step2Error.textContent = "Error saving purchase. Please try again.";
-      console.error(err);
-    });
-  };
-
-  // Close modal button
-  document.getElementById("closeModalBtn").onclick = () => {
-    modal.style.display = "none";
-  };
-
-  // Optional: close modal on clicking outside content
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-    }
-  };
-  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
-  // Show 2nd checkpoint
+// Loading checkpoints logic
+db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+  // Show 2nd checkpoint (Processing)
   document.querySelectorAll('.checkpoint')[1].classList.add('active');
 
-  // After rendering product:
+  // After loading, show Received
   document.querySelectorAll('.checkpoint')[2].classList.add('active');
+
   setTimeout(() => {
     document.getElementById("loadingScreen").style.display = "none";
   }, 1000);
