@@ -1,1405 +1,347 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>dlsaccounts</title>
-<style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    background-color: #000000;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-  }
-header {
-  position: sticky;
-  top: 0;
-  z-index: 9999;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat with Seller</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #121212;
+      color: #eee;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-direction: column;
+    }
 
-  height: 60px;
-  width: 100%;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #1da1f2;
+      border-bottom: 1px solid #0c7ddb;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      gap: 12px;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      user-select: none;
+    }
+    header img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+      flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+    #sellerName {
+      font-weight: 700;
+      font-size: 1.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-grow: 1;
+    }
 
-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1.5px;
-  background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
-  box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
-}
+    #productPreview {
+      margin-top: 60px; /* header height */
+      background: #181818;
+      border-bottom: 1px solid #222;
+      padding: 12px 16px;
+      position: sticky;
+      top: 60px;
+      z-index: 900;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+    #productPreview:hover {
+      background-color: #222;
+    }
+    #productPreview img {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #222;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      flex-shrink: 0;
+    }
+    #productPreview div {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #productPreview strong {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #eee;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #productPreview p {
+      margin: 2px 0 0;
+      color: #aaa;
+      font-size: 0.85rem;
+      user-select: none;
+    }
 
-/* Ensure content starts directly below header */
-main {
-  padding-top: 60px; /* match the header height */
-  background-color: #000;
-  width: 100%;
-  box-sizing: border-box;
-}
+    #chatContainer {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 90px; /* bottom space for input */
+      background: #121212;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-/* Ensure product cards sit neatly under main */
-#productList {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 60px;
-  width: 100%;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  box-sizing: border-box;
-}
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon-wrapper {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(145deg, #ff000033, #0000ff33);
-    box-shadow:
-      0 0 6px rgba(255, 0, 255, 0.3),
-      0 0 12px rgba(0, 255, 255, 0.15),
-      inset 0 0 6px rgba(0, 255, 255, 0.1);
-    animation: colorChange 7s linear infinite;
-  }
-  .logo-icon-wrapper img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #00000088;
-  }
-  @keyframes colorChange {
-    0%   { box-shadow: 0 0 6px #ff0000aa, 0 0 12px #ff000055, inset 0 0 6px #ff000033; }
-    20%  { box-shadow: 0 0 6px #ff7f00aa, 0 0 12px #ff7f0055, inset 0 0 6px #ff7f0033; }
-    40%  { box-shadow: 0 0 6px #ffff00aa, 0 0 12px #ffff0055, inset 0 0 6px #ffff0033; }
-    60%  { box-shadow: 0 0 6px #00ff00aa, 0 0 12px #00ff0055, inset 0 0 6px #00ff0033; }
-    80%  { box-shadow: 0 0 6px #0000ffaa, 0 0 12px #0000ff55, inset 0 0 6px #0000ff33; }
-    100% { box-shadow: 0 0 6px #ff00ffaa, 0 0 12px #ff00ff55, inset 0 0 6px #ff00ff33; }
-  }
-  .logo-text {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e0e0e0;
-    user-select: none;
-  }
-  .user-area {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  .profile-pic {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
-  }
-  .login-btn {
-    padding: 8px 18px;
-    border-radius: 20px;
-    background: rgba(0, 255, 255, 0.12);
-    border: 1.5px solid rgba(0, 255, 255, 0.35);
-    color: #00ffff;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
-    backdrop-filter: blur(6px);
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-  .login-btn:hover {
-    background: rgba(0, 255, 255, 0.25);
-    color: #a0ffff;
-  }
-main {
-  flex: 1;
-  background-color: #000000;
-  padding-top: 64px; /* match desktop header height */
-  display: block; /* no flex to avoid centering */
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+    .message {
+      max-width: 80%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      line-height: 1.4;
+      border-radius: 20px;
+      position: relative;
+      word-wrap: break-word;
+      user-select: text;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+    .message.self {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #0f7cf9, #30a0f9);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+    .message.seller {
+      align-self: flex-start;
+      background: #1a1a1a;
+      color: #eee;
+      border-bottom-left-radius: 6px;
+    }
+    .message .prefix {
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+      color: #a0cfff;
+    }
+    .message .timestamp {
+      font-size: 10px;
+      opacity: 0.4;
+      position: absolute;
+      bottom: 6px;
+      right: 12px;
+      user-select: none;
+    }
+    .message a {
+      color: #a0d8ff;
+      text-decoration: underline;
+      word-break: break-word;
+    }
 
-@media (max-width: 500px) {
-  main {
-    padding-top: 56px; /* match mobile header height */
-  }
-}
-  /* Prevent text selection and copying everywhere */
-* {
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* IE10+ */
-  user-select: none;         /* Standard */
-  -webkit-touch-callout: none; /* Disable callout on iOS */
-  -webkit-user-drag: none;     /* Disable dragging images/text */
-}
+    #chatForm {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      background: #181818;
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.7);
+      z-index: 1100;
+    }
+    #messageInput {
+      flex: 1;
+      border-radius: 30px;
+      border: none;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      background: #222;
+      color: #eee;
+      outline-offset: 2px;
+      outline-color: #1da1f2;
+      caret-color: #1da1f2;
+      transition: background-color 0.3s ease;
+    }
+    #messageInput::placeholder {
+      color: #888;
+    }
+    #messageInput:focus {
+      background-color: #2c2c2c;
+    }
+    #sendBtn {
+      background: #1da1f2;
+      border: none;
+      border-radius: 30px;
+      padding: 0 24px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #000;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      min-width: 72px;
+    }
+    #sendBtn:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    #sendBtn:hover:not(:disabled) {
+      background: #2b8afc;
+    }
 
-/* Responsive header tweaks */
-@media (max-width: 480px) {
-  header {
-    height: 50px !important; /* smaller height on mobile */
-    padding: 0 12px !important; /* less horizontal padding */
-  }
+    /* New message badge for demo purposes */
+    #newMessageBadge {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: #e0245e;
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: 18px;
+      user-select: none;
+      box-shadow: 0 0 10px #e0245eaa;
+      display: none;
+      z-index: 1200;
+    }
 
-  .logo-icon-wrapper {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 2px !important;
-  }
-
-  .logo-text {
-    font-size: 1rem !important;
-  }
-
-  .profile-pic {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.9rem !important;
-  }
-}
-@media (max-width: 480px) {
-  header {
-    width: 100% !important;  /* full width always */
-    height: 50px !important; /* shorter height */
-    padding: 0 12px !important;
-    box-sizing: border-box;  /* avoid overflow */
-  }
-
-  /* rest remains the same */
-  .logo-icon-wrapper {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 2px !important;
-  }
-
-  .logo-text {
-    font-size: 1rem !important;
-  }
-
-  .profile-pic {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.9rem !important;
-  }
-}
-.profile-pic {
-  outline: none;          /* remove default focus ring */
-  -webkit-tap-highlight-color: transparent; /* remove highlight on mobile */
-}
-
-.profile-pic:focus,
-.profile-pic:active {
-  outline: none;
-  box-shadow: 0 0 6px rgba(0, 255, 255, 0.5); /* optional: custom subtle glow for focus */
-}
-@media (max-width: 480px) {
-  header {
-    width: 100% !important;
-    height: 46px !important; /* slightly shorter header */
-    padding: 0 8px !important;
-    box-sizing: border-box;
-  }
-
-  .logo {
-    gap: 6px !important;
-  }
-
-  .logo-icon-wrapper {
-    width: 22px !important;
-    height: 22px !important;
-    padding: 1px !important;
-  }
-
-  .logo-text {
-    font-size: 0.9rem !important;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-  }
-
-  .profile-pic {
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  .login-btn {
-    padding: 5px 12px !important;
-    font-size: 0.8rem !important;
-    border-radius: 16px !important;
-  }
-
-  .user-area {
-    gap: 10px !important;
-  }
-}
-@media (max-width: 480px) {
-  header {
-    width: 100%;
-    height: 42px !important;       /* tighter height */
-    padding: 0 6px !important;     /* minimal padding */
-    gap: 0;
-  }
-
-  .logo {
-    gap: 4px !important;
-  }
-
-  .logo-icon-wrapper {
-    width: 20px !important;
-    height: 20px !important;
-    padding: 0px !important;
-  }
-
-  .logo-text {
-    font-size: 0.75rem !important;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-  }
-
-  .user-area {
-    gap: 6px !important;
-  }
-
-  .profile-pic {
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .login-btn {
-    padding: 4px 10px !important;
-    font-size: 0.75rem !important;
-    border-radius: 14px !important;
-  }
-}
-@media (max-width: 480px) {
-  header {
-    width: 100%;
-    height: 56px !important;         /* ✅ More height for visibility */
-    padding: 0 12px !important;      /* ✅ Room for breathing */
-    box-sizing: border-box;
-  }
-
-  .logo {
-    gap: 8px !important;
-    align-items: center;
-  }
-
-  .logo-icon-wrapper {
-    width: 26px !important;
-    height: 26px !important;
-    padding: 2px !important;
-  }
-
-  .logo-text {
-    font-size: 1rem !important;      /* ✅ Bigger font on mobile */
-    font-weight: 700;
-  }
-
-  .user-area {
-    gap: 10px !important;
-  }
-
-  .profile-pic {
-    width: 30px !important;
-    height: 30px !important;
-  }
-
-  .login-btn {
-    padding: 6px 14px !important;
-    font-size: 0.85rem !important;
-    border-radius: 18px !important;
-  }
-}
-/* Reset & Base */
-.product-page * {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.product-page {
-  /* Removed background, padding and container styling */
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-/* Card */
-.product-page .card {
-  background: rgba(30, 30, 30, 0.65);
-  backdrop-filter: blur(14px);
-  border-radius: 24px;
-  width: 100%;
-  max-width: 370px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* 3D layered shadows for depth & edges */
-  box-shadow:
-    4px 4px 10px rgba(0, 0, 0, 0.7),
-    inset 1px 1px 4px rgba(255, 255, 255, 0.1),
-    inset -1px -1px 6px rgba(0, 0, 0, 0.8);
-
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.3s ease;
-}
-
-.product-page .card:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    8px 8px 18px rgba(0, 0, 0, 0.9),
-    inset 2px 2px 5px rgba(255, 255, 255, 0.15),
-    inset -2px -2px 8px rgba(0, 0, 0, 0.9);
-}
-
-/* Card Image */
-.product-page .card img {
-  width: 100%;
-  object-fit: cover;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
-  background: transparent;
-  animation: none;
-}
-
-/* View All Button */
-.product-page .view-all-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #000;
-  color: #fff;
-  font-size: 0.75rem;
-  padding: 6px 14px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  z-index: 2;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-
-.product-page .view-all-btn:hover {
-  background: #222;
-}
-
-/* Card Content */
-.product-page .card-content {
-  padding: 20px;
-}
-
-/* Titles & Text */
-.product-page .card-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  text-align: center;
-  color: #00fff7;
-  text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
-}
-
-.product-page .card-description {
-  font-size: 1rem;
-  line-height: 1.5;
-  opacity: 0.85;
-  text-align: center;
-  margin-bottom: 20px;
-  color: #ccc;
-}
-
-/* Rating */
-.product-page .rating {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  color: #ffcc33;
-  margin-bottom: 14px;
-}
-
-.product-page .rating span {
-  margin-left: 6px;
-  color: #aaa;
-}
-
-/* Seller Profile */
-.product-page .seller-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.product-page .seller-profile img {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid #00d68f;
-  object-fit: cover;
-}
-
-.product-page .seller-username {
-  font-size: 0.9rem;
-  color: #ccc;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.product-page .verified-badge {
-  font-size: 0.75rem;
-  background: #00d68f;
-  color: #000;
-  padding: 3px 8px;
-  border-radius: 14px;
-  font-weight: 700;
-  user-select: none;
-}
-
-/* Info Bar */
-.product-page .info-bar {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  opacity: 0.55;
-  margin-bottom: 18px;
-  color: #999;
-}
-
-/* PRICE: Removed container styling, just clean text now */
-.price {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #00fff7; /* crisp cyan */
-  text-align: center;
-  margin: 16px auto 24px;
-  user-select: none;
-  /* No padding, no border, no background */
-}
-
-/* Buy Button */
-.buy-btn {
-  background: #00d68f;
-  color: #000;
-  border: none;
-  padding: 14px 22px;
-  font-weight: 700;
-  font-size: 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  width: 80%;
-  margin: 0 auto 30px;
-  display: block;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  user-select: none;
-}
-
-.buy-btn:hover {
-  background: #00b57d;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
-}
-
-.message-btn {
-  padding: 8px 16px;
-  background: rgba(0, 255, 255, 0.15);
-  border-radius: 14px;
-  color: #00ffff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  user-select: none;
-  transition: background 0.2s ease;
-
-  flex-grow: 1;     /* take all leftover space */
-  min-width: 0;     /* avoid flexbox overflow */
-}
-
-.message-btn:hover {
-  background: rgba(0, 255, 255, 0.3);
-}
-
-/* Fullscreen Modal */
-.fullscreen-modal {
+    /* Scrollbar style for chat container */
+    #chatContainer::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chatContainer::-webkit-scrollbar-track {
+      background: #181818;
+    }
+    #chatContainer::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 10px;
+    }
+    @media (max-width: 480px) {
+      #productPreview {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      #productPreview img {
+        width: 48px;
+        height: 48px;
+      }
+      #chatContainer {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 80px;
+      }
+      #messageInput {
+        font-size: 1rem;
+      }
+      #sendBtn {
+        min-width: 56px;
+        font-size: 1rem;
+        padding: 0 18px;
+      }
+    }
+    #loadingScreen {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(10, 10, 10, 0.9);
-  z-index: 9999;
-  overflow-y: auto;
-  padding: 20px;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
-}
-
-.fullscreen-modal img {
-  max-width: 90%;
-  max-height: 80vh;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  display: block;
-}
-
-/* Close modal */
-.close-modal {
-  background: black;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-
-.close-modal:hover {
-  background: #222;
-}
-/* Responsive tweaks */
-@media (max-width: 500px) {
-  .product-page {
-    padding: 12px;
-  }
-
-  .product-page .card {
-    border-radius: 16px;
-    max-width: 100%;
-  }
-
-  .product-page .card img {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-  }
-
-  .buy-btn {
-    width: 90%;
-  }
-}
-
-/* Layout Reset */
-body.mobile .product-page {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-body.tablet .product-page,
-body.desktop .product-page {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  justify-content: center;
-  padding: 40px 20px;
-}
-
-body.desktop #productList,
-body.tablet #productList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-#productList {
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-content: center;
-  gap: 24px;
-  width: 100%;
-  max-width: 700px;
-  margin: 60px auto 20px; /* Top margin creates breathing space */
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-/* Make the product card full width inside its container */
-.product-page .card {
-  width: 100%;       /* full width of the grid item */
-  max-width: none;   /* remove max-width limit so it can fill */
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 600px;  /* optional: max width so it doesn’t get crazy wide on big screens */
-}
-
-/* Center the grid container */
-#productList {
-  display: grid;
-  grid-template-columns: 1fr;  /* one column so cards stack vertically and fill container */
-  justify-content: center;     /* center the grid inside container */
-  gap: 24px;
-  width: 100%;
-  max-width: 700px;            /* keep max width reasonable for large screens */
-  margin: 40px auto;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-/* Tighten spacing inside product card */
-.product-page .card-content {
-  padding: 12px 16px; /* less padding inside card */
-}
-
-.product-page .card-title {
-  font-size: 1.1rem;
-  font-weight: 700;      /* bold but not too heavy */
-  margin-bottom: 6px;    /* less margin below title */
-  text-align: center;
-}
-
-.product-page .card-description {
-  font-size: 0.9rem;
-  line-height: 1.3;
-  opacity: 0.85;
-  margin-bottom: 10px;   /* tighter margin */
-  text-align: center;
-}
-
-.product-page .seller-profile {
-  margin-bottom: 8px;    /* less gap */
-  gap: 6px;              /* less space between elements */
-}
-
-.buy-btn {
-  margin-bottom: 12px;   /* less space below button */
-}
-
-/* Fancy price styling */
-.price {
-  font-size: 1.5rem;
-  font-weight: 900;         /* heavy weight */
-  color: #fff;              /* pure white */
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7), 0 0 10px #00d68f;
-  margin: 8px auto 14px;
-  text-align: center;
-  user-select: none;
-  letter-spacing: 0.05em;
-}
-#productList {
-  margin-top: 40px; /* Clean gap between header/section and products */
-}
-@media (max-width: 500px) {
-  #productList {
-    margin-top: 20px;
-  }
-}
-.login-modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(6px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999999;
-}
-
-.login-modal-content {
-  background: rgba(30,30,30,0.9);
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 30px 24px;
-  border-radius: 18px;
-  max-width: 90%;
-  width: 360px;
-  text-align: center;
-  color: white;
-  box-shadow: 0 0 20px rgba(0,255,255,0.1);
-}
-
-.login-modal-content h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #00ffff;
-}
-
-.login-modal-content p {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.modal-login, .modal-close {
-  flex: 1;
-  padding: 10px 16px;
-  font-weight: 600;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.modal-login {
-  background: #00d68f;
-  color: #000;
-}
-
-.modal-login:hover {
-  background: #00b57d;
-}
-
-.modal-close {
-  background: #222;
-  color: white;
-}
-
-.modal-close:hover {
-  background: #444;
-}
-.google-login {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: #ffffff;
-  color: #000000;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-.google-login img {
-  width: 20px;
-  height: 20px;
-}
-
-.google-login:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-.product-card {
-  background: linear-gradient(145deg, #1e1e1e, #2a2a2a); /* dark glassy vibe */
-  border-radius: 12px;
-  box-shadow:
-    4px 4px 8px rgba(0,0,0,0.7),       /* dark outer shadow for depth */
-    inset 2px 2px 4px rgba(255,255,255,0.05), /* subtle highlight edge */
-    inset -2px -2px 6px rgba(0,0,0,0.7);       /* inset shadow for 3D feel */
-  padding: 20px;
+  width: 100vw; height: 100vh;
+  background-color: #121212;
   color: #eee;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  user-select: none;
-}
-
-.product-card:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    8px 8px 16px rgba(0,0,0,0.9),
-    inset 3px 3px 5px rgba(255,255,255,0.1),
-    inset -3px -3px 8px rgba(0,0,0,0.8);
-}
-
-/* Optional: smooth text */
-.product-card * {
-  font-smooth: always;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-@media (max-width: 500px) {
-  #productList {
-    margin-top: 12px !important;
-    padding: 0 12px !important;
-    gap: 16px !important;
-  }
-
-  .product-page .card {
-    margin-bottom: 16px !important;
-  }
-
-  .buy-btn {
-    margin-bottom: 16px !important;
-    margin-top: 8px !important;
-  }
-
-  .product-page .card-content {
-    padding: 10px 12px !important;
-  }
-
-  #loadMoreBtn {
-    margin: 20px 0 30px !important;
-  }
-
-  .fullscreen-modal {
-    gap: 12px !important;
-    padding: 12px !important;
-  }
-
-  .product-page {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-@media (max-width: 500px) {
-  #loadMoreBtn {
-    margin: 20px 0 24px !important;
-  }
-}
-@media (max-width: 500px) {
-  #productList {
-    margin-top: 12px !important;
-    padding: 0 12px !important;
-    gap: 16px !important;
-  }
-
-  .product-page .card {
-    margin-bottom: 16px !important;
-  }
-
-  .buy-btn {
-    margin-bottom: 16px !important;
-    margin-top: 8px !important;
-  }
-
-  .product-page .card-content {
-    padding: 10px 12px !important;
-  }
-
-  #loadMoreBtn {
-    margin: 20px 0 30px !important;
-  }
-
-  .fullscreen-modal {
-    gap: 12px !important;
-    padding: 12px !important;
-  }
-
-  .product-page {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-/* 1) Increase header height & fix vertical alignment */
-header {
-  height: 64px; /* a bit taller */
-  padding: 0 20px;
-}
-
-/* Adjust main padding-top accordingly */
-main {
-  padding-top: 64px; /* match header height */
-}
-
-/* 2) Ensure user-area items fit inside header */
-.user-area {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  height: 100%; /* make sure they don't overflow */
-}
-
-/* Profile pic and login button tweaks */
-.profile-pic, .login-btn {
-  max-height: 40px; /* slightly smaller than header */
-  line-height: normal;
-  box-sizing: border-box;
-}
-@media (max-width: 500px) {
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.85); /* stronger background for visibility */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
-main {
-  flex: 1;
-  background-color: #000000;
-  padding-top: 64px; /* same as header height */
-}
-main {
-  height: 100%;
-  overflow: auto;
-}
-/* Put this near your existing styles */
-body.loading {
-  overflow: hidden;
-}
-
-#skeletonContainer {
-  position: absolute;
-  top: var(--header-height, 56px); /* adjust if your header is taller */
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  background: #000;
-  z-index: 999;
-}
-
-  #imageModal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.92);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    overflow-y: auto;
-    padding: 20px;
-  }
-
-  .close-modal {
-    background: red;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-
-  .skeleton {
-    width: 90vw;
-    max-width: 360px;
-    height: 280px;
-    border-radius: 20px;
-    background: linear-gradient(130deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 75%);
-    background-size: 400% 100%;
-    animation: shimmer 1.4s ease infinite;
-    margin: 10px;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -400% 0; }
-    100% { background-position: 400% 0; }
-  }
-main {
-  padding-top: 64px; /* same height as header */
-}
-
-@media (max-width: 500px) {
-  main {
-    padding-top: 56px; /* shorter on mobile if your header is smaller there */
-  }
-}
-
-#productList {
-  margin-top: 0 !important; /* kill top margin */
-  padding-top: 0 !important; /* kill padding */
-}
-#productList {
-  margin-top: 0 !important;
-  padding: 0 12px !important; /* keep horizontal padding if needed */
-}
-/* Container styling for ads row */
-#adContainer {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  gap: 16px;
-  padding: 16px;
-  margin: 20px 0;
-  -webkit-overflow-scrolling: touch;
-}
-#adContainer::-webkit-scrollbar {
-  display: none;
-}
-
-.ad-card {
-  position: relative;
-  flex: 0 0 auto;
-  width: 280px;
-  scroll-snap-align: center;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
-  border-radius: 18px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  color: #f1f1f1;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-}
-
-.ad-card:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-}
-
-.ad-card img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 18px 18px 0 0;
-  display: block;
-}
-
-.ad-content {
-  padding: 14px 16px;
-}
-
-.ad-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.visit-ad-btn {
-  background: linear-gradient(135deg, #0a84ff, #007aff);
-  border: none;
-  padding: 6px 14px;
-  color: #fff;
-  font-size: 13px;
-  border-radius: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-.visit-ad-btn:hover {
-  background: linear-gradient(135deg, #007aff, #005fcc);
-}
-
-.ad-title {
-  max-width: 60%;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #fff;
-}
-
-.sponsored-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
-  padding: 4px 10px;
-  font-size: 11px;
-  color: #fff;
-  border-radius: 8px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 2;
-}
-#adContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  padding: 16px 0;
-  margin: 30px 0;
-}
-
-.ad-card {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
-  border-radius: 18px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  color: #f1f1f1;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  position: relative;
-}
-
-.ad-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-}
-
-.ad-card img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 18px 18px 0 0;
-  display: block;
-}
-
-/* Sponsored badge */
-.sponsored-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
-  padding: 4px 10px;
-  font-size: 11px;
-  color: #fff;
-  border-radius: 8px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 2;
-}
-
-.ad-content {
-  padding: 16px;
-}
-
-.ad-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.visit-ad-btn {
-  background: linear-gradient(135deg, #0a84ff, #007aff);
-  border: none;
-  padding: 6px 14px;
-  color: #fff;
-  font-size: 13px;
-  border-radius: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.visit-ad-btn:hover {
-  background: linear-gradient(135deg, #007aff, #005fcc);
-}
-
-.ad-title {
-  font-size: 0.95rem;
+  justify-content: center;
+  z-index: 1500;
+  user-select: none;
+  font-size: 1.2rem;
   font-weight: 600;
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #fff;
-  max-width: 60%;
+  letter-spacing: 0.03em;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
-@media (max-width: 600px) {
-  .ad-card {
-    width: 95%;
-  }
+
+#loadingScreen.hide {
+  opacity: 0;
+  pointer-events: none;
 }
-</style>
-</style>
+
+.spinner {
+  border: 4px solid #222;
+  border-top: 4px solid #1da1f2;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+  </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">
-    <div class="logo-icon-wrapper">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
-    </div>
-    <div class="logo-text">DLSACCOUNTS</div>
-  </div>
-  <div class="user-area" id="userArea">
-    <!-- Profile pic or login button shows here -->
-    <button class="login-btn" id="loginBtn">Login</button>
-  </div>
+  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" />
+  <div id="sellerName">Loading seller...</div>
 </header>
 
-<main>
-  <div class="product-page">
+<div id="productPreview" tabindex="0" aria-label="Product preview"></div>
 
-    <!-- ✅ Product Cards Go Here -->
-    <div id="productList" class="product-grid"></div>
+<div id="chatContainer" role="log" aria-live="polite" aria-relevant="additions"></div>
 
-    <!-- ✅ Skeleton Loading Placeholder -->
-    <div id="skeletonContainer"></div>
-
-    <!-- ✅ Fullscreen Image Modal -->
-    <div class="fullscreen-modal" id="imageModal">
-      <button class="close-modal" onclick="closeModal()">Close</button>
-    </div>
-
-  </div>
-</main>
-<!-- 🔐 Login Modal -->
-<div id="loginModal" class="login-modal" onclick="closeLoginModal()">
-  <div class="login-modal-content" onclick="event.stopPropagation()">
-    <h2>Please Log In</h2>
-    <p>We require each user to be logged in for the safety of our community and to uniquely identify every action made.</p>
-
-    <!-- Google Login Button -->
-    <button id="loginBtn" class="google-login" onclick="triggerLogin()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
-      <span>Continue with Google</span>
-    </button>
-
-    <!-- Close Button -->
-    <button onclick="closeLoginModal()" class="modal-close">Close</button>
+<form id="chatForm" aria-label="Send a message">
+  <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" aria-required="true" />
+  <button id="sendBtn" type="submit" disabled aria-disabled="true">Send</button>
+</form>
+<div id="loadingScreen" aria-live="polite" aria-label="Loading chat" role="alert">
+  <div class="spinner"></div>
+  <div class="loadingText">Loading chat…</div>
+</div>
+<div id="newMessageBadge" aria-live="assertive" aria-atomic="true">+0</div>
+<div id="modernAlert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); 
+  display:flex; justify-content:center; align-items:center; z-index:9999;">
+  <div style="background:#fff; border-radius:20px; padding:24px; width:90%; max-width:320px; 
+    box-shadow:0 8px 30px rgba(0,0,0,0.25); text-align:center; font-family:-apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="font-size:18px; font-weight:600; margin-bottom:10px;">Notice</div>
+    <div id="modernAlertMsg" style="font-size:15px; color:#444; margin-bottom:20px;">You must log in to chat.</div>
+    <button id="modernAlertBtn" style="padding:10px 20px; font-size:16px; background:#1da1f2; color:white;
+      border:none; border-radius:12px; cursor:pointer;">OK</button>
   </div>
 </div>
-<script type="module">
-// ✅ Firebase imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-// ✅ Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-// ✅ Init Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-// ✅ DOM refs
-const userArea = document.getElementById('userArea');
-const loginBtn = document.getElementById('loginBtn');
-
-// ✅ Login button click
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider).catch(console.error);
-});
-
-// ✅ Track auth state
-onAuthStateChanged(auth, (user) => {
-  window.isUserLoggedIn = !!user;
-  userArea.innerHTML = '';
-
-  if (user) {
-    // 🔓 Show profile image
-    const img = document.createElement('img');
-    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
-    img.alt = user.displayName || 'User';
-    img.title = user.displayName || 'User';
-    img.className = 'profile-pic';
-    img.addEventListener('click', () => {
-      window.location.href = '/myprofile';
-    });
-    userArea.appendChild(img);
-
-    // 🧹 Auto-close modal
-    closeLoginModal();
-  } else {
-    // 🚫 Show cloned login button
-    const clonedBtn = loginBtn.cloneNode(true);
-    clonedBtn.addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(console.error);
-    });
-    userArea.appendChild(clonedBtn);
-  }
-});
-
-// ✅ Show login modal if user not logged in and clicked outside allowed area
-document.body.addEventListener('click', (e) => {
-  const user = auth.currentUser;
-  const clickedEl = e.target;
-
-  const isAllowedClick =
-    user || // Logged in? All good
-    clickedEl.closest('#loginModal') ||
-    clickedEl.closest('#loginBtn') ||
-    clickedEl.closest('.google-login') ||
-    clickedEl.classList.contains('modal-close');
-
-  if (!isAllowedClick) {
-    e.preventDefault();
-    e.stopPropagation();
-    const modal = document.getElementById('loginModal');
-    if (modal && modal.style.display !== 'flex') {
-      modal.style.display = 'flex';
-    }
-  }
-});
-
-// 🟢 Manual login trigger (e.g. from modal button)
-window.triggerLogin = function () {
-  signInWithPopup(auth, provider).catch(console.error);
-  closeLoginModal();
-};
-
-// ❌ Close modal utility
-window.closeLoginModal = function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "none";
-};
-</script>
-  <!-- Firebase -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+
 <script>
-  // Firebase setup (same as your config)
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1410,258 +352,375 @@ window.closeLoginModal = function () {
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
   firebase.initializeApp(firebaseConfig);
+
+  const auth = firebase.auth();
   const db = firebase.database();
 
-  const LIMIT = 5;
-  const ADS_LIMIT = 1;
-  let lastKey = null;
-  let loading = false;
+  const sellerAvatarEl = document.getElementById('sellerAvatar');
+  const sellerNameEl = document.getElementById('sellerName');
+  const productPreviewEl = document.getElementById('productPreview');
+  const chatContainer = document.getElementById('chatContainer');
+  const chatForm = document.getElementById('chatForm');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const newMessageBadge = document.getElementById('newMessageBadge');
 
-  function showSkeletons() {
-    document.body.classList.add("loading");
-    const container = document.getElementById("skeletonContainer");
-    container.innerHTML = '';
-    container.style.display = 'flex';
-    for (let i = 0; i < LIMIT; i++) {
-      const skel = document.createElement("div");
-      skel.className = "skeleton";
-      container.appendChild(skel);
-    }
+  let currentUser = null;
+  let sellerUid = null;
+  let sellerName = '';
+  let sellerAvatar = '';
+  let productId = null;
+  let chatId = null;
+
+  let unreadCount = 0;
+  let lastReadTimestamp = 0;
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
-  function hideSkeletons() {
-    document.body.classList.remove("loading");
-    const container = document.getElementById("skeletonContainer");
-    container.innerHTML = '';
-    container.style.display = 'none';
+  function formatTimestamp(ts) {
+    const date = new Date(ts);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+  function getChatId(uid1, uid2) {
+    return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
   }
 
-  function renderProduct(product, id) {
-    const mainImage = product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image';
-    const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
-    const sellerUsername = product.seller?.username || 'Unknown Seller';
-    const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
-    const sellerUid = product.seller?.uid || null;
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
 
-    const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
+  function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+  }
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <img src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 12px;" loading="lazy" />
-      <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>
-      <div class="card-content">
-        <div class="card-title">${product.title || 'Untitled'}</div>
-        <div class="card-description">${product.description || ''}</div>
-        <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-          <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy" />
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span>${sellerUsername} ${verifiedBadge}</span>
-            ${messageBtnHTML}
-          </div>
-        </div>
-      </div>
-      <div class="price">$${product.price !== undefined ? parseFloat(product.price).toFixed(2) : '0.00'}</div>
-      <button class="buy-btn" onclick="buyProduct('${id}')">Buy Now</button>
+  // Prefix format: "You - " or "@username - "
+  function createMessagePrefix(senderUid) {
+    if (senderUid === currentUser.uid) return "You - ";
+    else return "@" + (senderUid === sellerUid ? sellerName : "Other") + " - ";
+  }
+
+  function addMessageBubble(text, senderUid, timestamp) {
+    const div = document.createElement('div');
+    div.classList.add('message');
+
+    if (senderUid === currentUser.uid) div.classList.add('self');
+    else if (senderUid === sellerUid) div.classList.add('seller');
+    else div.classList.add('system');
+
+    const prefixText = createMessagePrefix(senderUid);
+    const escapedText = escapeHtml(text);
+    const linkedText = linkify(escapedText);
+
+    div.innerHTML = `
+      <span class="prefix">${prefixText}</span>
+      <span>${linkedText}</span>
+      <span class="timestamp">${formatTimestamp(timestamp)}</span>
     `;
-    document.getElementById("productList").appendChild(card);
+
+    chatContainer.appendChild(div);
+
+    // Manage unread badge
+    if (timestamp > lastReadTimestamp && senderUid !== currentUser.uid) {
+      unreadCount++;
+      updateUnreadBadge();
+    }
   }
 
-  function messageUser(productId) {
-    if (!productId) {
-      alert("Missing product ID.");
+  function updateUnreadBadge() {
+    if (unreadCount > 0) {
+      newMessageBadge.textContent = unreadCount > 9 ? "+9" : "+" + unreadCount;
+      newMessageBadge.style.display = 'block';
+    } else {
+      newMessageBadge.style.display = 'none';
+    }
+  }
+
+  function markAllRead() {
+    unreadCount = 0;
+    updateUnreadBadge();
+    lastReadTimestamp = Date.now();
+
+    // Update lastReadTimes in meta for current user
+    const metaRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
+    metaRef.set(lastReadTimestamp);
+  }
+
+  async function loadChatByChatId(chatIdParam) {
+    const metaSnap = await db.ref(`/chats/${chatIdParam}/meta`).once('value');
+    const meta = metaSnap.val();
+    if (!meta) throw new Error('Chat meta not found');
+
+    const otherUsers = Object.keys(meta.users || {}).filter(uid => uid !== currentUser.uid);
+    if (otherUsers.length === 0) throw new Error('No other user found in chat');
+
+    sellerUid = otherUsers[0];
+
+    // Load seller profile from /users/{sellerUid} or fallback
+    const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
+    const seller = sellerSnap.val() || {};
+    sellerName = seller.username || 'Seller';
+    sellerAvatar = seller.avatar || 'https://via.placeholder.com/40?text=👤';
+
+    sellerNameEl.textContent = sellerName;
+    sellerAvatarEl.src = sellerAvatar;
+
+    productPreviewEl.innerHTML = '';
+    chatId = chatIdParam;
+  }
+
+  async function loadChatByProductId(productIdParam) {
+    const productSnap = await db.ref(`/dlsaccounts/${productIdParam}`).once('value');
+    const product = productSnap.val();
+    if (!product) throw new Error('Product not found');
+
+    productPreviewEl.innerHTML = `
+      <a href="https://cyberchat.online/product?id=${productIdParam}" target="_blank" rel="noopener" tabindex="0" aria-label="View product details">
+        <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" />
+        <div>
+          <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
+          <p>Tap to view product 👇</p>
+        </div>
+      </a>
+    `;
+
+    sellerUid = product.seller?.uid;
+    sellerName = product.seller?.username || 'Seller';
+    sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
+
+    sellerNameEl.textContent = sellerName;
+    sellerAvatarEl.src = sellerAvatar;
+
+    if (!sellerUid) throw new Error('Seller info missing.');
+
+    chatId = getChatId(currentUser.uid, sellerUid);
+  }
+
+  async function initChat() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const chatIdParam = urlParams.get('chatId');
+    const productIdParam = urlParams.get('product');
+
+    if (chatIdParam) {
+      await loadChatByChatId(chatIdParam);
+    } else if (productIdParam) {
+      await loadChatByProductId(productIdParam);
+    } else {
+      alert('No chatId or product provided in URL.');
+      throw new Error('Missing chatId and product in URL');
+    }
+
+    // Ensure chat meta exists
+    const metaRef = db.ref(`/chats/${chatId}/meta`);
+    const metaSnap = await metaRef.once('value');
+    if (!metaSnap.exists()) {
+      await metaRef.set({
+        users: {
+          [currentUser.uid]: true,
+          [sellerUid]: true,
+        },
+        lastMessage: '',
+        lastTimestamp: 0,
+        lastReadTimes: {
+          [currentUser.uid]: 0,
+          [sellerUid]: 0,
+        }
+      });
+    }
+
+    // Load lastReadTimestamp for current user to manage unread badge
+    const lastReadTimes = metaSnap.val()?.lastReadTimes || {};
+    lastReadTimestamp = lastReadTimes[currentUser.uid] || 0;
+  }
+
+  // --- New function to ensure user profile saved in /users ---
+  async function ensureUserInUsersDb(user) {
+    if (!user || !user.uid) return;
+
+    const userRef = db.ref(`/users/${user.uid}`);
+    const snapshot = await userRef.once('value');
+    if (!snapshot.exists()) {
+      await userRef.set({
+        username: user.displayName || `User_${user.uid.slice(0,6)}`,
+        avatar: user.photoURL || 'https://via.placeholder.com/40?text=👤',
+        email: user.email || '',
+        createdAt: Date.now(),
+      });
+    }
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      showModernAlert("You must log in to chat.", "/login");
+      window.location.href = '/';
       return;
     }
-    window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
-  }
+    currentUser = user;
 
-  async function loadAds() {
-    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
-    const adsData = adsSnapshot.val();
-    if (!adsData) return;
+    try {
+      await initChat();
 
-    const adsEntries = shuffleArray(Object.entries(adsData));
-    const container = document.createElement('div');
-    container.id = 'adContainer';
+      // Listen for new messages
+      const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
+      messagesRef.off();
+      messagesRef.on('child_added', (snapshot) => {
+        const msg = snapshot.val();
+        if (msg && msg.text && msg.sender && msg.timestamp) {
+          addMessageBubble(msg.text, msg.sender, msg.timestamp);
+          scrollToBottom();
 
-    for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
-      const adCard = document.createElement("div");
-      adCard.className = "ad-card";
+          if (msg.sender !== currentUser.uid && document.visibilityState !== 'visible') {
+            unreadCount++;
+            updateUnreadBadge();
+          }
+        }
+      });
 
-      const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
-      const adTitle = ad.title?.trim() || "Sponsored Ad";
-      const adUrl = ad.url?.trim() || "#";
+      window.addEventListener('focus', () => {
+        markAllRead();
+      });
 
-      adCard.innerHTML = `
-        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
-          <div class="sponsored-badge">Sponsored</div>
-          <img src="${adImage}" alt="${adTitle}" loading="lazy">
-          <div class="ad-content">
-            <div class="ad-footer">
-              <button class="visit-ad-btn">Visit Ad</button>
-              <div class="ad-title">${adTitle}</div>
-            </div>
-          </div>
-        </a>
-      `;
-      container.appendChild(adCard);
+      markAllRead();
+
+      sendBtn.disabled = false;
+      messageInput.focus();
+
+    } catch (error) {
+      alert(error.message);
+      console.error(error);
     }
+  });
 
-    document.getElementById("productList").appendChild(container);
-  }
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
 
-  function openModal(images) {
-    const modal = document.getElementById("imageModal");
-    modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
-    images.forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.style.maxWidth = "90%";
-      img.style.maxHeight = "80vh";
-      img.style.borderRadius = "20px";
-      img.style.marginBottom = "20px";
-      modal.appendChild(img);
-    });
-    modal.style.display = 'flex';
-  }
+    try {
+      // Save current user profile to /users if missing
+      await ensureUserInUsersDb(currentUser);
 
-  function closeModal() {
-    document.getElementById("imageModal").style.display = 'none';
-  }
-
-  function buyProduct(id) {
-    window.location.href = `/product?id=${id}`;
-  }
-
-  async function loadMore() {
-    if (loading) return;
-    loading = true;
-    showSkeletons();
-
-    let ref = db.ref("/dlsaccounts").orderByKey().limitToFirst(LIMIT + 1);
-    if (lastKey) {
-      ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);
-    }
-
-    const snapshot = await ref.once("value");
-    const data = snapshot.val();
-    hideSkeletons();
-
-    if (!data) {
-      window.removeEventListener('scroll', onScroll);
-      loading = false;
-      return;
-    }
-
-    let entries = Object.entries(data);
-    if (entries.length > LIMIT) {
-      lastKey = entries[LIMIT - 1][0];
-      entries.length = LIMIT;
-    } else {
-      window.removeEventListener('scroll', onScroll);
-    }
-
-    entries = shuffleArray(entries);
-    for (const [id, product] of entries) {
-      renderProduct(product, id);
-      lastKey = id;
-    }
-
-    await loadAds();
-    loading = false;
-  }
-
-  function onScroll() {
-    if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 &&
-      !loading
-    ) {
-      loadMore();
-    }
-  }
-
-  window.onload = () => {
-    loadMore();
-    window.addEventListener('scroll', onScroll);
-  };
-</script>
-<script>
-  function detectDeviceAndApplyClasses() {
-    const width = window.innerWidth;
-    const ua = navigator.userAgent.toLowerCase();
-
-    const isMobile = /android|iphone|ipod/.test(ua);
-    const isTablet = /ipad|tablet/.test(ua) || (width > 500 && width < 1024);
-
-    document.body.classList.remove('mobile', 'tablet', 'desktop');
-
-    if (isMobile || width < 500) {
-      document.body.classList.add('mobile');
-    } else if (isTablet) {
-      document.body.classList.add('tablet');
-    } else {
-      document.body.classList.add('desktop');
-    }
-  }
-
-  // Run on load
-  detectDeviceAndApplyClasses();
-
-  // Run on resize too (responsive AF)
-  window.addEventListener('resize', detectDeviceAndApplyClasses);
-</script>
-<script>
-  const isMobile = window.innerWidth <= 800;
-  let loading = false;
-
-  function loadMore() {
-    if (loading) return;
-    loading = true;
-
-    // Your existing load logic here
-    // Don't forget to reset loading = false at the end
-  }
-
-  if (!isMobile) {
-    // Infinite scroll for desktop
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-        loadMore();
+      // Check if seller exists, if not save minimal profile (fallback)
+      if (sellerUid && sellerUid !== currentUser.uid) {
+        const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
+        if (!sellerSnap.exists()) {
+          await db.ref(`/users/${sellerUid}`).set({
+            username: sellerName || `Seller_${sellerUid.slice(0,6)}`,
+            avatar: sellerAvatar || 'https://via.placeholder.com/40?text=👤',
+            createdAt: Date.now(),
+          });
+        }
       }
-    });
-  }
-</script>
-<script>
-  // You can tweak the width if needed (e.g., 768px, 1024px depending on your layout)
-  const hideAdsOn = window.innerWidth >= 800; // large screens and faked desktop mode
 
-  if (hideAdsOn) {
-    const el = document.getElementById('mobileOnly');
-    if (el) el.style.display = 'none';
+      const messagesRef = db.ref(`/chats/${chatId}/messages`);
+      const newMsgRef = messagesRef.push();
+      const timestamp = Date.now();
 
-    // Also optionally trigger auto-load
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
-        if (typeof loadMore === 'function') loadMore();
-      }
-    });
+      await newMsgRef.set({
+        sender: currentUser.uid,
+        text,
+        timestamp
+      });
+
+      const metaRef = db.ref(`/chats/${chatId}/meta`);
+      await metaRef.transaction((meta) => {
+        if (!meta) {
+          return {
+            users: {
+              [currentUser.uid]: true,
+              [sellerUid]: true,
+            },
+            lastMessage: text,
+            lastTimestamp: timestamp,
+            lastReadTimes: {
+              [currentUser.uid]: timestamp,
+              [sellerUid]: 0,
+            }
+          };
+        }
+        meta.lastMessage = text;
+        meta.lastTimestamp = timestamp;
+        meta.users = meta.users || {};
+        meta.users[currentUser.uid] = true;
+        meta.users[sellerUid] = true;
+        meta.lastReadTimes = meta.lastReadTimes || {};
+        meta.lastReadTimes[currentUser.uid] = timestamp;
+        if (!meta.lastReadTimes[sellerUid]) meta.lastReadTimes[sellerUid] = 0;
+        return meta;
+      });
+
+      messageInput.value = '';
+      messageInput.focus();
+      sendBtn.disabled = true;
+
+    } catch (err) {
+      alert('Error sending message. Try again.');
+      console.error(err);
+    }
+  });
+
+  messageInput.addEventListener('input', () => {
+    sendBtn.disabled = messageInput.value.trim().length === 0;
+  });
+
+  productPreviewEl.addEventListener('click', () => {
+    const link = productPreviewEl.querySelector('a');
+    if (link) window.open(link.href, '_blank');
+  });
+
+  productPreviewEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      productPreviewEl.click();
+    }
+  });
+  auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    alert('You must log in to chat.');
+    window.location.href = '/login';
+    return;
   }
-  window.addEventListener('scroll', () => {
-  const header = document.querySelector('header');
-  if (window.scrollY > 10) {
-    header.style.boxShadow = '0 2px 10px rgba(0,255,255,0.15)';
-  } else {
-    header.style.boxShadow = 'none';
+  currentUser = user;
+
+  try {
+    await initChat();
+
+    // Your existing message listener setup here...
+
+    // After everything is loaded and listeners set:
+    document.getElementById('loadingScreen').classList.add('hide');
+
+    sendBtn.disabled = false;
+    messageInput.focus();
+
+  } catch (error) {
+    alert(error.message);
+    console.error(error);
+    // Optionally hide loading screen on error to show something else
+    document.getElementById('loadingScreen').classList.add('hide');
   }
 });
+function showModernAlert(message, redirectUrl) {
+  const alertBox = document.getElementById('modernAlert');
+  const msg = document.getElementById('modernAlertMsg');
+  const btn = document.getElementById('modernAlertBtn');
+
+  msg.textContent = message;
+  alertBox.style.display = 'flex';
+
+  btn.onclick = () => {
+    alertBox.style.display = 'none';
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    }
+  };
+}
 </script>
+
 </body>
 </html>
