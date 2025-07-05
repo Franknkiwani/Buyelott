@@ -492,15 +492,10 @@
     }
     currentUser = user;
 
-    // Set currentUser display info from Google profile
-    // If you want to show your own avatar/name somewhere, use user.photoURL and user.displayName
-    // For now, we only load other user
-// Continue inside onAuthStateChanged
-
     try {
       await initChat();
 
-      // Listen for messages
+      // Listen for new messages
       const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
       messagesRef.off();
       messagesRef.on('child_added', (snapshot) => {
@@ -509,7 +504,7 @@
           addMessageBubble(msg.text, msg.sender, msg.timestamp);
           scrollToBottom();
 
-          // If message is from other user, and window not focused, increment unread
+          // If message from other user and window not focused, increment unread count
           if (msg.sender !== currentUser.uid && document.visibilityState !== 'visible') {
             unreadCount++;
             updateUnreadBadge();
@@ -517,16 +512,17 @@
         }
       });
 
-      // Mark messages as read when window is focused
+      // Mark messages as read on window focus
       window.addEventListener('focus', () => {
         markAllRead();
       });
 
-      // Mark read initially on load
+      // Initial mark as read
       markAllRead();
 
       sendBtn.disabled = false;
       messageInput.focus();
+
     } catch (error) {
       alert(error.message);
       console.error(error);
@@ -549,7 +545,7 @@
         timestamp
       });
 
-      // Update meta
+      // Update chat meta with last message and timestamps
       const metaRef = db.ref(`/chats/${chatId}/meta`);
       await metaRef.transaction((meta) => {
         if (!meta) {
@@ -590,12 +586,12 @@
     sendBtn.disabled = messageInput.value.trim().length === 0;
   });
 
-  // Optional: Scroll to bottom when user clicks product preview (UX nicety)
+  // Open product page on click or keyboard enter/space
   productPreviewEl.addEventListener('click', () => {
-    window.open(productPreviewEl.querySelector('a')?.href, '_blank');
+    const link = productPreviewEl.querySelector('a');
+    if (link) window.open(link.href, '_blank');
   });
 
-  // Accessibility: keyboard enter key on product preview triggers click
   productPreviewEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
