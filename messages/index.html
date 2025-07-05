@@ -253,33 +253,41 @@
     chatContainer.appendChild(div);
   }
 
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      alert('You must log in to chat.');
-      window.location.href = '/login';
-      return;
-    }
-    currentUser = user;
+  async function loadChatByChatId(chatIdParam) {
+    // Load chat meta
+    const metaSnap = await db.ref(`/chats/${chatIdParam}/meta`).once('value');
+    const meta = metaSnap.val();
+    if (!meta) throw new Error('Chat meta not found');
 
-    // Get product ID from URL query
-    const urlParams = new URLSearchParams(window.location.search);
-    productId = urlParams.get('product');
-    if (!productId) {
-      alert('Missing product id in URL.');
-      return;
-    }
+    // Identify sellerUid = other user
+    const otherUsers = Object.keys(meta.users || {}).filter(uid => uid !== currentUser.uid);
+    if (otherUsers.length === 0) throw new Error('No other user found in chat');
 
-    // Load product info + seller data
-    const productSnap = await db.ref(`/dlsaccounts/${productId}`).once('value');
+    sellerUid = otherUsers[0];
+
+    // Load seller profile
+    const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
+    const seller = sellerSnap.val() || {};
+    sellerName = seller.username || 'Seller';
+    sellerAvatar = seller.avatar || 'https://via.placeholder.com/40?text=👤';
+
+    sellerNameEl.textContent = sellerName;
+    sellerAvatarEl.src = sellerAvatar;
+
+    // Clear product preview — no product data here
+    productPreviewEl.innerHTML = '';
+
+    chatId = chatIdParam;
+  }
+
+  async function loadChatByProductId(productIdParam) {
+    // Load product
+    const productSnap = await db.ref(`/dlsaccounts/${productIdParam}`).once('value');
     const product = productSnap.val();
-    if (!product) {
-      alert('Product not found.');
-      return;
-    }
+    if (!product) throw new Error('Product not found');
 
-    // Show product preview
     productPreviewEl.innerHTML = `
-      <a href="https://cyberchat.online/product?id=${productId}" target="_blank" rel="noopener">
+      <a href="https://cyberchat.online/product?id=${productIdParam}" target="_blank" rel="noopener">
         <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" />
         <div>
           <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
@@ -288,7 +296,6 @@
       </a>
     `;
 
-    // Seller info
     sellerUid = product.seller?.uid;
     sellerName = product.seller?.username || 'Seller';
     sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
@@ -296,47 +303,69 @@
     sellerNameEl.textContent = sellerName;
     sellerAvatarEl.src = sellerAvatar;
 
-    if (!sellerUid) {
-      alert('Seller info missing.');
+    if (!sellerUid) throw new Error('Seller info missing.');
+
+    chatId = getChatId(currentUser.uid, sellerUid);
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      alert('You must log in to chat.');
+      window.location.href = '/login';
       return;
     }
+    currentUser = user;
 
-    // Generate consistent chat ID
-    chatId = getChatId(currentUser.uid, sellerUid);
+    const urlParams = new URLSearchParams(window.location.search);
+    const chatIdParam = urlParams.get('chatId');
+    const productIdParam = urlParams.get('product');
 
-    // Ensure chat meta exists before listening for messages
-    const metaRef = db.ref(`/chats/${chatId}/meta`);
-    const metaSnap = await metaRef.once('value');
+    try {
+      if (chatIdParam) {
+        await loadChatByChatId(chatIdParam);
+      } else if (productIdParam) {
+        await loadChatByProductId(productIdParam);
+      } else {
+        alert('No chatId or product provided in URL.');
+        return;
+      }
 
-    if (!metaSnap.exists()) {
-      // Create default meta object including lastReadTimes for both users
-      await metaRef.set({
-        users: {
-          [currentUser.uid]: true,
-          [sellerUid]: true,
-        },
-        lastMessage: '',
-        lastTimestamp: 0,
-        lastReadTimes: {
-          [currentUser.uid]: 0,
-          [sellerUid]: 0,
+      // Ensure chat meta exists before listening for messages
+      const metaRef = db.ref(`/chats/${chatId}/meta`);
+      const metaSnap = await metaRef.once('value');
+      if (!metaSnap.exists()) {
+        await metaRef.set({
+          users: {
+            [currentUser.uid]: true,
+            [sellerUid]: true,
+          },
+          lastMessage: '',
+          lastTimestamp: 0,
+          lastReadTimes: {
+            [currentUser.uid]: 0,
+            [sellerUid]: 0,
+          }
+        });
+      }
+
+      // Listen for last 100 messages
+      const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
+      messagesRef.off();
+      messagesRef.on('child_added', (snapshot) => {
+        const msg = snapshot.val();
+        if (msg && msg.text && msg.sender && msg.timestamp) {
+          addMessageBubble(msg.text, msg.sender, msg.timestamp);
+          scrollToBottom();
         }
       });
+
+      sendBtn.disabled = false;
+      messageInput.focus();
+
+    } catch (err) {
+      alert(err.message);
+      console.error(err);
     }
-
-    // Listen for last 100 messages
-    const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
-    messagesRef.off(); // remove previous listeners to avoid duplicates
-    messagesRef.on('child_added', (snapshot) => {
-      const msg = snapshot.val();
-      if (msg && msg.text && msg.sender && msg.timestamp) {
-        addMessageBubble(msg.text, msg.sender, msg.timestamp);
-        scrollToBottom();
-      }
-    });
-
-    sendBtn.disabled = false;
-    messageInput.focus();
   });
 
   chatForm.addEventListener('submit', async (e) => {
@@ -345,8 +374,6 @@
     if (!text) return;
 
     const messagesRef = db.ref(`/chats/${chatId}/messages`);
-
-    // Push new message
     const newMsgRef = messagesRef.push();
     const timestamp = Date.now();
 
@@ -357,13 +384,10 @@
         timestamp
       });
 
-      // Update meta after sending message
+      // Update chat meta atomically
       const metaRef = db.ref(`/chats/${chatId}/meta`);
-
-      // Use transaction to update meta atomically and prevent overwrites
       await metaRef.transaction((meta) => {
         if (meta === null) {
-          // In case meta somehow missing, recreate it
           return {
             users: {
               [currentUser.uid]: true,
@@ -397,7 +421,7 @@
         const autoMsgRef = messagesRef.push();
         await autoMsgRef.set({
           sender: sellerUid,
-          text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId}`,
+          text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId || ''}`,
           timestamp: Date.now()
         });
       }
@@ -407,7 +431,6 @@
     }
   });
 
-  // Enable send button only if input has content
   messageInput.addEventListener('input', () => {
     sendBtn.disabled = messageInput.value.trim().length === 0;
   });
