@@ -4,257 +4,187 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chat with Seller</title>
-</head>
-<body style="margin:0;padding:0;background:#121212;color:#eee;font-family:sans-serif;display:flex;flex-direction:column;height:100vh;">
-<style>
-  /* RESET & BASE */
-  * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-  html, body {
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #000;
-    color: #eee;
-    height: 100%;
-    scroll-behavior: smooth;
-  }
-
-  /* HEADER */
-  header {
-    background-color: #111;
-    color: #fff;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: fixed;
-    width: 100%;
-    top: 0; left: 0;
-    z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
-  header img {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
-  }
-  .seller-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* PRODUCT PREVIEW */
-  #productPreview {
-    padding: 16px;
-    margin-top: 64px;
-    background: #111;
-    border-bottom: 1px solid #222;
-  }
-  .product-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .product-card img {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #222;
-  }
-  .product-card strong {
-    font-size: 15px;
-    display: block;
-    color: #fff;
-  }
-  .product-card p {
-    font-size: 12px;
-    color: #aaa;
-    margin: 2px 0 0;
-  }
-
-  /* CHAT */
-  #chatContainer {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 12px 96px;
-  }
-  .message {
-    max-width: 80%;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    font-size: 15px;
-    line-height: 1.4;
-    border-radius: 20px;
-    position: relative;
-    word-wrap: break-word;
-    word-break: break-word;
-  }
-  .message .timestamp {
-    font-size: 10px;
-    opacity: 0.5;
-    position: absolute;
-    bottom: 4px;
-    right: 12px;
-  }
-
-  .message.self {
-    margin-left: auto;
-    background: linear-gradient(135deg, #0f7cf9, #30a0f9);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  .message.seller {
-    margin-right: auto;
-    background: #1a1a1a;
-    color: #eee;
-    border-bottom-left-radius: 4px;
-  }
-  .message.system {
-    background: none;
-    color: #666;
-    text-align: center;
-    font-style: italic;
-    max-width: 100%;
-    margin: 24px auto 12px;
-  }
-
-  /* FORM */
-  #chatForm {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px 12px;
-    background: #0a0a0a;
-    display: flex;
-    gap: 8px;
-    box-shadow: 0 -1px 8px rgba(0,0,0,0.6);
-    z-index: 1100;
-  }
-  #chatForm input {
-    flex: 1;
-    padding: 12px 16px;
-    background: #222;
-    border: none;
-    border-radius: 20px;
-    color: #eee;
-    font-size: 1rem;
-    outline: none;
-  }
-  #chatForm button {
-    background: #0f7cf9;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 12px 20px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  #chatForm button:disabled {
-    background: #444;
-    cursor: not-allowed;
-  }
-  #chatForm button:hover:not(:disabled) {
-    background: #2b8afc;
-  }
-
-  /* MOBILE SCROLLBAR */
-  #chatContainer::-webkit-scrollbar {
-    width: 5px;
-  }
-  #chatContainer::-webkit-scrollbar-thumb {
-    background: #1da1f2;
-    border-radius: 2.5px;
-  }
-
-  /* SMALL SCREEN TWEAKS */
-  @media (max-width: 480px) {
+  <style>
+    body {
+      margin:0; padding:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #000;
+      color: #eee;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #1da1f2;
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: fixed;
+      width: 100%;
+      top: 0; left: 0;
+      z-index: 1000;
+      border-bottom: 1px solid #222;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    header img {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+    }
+    .seller-name {
+      font-weight: 700;
+      font-size: 1.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    #productPreview {
+      position: sticky;
+      top: 64px;
+      background: #111;
+      border-bottom: 1px solid #222;
+      padding: 12px 16px;
+      z-index: 999;
+    }
+    .product-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     .product-card img {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #222;
     }
     .product-card strong {
-      font-size: 14px;
+      font-size: 16px;
+      color: #fff;
+    }
+    .product-card p {
+      font-size: 13px;
+      color: #aaa;
+      margin: 4px 0 0;
+    }
+    #chatContainer {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px 96px;
+      margin-top: 64px;
     }
     .message {
-      font-size: 14px;
+      max-width: 80%;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.4;
+      border-radius: 20px;
+      position: relative;
+      word-wrap: break-word;
+      word-break: break-word;
     }
-  }
-  header {
-  background: #0a0a0a;
-  color: #fff;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid #222;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
-header img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid #2b2b2b;
-}
-.seller-name {
-  font-size: 16px;
-  font-weight: 600;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+    .message .timestamp {
+      font-size: 10px;
+      opacity: 0.5;
+      position: absolute;
+      bottom: 4px;
+      right: 12px;
+    }
+    .message.self {
+      margin-left: auto;
+      background: linear-gradient(135deg, #0f7cf9, #30a0f9);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .message.seller {
+      margin-right: auto;
+      background: #1a1a1a;
+      color: #eee;
+      border-bottom-left-radius: 4px;
+    }
+    .message.system {
+      background: none;
+      color: #666;
+      text-align: center;
+      font-style: italic;
+      max-width: 100%;
+      margin: 24px auto 12px;
+    }
+    .message a {
+      color: #1da1f2;
+      text-decoration: underline;
+      word-break: break-word;
+    }
+    #chatForm {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 12px;
+      background: #0a0a0a;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 -1px 8px rgba(0,0,0,0.6);
+      z-index: 1100;
+    }
+    #chatForm input {
+      flex: 1;
+      padding: 12px 16px;
+      background: #222;
+      border: none;
+      border-radius: 20px;
+      color: #eee;
+      font-size: 1rem;
+      outline: none;
+    }
+    #chatForm button {
+      background: #0f7cf9;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #chatForm button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    #chatForm button:hover:not(:disabled) {
+      background: #2b8afc;
+    }
+    #chatContainer::-webkit-scrollbar {
+      width: 5px;
+    }
+    #chatContainer::-webkit-scrollbar-thumb {
+      background: #1da1f2;
+      border-radius: 2.5px;
+    }
+  </style>
+</head>
+<body>
 
-.message a {
-  color: #1da1f2;
-  text-decoration: underline;
-  word-break: break-all;
-}
-#productPreview {
-  position: sticky;
-  top: 64px; /* height of your fixed header */
-  background: #111;
-  z-index: 999; /* just below header */
-  border-bottom: 1px solid #222;
-  padding: 12px 16px;
-}
-</style>
-<!-- Header -->
-<header style="background:#1da1f2;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:fixed;width:100%;top:0;left:0;z-index:1000;">
-  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff;" />
-  <div id="sellerName" style="font-weight:700;font-size:1.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading seller...</div>
+<header>
+  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" />
+  <div id="sellerName" class="seller-name">Loading seller...</div>
 </header>
 
-<!-- Product Preview -->
-<div id="productPreview" style="margin-top:64px;padding:12px;background:#181818;border-bottom:1px solid #333;"></div>
+<div id="productPreview"></div>
+<div id="chatContainer"></div>
 
-<!-- Chat Container -->
-<div id="chatContainer" style="flex:1;overflow-y:auto;padding:12px 12px 80px;scroll-behavior:smooth;"></div>
-
-<!-- Chat Form -->
-<form id="chatForm" style="position:fixed;bottom:0;left:0;width:100%;background:#181818;display:flex;padding:8px 12px;gap:8px;z-index:1000;">
-  <input id="messageInput" type="text" placeholder="Type a message..." required style="flex:1;background:#222;border:none;padding:12px 16px;border-radius:24px;color:#eee;font-size:1rem;outline:none;" />
-  <button id="sendBtn" type="submit" disabled style="background:#1da1f2;border:none;border-radius:24px;padding:12px 20px;color:#000;font-weight:700;font-size:1rem;cursor:pointer;">Send</button>
+<form id="chatForm">
+  <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" required />
+  <button id="sendBtn" type="submit" disabled>Send</button>
 </form>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
@@ -288,6 +218,8 @@ header img {
   let sellerAvatar = '';
   let productId = null;
   let chatId = null;
+  let chatMetaRef = null;
+  let messagesRef = null;
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -308,31 +240,29 @@ header img {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
-function linkify(text) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color:#1da1f2;text-decoration:underline;">${url}</a>`);
-}
-
-function addMessageBubble(text, senderUid, timestamp, read = false) {
-  const div = document.createElement('div');
-  div.classList.add('message');
-
-  if (senderUid === currentUser.uid) {
-    div.classList.add('self');
-  } else if (senderUid === sellerUid) {
-    div.classList.add('seller');
-  } else {
-    div.classList.add('system');
+  function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
   }
 
-  const checkmark = senderUid === currentUser.uid ? `<span style="margin-left:6px;color:#1da1f2;font-size:12px;">✅</span>` : '';
+  function addMessageBubble(text, senderUid, timestamp, read = false) {
+    const div = document.createElement('div');
+    div.classList.add('message');
 
-  div.innerHTML = `
-    <div style="word-wrap:break-word;">${linkify(escapeHtml(text))}${checkmark}</div>
-    <span class="timestamp">${formatTimestamp(timestamp)}</span>
-  `;
-  chatContainer.appendChild(div);
-}
+    if (senderUid === currentUser.uid) {
+      div.classList.add('self');
+    } else if (senderUid === sellerUid) {
+      div.classList.add('seller');
+    } else {
+      div.classList.add('system');
+    }
+
+    div.innerHTML = `
+      <div>${linkify(escapeHtml(text))}</div>
+      <span class="timestamp">${formatTimestamp(timestamp)}</span>
+    `;
+    chatContainer.appendChild(div);
+  }
 
   auth.onAuthStateChanged(user => {
     if (!user) {
@@ -344,93 +274,108 @@ function addMessageBubble(text, senderUid, timestamp, read = false) {
 
     const urlParams = new URLSearchParams(window.location.search);
     productId = urlParams.get('product');
-    if (!productId) {
-      alert('Missing product id in URL.');
+    sellerUid = urlParams.get('uid');
+
+    if (!productId || !sellerUid) {
+      alert('Missing product ID or seller UID in URL.');
       return;
     }
 
-    db.ref(`/dlsaccounts/${productId}`).once('value').then(snapshot => {
-      const product = snapshot.val();
+    chatId = getChatId(currentUser.uid, sellerUid);
+    chatMetaRef = db.ref(`/chats/${chatId}/meta`);
+    messagesRef = db.ref(`/chats/${chatId}/messages`);
+
+    // Load product info for preview
+    db.ref(`/dlsaccounts/${productId}`).once('value').then(snap => {
+      const product = snap.val();
       if (!product) {
-        alert('Product not found.');
+        productPreviewEl.textContent = 'Product not found.';
         return;
       }
-
-      // Product preview
       productPreviewEl.innerHTML = `
-        <a href="https://cyberchat.online/product?id=${productId}" target="_blank" style="text-decoration:none;color:inherit;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" style="width:60px;height:60px;border-radius:10px;object-fit:cover;background:#222;">
-            <div>
-              <strong style="font-size:16px;">${escapeHtml(product.title || 'Unnamed Account')}</strong>
-              <p style="color:#aaa;font-size:13px;margin:4px 0 0;">Tap to view product 👇</p>
+        <a href="https://cyberchat.online/product?id=${productId}" target="_blank" style="color:#fff; text-decoration:none;">
+          <div class="product-card">
+            <img src="${product.images?.[0] || 'https://via.placeholder.com/56'}" alt="Product Image" />
+<div>
+              <strong>${escapeHtml(product.seller || 'Seller')}</strong>
+              <p>$${product.price || 'N/A'}</p>
             </div>
           </div>
         </a>
       `;
+    });
 
-      sellerUid = product.seller?.uid;
-      sellerName = product.seller?.username || 'Seller';
-      sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
-
-      sellerNameEl.textContent = sellerName;
-      sellerAvatarEl.src = sellerAvatar;
-
-      if (!sellerUid) {
-        alert('Seller info missing.');
-        return;
+    // Load seller user info
+    db.ref(`/users/${sellerUid}`).once('value').then(snap => {
+      const seller = snap.val();
+      if (seller) {
+        sellerName = seller.username || 'Seller';
+        sellerAvatar = seller.avatar || 'https://via.placeholder.com/40?text=👤';
+        sellerNameEl.textContent = sellerName;
+        sellerAvatarEl.src = sellerAvatar;
+        sellerAvatarEl.alt = `Avatar of ${sellerName}`;
       }
+    });
 
-      chatId = getChatId(currentUser.uid, sellerUid);
+    // Enable send button only if input has text
+    messageInput.addEventListener('input', () => {
+      sendBtn.disabled = messageInput.value.trim() === '';
+    });
 
-      const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
-      messagesRef.off();
-      messagesRef.on('child_added', snapshot => {
-        const msg = snapshot.val();
-        if (msg && msg.text && msg.sender && msg.timestamp) {
-          addMessageBubble(msg.text, msg.sender, msg.timestamp);
-          scrollToBottom();
-        }
+    // Listen for new messages in real time
+    messagesRef.on('value', snapshot => {
+      chatContainer.innerHTML = ''; // clear
+      const messages = snapshot.val();
+      if (!messages) return;
+
+      // Sort messages by timestamp ascending
+      const sortedMessages = Object.values(messages).sort((a, b) => a.timestamp - b.timestamp);
+
+      sortedMessages.forEach(msg => {
+        addMessageBubble(msg.text, msg.sender, msg.timestamp);
       });
 
-      sendBtn.disabled = false;
-      messageInput.focus();
+      scrollToBottom();
+
+      // Update lastReadTimes to now on receiving messages (mark as read)
+      chatMetaRef.child('lastReadTimes').child(currentUser.uid).set(Date.now());
     });
-  });
 
-  chatForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if (!text) return;
+    // Handle form submit to send message
+    chatForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text) return;
 
-    const messagesRef = db.ref(`/chats/${chatId}/messages`);
-    const newMsgRef = messagesRef.push();
+      const newMsgRef = messagesRef.push();
+      const now = Date.now();
 
-    newMsgRef.set({
-      sender: currentUser.uid,
-      text,
-      timestamp: Date.now()
-    }).then(() => {
-      messageInput.value = '';
-      messageInput.focus();
+      newMsgRef.set({
+        sender: currentUser.uid,
+        text,
+        timestamp: now,
+      }).then(() => {
+        messageInput.value = '';
+        sendBtn.disabled = true;
 
-      // Auto-reply from seller if first message
-      messagesRef.once('value').then(snapshot => {
-        const count = snapshot.numChildren();
-        if (count === 1 && currentUser.uid !== sellerUid) {
-          const autoMsgRef = messagesRef.push();
-          autoMsgRef.set({
-            sender: sellerUid,
-            text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId}`,
-            timestamp: Date.now()
-          });
-        }
+        // Update lastReadTimes for sender on send
+        chatMetaRef.child('lastReadTimes').child(currentUser.uid).set(now);
       });
-    }).catch(err => {
-      alert('Error sending message. Try again.');
-      console.error(err);
     });
+
+    // Mark chat users in meta.users (if not already)
+    chatMetaRef.child('users').once('value').then(snapshot => {
+      const users = snapshot.val() || {};
+      if (!users[currentUser.uid] || !users[sellerUid]) {
+        let updates = {};
+        updates[currentUser.uid] = true;
+        updates[sellerUid] = true;
+        chatMetaRef.child('users').update(updates);
+      }
+    });
+
   });
 </script>
+
 </body>
 </html>
