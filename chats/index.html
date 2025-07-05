@@ -1,108 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CyberChat Inbox</title>
-<style>
-  /* Reset & base */
-  body {
-    margin: 0; padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #000;
-    color: #eee;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  header {
-    background: #0a0a0a;
-    padding: 14px 18px;
-    font-weight: 700;
-    font-size: 1.4rem;
-    border-bottom: 1px solid #222;
-    position: fixed;
-    width: 100%;
-    top: 0; left: 0;
-    z-index: 1000;
-    user-select: none;
-  }
-  main {
-    flex: 1;
-    margin-top: 56px;
-    overflow-y: auto;
-    background: #111;
-  }
-  .chat-list-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #222;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .chat-list-item:hover {
-    background: #222;
-  }
-  .avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 14px;
-    border: 1.5px solid #333;
-    flex-shrink: 0;
-  }
-  .chat-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .username {
-    font-weight: 600;
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .last-message {
-    font-size: 0.85rem;
-    color: #aaa;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 3px;
-  }
-  .timestamp {
-    font-size: 0.75rem;
-    color: #666;
-    margin-left: 8px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .unread-badge {
-    background: #1da1f2;
-    color: #000;
-    font-weight: 700;
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: 8px;
-    user-select: none;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat with Seller</title>
+  <style>
+    /* iOS-style clean header */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #121212;
+      color: #eee;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #007aff;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: fixed;
+      width: 100%;
+      top: 0; left: 0;
+      z-index: 10000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      font-weight: 600;
+      font-size: 17px;
+      user-select: none;
+    }
+    header img {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1.8px solid white;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    #productPreview {
+      position: sticky;
+      top: 64px; /* header height */
+      background: #1c1c1e;
+      border-bottom: 1px solid #444;
+      z-index: 9999;
+      padding: 8px 16px;
+    }
+    #productPreview a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #ccc;
+    }
+    #productPreview img {
+      width: 60px; height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #222;
+      flex-shrink: 0;
+    }
+    #productPreview strong {
+      color: white;
+      font-size: 16px;
+      user-select: text;
+    }
+    #productPreview p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #888;
+    }
+    #chatContainer {
+      flex: 1;
+      margin-top: 112px; /* header + product preview */
+      overflow-y: auto;
+      padding: 12px 16px 80px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    .message {
+      max-width: 70%;
+      margin-bottom: 12px;
+      padding: 12px 16px;
+      border-radius: 20px;
+      font-size: 1rem;
+      line-height: 1.3;
+      word-wrap: break-word;
+      position: relative;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      user-select: text;
+      white-space: pre-wrap;
+      background-color: #2c2c2e;
+      color: #ddd;
+      transition: background-color 0.2s ease;
+    }
+    .message.self {
+      background-color: #007aff;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .message.seller {
+      background-color: #3a3a3c;
+      color: #ddd;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    .message.system {
+      background: transparent;
+      color: #888;
+      text-align: center;
+      font-style: italic;
+      max-width: 100%;
+      margin: 20px auto;
+      user-select: none;
+    }
+    .message .timestamp {
+      font-size: 0.7rem;
+      color: #bbb;
+      position: absolute;
+      bottom: 6px;
+      right: 12px;
+      opacity: 0.75;
+      user-select: none;
+    }
+    .message .checkmark {
+      position: absolute;
+      bottom: 6px;
+      right: 40px;
+      font-size: 14px;
+      color: #34c759; /* WhatsApp green */
+      user-select: none;
+    }
+    a {
+      color: #0a84ff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    form#chatForm {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #1c1c1e;
+      display: flex;
+      padding: 10px 16px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.8);
+      align-items: center;
+      gap: 8px;
+      z-index: 11000;
+    }
+    form#chatForm input[type="text"] {
+      flex: 1;
+      background: #2c2c2e;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 24px;
+      color: #eee;
+      font-size: 1rem;
+      outline: none;
+      user-select: text;
+    }
+    form#chatForm button {
+      background-color: #007aff;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 24px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.25s ease;
+    }
+    form#chatForm button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    form#chatForm button:hover:not(:disabled) {
+      background-color: #005bb5;
+    }
+    /* Scrollbar for mobile */
+    #chatContainer::-webkit-scrollbar {
+      width: 6px;
+    }
+    #chatContainer::-webkit-scrollbar-thumb {
+      background-color: #007aff;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
-<header>CyberChat Inbox</header>
-<main id="chatList" aria-label="Chat list" role="list"></main>
+
+<header>
+  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" />
+  <div id="sellerName">Loading seller...</div>
+</header>
+
+<div id="productPreview"></div>
+
+<div id="chatContainer" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+<form id="chatForm" aria-label="Send message" autocomplete="off">
+  <input type="text" id="messageInput" placeholder="Type a message..." required aria-required="true" />
+  <button type="submit" id="sendBtn" disabled>Send</button>
+</form>
 
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
 <script>
-  // Firebase config — replace with yours if needed
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -117,14 +227,20 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const chatListEl = document.getElementById('chatList');
-  let currentUser = null;
+  const sellerAvatarEl = document.getElementById('sellerAvatar');
+  const sellerNameEl = document.getElementById('sellerName');
+  const productPreviewEl = document.getElementById('productPreview');
+  const chatContainer = document.getElementById('chatContainer');
+  const chatForm = document.getElementById('chatForm');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-  function formatTimestamp(ts) {
-    if (!ts) return '';
-    const d = new Date(ts);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  let currentUser = null;
+  let sellerUid = null;
+  let sellerName = 'Seller';
+  let sellerAvatar = '';
+  let productId = null;
+  let chatId = null;
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -132,89 +248,172 @@
     return div.innerHTML;
   }
 
-  // Find the "other user" in the chat metadata users object
-  function getOtherUid(usersObj, currentUid) {
-    return Object.keys(usersObj).find(uid => uid !== currentUid);
+  function formatTimestamp(ts) {
+    const date = new Date(ts);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  function createChatListItem(user, lastMsg, lastMsgTime, chatId, unread) {
-    const item = document.createElement('div');
-    item.className = 'chat-list-item';
-    item.setAttribute('role', 'listitem');
-    item.tabIndex = 0;
+  function getChatId(uid1, uid2) {
+    return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+  }
 
-    item.onclick = () => {
-      window.location.href = `/chat?uid=${user.uid}`;
-    };
-    item.onkeypress = (e) => {
-      if (e.key === 'Enter') item.click();
-    };
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
 
-    // Show unread badge only if unread == true
-    const unreadBadge = unread ? `<span class="unread-badge">NEW</span>` : '';
+  function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+  }
 
-    item.innerHTML = `
-      <img class="avatar" src="${user.avatar || 'https://via.placeholder.com/48?text=👤'}" alt="Avatar of ${escapeHtml(user.username)}" />
-      <div class="chat-info">
-        <div class="username">@${escapeHtml(user.username || 'unknown')}</div>
-        <div class="last-message">${escapeHtml(lastMsg || '')}</div>
-      </div>
-      <div>
-        <div class="timestamp">${formatTimestamp(lastMsgTime)}</div>
-        ${unreadBadge}
-      </div>
+  function addMessageBubble(text, senderUid, timestamp) {
+    const div = document.createElement('div');
+    div.classList.add('message');
+
+    if (senderUid === currentUser.uid) {
+      div.classList.add('self');
+    } else if (senderUid === sellerUid) {
+      div.classList.add('seller');
+    } else {
+      div.classList.add('system');
+    }
+
+    // Checkmark for messages sent by current user (like WhatsApp read checkmark)
+    const checkmarkHtml = senderUid === currentUser.uid 
+      ? `<span class="checkmark">✓✓</span>` 
+      : '';
+
+    div.innerHTML = `
+      <div>${linkify(escapeHtml(text))}</div>
+      <span class="timestamp">${formatTimestamp(timestamp)}</span>
+      ${checkmarkHtml}
     `;
-    return item;
+
+    chatContainer.appendChild(div);
   }
 
-  auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(async user => {
     if (!user) {
-      alert('Please log in to see your chats.');
+      alert('You must log in to chat.');
       window.location.href = '/login';
       return;
     }
     currentUser = user;
 
-    db.ref('/chats').once('value').then(snapshot => {
-      const chats = snapshot.val() || {};
-      chatListEl.innerHTML = '';
+    const urlParams = new URLSearchParams(window.location.search);
+    productId = urlParams.get('product');
+    if (!productId) {
+      alert('Missing product id in URL.');
+      return;
+    }
 
-      const promises = [];
+    const productSnap = await db.ref(`/dlsaccounts/${productId}`).once('value');
+    const product = productSnap.val();
+    if (!product) {
+      alert('Product not found.');
+      return;
+    }
 
-      Object.entries(chats).forEach(([chatId, chatData]) => {
-        const meta = chatData.meta;
-        if (!meta || !meta.users || !meta.users[currentUser.uid]) return;
+    // Product preview
+    productPreviewEl.innerHTML = `
+      <a href="https://cyberchat.online/product?id=${productId}" target="_blank" style="color:inherit; text-decoration:none;">
+        <img src="${product.images?.[0] || 'https://via.placeholder.com/60'}" alt="Product" />
+        <div>
+          <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
+          <p>Tap to view product 👇</p>
+        </div>
+      </a>
+    `;
 
-        const otherUid = getOtherUid(meta.users, currentUser.uid);
-        if (!otherUid) return;
+    // Seller info
+    sellerUid = product.seller?.uid;
+    sellerName = product.seller?.username || 'Seller';
+    sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
 
-        const messages = chatData.messages || {};
-        const lastKey = Object.keys(messages).pop();
-        const lastMsg = messages[lastKey];
+    sellerNameEl.textContent = sellerName;
+    sellerAvatarEl.src = sellerAvatar;
 
-        // Determine if the last message is unread:
-        // Unread if last message sender != current user AND
-        // last message timestamp > meta.lastReadTimes[currentUser.uid] (if stored)
-        let unread = false;
-        const lastReadTimes = meta.lastReadTimes || {};
-        const userLastRead = lastReadTimes[currentUser.uid] || 0;
-        if (lastMsg && lastMsg.sender !== currentUser.uid && lastMsg.timestamp > userLastRead) {
-          unread = true;
-        }
+    if (!sellerUid) {
+      alert('Seller info missing.');
+      return;
+    }
 
-        const p = db.ref(`/users/${otherUid}`).once('value').then(userSnap => {
-          const otherUser = userSnap.val() || { username: 'unknown', avatar: '' };
-          otherUser.uid = otherUid;
+    chatId = getChatId(currentUser.uid, sellerUid);
 
-          const chatItem = createChatListItem(otherUser, lastMsg?.text, lastMsg?.timestamp, chatId, unread);
-          chatListEl.appendChild(chatItem);
-        });
-        promises.push(p);
+    // Update lastReadTimes when user opens chat
+    const lastReadRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
+    await lastReadRef.set(Date.now());
+
+    // Listen for messages
+    const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
+    messagesRef.off();
+    messagesRef.on('child_added', snapshot => {
+      const msg = snapshot.val();
+      if (msg && msg.text && msg.sender && msg.timestamp) {
+        addMessageBubble(msg.text, msg.sender, msg.timestamp);
+        scrollToBottom();
+      }
+    });
+
+    sendBtn.disabled = false;
+    messageInput.focus();
+  });
+
+  chatForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    const messagesRef = db.ref(`/chats/${chatId}/messages`);
+    const newMsgRef = messagesRef.push();
+
+    try {
+      await newMsgRef.set({
+        sender: currentUser.uid,
+        text,
+        timestamp: Date.now()
       });
 
-      return Promise.all(promises);
-    }).catch(console.error);
+      messageInput.value = '';
+      messageInput.focus();
+
+      // Create meta if missing
+      const metaRef = db.ref(`/chats/${chatId}/meta`);
+      const metaSnap = await metaRef.once('value');
+      if (!metaSnap.exists()) {
+        await metaRef.set({
+          users: {
+            [currentUser.uid]: true,
+            [sellerUid]: true
+          },
+          lastReadTimes: {
+            [currentUser.uid]: Date.now(),
+            [sellerUid]: 0
+          }
+        });
+      } else {
+        // Update lastReadTimes for current user on new message
+        const lastReadTimesRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
+        await lastReadTimesRef.set(Date.now());
+      }
+
+      // Auto reply from seller if first message
+      const messagesSnapshot = await messagesRef.once('value');
+      if (messagesSnapshot.numChildren() === 1 && currentUser.uid !== sellerUid) {
+        const autoMsgRef = messagesRef.push();
+        await autoMsgRef.set({
+          sender: sellerUid,
+          text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId}`,
+          timestamp: Date.now()
+        });
+      }
+
+    } catch (err) {
+      alert('Error sending message. Try again.');
+      console.error(err);
+    }
   });
 </script>
+
 </body>
 </html>
