@@ -1269,7 +1269,7 @@ window.closeLoginModal = function () {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 <script>
-  // Initialize Firebase
+  // Firebase setup (same as your config)
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1279,7 +1279,6 @@ window.closeLoginModal = function () {
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
-
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
@@ -1322,21 +1321,22 @@ window.closeLoginModal = function () {
     const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
     const sellerUid = product.seller?.uid || null;
 
+    // Message button ALWAYS enabled, redirects with just product ID
+    const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
+
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <img src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 12px;" loading="lazy">
+      <img src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 12px;" loading="lazy" />
       <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>
       <div class="card-content">
         <div class="card-title">${product.title || 'Untitled'}</div>
         <div class="card-description">${product.description || ''}</div>
         <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-          <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy">
+          <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy" />
           <div style="display:flex; align-items:center; gap:10px;">
             <span>${sellerUsername} ${verifiedBadge}</span>
-            ${sellerUid 
-              ? `<button class="message-btn" onclick="messageUser('${sellerUid}', '${id}')">Message</button>` 
-              : `<button class="message-btn" onclick="messageUser('', '${id}')">Message</button>`}
+            ${messageBtnHTML}
           </div>
         </div>
       </div>
@@ -1346,29 +1346,13 @@ window.closeLoginModal = function () {
     document.getElementById("productList").appendChild(card);
   }
 
-  function messageUser(sellerUid, productId) {
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser) {
-      alert("Please log in to message the seller.");
-      return;
-    }
-
+  // Now messageUser redirects with product id only
+  function messageUser(productId) {
     if (!productId) {
-      alert("Missing product information.");
+      alert("Missing product ID.");
       return;
     }
-
-    if (!sellerUid) {
-      alert("Seller ID missing.");
-      // Redirect anyway with product only
-      const chatUrl = `/messages?product=${encodeURIComponent(productId)}`;
-      window.location.href = chatUrl;
-      return;
-    }
-
-    // Both sellerUid and productId present
-    const chatUrl = `/messages?user=${encodeURIComponent(sellerUid)}&product=${encodeURIComponent(productId)}`;
-    window.location.href = chatUrl;
+    window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
   }
 
   async function loadAds() {
