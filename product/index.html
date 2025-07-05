@@ -231,6 +231,123 @@
       padding: 14px;
     }
   }
+
+
+/* Also update the progress bar gradient colors to match */
+.progress-line::before {
+  background: linear-gradient(to right, #1da1f2 0%, #f5d742 33%, #e74c3c 66%, #e74c3c 100%);
+  animation: fillBar 3s forwards;
+}
+.progress-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 33%; /* only fill first third */
+  background: linear-gradient(to right, #1da1f2, #00c6ff);
+  /* Remove animation */
+}
+.checkpoint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkpoint .icon {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: 50%;
+  background: #111;
+  transition: all 0.3s ease;
+}
+
+.checkpoint.active .icon {
+  background: radial-gradient(circle at center, #1da1f2 20%, #000 100%);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+  animation: pulse 1.4s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(29,161,242,0.6);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(0,198,255,0.8);
+  }
+}
+
+.label {
+  font-size: 13px;
+  color: #ccc;
+  font-weight: 600;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  position: relative;
+  padding: 20px;
+}
+
+.progress-line {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #333;
+  z-index: 0;
+}
+
+.checkpoint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.checkpoint .icon-container {
+  background: #111;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.checkpoint .icon {
+  width: 36px;
+  height: 36px;
+}
+
+.checkpoint.active .icon-container {
+  background: radial-gradient(circle at center, #1da1f2 20%, #000 100%);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(29,161,242,0.5);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(0,198,255,0.8);
+  }
+}
+
+.label {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ccc;
+  font-weight: 500;
+}
 </style>
 </head>
 <body>
@@ -483,21 +600,43 @@
     </div>
   </div>
 </div>
-<!-- Loader Screen -->
-<div id="loadingScreen" style="display:none; position:fixed; inset:0; background:#000c; z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
-  <div style="display:flex; gap:40px; align-items:center;">
-    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
-      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2-.9-2-2V6h2v10h10v2H7zM17 4H6c-1.1 0-2 .9-2 2v2h2V6h11v11h-2v2h2c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+<div id="loadingScreen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff;">
+  <div style="margin-bottom:24px; font-size:18px; font-weight:600;">Preparing your product...</div>
+
+  <div class="progress-container">
+    <div class="progress-line"></div>
+
+    <!-- Cart Checkpoint (Active) -->
+    <div class="checkpoint active">
+      <div class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#1da1f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </div>
+      <div class="label">Cart</div>
     </div>
-    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
-      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M20 8h-3V4H7v4H4l8 8 8-8zM4 20h16v-2H4v2z"/></svg>
+
+    <!-- Processing -->
+    <div class="checkpoint">
+      <div class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#666" d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3z"/>
+        </svg>
+      </div>
+      <div class="label">Processing</div>
     </div>
-    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
-      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M12 0a12 12 0 1 0 12 12A12.014 12.014 0 0 0 12 0zm5.707 8.707-6.364 6.364a1 1 0 0 1-1.414 0L6.293 11.43a1 1 0 1 1 1.414-1.414L11 13.309l5.293-5.293a1 1 0 0 1 1.414 1.414z"/></svg>
+
+    <!-- Received -->
+    <div class="checkpoint">
+      <div class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#666" d="M20.49 9.9l-1.39-1.4-6.6 6.6-3.2-3.2-1.4 1.4 4.6 4.6 8-8z"/>
+        </svg>
+      </div>
+      <div class="label">Received</div>
     </div>
-  </div>
-  <div style="height:6px; width:80%; background:#333; border-radius:20px; overflow:hidden; position:relative;">
-    <div id="progressBar" style="position:absolute; left:0; top:0; bottom:0; width:0%; background:#1da1f2; transition:width 0.4s;"></div>
   </div>
 </div>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -713,49 +852,17 @@
 
   // Show modal on buy button click
   function confirmPurchase() {
-  // Show loading screen and reset progress bar
-  const loadingScreen = document.getElementById("loadingScreen");
-  const loadingBar = document.getElementById("loadingBar");
-  const checkpoints = document.querySelectorAll(".checkpoint");
-
-  loadingScreen.style.display = "flex"; // Show the loader
-  loadingBar.style.width = "0%";
-  checkpoints.forEach(cp => (cp.style.opacity = "0.3"));
-
-  // Animate the loading bar & checkpoints in 3 stages over 3 seconds
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 1; // increment by 1% every 30ms -> total ~3s
-    loadingBar.style.width = progress + "%";
-
-    // Activate checkpoints at 33% and 66%
-    if (progress === 33 || progress === 66) {
-      const index = progress === 33 ? 0 : 1;
-      checkpoints[index].style.opacity = "1";
-    }
-
-    if (progress >= 100) {
-      clearInterval(interval);
-      checkpoints[2].style.opacity = "1";
-
-      // Hide loading and show modal with reset after animation ends
-      setTimeout(() => {
-        loadingScreen.style.display = "none";
-
-        // Now reset modal forms and show modal
-        modal.style.display = "block";
-        step1.classList.add("active");
-        step2.classList.remove("active");
-        step3.classList.remove("active");
-        step1Error.textContent = "";
-        step2Error.textContent = "";
-        emailInput.value = "";
-        phoneInput.value = "";
-        paymentMethod.value = "";
-      }, 500);
-    }
-  }, 30);
-}
+    modal.style.display = "block";
+    // Reset all
+    step1.classList.add("active");
+    step2.classList.remove("active");
+    step3.classList.remove("active");
+    step1Error.textContent = "";
+    step2Error.textContent = "";
+    emailInput.value = "";
+    phoneInput.value = "";
+    paymentMethod.value = "";
+  }
 
   // Validation for email + phone (basic)
   function validateStep1() {
@@ -847,6 +954,13 @@
     document.getElementById("loadingScreen").style.display = "none";
   }, 1000);
 });
+// Only mark the first checkpoint active initially — no changes later
+// So, no timeouts to add active class to steps 2 and 3
+
+// Hide loading after some delay (or after your data loads)
+setTimeout(() => {
+  document.getElementById("loadingScreen").style.display = "none";
+}, 2500);
 </script>
 </body>
 
