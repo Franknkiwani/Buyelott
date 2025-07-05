@@ -1,182 +1,159 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Inbox</title>
-  <style>
-    /* Base & Reset */
-    body {
-      margin: 0; padding: 0;
-      background: #121212;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex; flex-direction: column; height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    header {
-      background: #1da1f2;
-      color: #fff;
-      padding: 16px 20px;
-      font-weight: 700;
-      font-size: 1.5rem;
-      position: fixed;
-      width: 100%;
-      top: 0; left: 0;
-      z-index: 1000;
-      border-bottom: 2px solid #0c7ddb;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-      user-select: none;
-      letter-spacing: 0.03em;
-    }
-    main {
-      margin-top: 64px;
-      flex: 1;
-      overflow-y: auto;
-      background: #121212;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Chat item container */
-    .chat-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 18px;
-      border-bottom: 1px solid #222;
-      cursor: pointer;
-      transition: background-color 0.18s ease;
-    }
-    .chat-item:hover,
-    .chat-item:focus-visible {
-      background: #1a1a1a;
-      outline: none;
-    }
-
-    /* Avatar wrapper to hold badge */
-    .avatar-wrapper {
-      position: relative;
-      flex-shrink: 0;
-      margin-right: 14px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your Inbox</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: #121212;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    background: #1da1f2;
+    color: #fff;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    position: fixed;
+    width: 100%;
+    top: 0; left: 0;
+    z-index: 1000;
+    border-bottom: 2px solid #0c7ddb;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    user-select: none;
+    letter-spacing: 0.03em;
+  }
+  main {
+    margin-top: 64px;
+    flex: 1;
+    overflow-y: auto;
+    background: #121212;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+  }
+  .chat-item:hover,
+  .chat-item:focus-visible {
+    background: #1a1a1a;
+    outline: none;
+  }
+  .avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-right: 14px;
+  }
+  .chat-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+    display: block;
+  }
+  .chat-item.unread .chat-avatar {
+    border-color: #ff3b30;
+  }
+  .unread-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ff3b30;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+    box-shadow: 0 0 4px rgba(255, 59, 48, 0.6);
+    user-select: none;
+  }
+  .chat-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .chat-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+  }
+  .chat-last-message {
+    font-size: 0.9rem;
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+  }
+  .chat-timestamp {
+    font-size: 0.8rem;
+    color: #666;
+    margin-left: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+  .no-chats {
+    margin: 32px 16px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    font-size: 1rem;
+    user-select: none;
+  }
+  .chat-item:focus-visible {
+    outline: 2px solid #1da1f2;
+    outline-offset: 2px;
+  }
+  @media (max-width: 360px) {
     .chat-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #333;
-      border: 2px solid transparent;
-      transition: border-color 0.3s ease;
-      display: block;
-    }
-    /* Highlight avatar border if unread */
-    .chat-item.unread .chat-avatar {
-      border-color: #ff3b30;
-    }
-
-    /* Unread badge bubble */
-    .unread-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #ff3b30;
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 12px;
-      min-width: 18px;
-      text-align: center;
-      line-height: 1;
-      box-shadow: 0 0 4px rgba(255, 59, 48, 0.6);
-      user-select: none;
-    }
-
-    /* Chat text info */
-    .chat-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      width: 44px;
+      height: 44px;
     }
     .chat-name {
-      font-weight: 700;
-      font-size: 1.15rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #fff;
+      font-size: 1rem;
     }
     .chat-last-message {
-      font-size: 0.9rem;
-      color: #bbb;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 4px;
-      font-style: normal;
+      font-size: 0.85rem;
     }
-
-    /* Timestamp on right */
     .chat-timestamp {
-      font-size: 0.8rem;
-      color: #666;
-      margin-left: 12px;
-      flex-shrink: 0;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-      user-select: none;
+      font-size: 0.7rem;
+      margin-left: 8px;
     }
-
-    /* No chats placeholder */
-    .no-chats {
-      margin: 32px 16px;
-      text-align: center;
-      color: #666;
-      font-style: italic;
-      font-size: 1rem;
-      user-select: none;
-    }
-
-    /* Focus ring for accessibility */
-    .chat-item:focus-visible {
-      outline: 2px solid #1da1f2;
-      outline-offset: 2px;
-    }
-
-    /* Responsive tweak for very small screens */
-    @media (max-width: 360px) {
-      .chat-avatar {
-        width: 44px;
-        height: 44px;
-      }
-      .chat-name {
-        font-size: 1rem;
-      }
-      .chat-last-message {
-        font-size: 0.85rem;
-      }
-      .chat-timestamp {
-        font-size: 0.7rem;
-        margin-left: 8px;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-
 <header>Your Inbox</header>
-
 <main id="inboxContainer">
   <div class="no-chats">Loading chats...</div>
 </main>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -195,16 +172,16 @@
   const inboxContainer = document.getElementById('inboxContainer');
 
   let currentUser = null;
-  let chatsData = {};  // cached chats metadata
+  let chatsData = {};
 
   function formatTimestamp(ts) {
     if (!ts) return '';
-    const date = new Date(ts);
+    const d = new Date(ts);
     const now = new Date();
-    if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     }
-    return date.toLocaleDateString();
+    return d.toLocaleDateString();
   }
 
   function escapeHtml(text) {
@@ -215,129 +192,59 @@
 
   async function fetchUserProfile(uid) {
     try {
-      const userSnap = await db.ref(`/users/${uid}`).once('value');
-      const user = userSnap.val();
-      if (user) {
-        return {
-          username: user.username || 'Unknown',
-          avatar: user.avatar || 'https://via.placeholder.com/48?text=👤'
-        };
-      } else {
-        return {
-          username: 'Unknown',
-          avatar: 'https://via.placeholder.com/48?text=👤'
-        };
-      }
+      const snap = await db.ref(`/users/${uid}`).once('value');
+      const user = snap.val();
+      if(user) return {username: user.username || 'Unknown', avatar: user.avatar || 'https://via.placeholder.com/48?text=👤'};
+      return {username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤'};
     } catch {
-      return {
-        username: 'Unknown',
-        avatar: 'https://via.placeholder.com/48?text=👤'
-      };
+      return {username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤'};
     }
-  }
-
-  // Escape usernames for display
-  function formatUsername(name) {
-    if (!name) return 'Unknown';
-    return name;
-  }
-
-  // To check who sent last message & prepend prefix accordingly
-  async function getLastMessagePreview(chatMeta, otherUserName) {
-    if (!chatMeta.lastMessage) return '';
-    const sender = chatMeta.lastMessageSender || '';
-    const msg = chatMeta.lastMessage;
-    if (sender === currentUser.uid) {
-      return `you: ${msg}`;
-    } else if (sender === otherUserName) {
-      return `@${otherUserName}: ${msg}`;
-    } else {
-      // fallback
-      return msg;
-    }
-  }
-
-  // This one gets usernames by UID for sender in last message
-  async function getUsernamesForChat(chatMeta) {
-    const users = chatMeta.users || {};
-    const userIds = Object.keys(users);
-
-    let usernames = {};
-    for (const uid of userIds) {
-      const profile = await fetchUserProfile(uid);
-      usernames[uid] = profile.username;
-    }
-    return usernames;
   }
 
   async function renderInbox() {
     inboxContainer.innerHTML = '';
-
-    if (Object.keys(chatsData).length === 0) {
-      inboxContainer.innerHTML = `<div class="no-chats">No chats yet. Start a conversation!</div>`;
+    if (!Object.keys(chatsData).length) {
+      inboxContainer.innerHTML = '<div class="no-chats">No chats yet. Start a conversation!</div>';
       return;
     }
+    for (const [chatId, chatMeta] of Object.entries(chatsData)) {
+      const users = chatMeta.users || {};
+      const otherUid = Object.keys(users).find(uid => uid !== currentUser.uid);
+      if (!otherUid) continue;
 
-    const chatEntries = Object.entries(chatsData);
+      const otherProfile = await fetchUserProfile(otherUid);
+      const unread = (chatMeta.unreadCounts && chatMeta.unreadCounts[currentUser.uid]) || 0;
+      const lastMsg = chatMeta.lastMessage || '';
+      const lastSender = chatMeta.lastMessageSender || '';
+      let preview = (lastSender === currentUser.uid) ? `you: ${lastMsg}` : `@${otherProfile.username}: ${lastMsg}`;
+      const lastTime = chatMeta.lastTimestamp || 0;
 
-    for (const [chatId, chatMeta] of chatEntries) {
-      const usersInChat = chatMeta.users || {};
-      const otherUserUid = Object.keys(usersInChat).find(uid => uid !== currentUser.uid);
-
-      if (!otherUserUid) {
-        console.warn(`Chat ${chatId} has no other user besides currentUser`);
-        continue;
-      }
-
-      // Fetch other user info
-      const otherUserProfile = await fetchUserProfile(otherUserUid);
-      const otherUsername = otherUserProfile.username || 'Unknown';
-      const avatar = otherUserProfile.avatar || 'https://via.placeholder.com/48?text=👤';
-
-      // Determine unread count from chatMeta.unread or chatMeta.unreadCounts for currentUser
-      const unreadCount = (chatMeta.unreadCounts && chatMeta.unreadCounts[currentUser.uid]) || 0;
-
-      // Format timestamp
-      const lastTimestamp = chatMeta.lastTimestamp || 0;
-
-      // Build last message preview with sender prefix
-      let lastMessagePreview = chatMeta.lastMessage || '';
-      if (chatMeta.lastMessageSender === currentUser.uid) {
-        lastMessagePreview = `you: ${lastMessagePreview}`;
-      } else {
-        lastMessagePreview = `@${otherUsername}: ${lastMessagePreview}`;
-      }
-
-      // Create chat item container
       const chatDiv = document.createElement('div');
-      chatDiv.className = 'chat-item' + (unreadCount > 0 ? ' unread' : '');
-      chatDiv.title = `${otherUsername}\n${lastMessagePreview}`;
+      chatDiv.className = 'chat-item' + (unread ? ' unread' : '');
+      chatDiv.title = `${otherProfile.username}\n${preview}`;
       chatDiv.tabIndex = 0;
       chatDiv.setAttribute('role', 'button');
-
-      // Compose inner HTML with unread badge if any
       chatDiv.innerHTML = `
         <div class="avatar-wrapper">
-          <img class="chat-avatar" src="${avatar}" alt="${otherUsername} avatar" />
-          ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount > 99 ? '99+' : unreadCount}</div>` : ''}
+          <img class="chat-avatar" src="${otherProfile.avatar}" alt="${otherProfile.username} avatar" />
+          ${unread ? `<div class="unread-badge">${unread > 99 ? '99+' : unread}</div>` : ''}
         </div>
         <div class="chat-info">
-          <div class="chat-name">${escapeHtml(otherUsername)}</div>
-          <div class="chat-last-message">${escapeHtml(lastMessagePreview)}</div>
+          <div class="chat-name">${escapeHtml(otherProfile.username)}</div>
+          <div class="chat-last-message">${escapeHtml(preview)}</div>
         </div>
-        <div class="chat-timestamp">${formatTimestamp(lastTimestamp)}</div>
+        <div class="chat-timestamp">${formatTimestamp(lastTime)}</div>
       `;
 
-      chatDiv.addEventListener('click', () => {
+      chatDiv.onclick = () => {
         window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;
-      });
-
-      chatDiv.addEventListener('keydown', (e) => {
+      };
+      chatDiv.onkeydown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           chatDiv.click();
         }
-      });
+      };
 
       inboxContainer.appendChild(chatDiv);
     }
@@ -352,22 +259,17 @@
     currentUser = user;
 
     const chatsRef = db.ref('/chats');
-
-    chatsRef.on('value', (snapshot) => {
+    chatsRef.on('value', snapshot => {
       const allChats = snapshot.val() || {};
-
-      // Filter chats where current user is participant, extract meta
       chatsData = Object.entries(allChats)
-        .filter(([chatId, chatMeta]) => chatMeta?.meta?.users && chatMeta.meta.users[currentUser.uid])
-        .reduce((acc, [chatId, chatMeta]) => {
-          acc[chatId] = chatMeta.meta;
+        .filter(([_, meta]) => meta?.meta?.users && meta.meta.users[currentUser.uid])
+        .reduce((acc, [chatId, meta]) => {
+          acc[chatId] = meta.meta;
           return acc;
         }, {});
-
       renderInbox();
     });
   });
 </script>
-
 </body>
 </html>
