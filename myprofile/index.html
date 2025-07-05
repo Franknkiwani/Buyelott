@@ -422,6 +422,26 @@ button#logoutBtn:focus {
   text-align: center;
   box-shadow: 0 0 6px rgba(255,59,48,0.6);
 }
+#messagesBadge {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  background: #ff3b30;
+  color: white;
+  font-weight: 700;
+  font-size: 0.75rem;
+  min-width: 20px;      /* Make sure it’s wide enough */
+  height: 20px;
+  line-height: 20px;
+  border-radius: 9999px;
+  padding: 0 6px;
+  user-select: none;
+  pointer-events: none;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(255, 59, 48, 0.6);
+  white-space: nowrap;
+  display: none;  /* Initially hidden */
+}
 </style>
   </style>
 </head>
@@ -484,97 +504,119 @@ button#logoutBtn:focus {
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+  firebase.initializeApp(firebaseConfig);
 
-    firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const overlay = document.getElementById("overlay");
+  const overlayText = document.getElementById("overlayText");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const profileName = document.getElementById("profileName");
+  const badge = document.getElementById('messagesBadge');
 
-    const auth = firebase.auth();
-    const overlay = document.getElementById("overlay");
-    const overlayText = document.getElementById("overlayText");
-    const logoutBtn = document.getElementById("logoutBtn");
+  function showOverlay(text) {
+    overlayText.textContent = text;
+    overlay.style.display = "flex";
+  }
 
-    const profileAvatar = document.getElementById("profileAvatar");
-    const profileName = document.getElementById("profileName");
+  function hideOverlay() {
+    overlay.style.display = "none";
+  }
 
-    function showOverlay(text) {
-      overlayText.textContent = text;
-      overlay.style.display = "flex";
-    }
+  // Update unread messages count for the logged-in user
+  function updateUnreadMessagesCount(uid) {
+    const messagesRef = firebase.database().ref('messages');
 
-    function hideOverlay() {
-      overlay.style.display = "none";
-    }
+    messagesRef.orderByChild('to').equalTo(uid).on('value', snapshot => {
+      if (!snapshot.exists()) {
+        // No messages at all
+        badge.style.display = 'inline-block';
+        badge.textContent = 'No messages';
+        badge.style.background = 'transparent';
+        badge.style.color = '#999';
+        badge.style.boxShadow = 'none';
+        badge.style.minWidth = 'auto';
+        badge.style.height = 'auto';
+        badge.style.lineHeight = 'normal';
+        badge.style.padding = '0 4px';
+        badge.style.fontWeight = '400';
+        badge.style.fontSize = '0.75rem';
+        return;
+      }
 
-    // Check auth state on page load
-    showOverlay("Checking authentication...");
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // User logged in, hide overlay & update profile
-        hideOverlay();
+      let unreadCount = 0;
+      snapshot.forEach(msgSnap => {
+        const msg = msgSnap.val();
+        if (msg.read === false) unreadCount++;
+      });
 
-        // Update profile avatar & name
-        profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${user.uid}`;
-        profileAvatar.alt = `${user.displayName || "User"} Avatar`;
-        profileName.textContent = user.displayName || user.email || "User";
+      if (unreadCount > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        badge.style.background = '#ff3b30';
+        badge.style.color = 'white';
+        badge.style.boxShadow = '0 0 6px rgba(255,59,48,0.6)';
+        badge.style.minWidth = '20px';
+        badge.style.height = '20px';
+        badge.style.lineHeight = '20px';
+        badge.style.padding = '0 6px';
+        badge.style.fontWeight = '700';
+        badge.style.fontSize = '0.75rem';
       } else {
-        // Not logged in, redirect to homepage (login)
-        window.location.href = "/";
+        badge.style.display = 'inline-block';
+        badge.textContent = 'No messages';
+        badge.style.background = 'transparent';
+        badge.style.color = '#999';
+        badge.style.boxShadow = 'none';
+        badge.style.minWidth = 'auto';
+        badge.style.height = 'auto';
+        badge.style.lineHeight = 'normal';
+        badge.style.padding = '0 4px';
+        badge.style.fontWeight = '400';
+        badge.style.fontSize = '0.75rem';
       }
     });
+  }
 
-    logoutBtn.addEventListener("click", () => {
-      showOverlay("Logging out...");
-      auth.signOut().then(() => {
-        window.location.href = "/";
-      }).catch(err => {
-        hideOverlay();
-        alert("Logout failed: " + err.message);
-      });
-    });
-    function updateUnreadMessagesCount(uid) {
-  const messagesRef = firebase.database().ref('messages');
+  // Auth state listener
+  showOverlay("Checking authentication...");
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      hideOverlay();
 
-  messagesRef.orderByChild('to').equalTo(uid).on('value', snapshot => {
-    let unreadCount = 0;
-    snapshot.forEach(msgSnap => {
-      const msg = msgSnap.val();
-      if (msg.read === false) unreadCount++;
-    });
+      // Update profile UI
+      profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${user.uid}`;
+      profileAvatar.alt = `${user.displayName || "User"} Avatar`;
+      profileName.textContent = user.displayName || user.email || "User";
 
-    const badge = document.getElementById('messagesBadge');
+      // Start watching unread messages
+      updateUnreadMessagesCount(user.uid);
 
-    if (unreadCount > 0) {
-      badge.style.background = '#ff3b30';  // bright red badge for unread
-      badge.style.color = 'white';
-      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-      badge.style.display = 'inline-block';
-      badge.style.boxShadow = '0 0 6px rgba(255,59,48,0.6)';
     } else {
-      // No unread messages — show 'No messages' in gray, smaller and subtle
-      badge.style.background = 'transparent';
-      badge.style.color = '#999';
-      badge.textContent = 'No messages';
-      badge.style.display = 'inline-block';
-      badge.style.boxShadow = 'none';
-      badge.style.minWidth = 'auto';
-      badge.style.height = 'auto';
-      badge.style.lineHeight = 'normal';
-      badge.style.padding = '0 4px';
-      badge.style.fontWeight = '400';
-      badge.style.fontSize = '0.75rem';
+      window.location.href = "/";
     }
   });
-}
-  </script>
+
+  logoutBtn.addEventListener("click", () => {
+    showOverlay("Logging out...");
+    auth.signOut().then(() => {
+      window.location.href = "/";
+    }).catch(err => {
+      hideOverlay();
+      alert("Logout failed: " + err.message);
+    });
+  });
+</script>
 </body>
 </html>
