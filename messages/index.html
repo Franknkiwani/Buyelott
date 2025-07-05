@@ -191,6 +191,7 @@
   const chatForm = document.getElementById('chatForm');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
+  const productPreviewEl = document.getElementById('productPreview');
 
   let currentUser = null;
   let sellerUid = null;
@@ -199,34 +200,28 @@
   let productId = null;
   let chatId = null;
 
-  // Helper to escape HTML
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  // Format timestamp nicely (e.g. 3:45 PM)
   function formatTimestamp(ts) {
     const date = new Date(ts);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Determine chatId from two uids (sort them alphabetically)
   function getChatId(uid1, uid2) {
     return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
   }
 
-  // Scroll chat container to bottom
   function scrollToBottom() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
-  // Add message bubble
   function addMessageBubble(text, senderUid, timestamp) {
     const div = document.createElement('div');
     div.classList.add('message');
-
     if (senderUid === currentUser.uid) {
       div.classList.add('self');
     } else if (senderUid === sellerUid) {
@@ -234,25 +229,21 @@
     } else {
       div.classList.add('system');
     }
-
     div.innerHTML = `
       ${escapeHtml(text)}
       <span class="timestamp">${formatTimestamp(timestamp)}</span>
     `;
-
     chatContainer.appendChild(div);
   }
 
-  // Listen for auth state changes
   auth.onAuthStateChanged(user => {
     if (!user) {
       alert('You must log in to chat.');
-      window.location.href = '/login'; // change if needed
+      window.location.href = '/login';
       return;
     }
     currentUser = user;
 
-    // Get productId from URL
     const urlParams = new URLSearchParams(window.location.search);
     productId = urlParams.get('product');
     if (!productId) {
@@ -260,13 +251,27 @@
       return;
     }
 
-    // Load product info to get seller UID, name, avatar
     db.ref(`/dlsaccounts/${productId}`).once('value').then(snapshot => {
       const product = snapshot.val();
       if (!product) {
         alert('Product not found.');
         return;
       }
+
+      // ✅ Set product preview
+      productPreviewEl.innerHTML = `
+        <a href="https://cyberchat.online/product?id=${productId}" target="_blank" style="text-decoration:none; color:inherit;">
+          <div class="product-card">
+            <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" />
+            <div>
+              <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
+              <p style="color: #aaa; font-size: 13px;">Tap to view product 👇</p>
+            </div>
+          </div>
+        </a>
+      `;
+
+      // ✅ Set seller info
       sellerUid = product.seller?.uid;
       sellerName = product.seller?.username || 'Seller';
       sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
@@ -281,9 +286,8 @@
 
       chatId = getChatId(currentUser.uid, sellerUid);
 
-      // Listen for new messages
       const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
-      messagesRef.off(); // just in case
+      messagesRef.off();
       messagesRef.on('child_added', snapshot => {
         const msg = snapshot.val();
         if (msg && msg.text && msg.sender && msg.timestamp) {
@@ -297,7 +301,6 @@
     });
   });
 
-  // Send message handler
   chatForm.addEventListener('submit', e => {
     e.preventDefault();
     const text = messageInput.value.trim();
@@ -313,6 +316,19 @@
     }).then(() => {
       messageInput.value = '';
       messageInput.focus();
+
+      // ✅ Auto-reply if it's the first message and sender isn't the seller
+      messagesRef.once('value').then(snapshot => {
+        const count = snapshot.numChildren();
+        if (count === 1 && currentUser.uid !== sellerUid) {
+          const autoMsgRef = messagesRef.push();
+          autoMsgRef.set({
+            sender: sellerUid,
+            text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId}`,
+            timestamp: Date.now()
+          });
+        }
+      });
     }).catch(err => {
       alert('Error sending message. Try again.');
       console.error(err);
