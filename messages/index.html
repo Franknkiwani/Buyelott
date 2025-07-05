@@ -743,6 +743,7 @@
   auth.onAuthStateChanged(async (user) => {
   if (!user) {
     showModernAlert("You must log in to chat.");
+    window.location.href = '/';
     return;
   }
   currentUser = user;
