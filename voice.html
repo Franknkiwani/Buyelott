@@ -1319,6 +1319,7 @@ window.closeLoginModal = function () {
     const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
     const sellerUsername = product.seller?.username || 'Unknown Seller';
     const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
+    const sellerUid = product.seller?.uid || null;
 
     const card = document.createElement("div");
     card.className = "card";
@@ -1332,7 +1333,7 @@ window.closeLoginModal = function () {
           <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy">
           <div style="display:flex; align-items:center; gap:10px;">
             <span>${sellerUsername} ${verifiedBadge}</span>
-            <button class="message-btn" onclick="messageUser('${sellerUsername}')">Message</button>
+            <button class="message-btn" onclick="messageUser('${sellerUid}', '${id}')">Message</button>
           </div>
         </div>
       </div>
@@ -1340,6 +1341,25 @@ window.closeLoginModal = function () {
       <button class="buy-btn" onclick="buyProduct('${id}')">Buy Now</button>
     `;
     document.getElementById("productList").appendChild(card);
+  }
+
+  function messageUser(sellerUid, productId) {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      alert("Please log in to message the seller.");
+      return;
+    }
+
+    if (!sellerUid || !productId) {
+      alert("Missing seller or product information.");
+      return;
+    }
+
+    const encodedUid = encodeURIComponent(sellerUid);
+    const encodedPid = encodeURIComponent(productId);
+    const chatUrl = `/messages?user=${encodedUid}&product=${encodedPid}`;
+    console.log("Redirecting to:", chatUrl);
+    window.location.href = chatUrl;
   }
 
   async function loadAds() {
@@ -1393,10 +1413,6 @@ window.closeLoginModal = function () {
     window.location.href = `/product?id=${id}`;
   }
 
-  function messageUser(username) {
-    alert(`Feature coming soon: Message @${username}`);
-  }
-
   async function loadMore() {
     if (loading) return;
     loading = true;
@@ -1431,9 +1447,7 @@ window.closeLoginModal = function () {
       lastKey = id;
     }
 
-    // Insert ads after every batch
     await loadAds();
-
     loading = false;
   }
 
