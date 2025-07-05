@@ -1168,9 +1168,15 @@ main {
 <script type="module">
 // ✅ Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// ✅ Your Firebase config
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1182,81 +1188,57 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"
 };
 
-// ✅ Initialize Firebase
+// ✅ Init Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// ✅ Handle login/logout UI in #userArea
+// ✅ DOM refs
 const userArea = document.getElementById('userArea');
 const loginBtn = document.getElementById('loginBtn');
 
+// ✅ Login button click
 loginBtn.addEventListener('click', () => {
   signInWithPopup(auth, provider).catch(console.error);
 });
 
-onAuthStateChanged(auth, user => {
+// ✅ Track auth state
+onAuthStateChanged(auth, (user) => {
+  window.isUserLoggedIn = !!user;
+  userArea.innerHTML = '';
+
   if (user) {
-    // 🔓 Logged in: show profile pic
-    userArea.innerHTML = '';
+    // 🔓 Show profile image
     const img = document.createElement('img');
     img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
     img.alt = user.displayName || 'User';
     img.title = user.displayName || 'User';
     img.className = 'profile-pic';
     img.addEventListener('click', () => {
-      if (confirm('Sign out?')) signOut(auth);
+      window.location.href = '/myprofile';
     });
     userArea.appendChild(img);
 
-    // 🧹 Auto-close modal if open
+    // 🧹 Auto-close modal
     closeLoginModal();
   } else {
-    // 🚫 Not logged in: show login button
-    userArea.innerHTML = '';
-    userArea.appendChild(loginBtn);
+    // 🚫 Show cloned login button
+    const clonedBtn = loginBtn.cloneNode(true);
+    clonedBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(console.error);
+    });
+    userArea.appendChild(clonedBtn);
   }
 });
 
-// 🚨 Show login modal if user not logged in and clicked anywhere
+// ✅ Show login modal if user not logged in and clicked outside allowed area
 document.body.addEventListener('click', (e) => {
   const user = auth.currentUser;
-  const isModal = e.target.closest('#loginModal') !== null;
-  const isLoginBtn = e.target.closest('#loginBtn');
-
-  if (!user && !isModal && !isLoginBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    const modal = document.getElementById("loginModal");
-    if (modal) modal.style.display = "flex";
-  }
-});
-
-// 🟢 Login trigger from modal
-window.triggerLogin = function () {
-  signInWithPopup(auth, provider).catch(console.error);
-  closeLoginModal();
-};
-
-// ❌ Close modal manually or on backdrop click
-window.closeLoginModal = function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "none";
-};
-document.body.addEventListener('click', (e) => {
-  const user = auth.currentUser;
-
-  // Allowed clicks even if not logged in:
-  // - Inside login modal (#loginModal)
-  // - Login button (#loginBtn or .google-login)
-  // - Modal close button (class .modal-close)
-
   const clickedEl = e.target;
 
-  // Check if click is on allowed elements or inside modal
   const isAllowedClick =
-    user || // if logged in, allow everything
-    clickedEl.closest('#loginModal') || 
+    user || // Logged in? All good
+    clickedEl.closest('#loginModal') ||
     clickedEl.closest('#loginBtn') ||
     clickedEl.closest('.google-login') ||
     clickedEl.classList.contains('modal-close');
@@ -1264,17 +1246,24 @@ document.body.addEventListener('click', (e) => {
   if (!isAllowedClick) {
     e.preventDefault();
     e.stopPropagation();
-
-    // Show the login modal if not already visible
-    const loginModal = document.getElementById('loginModal');
-    if (loginModal.style.display !== 'flex') {
-      loginModal.style.display = 'flex';
+    const modal = document.getElementById('loginModal');
+    if (modal && modal.style.display !== 'flex') {
+      modal.style.display = 'flex';
     }
-
-    // Optionally, flash a warning or shake the modal for UX
-    // You can add that later if you want
   }
 });
+
+// 🟢 Manual login trigger (e.g. from modal button)
+window.triggerLogin = function () {
+  signInWithPopup(auth, provider).catch(console.error);
+  closeLoginModal();
+};
+
+// ❌ Close modal utility
+window.closeLoginModal = function () {
+  const modal = document.getElementById("loginModal");
+  if (modal) modal.style.display = "none";
+};
 </script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
