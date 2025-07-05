@@ -1,878 +1,1405 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<head>
-  <title>CyberChat- Games That Pay $10/Daily</title>
-  <meta name="description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:title" content="Earnify - Games That Pay $10/Daily" />
-  <meta property="og:description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
-  <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtkE0UUTcUC4p9Be4hw5NH-xv6nbhX8I7rAXOkZAufSNBpb5NxKVwOgmeT&s=10" />
-  <meta property="og:type" content="website" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Earnify - Games That Pay $10/Daily" />
-  <meta name="twitter:description" content="Play fun games, earn points, and cash out up to $10 daily with Earnify. Real rewards. No cap." />
-  <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtkE0UUTcUC4p9Be4hw5NH-xv6nbhX8I7rAXOkZAufSNBpb5NxKVwOgmeT&s=10" />
-</head>
-  <style>
-    html, body {
-      margin: 0; padding: 0; overflow: hidden;
-      background: #222;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee;
-      user-select: none;
-      touch-action: none;
-      height: 100%;
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: linear-gradient(180deg, #003300 0%, #006600 100%);
-      border-radius: 12px;
-      box-shadow: 0 0 20px #0f0;
-    }
-    #scoreLabel {
-      position: absolute; top: 10px; left: 10px; font-size: 24px; font-weight: bold;
-      color: #fff;
-      text-shadow: 1px 1px 4px #000;
-      user-select: none;
-    }
-    #lives {
-      position: absolute; top: 10px; right: 10px; font-size: 24px; font-weight: bold;
-      color: #f55;
-      text-shadow: 1px 1px 4px #000;
-      user-select: none;
-    }
-    #restartBtn {
-      margin-top: 20px;
-      font-size: 24px;
-      padding: 10px 30px;
-      background: #0a0;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      box-shadow: 0 0 10px #0a0;
-    }
-    #restartBtn:hover {
-      background: #070;
-    }
-    #hitFlash {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(255,0,0,0.9);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.8s ease-out;
-      z-index: 20;
-    }
-    #wastedText {
-      position: fixed;
-      top: 30%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 80px;
-      font-weight: 900;
-      color: #ff0000;
-      text-shadow: 4px 4px 8px black;
-      font-family: 'Impact', Arial, sans-serif;
-      display: none;
-      z-index: 30;
-      user-select: none;
-      pointer-events: none;
-    }
-    /* Popup overlay */
-    #cashoutPopupOverlay {
-      position: fixed;
-      top:0; left:0; width:100vw; height:100vh;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      z-index: 40;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    /* Popup container */
-    #cashoutPopup {
-      background: #121212;
-      border-radius: 16px;
-      padding: 30px 40px;
-      max-width: 360px;
-      width: 100%;
-      box-shadow: 0 0 20px #0f0;
-      color: #eee;
-      text-align: center;
-    }
-    #cashoutPopup h2 {
-      margin: 0 0 15px;
-      font-size: 36px;
-      color: #0f0;
-      text-shadow: 1px 1px 5px black;
-      user-select: none;
-    }
-    #cashoutPopup p {
-      font-size: 16px;
-      margin-bottom: 20px;
-      user-select: none;
-    }
-    #paypalEmail {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 2px solid #0f0;
-      background: #222;
-      color: #eee;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-    }
-    #paypalEmail:focus {
-      outline: none;
-      border-color: #0f0;
-      box-shadow: 0 0 6px #0f0;
-    }
-    #confirmBtn {
-      background: #0a0;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #0a0;
-      user-select: none;
-    }
-    #confirmBtn:hover:not(:disabled) {
-      background: #070;
-    }
-    #confirmBtn:disabled {
-      background: #055005;
-      cursor: default;
-      box-shadow: none;
-    }
-    #pendingMsg {
-      font-size: 18px;
-      color: #0f0;
-      margin-top: 20px;
-      display: none;
-      user-select: none;
-    }
-    #balanceDisplay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 36px;
-  font-weight: 700;
-  color: #0f0;
-  text-shadow: 1px 1px 6px black;
-  user-select: none;
-  pointer-events: none;
-  z-index: 15;
-}
-  </style>
-  <style>
-  /* Container to center and style the ad */
-  .ad-container {
-    width: 320px;              /* Match ad width */
-    height: 50px;              /* Match ad height */
-    margin: 20px auto;         /* Center horizontally with vertical spacing */
-    border-radius: 12px;       /* Rounded corners for modern feel */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12); /* Soft shadow for subtle depth */
-    overflow: hidden;          /* Hide anything spilling out */
-    background: #f8f8f8;       /* Light background to contrast the ad */
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dlsaccounts</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #000000;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
     display: flex;
-    align-items: center;       /* Vertical center alignment */
-    justify-content: center;   /* Horizontal center */
+    flex-direction: column;
   }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
 
-  /* Optional: add a subtle label above or below */
-  .ad-label {
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    margin-top: 6px;
-  }
-  #restartContainer {
+  height: 60px;
+  width: 100%;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+header::after {
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: none;
-  z-index: 20;
-  text-align: center;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
 }
 
-#restartBtn {
-  padding: 14px 28px;
-  font-size: 18px;
-  font-weight: bold;
-  background-color: #111;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  cursor: not-allowed;
-  opacity: 0.7;
-  transition: all 0.3s ease;
+/* Ensure content starts directly below header */
+main {
+  padding-top: 60px; /* match the header height */
+  background-color: #000;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-#restartBtn:enabled {
-  cursor: pointer;
-  background-color: #28a745;
-  opacity: 1;
+/* Ensure product cards sit neatly under main */
+#productList {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 60px;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  box-sizing: border-box;
 }
-</style>
-<style>
-  .footer-links {
-    max-width: 320px;
-    margin: 12px auto 40px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    font-size: 14px;
-    color: #555;
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .footer-links a {
-    color: #007aff; /* iOS blue */
-    text-decoration: none;
-    margin: 0 10px;
-    transition: color 0.2s ease;
-  }
-
-  .footer-links a:hover {
-    color: #0051a8;
-  }
-</style>
-
-
-<style>
-  .popup-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(8px);
+  .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+    gap: 10px;
   }
-  .popup-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
+  .logo-icon-wrapper {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(145deg, #ff000033, #0000ff33);
+    box-shadow:
+      0 0 6px rgba(255, 0, 255, 0.3),
+      0 0 12px rgba(0, 255, 255, 0.15),
+      inset 0 0 6px rgba(0, 255, 255, 0.1);
+    animation: colorChange 7s linear infinite;
   }
-
-  .popup {
-    background: #fff;
-    border-radius: 20px;
-    width: 320px;
-    padding: 24px 28px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    color: #1c1c1e;
-    text-align: center;
-    user-select: none;
-  }
-
-  .image-wrapper {
-    position: relative;
-    width: 100%;
-    height: 180px;
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 16px;
-    background: #f0f0f0;
-  }
-
-  .image-wrapper img {
+  .logo-icon-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 32px;
-    height: 32px;
-    margin: -16px 0 0 -16px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top: 3px solid #007aff;
     border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-    z-index: 1;
+    object-fit: cover;
+    border: 1px solid #00000088;
   }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  @keyframes colorChange {
+    0%   { box-shadow: 0 0 6px #ff0000aa, 0 0 12px #ff000055, inset 0 0 6px #ff000033; }
+    20%  { box-shadow: 0 0 6px #ff7f00aa, 0 0 12px #ff7f0055, inset 0 0 6px #ff7f0033; }
+    40%  { box-shadow: 0 0 6px #ffff00aa, 0 0 12px #ffff0055, inset 0 0 6px #ffff0033; }
+    60%  { box-shadow: 0 0 6px #00ff00aa, 0 0 12px #00ff0055, inset 0 0 6px #00ff0033; }
+    80%  { box-shadow: 0 0 6px #0000ffaa, 0 0 12px #0000ff55, inset 0 0 6px #0000ff33; }
+    100% { box-shadow: 0 0 6px #ff00ffaa, 0 0 12px #ff00ff55, inset 0 0 6px #ff00ff33; }
   }
-
-  .popup h2 {
-    font-weight: 600;
-    font-size: 22px;
-    margin-bottom: 12px;
-  }
-
-  .popup p {
-    font-size: 16px;
-    line-height: 1.4;
-    margin-bottom: 20px;
-    color: #3a3a3c;
-  }
-
-  .popup .highlight {
+  .logo-text {
+    font-size: 1.3rem;
     font-weight: 700;
-    color: #007aff;
+    letter-spacing: 1px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    user-select: none;
   }
-
-  .popup button {
-    background-color: #007aff;
-    color: white;
-    border: none;
-    border-radius: 14px;
-    padding: 12px 0;
-    width: 100%;
-    font-size: 17px;
+  .user-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .profile-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+  }
+  .login-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(0, 255, 255, 0.12);
+    border: 1.5px solid rgba(0, 255, 255, 0.35);
+    color: #00ffff;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.25s ease;
+    user-select: none;
+    backdrop-filter: blur(6px);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .login-btn:hover {
+    background: rgba(0, 255, 255, 0.25);
+    color: #a0ffff;
+  }
+main {
+  flex: 1;
+  background-color: #000000;
+  padding-top: 64px; /* match desktop header height */
+  display: block; /* no flex to avoid centering */
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* match mobile header height */
+  }
+}
+  /* Prevent text selection and copying everywhere */
+* {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+  user-select: none;         /* Standard */
+  -webkit-touch-callout: none; /* Disable callout on iOS */
+  -webkit-user-drag: none;     /* Disable dragging images/text */
+}
+
+/* Responsive header tweaks */
+@media (max-width: 480px) {
+  header {
+    height: 50px !important; /* smaller height on mobile */
+    padding: 0 12px !important; /* less horizontal padding */
   }
 
-  .popup button:hover {
-    background-color: #005bb5;
+  .logo-icon-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
   }
-  #redirectConfirmPopup {
+
+  .logo-text {
+    font-size: 1rem !important;
+  }
+
+  .profile-pic {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.9rem !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;  /* full width always */
+    height: 50px !important; /* shorter height */
+    padding: 0 12px !important;
+    box-sizing: border-box;  /* avoid overflow */
+  }
+
+  /* rest remains the same */
+  .logo-icon-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem !important;
+  }
+
+  .profile-pic {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.9rem !important;
+  }
+}
+.profile-pic {
+  outline: none;          /* remove default focus ring */
+  -webkit-tap-highlight-color: transparent; /* remove highlight on mobile */
+}
+
+.profile-pic:focus,
+.profile-pic:active {
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.5); /* optional: custom subtle glow for focus */
+}
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;
+    height: 46px !important; /* slightly shorter header */
+    padding: 0 8px !important;
+    box-sizing: border-box;
+  }
+
+  .logo {
+    gap: 6px !important;
+  }
+
+  .logo-icon-wrapper {
+    width: 22px !important;
+    height: 22px !important;
+    padding: 1px !important;
+  }
+
+  .logo-text {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+
+  .profile-pic {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .login-btn {
+    padding: 5px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 16px !important;
+  }
+
+  .user-area {
+    gap: 10px !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 42px !important;       /* tighter height */
+    padding: 0 6px !important;     /* minimal padding */
+    gap: 0;
+  }
+
+  .logo {
+    gap: 4px !important;
+  }
+
+  .logo-icon-wrapper {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0px !important;
+  }
+
+  .logo-text {
+    font-size: 0.75rem !important;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .user-area {
+    gap: 6px !important;
+  }
+
+  .profile-pic {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .login-btn {
+    padding: 4px 10px !important;
+    font-size: 0.75rem !important;
+    border-radius: 14px !important;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 56px !important;         /* ✅ More height for visibility */
+    padding: 0 12px !important;      /* ✅ Room for breathing */
+    box-sizing: border-box;
+  }
+
+  .logo {
+    gap: 8px !important;
+    align-items: center;
+  }
+
+  .logo-icon-wrapper {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 2px !important;
+  }
+
+  .logo-text {
+    font-size: 1rem !important;      /* ✅ Bigger font on mobile */
+    font-weight: 700;
+  }
+
+  .user-area {
+    gap: 10px !important;
+  }
+
+  .profile-pic {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .login-btn {
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 18px !important;
+  }
+}
+/* Reset & Base */
+.product-page * {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.product-page {
+  /* Removed background, padding and container styling */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Card */
+.product-page .card {
+  background: rgba(30, 30, 30, 0.65);
+  backdrop-filter: blur(14px);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 370px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* 3D layered shadows for depth & edges */
+  box-shadow:
+    4px 4px 10px rgba(0, 0, 0, 0.7),
+    inset 1px 1px 4px rgba(255, 255, 255, 0.1),
+    inset -1px -1px 6px rgba(0, 0, 0, 0.8);
+
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+
+.product-page .card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    8px 8px 18px rgba(0, 0, 0, 0.9),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.15),
+    inset -2px -2px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* Card Image */
+.product-page .card img {
+  width: 100%;
+  object-fit: cover;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  background: transparent;
+  animation: none;
+}
+
+/* View All Button */
+.product-page .view-all-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #000;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+
+.product-page .view-all-btn:hover {
+  background: #222;
+}
+
+/* Card Content */
+.product-page .card-content {
+  padding: 20px;
+}
+
+/* Titles & Text */
+.product-page .card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #00fff7;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+}
+
+.product-page .card-description {
+  font-size: 1rem;
+  line-height: 1.5;
+  opacity: 0.85;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+
+/* Rating */
+.product-page .rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #ffcc33;
+  margin-bottom: 14px;
+}
+
+.product-page .rating span {
+  margin-left: 6px;
+  color: #aaa;
+}
+
+/* Seller Profile */
+.product-page .seller-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.product-page .seller-profile img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #00d68f;
+  object-fit: cover;
+}
+
+.product-page .seller-username {
+  font-size: 0.9rem;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-page .verified-badge {
+  font-size: 0.75rem;
+  background: #00d68f;
+  color: #000;
+  padding: 3px 8px;
+  border-radius: 14px;
+  font-weight: 700;
+  user-select: none;
+}
+
+/* Info Bar */
+.product-page .info-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.55;
+  margin-bottom: 18px;
+  color: #999;
+}
+
+/* PRICE: Removed container styling, just clean text now */
+.price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #00fff7; /* crisp cyan */
+  text-align: center;
+  margin: 16px auto 24px;
+  user-select: none;
+  /* No padding, no border, no background */
+}
+
+/* Buy Button */
+.buy-btn {
+  background: #00d68f;
+  color: #000;
+  border: none;
+  padding: 14px 22px;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  width: 80%;
+  margin: 0 auto 30px;
+  display: block;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  user-select: none;
+}
+
+.buy-btn:hover {
+  background: #00b57d;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.message-btn {
+  padding: 8px 16px;
+  background: rgba(0, 255, 255, 0.15);
+  border-radius: 14px;
+  color: #00ffff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+  transition: background 0.2s ease;
+
+  flex-grow: 1;     /* take all leftover space */
+  min-width: 0;     /* avoid flexbox overflow */
+}
+
+.message-btn:hover {
+  background: rgba(0, 255, 255, 0.3);
+}
+
+/* Fullscreen Modal */
+.fullscreen-modal {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: rgba(10, 10, 10, 0.9);
   z-index: 9999;
+  overflow-y: auto;
+  padding: 20px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
 }
 
-#redirectBox {
-  background: #1e1e1e;
-  color: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  text-align: center;
-  width: 300px;
-  box-shadow: 0 0 16px #00ff99;
-  font-family: sans-serif;
+.fullscreen-modal img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: block;
 }
 
-#redirectBox button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
+/* Close modal */
+.close-modal {
+  background: black;
+  color: white;
+  padding: 12px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
 }
 
-#confirmYesBtn {
-  background: #00ff99;
+.close-modal:hover {
+  background: #222;
+}
+/* Responsive tweaks */
+@media (max-width: 500px) {
+  .product-page {
+    padding: 12px;
+  }
+
+  .product-page .card {
+    border-radius: 16px;
+    max-width: 100%;
+  }
+
+  .product-page .card img {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+
+  .buy-btn {
+    width: 90%;
+  }
+}
+
+/* Layout Reset */
+body.mobile .product-page {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.tablet .product-page,
+body.desktop .product-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+body.desktop #productList,
+body.tablet #productList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#productList {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 700px;
+  margin: 60px auto 20px; /* Top margin creates breathing space */
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+/* Make the product card full width inside its container */
+.product-page .card {
+  width: 100%;       /* full width of the grid item */
+  max-width: none;   /* remove max-width limit so it can fill */
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;  /* optional: max width so it doesn’t get crazy wide on big screens */
+}
+
+/* Center the grid container */
+#productList {
+  display: grid;
+  grid-template-columns: 1fr;  /* one column so cards stack vertically and fill container */
+  justify-content: center;     /* center the grid inside container */
+  gap: 24px;
+  width: 100%;
+  max-width: 700px;            /* keep max width reasonable for large screens */
+  margin: 40px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+/* Tighten spacing inside product card */
+.product-page .card-content {
+  padding: 12px 16px; /* less padding inside card */
+}
+
+.product-page .card-title {
+  font-size: 1.1rem;
+  font-weight: 700;      /* bold but not too heavy */
+  margin-bottom: 6px;    /* less margin below title */
+  text-align: center;
+}
+
+.product-page .card-description {
+  font-size: 0.9rem;
+  line-height: 1.3;
+  opacity: 0.85;
+  margin-bottom: 10px;   /* tighter margin */
+  text-align: center;
+}
+
+.product-page .seller-profile {
+  margin-bottom: 8px;    /* less gap */
+  gap: 6px;              /* less space between elements */
+}
+
+.buy-btn {
+  margin-bottom: 12px;   /* less space below button */
+}
+
+/* Fancy price styling */
+.price {
+  font-size: 1.5rem;
+  font-weight: 900;         /* heavy weight */
+  color: #fff;              /* pure white */
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7), 0 0 10px #00d68f;
+  margin: 8px auto 14px;
+  text-align: center;
+  user-select: none;
+  letter-spacing: 0.05em;
+}
+#productList {
+  margin-top: 40px; /* Clean gap between header/section and products */
+}
+@media (max-width: 500px) {
+  #productList {
+    margin-top: 20px;
+  }
+}
+.login-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.login-modal-content {
+  background: rgba(30,30,30,0.9);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 30px 24px;
+  border-radius: 18px;
+  max-width: 90%;
+  width: 360px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+}
+
+.login-modal-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #00ffff;
+}
+
+.login-modal-content p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-login, .modal-close {
+  flex: 1;
+  padding: 10px 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-login {
+  background: #00d68f;
   color: #000;
 }
 
-#confirmNoBtn {
+.modal-login:hover {
+  background: #00b57d;
+}
+
+.modal-close {
+  background: #222;
+  color: white;
+}
+
+.modal-close:hover {
   background: #444;
+}
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.google-login img {
+  width: 20px;
+  height: 20px;
+}
+
+.google-login:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.product-card {
+  background: linear-gradient(145deg, #1e1e1e, #2a2a2a); /* dark glassy vibe */
+  border-radius: 12px;
+  box-shadow:
+    4px 4px 8px rgba(0,0,0,0.7),       /* dark outer shadow for depth */
+    inset 2px 2px 4px rgba(255,255,255,0.05), /* subtle highlight edge */
+    inset -2px -2px 6px rgba(0,0,0,0.7);       /* inset shadow for 3D feel */
+  padding: 20px;
+  color: #eee;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    8px 8px 16px rgba(0,0,0,0.9),
+    inset 3px 3px 5px rgba(255,255,255,0.1),
+    inset -3px -3px 8px rgba(0,0,0,0.8);
+}
+
+/* Optional: smooth text */
+.product-card * {
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media (max-width: 500px) {
+  #productList {
+    margin-top: 12px !important;
+    padding: 0 12px !important;
+    gap: 16px !important;
+  }
+
+  .product-page .card {
+    margin-bottom: 16px !important;
+  }
+
+  .buy-btn {
+    margin-bottom: 16px !important;
+    margin-top: 8px !important;
+  }
+
+  .product-page .card-content {
+    padding: 10px 12px !important;
+  }
+
+  #loadMoreBtn {
+    margin: 20px 0 30px !important;
+  }
+
+  .fullscreen-modal {
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  .product-page {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+@media (max-width: 500px) {
+  #loadMoreBtn {
+    margin: 20px 0 24px !important;
+  }
+}
+@media (max-width: 500px) {
+  #productList {
+    margin-top: 12px !important;
+    padding: 0 12px !important;
+    gap: 16px !important;
+  }
+
+  .product-page .card {
+    margin-bottom: 16px !important;
+  }
+
+  .buy-btn {
+    margin-bottom: 16px !important;
+    margin-top: 8px !important;
+  }
+
+  .product-page .card-content {
+    padding: 10px 12px !important;
+  }
+
+  #loadMoreBtn {
+    margin: 20px 0 30px !important;
+  }
+
+  .fullscreen-modal {
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  .product-page {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* 1) Increase header height & fix vertical alignment */
+header {
+  height: 64px; /* a bit taller */
+  padding: 0 20px;
+}
+
+/* Adjust main padding-top accordingly */
+main {
+  padding-top: 64px; /* match header height */
+}
+
+/* 2) Ensure user-area items fit inside header */
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  height: 100%; /* make sure they don't overflow */
+}
+
+/* Profile pic and login button tweaks */
+.profile-pic, .login-btn {
+  max-height: 40px; /* slightly smaller than header */
+  line-height: normal;
+  box-sizing: border-box;
+}
+@media (max-width: 500px) {
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85); /* stronger background for visibility */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+main {
+  flex: 1;
+  background-color: #000000;
+  padding-top: 64px; /* same as header height */
+}
+main {
+  height: 100%;
+  overflow: auto;
+}
+/* Put this near your existing styles */
+body.loading {
+  overflow: hidden;
+}
+
+#skeletonContainer {
+  position: absolute;
+  top: var(--header-height, 56px); /* adjust if your header is taller */
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: #000;
+  z-index: 999;
+}
+
+  #imageModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .close-modal {
+    background: red;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .skeleton {
+    width: 90vw;
+    max-width: 360px;
+    height: 280px;
+    border-radius: 20px;
+    background: linear-gradient(130deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    margin: 10px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -400% 0; }
+    100% { background-position: 400% 0; }
+  }
+main {
+  padding-top: 64px; /* same height as header */
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* shorter on mobile if your header is smaller there */
+  }
+}
+
+#productList {
+  margin-top: 0 !important; /* kill top margin */
+  padding-top: 0 !important; /* kill padding */
+}
+#productList {
+  margin-top: 0 !important;
+  padding: 0 12px !important; /* keep horizontal padding if needed */
+}
+/* Container styling for ads row */
+#adContainer {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding: 16px;
+  margin: 20px 0;
+  -webkit-overflow-scrolling: touch;
+}
+#adContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.ad-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 280px;
+  scroll-snap-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  color: #f1f1f1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.ad-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+.ad-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 18px 18px 0 0;
+  display: block;
+}
+
+.ad-content {
+  padding: 14px 16px;
+}
+
+.ad-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.visit-ad-btn {
+  background: linear-gradient(135deg, #0a84ff, #007aff);
+  border: none;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.visit-ad-btn:hover {
+  background: linear-gradient(135deg, #007aff, #005fcc);
+}
+
+.ad-title {
+  max-width: 60%;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #fff;
 }
+
+.sponsored-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+#adContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 16px 0;
+  margin: 30px 0;
+}
+
+.ad-card {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  color: #f1f1f1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.ad-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+.ad-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 18px 18px 0 0;
+  display: block;
+}
+
+/* Sponsored badge */
+.sponsored-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+.ad-content {
+  padding: 16px;
+}
+
+.ad-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.visit-ad-btn {
+  background: linear-gradient(135deg, #0a84ff, #007aff);
+  border: none;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.visit-ad-btn:hover {
+  background: linear-gradient(135deg, #007aff, #005fcc);
+}
+
+.ad-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  max-width: 60%;
+}
+@media (max-width: 600px) {
+  .ad-card {
+    width: 95%;
+  }
+}
+</style>
 </style>
 </head>
 <body>
 
-<div class="popup-overlay" id="iosPopup">
-  <div class="popup" role="alert" aria-modal="true">
-    <div class="image-wrapper">
-      <div class="spinner" id="imgSpinner"></div>
-      <img src="https://i.imgur.com/sHuifkc.jpeg" alt="Reward Info" id="popupImage" />
+<header>
+  <div class="logo">
+    <div class="logo-icon-wrapper">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
     </div>
-    <h2>Your Goal</h2>
-    <p>Reach <span class="highlight">100 points</span> to exchange for <span class="highlight">$1 via PayPal</span>.</p>
-    <button id="popupCloseBtn" aria-label="Close popup">Got it</button>
+    <div class="logo-text">DLSACCOUNTS</div>
+  </div>
+  <div class="user-area" id="userArea">
+    <!-- Profile pic or login button shows here -->
+    <button class="login-btn" id="loginBtn">Login</button>
+  </div>
+</header>
+
+<main>
+  <div class="product-page">
+
+    <!-- ✅ Product Cards Go Here -->
+    <div id="productList" class="product-grid"></div>
+
+    <!-- ✅ Skeleton Loading Placeholder -->
+    <div id="skeletonContainer"></div>
+
+    <!-- ✅ Fullscreen Image Modal -->
+    <div class="fullscreen-modal" id="imageModal">
+      <button class="close-modal" onclick="closeModal()">Close</button>
+    </div>
+
+  </div>
+</main>
+<!-- 🔐 Login Modal -->
+<div id="loginModal" class="login-modal" onclick="closeLoginModal()">
+  <div class="login-modal-content" onclick="event.stopPropagation()">
+    <h2>Please Log In</h2>
+    <p>We require each user to be logged in for the safety of our community and to uniquely identify every action made.</p>
+
+    <!-- Google Login Button -->
+    <button id="loginBtn" class="google-login" onclick="triggerLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
+      <span>Continue with Google</span>
+    </button>
+
+    <!-- Close Button -->
+    <button onclick="closeLoginModal()" class="modal-close">Close</button>
   </div>
 </div>
-
-<script>
-  const popup = document.getElementById('iosPopup');
-  const closeBtn = document.getElementById('popupCloseBtn');
-  const popupImage = document.getElementById('popupImage');
-  const spinner = document.getElementById('imgSpinner');
-
-  function showPopup() {
-    popup.classList.add('active');
-  }
-
-  function hidePopup() {
-    popup.classList.remove('active');
-  }
-
-  closeBtn.addEventListener('click', hidePopup);
-
-  // Show the popup after delay
-  window.addEventListener('load', () => {
-    setTimeout(showPopup, 500);
-  });
-
-  // Hide spinner when image is fully loaded
-  popupImage.addEventListener('load', () => {
-    spinner.style.display = 'none';
-  });
-
-  // Also handle image load fail
-  popupImage.addEventListener('error', () => {
-    spinner.style.display = 'none';
-    popupImage.style.display = 'none';
-  });
-</script>
-
-</head>
-<body>
-
-<div id="scoreLabel">Score: 0</div>
-<div id="balanceDisplay">$0.000</div>
-<div id="lives">Lives: 3</div>
-
-<div id="restartContainer" style="display: none;">
-  <button id="restartBtn" disabled>Restart in 10s...</button>
-</div>
-<div id="hitFlash"></div>
-<div id="wastedText">WASTED</div>
-
-<!-- Cashout popup -->
-<div id="cashoutPopupOverlay">
-  <div id="cashoutPopup">
-    <h2>$1 EARNED</h2>
-    <p>You earned $1 for completing this game.<br>Enter your PayPal email to get paid:</p>
-    <input type="email" id="paypalEmail" placeholder="you@example.com" autocomplete="email" />
-    <button id="confirmBtn" disabled>Confirm & Cash Out</button>
-    <div id="pendingMsg">Pending payment... Please allow 10 to 30 minutes for transfer.</div>
-  </div>
-</div>
-<div id="redirectConfirmPopup" style="display: none;">
-  <div id="redirectBox">
-    <p><strong>Redirect to final step?</strong><br>CyberChat wants to redirect you to complete your payout.</p>
-    <button id="confirmYesBtn">Yes</button>
-    <button id="confirmNoBtn">No</button>
-  </div>
-</div>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
-<div class="ad-container" style="width:320px; height:50px; margin:20px auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.12); overflow:hidden; background:#f8f8f8; display:flex; align-items:center; justify-content:center;"></div>
-
-<div class="ad-label">Sponsored</div>
-
-<div class="footer-links">
-  <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> |
-  <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> |
-  <a href="/contact-us.html" target="_blank" rel="noopener noreferrer">Contact Us</a>
-</div>
-<script>
-(() => {
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-
-  const scoreLabel = document.getElementById('scoreLabel');
-  const livesEl = document.getElementById('lives');
-  const restartBtn = document.getElementById('restartBtn');
-  const restartContainer = document.getElementById('restartContainer');
-
-  const hitFlash = document.getElementById('hitFlash');
-  const wastedText = document.getElementById('wastedText');
-
-  const cashoutPopupOverlay = document.getElementById('cashoutPopupOverlay');
-  const paypalEmailInput = document.getElementById('paypalEmail');
-  const confirmBtn = document.getElementById('confirmBtn');
-  const pendingMsg = document.getElementById('pendingMsg');
-
-  const balanceDisplay = document.getElementById('balanceDisplay');
-  let balance = 0;
-
-  const ballRadius = 25;
-  const playerY = canvas.height - ballRadius - 30;
-
-  let playerX = canvas.width / 2;
-  let targetX = playerX;
-
-  let enemies = [];
-  let enemyWidth = 40;
-  let enemyHeight = 80;
-  let enemySpeed = 3;
-  let spawnInterval = 1500;
-
-  let score = 0;
-  let lives = 3;
-
-  let gameRunning = true;
-  let gameEnded = false;
-
-  // Swipe detection
-  let touchStartX = 0;
-  let touchEndX = 0;
-
-  function drawFootball(x, y) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, 0, ballRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-
-    const patchRadius = ballRadius / 3;
-    const angles = [0, 60, 120, 180, 240, 300];
-    angles.forEach(angle => {
-      const rad = angle * Math.PI / 180;
-      ctx.beginPath();
-      ctx.moveTo(patchRadius * Math.cos(rad), patchRadius * Math.sin(rad));
-      ctx.lineTo(patchRadius * Math.cos(rad + Math.PI/3), patchRadius * Math.sin(rad + Math.PI/3));
-      ctx.lineTo(patchRadius * Math.cos(rad + 2*Math.PI/3), patchRadius * Math.sin(rad + 2*Math.PI/3));
-      ctx.closePath();
-      ctx.fillStyle = '#000';
-      ctx.fill();
-    });
-    ctx.restore();
-  }
-
-  function drawEnemy(enemy) {
-    ctx.fillStyle = '#880000';
-    ctx.fillRect(enemy.x, enemy.y, enemyWidth, enemyHeight);
-  }
-
-  function spawnEnemy() {
-    const x = Math.random() * (canvas.width - enemyWidth);
-    enemies.push({ x, y: -enemyHeight });
-  }
-
-  function updateEnemies() {
-    for (let i = enemies.length - 1; i >= 0; i--) {
-      enemies[i].y += enemySpeed;
-
-      if (collisionCircleRect(playerX, playerY, ballRadius, enemies[i].x, enemies[i].y, enemyWidth, enemyHeight)) {
-        enemies.splice(i, 1);
-        loseLife();
-      } else if (enemies[i].y > canvas.height) {
-        enemies.splice(i, 1);
-        incrementScore();
-      }
-    }
-  }
-
-  function collisionCircleRect(cx, cy, cr, rx, ry, rw, rh) {
-    let closestX = Math.max(rx, Math.min(cx, rx + rw));
-    let closestY = Math.max(ry, Math.min(cy, ry + rh));
-    let dx = cx - closestX;
-    let dy = cy - closestY;
-    return (dx * dx + dy * dy) < (cr * cr);
-  }
-
-  function loseLife() {
-    if (!gameRunning) return;
-    lives--;
-    updateLives();
-
-    // Reset balance on life lost
-    balance = 0;
-    updateBalance();
-
-    // Intense red flash - show fully and hold longer
-    hitFlash.style.opacity = '1';
-    setTimeout(() => {
-      hitFlash.style.opacity = '0';
-    }, 800);
-
-    if (lives <= 0) {
-      showWasted();
-    }
-  }
-
-  function incrementScore() {
-    if (!gameRunning) return;
-    score++;
-
-    // Update balance by $0.01 per point (change as you want)
-    balance = score * 0.01;
-    updateBalance();
-
-    // At 100 points, end game and show cashout popup
-    if (score === 100) {
-      showCashoutPopup();
-      return;
-    }
-
-    updateScore();
-  }
-
-  function updateScore() {
-    // Change label to "Points" if 1 or more, else "Score"
-    if (score >= 1) {
-      scoreLabel.textContent = `Points: ${score}`;
-    } else {
-      scoreLabel.textContent = `Score: ${score}`;
-    }
-  }
-
-  function updateLives() {
-    livesEl.textContent = 'Lives: ' + lives;
-  }
-
-  function updateBalance() {
-    if (gameRunning) {
-      balanceDisplay.textContent = '$' + balance.toFixed(3);
-      balanceDisplay.style.display = 'block';
-    } else {
-      balanceDisplay.style.display = 'none';
-    }
-  }
-
-  function showWasted() {
-  gameRunning = false;
-  wastedText.style.display = 'block';
-  restartContainer.style.display = 'block';
-
-  // Show ad script once
-  showAdScript();
-
-  const restartBtn = document.getElementById('restartBtn');
-  let countdown = 10;
-  restartBtn.disabled = true;
-  restartBtn.textContent = `Restart in ${countdown}s...`;
-
-  const interval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      restartBtn.textContent = `Restart in ${countdown}s...`;
-    } else {
-      clearInterval(interval);
-      restartBtn.disabled = false;
-      restartBtn.textContent = 'Restart (Click to Continue)';
-    }
-  }, 1000);
-
-  restartBtn.onclick = () => {
-    window.location.href = "https://www.profitableratecpm.com/mtux2f3g?key=10f50e5fc3d4ec2f75c6e32cd767b041";
-  };
-}
-
-  function showCashoutPopup() {
-    gameRunning = false;
-    // Freeze game, show popup
-    cashoutPopupOverlay.style.display = 'flex';
-    scoreLabel.textContent = `Points: ${score}`;
-    balanceDisplay.style.display = 'none';
-  }
-
-  function restartGame() {
-    score = 0;
-    lives = 3;
-    enemies = [];
-    enemySpeed = 3;
-    spawnInterval = 1500;
-    updateScore();
-    updateLives();
-    updateBalance();
-    wastedText.style.display = 'none';
-    hitFlash.style.opacity = '0';
-    cashoutPopupOverlay.style.display = 'none';
-    pendingMsg.style.display = 'none';
-    confirmBtn.disabled = true;
-    paypalEmailInput.value = '';
-    restartContainer.style.display = 'none';
-    playerX = canvas.width / 2;
-    targetX = playerX;
-    gameRunning = true;
-    requestAnimationFrame(gameLoop);
-  }
-
-  function updatePlayer() {
-    let dx = targetX - playerX;
-    playerX += dx * 0.2;
-    playerX = Math.min(Math.max(ballRadius, playerX), canvas.width - ballRadius);
-  }
-
-  function handleSwipe() {
-    let diffX = touchEndX - touchStartX;
-    if (Math.abs(diffX) < 30) return;
-
-    if (diffX > 0) {
-      targetX = Math.min(targetX + 80, canvas.width - ballRadius);
-    } else {
-      targetX = Math.max(targetX - 80, ballRadius);
-    }
-  }
-
-  // Email validation helper
-  function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email.toLowerCase());
-  }
-
-  paypalEmailInput.addEventListener('input', () => {
-    confirmBtn.disabled = !validateEmail(paypalEmailInput.value);
-  });
-
- confirmBtn.addEventListener('click', () => {
-  confirmBtn.disabled = true;
-  paypalEmailInput.disabled = true;
-  confirmBtn.textContent = 'Confirming...';
-
-  // Simulate a short delay before redirect prompt
-  setTimeout(() => {
-    document.getElementById('redirectConfirmPopup').style.display = 'flex';
-  }, 2000); // 2 seconds for suspense
-});
-
-  let lastSpawn = performance.now();
-
-  function gameLoop(timestamp) {
-  if (!gameRunning) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  updatePlayer();
-  updateEnemies();
-
-  drawFootball(playerX, playerY);
-  enemies.forEach(drawEnemy);
-
-  if (timestamp - lastSpawn > spawnInterval) {
-    // If score between 80 and 100, spawn 2 enemies at once for extra chaos
-    if (score >= 70 && score < 100) {
-      spawnEnemy();
-      spawnEnemy();
-    } else {
-      spawnEnemy();
-    }
-    lastSpawn = timestamp;
-
-    // Increase difficulty faster in final stretch
-    if (score >= 70 && score < 100) {
-      spawnInterval = Math.max(300, spawnInterval - 30); // drop interval faster, but never below 300ms
-      enemySpeed += 0.1; // boost speed more aggressively
-    } else if (spawnInterval > 500) {
-      spawnInterval -= 15;
-      enemySpeed += 0.03;
-    }
-  }
-
-  requestAnimationFrame(gameLoop);
-}
-
-  canvas.addEventListener('touchstart', e => {
-    if (!gameRunning) return;
-    const touch = e.touches[0];
-    touchStartX = touch.clientX;
-  });
-
-  canvas.addEventListener('touchend', e => {
-    if (!gameRunning) return;
-    const touch = e.changedTouches[0];
-    touchEndX = touch.clientX;
-    handleSwipe();
-  });
-
-  restartBtn.addEventListener('click', restartGame);
-
-  updateScore();
-  updateLives();
-  updateBalance();
-  requestAnimationFrame(gameLoop);
-
-})();
-document.getElementById('confirmYesBtn').addEventListener('click', () => {
-  window.location.href = "https://cyberchat.online/securedcashout";
-});
-
-document.getElementById('confirmNoBtn').addEventListener('click', () => {
-  document.getElementById('redirectConfirmPopup').style.display = 'none';
-});
-</script>
-
-
-<script>
-  const adContainer = document.querySelector('.ad-container');
-
-  // List your ad configs here
-  const ads = [
-    {
-      key: 'f17f4bf893957f37c1f0b072d1f31673',
-      src: '//www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js'
-    },
-    {
-      key: '422464b66941bc97358dab788b05bd0b',
-      src: '//www.highperformanceformat.com/422464b66941bc97358dab788b05bd0b/invoke.js'
-    },
-    {
-      key: '31ec87f8cba772b5dfffb708faede576',
-      src: '//www.highperformanceformat.com/31ec87f8cba772b5dfffb708faede576/invoke.js'
-    },
-    {
-      key: '2a9930a498db1f8096726619a2fe13ff',
-      src: '//www.highperformanceformat.com/2a9930a498db1f8096726619a2fe13ff/invoke.js'
-    }
-  ];
-
-  let currentIndex = 0;
-
-  function loadAd() {
-    adContainer.innerHTML = ''; // clear previous ad
-
-    const ad = ads[currentIndex];
-
-    // Inject atOptions script dynamically
-    const scriptConfig = document.createElement('script');
-    scriptConfig.type = 'text/javascript';
-    scriptConfig.text = `
-      atOptions = {
-        'key' : '${ad.key}',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
-        'params' : {}
-      };
-    `;
-    adContainer.appendChild(scriptConfig);
-
-    // Inject ad script
-    const scriptAd = document.createElement('script');
-    scriptAd.type = 'text/javascript';
-    scriptAd.src = ad.src;
-    adContainer.appendChild(scriptAd);
-
-    // Move to next ad for next refresh, loop back at end
-    currentIndex = (currentIndex + 1) % ads.length;
-  }
-
-  loadAd(); // initial load
-  setInterval(loadAd, 20000); // rotate every 15 seconds
-</script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+// ✅ Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// ✅ Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// ✅ Init Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ✅ DOM refs
+const userArea = document.getElementById('userArea');
+const loginBtn = document.getElementById('loginBtn');
+
+// ✅ Login button click
+loginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider).catch(console.error);
+});
+
+// ✅ Track auth state
+onAuthStateChanged(auth, (user) => {
+  window.isUserLoggedIn = !!user;
+  userArea.innerHTML = '';
+
+  if (user) {
+    // 🔓 Show profile image
+    const img = document.createElement('img');
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
+    img.alt = user.displayName || 'User';
+    img.title = user.displayName || 'User';
+    img.className = 'profile-pic';
+    img.addEventListener('click', () => {
+      window.location.href = '/myprofile';
+    });
+    userArea.appendChild(img);
+
+    // 🧹 Auto-close modal
+    closeLoginModal();
+  } else {
+    // 🚫 Show cloned login button
+    const clonedBtn = loginBtn.cloneNode(true);
+    clonedBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(console.error);
+    });
+    userArea.appendChild(clonedBtn);
+  }
+});
+
+// ✅ Show login modal if user not logged in and clicked outside allowed area
+document.body.addEventListener('click', (e) => {
+  const user = auth.currentUser;
+  const clickedEl = e.target;
+
+  const isAllowedClick =
+    user || // Logged in? All good
+    clickedEl.closest('#loginModal') ||
+    clickedEl.closest('#loginBtn') ||
+    clickedEl.closest('.google-login') ||
+    clickedEl.classList.contains('modal-close');
+
+  if (!isAllowedClick) {
+    e.preventDefault();
+    e.stopPropagation();
+    const modal = document.getElementById('loginModal');
+    if (modal && modal.style.display !== 'flex') {
+      modal.style.display = 'flex';
+    }
+  }
+});
+
+// 🟢 Manual login trigger (e.g. from modal button)
+window.triggerLogin = function () {
+  signInWithPopup(auth, provider).catch(console.error);
+  closeLoginModal();
+};
+
+// ❌ Close modal utility
+window.closeLoginModal = function () {
+  const modal = document.getElementById("loginModal");
+  if (modal) modal.style.display = "none";
+};
+</script>
+  <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+<script>
+  // Firebase setup (same as your config)
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -880,153 +1407,261 @@ document.getElementById('confirmNoBtn').addEventListener('click', () => {
     projectId: "itzhoyoo-f9f7e",
     storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  const LIMIT = 5;
+  const ADS_LIMIT = 1;
+  let lastKey = null;
+  let loading = false;
 
-  // Session vars
-  let clickCount = 0;
-  let maxScrollPercent = 0;
-  const sessionStart = Date.now();
-  const referrer = document.referrer || 'Direct / Unknown';
-  const pageUrl = window.location.href;
-  const userAgent = navigator.userAgent;
-
-  // Visitor location cache
-  let visitorCity = 'Unknown', visitorCountry = 'Unknown';
-
-  // Fetch legit visitor location
-  async function fetchVisitorLocation() {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const data = await res.json();
-      visitorCity = data.city || 'Unknown';
-      visitorCountry = data.country_name || 'Unknown';
-    } catch (err) {
-      console.warn('Location fetch failed:', err);
+  function showSkeletons() {
+    document.body.classList.add("loading");
+    const container = document.getElementById("skeletonContainer");
+    container.innerHTML = '';
+    container.style.display = 'flex';
+    for (let i = 0; i < LIMIT; i++) {
+      const skel = document.createElement("div");
+      skel.className = "skeleton";
+      container.appendChild(skel);
     }
   }
 
-  // Scroll depth tracker
-  function updateScrollDepth() {
-    const scrollTop = window.scrollY || window.pageYOffset;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    if (docHeight <= 0) return;
-    const scrollPercent = Math.min(100, Math.floor((scrollTop / docHeight) * 100));
-    if (scrollPercent > maxScrollPercent) maxScrollPercent = scrollPercent;
+  function hideSkeletons() {
+    document.body.classList.remove("loading");
+    const container = document.getElementById("skeletonContainer");
+    container.innerHTML = '';
+    container.style.display = 'none';
   }
 
-  // Format date/time helper
-  function getFormattedDateTime(timestamp) {
-    const d = new Date(timestamp);
-    const pad = (n) => n.toString().padStart(2, '0');
-    return {
-      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-      time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-    };
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 
-  // Firebase session ref key
-  let sessionKey = null;
+  function renderProduct(product, id) {
+    const mainImage = product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image';
+    const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
+    const sellerUsername = product.seller?.username || 'Unknown Seller';
+    const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
+    const sellerUid = product.seller?.uid || null;
 
-  async function saveSessionData() {
-    const sessionEnd = Date.now();
-    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
-    const { date, time } = getFormattedDateTime(sessionEnd);
+    const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
 
-    const sessionData = {
-      timestampStart: sessionStart,
-      timestampEnd: sessionEnd,
-      sessionDuration,
-      date,
-      time,
-      clickCount,
-      maxScrollPercent,
-      city: visitorCity,
-      country: visitorCountry,
-      referrer,
-      page: pageUrl,
-      userAgent
-    };
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 12px;" loading="lazy" />
+      <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>
+      <div class="card-content">
+        <div class="card-title">${product.title || 'Untitled'}</div>
+        <div class="card-description">${product.description || ''}</div>
+        <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+          <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy" />
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span>${sellerUsername} ${verifiedBadge}</span>
+            ${messageBtnHTML}
+          </div>
+        </div>
+      </div>
+      <div class="price">$${product.price !== undefined ? parseFloat(product.price).toFixed(2) : '0.00'}</div>
+      <button class="buy-btn" onclick="buyProduct('${id}')">Buy Now</button>
+    `;
+    document.getElementById("productList").appendChild(card);
+  }
 
-    try {
-      if (!sessionKey) {
-        const sessionRef = ref(db, 'visits');
-        const newSessionRef = await push(sessionRef, sessionData);
-        sessionKey = newSessionRef.key;
-      } else {
-        const sessionRef = ref(db, `visits/${sessionKey}`);
-        await update(sessionRef, sessionData);
-      }
-    } catch (err) {
-      console.error('Failed to save session data:', err);
+  function messageUser(productId) {
+    if (!productId) {
+      alert("Missing product ID.");
+      return;
+    }
+    window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
+  }
+
+  async function loadAds() {
+    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
+    const adsData = adsSnapshot.val();
+    if (!adsData) return;
+
+    const adsEntries = shuffleArray(Object.entries(adsData));
+    const container = document.createElement('div');
+    container.id = 'adContainer';
+
+    for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
+      const adCard = document.createElement("div");
+      adCard.className = "ad-card";
+
+      const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
+      const adTitle = ad.title?.trim() || "Sponsored Ad";
+      const adUrl = ad.url?.trim() || "#";
+
+      adCard.innerHTML = `
+        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
+          <div class="sponsored-badge">Sponsored</div>
+          <img src="${adImage}" alt="${adTitle}" loading="lazy">
+          <div class="ad-content">
+            <div class="ad-footer">
+              <button class="visit-ad-btn">Visit Ad</button>
+              <div class="ad-title">${adTitle}</div>
+            </div>
+          </div>
+        </a>
+      `;
+      container.appendChild(adCard);
+    }
+
+    document.getElementById("productList").appendChild(container);
+  }
+
+  function openModal(images) {
+    const modal = document.getElementById("imageModal");
+    modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
+    images.forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.maxWidth = "90%";
+      img.style.maxHeight = "80vh";
+      img.style.borderRadius = "20px";
+      img.style.marginBottom = "20px";
+      modal.appendChild(img);
+    });
+    modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById("imageModal").style.display = 'none';
+  }
+
+  function buyProduct(id) {
+    window.location.href = `/product?id=${id}`;
+  }
+
+  async function loadMore() {
+    if (loading) return;
+    loading = true;
+    showSkeletons();
+
+    let ref = db.ref("/dlsaccounts").orderByKey().limitToFirst(LIMIT + 1);
+    if (lastKey) {
+      ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);
+    }
+
+    const snapshot = await ref.once("value");
+    const data = snapshot.val();
+    hideSkeletons();
+
+    if (!data) {
+      window.removeEventListener('scroll', onScroll);
+      loading = false;
+      return;
+    }
+
+    let entries = Object.entries(data);
+    if (entries.length > LIMIT) {
+      lastKey = entries[LIMIT - 1][0];
+      entries.length = LIMIT;
+    } else {
+      window.removeEventListener('scroll', onScroll);
+    }
+
+    entries = shuffleArray(entries);
+    for (const [id, product] of entries) {
+      renderProduct(product, id);
+      lastKey = id;
+    }
+
+    await loadAds();
+    loading = false;
+  }
+
+  function onScroll() {
+    if (
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 &&
+      !loading
+    ) {
+      loadMore();
     }
   }
 
-  // Count clicks
-  document.addEventListener('click', () => {
-    clickCount++;
-  });
-
-  // Scroll depth throttle
-  let scrollTimeout = null;
-  window.addEventListener('scroll', () => {
-    if (scrollTimeout) return;
-    scrollTimeout = setTimeout(() => {
-      updateScrollDepth();
-      scrollTimeout = null;
-    }, 500);
-  });
-
-  // On unload, try sendBeacon final save
-  window.addEventListener('unload', () => {
-    const sessionEnd = Date.now();
-    const sessionDuration = Math.floor((sessionEnd - sessionStart) / 1000);
-    const { date, time } = getFormattedDateTime(sessionEnd);
-
-    const sessionData = {
-      timestampStart: sessionStart,
-      timestampEnd: sessionEnd,
-      sessionDuration,
-      date,
-      time,
-      clickCount,
-      maxScrollPercent,
-      city: visitorCity,
-      country: visitorCountry,
-      referrer,
-      page: pageUrl,
-      userAgent
-    };
-
-    if (sessionKey) {
-      const firebaseUrl = `https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/visits/${sessionKey}.json`;
-
-      const blob = new Blob([JSON.stringify(sessionData)], { type: 'application/json' });
-
-      navigator.sendBeacon(firebaseUrl, blob);
-    }
-  });
-
-  // Initialize tracking
-  (async () => {
-    await fetchVisitorLocation();
-    await saveSessionData(); // Initial save
-  })();
-
-  // Autosave every 10 seconds
-  setInterval(saveSessionData, 10_000);
+  window.onload = () => {
+    loadMore();
+    window.addEventListener('scroll', onScroll);
+  };
 </script>
 <script>
-function showAdScript() {
-  const script = document.createElement('script');
-  script.src = "//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js";
-  document.body.appendChild(script);
-}
+  function detectDeviceAndApplyClasses() {
+    const width = window.innerWidth;
+    const ua = navigator.userAgent.toLowerCase();
+
+    const isMobile = /android|iphone|ipod/.test(ua);
+    const isTablet = /ipad|tablet/.test(ua) || (width > 500 && width < 1024);
+
+    document.body.classList.remove('mobile', 'tablet', 'desktop');
+
+    if (isMobile || width < 500) {
+      document.body.classList.add('mobile');
+    } else if (isTablet) {
+      document.body.classList.add('tablet');
+    } else {
+      document.body.classList.add('desktop');
+    }
+  }
+
+  // Run on load
+  detectDeviceAndApplyClasses();
+
+  // Run on resize too (responsive AF)
+  window.addEventListener('resize', detectDeviceAndApplyClasses);
+</script>
+<script>
+  const isMobile = window.innerWidth <= 800;
+  let loading = false;
+
+  function loadMore() {
+    if (loading) return;
+    loading = true;
+
+    // Your existing load logic here
+    // Don't forget to reset loading = false at the end
+  }
+
+  if (!isMobile) {
+    // Infinite scroll for desktop
+    window.addEventListener('scroll', () => {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        loadMore();
+      }
+    });
+  }
+</script>
+<script>
+  // You can tweak the width if needed (e.g., 768px, 1024px depending on your layout)
+  const hideAdsOn = window.innerWidth >= 800; // large screens and faked desktop mode
+
+  if (hideAdsOn) {
+    const el = document.getElementById('mobileOnly');
+    if (el) el.style.display = 'none';
+
+    // Also optionally trigger auto-load
+    window.addEventListener('scroll', () => {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+        if (typeof loadMore === 'function') loadMore();
+      }
+    });
+  }
+  window.addEventListener('scroll', () => {
+  const header = document.querySelector('header');
+  if (window.scrollY > 10) {
+    header.style.boxShadow = '0 2px 10px rgba(0,255,255,0.15)';
+  } else {
+    header.style.boxShadow = 'none';
+  }
+});
 </script>
 </body>
 </html>
