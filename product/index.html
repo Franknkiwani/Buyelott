@@ -348,9 +348,89 @@
   color: #ccc;
   font-weight: 500;
 }
+header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15); /* semi-transparent white */
+  backdrop-filter: saturate(180%) blur(12px); /* the glass blur magic */
+  -webkit-backdrop-filter: saturate(180%) blur(12px); /* Safari support */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* subtle line */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow for depth */
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  z-index: 9999; /* top layer, no getting behind anything */
+  user-select: none;
+}
+
+/* Keep share button styling but with some transparency */
+#shareButton {
+  background: rgba(29, 161, 242, 0.8);
+  box-shadow: 0 2px 10px rgba(29, 161, 242, 0.4);
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+#shareButton:hover {
+  background: rgba(29, 161, 242, 1);
+  box-shadow: 0 4px 15px rgba(29, 161, 242, 0.7);
+}
+header {
+  border-radius: 0 0 20px 20px; /* curves at bottom left & right */
+  /* keep everything else from before */
+}
+
+#shareButton {
+  border-radius: 20px; /* fully rounded pill shape */
+}
 </style>
 </head>
 <body>
+
+  <header style="
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    z-index: 20;
+  ">
+    <div id="shareButton" onclick="shareProduct()" style="
+      background: #1da1f2; 
+      color: #fff; 
+      font-size: 14px; 
+      padding: 8px 14px; 
+      border-radius: 14px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      user-select: none;
+    ">
+      Share
+    </div>
+    <h1 style="
+      flex: 1; 
+      text-align: center; 
+      margin: 0; 
+      font-size: 18px; 
+      font-weight: 700; 
+      color: #111;
+      user-select: none;
+    ">
+      Product Details
+    </h1>
+    <!-- Right side empty for now, can add icons or buttons later -->
+    <div style="width: 48px;"></div>
+  </header>
 
   <div id="product" class="product-container" style="display: none;"></div>
   <div id="notFound" class="not-found" style="display: none;">🚫 No product found.</div>
@@ -374,9 +454,8 @@
     <textarea id="commentInput" placeholder="Write your comment..." rows="3" style="width: 100%; margin-top: 10px; border-radius: 12px; padding: 10px;"></textarea>
     <button onclick="submitComment()" style="margin-top: 10px; padding: 12px; border-radius: 12px; background: #1da1f2; border: none; color: white; font-size: 16px;">Submit Review</button>
   </div>
-<div id="shareButton" onclick="shareProduct()" style="position:absolute; top:10px; left:10px; z-index:10; background:#1da1f2; color:#fff; font-size:14px; padding:8px 14px; border-radius:14px; cursor:pointer; font-weight:600; box-shadow:0 2px 10px rgba(0,0,0,0.2);">
-  Share
-</div>
+
+</body>
   <div id="commentsList" style="margin-top: 30px;"></div>
 
 <style>
@@ -600,6 +679,7 @@
     </div>
   </div>
 </div>
+<div
 <div id="loadingScreen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff;">
   <div style="margin-bottom:24px; font-size:18px; font-weight:600;">Preparing your product...</div>
 
@@ -642,7 +722,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
