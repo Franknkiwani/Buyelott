@@ -1336,7 +1336,7 @@ window.closeLoginModal = function () {
             <span>${sellerUsername} ${verifiedBadge}</span>
             ${sellerUid 
               ? `<button class="message-btn" onclick="messageUser('${sellerUid}', '${id}')">Message</button>` 
-              : `<button class="message-btn" disabled title="No seller info">Message</button>`}
+              : `<button class="message-btn" onclick="messageUser('', '${id}')">Message</button>`}
           </div>
         </div>
       </div>
@@ -1353,14 +1353,21 @@ window.closeLoginModal = function () {
       return;
     }
 
-    if (!sellerUid || !productId) {
-      alert("Missing seller or product information.");
+    if (!productId) {
+      alert("Missing product information.");
       return;
     }
 
-    const encodedUid = encodeURIComponent(sellerUid);
-    const encodedPid = encodeURIComponent(productId);
-    const chatUrl = `/messages?user=${encodedUid}&product=${encodedPid}`;
+    if (!sellerUid) {
+      alert("Seller ID missing.");
+      // Redirect anyway with product only
+      const chatUrl = `/messages?product=${encodeURIComponent(productId)}`;
+      window.location.href = chatUrl;
+      return;
+    }
+
+    // Both sellerUid and productId present
+    const chatUrl = `/messages?user=${encodeURIComponent(sellerUid)}&product=${encodeURIComponent(productId)}`;
     window.location.href = chatUrl;
   }
 
