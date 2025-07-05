@@ -1059,60 +1059,190 @@ main {
 /* Container styling for ads row */
 #adContainer {
   display: flex;
-  gap: 16px; /* space between ads */
-  justify-content: center; /* center the row */
-  flex-wrap: nowrap; /* no wrapping, keep in one row */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding: 16px;
   margin: 20px 0;
+  -webkit-overflow-scrolling: touch;
+}
+#adContainer::-webkit-scrollbar {
+  display: none;
 }
 
-/* Individual ad cards inside the container */
 .ad-card {
-  flex: 1 1 30%; /* each ad takes about 30% width, flexibly */
-  max-width: 320px; /* cap max width for bigger screens */
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  position: relative;
+  flex: 0 0 auto;
+  width: 280px;
+  scroll-snap-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  color: #ddd;
-  transition: transform 0.2s ease;
+  color: #f1f1f1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
 
 .ad-card:hover {
-  transform: scale(1.03);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
 }
 
 .ad-card img {
   width: 100%;
-  border-radius: 12px 12px 0 0;
+  height: auto;
+  object-fit: cover;
+  border-radius: 18px 18px 0 0;
   display: block;
 }
 
-/* Ad content inside card */
 .ad-content {
-  padding: 10px;
+  padding: 14px 16px;
+}
+
+.ad-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.visit-ad-btn {
+  background: linear-gradient(135deg, #0a84ff, #007aff);
+  border: none;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.visit-ad-btn:hover {
+  background: linear-gradient(135deg, #007aff, #005fcc);
 }
 
 .ad-title {
+  max-width: 60%;
+  font-size: 0.95rem;
   font-weight: 600;
-  font-size: 1.1em;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
 }
 
-.ad-sponsored {
-  color: #888;
-  font-size: 12px;
-  margin-top: 4px;
+.sponsored-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+#adContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 16px 0;
+  margin: 30px 0;
 }
 
-/* Responsive: on small screens, stack ads vertically */
+.ad-card {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  color: #f1f1f1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.ad-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+.ad-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 18px 18px 0 0;
+  display: block;
+}
+
+/* Sponsored badge */
+.sponsored-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+.ad-content {
+  padding: 16px;
+}
+
+.ad-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.visit-ad-btn {
+  background: linear-gradient(135deg, #0a84ff, #007aff);
+  border: none;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.visit-ad-btn:hover {
+  background: linear-gradient(135deg, #007aff, #005fcc);
+}
+
+.ad-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  max-width: 60%;
+}
 @media (max-width: 600px) {
-  #adContainer {
-    flex-direction: column;
-    gap: 12px;
-  }
   .ad-card {
-    max-width: 100%;
-    flex: none;
+    width: 95%;
   }
 }
 </style>
@@ -1321,7 +1451,6 @@ window.closeLoginModal = function () {
     const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
     const sellerUid = product.seller?.uid || null;
 
-    // Message button ALWAYS enabled, redirects with just product ID
     const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
 
     const card = document.createElement("div");
@@ -1346,7 +1475,6 @@ window.closeLoginModal = function () {
     document.getElementById("productList").appendChild(card);
   }
 
-  // Now messageUser redirects with product id only
   function messageUser(productId) {
     if (!productId) {
       alert("Missing product ID.");
@@ -1363,23 +1491,30 @@ window.closeLoginModal = function () {
     const adsEntries = shuffleArray(Object.entries(adsData));
     const container = document.createElement('div');
     container.id = 'adContainer';
+
     for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
       const adCard = document.createElement("div");
       adCard.className = "ad-card";
+
       const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
-      const adTitle = ad.title || "Sponsored Ad";
-      const adUrl = ad.url || "#";
+      const adTitle = ad.title?.trim() || "Sponsored Ad";
+      const adUrl = ad.url?.trim() || "#";
+
       adCard.innerHTML = `
-        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit; display:block;">
-          <img src="${adImage}" alt="Ad Image" loading="lazy" style="width:100%; border-radius:12px 12px 0 0;">
-          <div class="ad-content" style="padding:10px;">
-            <div class="ad-title" style="font-weight:600; font-size:1.1em;">${adTitle}</div>
-            <div class="ad-sponsored" style="color:#888; font-size:12px; margin-top:4px;">Sponsored</div>
+        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
+          <div class="sponsored-badge">Sponsored</div>
+          <img src="${adImage}" alt="${adTitle}" loading="lazy">
+          <div class="ad-content">
+            <div class="ad-footer">
+              <button class="visit-ad-btn">Visit Ad</button>
+              <div class="ad-title">${adTitle}</div>
+            </div>
           </div>
         </a>
       `;
       container.appendChild(adCard);
     }
+
     document.getElementById("productList").appendChild(container);
   }
 
