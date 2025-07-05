@@ -637,49 +637,39 @@ header {
 }
 </style>
 
-<div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle">
+<div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle" style="display: none;">
   <div class="modal-content">
-    <!-- Step 1: Email + Phone -->
+    
+    <!-- Step 1: Collect Info -->
     <div class="step active" id="step1">
-      <h2 id="purchaseTitle">Enter your contact info</h2>
+      <h2 id="purchaseTitle">Request Access</h2>
+      <p style="color:#888; font-size:14px;">We don’t collect payment here. Just send your request. Seller will contact you directly.</p>
 
-      <label for="emailInput">Email address</label>
+      <label for="emailInput">Email</label>
       <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required>
 
-      <label for="phoneInput">Phone number</label>
+      <label for="phoneInput">Phone</label>
       <input type="tel" id="phoneInput" placeholder="+1 555 555 5555" autocomplete="tel" required>
 
       <div class="error" id="step1Error"></div>
-
-      <button id="step1NextBtn">Proceed</button>
+      <button id="step1NextBtn">Send Request</button>
     </div>
 
-    <!-- Step 2: Payment Method -->
+    <!-- Step 2: Processing -->
     <div class="step" id="step2">
-      <h2>Select payment method</h2>
-
-      <select id="paymentMethod" required>
-        <option value="" disabled selected>Choose a payment option</option>
-        <option value="paypal">PayPal</option>
-        <option value="card">Credit/Debit Card</option>
-        <option value="manual">Manual payment (contact seller)</option>
-      </select>
-
-      <div class="error" id="step2Error"></div>
-
-      <button id="step2NextBtn">Confirm</button>
-      <button class="back-btn" id="step2BackBtn">&larr; Back</button>
+      <h2>Processing your request...</h2>
+      <div class="loader" style="margin: 20px auto;"></div>
+      <p style="color:#888; font-size:14px;">Securely submitting to seller. Please wait.</p>
     </div>
 
-    <!-- Step 3: Confirmation -->
+    <!-- Step 3: Done -->
     <div class="step" id="step3">
-      <h2>Thank you!</h2>
-      <p>Your purchase request has been received.<br>Seller will contact you shortly.</p>
+      <h2>✅ Request Sent</h2>
+      <p>The seller has received your info.<br>They’ll contact you soon via email or phone.</p>
       <button id="closeModalBtn">Close</button>
     </div>
   </div>
 </div>
-<div
 <div id="loadingScreen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff;">
   <div style="margin-bottom:24px; font-size:18px; font-weight:600;">Preparing your product...</div>
 
@@ -931,43 +921,86 @@ header {
 
   // Show modal on buy button click
   function confirmPurchase() {
-    modal.style.display = "block";
-    // Reset all
-    step1.classList.add("active");
-    step2.classList.remove("active");
-    step3.classList.remove("active");
-    step1Error.textContent = "";
-    step2Error.textContent = "";
-    emailInput.value = "";
-    phoneInput.value = "";
-    paymentMethod.value = "";
+  modal.style.display = "flex"; // flex for centered layout
+  step1.classList.add("active");
+  step2.classList.remove("active");
+  step3.classList.remove("active");
+
+  step1Error.textContent = "";
+  emailInput.value = "";
+  phoneInput.value = "";
+}
+
+// Validate email & phone
+function validateStep1() {
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+  step1Error.textContent = "";
+
+  if (!email || !phone) {
+    step1Error.textContent = "Please enter both email and phone number.";
+    return false;
   }
 
-  // Validation for email + phone (basic)
-  function validateStep1() {
-    const email = emailInput.value.trim();
-    const phone = phoneInput.value.trim();
-
-    step1Error.textContent = "";
-
-    if (!email || !phone) {
-      step1Error.textContent = "Please enter both email and phone number.";
-      return false;
-    }
-    // Basic email regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      step1Error.textContent = "Please enter a valid email address.";
-      return false;
-    }
-    // Basic phone validation (digits + +, min 6 chars)
-    const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
-    if (!phoneRegex.test(phone)) {
-      step1Error.textContent = "Please enter a valid phone number.";
-      return false;
-    }
-    return true;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    step1Error.textContent = "Invalid email format.";
+    return false;
   }
+
+  const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
+  if (!phoneRegex.test(phone)) {
+    step1Error.textContent = "Invalid phone number.";
+    return false;
+  }
+
+  return true;
+}
+
+// Handle "Send Request" button
+document.getElementById("step1NextBtn").onclick = () => {
+  if (!validateStep1()) return;
+
+  step1.classList.remove("active");
+  step2.classList.add("active");
+
+  const purchaseData = {
+    productId,
+    sellerId,
+    email: emailInput.value.trim(),
+    phone: phoneInput.value.trim(),
+    paymentMethod: "manual",
+    timestamp: Date.now(),
+    userId: currentUser?.uid || null,
+  };
+
+  // Simulated delay + saving to Firebase
+  setTimeout(() => {
+    db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
+      .then(() => {
+        step2.classList.remove("active");
+        step3.classList.add("active");
+      })
+      .catch(err => {
+        console.error("Request error:", err);
+        step2.classList.remove("active");
+        step1.classList.add("active");
+        step1Error.textContent = "Something went wrong. Please try again.";
+      });
+  }, 1200);
+};
+
+// Close modal
+document.getElementById("closeModalBtn").onclick = () => {
+  modal.style.display = "none";
+};
+
+// Close modal on background click
+modal.onclick = (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+};
 
   // Step 1 next button handler
   document.getElementById("step1NextBtn").onclick = () => {
