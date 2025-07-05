@@ -1269,6 +1269,7 @@ window.closeLoginModal = function () {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 <script>
+  // Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1333,7 +1334,9 @@ window.closeLoginModal = function () {
           <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy">
           <div style="display:flex; align-items:center; gap:10px;">
             <span>${sellerUsername} ${verifiedBadge}</span>
-            <button class="message-btn" onclick="messageUser('${sellerUid}', '${id}')">Message</button>
+            ${sellerUid 
+              ? `<button class="message-btn" onclick="messageUser('${sellerUid}', '${id}')">Message</button>` 
+              : `<button class="message-btn" disabled title="No seller info">Message</button>`}
           </div>
         </div>
       </div>
@@ -1358,7 +1361,6 @@ window.closeLoginModal = function () {
     const encodedUid = encodeURIComponent(sellerUid);
     const encodedPid = encodeURIComponent(productId);
     const chatUrl = `/messages?user=${encodedUid}&product=${encodedPid}`;
-    console.log("Redirecting to:", chatUrl);
     window.location.href = chatUrl;
   }
 
@@ -1369,7 +1371,7 @@ window.closeLoginModal = function () {
 
     const adsEntries = shuffleArray(Object.entries(adsData));
     const container = document.createElement('div');
-    container.id = 'adContainer'; // styling targets this
+    container.id = 'adContainer';
     for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
       const adCard = document.createElement("div");
       adCard.className = "ad-card";
