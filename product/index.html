@@ -369,6 +369,76 @@
     font-size: 13px;
     margin-top: 8px;
   }
+  /* === Progress Loader === */
+.progress-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  max-width: 400px;
+}
+
+.progress-line {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #333;
+  z-index: 0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #1da1f2, #00c6ff);
+  animation: fillBar 3s forwards;
+}
+
+@keyframes fillBar {
+  0% { width: 0%; }
+  33% { width: 33%; }
+  66% { width: 66%; }
+  100% { width: 100%; }
+}
+
+.checkpoint {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 33.33%;
+}
+
+.checkpoint .icon {
+  width: 32px;
+  height: 32px;
+  background: #111;
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0,255,255,0.2);
+  transition: all 0.5s ease;
+}
+
+.checkpoint.active .icon {
+  background: #1da1f2;
+  transform: scale(1.1);
+  box-shadow: 0 0 16px rgba(29,161,242,0.7);
+}
+
+.label {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #aaa;
+}
 </style>
 
 <div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle">
@@ -411,6 +481,23 @@
       <p>Your purchase request has been received.<br>Seller will contact you shortly.</p>
       <button id="closeModalBtn">Close</button>
     </div>
+  </div>
+</div>
+<!-- Loader Screen -->
+<div id="loadingScreen" style="display:none; position:fixed; inset:0; background:#000c; z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+  <div style="display:flex; gap:40px; align-items:center;">
+    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
+      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2-.9-2-2V6h2v10h10v2H7zM17 4H6c-1.1 0-2 .9-2 2v2h2V6h11v11h-2v2h2c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+    </div>
+    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
+      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M20 8h-3V4H7v4H4l8 8 8-8zM4 20h16v-2H4v2z"/></svg>
+    </div>
+    <div class="checkpoint" style="opacity:0.3; transition:opacity 0.5s;">
+      <svg width="60" height="60" fill="#1da1f2" viewBox="0 0 24 24"><path d="M12 0a12 12 0 1 0 12 12A12.014 12.014 0 0 0 12 0zm5.707 8.707-6.364 6.364a1 1 0 0 1-1.414 0L6.293 11.43a1 1 0 1 1 1.414-1.414L11 13.309l5.293-5.293a1 1 0 0 1 1.414 1.414z"/></svg>
+    </div>
+  </div>
+  <div style="height:6px; width:80%; background:#333; border-radius:20px; overflow:hidden; position:relative;">
+    <div id="progressBar" style="position:absolute; left:0; top:0; bottom:0; width:0%; background:#1da1f2; transition:width 0.4s;"></div>
   </div>
 </div>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -626,17 +713,49 @@
 
   // Show modal on buy button click
   function confirmPurchase() {
-    modal.style.display = "block";
-    // Reset all
-    step1.classList.add("active");
-    step2.classList.remove("active");
-    step3.classList.remove("active");
-    step1Error.textContent = "";
-    step2Error.textContent = "";
-    emailInput.value = "";
-    phoneInput.value = "";
-    paymentMethod.value = "";
-  }
+  // Show loading screen and reset progress bar
+  const loadingScreen = document.getElementById("loadingScreen");
+  const loadingBar = document.getElementById("loadingBar");
+  const checkpoints = document.querySelectorAll(".checkpoint");
+
+  loadingScreen.style.display = "flex"; // Show the loader
+  loadingBar.style.width = "0%";
+  checkpoints.forEach(cp => (cp.style.opacity = "0.3"));
+
+  // Animate the loading bar & checkpoints in 3 stages over 3 seconds
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 1; // increment by 1% every 30ms -> total ~3s
+    loadingBar.style.width = progress + "%";
+
+    // Activate checkpoints at 33% and 66%
+    if (progress === 33 || progress === 66) {
+      const index = progress === 33 ? 0 : 1;
+      checkpoints[index].style.opacity = "1";
+    }
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      checkpoints[2].style.opacity = "1";
+
+      // Hide loading and show modal with reset after animation ends
+      setTimeout(() => {
+        loadingScreen.style.display = "none";
+
+        // Now reset modal forms and show modal
+        modal.style.display = "block";
+        step1.classList.add("active");
+        step2.classList.remove("active");
+        step3.classList.remove("active");
+        step1Error.textContent = "";
+        step2Error.textContent = "";
+        emailInput.value = "";
+        phoneInput.value = "";
+        paymentMethod.value = "";
+      }, 500);
+    }
+  }, 30);
+}
 
   // Validation for email + phone (basic)
   function validateStep1() {
@@ -718,6 +837,16 @@
       modal.style.display = "none";
     }
   };
+  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+  // Show 2nd checkpoint
+  document.querySelectorAll('.checkpoint')[1].classList.add('active');
+
+  // After rendering product:
+  document.querySelectorAll('.checkpoint')[2].classList.add('active');
+  setTimeout(() => {
+    document.getElementById("loadingScreen").style.display = "none";
+  }, 1000);
+});
 </script>
 </body>
 
