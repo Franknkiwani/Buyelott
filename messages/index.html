@@ -1,145 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chat with Seller</title>
   <style>
-    body {
-      margin: 0; padding: 0;
-      background: #121212;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex; flex-direction: column; height: 100vh;
+    /* Reset */
+    * {
+      box-sizing: border-box;
     }
+    body, html {
+      margin: 0; padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #121212;
+      color: #eee;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-direction: column;
+    }
+
     header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
       background: #1da1f2;
-      color: #fff;
-      padding: 12px 16px;
-      display: flex; align-items: center; gap: 12px;
-      position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
       border-bottom: 1px solid #0c7ddb;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      gap: 12px;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      user-select: none;
     }
     header img {
-      width: 42px; height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #fff;
+      border: 2px solid white;
+      flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
     #sellerName {
-      font-weight: 700; font-size: 1.2rem;
-      overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-      flex: 1;
+      font-weight: 700;
+      font-size: 1.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-grow: 1;
     }
+
     #productPreview {
-      margin-top: 64px; /* header height */
+      margin-top: 60px; /* header height */
       background: #181818;
       border-bottom: 1px solid #222;
       padding: 12px 16px;
-      z-index: 900;
       position: sticky;
-      top: 64px;
+      top: 60px;
+      z-index: 900;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
     }
-    #productPreview a {
-      color: inherit; text-decoration: none;
-      display: flex; align-items: center; gap: 12px;
+    #productPreview:hover {
+      background-color: #222;
     }
     #productPreview img {
-      width: 60px; height: 60px;
-      border-radius: 10px;
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
       object-fit: cover;
       background: #222;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      flex-shrink: 0;
+    }
+    #productPreview div {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
     }
     #productPreview strong {
-      font-size: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #eee;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
     #productPreview p {
-      color: #aaa; font-size: 13px; margin-top: 4px;
+      margin: 2px 0 0;
+      color: #aaa;
+      font-size: 0.85rem;
+      user-select: none;
     }
+
     #chatContainer {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 12px 80px;
-      scroll-behavior: smooth;
+      padding: 14px 16px 90px; /* bottom space for input */
       background: #121212;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
+
     .message {
       max-width: 80%;
-      padding: 12px 16px;
-      margin-bottom: 10px;
-      font-size: 15px;
+      padding: 14px 18px;
+      font-size: 1rem;
       line-height: 1.4;
       border-radius: 20px;
       position: relative;
       word-wrap: break-word;
-      word-break: break-word;
       user-select: text;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      display: inline-block;
+      transition: background-color 0.3s ease;
     }
     .message.self {
-      margin-left: auto;
+      align-self: flex-end;
       background: linear-gradient(135deg, #0f7cf9, #30a0f9);
       color: #fff;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 6px;
     }
     .message.seller {
-      margin-right: auto;
+      align-self: flex-start;
       background: #1a1a1a;
       color: #eee;
-      border-bottom-left-radius: 4px;
+      border-bottom-left-radius: 6px;
     }
-    .message.system {
-      background: none;
-      color: #666;
-      text-align: center;
-      font-style: italic;
-      max-width: 100%;
-      margin: 24px auto 12px;
-      user-select: none;
+    .message .prefix {
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+      color: #a0cfff;
     }
     .message .timestamp {
       font-size: 10px;
-      opacity: 0.5;
+      opacity: 0.4;
       position: absolute;
-      bottom: 4px;
+      bottom: 6px;
       right: 12px;
       user-select: none;
     }
     .message a {
-      color: #1da1f2;
+      color: #a0d8ff;
       text-decoration: underline;
       word-break: break-word;
     }
+
     #chatForm {
       position: fixed;
       bottom: 0; left: 0; width: 100%;
-      padding: 8px 12px;
       background: #181818;
+      padding: 12px 16px;
       display: flex;
-      gap: 8px;
-      box-shadow: 0 -1px 8px rgba(0,0,0,0.6);
+      gap: 12px;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.7);
       z-index: 1100;
     }
     #messageInput {
       flex: 1;
-      padding: 12px 16px;
-      background: #222;
+      border-radius: 30px;
       border: none;
-      border-radius: 24px;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      background: #222;
       color: #eee;
-      font-size: 1rem;
-      outline: none;
+      outline-offset: 2px;
+      outline-color: #1da1f2;
+      caret-color: #1da1f2;
+      transition: background-color 0.3s ease;
+    }
+    #messageInput::placeholder {
+      color: #888;
+    }
+    #messageInput:focus {
+      background-color: #2c2c2c;
     }
     #sendBtn {
       background: #1da1f2;
-      color: #000;
       border: none;
-      border-radius: 24px;
-      padding: 12px 20px;
+      border-radius: 30px;
+      padding: 0 24px;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 1.1rem;
+      color: #000;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      min-width: 72px;
     }
     #sendBtn:disabled {
       background: #444;
@@ -147,6 +208,59 @@
     }
     #sendBtn:hover:not(:disabled) {
       background: #2b8afc;
+    }
+
+    /* New message badge for demo purposes */
+    #newMessageBadge {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: #e0245e;
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: 18px;
+      user-select: none;
+      box-shadow: 0 0 10px #e0245eaa;
+      display: none;
+      z-index: 1200;
+    }
+
+    /* Scrollbar style for chat container */
+    #chatContainer::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chatContainer::-webkit-scrollbar-track {
+      background: #181818;
+    }
+    #chatContainer::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 10px;
+    }
+    @media (max-width: 480px) {
+      #productPreview {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      #productPreview img {
+        width: 48px;
+        height: 48px;
+      }
+      #chatContainer {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 80px;
+      }
+      #messageInput {
+        font-size: 1rem;
+      }
+      #sendBtn {
+        min-width: 56px;
+        font-size: 1rem;
+        padding: 0 18px;
+      }
     }
   </style>
 </head>
@@ -157,14 +271,16 @@
   <div id="sellerName">Loading seller...</div>
 </header>
 
-<div id="productPreview"></div>
+<div id="productPreview" tabindex="0" aria-label="Product preview"></div>
 
-<div id="chatContainer"></div>
+<div id="chatContainer" role="log" aria-live="polite" aria-relevant="additions"></div>
 
-<form id="chatForm">
-  <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" required />
-  <button id="sendBtn" type="submit" disabled>Send</button>
+<form id="chatForm" aria-label="Send a message">
+  <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" aria-required="true" />
+  <button id="sendBtn" type="submit" disabled aria-disabled="true">Send</button>
 </form>
+
+<div id="newMessageBadge" aria-live="assertive" aria-atomic="true">+0</div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
@@ -193,6 +309,7 @@
   const chatForm = document.getElementById('chatForm');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
+  const newMessageBadge = document.getElementById('newMessageBadge');
 
   let currentUser = null;
   let sellerUid = null;
@@ -201,71 +318,96 @@
   let productId = null;
   let chatId = null;
 
-  // Escape HTML to avoid XSS
+  let unreadCount = 0;
+  let lastReadTimestamp = 0;
+
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  // Format timestamp (e.g. 14:23)
   function formatTimestamp(ts) {
     const date = new Date(ts);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Consistent chat ID generation (sorted UIDs)
   function getChatId(uid1, uid2) {
     return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
   }
 
-  // Scroll chat to bottom
   function scrollToBottom() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
-  // Convert URLs in messages to clickable links
   function linkify(text) {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
   }
 
-  // Add a chat message bubble
+  // Prefix format: "You - " or "@username - "
+  function createMessagePrefix(senderUid) {
+    if (senderUid === currentUser.uid) return "You - ";
+    else return "@" + (senderUid === sellerUid ? sellerName : "Other") + " - ";
+  }
+
   function addMessageBubble(text, senderUid, timestamp) {
     const div = document.createElement('div');
     div.classList.add('message');
 
-    if (senderUid === currentUser.uid) {
-      div.classList.add('self');
-    } else if (senderUid === sellerUid) {
-      div.classList.add('seller');
-    } else {
-      div.classList.add('system');
-    }
+    if (senderUid === currentUser.uid) div.classList.add('self');
+    else if (senderUid === sellerUid) div.classList.add('seller');
+    else div.classList.add('system');
 
-    const checkmark = senderUid === currentUser.uid ? `<span style="margin-left:6px;color:#1da1f2;font-size:12px;">✅</span>` : '';
+    const prefixText = createMessagePrefix(senderUid);
+    const escapedText = escapeHtml(text);
+    const linkedText = linkify(escapedText);
 
     div.innerHTML = `
-      <div>${linkify(escapeHtml(text))}${checkmark}</div>
+      <span class="prefix">${prefixText}</span>
+      <span>${linkedText}</span>
       <span class="timestamp">${formatTimestamp(timestamp)}</span>
     `;
 
     chatContainer.appendChild(div);
+
+    // Manage unread badge
+    if (timestamp > lastReadTimestamp && senderUid !== currentUser.uid) {
+      unreadCount++;
+      updateUnreadBadge();
+    }
+  }
+
+  function updateUnreadBadge() {
+    if (unreadCount > 0) {
+      newMessageBadge.textContent = unreadCount > 9 ? "+9" : "+" + unreadCount;
+      newMessageBadge.style.display = 'block';
+    } else {
+      newMessageBadge.style.display = 'none';
+    }
+  }
+
+  function markAllRead() {
+    unreadCount = 0;
+    updateUnreadBadge();
+    lastReadTimestamp = Date.now();
+
+    // Update lastReadTimes in meta for current user
+    const metaRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
+    metaRef.set(lastReadTimestamp);
   }
 
   async function loadChatByChatId(chatIdParam) {
-    // Load chat meta
     const metaSnap = await db.ref(`/chats/${chatIdParam}/meta`).once('value');
     const meta = metaSnap.val();
     if (!meta) throw new Error('Chat meta not found');
 
-    // Identify sellerUid = other user
     const otherUsers = Object.keys(meta.users || {}).filter(uid => uid !== currentUser.uid);
     if (otherUsers.length === 0) throw new Error('No other user found in chat');
 
     sellerUid = otherUsers[0];
 
-    // Load seller profile
+    // Load seller profile from /users/{sellerUid} or fallback
     const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
     const seller = sellerSnap.val() || {};
     sellerName = seller.username || 'Seller';
@@ -274,20 +416,17 @@
     sellerNameEl.textContent = sellerName;
     sellerAvatarEl.src = sellerAvatar;
 
-    // Clear product preview — no product data here
     productPreviewEl.innerHTML = '';
-
     chatId = chatIdParam;
   }
 
   async function loadChatByProductId(productIdParam) {
-    // Load product
     const productSnap = await db.ref(`/dlsaccounts/${productIdParam}`).once('value');
     const product = productSnap.val();
     if (!product) throw new Error('Product not found');
 
     productPreviewEl.innerHTML = `
-      <a href="https://cyberchat.online/product?id=${productIdParam}" target="_blank" rel="noopener">
+      <a href="https://cyberchat.online/product?id=${productIdParam}" target="_blank" rel="noopener" tabindex="0" aria-label="View product details">
         <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" />
         <div>
           <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
@@ -308,6 +447,43 @@
     chatId = getChatId(currentUser.uid, sellerUid);
   }
 
+  async function initChat() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const chatIdParam = urlParams.get('chatId');
+    const productIdParam = urlParams.get('product');
+
+    if (chatIdParam) {
+      await loadChatByChatId(chatIdParam);
+    } else if (productIdParam) {
+      await loadChatByProductId(productIdParam);
+    } else {
+      alert('No chatId or product provided in URL.');
+      throw new Error('Missing chatId and product in URL');
+    }
+
+    // Ensure chat meta exists
+    const metaRef = db.ref(`/chats/${chatId}/meta`);
+    const metaSnap = await metaRef.once('value');
+    if (!metaSnap.exists()) {
+      await metaRef.set({
+        users: {
+          [currentUser.uid]: true,
+          [sellerUid]: true,
+        },
+        lastMessage: '',
+        lastTimestamp: 0,
+        lastReadTimes: {
+          [currentUser.uid]: 0,
+          [sellerUid]: 0,
+        }
+      });
+    }
+
+    // Load lastReadTimestamp for current user to manage unread badge
+    const lastReadTimes = metaSnap.val()?.lastReadTimes || {};
+    lastReadTimestamp = lastReadTimes[currentUser.uid] || 0;
+  }
+
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
       alert('You must log in to chat.');
@@ -316,39 +492,15 @@
     }
     currentUser = user;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const chatIdParam = urlParams.get('chatId');
-    const productIdParam = urlParams.get('product');
+    // Set currentUser display info from Google profile
+    // If you want to show your own avatar/name somewhere, use user.photoURL and user.displayName
+    // For now, we only load other user
+// Continue inside onAuthStateChanged
 
     try {
-      if (chatIdParam) {
-        await loadChatByChatId(chatIdParam);
-      } else if (productIdParam) {
-        await loadChatByProductId(productIdParam);
-      } else {
-        alert('No chatId or product provided in URL.');
-        return;
-      }
+      await initChat();
 
-      // Ensure chat meta exists before listening for messages
-      const metaRef = db.ref(`/chats/${chatId}/meta`);
-      const metaSnap = await metaRef.once('value');
-      if (!metaSnap.exists()) {
-        await metaRef.set({
-          users: {
-            [currentUser.uid]: true,
-            [sellerUid]: true,
-          },
-          lastMessage: '',
-          lastTimestamp: 0,
-          lastReadTimes: {
-            [currentUser.uid]: 0,
-            [sellerUid]: 0,
-          }
-        });
-      }
-
-      // Listen for last 100 messages
+      // Listen for messages
       const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
       messagesRef.off();
       messagesRef.on('child_added', (snapshot) => {
@@ -356,15 +508,28 @@
         if (msg && msg.text && msg.sender && msg.timestamp) {
           addMessageBubble(msg.text, msg.sender, msg.timestamp);
           scrollToBottom();
+
+          // If message is from other user, and window not focused, increment unread
+          if (msg.sender !== currentUser.uid && document.visibilityState !== 'visible') {
+            unreadCount++;
+            updateUnreadBadge();
+          }
         }
       });
 
+      // Mark messages as read when window is focused
+      window.addEventListener('focus', () => {
+        markAllRead();
+      });
+
+      // Mark read initially on load
+      markAllRead();
+
       sendBtn.disabled = false;
       messageInput.focus();
-
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
+    } catch (error) {
+      alert(error.message);
+      console.error(error);
     }
   });
 
@@ -384,10 +549,10 @@
         timestamp
       });
 
-      // Update chat meta atomically
+      // Update meta
       const metaRef = db.ref(`/chats/${chatId}/meta`);
       await metaRef.transaction((meta) => {
-        if (meta === null) {
+        if (!meta) {
           return {
             users: {
               [currentUser.uid]: true,
@@ -403,10 +568,10 @@
         }
         meta.lastMessage = text;
         meta.lastTimestamp = timestamp;
-        if (!meta.users) meta.users = {};
+        meta.users = meta.users || {};
         meta.users[currentUser.uid] = true;
         meta.users[sellerUid] = true;
-        if (!meta.lastReadTimes) meta.lastReadTimes = {};
+        meta.lastReadTimes = meta.lastReadTimes || {};
         meta.lastReadTimes[currentUser.uid] = timestamp;
         if (!meta.lastReadTimes[sellerUid]) meta.lastReadTimes[sellerUid] = 0;
         return meta;
@@ -414,17 +579,7 @@
 
       messageInput.value = '';
       messageInput.focus();
-
-      // Auto-reply from seller if first message and current user is not seller
-      const messagesSnap = await messagesRef.once('value');
-      if (messagesSnap.numChildren() === 1 && currentUser.uid !== sellerUid) {
-        const autoMsgRef = messagesRef.push();
-        await autoMsgRef.set({
-          sender: sellerUid,
-          text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId || ''}`,
-          timestamp: Date.now()
-        });
-      }
+      sendBtn.disabled = true;
     } catch (err) {
       alert('Error sending message. Try again.');
       console.error(err);
@@ -433,6 +588,19 @@
 
   messageInput.addEventListener('input', () => {
     sendBtn.disabled = messageInput.value.trim().length === 0;
+  });
+
+  // Optional: Scroll to bottom when user clicks product preview (UX nicety)
+  productPreviewEl.addEventListener('click', () => {
+    window.open(productPreviewEl.querySelector('a')?.href, '_blank');
+  });
+
+  // Accessibility: keyboard enter key on product preview triggers click
+  productPreviewEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      productPreviewEl.click();
+    }
   });
 </script>
 
