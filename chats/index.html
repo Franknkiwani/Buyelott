@@ -119,11 +119,9 @@
   let currentUser = null;
   let chatsData = {};  // cache chats data
 
-  // Format timestamp (just like messaging page)
   function formatTimestamp(ts) {
     if (!ts) return '';
     const date = new Date(ts);
-    // Show time if today, else show date
     const now = new Date();
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -131,14 +129,12 @@
     return date.toLocaleDateString();
   }
 
-  // Escape HTML for safety
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  // Fetch user profile (username + avatar) for given uid
   async function fetchUserProfile(uid) {
     try {
       const userSnap = await db.ref(`/users/${uid}`).once('value');
@@ -162,32 +158,29 @@
     }
   }
 
-  // Render the inbox list
   async function renderInbox() {
     inboxContainer.innerHTML = '';
 
-    // If no chats, show empty state
     if (Object.keys(chatsData).length === 0) {
       inboxContainer.innerHTML = `<div class="no-chats">No chats yet. Start a conversation!</div>`;
       return;
     }
 
-    // For each chat, fetch the other user's profile and show chat item
     const chatEntries = Object.entries(chatsData);
 
     for (const [chatId, chatMeta] of chatEntries) {
-      // Determine other user id in chat
       const usersInChat = chatMeta.users || {};
       const otherUserUid = Object.keys(usersInChat).find(uid => uid !== currentUser.uid);
 
-      // Fetch profile data
-      const { username, avatar } = await fetchUserProfile(otherUserUid);
+      if (!otherUserUid) {
+        console.warn(`Chat ${chatId} has no other user besides currentUser`);
+        continue;
+      }
 
-      // Last message snippet
+      const { username, avatar } = await fetchUserProfile(otherUserUid);
       const lastMsg = chatMeta.lastMessage || '';
       const lastTimestamp = chatMeta.lastTimestamp || 0;
 
-      // Create chat item div
       const chatDiv = document.createElement('div');
       chatDiv.className = 'chat-item';
       chatDiv.title = username + '\n' + lastMsg;
@@ -203,19 +196,11 @@
         <div class="chat-timestamp">${formatTimestamp(lastTimestamp)}</div>
       `;
 
-      // Click or enter opens the chat page with that user
       chatDiv.addEventListener('click', () => {
-        // Open your chat page with the other user by encoding product id or chatId
-        // Since your chatId is uid1_uid2, let's open messages with ?product=productId
-        // But inbox doesn't know productId, so open messages page with chatId param
-        // You might want to adjust messages page to accept chatId directly.
-        // For now, open chat page passing chatId as query param
-
-        // Redirect to messages page with chatId param (you need to support this in your messages page)
+        // Open messages page with chatId param (you'll need to support this in messages page)
         window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;
       });
 
-      // Keyboard accessible
       chatDiv.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -235,22 +220,22 @@
     }
     currentUser = user;
 
-    // Listen for chats where currentUser is a participant in /chats
     const chatsRef = db.ref('/chats');
 
-    // Using 'value' event here for demo simplicity — for large data, better use queries or pagination
     chatsRef.on('value', (snapshot) => {
       const allChats = snapshot.val() || {};
 
-      // Filter chats that include current user
+      // FIXED: Look inside chatMeta.meta for users and lastMessage
       chatsData = Object.entries(allChats)
         .filter(([chatId, chatMeta]) => {
-          return chatMeta?.users && chatMeta.users[currentUser.uid];
+          return chatMeta?.meta?.users && chatMeta.meta.users[currentUser.uid];
         })
         .reduce((acc, [chatId, chatMeta]) => {
-          acc[chatId] = chatMeta;
+          acc[chatId] = chatMeta.meta;
           return acc;
         }, {});
+
+      console.log('Loaded chats for inbox:', chatsData);
 
       renderInbox();
     });
