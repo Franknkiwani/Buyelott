@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat with Seller</title>
+  <title>Inbox - Chat</title>
   <style>
-    /* iOS-style clean header */
-    * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
@@ -20,193 +18,97 @@
     header {
       background-color: #007aff;
       color: white;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 14px 16px;
+      font-weight: 600;
+      font-size: 20px;
+      user-select: none;
       position: fixed;
       width: 100%;
       top: 0; left: 0;
       z-index: 10000;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      font-weight: 600;
-      font-size: 17px;
-      user-select: none;
     }
-    header img {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: 1.8px solid white;
-      object-fit: cover;
-      flex-shrink: 0;
+    main {
+      margin-top: 56px; /* header height */
+      flex: 1;
+      overflow-y: auto;
+      background-color: #181818;
     }
-    #productPreview {
-      position: sticky;
-      top: 64px; /* header height */
-      background: #1c1c1e;
-      border-bottom: 1px solid #444;
-      z-index: 9999;
-      padding: 8px 16px;
+    .chat-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
-    #productPreview a {
+    .chat-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: #ccc;
-    }
-    #productPreview img {
-      width: 60px; height: 60px;
-      border-radius: 10px;
-      object-fit: cover;
-      background: #222;
-      flex-shrink: 0;
-    }
-    #productPreview strong {
-      color: white;
-      font-size: 16px;
-      user-select: text;
-    }
-    #productPreview p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: #888;
-    }
-    #chatContainer {
-      flex: 1;
-      margin-top: 112px; /* header + product preview */
-      overflow-y: auto;
-      padding: 12px 16px 80px;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-    .message {
-      max-width: 70%;
-      margin-bottom: 12px;
       padding: 12px 16px;
-      border-radius: 20px;
-      font-size: 1rem;
-      line-height: 1.3;
-      word-wrap: break-word;
-      position: relative;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      user-select: text;
-      white-space: pre-wrap;
-      background-color: #2c2c2e;
-      color: #ddd;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
       transition: background-color 0.2s ease;
     }
-    .message.self {
-      background-color: #007aff;
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
+    .chat-item:hover {
+      background-color: #2a2a2a;
     }
-    .message.seller {
-      background-color: #3a3a3c;
-      color: #ddd;
-      margin-right: auto;
-      border-bottom-left-radius: 4px;
+    .chat-item img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      margin-right: 12px;
+      border: 1.5px solid #007aff;
     }
-    .message.system {
-      background: transparent;
-      color: #888;
-      text-align: center;
-      font-style: italic;
-      max-width: 100%;
-      margin: 20px auto;
-      user-select: none;
-    }
-    .message .timestamp {
-      font-size: 0.7rem;
-      color: #bbb;
-      position: absolute;
-      bottom: 6px;
-      right: 12px;
-      opacity: 0.75;
-      user-select: none;
-    }
-    .message .checkmark {
-      position: absolute;
-      bottom: 6px;
-      right: 40px;
-      font-size: 14px;
-      color: #34c759; /* WhatsApp green */
-      user-select: none;
-    }
-    a {
-      color: #0a84ff;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    form#chatForm {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #1c1c1e;
-      display: flex;
-      padding: 10px 16px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.8);
-      align-items: center;
-      gap: 8px;
-      z-index: 11000;
-    }
-    form#chatForm input[type="text"] {
+    .chat-info {
       flex: 1;
-      background: #2c2c2e;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 24px;
-      color: #eee;
-      font-size: 1rem;
-      outline: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .chat-username {
+      font-weight: 600;
+      font-size: 17px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-time {
+      font-size: 13px;
+      color: #888;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .chat-last-message {
+      font-size: 14px;
+      color: #bbb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       user-select: text;
     }
-    form#chatForm button {
-      background-color: #007aff;
-      border: none;
-      border-radius: 24px;
-      padding: 12px 24px;
+    .unread-badge {
+      background-color: #34c759; /* WhatsApp green */
       color: white;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      margin-left: 8px;
       user-select: none;
-      transition: background-color 0.25s ease;
-    }
-    form#chatForm button:disabled {
-      background-color: #555;
-      cursor: not-allowed;
-    }
-    form#chatForm button:hover:not(:disabled) {
-      background-color: #005bb5;
-    }
-    /* Scrollbar for mobile */
-    #chatContainer::-webkit-scrollbar {
-      width: 6px;
-    }
-    #chatContainer::-webkit-scrollbar-thumb {
-      background-color: #007aff;
-      border-radius: 3px;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
-
-<header>
-  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" />
-  <div id="sellerName">Loading seller...</div>
-</header>
-
-<div id="productPreview"></div>
-
-<div id="chatContainer" role="log" aria-live="polite" aria-relevant="additions"></div>
-
-<form id="chatForm" aria-label="Send message" autocomplete="off">
-  <input type="text" id="messageInput" placeholder="Type a message..." required aria-required="true" />
-  <button type="submit" id="sendBtn" disabled>Send</button>
-</form>
+<header>Inbox</header>
+<main>
+  <ul class="chat-list" id="chatList"></ul>
+</main>
 
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
@@ -227,20 +129,18 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const sellerAvatarEl = document.getElementById('sellerAvatar');
-  const sellerNameEl = document.getElementById('sellerName');
-  const productPreviewEl = document.getElementById('productPreview');
-  const chatContainer = document.getElementById('chatContainer');
-  const chatForm = document.getElementById('chatForm');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
+  const chatListEl = document.getElementById('chatList');
 
-  let currentUser = null;
-  let sellerUid = null;
-  let sellerName = 'Seller';
-  let sellerAvatar = '';
-  let productId = null;
-  let chatId = null;
+  function formatTime(ts) {
+    const d = new Date(ts);
+    const now = Date.now();
+    const diff = now - ts;
+
+    if(diff < 60000) return 'Just now';
+    if(diff < 3600000) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    if(diff < 86400000) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString();
+  }
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -248,172 +148,89 @@
     return div.innerHTML;
   }
 
-  function formatTimestamp(ts) {
-    const date = new Date(ts);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function getChatId(uid1, uid2) {
-    return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
-  }
-
-  function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-
-  function linkify(text) {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
-  }
-
-  function addMessageBubble(text, senderUid, timestamp) {
-    const div = document.createElement('div');
-    div.classList.add('message');
-
-    if (senderUid === currentUser.uid) {
-      div.classList.add('self');
-    } else if (senderUid === sellerUid) {
-      div.classList.add('seller');
-    } else {
-      div.classList.add('system');
-    }
-
-    // Checkmark for messages sent by current user (like WhatsApp read checkmark)
-    const checkmarkHtml = senderUid === currentUser.uid 
-      ? `<span class="checkmark">✓✓</span>` 
-      : '';
-
-    div.innerHTML = `
-      <div>${linkify(escapeHtml(text))}</div>
-      <span class="timestamp">${formatTimestamp(timestamp)}</span>
-      ${checkmarkHtml}
-    `;
-
-    chatContainer.appendChild(div);
-  }
-
   auth.onAuthStateChanged(async user => {
     if (!user) {
-      alert('You must log in to chat.');
-      window.location.href = '/login';
+      alert('Please log in to see your chats.');
+      window.location.href = '/login'; 
       return;
     }
-    currentUser = user;
+    const currentUid = user.uid;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    productId = urlParams.get('product');
-    if (!productId) {
-      alert('Missing product id in URL.');
-      return;
-    }
-
-    const productSnap = await db.ref(`/dlsaccounts/${productId}`).once('value');
-    const product = productSnap.val();
-    if (!product) {
-      alert('Product not found.');
-      return;
-    }
-
-    // Product preview
-    productPreviewEl.innerHTML = `
-      <a href="https://cyberchat.online/product?id=${productId}" target="_blank" style="color:inherit; text-decoration:none;">
-        <img src="${product.images?.[0] || 'https://via.placeholder.com/60'}" alt="Product" />
-        <div>
-          <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
-          <p>Tap to view product 👇</p>
-        </div>
-      </a>
-    `;
-
-    // Seller info
-    sellerUid = product.seller?.uid;
-    sellerName = product.seller?.username || 'Seller';
-    sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
-
-    sellerNameEl.textContent = sellerName;
-    sellerAvatarEl.src = sellerAvatar;
-
-    if (!sellerUid) {
-      alert('Seller info missing.');
-      return;
-    }
-
-    chatId = getChatId(currentUser.uid, sellerUid);
-
-    // Update lastReadTimes when user opens chat
-    const lastReadRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
-    await lastReadRef.set(Date.now());
-
-    // Listen for messages
-    const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
-    messagesRef.off();
-    messagesRef.on('child_added', snapshot => {
-      const msg = snapshot.val();
-      if (msg && msg.text && msg.sender && msg.timestamp) {
-        addMessageBubble(msg.text, msg.sender, msg.timestamp);
-        scrollToBottom();
+    // Load chats where currentUser is part of 'meta/users'
+    const chatsRef = db.ref('/chats');
+    chatsRef.on('value', snapshot => {
+      const chats = snapshot.val();
+      if (!chats) {
+        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
+        return;
       }
-    });
 
-    sendBtn.disabled = false;
-    messageInput.focus();
-  });
-
-  chatForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if (!text) return;
-
-    const messagesRef = db.ref(`/chats/${chatId}/messages`);
-    const newMsgRef = messagesRef.push();
-
-    try {
-      await newMsgRef.set({
-        sender: currentUser.uid,
-        text,
-        timestamp: Date.now()
+      // Filter chats currentUser is part of
+      const userChats = Object.entries(chats).filter(([chatId, chatData]) => {
+        return chatData.meta?.users?.[currentUid];
       });
 
-      messageInput.value = '';
-      messageInput.focus();
+      if(userChats.length === 0) {
+        chatListEl.innerHTML = '<li style="padding:20px;color:#666;">No chats yet</li>';
+        return;
+      }
 
-      // Create meta if missing
-      const metaRef = db.ref(`/chats/${chatId}/meta`);
-      const metaSnap = await metaRef.once('value');
-      if (!metaSnap.exists()) {
-        await metaRef.set({
-          users: {
-            [currentUser.uid]: true,
-            [sellerUid]: true
-          },
-          lastReadTimes: {
-            [currentUser.uid]: Date.now(),
-            [sellerUid]: 0
+      chatListEl.innerHTML = '';
+
+      userChats.forEach(async ([chatId, chatData]) => {
+        const users = chatData.meta.users;
+        const otherUid = Object.keys(users).find(uid => uid !== currentUid);
+        if(!otherUid) return;
+
+        // Get other user info
+        const userSnap = await db.ref(`/users/${otherUid}`).once('value');
+        const otherUser = userSnap.val() || {};
+
+        // Get last message
+        const messages = chatData.messages;
+        if(!messages) return;
+        const lastMessageEntry = Object.entries(messages).sort((a,b) => b[1].timestamp - a[1].timestamp)[0];
+        if(!lastMessageEntry) return;
+        const [lastMsgId, lastMsg] = lastMessageEntry;
+
+        // Check unread count: messages sent by other user after currentUser's lastReadTime
+        const lastReadTimes = chatData.meta.lastReadTimes || {};
+        const lastRead = lastReadTimes[currentUid] || 0;
+        const unreadCount = Object.values(messages).filter(m => m.timestamp > lastRead && m.sender !== currentUid).length;
+
+        // Create chat list item
+        const li = document.createElement('li');
+        li.className = 'chat-item';
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `Chat with ${otherUser.username || 'Unknown user'}`);
+        li.addEventListener('click', () => {
+          // Redirect to chat page with otherUid param
+          window.location.href = `/chat.html?uid=${otherUid}`;
+        });
+        li.addEventListener('keydown', e => {
+          if(e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            li.click();
           }
         });
-      } else {
-        // Update lastReadTimes for current user on new message
-        const lastReadTimesRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
-        await lastReadTimesRef.set(Date.now());
-      }
 
-      // Auto reply from seller if first message
-      const messagesSnapshot = await messagesRef.once('value');
-      if (messagesSnapshot.numChildren() === 1 && currentUser.uid !== sellerUid) {
-        const autoMsgRef = messagesRef.push();
-        await autoMsgRef.set({
-          sender: sellerUid,
-          text: `Buy the account here:\nhttps://cyberchat.online/product?id=${productId}`,
-          timestamp: Date.now()
-        });
-      }
+        li.innerHTML = `
+          <img src="${otherUser.avatar || 'https://via.placeholder.com/48?text=👤'}" alt="Profile picture of ${escapeHtml(otherUser.username || 'User')}" />
+          <div class="chat-info">
+            <div class="chat-header">
+              <span class="chat-username">${escapeHtml(otherUser.username || 'Unknown')}</span>
+              <span class="chat-time">${formatTime(lastMsg.timestamp)}</span>
+            </div>
+            <div class="chat-last-message">${escapeHtml(lastMsg.text || '')}</div>
+          </div>
+          ${unreadCount > 0 ? `<span class="unread-badge" aria-label="${unreadCount} unread messages">${unreadCount}</span>` : ''}
+        `;
 
-    } catch (err) {
-      alert('Error sending message. Try again.');
-      console.error(err);
-    }
+        chatListEl.appendChild(li);
+      });
+    });
   });
 </script>
-
 </body>
 </html>
