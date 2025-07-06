@@ -5,11 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Firebase Chat with Push</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:#121212; color:#eee; margin:0; padding:20px; }
-  #messages { max-height: 300px; overflow-y: auto; border: 1px solid #444; padding:10px; margin-bottom:10px; background:#222; }
-  #input { width: 80%; padding: 8px; }
-  button { padding: 8px 12px; }
-  #status { margin-top: 10px; font-size: 0.9rem; color: #aaa; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #121212; color: #eee; margin: 0; padding: 20px;
+  }
+  #messages {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #222;
+  }
+  #input {
+    width: 80%;
+    padding: 8px;
+  }
+  button {
+    padding: 8px 12px;
+  }
+  #status {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
 </style>
 </head>
 <body>
@@ -34,7 +53,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
 
 <script>
-  // Your Firebase config (replace with yours)
+  // Your Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -59,7 +78,6 @@
   const sendBtn = document.getElementById('sendBtn');
   const statusEl = document.getElementById('status');
 
-  // Sign in anonymously (or customize auth as you want)
   async function signIn() {
     try {
       await auth.signInAnonymously();
@@ -69,21 +87,31 @@
     }
   }
 
-  // Register FCM token and save to DB under `/fcmTokens/{uid}`
   async function registerFCMToken(user) {
     try {
-      await messaging.requestPermission();
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        statusEl.textContent = 'Notification permission denied';
+        return;
+      }
       statusEl.textContent = 'Notification permission granted. Getting token...';
-      const token = await messaging.getToken({ vapidKey: '<YOUR_PUBLIC_VAPID_KEY_HERE>' });
-      statusEl.textContent = 'FCM Token received and saved!';
-      await db.ref('fcmTokens/' + user.uid).set(token);
-      console.log('FCM Token:', token);
+
+      const token = await messaging.getToken({
+        vapidKey: 'BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc' // Your public VAPID key
+      });
+
+      if (token) {
+        statusEl.textContent = 'FCM Token received and saved!';
+        await db.ref('fcmTokens/' + user.uid).set(token);
+        console.log('FCM Token:', token);
+      } else {
+        statusEl.textContent = 'No FCM token received.';
+      }
     } catch (e) {
-      statusEl.textContent = 'Unable to get permission for notifications: ' + e.message;
+      statusEl.textContent = 'Error getting notification permission or token: ' + e.message;
     }
   }
 
-  // Listen for new messages and update UI
   function listenMessages() {
     db.ref('messages').limitToLast(50).on('child_added', snapshot => {
       const msg = snapshot.val();
@@ -94,7 +122,6 @@
     });
   }
 
-  // Send message
   async function sendMessage(text, uid) {
     if (!text.trim()) return;
     const message = {
@@ -106,7 +133,6 @@
     inputEl.value = '';
   }
 
-  // Auth state listener
   auth.onAuthStateChanged(async user => {
     if (user) {
       userInfoEl.textContent = `User ID: ${user.uid}`;
@@ -132,12 +158,10 @@
     sendMessage(inputEl.value, user.uid);
   };
 
-  // Background message handler for foreground app
   messaging.onMessage(payload => {
-    console.log('Message received. ', payload);
-    // You can also display a custom notification here if you want
+    console.log('Foreground message received: ', payload);
+    // Optional: show UI alert, toast, etc.
   });
-
 </script>
 
 </body>
