@@ -564,6 +564,7 @@ header {
   }
 }
 </style>
+
 </head>
 <body>
 
@@ -909,26 +910,99 @@ header {
   
       <div class="error" id="step1Error"></div>  
       <button id="step1NextBtn">Send Request</button>  
-      <button style="
+    <!-- Pay with PayPal button -->
+<button id="payBtn" style="
   background-color: #0070ba;
   color: white;
   padding: 14px 60px;
   border-radius: 30px;
   font-size: 18px;
   font-weight: 700;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   border: none;
-  box-shadow: 0 6px 20px rgba(0, 112, 186, 0.45);
   cursor: pointer;
-  letter-spacing: 1.1px;
   user-select: none;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-"
-onmouseover="this.style.backgroundColor='#005c99'; this.style.boxShadow='0 8px 28px rgba(0, 92, 153, 0.55)'" 
-onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20px rgba(0, 112, 186, 0.45)'"
->
-  Pay with PayPal
-</button>
+  box-shadow: 0 6px 20px rgba(0, 112, 186, 0.45);
+  transition: background-color 0.3s ease;
+">Pay with PayPal</button>
+
+<!-- Payment Modal -->
+<div id="paymentModal" style="
+  display: none;
+  position: fixed; 
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  justify-content: center; 
+  align-items: center;
+  z-index: 9999;
+">
+  <div style="
+    background: #fff;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 420px;
+    padding: 30px 35px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.25);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  ">
+    <h2 style="margin-top:0; font-weight: 800; color: #0070ba; text-align:center;">Complete Your Purchase</h2>
+    
+    <form id="paymentForm" style="display: flex; flex-direction: column; gap: 16px;">
+      <label>
+        Email
+        <input id="userEmail" type="email" required placeholder="you@example.com" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <label>
+        Full Name
+        <input id="userName" type="text" required placeholder="Your full name" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <label>
+        Phone Number
+        <input id="userPhone" type="tel" required placeholder="+1234567890" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <div style="font-weight: 700; font-size: 20px; color: #333; text-align: center; margin-top: 10px;">
+        Final Pay: $<span id="finalPrice">0.00</span>
+      </div>
+      <div style="color: #2a7d32; font-weight: 700; font-size: 14px; text-align: center; margin-top: 8px;">
+        🚀 Delivery in less than 24 hours via Email or Phone
+      </div>
+      <button type="submit" style="
+        margin-top: 20px;
+        background-color: #2a7d32;
+        color: white;
+        font-weight: 700;
+        padding: 14px 0;
+        font-size: 18px;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      " onmouseover="this.style.backgroundColor='#236627'" onmouseout="this.style.backgroundColor='#2a7d32'">
+        Pay Now
+      </button>
+      <button type="button" id="closeModalBtn" style="
+        margin-top: 12px;
+        background: transparent;
+        border: none;
+        color: #777;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: underline;
+        user-select: none;
+      ">Cancel</button>
+    </form>
+  </div>
+</div>
     </div>  
   
     <!-- Step 2: Processing -->  
@@ -989,7 +1063,6 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
 <script>  
   const firebaseConfig = {  
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
@@ -1051,7 +1124,8 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
           <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">  
           <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>  
         </div>  
-        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>  
+        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px 10px 0 0; display: inline-block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>  
+        <button id="paypalBtn" style="margin: 30px 0 0 0; display: inline-block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #ffc439; color: #111; border: none; cursor: pointer; font-weight: bold; user-select:none;">Pay with PayPal</button>  
       `;  
   
       container.style.display = "block";  
@@ -1177,7 +1251,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     }  
   }  
   
-  // Purchase modal elements  
+  // Purchase modal elements for manual purchase  
   const modal = document.getElementById("purchaseModal");  
   const step1 = document.getElementById("step1");  
   const step2 = document.getElementById("step2");  
@@ -1190,7 +1264,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
   const step1Error = document.getElementById("step1Error");  
   const step2Error = document.getElementById("step2Error");  
   
-  // Show modal on buy button click  
+  // Show modal on buy button click (manual purchase)  
   function confirmPurchase() {  
     modal.style.display = "flex";  
     step1.classList.add("active");  
@@ -1202,7 +1276,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     phoneInput.value = "";  
   }  
   
-  // Validate email & phone  
+  // Validate email & phone for manual purchase modal  
   function validateStep1() {  
     const email = emailInput.value.trim();  
     const phone = phoneInput.value.trim();  
@@ -1228,7 +1302,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     return true;  
   }  
   
-  // Handle "Send Request" button (Step 1)  
+  // Handle "Send Request" button (Step 1) for manual purchase  
   document.getElementById("step1NextBtn").onclick = () => {  
     if (!validateStep1()) return;  
   
@@ -1260,7 +1334,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     }, 1200);  
   };  
   
-  // Close modal  
+  // Close manual purchase modal  
   document.getElementById("closeModalBtn").onclick = () => {  
     modal.style.display = "none";  
   };  
@@ -1271,7 +1345,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     }  
   };  
   
-  // Loading checkpoints logic  
+  // Loading checkpoints logic (you can keep or remove if you want)  
   db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {  
     document.querySelectorAll('.checkpoint')[1].classList.add('active');  
     document.querySelectorAll('.checkpoint')[2].classList.add('active');  
@@ -1281,6 +1355,7 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
     }, 1000);  
   });  
   
+  // Report modal stuff  
   function openReportModal() {  
     document.getElementById("reportModal").style.display = "flex";  
     document.getElementById("reportReason").value = "";  
@@ -1319,7 +1394,95 @@ onmouseout="this.style.backgroundColor='#0070ba'; this.style.boxShadow='0 6px 20
       statusBox.textContent = "⚠️ Failed to send. Try again.";  
     });  
   }  
+  
+  // PayPal Payment Modal Trigger  
+  document.addEventListener("click", function (e) {  
+    if (e.target.id === "paypalBtn") {  
+      const modalHtml = `  
+        <div id="paypalModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;">  
+          <div style="background:#fff;padding:30px;border-radius:16px;width:90%;max-width:400px;text-align:center;font-family:sans-serif;">  
+            <h2 style="margin-bottom:20px;color:#1a1a1a;">Confirm Payment</h2>  
+            <input type="text" placeholder="Your name" id="paypalName" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">  
+            <input type="email" placeholder="Your email" id="paypalEmail" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">  
+            <input type="tel" placeholder="Your phone" id="paypalPhone" style="width:100%;padding:12px;margin-bottom:20px;border:1px solid #ccc;border-radius:8px;">  
+           <div style="font-size:20px;font-weight:bold;margin-bottom:20px;color:#111;">
+              Total: $${formattedPrice}
+            </div>
+            <button id="paypalConfirmBtn" style="background:#ffc439;color:#111;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Pay with PayPal</button>
+            <button id="paypalCancelBtn" style="margin-top:12px;background:#e74c3c;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      // Append modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      // Cancel button closes modal & removes it
+      document.getElementById('paypalCancelBtn').onclick = () => {
+        document.getElementById('paypalModal').remove();
+      };
+
+      // Confirm button triggers payment process
+      document.getElementById('paypalConfirmBtn').onclick = () => {
+        const name = document.getElementById('paypalName').value.trim();
+        const email = document.getElementById('paypalEmail').value.trim();
+        const phone = document.getElementById('paypalPhone').value.trim();
+
+        if (!name || !email || !phone) {
+          alert('Please fill in all the fields.');
+          return;
+        }
+
+        // Simple email and phone validation (basic)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
+
+        if (!emailRegex.test(email)) {
+          alert('Invalid email format.');
+          return;
+        }
+
+        if (!phoneRegex.test(phone)) {
+          alert('Invalid phone number.');
+          return;
+        }
+
+        // Disable button to prevent double clicks
+        const btn = document.getElementById('paypalConfirmBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        // Save purchase info in Firebase with paymentMethod: 'paypal'
+        const purchaseData = {
+          productId,
+          sellerId,
+          name,
+          email,
+          phone,
+          paymentMethod: 'paypal',
+          timestamp: Date.now(),
+          userId: currentUser?.uid || null,
+        };
+
+        db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
+          .then(() => {
+            alert('Payment info saved! Now redirecting to PayPal...');
+            // Redirect to PayPal payment URL — placeholder example
+            // You should replace this with your actual PayPal checkout URL or integration
+            const paypalCheckoutUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your_paypal_email@example.com&item_name=${encodeURIComponent(data.title || 'Product')}&amount=${formattedPrice}&currency_code=USD`;
+
+            window.location.href = paypalCheckoutUrl;
+          })
+          .catch(err => {
+            console.error('Error saving PayPal purchase:', err);
+            alert('Failed to process payment. Try again.');
+            btn.disabled = false;
+            btn.textContent = 'Pay with PayPal';
+          });
+      };
+    }
+  });
 </script>
-</script>
+
 </body>
 </html>
