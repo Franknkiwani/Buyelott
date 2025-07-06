@@ -5,55 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Create DLS Product - Luxe Dark</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 /* Reset & base */
 * {
   box-sizing: border-box;
 }
-
 html, body {
-  margin: 0; padding: 0; height: 100%;
-  background: #121212;
-  color: #eee;
+  margin: 0; padding: 0;
+  height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #121212;
+  color: #f5f5f7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px 20px;
-}
-
-/* Headings */
-h1 {
-  font-weight: 600;
-  font-size: 2.25rem;
-  margin-bottom: 32px;
-  text-align: center;
-  color: #f0f0f0;
-  text-shadow: 0 0 6px #007aff55;
   user-select: none;
+  overflow: hidden;
 }
 
-/* Containers full width & height, no border or blur */
+/* Container full screen sticky with vertical scroll */
 #formContainer, #loginContainer {
+  position: fixed;
+  top: 0; left: 0;
   width: 100vw;
-  max-width: none;
   height: 100vh;
-  padding: 40px 32px;
-  background: #121212;
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  border: none;
-  color: #ddd;
-  user-select: none;
+  padding: 40px 24px;
+  overflow-y: auto;
+  background: #1c1c1e;
+  color: #eee;
   display: none;
   flex-direction: column;
-  align-items: stretch;
-  overflow-y: auto;
+  user-select: text;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 /* Show container */
@@ -61,173 +45,181 @@ h1 {
   display: flex;
 }
 
+/* Heading */
+h1 {
+  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 28px;
+  color: #f5f5f7;
+  text-align: center;
+  user-select: text;
+}
+
 /* Labels */
 label {
-  width: 100%;
-  margin-bottom: 10px;
   font-weight: 600;
   font-size: 1rem;
-  color: #9aa4eb;
-  user-select: none;
+  color: #a0a0a5;
+  margin-bottom: 8px;
+  user-select: text;
 }
 .required::after {
   content: '*';
-  color: #ff4d6d;
+  color: #d55;
   margin-left: 6px;
   font-weight: 700;
 }
 
-/* Inputs */
+/* Inputs & textarea & file input */
 input[type="text"],
 input[type="number"],
 textarea,
 input[type="file"] {
   width: 100%;
-  background: #222;
+  background: #2a2a2c;
   border: none;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 14px 18px;
   font-size: 1rem;
   color: #eee;
+  margin-bottom: 24px;
   font-weight: 500;
-  outline-offset: 0;
-  box-shadow: none;
+  outline: none !important; /* No blue outline */
+  box-shadow: none !important; /* No glow */
   resize: vertical;
   user-select: text;
-  transition: background 0.25s ease, color 0.25s ease;
-  cursor: text;
+  transition: background-color 0.25s ease;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 input[type="file"]:focus {
-  outline: 2px solid #005bb5;
-  background: #333;
-  color: #fff;
-  box-shadow: none;
+  background: #3a3a3c;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* File input tweaks */
 input[type="file"] {
   cursor: pointer;
-  user-select: none;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
-/* Preview container */
+/* Preview images */
 .preview {
-  width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-bottom: 28px;
-  user-select: none;
+  margin-bottom: 32px;
   justify-content: flex-start;
 }
 
 .preview img {
-  width: 90px;
-  height: 90px;
+  width: 88px;
+  height: 88px;
   object-fit: cover;
-  border-radius: 16px;
-  box-shadow: 0 0 8px #007aff55;
-  border: 1px solid #005bb5aa;
-  transition: border-color 0.25s ease;
+  border-radius: 18px;
+  box-shadow: 0 0 0 1.5px #3a3a3c;
+  transition: box-shadow 0.2s ease;
 }
 
-/* Hover effect on preview images */
 .preview img:hover {
-  border-color: #ff4d6d;
+  box-shadow: 0 0 6px 2px #d55;
   cursor: pointer;
 }
 
 /* Error message */
 .error {
-  width: 100%;
-  color: #ff4d6d;
+  color: #d55;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 24px;
+  font-size: 0.95rem;
+  margin-bottom: 28px;
   text-align: center;
-  user-select: none;
+  user-select: text;
 }
 
 /* Buttons */
 button {
   width: 100%;
-  padding: 16px;
+  padding: 16px 0;
   font-weight: 700;
-  font-size: 1.15rem;
-  background: linear-gradient(90deg, #007aff, #005bb5);
+  font-size: 1.1rem;
+  background: #444444;
   border: none;
-  border-radius: 22px;
-  color: white;
+  border-radius: 24px;
+  color: #eee;
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 4px 14px #007affcc;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  transition: background-color 0.3s ease;
+  margin-bottom: 16px;
 }
 
 button:hover:not(:disabled) {
-  background: linear-gradient(90deg, #0087ff, #004a99);
-  box-shadow: 0 6px 18px #0087ffcc;
+  background: #5a5a5a;
 }
 
 button:disabled {
-  background: #444;
+  background: #333333;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
-/* Google login button style */
+/* Google login button */
 #googleLoginBtn {
-  background: #121212;
-  color: #69f;
-  border: 2px solid #69f;
+  background: transparent;
+  color: #888888;
+  border: 2px solid #888888;
   font-weight: 700;
-  transition: background 0.25s ease;
+  padding: 14px 0;
+  border-radius: 24px;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 #googleLoginBtn:hover {
-  background: #69f;
-  color: #121212;
-  box-shadow: 0 0 8px #69faa;
+  background: #555555;
+  color: #ddd;
+  border-color: #ddd;
+  box-shadow: none;
 }
 
 /* Progress bar container */
 #uploadProgressContainer {
   width: 100%;
   height: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: #3a3a3c;
+  border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   user-select: none;
-  box-shadow: inset 0 0 6px #007aff33;
+  box-shadow: none;
   display: none;
 }
 
+/* Progress bar fill */
 #uploadProgress {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #69f, #007aff);
-  border-radius: 12px 0 0 12px;
-  transition: width 0.2s ease;
+  background: #d55;
+  border-radius: 14px 0 0 14px;
+  transition: width 0.3s ease;
 }
 
-/* Responsive */
+/* Responsive tweaks */
 @media (max-width: 600px) {
-  html, body {
-    padding: 20px 12px;
-  }
   #formContainer, #loginContainer {
-    padding: 24px;
-    height: 100vh;
+    padding: 32px 16px;
   }
   h1 {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
+    margin-bottom: 24px;
+  }
+  button, input[type="text"], input[type="number"], textarea, input[type="file"] {
+    font-size: 1rem;
+  }
+  .preview img {
+    width: 72px;
+    height: 72px;
   }
 }
 </style>
