@@ -12,7 +12,8 @@
   box-sizing: border-box;
 }
 html, body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #121212;
@@ -23,39 +24,100 @@ html, body {
   overflow: hidden;
 }
 
-/* Container full screen sticky with vertical scroll */
+/* Sticky Header */
+header#topHeader {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid #2a2a2c;
+  z-index: 1000;
+  padding: 8px 10px;      /* tighter padding */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;              /* space between title and tabs */
+  min-height: 48px;       /* controlled height */
+  box-sizing: border-box;
+}
+
+header#topHeader .title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5f5f7;
+  letter-spacing: 0.2px;
+  margin: 0;             /* kill margin bottom to reduce height */
+  user-select: none;
+}
+
+/* Tab Switcher */
+#sectionSwitcher {
+  display: flex;
+  width: 100%;
+  max-width: 420px;       /* a bit narrower, neat on all screens */
+  border-radius: 14px;
+  overflow: hidden;
+  background: #2a2a2c;
+  box-sizing: border-box;
+}
+
+#sectionSwitcher button {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: #aaa;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  user-select: none;
+}
+
+#sectionSwitcher button[aria-selected="true"] {
+  background: rgba(0, 0, 0, 0.4); /* black translucent glass effect */
+  color: #f5f5f7;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 6px 12px;
+  border-bottom: none !important; /* kill any underline */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+#sectionSwitcher button[aria-selected="true"]:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#sectionSwitcher button:focus-visible {
+  outline: 2px solid #d55;
+  outline-offset: 4px;
+}
+
+/* Containers - account view & post view */
 #formContainer, #loginContainer {
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  padding: 40px 24px;
+  padding: 96px 24px 40px; /* leaves room for header */
   overflow-y: auto;
   background: #1c1c1e;
   color: #eee;
   display: none;
   flex-direction: column;
   user-select: text;
-  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
-
-/* Show container */
 #formContainer.show, #loginContainer.show {
   display: flex;
 }
 
-/* Heading */
-h1 {
-  font-weight: 600;
-  font-size: 2rem;
-  margin-bottom: 28px;
-  color: #f5f5f7;
-  text-align: center;
-  user-select: text;
-}
-
-/* Labels */
+/* Inputs */
 label {
   font-weight: 600;
   font-size: 1rem;
@@ -69,8 +131,6 @@ label {
   margin-left: 6px;
   font-weight: 700;
 }
-
-/* Inputs & textarea & file input */
 input[type="text"],
 input[type="number"],
 textarea,
@@ -84,37 +144,30 @@ input[type="file"] {
   color: #eee;
   margin-bottom: 24px;
   font-weight: 500;
-  outline: none !important; /* No blue outline */
-  box-shadow: none !important; /* No glow */
+  outline: none !important;
   resize: vertical;
   user-select: text;
   transition: background-color 0.25s ease;
 }
-
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 input[type="file"]:focus {
   background: #3a3a3c;
-  outline: none !important;
-  box-shadow: none !important;
 }
-
 input[type="file"] {
   cursor: pointer;
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-/* Preview images */
+/* Image Preview */
 .preview {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
   margin-bottom: 32px;
-  justify-content: flex-start;
 }
-
 .preview img {
   width: 88px;
   height: 88px;
@@ -123,13 +176,12 @@ input[type="file"] {
   box-shadow: 0 0 0 1.5px #3a3a3c;
   transition: box-shadow 0.2s ease;
 }
-
 .preview img:hover {
   box-shadow: 0 0 6px 2px #d55;
   cursor: pointer;
 }
 
-/* Error message */
+/* Error */
 .error {
   color: #d55;
   font-weight: 600;
@@ -139,51 +191,46 @@ input[type="file"] {
   user-select: text;
 }
 
-/* Buttons */
+/* Button styling */
 button {
   width: 100%;
   padding: 16px 0;
   font-weight: 700;
   font-size: 1.1rem;
-  background: #444444;
+  background: #444;
   border: none;
   border-radius: 24px;
   color: #eee;
   cursor: pointer;
   user-select: none;
-  box-shadow: none;
   transition: background-color 0.3s ease;
   margin-bottom: 16px;
 }
-
 button:hover:not(:disabled) {
   background: #5a5a5a;
 }
-
 button:disabled {
-  background: #333333;
+  background: #333;
   cursor: not-allowed;
 }
 
-/* Google login button */
+/* Google Login */
 #googleLoginBtn {
   background: transparent;
-  color: #888888;
-  border: 2px solid #888888;
-  font-weight: 700;
+  color: #888;
+  border: 2px solid #888;
   padding: 14px 0;
   border-radius: 24px;
+  font-weight: 700;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
-
 #googleLoginBtn:hover {
-  background: #555555;
+  background: #555;
   color: #ddd;
   border-color: #ddd;
-  box-shadow: none;
 }
 
-/* Progress bar container */
+/* Upload Progress Bar */
 #uploadProgressContainer {
   width: 100%;
   height: 14px;
@@ -191,12 +238,8 @@ button:disabled {
   border-radius: 14px;
   overflow: hidden;
   margin-bottom: 28px;
-  user-select: none;
-  box-shadow: none;
   display: none;
 }
-
-/* Progress bar fill */
 #uploadProgress {
   height: 100%;
   width: 0%;
@@ -205,69 +248,40 @@ button:disabled {
   transition: width 0.3s ease;
 }
 
-/* Responsive tweaks */
+/* Responsive */
 @media (max-width: 600px) {
+  header#topHeader {
+    padding: 14px 16px;
+  }
+  header#topHeader .title {
+    font-size: 0.95rem;
+  }
   #formContainer, #loginContainer {
-    padding: 32px 16px;
-  }
-  h1 {
-    font-size: 1.75rem;
-    margin-bottom: 24px;
-  }
-  button, input[type="text"], input[type="number"], textarea, input[type="file"] {
-    font-size: 1rem;
+    padding: 88px 16px 32px;
   }
   .preview img {
     width: 72px;
     height: 72px;
   }
-}
-#sectionSwitcher {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin: 16px 0;
-  user-select: none;
+  button, input, textarea {
+    font-size: 1rem;
+  }
 }
 
-#sectionSwitcher button {
-  background: none;
-  border: none;
-  font-weight: 600;
-  font-size: 1.15rem;
-  padding-bottom: 6px;
-  cursor: pointer;
-  color: #888;
-  border-bottom: 2.5px solid transparent;
-  transition: color 0.3s ease, border-bottom-color 0.3s ease;
-  outline-offset: 2px;
-}
-
-#sectionSwitcher button[aria-selected="true"] {
-  font-weight: 700;
-  color: #d55;
-  border-bottom-color: #d55;
-}
-
-#sectionSwitcher button:focus-visible {
-  outline: 2px solid #d55;
-  outline-offset: 4px;
-}
 </style>
 </head>
 <body>
-  <!-- Section Switcher Tabs -->
-  <div id="sectionSwitcher" role="tablist" aria-label="Product management sections" style="display:flex; justify-content:center; gap:24px; margin: 16px 0;">
-    <button role="tab" id="tabCreate" aria-selected="true" aria-controls="createSection" tabindex="0"
-      style="background:none; border:none; font-weight:700; font-size:1.15rem; color:#d55; padding-bottom:6px; border-bottom:2.5px solid #d55; cursor:pointer; user-select:none;">
-      Create a Count
-    </button>
-    <button role="tab" id="tabAccounts" aria-selected="false" aria-controls="accountsSection" tabindex="-1"
-      style="background:none; border:none; font-weight:600; font-size:1.15rem; color:#888; padding-bottom:6px; border-bottom:2.5px solid transparent; cursor:pointer; user-select:none;">
-      My Accounts
-    </button>
-  </div>
-
+  <!-- Sticky Luxe Header -->
+  <header id="topHeader">
+    <div id="sectionSwitcher" role="tablist" aria-label="Sections">
+      <button role="tab" id="tabCreate" aria-selected="true" aria-controls="createSection" tabindex="0">
+        Create
+      </button>
+      <button role="tab" id="tabAccounts" aria-selected="false" aria-controls="accountsSection" tabindex="-1">
+        My Accounts
+      </button>
+    </div>
+  </header>
   <!-- Login prompt shown if not signed in -->
   <div id="loginContainer" class="show">
     <p style="font-size:1.1rem; color:#888; user-select:none;">Sign in with Google to post a product</p>
