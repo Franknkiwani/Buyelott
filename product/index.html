@@ -893,7 +893,40 @@ header {
 }
 
 </style>
-<button class="buy-btn" onclick="confirmPurchase()" style="...">Confirm to Buy</button>
+<div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle" style="display: none;">  
+  <div class="modal-content">  
+      
+    <!-- Step 1: Collect Info -->  
+    <div class="step active" id="step1">  
+      <h2 id="purchaseTitle">Request Access</h2>  
+      <p style="color:#888; font-size:14px;">Send request if you wish to buy this account or know more about it.</p>  
+  
+      <label for="emailInput">Email</label>  
+      <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required>  
+  
+      <label for="phoneInput">Phone</label>  
+      <input type="tel" id="phoneInput" placeholder="+1 555 555 5555" autocomplete="tel" required>  
+  
+      <div class="error" id="step1Error"></div>  
+      <button id="step1NextBtn">Send Request</button>  
+    </div>  
+  
+    <!-- Step 2: Processing -->  
+    <div class="step" id="step2">  
+      <h2>Processing your request...</h2>  
+      <div class="loader" style="margin: 20px auto;"></div>  
+      <p style="color:#888; font-size:14px;">Securely submitting to seller. Please wait.</p>  
+    </div>  
+  
+    <!-- Step 3: Done -->  
+    <div class="step" id="step3">  
+      <h2>✅ Request Sent</h2>  
+      <p>  
+ <p>We’ve got your request!<br>Our team will contact you soon via your provided email or phone number to complete the process.</p>  
+      <button id="closeModalBtn">Close</button>  
+    </div>  
+  </div>  
+</div>
 <div id="loadingScreen" style="position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff;">
   <div style="margin-bottom:24px; font-size:18px; font-weight:600;">Preparing your product...</div>
 
