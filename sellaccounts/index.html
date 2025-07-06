@@ -222,16 +222,59 @@ button:disabled {
     height: 72px;
   }
 }
+#sectionSwitcher {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 16px 0;
+  user-select: none;
+}
+
+#sectionSwitcher button {
+  background: none;
+  border: none;
+  font-weight: 600;
+  font-size: 1.15rem;
+  padding-bottom: 6px;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+  outline-offset: 2px;
+}
+
+#sectionSwitcher button[aria-selected="true"] {
+  font-weight: 700;
+  color: #d55;
+  border-bottom-color: #d55;
+}
+
+#sectionSwitcher button:focus-visible {
+  outline: 2px solid #d55;
+  outline-offset: 4px;
+}
 </style>
 </head>
 <body>
- 
+  <!-- Section Switcher Tabs -->
+  <div id="sectionSwitcher" role="tablist" aria-label="Product management sections" style="display:flex; justify-content:center; gap:24px; margin: 16px 0;">
+    <button role="tab" id="tabCreate" aria-selected="true" aria-controls="createSection" tabindex="0"
+      style="background:none; border:none; font-weight:700; font-size:1.15rem; color:#d55; padding-bottom:6px; border-bottom:2.5px solid #d55; cursor:pointer; user-select:none;">
+      Create a Count
+    </button>
+    <button role="tab" id="tabAccounts" aria-selected="false" aria-controls="accountsSection" tabindex="-1"
+      style="background:none; border:none; font-weight:600; font-size:1.15rem; color:#888; padding-bottom:6px; border-bottom:2.5px solid transparent; cursor:pointer; user-select:none;">
+      My Accounts
+    </button>
+  </div>
 
+  <!-- Login prompt shown if not signed in -->
   <div id="loginContainer" class="show">
     <p style="font-size:1.1rem; color:#888; user-select:none;">Sign in with Google to post a product</p>
     <button id="googleLoginBtn">🔐 Sign in with Google</button>
   </div>
 
+  <!-- Product creation form -->
   <div id="formContainer" aria-live="polite" aria-busy="false" role="region">
     <form id="createForm" novalidate autocomplete="off">
       <label class="required" for="title">Title</label>
@@ -257,6 +300,14 @@ button:disabled {
     </form>
   </div>
 
+  <!-- My Accounts section, hidden initially -->
+  <div id="accountsSection" aria-live="polite" role="region" aria-hidden="true" style="display:none; padding: 0 24px; color:#ccc;">
+    <h2 style="font-weight:600; text-align:center; margin-bottom:24px;">Your DLS Products</h2>
+    <div id="accountsList" style="display:flex; flex-direction:column; gap:12px; max-width:600px; margin:0 auto;">
+      <p style="text-align:center; color:#666;">Loading your accounts...</p>
+    </div>
+  </div>
+</body>
   <!-- continuing inside <body> -->
 
   <!-- Firebase SDKs -->
@@ -264,199 +315,362 @@ button:disabled {
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-    const loginContainer = document.getElementById('loginContainer');
-    const formContainer = document.getElementById('formContainer');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    const form = document.getElementById('createForm');
-    const imagesInput = document.getElementById('images');
-    const preview = document.getElementById('preview');
-    const imgError = document.getElementById('imgError');
-    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
-    const uploadProgress = document.getElementById('uploadProgress');
-    const submitBtn = form.querySelector('button[type="submit"]');
+  const loginContainer = document.getElementById('loginContainer');
+  const formContainer = document.getElementById('formContainer');
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const form = document.getElementById('createForm');
+  const imagesInput = document.getElementById('images');
+  const preview = document.getElementById('preview');
+  const imgError = document.getElementById('imgError');
+  const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+  const uploadProgress = document.getElementById('uploadProgress');
+  const submitBtn = form.querySelector('button[type="submit"]');
 
-    let currentUser = null;
-    let selectedFiles = [];
+  // New elements for tabs and accounts section
+  const tabCreate = document.getElementById('tabCreate');
+  const tabAccounts = document.getElementById('tabAccounts');
+  const accountsSection = document.getElementById('accountsSection');
+  const accountsList = document.getElementById('accountsList');
 
-    // Show login or form depending on user
-    auth.onAuthStateChanged(user => {
-      if(user) {
-        currentUser = user;
-        loginContainer.classList.remove('show');
-        formContainer.classList.add('show');
-      } else {
-        currentUser = null;
-        formContainer.classList.remove('show');
-        loginContainer.classList.add('show');
-      }
+  let currentUser = null;
+  let selectedFiles = [];
+
+  // Show login or form depending on user
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    if(user) {
+      loginContainer.classList.remove('show');
+      // Default to create tab on login
+      switchSection(true);
+    } else {
+      formContainer.classList.remove('show');
+      accountsSection.style.display = 'none';
+      loginContainer.classList.add('show');
+      // Reset tab states on logout
+      tabCreate.setAttribute('aria-selected', 'true');
+      tabCreate.style.color = '#d55';
+      tabCreate.style.borderBottomColor = '#d55';
+      tabCreate.tabIndex = 0;
+
+      tabAccounts.setAttribute('aria-selected', 'false');
+      tabAccounts.style.color = '#888';
+      tabAccounts.style.borderBottomColor = 'transparent';
+      tabAccounts.tabIndex = -1;
+    }
+  });
+
+  // Google login button click
+  googleLoginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => {
+      alert('Google sign-in failed: ' + err.message);
+      console.error(err);
     });
+  });
 
-    // Google login button click
-    googleLoginBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => {
-        alert('Google sign-in failed: ' + err.message);
-        console.error(err);
-      });
-    });
+  // Image input change - preview + validation
+  imagesInput.addEventListener('change', () => {
+    imgError.textContent = '';
+    preview.innerHTML = '';
+    selectedFiles = [];
 
-    // Image input change - preview + validation
-    imagesInput.addEventListener('change', () => {
-      imgError.textContent = '';
-      preview.innerHTML = '';
-      selectedFiles = [];
+    const files = Array.from(imagesInput.files);
 
-      const files = Array.from(imagesInput.files);
-
-      if(files.length > 4){
-        imgError.textContent = 'You can upload a maximum of 4 images.';
-        imagesInput.value = '';
-        return;
-      }
-
-      selectedFiles = files;
-
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.alt = file.name;
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    // Upload to Imgur with progress callback
-    function uploadToImgur(file, onProgress){
-      const clientId = '891e5bb4aa94282';
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://api.imgur.com/3/image');
-        xhr.setRequestHeader('Authorization', 'Client-ID ' + clientId);
-
-        xhr.upload.onprogress = e => {
-          if(e.lengthComputable && onProgress){
-            const percent = Math.round((e.loaded / e.total) * 100);
-            onProgress(percent);
-          }
-        };
-
-        xhr.onload = () => {
-          try {
-            const res = JSON.parse(xhr.responseText);
-            if(res.success && res.data.link){
-              resolve(res.data.link);
-            } else {
-              reject(new Error('Imgur upload failed'));
-            }
-          } catch (err) {
-            reject(err);
-          }
-        };
-
-        xhr.onerror = () => reject(new Error('Network error during Imgur upload'));
-        const formData = new FormData();
-        formData.append('image', file);
-        xhr.send(formData);
-      });
+    if(files.length > 4){
+      imgError.textContent = 'You can upload a maximum of 4 images.';
+      imagesInput.value = '';
+      return;
     }
 
-    // Form submission handler
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
+    selectedFiles = files;
 
-      if(!currentUser) {
-        alert('Please sign in with Google before posting.');
-        return;
-      }
-
-      // Simple form validation
-      if(!form.title.value.trim() || !form.description.value.trim() || !form.price.value.trim() || selectedFiles.length === 0) {
-        alert('Please fill all required fields and select images.');
-        return;
-      }
-
-      if(selectedFiles.length > 4){
-        alert('You can upload max 4 images.');
-        return;
-      }
-
-      // Disable form and show progress bar
-      submitBtn.disabled = true;
-      uploadProgressContainer.style.display = 'block';
-      uploadProgress.style.width = '0%';
-      imgError.textContent = '';
-      uploadProgressContainer.setAttribute('aria-hidden', 'false');
-
-      try {
-        // Upload images one by one with progress
-        const imageUrls = [];
-        for(let i=0; i<selectedFiles.length; i++){
-          const file = selectedFiles[i];
-          await uploadToImgur(file, percent => {
-            // Calculate overall progress
-            const overallPercent = Math.round(((i + percent/100) / selectedFiles.length) * 100);
-            uploadProgress.style.width = overallPercent + '%';
-          }).then(link => {
-            imageUrls.push(link);
-          });
-        }
-
-        // Build product object
-        const productData = {
-          title: form.title.value.trim(),
-          description: form.description.value.trim(),
-          price: parseFloat(form.price.value).toFixed(2),
-          images: imageUrls,
-          seller: {
-            uid: currentUser.uid,
-            username: currentUser.displayName || 'Unknown',
-            email: currentUser.email,
-            avatar: currentUser.photoURL || '',
-          },
-          createdAt: Date.now()
-        };
-
-        // Save to Firebase under /dlsaccounts
-        const newRef = db.ref('/dlsaccounts').push();
-        await newRef.set(productData);
-
-        alert('Product posted successfully 🚀');
-
-        // Reset form & UI
-        form.reset();
-        preview.innerHTML = '';
-        uploadProgressContainer.style.display = 'none';
-        uploadProgress.style.width = '0%';
-        submitBtn.disabled = false;
-
-      } catch (error) {
-        console.error(error);
-        imgError.textContent = 'Upload failed: ' + error.message;
-        submitBtn.disabled = false;
-        uploadProgressContainer.style.display = 'none';
-        uploadProgress.style.width = '0%';
-      }
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = file.name;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     });
+  });
 
-  </script>
+  // Upload to Imgur with progress callback
+  function uploadToImgur(file, onProgress){
+    const clientId = '891e5bb4aa94282';
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.imgur.com/3/image');
+      xhr.setRequestHeader('Authorization', 'Client-ID ' + clientId);
+
+      xhr.upload.onprogress = e => {
+        if(e.lengthComputable && onProgress){
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if(res.success && res.data.link){
+            resolve(res.data.link);
+          } else {
+            reject(new Error('Imgur upload failed'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during Imgur upload'));
+      const formData = new FormData();
+      formData.append('image', file);
+      xhr.send(formData);
+    });
+  }
+
+  // Form submission handler
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    if(!currentUser) {
+      alert('Please sign in with Google before posting.');
+      return;
+    }
+
+    // Simple form validation
+    if(!form.title.value.trim() || !form.description.value.trim() || !form.price.value.trim() || selectedFiles.length === 0) {
+      alert('Please fill all required fields and select images.');
+      return;
+    }
+
+    if(selectedFiles.length > 4){
+      alert('You can upload max 4 images.');
+      return;
+    }
+
+    // Disable form and show progress bar
+    submitBtn.disabled = true;
+    uploadProgressContainer.style.display = 'block';
+    uploadProgress.style.width = '0%';
+    imgError.textContent = '';
+    uploadProgressContainer.setAttribute('aria-hidden', 'false');
+
+    try {
+      // Upload images one by one with progress
+      const imageUrls = [];
+      for(let i=0; i<selectedFiles.length; i++){
+        const file = selectedFiles[i];
+        await uploadToImgur(file, percent => {
+          // Calculate overall progress
+          const overallPercent = Math.round(((i + percent/100) / selectedFiles.length) * 100);
+          uploadProgress.style.width = overallPercent + '%';
+        }).then(link => {
+          imageUrls.push(link);
+        });
+      }
+
+      // Build product object
+      const productData = {
+        title: form.title.value.trim(),
+        description: form.description.value.trim(),
+        price: parseFloat(form.price.value).toFixed(2),
+        images: imageUrls,
+        seller: {
+          uid: currentUser.uid,
+          username: currentUser.displayName || 'Unknown',
+          email: currentUser.email,
+          avatar: currentUser.photoURL || '',
+        },
+        createdAt: Date.now()
+      };
+
+      // Save to Firebase under /dlsaccounts
+      const newRef = db.ref('/dlsaccounts').push();
+      await newRef.set(productData);
+
+      alert('Product posted successfully 🚀');
+
+      // Reset form & UI
+      form.reset();
+      preview.innerHTML = '';
+      uploadProgressContainer.style.display = 'none';
+      uploadProgress.style.width = '0%';
+      submitBtn.disabled = false;
+
+    } catch (error) {
+      console.error(error);
+      imgError.textContent = 'Upload failed: ' + error.message;
+      submitBtn.disabled = false;
+      uploadProgressContainer.style.display = 'none';
+      uploadProgress.style.width = '0%';
+    }
+  });
+
+  // Section switcher logic
+  function switchSection(toCreate) {
+    if (toCreate) {
+      // Show create form, hide accounts
+      tabCreate.setAttribute('aria-selected', 'true');
+      tabCreate.style.color = '#d55';
+      tabCreate.style.borderBottomColor = '#d55';
+      tabCreate.tabIndex = 0;
+
+      tabAccounts.setAttribute('aria-selected', 'false');
+      tabAccounts.style.color = '#888';
+      tabAccounts.style.borderBottomColor = 'transparent';
+      tabAccounts.tabIndex = -1;
+
+      formContainer.classList.add('show');
+      formContainer.setAttribute('aria-hidden', 'false');
+      accountsSection.style.display = 'none';
+      accountsSection.setAttribute('aria-hidden', 'true');
+    } else {
+      // Show accounts list, hide create form
+      tabCreate.setAttribute('aria-selected', 'false');
+      tabCreate.style.color = '#888';
+      tabCreate.style.borderBottomColor = 'transparent';
+      tabCreate.tabIndex = -1;
+
+      tabAccounts.setAttribute('aria-selected', 'true');
+      tabAccounts.style.color = '#d55';
+      tabAccounts.style.borderBottomColor = '#d55';
+      tabAccounts.tabIndex = 0;
+
+      formContainer.classList.remove('show');
+      formContainer.setAttribute('aria-hidden', 'true');
+      accountsSection.style.display = 'block';
+      accountsSection.setAttribute('aria-hidden', 'false');
+
+      // Load products only once when switching to accounts
+      if (!accountsSection.dataset.loaded) {
+        loadUserProducts();
+        accountsSection.dataset.loaded = 'true';
+      }
+    }
+  }
+
+  tabCreate.addEventListener('click', () => switchSection(true));
+  tabAccounts.addEventListener('click', () => switchSection(false));
+
+  // Initialize view
+  // If user already signed in, show create tab
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      switchSection(true);
+    }
+  });
+
+  // Load user's products from Firebase
+  async function loadUserProducts() {
+    if (!currentUser) {
+      accountsList.innerHTML = '<p style="color:#d55; text-align:center;">You must be signed in to view your accounts.</p>';
+      return;
+    }
+
+    accountsList.innerHTML = '<p style="color:#888; text-align:center;">Loading your accounts...</p>';
+
+    try {
+      const snapshot = await db.ref('/dlsaccounts').orderByChild('seller/uid').equalTo(currentUser.uid).once('value');
+      const products = snapshot.val();
+
+      if (!products) {
+        accountsList.innerHTML = '<p style="color:#666; text-align:center;">No products found.</p>';
+        return;
+      }
+
+      // Clear list
+      accountsList.innerHTML = '';
+
+      // Render each product nicely
+      Object.entries(products).forEach(([key, product]) => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+          background: #2a2a2c;
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 0 8px rgba(213, 85, 85, 0.3);
+          color: #eee;
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          user-select: text;
+        `;
+
+        // Thumbnail (first image)
+        const thumb = document.createElement('img');
+        thumb.src = product.images && product.images.length ? product.images[0] : '';
+        thumb.alt = product.title || 'Product Image';
+        thumb.style.cssText = `
+          width: 72px;
+          height: 72px;
+          object-fit: cover;
+          border-radius: 14px;
+          flex-shrink: 0;
+          box-shadow: 0 0 4px #d55;
+        `;
+        card.appendChild(thumb);
+
+        // Details container
+        const details = document.createElement('div');
+        details.style.flex = '1';
+        details.style.display = 'flex';
+        details.style.flexDirection = 'column';
+        details.style.justifyContent = 'center';
+
+        // Title
+        const title = document.createElement('h3');
+        title.textContent = product.title || '(No Title)';
+        title.style.margin = '0 0 6px 0';
+        title.style.fontWeight = '700';
+        title.style.color = '#d55';
+        details.appendChild(title);
+
+        // Description (shortened)
+        const desc = document.createElement('p');
+        desc.textContent = product.description ? product.description.slice(0, 80) + (product.description.length > 80 ? '…' : '') : 'No description';
+        desc.style.margin = '0 0 8px 0';
+        desc.style.color = '#bbb';
+        desc.style.fontSize = '0.9rem';
+        details.appendChild(desc);
+
+        // Price
+        const price = document.createElement('span');
+        price.textContent = `$${parseFloat(product.price).toFixed(2)}`;
+        price.style.fontWeight = '600';
+        price.style.color = '#f55';
+        details.appendChild(price);
+
+        card.appendChild(details);
+
+        // Optionally add delete or edit buttons here in the future
+
+        accountsList.appendChild(card);
+      });
+
+    } catch (error) {
+      console.error(error);
+      accountsList.innerHTML = `<p style="color:#d55; text-align:center;">Failed to load accounts: ${error.message}</p>`;
+    }
+  }
+</script>
 </body>
 </html>
