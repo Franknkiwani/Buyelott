@@ -910,97 +910,7 @@ header {
   
       <div class="error" id="step1Error"></div>  
       <button id="step1NextBtn">Send Request</button>  
-    <!-- Pay with PayPal button -->
-<button id="payBtn" style="
-  background-color: #0070ba;
-  color: white;
-  padding: 14px 60px;
-  border-radius: 30px;
-  font-size: 18px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  box-shadow: 0 6px 20px rgba(0, 112, 186, 0.45);
-  transition: background-color 0.3s ease;
-">Pay with PayPal</button>
 
-<!-- Payment Modal -->
-<div id="paymentModal" style="
-  display: none;
-  position: fixed; 
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(5px);
-  justify-content: center; 
-  align-items: center;
-  z-index: 9999;
-">
-  <div style="
-    background: #fff;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 420px;
-    padding: 30px 35px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.25);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  ">
-    <h2 style="margin-top:0; font-weight: 800; color: #0070ba; text-align:center;">Complete Your Purchase</h2>
-    
-    <form id="paymentForm" style="display: flex; flex-direction: column; gap: 16px;">
-      <label>
-        Email
-        <input id="userEmail" type="email" required placeholder="you@example.com" style="
-          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
-          outline-offset: 2px;
-        " />
-      </label>
-      <label>
-        Full Name
-        <input id="userName" type="text" required placeholder="Your full name" style="
-          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
-          outline-offset: 2px;
-        " />
-      </label>
-      <label>
-        Phone Number
-        <input id="userPhone" type="tel" required placeholder="+1234567890" style="
-          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
-          outline-offset: 2px;
-        " />
-      </label>
-      <div style="font-weight: 700; font-size: 20px; color: #333; text-align: center; margin-top: 10px;">
-        Final Pay: $<span id="finalPrice">0.00</span>
-      </div>
-      <div style="color: #2a7d32; font-weight: 700; font-size: 14px; text-align: center; margin-top: 8px;">
-        🚀 Delivery in less than 24 hours via Email or Phone
-      </div>
-      <button type="submit" style="
-        margin-top: 20px;
-        background-color: #2a7d32;
-        color: white;
-        font-weight: 700;
-        padding: 14px 0;
-        font-size: 18px;
-        border-radius: 30px;
-        border: none;
-        cursor: pointer;
-        user-select: none;
-        transition: background-color 0.3s ease;
-      " onmouseover="this.style.backgroundColor='#236627'" onmouseout="this.style.backgroundColor='#2a7d32'">
-        Pay Now
-      </button>
-      <button type="button" id="closeModalBtn" style="
-        margin-top: 12px;
-        background: transparent;
-        border: none;
-        color: #777;
-        font-size: 14px;
-        cursor: pointer;
-        text-decoration: underline;
-        user-select: none;
-      ">Cancel</button>
-    </form>
   </div>
 </div>
     </div>  
@@ -1395,8 +1305,12 @@ header {
     });
   }
 </script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+
 <script>
-  // Initialize Firebase config & app
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1407,134 +1321,79 @@ header {
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
 
+  // Init Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-  const params = new URLSearchParams(window.location.search);
-  const productId = params.get('id');
 
+  const productId = new URLSearchParams(window.location.search).get("id");
   let currentUser = null;
-  let sellerId = null;
+  let productData = null;
 
-  // Listen for Firebase auth state changes
+  // Auth state
   firebase.auth().onAuthStateChanged(user => {
     currentUser = user;
+    if (user?.email) {
+      document.getElementById("userEmail").value = user.email;
+    }
   });
 
-  // Load product info or show "not found"
-  if (!productId) {
-    document.getElementById("notFound").style.display = "block";
-  } else {
+  // Load product and price
+  if (productId) {
     db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
       const data = snapshot.val();
-      if (!data) {
-        document.getElementById("notFound").style.display = "block";
-        return;
-      }
+      if (!data) return alert("⚠️ Product not found");
 
-      sellerId = (data.seller && data.seller.id) ? data.seller.id : null;
-
-      const container = document.getElementById("product");
-      const mainImage = (data.images && data.images.length > 0)
-        ? data.images[0]
-        : 'https://via.placeholder.com/600x400?text=No+Image';
-      const sellerAvatar = (data.seller && data.seller.avatar)
-        ? data.seller.avatar
-        : 'https://via.placeholder.com/40?text=👤';
-      const sellerUsername = (data.seller && data.seller.username)
-        ? data.seller.username
-        : 'Unknown Seller';
-      const verifiedBadge = (data.seller && data.seller.verified)
-        ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>'
-        : '';
-      const price = parseFloat(data.price);
-      const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
-
-      container.innerHTML = `
-        <div class="product-image-wrapper" style="position: relative;">
-          <img class="main-image" src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 16px;">
-        </div>
-        <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">
-          ${data.title || "Untitled"}
-        </div>
-        <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">
-          ${data.description || "No description available."}
-        </div>
-        <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">
-          $${formattedPrice}
-        </div>
-        <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
-          <img src="${sellerAvatar}" alt="Seller Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
-          <span style="font-weight: 600; font-size: 16px;">
-            ${sellerUsername} ${verifiedBadge}
-          </span>
-        </div>
-        <button id="paypalBtn" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #ffc439; color: #111; border: none; cursor: pointer; font-weight: bold;">
-          Pay with PayPal
-        </button>
-      `;
-
-      container.style.display = "block";
+      productData = data;
+      document.getElementById("finalPrice").textContent = parseFloat(data.price || 0).toFixed(2);
     });
+  } else {
+    alert("❌ No product ID in URL.");
   }
 
-  // PayPal Modal Trigger & Logic
-  document.addEventListener("click", function (e) {
-    if (e.target.id === "paypalBtn") {
-      const modalHtml = `
-        <div id="paypalModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;">
-          <div style="background:#fff;padding:30px;border-radius:16px;width:90%;max-width:400px;text-align:center;font-family:sans-serif;">
-            <h2 style="margin-bottom:20px;color:#1a1a1a;">Confirm Payment</h2>
-            <input type="text" placeholder="Your name" id="paypalName" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">
-            <input type="email" placeholder="Your email" id="paypalEmail" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">
-            <input type="tel" placeholder="Your phone" id="paypalPhone" style="width:100%;padding:12px;margin-bottom:20px;border:1px solid #ccc;border-radius:8px;">
-            <div style="font-size:20px;font-weight:bold;margin-bottom:20px;color:#111;">
-              Total: $<span id="paypalAmount">0.00</span>
-            </div>
-            <button id="finalConfirmPay" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:10px;font-size:16px;cursor:pointer;width:100%;">Confirm and Pay</button>
-            <div style="font-size:12px;margin-top:12px;color:#555;">Delivery in &lt; 24hrs via email or phone</div>
-          </div>
-        </div>`;
+  // Open modal
+  document.getElementById("payBtn").addEventListener("click", () => {
+    if (!productData) return alert("Wait — product not loaded yet.");
+    document.getElementById("paymentModal").style.display = "flex";
+  });
 
-      document.body.insertAdjacentHTML("beforeend", modalHtml);
+  // Close modal
+  document.getElementById("closeModalBtn").addEventListener("click", () => {
+    document.getElementById("paymentModal").style.display = "none";
+  });
 
-      // Load product price & autofill email if logged in
-      db.ref("/dlsaccounts/" + productId).once("value").then(snap => {
-        const d = snap.val();
-        document.getElementById("paypalAmount").textContent = parseFloat(d.price || 0).toFixed(2);
-        if (currentUser && currentUser.email) {
-          document.getElementById("paypalEmail").value = currentUser.email;
-        }
-      });
+  // Submit payment
+  document.getElementById("paymentForm").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      // Final confirm pay button logic
-      document.getElementById("finalConfirmPay").onclick = () => {
-        const name = document.getElementById("paypalName").value.trim();
-        const email = document.getElementById("paypalEmail").value.trim();
-        const phone = document.getElementById("paypalPhone").value.trim();
+    const name = document.getElementById("userName").value.trim();
+    const email = document.getElementById("userEmail").value.trim();
+    const phone = document.getElementById("userPhone").value.trim();
+    const amount = document.getElementById("finalPrice").textContent;
 
-        if (!name || !email || !phone) {
-          alert("Please fill in all fields.");
-          return;
-        }
-
-        // Save payment request data (pseudo-payment)
-        const paymentData = {
-          productId,
-          name,
-          email,
-          phone,
-          status: "Pending",
-          amount: document.getElementById("paypalAmount").textContent,
-          userId: currentUser?.uid || "guest",
-          timestamp: Date.now()
-        };
-
-        db.ref("/paypalPayments/" + productId + "_" + Date.now()).set(paymentData).then(() => {
-          alert("✅ Thanks! You'll receive delivery within 24hrs.");
-          document.getElementById("paypalModal").remove();
-        });
-      };
+    if (!name || !email || !phone) {
+      alert("Please fill in all fields.");
+      return;
     }
+
+    const paymentData = {
+      productId,
+      name,
+      email,
+      phone,
+      status: "Pending",
+      amount,
+      userId: currentUser?.uid || "guest",
+      timestamp: Date.now()
+    };
+
+    const ref = `/paypalPayments/${productId}_${Date.now()}`;
+    db.ref(ref).set(paymentData).then(() => {
+      alert("✅ Payment request saved. You'll get your item in under 24hrs.");
+      document.getElementById("paymentModal").style.display = "none";
+    }).catch(err => {
+      console.error("Payment error:", err);
+      alert("❌ Something went wrong saving your payment.");
+    });
   });
 </script>
 </body>
