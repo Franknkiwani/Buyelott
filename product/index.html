@@ -1161,7 +1161,7 @@ button:hover {
           <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">
           <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>
         </div>
-        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>
+        <button class="buy-btn" onclick="openPurchaseModal()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Buy or Request Info</button>
       `;
 
       container.style.display = "block";
@@ -1287,148 +1287,190 @@ button:hover {
     }
   }
 
-  // Purchase modal elements
-  const modal = document.getElementById("purchaseModal");
-  const step1 = document.getElementById("step1");
+  // ----- PURCHASE & REQUEST INFO MODAL LOGIC -----
+
+  const purchaseModal = document.getElementById("purchaseModal");
+  const step0 = document.getElementById("step0");
+  const step1Request = document.getElementById("step1Request");
+  const step1Buy = document.getElementById("step1Buy");
   const step2 = document.getElementById("step2");
   const step3 = document.getElementById("step3");
 
-  const emailInput = document.getElementById("emailInput");
-  const phoneInput = document.getElementById("phoneInput");
-  const paymentMethod = document.getElementById("paymentMethod");
+  // Inputs and error displays
+  const emailInputRequest = document.getElementById("emailInput");
+  const phoneInputRequest = document.getElementById("phoneInput");
+  const step1ErrorRequest = document.getElementById("step1Error");
 
-  const step1Error = document.getElementById("step1Error");
-  const step2Error = document.getElementById("step2Error");
+  const emailInputBuy = document.getElementById("buyEmailInput");
+  const buyError = document.getElementById("buyError");
 
-  // Show modal on buy button click
-  function confirmPurchase() {
-    modal.style.display = "flex";
-    step1.classList.add("active");
-    step2.classList.remove("active");
-    step3.classList.remove("active");
-
-    step1Error.textContent = "";
-    emailInput.value = "";
-    phoneInput.value = "";
+  // Open modal from buy button
+  function openPurchaseModal() {
+    purchaseModal.style.display = "flex";
+    showStep(0);
+    clearRequestInputs();
+    clearBuyInputs();
   }
 
-  // Validate email & phone
-  function validateStep1() {
-    const email = emailInput.value.trim();
-    const phone = phoneInput.value.trim();
-    step1Error.textContent = "";
+  // Show the given step, hide others
+  function showStep(stepNumber) {
+    step0.style.display = "none";
+    step1Request.style.display = "none";
+    step1Buy.style.display = "none";
+    step2.style.display = "none";
+    step3.style.display = "none";
+
+    switch(stepNumber) {
+      case 0: step0.style.display = "block"; break;
+      case 1: step1Request.style.display = "block"; break;
+      case 2: step1Buy.style.display = "block"; break;
+      case 3: step2.style.display = "block"; break;
+      case 4: step3.style.display = "block"; break;
+    }
+  }
+
+  // Clear inputs and errors for request
+  function clearRequestInputs() {
+    emailInputRequest.value = "";
+    phoneInputRequest.value = "";
+    step1ErrorRequest.textContent = "";
+  }
+
+  // Clear inputs and errors for buy
+  function clearBuyInputs() {
+    emailInputBuy.value = "";
+    buyError.textContent = "";
+  }
+
+  // BUTTON HANDLERS
+
+  // Choose Request More Info
+  document.getElementById("chooseRequestBtn").onclick = () => {
+    showStep(1);
+  };
+
+  // Choose Buy Now
+  document.getElementById("chooseBuyBtn").onclick = () => {
+    showStep(2);
+  };
+
+  // Back buttons
+  document.getElementById("requestBackBtn").onclick = () => {
+    showStep(0);
+  };
+  document.getElementById("buyBackBtn").onclick = () => {
+    showStep(0);
+  };
+
+  // Close modal
+  document.getElementById("closeModalBtn").onclick = () => {
+    purchaseModal.style.display = "none";
+  };
+
+  purchaseModal.onclick = (e) => {
+    if (e.target === purchaseModal) {
+      purchaseModal.style.display = "none";
+    }
+  };
+
+  // VALIDATION AND SUBMISSION
+
+  // Validate Request Info form
+  function validateRequestForm() {
+    const email = emailInputRequest.value.trim();
+    const phone = phoneInputRequest.value.trim();
+    step1ErrorRequest.textContent = "";
 
     if (!email || !phone) {
-      step1Error.textContent = "Please enter both email and phone number.";
+      step1ErrorRequest.textContent = "Please enter both email and phone number.";
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      step1Error.textContent = "Invalid email format.";
+      step1ErrorRequest.textContent = "Invalid email format.";
       return false;
     }
 
     const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
     if (!phoneRegex.test(phone)) {
-      step1Error.textContent = "Invalid phone number.";
+      step1ErrorRequest.textContent = "Invalid phone number.";
       return false;
     }
 
     return true;
   }
 
-  // Handle "Send Request" button (Step 1)
+  // Submit Request Info
   document.getElementById("step1NextBtn").onclick = () => {
-    if (!validateStep1()) return;
+    if (!validateRequestForm()) return;
 
-    step1.classList.remove("active");
-    step2.classList.add("active");
+    showStep(3); // show Processing step
 
-    const purchaseData = {
+    const requestData = {
       productId,
       sellerId,
-      email: emailInput.value.trim(),
-      phone: phoneInput.value.trim(),
-      paymentMethod: "manual",
+      email: emailInputRequest.value.trim(),
+      phone: phoneInputRequest.value.trim(),
+      type: "info_request",
       timestamp: Date.now(),
       userId: currentUser?.uid || null,
     };
 
-    setTimeout(() => {
-      db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
-        .then(() => {
-          step2.classList.remove("active");
-          step3.classList.add("active");
-        })
-        .catch(err => {
-          console.error("Request error:", err);
-          step2.classList.remove("active");
-          step1.classList.add("active");
-          step1Error.textContent = "Something went wrong. Please try again.";
-        });
-    }, 1200);
+    db.ref(`/requests/${productId}_${Date.now()}`).set(requestData)
+      .then(() => {
+        showStep(4); // show Done step
+      })
+      .catch(err => {
+        console.error("Request error:", err);
+        showStep(1);
+        step1ErrorRequest.textContent = "Something went wrong. Please try again.";
+      });
   };
 
-  // Close modal
-  document.getElementById("closeModalBtn").onclick = () => {
-    modal.style.display = "none";
-  };
+  // Validate Buy Now form
+  function validateBuyForm() {
+    const email = emailInputBuy.value.trim();
+    buyError.textContent = "";
 
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-    }
-  };
-
-  // Loading checkpoints logic
-  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
-    document.querySelectorAll('.checkpoint')[1].classList.add('active');
-    document.querySelectorAll('.checkpoint')[2].classList.add('active');
-
-    setTimeout(() => {
-      document.getElementById("loadingScreen").style.display = "none";
-    }, 1000);
-  });
-
-  function openReportModal() {
-    document.getElementById("reportModal").style.display = "flex";
-    document.getElementById("reportReason").value = "";
-    document.getElementById("reportStatus").textContent = "";
-  }
-
-  function closeReportModal() {
-    document.getElementById("reportModal").style.display = "none";
-  }
-
-  function submitReport() {
-    const reason = document.getElementById("reportReason").value.trim();
-    const statusBox = document.getElementById("reportStatus");
-
-    if (!reason) {
-      statusBox.style.color = "#f55";
-      statusBox.textContent = "Please enter a reason.";
-      return;
+    if (!email) {
+      buyError.textContent = "Please enter your email.";
+      return false;
     }
 
-    const report = {
-      reason,
-      url: window.location.href,
-      productId: productId || null,
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      buyError.textContent = "Invalid email format.";
+      return false;
+    }
+
+    return true;
+  }
+
+  // Submit Buy Now
+  document.getElementById("buyNowBtn").onclick = () => {
+    if (!validateBuyForm()) return;
+
+    showStep(3); // show Processing step
+
+    const buyData = {
+      productId,
+      sellerId,
+      email: emailInputBuy.value.trim(),
+      type: "buy_now",
       timestamp: Date.now(),
-      userId: currentUser?.uid || "anonymous"
+      userId: currentUser?.uid || null,
     };
 
-    firebase.database().ref("/reports").push(report).then(() => {
-      statusBox.style.color = "#0f0";
-      statusBox.textContent = "✅ Report sent. Thank you.";
-      setTimeout(() => closeReportModal(), 1500);
-    }).catch(err => {
-      console.error("Error submitting report:", err);
-      statusBox.style.color = "#f55";
-      statusBox.textContent = "⚠️ Failed to send. Try again.";
-    });
-  }
+    db.ref(`/purchases/${productId}_${Date.now()}`).set(buyData)
+      .then(() => {
+        showStep(4); // show Done step
+      })
+      .catch(err => {
+        console.error("Purchase error:", err);
+        showStep(2);buyError.textContent = "Something went wrong. Please try again.";
+      });
+  };
 </script>
 </script>
 </body>
