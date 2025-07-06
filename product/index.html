@@ -389,6 +389,180 @@ header {
 #shareButton {
   border-radius: 20px; /* fully rounded pill shape */
 }
+/* Modal backdrop */
+#purchaseModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modal content */
+.modal-content {
+  background: rgba(255 255 255 / 0.08);
+  border: 1px solid rgba(255 255 255, 0.1);
+  border-radius: 24px;
+  padding: 32px 28px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  color: #fff;
+  backdrop-filter: saturate(180%) blur(20px);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Steps */
+.step {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.step.active {
+  display: flex;
+}
+
+/* Headings */
+.modal-content h2 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* Paragraphs below heading */
+.modal-content p {
+  font-size: 14px;
+  color: #ccc;
+  text-align: center;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+/* Labels */
+.modal-content label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #a0a9b8;
+}
+
+/* Inputs and selects */
+.modal-content input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: none;
+  background: rgba(255 255 255 / 0.15);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: background 0.25s ease;
+}
+
+.modal-content input::placeholder {
+  color: #bbb;
+}
+
+.modal-content input:focus {
+  background: rgba(255 255 255 / 0.3);
+  outline-offset: 2px;
+  outline-color: #1da1f2;
+}
+
+/* Buttons (all) */
+.modal-content button {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 20px;
+  border: none;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+  color: white;
+  background: #1da1f2;
+  box-shadow: 0 6px 12px rgb(29 161 242 / 0.5);
+}
+
+.modal-content button:hover:not(:disabled) {
+  background: #0d8cd9;
+}
+
+.modal-content button:disabled {
+  background: #4aa3f3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Back buttons */
+.modal-content button.back-btn {
+  background: transparent;
+  color: #1da1f2;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  cursor: pointer;
+  box-shadow: none;
+  text-align: center;
+}
+
+/* Error text */
+.error {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  min-height: 18px;
+  text-align: center;
+}
+
+/* Loader placeholder - style or replace with your spinner */
+.loader {
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid #1da1f2;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1.2s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+
+  .modal-content h2 {
+    font-size: 20px;
+  }
+
+  .modal-content button {
+    font-size: 16px;
+    padding: 12px 0;
+  }
+}
 </style>
 </head>
 <body>
@@ -943,7 +1117,7 @@ button:hover {
   const productId = params.get('id');
 
   let currentUser = null;
-  let sellerId = null; // <-- We'll set this after loading product data
+  let sellerId = null;
 
   firebase.auth().onAuthStateChanged(user => {
     currentUser = user;
@@ -959,7 +1133,7 @@ button:hover {
         return;
       }
 
-      sellerId = (data.seller && data.seller.id) ? data.seller.id : null; // Save seller ID here
+      sellerId = (data.seller && data.seller.id) ? data.seller.id : null;
 
       const container = document.getElementById("product");
       const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
@@ -1009,7 +1183,6 @@ button:hover {
     });
   }
 
-  // Load detailed comments and update comment stats in form header
   function loadComments(productId) {
     db.ref(`/comments/${productId}`).on("value", (snapshot) => {
       const comments = snapshot.val();
@@ -1051,7 +1224,6 @@ button:hover {
     });
   }
 
-  // Load summary (number of reviews + average rating) under price
   function loadReviewsSummary(productId) {
     db.ref(`/comments/${productId}`).once("value").then(snapshot => {
       const comments = snapshot.val();
@@ -1115,12 +1287,7 @@ button:hover {
     }
   }
 
-
-  /*
-   * Purchase Modal Multi-Step Flow for email + phone + payment
-   */
-
-  // Grab modal elements, assuming modal markup is present in your HTML
+  // Purchase modal elements
   const modal = document.getElementById("purchaseModal");
   const step1 = document.getElementById("step1");
   const step2 = document.getElementById("step2");
@@ -1134,137 +1301,134 @@ button:hover {
   const step2Error = document.getElementById("step2Error");
 
   // Show modal on buy button click
-function confirmPurchase() {
-  modal.style.display = "flex"; // centered flex modal
-  step1.classList.add("active");
-  step2.classList.remove("active");
-  step3.classList.remove("active");
+  function confirmPurchase() {
+    modal.style.display = "flex";
+    step1.classList.add("active");
+    step2.classList.remove("active");
+    step3.classList.remove("active");
 
-  step1Error.textContent = "";
-  emailInput.value = "";
-  phoneInput.value = "";
-}
-
-// Validate email & phone
-function validateStep1() {
-  const email = emailInput.value.trim();
-  const phone = phoneInput.value.trim();
-  step1Error.textContent = "";
-
-  if (!email || !phone) {
-    step1Error.textContent = "Please enter both email and phone number.";
-    return false;
+    step1Error.textContent = "";
+    emailInput.value = "";
+    phoneInput.value = "";
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    step1Error.textContent = "Invalid email format.";
-    return false;
+  // Validate email & phone
+  function validateStep1() {
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+    step1Error.textContent = "";
+
+    if (!email || !phone) {
+      step1Error.textContent = "Please enter both email and phone number.";
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      step1Error.textContent = "Invalid email format.";
+      return false;
+    }
+
+    const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
+    if (!phoneRegex.test(phone)) {
+      step1Error.textContent = "Invalid phone number.";
+      return false;
+    }
+
+    return true;
   }
 
-  const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
-  if (!phoneRegex.test(phone)) {
-    step1Error.textContent = "Invalid phone number.";
-    return false;
-  }
+  // Handle "Send Request" button (Step 1)
+  document.getElementById("step1NextBtn").onclick = () => {
+    if (!validateStep1()) return;
 
-  return true;
-}
+    step1.classList.remove("active");
+    step2.classList.add("active");
 
-// Handle "Send Request" button (Step 1)
-document.getElementById("step1NextBtn").onclick = () => {
-  if (!validateStep1()) return;
+    const purchaseData = {
+      productId,
+      sellerId,
+      email: emailInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      paymentMethod: "manual",
+      timestamp: Date.now(),
+      userId: currentUser?.uid || null,
+    };
 
-  step1.classList.remove("active");
-  step2.classList.add("active");
-
-  const purchaseData = {
-    productId,
-    sellerId,
-    email: emailInput.value.trim(),
-    phone: phoneInput.value.trim(),
-    paymentMethod: "manual", // default to manual
-    timestamp: Date.now(),
-    userId: currentUser?.uid || null,
+    setTimeout(() => {
+      db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
+        .then(() => {
+          step2.classList.remove("active");
+          step3.classList.add("active");
+        })
+        .catch(err => {
+          console.error("Request error:", err);
+          step2.classList.remove("active");
+          step1.classList.add("active");
+          step1Error.textContent = "Something went wrong. Please try again.";
+        });
+    }, 1200);
   };
 
-  // Simulate loading (to show the loader animation)
-  setTimeout(() => {
-    db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
-      .then(() => {
-        step2.classList.remove("active");
-        step3.classList.add("active");
-      })
-      .catch(err => {
-        console.error("Request error:", err);
-        step2.classList.remove("active");
-        step1.classList.add("active");
-        step1Error.textContent = "Something went wrong. Please try again.";
-      });
-  }, 1200);
-};
-
-// Close modal logic
-document.getElementById("closeModalBtn").onclick = () => {
-  modal.style.display = "none";
-};
-
-modal.onclick = (e) => {
-  if (e.target === modal) {
+  // Close modal
+  document.getElementById("closeModalBtn").onclick = () => {
     modal.style.display = "none";
-  }
-};
-
-// Loading checkpoints logic
-db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
-  // Show 2nd checkpoint (Processing)
-  document.querySelectorAll('.checkpoint')[1].classList.add('active');
-
-  // After loading, show Received
-  document.querySelectorAll('.checkpoint')[2].classList.add('active');
-
-  setTimeout(() => {
-    document.getElementById("loadingScreen").style.display = "none";
-  }, 1000);
-});
-function openReportModal() {
-  document.getElementById("reportModal").style.display = "flex";
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportStatus").textContent = "";
-}
-
-function closeReportModal() {
-  document.getElementById("reportModal").style.display = "none";
-}
-
-function submitReport() {
-  const reason = document.getElementById("reportReason").value.trim();
-  const statusBox = document.getElementById("reportStatus");
-
-  if (!reason) {
-    statusBox.style.color = "#f55";
-    statusBox.textContent = "Please enter a reason.";
-    return;
-  }
-
-  const report = {
-    reason: reason,
-    url: window.location.href,
-    productId: productId || null,
-    timestamp: Date.now(),
-    userId: currentUser?.uid || "anonymous"
   };
 
-  firebase.database().ref("/reports").push(report).then(() => {
-    statusBox.style.color = "#0f0";
-    statusBox.textContent = "✅ Report sent. Thank you.";
-    setTimeout(() => closeReportModal(), 1500);
-  }).catch(err => {
-    console.error("Error submitting report:", err);
-    statusBox.style.color = "#f55";
-    statusBox.textContent = "⚠️ Failed to send. Try again.";
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  // Loading checkpoints logic
+  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+    document.querySelectorAll('.checkpoint')[1].classList.add('active');
+    document.querySelectorAll('.checkpoint')[2].classList.add('active');
+
+    setTimeout(() => {
+      document.getElementById("loadingScreen").style.display = "none";
+    }, 1000);
   });
-}
+
+  function openReportModal() {
+    document.getElementById("reportModal").style.display = "flex";
+    document.getElementById("reportReason").value = "";
+    document.getElementById("reportStatus").textContent = "";
+  }
+
+  function closeReportModal() {
+    document.getElementById("reportModal").style.display = "none";
+  }
+
+  function submitReport() {
+    const reason = document.getElementById("reportReason").value.trim();
+    const statusBox = document.getElementById("reportStatus");
+
+    if (!reason) {
+      statusBox.style.color = "#f55";
+      statusBox.textContent = "Please enter a reason.";
+      return;
+    }
+
+    const report = {
+      reason,
+      url: window.location.href,
+      productId: productId || null,
+      timestamp: Date.now(),
+      userId: currentUser?.uid || "anonymous"
+    };
+
+    firebase.database().ref("/reports").push(report).then(() => {
+      statusBox.style.color = "#0f0";
+      statusBox.textContent = "✅ Report sent. Thank you.";
+      setTimeout(() => closeReportModal(), 1500);
+    }).catch(err => {
+      console.error("Error submitting report:", err);
+      statusBox.style.color = "#f55";
+      statusBox.textContent = "⚠️ Failed to send. Try again.";
+    });
+  }
 </script>
 </script>
 </body>
