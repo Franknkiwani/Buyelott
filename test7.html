@@ -1,113 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>FCM Token Sender</title>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firebase Cloud Messaging Test - frank style</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #111;
-      color: #fff;
-      padding: 20px;
-    }
-    h1 {
-      font-weight: 600;
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    input, textarea, select, button {
-      font-size: 16px;
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      background: #222;
-      color: #fff;
-      border: 1px solid #333;
-      border-radius: 8px;
+      background: #121212;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
     }
     button {
-      background: #0f62fe;
+      background: #0a84ff;
       border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      color: white;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      margin-bottom: 1rem;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #0043ce;
+      background: #0066ff;
     }
-    .user-block {
-      margin-bottom: 30px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 20px;
+    #token {
+      word-break: break-word;
+      max-width: 600px;
+      background: #222;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    #status {
+      margin-top: 1rem;
+      min-height: 2rem;
     }
   </style>
 </head>
 <body>
-  <h1>📨 Send Notification to User</h1>
-  <div id="userList">Loading tokens...</div>
+
+  <h1>Firebase Cloud Messaging Test</h1>
+  <button id="enableNotifications">Enable Notifications & Get Token</button>
+
+  <div id="status">Status will appear here...</div>
+  <div>
+    <strong>FCM Token:</strong>
+    <pre id="token">No token yet.</pre>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
 
   <script>
+    // Your Firebase config - keep this secret in real life, but okay here for test
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.appspot.com",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const serverKey = 'YOUR_SERVER_KEY_HERE'; // ← Replace this!
-
-    function sendNotification(token, title, body) {
-      fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'key=' + serverKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          to: token,
-          notification: {
-            title,
-            body,
-            icon: "https://cyberchat.online/icons/icon-192x192.png"
-          }
-        })
-      })
-      .then(res => res.json())
-      .then(data => alert("✅ Sent!\n" + JSON.stringify(data, null, 2)))
-      .catch(err => alert("❌ Failed: " + err));
+    // Convert VAPID key string to Uint8Array
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
     }
 
-    db.ref("/fcmTokens").once("value").then(snapshot => {
-      const data = snapshot.val();
-      const container = document.getElementById('userList');
-      container.innerHTML = '';
+    // Your public VAPID key (the one you gave me)
+    const vapidPublicKey = 'BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc';
 
-      if (!data) {
-        container.innerHTML = "<p>No tokens found.</p>";
-        return;
+    // Init Firebase app
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    const statusEl = document.getElementById('status');
+    const tokenEl = document.getElementById('token');
+    const btn = document.getElementById('enableNotifications');
+
+    btn.addEventListener('click', async () => {
+      statusEl.textContent = 'Registering service worker...';
+
+      try {
+        // Register your service worker - make sure this file exists at your domain root!
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        statusEl.textContent = 'Service Worker registered. Requesting notification permission...';
+
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          statusEl.textContent = 'Permission denied!';
+          return;
+        }
+        statusEl.textContent = 'Permission granted. Subscribing to push...';
+
+        // Subscribe for push notifications with your VAPID key
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        });
+
+        statusEl.textContent = 'Push subscription obtained. Getting FCM token...';
+
+        // Get FCM token (using subscription endpoint)
+        const fcmToken = await messaging.getToken({
+          vapidKey: vapidPublicKey,
+          serviceWorkerRegistration: registration
+        });
+
+        if (!fcmToken) {
+          statusEl.textContent = 'No token received.';
+          return;
+        }
+
+        statusEl.textContent = 'Token received! You can now send push notifications.';
+        tokenEl.textContent = fcmToken;
+
+        console.log('FCM Token:', fcmToken);
+      } catch (error) {
+        console.error('Error during FCM setup:', error);
+        statusEl.textContent = `Error: ${error.message}`;
       }
-
-      Object.entries(data).forEach(([uid, obj]) => {
-        const div = document.createElement("div");
-        div.className = "user-block";
-        div.innerHTML = `
-          <strong>User ID:</strong> ${uid}<br>
-          <strong>Token:</strong><br><textarea readonly>${obj.token}</textarea><br>
-          <input placeholder="Notification Title" id="title-${uid}">
-          <input placeholder="Notification Body" id="body-${uid}">
-          <button onclick="sendNotification('${obj.token}', document.getElementById('title-${uid}').value, document.getElementById('body-${uid}').value)">
-            🚀 Send Notification
-          </button>
-        `;
-        container.appendChild(div);
-      });
     });
   </script>
+
 </body>
 </html>
