@@ -910,7 +910,97 @@ header {
   
       <div class="error" id="step1Error"></div>  
       <button id="step1NextBtn">Send Request</button>  
+    <!-- Pay with PayPal button -->
+<button id="payBtn" style="
+  background-color: #0070ba;
+  color: white;
+  padding: 14px 60px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 6px 20px rgba(0, 112, 186, 0.45);
+  transition: background-color 0.3s ease;
+">Pay with PayPal</button>
 
+<!-- Payment Modal -->
+<div id="paymentModal" style="
+  display: none;
+  position: fixed; 
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  justify-content: center; 
+  align-items: center;
+  z-index: 9999;
+">
+  <div style="
+    background: #fff;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 420px;
+    padding: 30px 35px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.25);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  ">
+    <h2 style="margin-top:0; font-weight: 800; color: #0070ba; text-align:center;">Complete Your Purchase</h2>
+    
+    <form id="paymentForm" style="display: flex; flex-direction: column; gap: 16px;">
+      <label>
+        Email
+        <input id="userEmail" type="email" required placeholder="you@example.com" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <label>
+        Full Name
+        <input id="userName" type="text" required placeholder="Your full name" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <label>
+        Phone Number
+        <input id="userPhone" type="tel" required placeholder="+1234567890" style="
+          width: 100%; padding: 10px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 16px;
+          outline-offset: 2px;
+        " />
+      </label>
+      <div style="font-weight: 700; font-size: 20px; color: #333; text-align: center; margin-top: 10px;">
+        Final Pay: $<span id="finalPrice">0.00</span>
+      </div>
+      <div style="color: #2a7d32; font-weight: 700; font-size: 14px; text-align: center; margin-top: 8px;">
+        🚀 Delivery in less than 24 hours via Email or Phone
+      </div>
+      <button type="submit" style="
+        margin-top: 20px;
+        background-color: #2a7d32;
+        color: white;
+        font-weight: 700;
+        padding: 14px 0;
+        font-size: 18px;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      " onmouseover="this.style.backgroundColor='#236627'" onmouseout="this.style.backgroundColor='#2a7d32'">
+        Pay Now
+      </button>
+      <button type="button" id="closeModalBtn" style="
+        margin-top: 12px;
+        background: transparent;
+        border: none;
+        color: #777;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: underline;
+        user-select: none;
+      ">Cancel</button>
+    </form>
   </div>
 </div>
     </div>  
