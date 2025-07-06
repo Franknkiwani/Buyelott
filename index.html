@@ -5,21 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>dlsaccounts</title>
 <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    background-color: #000000;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #000000;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
 header {
   position: sticky;
   top: 0;
   z-index: 9999;
-
+  position: relative;  /* fix for ::after positioning */
   height: 60px;
   width: 100%;
   flex-shrink: 0;
@@ -44,12 +45,19 @@ header::after {
   box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
 }
 
-/* Ensure content starts directly below header */
 main {
-  padding-top: 60px; /* match the header height */
+  flex: 1 1 auto;    /* grow and shrink properly */
+  overflow-y: auto;  /* scroll inside main */
+  padding-top: 60px; /* match header height */
   background-color: #000;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Reset margin/padding on first child inside main to avoid double spacing */
+main > *:first-child {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Ensure product cards sit neatly under main */
@@ -628,32 +636,19 @@ main {
 }
 
 /* Layout Reset */
-body.mobile .product-page {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-body.tablet .product-page,
-body.desktop .product-page {
+body.desktop .product-page,
+body.tablet .product-page {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  justify-content: center;
-  padding: 40px 20px;
+  ...
 }
 
 body.desktop #productList,
 body.tablet #productList {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  ...
 }
-
 #productList {
   display: grid;
   grid-template-columns: 1fr;
@@ -937,53 +932,57 @@ body.tablet #productList {
   }
 }
 
-/* 1) Increase header height & fix vertical alignment */
+/* 1) Header styling */
 header {
-  height: 64px; /* a bit taller */
+  height: 64px;
   padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-/* Adjust main padding-top accordingly */
-main {
-  padding-top: 64px; /* match header height */
-}
-
-/* 2) Ensure user-area items fit inside header */
+/* 2) User area inside header */
 .user-area {
   display: flex;
   align-items: center;
   gap: 15px;
-  height: 100%; /* make sure they don't overflow */
+  height: 100%;
 }
 
-/* Profile pic and login button tweaks */
-.profile-pic, .login-btn {
-  max-height: 40px; /* slightly smaller than header */
+.profile-pic,
+.login-btn {
+  max-height: 40px;
   line-height: normal;
   box-sizing: border-box;
 }
-@media (max-width: 500px) {
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.85); /* stronger background for visibility */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
+
+/* 3) Main content adjustment */
 main {
   flex: 1;
-  background-color: #000000;
   padding-top: 64px; /* same as header height */
+  background-color: #000000;
+  min-height: calc(100vh - 64px); /* ensures full height with scroll */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-main {
-  height: 100%;
-  overflow: auto;
-}
-/* Put this near your existing styles */
+
+/* 4) When loading, prevent scrolling */
 body.loading {
   overflow: hidden;
+}
+
+/* Optional — for mobile-specific tuning */
+@media (max-width: 500px) {
+  header {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+  }
 }
 
 #skeletonContainer {
@@ -1321,9 +1320,67 @@ main {
   display: block !important;
   opacity: 1;
 }
-</style>
-</style>
+/* ✅ Unified CSS Fixes for Cards & Ads */
 
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 0 8px;
+  margin: 0;
+}
+
+.card,
+.ad-card {
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  background: #1a1a1c;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.card img,
+.ad-card img {
+  border-radius: 12px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#adContainer {
+  margin-top: 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ad-card {
+  max-width: 350px;
+  padding: 8px;
+}
+
+#productList {
+  padding: 0;
+  margin: 0;
+}
+
+.seller-profile {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Optional: remove weird page padding/margins */
+main, .product-page, body {
+  margin: 0;
+  padding: 0;
+}
+
+</style>
 </head>
 <body>
 
