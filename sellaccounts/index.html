@@ -1,158 +1,272 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Create DLS Product</title>
+  <title>Create DLS Product - Luxe Dark</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
-      padding: 20px;
+      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
+      color: #eee;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-
     h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-
-    #loginContainer {
-      display: none;
+      font-weight: 600;
+      font-size: 2.25rem;
+      margin-bottom: 32px;
       text-align: center;
-      margin-top: 40px;
+      color: #f0f0f0;
+      text-shadow: 0 0 12px #007aff88;
     }
 
-    #formContainer {
-      display: none;
+    /* Container */
+    #formContainer, #loginContainer {
       width: 100%;
-      max-width: 500px;
-    }
-
-    form {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-      display: flex;
+      max-width: 520px;
+      background: rgba(30,30,30,0.7);
+      border-radius: 24px;
+      padding: 32px 32px 48px;
+      box-shadow:
+        0 0 25px rgba(0,122,255,0.25),
+        inset 0 0 30px rgba(255,255,255,0.03);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.1);
+      user-select: none;
+      color: #ddd;
+      display: none;
       flex-direction: column;
       align-items: center;
     }
 
+    /* Show container */
+    #formContainer.show, #loginContainer.show {
+      display: flex;
+    }
+
+    /* Labels */
     label {
-      width: 90%;
-      margin: 8px 0 4px;
-      font-weight: 500;
+      width: 100%;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #9aa4eb;
+      user-select: none;
     }
-
-    input, textarea, button {
-      width: 90%;
-      padding: 12px;
-      font-size: 16px;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      background: #fafafa;
-    }
-
-    textarea {
-      resize: vertical;
-    }
-
     .required::after {
       content: '*';
-      color: red;
-      margin-left: 4px;
+      color: #ff4d6d;
+      margin-left: 6px;
+      font-weight: 700;
     }
 
+    /* Inputs */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      background: rgba(40,40,40,0.8);
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: #eee;
+      box-shadow:
+        inset 0 0 6px rgba(255,255,255,0.1);
+      transition: box-shadow 0.3s ease;
+      font-weight: 500;
+      outline-offset: 2px;
+      resize: vertical;
+      user-select: text;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    input[type="file"]:focus {
+      box-shadow:
+        0 0 8px 2px #007affcc,
+        inset 0 0 8px #4f90ffcc;
+      outline: none;
+      color: #fff;
+      background: rgba(40,40,40,0.95);
+    }
+
+    /* File input style tweak */
+    input[type="file"] {
+      cursor: pointer;
+      user-select: none;
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+
+    /* Preview container */
     .preview {
+      width: 100%;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 16px;
-      width: 90%;
+      gap: 14px;
+      margin-bottom: 28px;
+      user-select: none;
+      justify-content: flex-start;
     }
 
     .preview img {
-      height: 80px;
-      border-radius: 10px;
+      width: 90px;
+      height: 90px;
       object-fit: cover;
-      border: 1px solid #ccc;
+      border-radius: 18px;
+      box-shadow:
+        0 0 15px #007affaa;
+      border: 2px solid transparent;
+      transition: border-color 0.25s ease;
     }
 
-    .error {
-      color: red;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-
-    button {
-      background-color: #007aff;
-      color: white;
-      font-weight: 600;
+    /* Hover effect on preview images */
+    .preview img:hover {
+      border-color: #ff4d6d;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
 
+    /* Error message */
+    .error {
+      width: 100%;
+      color: #ff4d6d;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      text-align: center;
+      user-select: none;
+    }
+
+    /* Buttons */
+    button {
+      width: 100%;
+      padding: 16px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      background: linear-gradient(90deg, #007aff, #005bb5);
+      border: none;
+      border-radius: 22px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 14px #007affcc;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    button:hover:not(:disabled) {
+      background: linear-gradient(90deg, #0087ff, #004a99);
+      box-shadow: 0 6px 18px #0087ffcc;
+    }
     button:disabled {
-      background: #aaa;
+      background: #444;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     #googleLoginBtn {
-      background: #fff;
-      color: #000;
-      border: 1px solid #ccc;
-      padding: 12px 18px;
-      font-weight: 500;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 12px;
+      background: #121212;
+      color: #69f;
+      border: 2px solid #69f;
+      font-weight: 700;
+      transition: background 0.25s ease;
+    }
+    #googleLoginBtn:hover {
+      background: #69f;
+      color: #121212;
+      box-shadow: 0 0 12px #69faa;
     }
 
-    #googleLoginBtn:hover {
-      background: #f3f3f3;
+    /* Progress bar container */
+    #uploadProgressContainer {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      user-select: none;
+      box-shadow: inset 0 0 6px #007aff33;
+      display: none;
+    }
+    /* Progress bar fill */
+    #uploadProgress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #69f, #007aff);
+      border-radius: 12px 0 0 12px;
+      transition: width 0.2s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 12px;
+      }
+      #formContainer, #loginContainer {
+        max-width: 100%;
+        padding: 24px 24px 36px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
 <body>
   <h1>➕ Create DLS Product</h1>
 
-  <div id="loginContainer">
-    <p>Please sign in with Google to post a product.</p>
+  <div id="loginContainer" class="show">
+    <p style="font-size:1.1rem; color:#888; user-select:none;">Sign in with Google to post a product</p>
     <button id="googleLoginBtn">🔐 Sign in with Google</button>
   </div>
 
-  <div id="formContainer">
-    <form id="createForm">
-      <label class="required">Title</label>
-      <input type="text" id="title" required />
+  <div id="formContainer" aria-live="polite" aria-busy="false" role="region">
+    <form id="createForm" novalidate autocomplete="off">
+      <label class="required" for="title">Title</label>
+      <input type="text" id="title" name="title" required autocomplete="off" spellcheck="false" />
 
-      <label class="required">Description</label>
-      <textarea id="description" rows="4" required></textarea>
+      <label class="required" for="description">Description</label>
+      <textarea id="description" name="description" rows="4" required spellcheck="true"></textarea>
 
-      <label class="required">Price ($)</label>
-      <input type="number" id="price" min="0" step="0.01" required />
+      <label class="required" for="price">Price ($)</label>
+      <input type="number" id="price" name="price" min="0" step="0.01" required autocomplete="off" />
 
-      <label class="required">Images (max 4)</label>
-      <input type="file" id="images" accept="image/*" multiple required />
+      <label class="required" for="images">Upload Images (max 4)</label>
+      <input type="file" id="images" name="images" accept="image/*" multiple required />
 
-      <div class="preview" id="preview"></div>
-      <div class="error" id="imgError"></div>
+      <div class="preview" id="preview" aria-live="polite" aria-atomic="true"></div>
+      <div class="error" id="imgError" role="alert" aria-live="assertive"></div>
 
-      <button type="submit">🚀 Post Product</button>
+      <div id="uploadProgressContainer" aria-hidden="true">
+        <div id="uploadProgress"></div>
+      </div>
+
+      <button type="submit" aria-label="Post product to marketplace">🚀 Post Product</button>
     </form>
   </div>
 
+  <!-- continuing inside <body> -->
+
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
   <script>
-    // Your real Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -165,49 +279,56 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
     const auth = firebase.auth();
+    const db = firebase.database();
 
-    let currentUser = null;
-
-    // Show form or login prompt based on auth
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('formContainer').style.display = 'block';
-      } else {
-        currentUser = null;
-        document.getElementById('loginContainer').style.display = 'block';
-        document.getElementById('formContainer').style.display = 'none';
-      }
-    });
-
-    document.getElementById('googleLoginBtn').addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => {
-        alert("❌ Login failed. Try again.");
-        console.error(err);
-      });
-    });
-
-    // UI refs
+    const loginContainer = document.getElementById('loginContainer');
+    const formContainer = document.getElementById('formContainer');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
     const form = document.getElementById('createForm');
     const imagesInput = document.getElementById('images');
     const preview = document.getElementById('preview');
     const imgError = document.getElementById('imgError');
+    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    let currentUser = null;
     let selectedFiles = [];
 
-    // Preview images on file select
-    imagesInput.addEventListener('change', () => {
-      const files = [...imagesInput.files];
-      preview.innerHTML = '';
-      imgError.textContent = '';
+    // Show login or form depending on user
+    auth.onAuthStateChanged(user => {
+      if(user) {
+        currentUser = user;
+        loginContainer.classList.remove('show');
+        formContainer.classList.add('show');
+      } else {
+        currentUser = null;
+        formContainer.classList.remove('show');
+        loginContainer.classList.add('show');
+      }
+    });
 
-      if (files.length > 4) {
-        imgError.textContent = '⚠️ Max 4 images allowed.';
+    // Google login button click
+    googleLoginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        alert('Google sign-in failed: ' + err.message);
+        console.error(err);
+      });
+    });
+
+    // Image input change - preview + validation
+    imagesInput.addEventListener('change', () => {
+      imgError.textContent = '';
+      preview.innerHTML = '';
+      selectedFiles = [];
+
+      const files = Array.from(imagesInput.files);
+
+      if(files.length > 4){
+        imgError.textContent = 'You can upload a maximum of 4 images.';
         imagesInput.value = '';
-        selectedFiles = [];
         return;
       }
 
@@ -218,91 +339,126 @@
         reader.onload = e => {
           const img = document.createElement('img');
           img.src = e.target.result;
+          img.alt = file.name;
           preview.appendChild(img);
         };
         reader.readAsDataURL(file);
       });
     });
 
-    // Imgur upload helper
-    async function uploadToImgur(file) {
+    // Upload to Imgur with progress callback
+    function uploadToImgur(file, onProgress){
       const clientId = '891e5bb4aa94282';
-      const formData = new FormData();
-      formData.append('image', file);
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://api.imgur.com/3/image');
+        xhr.setRequestHeader('Authorization', 'Client-ID ' + clientId);
 
-      const res = await fetch('https://api.imgur.com/3/image', {
-        method: 'POST',
-        headers: { Authorization: 'Client-ID ' + clientId },
-        body: formData
-      });
-
-      const json = await res.json();
-      if (!json.success) throw new Error('Imgur upload failed');
-      return json.data.link;
-    }
-
-    // Form submit handler
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (!currentUser) {
-        alert("⚠️ You must be logged in to post a product.");
-        return;
-      }
-
-      const title = document.getElementById('title').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const price = parseFloat(document.getElementById('price').value);
-
-      if (!title || !description || isNaN(price) || selectedFiles.length === 0) {
-        alert('❗ Fill all fields and upload 1-4 images.');
-        return;
-      }
-
-      const button = form.querySelector('button');
-      button.disabled = true;
-      button.textContent = 'Uploading...';
-
-      try {
-        // Upload all images to Imgur, collect URLs
-        const imageUrls = [];
-        for (const file of selectedFiles) {
-          const url = await uploadToImgur(file);
-          imageUrls.push(url);
-        }
-
-        // Build product data with seller info
-        const productData = {
-          title,
-          description,
-          price,
-          images: imageUrls,
-          createdAt: Date.now(),
-          seller: {
-            uid: currentUser.uid,
-            username: currentUser.displayName,
-            email: currentUser.email,
-            avatar: currentUser.photoURL,
-            verified: false
+        xhr.upload.onprogress = e => {
+          if(e.lengthComputable && onProgress){
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
           }
         };
 
-        // Push to Firebase Realtime Database
-        await db.ref('/dlsaccounts').push(productData);
+        xhr.onload = () => {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            if(res.success && res.data.link){
+              resolve(res.data.link);
+            } else {
+              reject(new Error('Imgur upload failed'));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        };
 
-        alert('✅ Product posted!');
-        form.reset();
-        preview.innerHTML = '';
-        selectedFiles = [];
-        imagesInput.value = '';
-      } catch (err) {
-        console.error(err);
-        alert('❌ Upload failed. Try again.');
+        xhr.onerror = () => reject(new Error('Network error during Imgur upload'));
+        const formData = new FormData();
+        formData.append('image', file);
+        xhr.send(formData);
+      });
+    }
+
+    // Form submission handler
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      if(!currentUser) {
+        alert('Please sign in with Google before posting.');
+        return;
       }
 
-      button.disabled = false;
-      button.textContent = '🚀 Post Product';
+      // Simple form validation
+      if(!form.title.value.trim() || !form.description.value.trim() || !form.price.value.trim() || selectedFiles.length === 0) {
+        alert('Please fill all required fields and select images.');
+        return;
+      }
+
+      if(selectedFiles.length > 4){
+        alert('You can upload max 4 images.');
+        return;
+      }
+
+      // Disable form and show progress bar
+      submitBtn.disabled = true;
+      uploadProgressContainer.style.display = 'block';
+      uploadProgress.style.width = '0%';
+      imgError.textContent = '';
+      uploadProgressContainer.setAttribute('aria-hidden', 'false');
+
+      try {
+        // Upload images one by one with progress
+        const imageUrls = [];
+        for(let i=0; i<selectedFiles.length; i++){
+          const file = selectedFiles[i];
+          await uploadToImgur(file, percent => {
+            // Calculate overall progress
+            const overallPercent = Math.round(((i + percent/100) / selectedFiles.length) * 100);
+            uploadProgress.style.width = overallPercent + '%';
+          }).then(link => {
+            imageUrls.push(link);
+          });
+        }
+
+        // Build product object
+        const productData = {
+          title: form.title.value.trim(),
+          description: form.description.value.trim(),
+          price: parseFloat(form.price.value).toFixed(2),
+          images: imageUrls,
+          seller: {
+            uid: currentUser.uid,
+            username: currentUser.displayName || 'Unknown',
+            email: currentUser.email,
+            avatar: currentUser.photoURL || '',
+          },
+          createdAt: Date.now()
+        };
+
+        // Save to Firebase under /dlsaccounts
+        const newRef = db.ref('/dlsaccounts').push();
+        await newRef.set(productData);
+
+        alert('Product posted successfully 🚀');
+
+        // Reset form & UI
+        form.reset();
+        preview.innerHTML = '';
+        uploadProgressContainer.style.display = 'none';
+        uploadProgress.style.width = '0%';
+        submitBtn.disabled = false;
+
+      } catch (error) {
+        console.error(error);
+        imgError.textContent = 'Upload failed: ' + error.message;
+        submitBtn.disabled = false;
+        uploadProgressContainer.style.display = 'none';
+        uploadProgress.style.width = '0%';
+      }
     });
+
   </script>
 </body>
 </html>
