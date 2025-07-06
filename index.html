@@ -1245,8 +1245,85 @@ main {
     width: 95%;
   }
 }
+.search-filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(28, 28, 30, 0.8);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-radius: 16px;
+  margin: 12px auto;
+  width: 80%;
+  max-width: 600px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #f0f0f5;
+
+  /* Responsive stacking for mobile */
+  flex-wrap: wrap; 
+  justify-content: center;
+}
+
+.search-filter-bar input,
+.search-filter-bar select {
+  flex: 1 1 200px; /* grow/shrink, min width */
+  min-width: 140px;
+  max-width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 400;
+  outline-offset: 2px;
+  outline-color: #0a84ff;
+  background: rgba(44, 44, 46, 0.8);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  color: #f0f0f5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-bottom: 8px; /* space if stacked */
+}
+
+.search-filter-bar input::placeholder {
+  color: #8e8e93;
+}
+
+.search-filter-bar select {
+  max-width: 140px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image:
+    url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3e%3cpath fill='%23999' d='M6 7L0 0h12z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 7px;
+  padding-right: 30px;
+  margin-bottom: 8px;
+}
+
+/* Optional: on wider screens remove bottom margin */
+@media (min-width: 501px) {
+  .search-filter-bar input,
+  .search-filter-bar select {
+    margin-bottom: 0;
+  }
+}
+#searchFilterContainer {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#searchFilterContainer.show {
+  display: block !important;
+  opacity: 1;
+}
 </style>
 </style>
+
 </head>
 <body>
 
@@ -1264,6 +1341,18 @@ main {
 </header>
 
 <main>
+<div id="searchFilterContainer" style="display: none;">
+  <div class="search-filter-bar">
+    <input type="text" id="searchInput" placeholder="Search accounts..." />
+    <select id="filterSelect">
+      <option value="default">Sort by</option>
+      <option value="priceLow">Price: Low to High</option>
+      <option value="priceHigh">Price: High to Low</option>
+      <option value="newest">Newest</option>
+      <option value="verified">Verified Sellers</option>
+    </select>
+  </div>
+</div>
   <div class="product-page">
 
     <!-- ✅ Product Cards Go Here -->
@@ -1399,7 +1488,6 @@ window.closeLoginModal = function () {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 <script>
-  // Firebase setup (same as your config)
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -1416,6 +1504,7 @@ window.closeLoginModal = function () {
   const ADS_LIMIT = 1;
   let lastKey = null;
   let loading = false;
+  let allProducts = [];
 
   function showSkeletons() {
     document.body.classList.add("loading");
@@ -1449,8 +1538,6 @@ window.closeLoginModal = function () {
     const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
     const sellerUsername = product.seller?.username || 'Unknown Seller';
     const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
-    const sellerUid = product.seller?.uid || null;
-
     const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
 
     const card = document.createElement("div");
@@ -1475,11 +1562,37 @@ window.closeLoginModal = function () {
     document.getElementById("productList").appendChild(card);
   }
 
-  function messageUser(productId) {
-    if (!productId) {
-      alert("Missing product ID.");
-      return;
+  function renderAllProducts(products) {
+    const productList = document.getElementById("productList");
+    productList.innerHTML = '';
+    products.forEach(([id, product]) => renderProduct(product, id));
+  }
+
+  function applySearchAndFilter() {
+    const searchTerm = document.getElementById("searchInput")?.value.toLowerCase() || '';
+    const filter = document.getElementById("filterSelect")?.value || 'default';
+
+    let filtered = allProducts.filter(([_, product]) => {
+      const title = product.title?.toLowerCase() || '';
+      const desc = product.description?.toLowerCase() || '';
+      return title.includes(searchTerm) || desc.includes(searchTerm);
+    });
+
+    if (filter === 'priceLow') {
+      filtered.sort((a, b) => parseFloat(a[1].price || 0) - parseFloat(b[1].price || 0));
+    } else if (filter === 'priceHigh') {
+      filtered.sort((a, b) => parseFloat(b[1].price || 0) - parseFloat(a[1].price || 0));
+    } else if (filter === 'newest') {
+      filtered.reverse();
+    } else if (filter === 'verified') {
+      filtered = filtered.filter(([_, p]) => p.seller?.verified === true);
     }
+
+    renderAllProducts(filtered);
+  }
+
+  function messageUser(productId) {
+    if (!productId) return alert("Missing product ID.");
     window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
   }
 
@@ -1495,7 +1608,6 @@ window.closeLoginModal = function () {
     for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
       const adCard = document.createElement("div");
       adCard.className = "ad-card";
-
       const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
       const adTitle = ad.title?.trim() || "Sponsored Ad";
       const adUrl = ad.url?.trim() || "#";
@@ -1570,11 +1682,12 @@ window.closeLoginModal = function () {
     }
 
     entries = shuffleArray(entries);
+
     for (const [id, product] of entries) {
-      renderProduct(product, id);
-      lastKey = id;
+      allProducts.push([id, product]);
     }
 
+    applySearchAndFilter(); // render with filters
     await loadAds();
     loading = false;
   }
@@ -1591,7 +1704,20 @@ window.closeLoginModal = function () {
   window.onload = () => {
     loadMore();
     window.addEventListener('scroll', onScroll);
+    const searchInput = document.getElementById("searchInput");
+    const filterSelect = document.getElementById("filterSelect");
+
+    if (searchInput) searchInput.addEventListener("input", applySearchAndFilter);
+    if (filterSelect) filterSelect.addEventListener("change", applySearchAndFilter);
   };
+  setTimeout(() => {
+  const container = document.getElementById("searchFilterContainer");
+  container.style.display = "block";
+  
+  requestAnimationFrame(() => {
+    container.classList.add("show");
+  });
+}, 500);
 </script>
 <script>
   function detectDeviceAndApplyClasses() {
@@ -1662,6 +1788,16 @@ window.closeLoginModal = function () {
     header.style.boxShadow = 'none';
   }
 });
+
+setTimeout(() => {
+  const bar = document.getElementById("searchFilterBar");
+  bar.style.display = "block";
+
+  // Trigger fade-in after it's visible
+  requestAnimationFrame(() => {
+    bar.classList.add("show");
+  });
+}, 1500);
 </script>
 </body>
 </html>
