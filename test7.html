@@ -78,6 +78,7 @@
   const sendBtn = document.getElementById('sendBtn');
   const statusEl = document.getElementById('status');
 
+  // Sign in anonymously
   async function signIn() {
     try {
       await auth.signInAnonymously();
@@ -87,6 +88,7 @@
     }
   }
 
+  // Request notification permission and get FCM token
   async function registerFCMToken(user) {
     try {
       const permission = await Notification.requestPermission();
@@ -112,6 +114,7 @@
     }
   }
 
+  // Listen to new chat messages
   function listenMessages() {
     db.ref('messages').limitToLast(50).on('child_added', snapshot => {
       const msg = snapshot.val();
@@ -122,6 +125,7 @@
     });
   }
 
+  // Send message to DB
   async function sendMessage(text, uid) {
     if (!text.trim()) return;
     const message = {
@@ -133,6 +137,7 @@
     inputEl.value = '';
   }
 
+  // Auth state change handler
   auth.onAuthStateChanged(async user => {
     if (user) {
       userInfoEl.textContent = `User ID: ${user.uid}`;
@@ -158,9 +163,10 @@
     sendMessage(inputEl.value, user.uid);
   };
 
+  // Optional: Listen for foreground messages
   messaging.onMessage(payload => {
     console.log('Foreground message received: ', payload);
-    // Optional: show UI alert, toast, etc.
+    // You can show a toast or alert here if you want
   });
 </script>
 
