@@ -832,10 +832,17 @@ button:hover {
 
 <div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle" style="display: none;">
   <div class="modal-content">
-    
-    <!-- Step 1: Collect Info -->
-    <div class="step active" id="step1">
-      <h2 id="purchaseTitle">Request Access</h2>
+
+    <!-- Step 0: Choose Action -->
+    <div class="step active" id="step0">
+      <h2 id="purchaseTitle">What do you want to do?</h2>
+      <button id="chooseRequestBtn">Request More Info</button>
+      <button id="chooseBuyBtn">Buy Now</button>
+    </div>
+
+    <!-- Step 1: Request Info -->
+    <div class="step" id="step1Request">
+      <h2 id="purchaseTitleRequest">Request Access</h2>
       <p style="color:#888; font-size:14px;">Send request if you wish to buy this account or know more about it.</p>
 
       <label for="emailInput">Email</label>
@@ -846,6 +853,20 @@ button:hover {
 
       <div class="error" id="step1Error"></div>
       <button id="step1NextBtn">Send Request</button>
+      <button class="back-btn" id="requestBackBtn">Back</button>
+    </div>
+
+    <!-- Step 1: Buy Now -->
+    <div class="step" id="step1Buy">
+      <h2 id="purchaseTitleBuy">Buy Now</h2>
+      <p style="color:#888; font-size:14px;">Enter your email to receive the account details.</p>
+
+      <label for="buyEmailInput">Email</label>
+      <input type="email" id="buyEmailInput" placeholder="you@example.com" autocomplete="email" required>
+
+      <div class="error" id="buyError"></div>
+      <button id="buyNowBtn">Pay Now</button>
+      <button class="back-btn" id="buyBackBtn">Back</button>
     </div>
 
     <!-- Step 2: Processing -->
@@ -858,8 +879,7 @@ button:hover {
     <!-- Step 3: Done -->
     <div class="step" id="step3">
       <h2>✅ Request Sent</h2>
-      <p>
- <p>We’ve got your request!<br>Our team will contact you soon via your provided email or phone number to complete the process.</p>
+      <p>We’ve got your request!<br>Our team will contact you soon via your provided email or phone number to complete the process.</p>
       <button id="closeModalBtn">Close</button>
     </div>
   </div>
