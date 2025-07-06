@@ -6,7 +6,8 @@
   <title>Firebase Cloud Messaging Test</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #121212;
       color: #eee;
       display: flex;
@@ -16,98 +17,105 @@
       height: 100vh;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
     button {
-      background: #0a84ff;
+      background-color: #1da1f2;
       border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
+      border-radius: 25px;
+      padding: 15px 30px;
+      color: black;
+      font-weight: 700;
+      font-size: 1.1rem;
       cursor: pointer;
-      box-shadow: 0 5px 15px rgba(10, 132, 255, 0.4);
-      transition: background 0.3s ease;
+      transition: background-color 0.3s ease;
+      user-select: none;
     }
     button:hover {
-      background: #0066ff;
+      background-color: #0c8ddb;
     }
-    pre {
+    #output {
       margin-top: 20px;
-      width: 90%;
       max-width: 600px;
+      word-break: break-word;
+      font-size: 0.9rem;
       background: #222;
       padding: 15px;
-      border-radius: 8px;
-      font-size: 14px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-shadow: inset 0 0 5px #000;
-      min-height: 80px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #1da1f2aa;
     }
   </style>
 </head>
 <body>
-  <h1>Firebase Cloud Messaging Test</h1>
-  <button id="enableBtn">Enable Notifications & Get Token</button>
-  <pre id="output">Status will appear here...</pre>
 
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+<h1>Firebase Cloud Messaging Test</h1>
+<button id="enableBtn">Enable Notifications & Get Token</button>
+<div id="output">Status will appear here...</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
 
-    const output = document.getElementById('output');
-    const enableBtn = document.getElementById('enableBtn');
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    projectId: "itzhoyoo-f9f7e",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-    // Public VAPID key from Firebase console (your public key)
-    const publicVapidKey = 'BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc';
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
+  // Your public VAPID key — use the *public* key you gave me:
+  const vapidKey = "BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc";
+
+  // Proper base64 to Uint8Array helper
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
     }
+    return outputArray;
+  }
 
-    enableBtn.onclick = async () => {
-      output.textContent = 'Requesting notification permission...';
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          output.textContent = 'Permission denied by user.';
-          return;
-        }
-        output.textContent = 'Registering service worker...';
+  const output = document.getElementById('output');
+  const enableBtn = document.getElementById('enableBtn');
 
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        output.textContent = 'Service worker registered.\nGetting FCM token...';
+  enableBtn.addEventListener('click', async () => {
+    output.textContent = 'Registering Service Worker...';
 
-        const token = await messaging.getToken({
-          vapidKey: urlBase64ToUint8Array(publicVapidKey),
-          serviceWorkerRegistration: registration
-        });
+    try {
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      output.textContent = 'Service Worker registered.\nRequesting permission...';
 
-        output.textContent = `✅ FCM Token received:\n${token}\n\nUse this token to send test messages from Firebase Console or server.`;
-      } catch (err) {
-        output.textContent = `❌ Error:\n${err.message}`;
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        output.textContent = 'Notification permission denied.';
+        return;
       }
-    };
-  </script>
+      output.textContent = 'Permission granted.\nGetting FCM token...';
+
+      const currentToken = await messaging.getToken({
+        vapidKey: vapidKey,
+        serviceWorkerRegistration: registration
+      });
+
+      if (currentToken) {
+        output.textContent = 'FCM Token:\n' + currentToken;
+        console.log('FCM Token:', currentToken);
+      } else {
+        output.textContent = 'No registration token available. Request permission to generate one.';
+      }
+    } catch (err) {
+      output.textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  });
+</script>
+
 </body>
 </html>
