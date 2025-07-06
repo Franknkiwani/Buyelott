@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Add Product with Auth</title>
+  <title>Add Product</title>
   <style>
     body {
       margin: 0;
@@ -20,18 +20,6 @@
       margin-bottom: 20px;
     }
 
-    #loginBtn {
-      background-color: #4285f4;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
-
     form {
       width: 100%;
       max-width: 500px;
@@ -42,7 +30,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      display: none; /* hide form initially */
     }
 
     label {
@@ -103,20 +90,10 @@
       background-color: #ccc;
       cursor: not-allowed;
     }
-
-    #userInfo {
-      margin-bottom: 20px;
-      font-size: 16px;
-      color: #333;
-    }
   </style>
 </head>
 <body>
   <h1>📦 Add Product</h1>
-
-  <button id="loginBtn">Sign in with Google</button>
-  <div id="userInfo"></div>
-
   <form id="productForm">
     <label class="required">Title</label>
     <input type="text" id="title" required />
@@ -135,12 +112,12 @@
     <button type="submit">Post This Magic ✨</button>
   </form>
 
-  <!-- Firebase -->
+  <!-- Firebase + Script -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
 
   <script>
+    // ✅ YOUR Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -148,45 +125,20 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.database();
 
-    const loginBtn = document.getElementById('loginBtn');
-    const productForm = document.getElementById('productForm');
-    const userInfoDiv = document.getElementById('userInfo');
-
-    const imagesInput = document.getElementById('images');
+    // State
+    const form = document.getElementById('productForm');
     const preview = document.getElementById('preview');
+    const imagesInput = document.getElementById('images');
     const errorDiv = document.getElementById('imgError');
-
     let selectedFiles = [];
-    let currentUser = null;
 
-    // Google Sign-in handler
-    loginBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => alert('Login failed: ' + err.message));
-    });
-
-    // Auth state listener
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        userInfoDiv.textContent = `Logged in as ${user.displayName} (${user.email})`;
-        loginBtn.style.display = 'none';
-        productForm.style.display = 'flex';
-      } else {
-        currentUser = null;
-        userInfoDiv.textContent = '';
-        loginBtn.style.display = 'block';
-        productForm.style.display = 'none';
-      }
-    });
-
-    // Image preview logic
+    // Image Preview Handler
     imagesInput.addEventListener('change', () => {
       const files = [...imagesInput.files];
       preview.innerHTML = '';
@@ -208,16 +160,16 @@
           preview.appendChild(img);
         };
         reader.onerror = function () {
-          console.error('Failed to preview image:', file.name);
-          errorDiv.textContent = '❌ Failed to preview image.';
+          console.error('Failed to load image preview:', file.name);
+          errorDiv.textContent = '❌ Failed to preview an image.';
         };
         reader.readAsDataURL(file);
       });
     });
 
-    // Imgur upload function
+    // ✅ YOUR Imgur Client ID
     async function uploadToImgur(file) {
-      const clientId = '891e5bb4aa94282';
+      const clientId = '891e5bb4aa94282'; // ← your actual Imgur client ID
       const formData = new FormData();
       formData.append('image', file);
       const res = await fetch('https://api.imgur.com/3/image', {
@@ -230,24 +182,19 @@
       return json.data.link;
     }
 
-    productForm.addEventListener('submit', async e => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      if (!currentUser) {
-        alert("You must be logged in to post a product.");
-        return;
-      }
 
       const title = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
       const price = document.getElementById('price').value.trim();
 
       if (!title || !description || !price || selectedFiles.length === 0) {
-        alert("Please fill in all fields and upload images.");
+        alert("Please complete all fields and upload images.");
         return;
       }
 
-      const button = productForm.querySelector('button');
+      const button = form.querySelector('button');
       button.disabled = true;
       button.textContent = "Uploading...";
 
@@ -258,32 +205,24 @@
           imageUrls.push(url);
         }
 
-        // Save product data with seller info
         const productData = {
           title,
           description,
           price,
           images: imageUrls,
-          seller: {
-            uid: currentUser.uid,
-            displayName: currentUser.displayName,
-            email: currentUser.email,
-            photoURL: currentUser.photoURL || ''
-          },
           createdAt: Date.now()
         };
 
         await db.ref('/dlsaccounts').push(productData);
 
         alert("✅ Product posted successfully!");
-        productForm.reset();
+        form.reset();
         preview.innerHTML = '';
         errorDiv.textContent = '';
         selectedFiles = [];
-
       } catch (err) {
         console.error(err);
-        alert("❌ Upload failed. Please try again.");
+        alert("❌ Upload failed. Try again.");
       }
 
       button.disabled = false;
