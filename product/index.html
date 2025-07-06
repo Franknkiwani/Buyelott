@@ -1063,426 +1063,479 @@ header {
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script>  
-  const firebaseConfig = {  
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
-    projectId: "itzhoyoo-f9f7e",  
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
-    messagingSenderId: "1094792075584",  
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"  
-  };  
-  
-  firebase.initializeApp(firebaseConfig);  
-  const db = firebase.database();  
-  const params = new URLSearchParams(window.location.search);  
-  const productId = params.get('id');  
-  
-  let currentUser = null;  
-  let sellerId = null;  
-  
-  firebase.auth().onAuthStateChanged(user => {  
-    currentUser = user;  
-  });  
-  
-  if (!productId) {  
-    document.getElementById("notFound").style.display = "block";  
-  } else {  
-    db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {  
-      const data = snapshot.val();  
-      if (!data) {  
-        document.getElementById("notFound").style.display = "block";  
-        return;  
-      }  
-  
-      sellerId = (data.seller && data.seller.id) ? data.seller.id : null;  
-  
-      const container = document.getElementById("product");  
-      const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';  
-      const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';  
-      const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';  
-      const verifiedBadge = (data.seller && data.seller.verified) ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : '';  
-      const price = parseFloat(data.price);  
-      const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);  
-  
-      let viewAllBtn = '';  
-      if (data.images && data.images.length > 1) {  
-        viewAllBtn = `<div class="view-all" onclick='openImageGallery(${JSON.stringify(data.images)})' style="cursor:pointer; position:absolute; top:10px; right:10px; background:#1da1f2; color:#fff; padding:6px 12px; border-radius:12px; font-weight:bold; user-select:none;">View All</div>`;  
-      }  
-  
-      container.innerHTML = `  
-        <div class="product-image-wrapper" style="position: relative;">  
-          ${viewAllBtn}  
-          <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy" style="width:100%; border-radius: 16px;">  
-        </div>  
-        <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">${data.title || "Untitled"}</div>  
-        <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">${data.description || "No description available."}</div>  
-        <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">$${formattedPrice}</div>  
-        <div id="reviewsSummary" style="text-align: center; font-size: 16px; color: #888; margin-top: 6px;">Loading reviews...</div>  
-        <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">  
-          <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">  
-          <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>  
-        </div>  
-        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px 10px 0 0; display: inline-block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>  
-        <button id="paypalBtn" style="margin: 30px 0 0 0; display: inline-block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #ffc439; color: #111; border: none; cursor: pointer; font-weight: bold; user-select:none;">Pay with PayPal</button>  
-      `;  
-  
-      container.style.display = "block";  
-  
-      loadComments(productId);  
-      loadReviewsSummary(productId);  
-    }).catch(error => {  
-      console.error(error);  
-      document.getElementById("notFound").innerText = "⚠️ Error loading product.";  
-      document.getElementById("notFound").style.display = "block";  
-    });  
-  }  
-  
-  function openImageGallery(images) {  
-    let gallery = window.open('', '_blank');  
-    gallery.document.write('<title>Product Images</title><style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}img{max-width:90%;margin-bottom:20px;border-radius:12px;}</style>');  
-    images.forEach(img => {  
-      gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);  
-    });  
-  }  
-  
-  function loadComments(productId) {  
-    db.ref(`/comments/${productId}`).on("value", (snapshot) => {  
-      const comments = snapshot.val();  
-      const container = document.getElementById("commentsList");  
-      const stats = document.getElementById("commentStats");  
-  
-      if (!comments) {  
-        container.innerHTML = "<p style='color:#aaa; text-align:center;'>No reviews yet.</p>";  
-        stats.textContent = "(0 comments)";  
-        return;  
-      }  
-  
-      let entries = Object.entries(comments);  
-      let totalRating = 0;  
-      let html = "";  
-  
-      entries.forEach(([id, comment]) => {  
-        const rating = parseInt(comment.rating || 0);  
-        totalRating += rating;  
-  
-        const username = comment.username || "Anonymous";  
-        const avatar = comment.avatar || `https://i.pravatar.cc/150?u=${id}`;  
-  
-        html += `  
-          <div style="margin-bottom: 20px; display: flex; gap: 12px;">  
-            <img src="${avatar}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">  
-            <div>  
-              <div style="font-weight: bold;">${username}</div>  
-              <div style="color: gold;">${"⭐️".repeat(rating)}</div>  
-              <div style="color: #ccc;">${comment.text}</div>  
-            </div>  
-          </div>  
-        `;  
-      });  
-  
-      const avg = totalRating / entries.length;  
-      stats.textContent = `(${entries.length} reviews • ${avg.toFixed(1)} ⭐️ | ${(avg / 5 * 100).toFixed(0)}%)`;  
-      container.innerHTML = html;  
-    });  
-  }  
-  
-  function loadReviewsSummary(productId) {  
-    db.ref(`/comments/${productId}`).once("value").then(snapshot => {  
-      const comments = snapshot.val();  
-      const summaryElem = document.getElementById("reviewsSummary");  
-      if (!comments) {  
-        summaryElem.innerText = "(0 reviews • No ratings yet)";  
-        return;  
-      }  
-  
-      const entries = Object.values(comments);  
-      const count = entries.length;  
-      const totalRating = entries.reduce((sum, c) => sum + (parseInt(c.rating) || 0), 0);  
-      const avgRating = count ? (totalRating / count) : 0;  
-  
-      summaryElem.innerText = `(${count} review${count > 1 ? 's' : ''} • ${avgRating.toFixed(1)}⭐️ | ${(avgRating / 5 * 100).toFixed(0)}%)`;  
-    });  
-  }  
-  
-  function submitComment() {  
-    const rating = parseInt(document.getElementById("ratingSelect").value);  
-    const text = document.getElementById("commentInput").value.trim();  
-  
-    if (!rating || !text) {  
-      alert("Please select a rating and enter your comment.");  
-      return;  
-    }  
-  
-    const uid = currentUser?.uid || "anon_" + Math.random().toString(36).slice(2, 8);  
-    const commentData = {  
-      rating,  
-      text,  
-      username: currentUser?.displayName || "Anonymous",  
-      avatar: currentUser?.photoURL || `https://i.pravatar.cc/150?u=${uid}`,  
-      timestamp: Date.now()  
-    };  
-  
-    db.ref(`/comments/${productId}/${uid}`).set(commentData).then(() => {  
-      document.getElementById("ratingSelect").value = "";  
-      document.getElementById("commentInput").value = "";  
-    });  
-  }  
-  
-  function shareProduct() {  
-    const title = document.querySelector('.title')?.textContent || 'Check this out!';  
-    const description = document.querySelector('.description')?.textContent || 'Awesome product on CyberChat!';  
-    const image = document.querySelector('.main-image')?.src || 'https://yourcdn.com/default-preview.png';  
-    const url = window.location.href;  
-  
-    if (navigator.share) {  
-      navigator.share({  
-        title: title,  
-        text: description,  
-        url: url  
-      }).catch((err) => {  
-        console.error("Share failed:", err);  
-      });  
-    } else {  
-      navigator.clipboard.writeText(url).then(() => {  
-        alert("📎 Link copied to clipboard!");  
-      });  
-    }  
-  }  
-  
-  // Purchase modal elements for manual purchase  
-  const modal = document.getElementById("purchaseModal");  
-  const step1 = document.getElementById("step1");  
-  const step2 = document.getElementById("step2");  
-  const step3 = document.getElementById("step3");  
-  
-  const emailInput = document.getElementById("emailInput");  
-  const phoneInput = document.getElementById("phoneInput");  
-  const paymentMethod = document.getElementById("paymentMethod");  
-  
-  const step1Error = document.getElementById("step1Error");  
-  const step2Error = document.getElementById("step2Error");  
-  
-  // Show modal on buy button click (manual purchase)  
-  function confirmPurchase() {  
-    modal.style.display = "flex";  
-    step1.classList.add("active");  
-    step2.classList.remove("active");  
-    step3.classList.remove("active");  
-  
-    step1Error.textContent = "";  
-    emailInput.value = "";  
-    phoneInput.value = "";  
-  }  
-  
-  // Validate email & phone for manual purchase modal  
-  function validateStep1() {  
-    const email = emailInput.value.trim();  
-    const phone = phoneInput.value.trim();  
-    step1Error.textContent = "";  
-  
-    if (!email || !phone) {  
-      step1Error.textContent = "Please enter both email and phone number.";  
-      return false;  
-    }  
-  
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  
-    if (!emailRegex.test(email)) {  
-      step1Error.textContent = "Invalid email format.";  
-      return false;  
-    }  
-  
-    const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;  
-    if (!phoneRegex.test(phone)) {  
-      step1Error.textContent = "Invalid phone number.";  
-      return false;  
-    }  
-  
-    return true;  
-  }  
-  
-  // Handle "Send Request" button (Step 1) for manual purchase  
-  document.getElementById("step1NextBtn").onclick = () => {  
-    if (!validateStep1()) return;  
-  
-    step1.classList.remove("active");  
-    step2.classList.add("active");  
-  
-    const purchaseData = {  
-      productId,  
-      sellerId,  
-      email: emailInput.value.trim(),  
-      phone: phoneInput.value.trim(),  
-      paymentMethod: "manual",  
-      timestamp: Date.now(),  
-      userId: currentUser?.uid || null,  
-    };  
-  
-    setTimeout(() => {  
-      db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)  
-        .then(() => {  
-          step2.classList.remove("active");  
-          step3.classList.add("active");  
-        })  
-        .catch(err => {  
-          console.error("Request error:", err);  
-          step2.classList.remove("active");  
-          step1.classList.add("active");  
-          step1Error.textContent = "Something went wrong. Please try again.";  
-        });  
-    }, 1200);  
-  };  
-  
-  // Close manual purchase modal  
-  document.getElementById("closeModalBtn").onclick = () => {  
-    modal.style.display = "none";  
-  };  
-  
-  modal.onclick = (e) => {  
-    if (e.target === modal) {  
-      modal.style.display = "none";  
-    }  
-  };  
-  
-  // Loading checkpoints logic (you can keep or remove if you want)  
-  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {  
-    document.querySelectorAll('.checkpoint')[1].classList.add('active');  
-    document.querySelectorAll('.checkpoint')[2].classList.add('active');  
-  
-    setTimeout(() => {  
-      document.getElementById("loadingScreen").style.display = "none";  
-    }, 1000);  
-  });  
-  
-  // Report modal stuff  
-  function openReportModal() {  
-    document.getElementById("reportModal").style.display = "flex";  
-    document.getElementById("reportReason").value = "";  
-    document.getElementById("reportStatus").textContent = "";  
-  }  
-  
-  function closeReportModal() {  
-    document.getElementById("reportModal").style.display = "none";  
-  }  
-  
-  function submitReport() {  
-    const reason = document.getElementById("reportReason").value.trim();  
-    const statusBox = document.getElementById("reportStatus");  
-  
-    if (!reason) {  
-      statusBox.style.color = "#f55";  
-      statusBox.textContent = "Please enter a reason.";  
-      return;  
-    }  
-  
-    const report = {  
-      reason,  
-      url: window.location.href,  
-      productId: productId || null,  
-      timestamp: Date.now(),  
-      userId: currentUser?.uid || "anonymous"  
-    };  
-  
-    firebase.database().ref("/reports").push(report).then(() => {  
-      statusBox.style.color = "#0f0";  
-      statusBox.textContent = "✅ Report sent. Thank you.";  
-      setTimeout(() => closeReportModal(), 1500);  
-    }).catch(err => {  
-      console.error("Error submitting report:", err);  
-      statusBox.style.color = "#f55";  
-      statusBox.textContent = "⚠️ Failed to send. Try again.";  
-    });  
-  }  
-  
-  // PayPal Payment Modal Trigger  
-  document.addEventListener("click", function (e) {  
-    if (e.target.id === "paypalBtn") {  
-      const modalHtml = `  
-        <div id="paypalModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;">  
-          <div style="background:#fff;padding:30px;border-radius:16px;width:90%;max-width:400px;text-align:center;font-family:sans-serif;">  
-            <h2 style="margin-bottom:20px;color:#1a1a1a;">Confirm Payment</h2>  
-            <input type="text" placeholder="Your name" id="paypalName" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">  
-            <input type="email" placeholder="Your email" id="paypalEmail" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">  
-            <input type="tel" placeholder="Your phone" id="paypalPhone" style="width:100%;padding:12px;margin-bottom:20px;border:1px solid #ccc;border-radius:8px;">  
-           <div style="font-size:20px;font-weight:bold;margin-bottom:20px;color:#111;">
-              Total: $${formattedPrice}
-            </div>
-            <button id="paypalConfirmBtn" style="background:#ffc439;color:#111;padding:12px 20px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Pay with PayPal</button>
-            <button id="paypalCancelBtn" style="margin-top:12px;background:#e74c3c;color:#fff;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;">Cancel</button>
-          </div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+
+  let currentUser = null;
+  let sellerId = null;
+
+  firebase.auth().onAuthStateChanged(user => {
+    currentUser = user;
+  });
+
+  if (!productId) {
+    document.getElementById("notFound").style.display = "block";
+  } else {
+    db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+      const data = snapshot.val();
+      if (!data) {
+        document.getElementById("notFound").style.display = "block";
+        return;
+      }
+
+      sellerId = (data.seller && data.seller.id) ? data.seller.id : null;
+
+      const container = document.getElementById("product");
+      const mainImage = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=No+Image';
+      const sellerAvatar = (data.seller && data.seller.avatar) ? data.seller.avatar : 'https://via.placeholder.com/40?text=👤';
+      const sellerUsername = (data.seller && data.seller.username) ? data.seller.username : 'Unknown Seller';
+      const verifiedBadge = (data.seller && data.seller.verified) ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>' : '';
+      const price = parseFloat(data.price);
+      const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
+
+      let viewAllBtn = '';
+      if (data.images && data.images.length > 1) {
+        viewAllBtn = `<div class="view-all" onclick='openImageGallery(${JSON.stringify(data.images)})' style="cursor:pointer; position:absolute; top:10px; right:10px; background:#1da1f2; color:#fff; padding:6px 12px; border-radius:12px; font-weight:bold; user-select:none;">View All</div>`;
+      }
+
+      container.innerHTML = `
+        <div class="product-image-wrapper" style="position: relative;">
+          ${viewAllBtn}
+          <img class="main-image" src="${mainImage}" alt="Product Image" loading="lazy" style="width:100%; border-radius: 16px;">
         </div>
+        <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">${data.title || "Untitled"}</div>
+        <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">${data.description || "No description available."}</div>
+        <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">$${formattedPrice}</div>
+        <div id="reviewsSummary" style="text-align: center; font-size: 16px; color: #888; margin-top: 6px;">Loading reviews...</div>
+        <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
+          <img src="${sellerAvatar}" alt="Seller Avatar" loading="lazy" style="width: 40px; height: 40px; border-radius: 50%;">
+          <span style="font-weight: 600; font-size: 16px;">${sellerUsername} ${verifiedBadge}</span>
+        </div>
+        <button class="buy-btn" onclick="confirmPurchase()" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #1da1f2; color: white; border: none; cursor: pointer; user-select: none;">Confirm to Buy</button>
       `;
 
-      // Append modal to body
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      container.style.display = "block";
 
-      // Cancel button closes modal & removes it
-      document.getElementById('paypalCancelBtn').onclick = () => {
-        document.getElementById('paypalModal').remove();
-      };
+      loadComments(productId);
+      loadReviewsSummary(productId);
+    }).catch(error => {
+      console.error(error);
+      document.getElementById("notFound").innerText = "⚠️ Error loading product.";
+      document.getElementById("notFound").style.display = "block";
+    });
+  }
 
-      // Confirm button triggers payment process
-      document.getElementById('paypalConfirmBtn').onclick = () => {
-        const name = document.getElementById('paypalName').value.trim();
-        const email = document.getElementById('paypalEmail').value.trim();
-        const phone = document.getElementById('paypalPhone').value.trim();
+  function openImageGallery(images) {
+    let gallery = window.open('', '_blank');
+    gallery.document.write('<title>Product Images</title><style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}img{max-width:90%;margin-bottom:20px;border-radius:12px;}</style>');
+    images.forEach(img => {
+      gallery.document.write(`<img src="${img}" alt="Product Image"><br>`);
+    });
+  }
+
+  function loadComments(productId) {
+    db.ref(`/comments/${productId}`).on("value", (snapshot) => {
+      const comments = snapshot.val();
+      const container = document.getElementById("commentsList");
+      const stats = document.getElementById("commentStats");
+
+      if (!comments) {
+        container.innerHTML = "<p style='color:#aaa; text-align:center;'>No reviews yet.</p>";
+        stats.textContent = "(0 comments)";
+        return;
+      }
+
+      let entries = Object.entries(comments);
+      let totalRating = 0;
+      let html = "";
+
+      entries.forEach(([id, comment]) => {
+        const rating = parseInt(comment.rating || 0);
+        totalRating += rating;
+
+        const username = comment.username || "Anonymous";
+        const avatar = comment.avatar || `https://i.pravatar.cc/150?u=${id}`;
+
+        html += `
+          <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+            <img src="${avatar}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+            <div>
+              <div style="font-weight: bold;">${username}</div>
+              <div style="color: gold;">${"⭐️".repeat(rating)}</div>
+              <div style="color: #ccc;">${comment.text}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      const avg = totalRating / entries.length;
+      stats.textContent = `(${entries.length} reviews • ${avg.toFixed(1)} ⭐️ | ${(avg / 5 * 100).toFixed(0)}%)`;
+      container.innerHTML = html;
+    });
+  }
+
+  function loadReviewsSummary(productId) {
+    db.ref(`/comments/${productId}`).once("value").then(snapshot => {
+      const comments = snapshot.val();
+      const summaryElem = document.getElementById("reviewsSummary");
+      if (!comments) {
+        summaryElem.innerText = "(0 reviews • No ratings yet)";
+        return;
+      }
+
+      const entries = Object.values(comments);
+      const count = entries.length;
+      const totalRating = entries.reduce((sum, c) => sum + (parseInt(c.rating) || 0), 0);
+      const avgRating = count ? (totalRating / count) : 0;
+
+      summaryElem.innerText = `(${count} review${count > 1 ? 's' : ''} • ${avgRating.toFixed(1)}⭐️ | ${(avgRating / 5 * 100).toFixed(0)}%)`;
+    });
+  }
+
+  function submitComment() {
+    const rating = parseInt(document.getElementById("ratingSelect").value);
+    const text = document.getElementById("commentInput").value.trim();
+
+    if (!rating || !text) {
+      alert("Please select a rating and enter your comment.");
+      return;
+    }
+
+    const uid = currentUser?.uid || "anon_" + Math.random().toString(36).slice(2, 8);
+    const commentData = {
+      rating,
+      text,
+      username: currentUser?.displayName || "Anonymous",
+      avatar: currentUser?.photoURL || `https://i.pravatar.cc/150?u=${uid}`,
+      timestamp: Date.now()
+    };
+
+    db.ref(`/comments/${productId}/${uid}`).set(commentData).then(() => {
+      document.getElementById("ratingSelect").value = "";
+      document.getElementById("commentInput").value = "";
+    });
+  }
+
+  function shareProduct() {
+    const title = document.querySelector('.title')?.textContent || 'Check this out!';
+    const description = document.querySelector('.description')?.textContent || 'Awesome product on CyberChat!';
+    const image = document.querySelector('.main-image')?.src || 'https://yourcdn.com/default-preview.png';
+    const url = window.location.href;
+
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        text: description,
+        url: url
+      }).catch((err) => {
+        console.error("Share failed:", err);
+      });
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        alert("📎 Link copied to clipboard!");
+      });
+    }
+  }
+
+  // Purchase modal elements and steps
+  const modal = document.getElementById("purchaseModal");
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const step3 = document.getElementById("step3");
+
+  const emailInput = document.getElementById("emailInput");
+  const phoneInput = document.getElementById("phoneInput");
+  const paymentMethod = document.getElementById("paymentMethod");
+
+  const step1Error = document.getElementById("step1Error");
+  const step2Error = document.getElementById("step2Error");
+
+  // Show purchase modal
+  function confirmPurchase() {
+    modal.style.display = "flex";
+    step1.classList.add("active");
+    step2.classList.remove("active");
+    step3.classList.remove("active");
+
+    step1Error.textContent = "";
+    emailInput.value = "";
+    phoneInput.value = "";
+  }
+
+  // Validate step 1 form
+  function validateStep1() {
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+    step1Error.textContent = "";
+
+    if (!email || !phone) {
+      step1Error.textContent = "Please enter both email and phone number.";
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      step1Error.textContent = "Invalid email format.";
+      return false;
+    }
+
+    const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
+    if (!phoneRegex.test(phone)) {
+      step1Error.textContent = "Invalid phone number.";
+      return false;
+    }
+
+    return true;
+  }
+
+  // Step 1 Next button handler
+  document.getElementById("step1NextBtn").onclick = () => {
+    if (!validateStep1()) return;
+
+    step1.classList.remove("active");
+    step2.classList.add("active");
+
+    const purchaseData = {
+      productId,
+      sellerId,
+      email: emailInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      paymentMethod: "manual",
+      timestamp: Date.now(),
+      userId: currentUser?.uid || null,
+    };
+
+    setTimeout(() => {
+      db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
+        .then(() => {
+          step2.classList.remove("active");
+          step3.classList.add("active");
+        })
+        .catch(err => {
+          console.error("Request error:", err);
+          step2.classList.remove("active");
+          step1.classList.add("active");
+          step1Error.textContent = "Something went wrong. Please try again.";
+        });
+    }, 1200);
+  };
+
+  // Close modal button handler
+  document.getElementById("closeModalBtn").onclick = () => {
+    modal.style.display = "none";
+  };
+
+  // Clicking outside modal closes it
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  // Loading animation checkpoints (optional, depends on your UI)
+  db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+    document.querySelectorAll('.checkpoint')[1].classList.add('active');
+    document.querySelectorAll('.checkpoint')[2].classList.add('active');
+
+    setTimeout(() => {
+      document.getElementById("loadingScreen").style.display = "none";
+    }, 1000);
+  });
+
+  // Report modal controls
+  function openReportModal() {
+    document.getElementById("reportModal").style.display = "flex";
+    document.getElementById("reportReason").value = "";
+    document.getElementById("reportStatus").textContent = "";
+  }
+
+  function closeReportModal() {
+    document.getElementById("reportModal").style.display = "none";
+  }
+
+  function submitReport() {
+    const reason = document.getElementById("reportReason").value.trim();
+    const statusBox = document.getElementById("reportStatus");
+
+    if (!reason) {
+      statusBox.style.color = "#f55";
+      statusBox.textContent = "Please enter a reason.";
+      return;
+    }
+
+    const report = {
+      reason,
+      url: window.location.href,
+      productId: productId || null,
+      timestamp: Date.now(),
+      userId: currentUser?.uid || "anonymous"
+    };
+
+    firebase.database().ref("/reports").push(report).then(() => {
+      statusBox.style.color = "#0f0";
+      statusBox.textContent = "✅ Report sent. Thank you.";
+      setTimeout(() => closeReportModal(), 1500);
+    }).catch(err => {
+      console.error("Error submitting report:", err);
+      statusBox.style.color = "#f55";
+      statusBox.textContent = "⚠️ Failed to send. Try again.";
+    });
+  }
+</script>
+<script>
+  // Initialize Firebase config & app
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+
+  let currentUser = null;
+  let sellerId = null;
+
+  // Listen for Firebase auth state changes
+  firebase.auth().onAuthStateChanged(user => {
+    currentUser = user;
+  });
+
+  // Load product info or show "not found"
+  if (!productId) {
+    document.getElementById("notFound").style.display = "block";
+  } else {
+    db.ref("/dlsaccounts/" + productId).once("value").then(snapshot => {
+      const data = snapshot.val();
+      if (!data) {
+        document.getElementById("notFound").style.display = "block";
+        return;
+      }
+
+      sellerId = (data.seller && data.seller.id) ? data.seller.id : null;
+
+      const container = document.getElementById("product");
+      const mainImage = (data.images && data.images.length > 0)
+        ? data.images[0]
+        : 'https://via.placeholder.com/600x400?text=No+Image';
+      const sellerAvatar = (data.seller && data.seller.avatar)
+        ? data.seller.avatar
+        : 'https://via.placeholder.com/40?text=👤';
+      const sellerUsername = (data.seller && data.seller.username)
+        ? data.seller.username
+        : 'Unknown Seller';
+      const verifiedBadge = (data.seller && data.seller.verified)
+        ? '<span class="verified-badge" style="color:#1da1f2; font-weight:bold; margin-left:5px;">✔</span>'
+        : '';
+      const price = parseFloat(data.price);
+      const formattedPrice = isNaN(price) ? '0.00' : price.toFixed(2);
+
+      container.innerHTML = `
+        <div class="product-image-wrapper" style="position: relative;">
+          <img class="main-image" src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 16px;">
+        </div>
+        <div class="title" style="text-align: center; font-size: 28px; font-weight: 700; margin-top: 20px;">
+          ${data.title || "Untitled"}
+        </div>
+        <div class="description" style="text-align: center; font-size: 16px; color: #555; margin-top: 10px;">
+          ${data.description || "No description available."}
+        </div>
+        <div class="price" style="text-align: center; font-size: 24px; font-weight: 700; margin-top: 20px;">
+          $${formattedPrice}
+        </div>
+        <div class="seller" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
+          <img src="${sellerAvatar}" alt="Seller Avatar" style="width: 40px; height: 40px; border-radius: 50%;">
+          <span style="font-weight: 600; font-size: 16px;">
+            ${sellerUsername} ${verifiedBadge}
+          </span>
+        </div>
+        <button id="paypalBtn" style="margin: 30px auto 0; display: block; padding: 14px 36px; font-size: 18px; border-radius: 12px; background: #ffc439; color: #111; border: none; cursor: pointer; font-weight: bold;">
+          Pay with PayPal
+        </button>
+      `;
+
+      container.style.display = "block";
+    });
+  }
+
+  // PayPal Modal Trigger & Logic
+  document.addEventListener("click", function (e) {
+    if (e.target.id === "paypalBtn") {
+      const modalHtml = `
+        <div id="paypalModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;">
+          <div style="background:#fff;padding:30px;border-radius:16px;width:90%;max-width:400px;text-align:center;font-family:sans-serif;">
+            <h2 style="margin-bottom:20px;color:#1a1a1a;">Confirm Payment</h2>
+            <input type="text" placeholder="Your name" id="paypalName" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">
+            <input type="email" placeholder="Your email" id="paypalEmail" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px;">
+            <input type="tel" placeholder="Your phone" id="paypalPhone" style="width:100%;padding:12px;margin-bottom:20px;border:1px solid #ccc;border-radius:8px;">
+            <div style="font-size:20px;font-weight:bold;margin-bottom:20px;color:#111;">
+              Total: $<span id="paypalAmount">0.00</span>
+            </div>
+            <button id="finalConfirmPay" style="background:#28a745;color:white;padding:12px 24px;border:none;border-radius:10px;font-size:16px;cursor:pointer;width:100%;">Confirm and Pay</button>
+            <div style="font-size:12px;margin-top:12px;color:#555;">Delivery in &lt; 24hrs via email or phone</div>
+          </div>
+        </div>`;
+
+      document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+      // Load product price & autofill email if logged in
+      db.ref("/dlsaccounts/" + productId).once("value").then(snap => {
+        const d = snap.val();
+        document.getElementById("paypalAmount").textContent = parseFloat(d.price || 0).toFixed(2);
+        if (currentUser && currentUser.email) {
+          document.getElementById("paypalEmail").value = currentUser.email;
+        }
+      });
+
+      // Final confirm pay button logic
+      document.getElementById("finalConfirmPay").onclick = () => {
+        const name = document.getElementById("paypalName").value.trim();
+        const email = document.getElementById("paypalEmail").value.trim();
+        const phone = document.getElementById("paypalPhone").value.trim();
 
         if (!name || !email || !phone) {
-          alert('Please fill in all the fields.');
+          alert("Please fill in all fields.");
           return;
         }
 
-        // Simple email and phone validation (basic)
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^[+\d][\d\s\-()]{5,}$/;
-
-        if (!emailRegex.test(email)) {
-          alert('Invalid email format.');
-          return;
-        }
-
-        if (!phoneRegex.test(phone)) {
-          alert('Invalid phone number.');
-          return;
-        }
-
-        // Disable button to prevent double clicks
-        const btn = document.getElementById('paypalConfirmBtn');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
-
-        // Save purchase info in Firebase with paymentMethod: 'paypal'
-        const purchaseData = {
+        // Save payment request data (pseudo-payment)
+        const paymentData = {
           productId,
-          sellerId,
           name,
           email,
           phone,
-          paymentMethod: 'paypal',
-          timestamp: Date.now(),
-          userId: currentUser?.uid || null,
+          status: "Pending",
+          amount: document.getElementById("paypalAmount").textContent,
+          userId: currentUser?.uid || "guest",
+          timestamp: Date.now()
         };
 
-        db.ref(`/purchases/${productId}_${Date.now()}`).set(purchaseData)
-          .then(() => {
-            alert('Payment info saved! Now redirecting to PayPal...');
-            // Redirect to PayPal payment URL — placeholder example
-            // You should replace this with your actual PayPal checkout URL or integration
-            const paypalCheckoutUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your_paypal_email@example.com&item_name=${encodeURIComponent(data.title || 'Product')}&amount=${formattedPrice}&currency_code=USD`;
-
-            window.location.href = paypalCheckoutUrl;
-          })
-          .catch(err => {
-            console.error('Error saving PayPal purchase:', err);
-            alert('Failed to process payment. Try again.');
-            btn.disabled = false;
-            btn.textContent = 'Pay with PayPal';
-          });
+        db.ref("/paypalPayments/" + productId + "_" + Date.now()).set(paymentData).then(() => {
+          alert("✅ Thanks! You'll receive delivery within 24hrs.");
+          document.getElementById("paypalModal").remove();
+        });
       };
     }
   });
 </script>
-
 </body>
 </html>
