@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Add Product</title>
+  <title>Create DLS Product</title>
   <style>
     body {
-      margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9f9f9;
+      background: #f0f2f5;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
     }
 
     h1 {
@@ -20,34 +19,46 @@
       margin-bottom: 20px;
     }
 
-    form {
+    #loginContainer {
+      display: none;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    #formContainer {
+      display: none;
       width: 100%;
       max-width: 500px;
+    }
+
+    form {
       background: white;
       border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 500;
       width: 90%;
+      margin: 8px 0 4px;
+      font-weight: 500;
     }
 
-    input, textarea, select, button {
+    input, textarea, button {
       width: 90%;
       padding: 12px;
-      margin-bottom: 16px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
       font-size: 16px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
       background: #fafafa;
-      display: block;
+    }
+
+    textarea {
+      resize: vertical;
     }
 
     .required::after {
@@ -56,26 +67,25 @@
       margin-left: 4px;
     }
 
-    #preview {
-      width: 90%;
+    .preview {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
       margin-bottom: 16px;
-      justify-content: flex-start;
+      width: 90%;
     }
 
-    #preview img {
+    .preview img {
       height: 80px;
       border-radius: 10px;
       object-fit: cover;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
     }
 
     .error {
       color: red;
       font-size: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     button {
@@ -87,37 +97,61 @@
     }
 
     button:disabled {
-      background-color: #ccc;
+      background: #aaa;
       cursor: not-allowed;
+    }
+
+    #googleLoginBtn {
+      background: #fff;
+      color: #000;
+      border: 1px solid #ccc;
+      padding: 12px 18px;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    #googleLoginBtn:hover {
+      background: #f3f3f3;
     }
   </style>
 </head>
 <body>
-  <h1>📦 Add Product</h1>
-  <form id="productForm">
-    <label class="required">Title</label>
-    <input type="text" id="title" required />
+  <h1>➕ Create DLS Product</h1>
 
-    <label class="required">Description</label>
-    <textarea id="description" rows="4" required></textarea>
+  <div id="loginContainer">
+    <p>Please sign in with Google to post a product.</p>
+    <button id="googleLoginBtn">🔐 Sign in with Google</button>
+  </div>
 
-    <label class="required">Price ($)</label>
-    <input type="number" id="price" min="0" step="0.01" required />
+  <div id="formContainer">
+    <form id="createForm">
+      <label class="required">Title</label>
+      <input type="text" id="title" required />
 
-    <label class="required">Upload Images (max 4)</label>
-    <input type="file" id="images" accept="image/*" multiple required />
-    <div id="preview"></div>
-    <div id="imgError" class="error"></div>
+      <label class="required">Description</label>
+      <textarea id="description" rows="4" required></textarea>
 
-    <button type="submit">Post This Magic ✨</button>
-  </form>
+      <label class="required">Price ($)</label>
+      <input type="number" id="price" min="0" step="0.01" required />
 
-  <!-- Firebase + Script -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+      <label class="required">Images (max 4)</label>
+      <input type="file" id="images" accept="image/*" multiple required />
+
+      <div class="preview" id="preview"></div>
+      <div class="error" id="imgError"></div>
+
+      <button type="submit">🚀 Post Product</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 
   <script>
-    // ✅ YOUR Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -128,24 +162,46 @@
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
       measurementId: "G-LLT6F9WRKH"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    // State
-    const form = document.getElementById('productForm');
-    const preview = document.getElementById('preview');
+    let currentUser = null;
+
+    // Show form or login
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('formContainer').style.display = 'block';
+      } else {
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('formContainer').style.display = 'none';
+      }
+    });
+
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        alert("❌ Login failed.");
+        console.error(err);
+      });
+    });
+
+    const form = document.getElementById('createForm');
     const imagesInput = document.getElementById('images');
-    const errorDiv = document.getElementById('imgError');
+    const preview = document.getElementById('preview');
+    const imgError = document.getElementById('imgError');
     let selectedFiles = [];
 
-    // Image Preview Handler
     imagesInput.addEventListener('change', () => {
       const files = [...imagesInput.files];
       preview.innerHTML = '';
-      errorDiv.textContent = '';
+      imgError.textContent = '';
 
       if (files.length > 4) {
-        errorDiv.textContent = '⚠️ You can only upload up to 4 images.';
+        imgError.textContent = '⚠️ Max 4 images allowed.';
         imagesInput.value = '';
         return;
       }
@@ -154,29 +210,26 @@
 
       files.forEach(file => {
         const reader = new FileReader();
-        reader.onload = function (event) {
+        reader.onload = e => {
           const img = document.createElement('img');
-          img.src = event.target.result;
+          img.src = e.target.result;
           preview.appendChild(img);
-        };
-        reader.onerror = function () {
-          console.error('Failed to load image preview:', file.name);
-          errorDiv.textContent = '❌ Failed to preview an image.';
         };
         reader.readAsDataURL(file);
       });
     });
 
-    // ✅ YOUR Imgur Client ID
     async function uploadToImgur(file) {
-      const clientId = '891e5bb4aa94282'; // ← your actual Imgur client ID
+      const clientId = '891e5bb4aa94282';
       const formData = new FormData();
       formData.append('image', file);
+
       const res = await fetch('https://api.imgur.com/3/image', {
         method: 'POST',
         headers: { Authorization: 'Client-ID ' + clientId },
         body: formData
       });
+
       const json = await res.json();
       if (!json.success) throw new Error('Imgur upload failed');
       return json.data.link;
@@ -187,16 +240,16 @@
 
       const title = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
-      const price = document.getElementById('price').value.trim();
+      const price = parseFloat(document.getElementById('price').value);
 
-      if (!title || !description || !price || selectedFiles.length === 0) {
-        alert("Please complete all fields and upload images.");
+      if (!title || !description || isNaN(price) || selectedFiles.length === 0) {
+        alert('❗ Fill all fields and upload 1-4 images.');
         return;
       }
 
       const button = form.querySelector('button');
       button.disabled = true;
-      button.textContent = "Uploading...";
+      button.textContent = 'Uploading...';
 
       try {
         const imageUrls = [];
@@ -210,23 +263,29 @@
           description,
           price,
           images: imageUrls,
-          createdAt: Date.now()
+          createdAt: Date.now(),
+          seller: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: currentUser.displayName,
+            photo: currentUser.photoURL
+          }
         };
 
         await db.ref('/dlsaccounts').push(productData);
 
-        alert("✅ Product posted successfully!");
+        alert('✅ Product posted!');
         form.reset();
         preview.innerHTML = '';
-        errorDiv.textContent = '';
         selectedFiles = [];
+        imagesInput.value = '';
       } catch (err) {
         console.error(err);
-        alert("❌ Upload failed. Try again.");
+        alert('❌ Upload failed. Try again.');
       }
 
       button.disabled = false;
-      button.textContent = "Post This Magic ✨";
+      button.textContent = '🚀 Post Product';
     });
   </script>
 </body>
