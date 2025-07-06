@@ -1,145 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>FCM Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Add Product - Imgur Upload + Firebase</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #121212;
+      font-family: sans-serif;
+      background: #111;
       color: #fff;
       padding: 20px;
-      max-width: 480px;
-      margin: 0 auto;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-      font-weight: 700;
-      font-size: 1.8rem;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .profile img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid #1da1f2;
-    }
-    .profile-name {
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      background: #222;
-      color: #fff;
-      resize: vertical;
-    }
-    textarea {
-      min-height: 80px;
-    }
-    input[type="file"] {
-      border-radius: 14px;
+    .log {
       background: #222;
       padding: 12px;
-      color: #fff;
-    }
-    button {
-      background: #1da1f2;
-      color: #fff;
-      border: none;
-      border-radius: 18px;
-      padding: 14px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
-    button:hover {
-      background: #0c7abf;
-    }
-    .uploaded-images {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .uploaded-images img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 14px;
-      border: 2px solid #1da1f2;
-    }
-    .logout-btn {
-      background: #d32f2f;
-      margin-top: 16px;
-    }
-    .status-msg {
-      margin-top: 16px;
-      font-weight: 600;
-      text-align: center;
+      border-radius: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
+  <h1>🔔 Firebase Push Notification Test</h1>
+  <p>This page tests push token and foreground notifications.</p>
+  <div class="log" id="log">Initializing...</div>
 
-  <h1>Add Product</h1>
-
-  <div class="profile" id="userProfile" style="display:none;">
-    <img src="" alt="Profile Pic" id="profilePic" />
-    <div class="profile-name" id="profileName"></div>
-  </div>
-
-  <form id="productForm">
-    <label for="productTitle">Product Title <span style="color:#e74c3c;">*</span></label>
-    <input type="text" id="productTitle" name="title" placeholder="Enter product title" required />
-
-    <label for="productDesc">Product Description</label>
-    <textarea id="productDesc" name="description" placeholder="Write a description"></textarea>
-
-    <label for="productImages">Select Images (max 5) <span style="color:#e74c3c;">*</span></label>
-    <input type="file" id="productImages" name="images" accept="image/*" multiple required />
-
-    <button type="submit">Post This Magic</button>
-  </form>
-
-  <div class="uploaded-images" id="previewImages"></div>
-
-  <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
-
-  <div class="status-msg" id="statusMessage"></div>
-
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
 
   <script>
-    // Firebase config - same as your project
+    const log = (msg) => {
+      document.getElementById('log').textContent += '\n' + msg;
+      console.log(msg);
+    };
+
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -149,162 +45,40 @@
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    const messaging = firebase.messaging();
 
-    // Imgur Client ID (your real one)
-    const IMGUR_CLIENT_ID = "891e5bb4aa94282";
+    // Login anonymously just for token testing
+    auth.signInAnonymously().then(({ user }) => {
+      log(`Signed in as: ${user.uid}`);
 
-    const userProfileEl = document.getElementById('userProfile');
-    const profilePicEl = document.getElementById('profilePic');
-    const profileNameEl = document.getElementById('profileName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const statusMessage = document.getElementById('statusMessage');
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then((reg) => {
+          messaging.useServiceWorker(reg);
 
-    let loggedInUser = null;
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loggedInUser = user;
-        userProfileEl.style.display = 'flex';
-        profilePicEl.src = user.photoURL || 'https://via.placeholder.com/48?text=👤';
-        profileNameEl.textContent = user.displayName || user.email;
-        logoutBtn.style.display = 'block';
-      } else {
-        loggedInUser = null;
-        userProfileEl.style.display = 'none';
-        logoutBtn.style.display = 'none';
-        alert('Please log in with Google to add a product.');
-        // Redirect to login page or show login prompt here
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      auth.signOut();
-    });
-
-    const productForm = document.getElementById('productForm');
-    const productImagesInput = document.getElementById('productImages');
-    const previewImages = document.getElementById('previewImages');
-
-    let uploadedImageUrls = [];
-
-    productImagesInput.addEventListener('change', () => {
-      previewImages.innerHTML = '';
-      uploadedImageUrls = [];
-
-      const files = productImagesInput.files;
-      if (files.length > 5) {
-        alert("You can upload a maximum of 5 images.");
-        productImagesInput.value = "";
-        return;
-      }
-
-      // Show previews instantly (local file URLs)
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const url = URL.createObjectURL(file);
-        const img = document.createElement('img');
-        img.src = url;
-        previewImages.appendChild(img);
-      }
-    });
-
-    async function uploadImageToImgur(file) {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      try {
-        const response = await fetch('https://api.imgur.com/3/image', {
-          method: 'POST',
-          headers: {
-            Authorization: `Client-ID ${IMGUR_CLIENT_ID}`
-          },
-          body: formData
+          return messaging.getToken({
+            vapidKey: 'BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc'
+          });
+        })
+        .then((token) => {
+          log('✅ FCM Token retrieved:\n' + token);
+          return db.ref(`/users/${auth.currentUser.uid}/fcmToken`).set(token);
+        })
+        .then(() => {
+          log('📥 Token saved to database');
+        })
+        .catch((err) => {
+          log('❌ Error getting token: ' + err.message);
         });
-        const data = await response.json();
-        if (data.success && data.data && data.data.link) {
-          return data.data.link;
-        } else {
-          throw new Error('Imgur upload failed');
-        }
-      } catch (error) {
-        console.error('Imgur upload error:', error);
-        throw error;
-      }
-    }
+    });
 
-    productForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!loggedInUser) {
-        alert('You must be logged in to post a product.');
-        return;
-      }
-
-      const title = productForm.title.value.trim();
-      const description = productForm.description.value.trim();
-      const files = productImagesInput.files;
-
-      if (!title) {
-        alert('Please enter a product title.');
-        return;
-      }
-      if (files.length === 0) {
-        alert('Please select at least one image.');
-        return;
-      }
-      if (files.length > 5) {
-        alert('Max 5 images allowed.');
-        return;
-      }
-
-      statusMessage.textContent = 'Uploading images... Please wait.';
-      productForm.querySelector('button[type="submit"]').disabled = true;
-
-      try {
-        // Upload images to Imgur and collect URLs
-        uploadedImageUrls = [];
-        for (const file of files) {
-          const url = await uploadImageToImgur(file);
-          uploadedImageUrls.push(url);
-        }
-
-        // Prepare product object
-        const productData = {
-          title,
-          description,
-          images: uploadedImageUrls,
-          seller: {
-            uid: loggedInUser.uid,
-            username: loggedInUser.displayName || loggedInUser.email,
-            avatar: loggedInUser.photoURL || null,
-            verified: false // You can handle verification separately
-          },
-          createdAt: Date.now()
-        };
-
-        // Push product to Firebase Realtime DB under /dlsaccounts
-        const newProductRef = db.ref('/dlsaccounts').push();
-        await newProductRef.set(productData);
-
-        statusMessage.textContent = 'Product posted successfully!';
-
-        // Reset form & preview
-        productForm.reset();
-        previewImages.innerHTML = '';
-      } catch (err) {
-        console.error(err);
-        statusMessage.textContent = 'Error posting product. Try again.';
-      } finally {
-        productForm.querySelector('button[type="submit"]').disabled = false;
-      }
+    messaging.onMessage((payload) => {
+      log('🔔 Foreground push received:\n' + JSON.stringify(payload, null, 2));
+      alert(`Push Received: ${payload.notification.title}\n${payload.notification.body}`);
     });
   </script>
-
-  <!-- FirebaseUI for Google Login (optional, you can add your own UI) -->
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
-
 </body>
 </html>
