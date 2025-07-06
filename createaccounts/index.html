@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Product with Auth</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #loginBtn {
+      background-color: #4285f4;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    form {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      display: none; /* hide form initially */
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      width: 90%;
+    }
+
+    input, textarea, select, button {
+      width: 90%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #fafafa;
+      display: block;
+    }
+
+    .required::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
+    }
+
+    #preview {
+      width: 90%;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      justify-content: flex-start;
+    }
+
+    #preview img {
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #007aff;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #userInfo {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Add Product</h1>
+
+  <button id="loginBtn">Sign in with Google</button>
+  <div id="userInfo"></div>
+
+  <form id="productForm">
+    <label class="required">Title</label>
+    <input type="text" id="title" required />
+
+    <label class="required">Description</label>
+    <textarea id="description" rows="4" required></textarea>
+
+    <label class="required">Price ($)</label>
+    <input type="number" id="price" min="0" step="0.01" required />
+
+    <label class="required">Upload Images (max 4)</label>
+    <input type="file" id="images" accept="image/*" multiple required />
+    <div id="preview"></div>
+    <div id="imgError" class="error"></div>
+
+    <button type="submit">Post This Magic ✨</button>
+  </form>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const loginBtn = document.getElementById('loginBtn');
+    const productForm = document.getElementById('productForm');
+    const userInfoDiv = document.getElementById('userInfo');
+
+    const imagesInput = document.getElementById('images');
+    const preview = document.getElementById('preview');
+    const errorDiv = document.getElementById('imgError');
+
+    let selectedFiles = [];
+    let currentUser = null;
+
+    // Google Sign-in handler
+    loginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => alert('Login failed: ' + err.message));
+    });
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        userInfoDiv.textContent = `Logged in as ${user.displayName} (${user.email})`;
+        loginBtn.style.display = 'none';
+        productForm.style.display = 'flex';
+      } else {
+        currentUser = null;
+        userInfoDiv.textContent = '';
+        loginBtn.style.display = 'block';
+        productForm.style.display = 'none';
+      }
+    });
+
+    // Image preview logic
+    imagesInput.addEventListener('change', () => {
+      const files = [...imagesInput.files];
+      preview.innerHTML = '';
+      errorDiv.textContent = '';
+
+      if (files.length > 4) {
+        errorDiv.textContent = '⚠️ You can only upload up to 4 images.';
+        imagesInput.value = '';
+        return;
+      }
+
+      selectedFiles = files;
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          preview.appendChild(img);
+        };
+        reader.onerror = function () {
+          console.error('Failed to preview image:', file.name);
+          errorDiv.textContent = '❌ Failed to preview image.';
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Imgur upload function
+    async function uploadToImgur(file) {
+      const clientId = '891e5bb4aa94282';
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: { Authorization: 'Client-ID ' + clientId },
+        body: formData
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error('Imgur upload failed');
+      return json.data.link;
+    }
+
+    productForm.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        alert("You must be logged in to post a product.");
+        return;
+      }
+
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const price = document.getElementById('price').value.trim();
+
+      if (!title || !description || !price || selectedFiles.length === 0) {
+        alert("Please fill in all fields and upload images.");
+        return;
+      }
+
+      const button = productForm.querySelector('button');
+      button.disabled = true;
+      button.textContent = "Uploading...";
+
+      try {
+        const imageUrls = [];
+        for (const file of selectedFiles) {
+          const url = await uploadToImgur(file);
+          imageUrls.push(url);
+        }
+
+        // Save product data with seller info
+        const productData = {
+          title,
+          description,
+          price,
+          images: imageUrls,
+          seller: {
+            uid: currentUser.uid,
+            displayName: currentUser.displayName,
+            email: currentUser.email,
+            photoURL: currentUser.photoURL || ''
+          },
+          createdAt: Date.now()
+        };
+
+        await db.ref('/dlsaccounts').push(productData);
+
+        alert("✅ Product posted successfully!");
+        productForm.reset();
+        preview.innerHTML = '';
+        errorDiv.textContent = '';
+        selectedFiles = [];
+
+      } catch (err) {
+        console.error(err);
+        alert("❌ Upload failed. Please try again.");
+      }
+
+      button.disabled = false;
+      button.textContent = "Post This Magic ✨";
+    });
+  </script>
+</body>
+</html>
