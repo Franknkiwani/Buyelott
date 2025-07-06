@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create DLS Product</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #loginContainer {
+      display: none;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    #formContainer {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    form {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      width: 90%;
+      margin: 8px 0 4px;
+      font-weight: 500;
+    }
+
+    input, textarea, button {
+      width: 90%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .required::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
+    }
+
+    .preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      width: 90%;
+    }
+
+    .preview img {
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      background-color: #007aff;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    #googleLoginBtn {
+      background: #fff;
+      color: #000;
+      border: 1px solid #ccc;
+      padding: 12px 18px;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    #googleLoginBtn:hover {
+      background: #f3f3f3;
+    }
+  </style>
+</head>
+<body>
+  <h1>➕ Create DLS Product</h1>
+
+  <div id="loginContainer">
+    <p>Please sign in with Google to post a product.</p>
+    <button id="googleLoginBtn">🔐 Sign in with Google</button>
+  </div>
+
+  <div id="formContainer">
+    <form id="createForm">
+      <label class="required">Title</label>
+      <input type="text" id="title" required />
+
+      <label class="required">Description</label>
+      <textarea id="description" rows="4" required></textarea>
+
+      <label class="required">Price ($)</label>
+      <input type="number" id="price" min="0" step="0.01" required />
+
+      <label class="required">Images (max 4)</label>
+      <input type="file" id="images" accept="image/*" multiple required />
+
+      <div class="preview" id="preview"></div>
+      <div class="error" id="imgError"></div>
+
+      <button type="submit">🚀 Post Product</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Your real Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    let currentUser = null;
+
+    // Show form or login prompt based on auth
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('formContainer').style.display = 'block';
+      } else {
+        currentUser = null;
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('formContainer').style.display = 'none';
+      }
+    });
+
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        alert("❌ Login failed. Try again.");
+        console.error(err);
+      });
+    });
+
+    // UI refs
+    const form = document.getElementById('createForm');
+    const imagesInput = document.getElementById('images');
+    const preview = document.getElementById('preview');
+    const imgError = document.getElementById('imgError');
+    let selectedFiles = [];
+
+    // Preview images on file select
+    imagesInput.addEventListener('change', () => {
+      const files = [...imagesInput.files];
+      preview.innerHTML = '';
+      imgError.textContent = '';
+
+      if (files.length > 4) {
+        imgError.textContent = '⚠️ Max 4 images allowed.';
+        imagesInput.value = '';
+        selectedFiles = [];
+        return;
+      }
+
+      selectedFiles = files;
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Imgur upload helper
+    async function uploadToImgur(file) {
+      const clientId = '891e5bb4aa94282';
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: { Authorization: 'Client-ID ' + clientId },
+        body: formData
+      });
+
+      const json = await res.json();
+      if (!json.success) throw new Error('Imgur upload failed');
+      return json.data.link;
+    }
+
+    // Form submit handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        alert("⚠️ You must be logged in to post a product.");
+        return;
+      }
+
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const price = parseFloat(document.getElementById('price').value);
+
+      if (!title || !description || isNaN(price) || selectedFiles.length === 0) {
+        alert('❗ Fill all fields and upload 1-4 images.');
+        return;
+      }
+
+      const button = form.querySelector('button');
+      button.disabled = true;
+      button.textContent = 'Uploading...';
+
+      try {
+        // Upload all images to Imgur, collect URLs
+        const imageUrls = [];
+        for (const file of selectedFiles) {
+          const url = await uploadToImgur(file);
+          imageUrls.push(url);
+        }
+
+        // Build product data with seller info
+        const productData = {
+          title,
+          description,
+          price,
+          images: imageUrls,
+          createdAt: Date.now(),
+          seller: {
+            uid: currentUser.uid,
+            username: currentUser.displayName,
+            email: currentUser.email,
+            avatar: currentUser.photoURL,
+            verified: false
+          }
+        };
+
+        // Push to Firebase Realtime Database
+        await db.ref('/dlsaccounts').push(productData);
+
+        alert('✅ Product posted!');
+        form.reset();
+        preview.innerHTML = '';
+        selectedFiles = [];
+        imagesInput.value = '';
+      } catch (err) {
+        console.error(err);
+        alert('❌ Upload failed. Try again.');
+      }
+
+      button.disabled = false;
+      button.textContent = '🚀 Post Product';
+    });
+  </script>
+</body>
+</html>
