@@ -2,93 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FCM Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firebase Messaging Test</title>
   <style>
-    body {
-      background: #111;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    button {
-      background: #1da1f2;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 20px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121212; color: #eee; padding: 20px; }
+    button { background: #1da1f2; border: none; padding: 10px 20px; color: black; font-weight: bold; border-radius: 8px; cursor: pointer; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    pre { background: #222; padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; }
   </style>
 </head>
 <body>
 
-<h1>🔥 Firebase Cloud Messaging Test</h1>
-<p id="status">Initializing...</p>
-<button id="requestPermissionBtn">Enable Notifications</button>
+  <h1>Firebase Cloud Messaging Test</h1>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
+  <button id="enableBtn">Enable Notifications & Get Token</button>
 
-<script>
-  // Initialize Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    projectId: "itzhoyoo-f9f7e",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-  firebase.initializeApp(firebaseConfig);
+  <h2>Output</h2>
+  <pre id="output">Status will appear here...</pre>
 
-  const messaging = firebase.messaging();
-  const statusEl = document.getElementById('status');
-  const btn = document.getElementById('requestPermissionBtn');
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
+  <script>
+    const outputEl = document.getElementById('output');
+    const enableBtn = document.getElementById('enableBtn');
 
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then((registration) => {
-      console.log('✅ Service Worker registered');
-      messaging.useServiceWorker(registration);
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
 
-      btn.addEventListener('click', async () => {
-        try {
-          await Notification.requestPermission();
-          if (Notification.permission === 'granted') {
-            const token = await messaging.getToken({
-              vapidKey: 'AK-6m_S0RReUO_QiiA97EnON7prWP7cPrNSRFemVRkM'
-            });
-            console.log('✅ Token:', token);
-            statusEl.textContent = '✅ Notifications enabled. Token in console.';
-          } else {
-            statusEl.textContent = '❌ Permission denied.';
-          }
-        } catch (err) {
-          console.error('❌ Error getting token:', err);
-          statusEl.textContent = '❌ Error getting token. See console.';
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    async function registerServiceWorker() {
+      try {
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        outputEl.textContent = 'Service Worker registered successfully.\n';
+        messaging.useServiceWorker(registration);
+        return registration;
+      } catch (err) {
+        outputEl.textContent = 'Service Worker registration failed:\n' + err;
+        throw err;
+      }
+    }
+
+    async function getFcmToken() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          outputEl.textContent += 'Notification permission denied.\n';
+          return;
         }
-      });
 
-      statusEl.textContent = 'Ready to request permission.';
-    })
-    .catch((err) => {
-      console.error('❌ Service Worker registration failed:', err);
-      statusEl.textContent = '❌ SW registration failed.';
+        // getToken returns the FCM device token
+        const token = await messaging.getToken();
+        if (token) {
+          outputEl.textContent += `FCM Token:\n${token}\n`;
+        } else {
+          outputEl.textContent += 'No registration token available. Request permission to generate one.\n';
+        }
+      } catch (err) {
+        outputEl.textContent += 'Error getting FCM token:\n' + err + '\n';
+      }
+    }
+
+    enableBtn.addEventListener('click', async () => {
+      enableBtn.disabled = true;
+      outputEl.textContent = 'Registering Service Worker...\n';
+      await registerServiceWorker();
+      outputEl.textContent += 'Requesting Notification Permission...\n';
+      await getFcmToken();
+      enableBtn.disabled = false;
     });
-
-  // Handle foreground messages
-  messaging.onMessage((payload) => {
-    console.log('📩 Foreground message:', payload);
-    alert(`📬 ${payload.notification?.title || 'Notification'}\n${payload.notification?.body || ''}`);
-  });
-</script>
+  </script>
 
 </body>
 </html>
