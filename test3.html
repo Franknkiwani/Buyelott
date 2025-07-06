@@ -1,86 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Firebase Messaging Test</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121212; color: #eee; padding: 20px; }
-    button { background: #1da1f2; border: none; padding: 10px 20px; color: black; font-weight: bold; border-radius: 8px; cursor: pointer; }
-    button:disabled { background: #555; cursor: not-allowed; }
-    pre { background: #222; padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; }
-  </style>
+  <title>FCM Test</title>
 </head>
 <body>
-
-  <h1>Firebase Cloud Messaging Test</h1>
-
-  <button id="enableBtn">Enable Notifications & Get Token</button>
-
-  <h2>Output</h2>
-  <pre id="output">Status will appear here...</pre>
+  <button id="enable">Enable Notifications & Get Token</button>
+  <pre id="output"></pre>
 
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
-  <script>
-    const outputEl = document.getElementById('output');
-    const enableBtn = document.getElementById('enableBtn');
 
-    // Your Firebase config
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
       projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     firebase.initializeApp(firebaseConfig);
+
     const messaging = firebase.messaging();
 
-    async function registerServiceWorker() {
-      try {
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        outputEl.textContent = 'Service Worker registered successfully.\n';
-        messaging.useServiceWorker(registration);
-        return registration;
-      } catch (err) {
-        outputEl.textContent = 'Service Worker registration failed:\n' + err;
-        throw err;
-      }
-    }
+    const enableBtn = document.getElementById('enable');
+    const outputEl = document.getElementById('output');
 
-    async function getFcmToken() {
+    enableBtn.addEventListener('click', async () => {
       try {
+        enableBtn.disabled = true;
+        outputEl.textContent = 'Registering Service Worker...\n';
+        await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        outputEl.textContent += 'Service Worker registered.\nRequesting permission...\n';
+
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
           outputEl.textContent += 'Notification permission denied.\n';
+          enableBtn.disabled = false;
           return;
         }
+        outputEl.textContent += 'Permission granted.\nGetting FCM token...\n';
 
-        // getToken returns the FCM device token
-        const token = await messaging.getToken();
-        if (token) {
-          outputEl.textContent += `FCM Token:\n${token}\n`;
-        } else {
-          outputEl.textContent += 'No registration token available. Request permission to generate one.\n';
-        }
-      } catch (err) {
-        outputEl.textContent += 'Error getting FCM token:\n' + err + '\n';
+        const token = await messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' });
+        outputEl.textContent += 'FCM Token:\n' + token;
+
+      } catch (error) {
+        outputEl.textContent += 'Error: ' + error.message;
+      } finally {
+        enableBtn.disabled = false;
       }
-    }
-
-    enableBtn.addEventListener('click', async () => {
-      enableBtn.disabled = true;
-      outputEl.textContent = 'Registering Service Worker...\n';
-      await registerServiceWorker();
-      outputEl.textContent += 'Requesting Notification Permission...\n';
-      await getFcmToken();
-      enableBtn.disabled = false;
     });
   </script>
-
 </body>
 </html>
