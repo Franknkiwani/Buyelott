@@ -267,7 +267,69 @@ button:disabled {
     font-size: 1rem;
   }
 }
+/* Fullscreen overlay */
+#loadingScreen {
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
+  background: rgba(18, 18, 18, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
 
+/* Spinner */
+.spinner {
+  width: 64px;
+  height: 64px;
+  border: 6px solid #444; /* dark border */
+  border-top: 6px solid #0af; /* highlight color (blue-ish) */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Spin animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive scaling */
+@media (max-width: 400px) {
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+}
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 40, 80, 0.6); /* dark blue with opacity */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+/* Disable text selection highlight everywhere */
+body, 
+body *:not(input):not(textarea) {
+  user-select: none; /* Prevent selection on everything except inputs */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Allow text selection inside input and textarea */
+input, textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
 </style>
 </head>
 <body>
@@ -282,6 +344,10 @@ button:disabled {
       </button>
     </div>
   </header>
+  <!-- Loading Screen with just the spinner -->
+<div id="loadingScreen" role="alert" aria-live="assertive" aria-busy="true">
+  <div class="spinner"></div>
+</div>
   <!-- Login prompt shown if not signed in -->
   <div id="loginContainer" class="show">
     <p style="font-size:1.1rem; color:#888; user-select:none;">Sign in with Google to post a product</p>
@@ -759,6 +825,14 @@ async function loadUserProducts() {
     accountsList.innerHTML = `<p style="color:#d55; text-align:center;">Failed to load your accounts: ${err.message}</p>`;
   }
 }
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loadingScreen');
+  const content = document.getElementById('content');
+  setTimeout(() => {
+    loader.style.display = 'none';
+    content.style.display = 'block';
+  }, 3000); // 3 seconds delay
+});
 </script>
 </body>
 </html>
