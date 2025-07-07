@@ -310,173 +310,222 @@
   </div>
 </div>
 <script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e"
+  };
 
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-const page = document.getElementById("paymentPage");
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+  const page = document.getElementById("paymentPage");
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get("id");
 
-const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id");
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    page.innerHTML = `<div class="loading">Please log in to complete your purchase.</div>`;
-    return;
-  }
-  if (!productId) {
-    page.innerHTML = `<div class="loading">Invalid product link.</div>`;
-    return;
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
-  const snap = await get(ref(db, "dlsaccounts/" + productId));
-  if (!snap.exists()) {
-    page.innerHTML = `<div class="loading">Product not found.</div>`;
-    return;
-  }
-
-  const data = snap.val();
-  const title = data.title || "Untitled";
-  const description = data.description || "";
-  const price = parseFloat(data.price || 0).toFixed(2);
-  const img = (data.images && data.images[0]) || "https://via.placeholder.com/500x240?text=No+Image";
-
-  page.innerHTML = `
-    <div class="title">${title}</div>
-    <div class="subtitle">${description}</div>
-    <img src="${img}" class="product-img" alt="Product Image" />
-    <div class="price">$${price}</div>
-
-    <button class="secure-pay-btn" id="payNow">
-      <svg class="lock-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/>
-      </svg>
-      Pay Securely
-    </button>
-
-    <div class="delivery-info">Account will be delivered to: <b>${user.email}</b></div>
-
-    <div class="trust-badges">
-      <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal" />
-      <img src="https://img.icons8.com/color/48/000000/secured-letter.png" alt="Secure SSL" />
-      <img src="https://img.icons8.com/color/48/000000/trust.png" alt="Trusted" />
-    </div>
-
-    <div id="commentSection">
-      <h3>What buyers are saying</h3>
-      <textarea id="commentInput" rows="3" placeholder="Write your opinion..."></textarea>
-      <button id="postCommentBtn" disabled>Post Comment</button>
-      <div id="commentStatus" style="display:none;">Comment posted ✅</div>
-      <div id="commentList"><div class="loading">Loading comments...</div></div>
-    </div>
-  `;
-
-  const payNowBtn = document.getElementById("payNow");
-  payNowBtn.addEventListener("click", () => {
-    const modal = document.getElementById("paymentMethodModal");
-    modal.style.display = "flex";
-
-    // Show price in modal
-    const priceDisplay = document.getElementById("priceDisplay");
-    if (priceDisplay) priceDisplay.textContent = `$${price}`;
-
-    // 24 hour PayPal.me link for fast payment
-    const fastPayLink = document.getElementById("fastPayLink");
-    if (fastPayLink) {
-      fastPayLink.href = `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
-    }
-
-    payNowBtn.disabled = true;
-  });
-
-  // Comments logic
-  const commentInput = document.getElementById("commentInput");
-  const postBtn = document.getElementById("postCommentBtn");
-  const commentStatus = document.getElementById("commentStatus");
-
-  commentInput.addEventListener("input", () => {
-    postBtn.disabled = commentInput.value.trim().length < 3;
-  });
-
-  postBtn.addEventListener("click", async () => {
-    const msg = commentInput.value.trim();
-    if (msg.length < 3) return;
-
-    postBtn.disabled = true;
-    await push(ref(db, `comments/${productId}`), {
-      uid: user.uid,
-      email: user.email,
-      text: msg,
-      postedAt: serverTimestamp()
-    });
-    commentInput.value = "";
-    commentStatus.style.display = "block";
-    setTimeout(() => {
-      commentStatus.style.display = "none";
-      postBtn.disabled = true;
-    }, 2000);
-  });
-
-  const commentList = document.getElementById("commentList");
-  onValue(ref(db, `comments/${productId}`), async (snapshot) => {
-    commentList.innerHTML = "";
-    const comments = snapshot.val();
-    if (!comments) {
-      commentList.innerHTML = `<div style="color:#888; font-size:14px; text-align:center;">No comments yet. Be the first!</div>`;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      page.innerHTML = `<div class="loading">Please log in to complete your purchase.</div>`;
       return;
     }
 
-    const commentEntries = Object.entries(comments);
-    commentEntries.sort((a, b) => (a[1].postedAt || 0) - (b[1].postedAt || 0));
-
-    for (const [id, comment] of commentEntries) {
-      try {
-        const userSnap = await get(ref(db, `users/${comment.uid}`));
-        const userData = userSnap.exists() ? userSnap.val() : {};
-        const name = userData.username || comment.email.split("@")[0];
-        const avatar = userData.avatar || "https://i.imgur.com/1XKxjzF.png";
-
-        const commentEl = document.createElement("div");
-        commentEl.className = "comment";
-        commentEl.innerHTML = `
-          <img src="${avatar}" alt="${name} avatar" loading="lazy" />
-          <div class="comment-content">
-            <div class="comment-author">${name}</div>
-            <div class="comment-text">${comment.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
-            <div class="comment-date">${formatDate(comment.postedAt || Date.now())}</div>
-          </div>
-        `;
-        commentList.appendChild(commentEl);
-      } catch {
-        // Fail silently if user data missing
-      }
+    if (!productId) {
+      page.innerHTML = `<div class="loading">Invalid product link.</div>`;
+      return;
     }
-  });
-});
 
-// Close modal on outside click & re-enable pay button
-document.getElementById("paymentMethodModal").addEventListener("click", (e) => {
-  if (e.target.id === "paymentMethodModal") {
-    e.target.style.display = "none";
-    const payNowBtn = document.getElementById("payNow");
-    if (payNowBtn) payNowBtn.disabled = false;
-  }
-});
+    const snap = await get(ref(db, "dlsaccounts/" + productId));
+    if (!snap.exists()) {
+      page.innerHTML = `<div class="loading">Product not found.</div>`;
+      return;
+    }
+
+    const data = snap.val();
+    const title = data.title || "Untitled";
+    const description = data.description || "";
+    const price = parseFloat(data.price || 0).toFixed(2);
+    const img = (data.images && data.images[0]) || "https://via.placeholder.com/500x240?text=No+Image";
+    const productName = encodeURIComponent(title);
+
+    const manualPayUrl = `https://www.paypal.com/paypalme/farainkiwani456/${price}`;
+    const standardPayUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${productName}&amount=${price}&currency_code=USD`;
+
+    page.innerHTML = `
+      <div class="title">${title}</div>
+      <div class="subtitle">${description}</div>
+      <img src="${img}" class="product-img" alt="Product Image">
+      <div class="price">$${price}</div>
+
+      <button class="secure-pay-btn" id="payNow">
+        <svg class="lock-icon" viewBox="0 0 24 24">
+          <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/>
+        </svg>
+        Pay Securely
+      </button>
+
+      <div class="delivery-info">Account will be delivered to: <b>${user.email}</b></div>
+
+      <div class="trust-badges">
+        <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal">
+        <img src="https://img.icons8.com/color/48/000000/secured-letter.png" alt="Secure SSL">
+        <img src="https://img.icons8.com/color/48/000000/trust.png" alt="Trusted">
+      </div>
+
+      <div id="paymentMethodModal" class="modal">
+        <div class="modal-content">
+          <div class="tabs">
+            <button id="manualTab" class="active">24H Delivery</button>
+            <button id="standardTab">7 Days</button>
+          </div>
+          <div id="manualSection" class="tab-content active">
+            <p>Pay using PayPal.me for instant 24h delivery.</p>
+            <a id="manualPayLink" href="${manualPayUrl}" target="_blank" class="pay-btn">Pay $${price}</a>
+          </div>
+          <div id="standardSection" class="tab-content">
+            <p>Pay with standard PayPal button (may take 7 days).</p>
+            <a id="standardPayLink" href="${standardPayUrl}" target="_blank" class="pay-btn">Pay $${price}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="commentSection">
+        <h3>What buyers are saying</h3>
+        <textarea id="commentInput" rows="3" placeholder="Write your opinion..."></textarea>
+        <button id="postCommentBtn" disabled>Post Comment</button>
+        <div id="commentStatus">Comment posted ✅</div>
+        <div id="commentList"><div class="loading">Loading comments...</div></div>
+      </div>
+    `;
+
+    // PayNow opens modal
+    document.getElementById("payNow").addEventListener("click", () => {
+      document.getElementById("paymentMethodModal").style.display = "flex";
+    });
+
+    // Modal click-outside to close
+    document.getElementById("paymentMethodModal").addEventListener("click", (e) => {
+      if (e.target.id === "paymentMethodModal") {
+        e.target.style.display = "none";
+      }
+    });
+
+    // Tab switching logic
+    const manualTab = document.getElementById("manualTab");
+    const standardTab = document.getElementById("standardTab");
+    const manualSec = document.getElementById("manualSection");
+    const standardSec = document.getElementById("standardSection");
+
+    manualTab.addEventListener("click", () => {
+      manualTab.classList.add("active");
+      standardTab.classList.remove("active");
+      manualSec.classList.add("active");
+      standardSec.classList.remove("active");
+    });
+
+    standardTab.addEventListener("click", () => {
+      standardTab.classList.add("active");
+      manualTab.classList.remove("active");
+      standardSec.classList.add("active");
+      manualSec.classList.remove("active");
+    });
+
+    // Manual payment click
+    document.getElementById("manualPayLink").addEventListener("click", async (e) => {
+      const user = auth.currentUser;
+      if (!user) return alert("Please log in to continue.");
+      await push(ref(db, `orders/${user.uid}`), {
+        productId,
+        email: user.email,
+        paymentMethod: "manual",
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+    });
+
+    // Standard payment click
+    document.getElementById("standardPayLink").addEventListener("click", async (e) => {
+      const user = auth.currentUser;
+      if (!user) return alert("Please log in to continue.");
+      await push(ref(db, `orders/${user.uid}`), {
+        productId,
+        email: user.email,
+        paymentMethod: "standard",
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+    });
+
+    // Comments section
+    const commentInput = document.getElementById("commentInput");
+    const postBtn = document.getElementById("postCommentBtn");
+    const commentStatus = document.getElementById("commentStatus");
+    const commentList = document.getElementById("commentList");
+    commentStatus.style.display = "none";
+
+    commentInput.addEventListener("input", () => {
+      postBtn.disabled = commentInput.value.trim().length < 3;
+    });
+
+    postBtn.addEventListener("click", async () => {
+      const msg = commentInput.value.trim();
+      if (msg.length < 3) return;
+      postBtn.disabled = true;
+
+      await push(ref(db, `comments/${productId}`), {
+        uid: user.uid,
+        email: user.email,
+        text: msg,
+        postedAt: serverTimestamp()
+      });
+
+      commentInput.value = "";
+      postBtn.disabled = true;
+      commentStatus.style.display = "block";
+      setTimeout(() => {
+        commentStatus.style.display = "none";
+      }, 2000);
+    });
+
+    onValue(ref(db, `comments/${productId}`), async (snapshot) => {
+      commentList.innerHTML = "";
+      const comments = snapshot.val();
+      if (!comments) {
+        commentList.innerHTML = `<div style="color:#888; font-size:14px; text-align:center;">No comments yet. Be the first!</div>`;
+        return;
+      }
+
+      const commentEntries = Object.entries(comments).sort((a, b) => (b[1].postedAt || 0) - (a[1].postedAt || 0));
+      for (const [id, comment] of commentEntries) {
+        try {
+          const userSnap = await get(ref(db, `users/${comment.uid}`));
+          const userData = userSnap.exists() ? userSnap.val() : {};
+          const name = userData.username || comment.email.split("@")[0];
+          const avatar = userData.avatar || "https://i.imgur.com/1XKxjzF.png";
+
+          const commentEl = document.createElement("div");
+          commentEl.className = "comment";
+          commentEl.innerHTML = `
+            <img src="${avatar}" alt="${name}" />
+            <div class="comment-content">
+              <div class="comment-author">${name}</div>
+              <div class="comment-text">${comment.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+              <div class="comment-date">${formatDate(comment.postedAt || Date.now())}</div>
+            </div>`;
+          commentList.appendChild(commentEl);
+        } catch {}
+      }
+    });
+  });
 </script>
 </body>  
 </html>
