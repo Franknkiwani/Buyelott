@@ -146,209 +146,216 @@ main {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-  const inboxContainer = document.getElementById('inboxContainer');
-
-  let currentUser = null;
-  let chatsData = {};
-
-  function formatTimestamp(ts) {
-    if (!ts) return '';
-    const d = new Date(ts);
-    const now = new Date();
-    if (d.toDateString() === now.toDateString()) {
-      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    }
-    return d.toLocaleDateString();
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  async function fetchUserProfile(uid) {
-    try {
-      const snap = await db.ref(`/users/${uid}`).once('value');
-      const user = snap.val();
-      return {
-        username: user?.username || 'Unknown',
-        avatar: user?.avatar || 'https://via.placeholder.com/48?text=👤'
-      };
-    } catch {
-      return { username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤' };
-    }
-  }
-
-  // DLS BOT Profile
-  const dlsBotProfile = {
-    username: "DLS BOT",
-    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPB83u2dRl1cIDRmf9GcExk7fhe-BqGiexJZeZCLa1sFWQ93n2fYYqUl0&s=10"
-  };
-
-  function renderDLSBot() {
-    const chatDiv = document.createElement('div');
-    chatDiv.className = 'chat-item';
-    chatDiv.tabIndex = 0;
-    chatDiv.setAttribute('role', 'button');
-    chatDiv.title = "DLS BOT\nClick to view admin messages";
-    chatDiv.innerHTML = `
-      <div class="avatar-wrapper">
-        <img class="chat-avatar" src="${dlsBotProfile.avatar}" alt="DLS Bot Avatar" />
-      </div>
-      <div class="chat-info">
-        <div class="chat-name">DLS BOT</div>
-        <div class="chat-last-message">Click to view messages from admin</div>
-      </div>
-      <div class="chat-timestamp"></div>
-    `;
-    chatDiv.onclick = showDLSBotPopup;
-    chatDiv.onkeydown = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        chatDiv.click();
-      }
-    };
-    inboxContainer.appendChild(chatDiv);
-  }
-
-  async function showDLSBotPopup() {
-    const snapshot = await db.ref(`/dlsbot/${currentUser.uid}`).once('value');
-    const messages = snapshot.val() || {};
-
-    const popup = document.createElement('div');
-    popup.id = 'dlsBotModal';
-    popup.style.cssText = `
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85); display: flex; align-items: center;
-      justify-content: center; z-index: 9999;
-    `;
-    popup.innerHTML = `
-      <div style="
-        background: #1e1e1e; color: #fff; max-width: 420px; width: 100%;
-        padding: 20px; border-radius: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.6);
-        max-height: 80vh; overflow-y: auto;
-      ">
-        <div style="display: flex; align-items: center; margin-bottom: 16px;">
-          <img src="${dlsBotProfile.avatar}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px;" />
-          <div>
-            <div style="font-weight: bold; font-size: 1.2rem;">${dlsBotProfile.username}</div>
-            <div style="font-size: 0.9rem; color: #aaa;">Admin Messages</div>
-          </div>
-        </div>
-        ${Object.entries(messages).reverse().map(([id, msg]) => {
-          const time = formatTimestamp(msg.timestamp || Date.now());
-          const safeText = escapeHtml(msg.text || '');
-          const linkBtn = msg.link ? `<div style="margin-top: 6px;"><a href="${msg.link}" target="_blank" style="
-            display: inline-block; padding: 6px 12px; background: #1da1f2; color: #fff;
-            border-radius: 8px; text-decoration: none; font-size: 0.85rem;
-          ">Visit Link</a></div>` : '';
-          return `
-            <div style="margin-bottom: 18px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-              <div style="font-size: 0.95rem;">${safeText}</div>
-              ${linkBtn}
-              <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">${time}</div>
-            </div>
-          `;
-        }).join('')}
-        <button onclick="document.getElementById('dlsBotModal')?.remove()" style="
-          margin-top: 12px; width: 100%; padding: 10px;
-          background: #ff3b30; color: white; border: none;
-          border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer;
-        ">Close</button>
-      </div>
-    `;
-    document.body.appendChild(popup);
-  }
-
-  async function renderInbox() {
-    if (!Object.keys(chatsData).length) {
-      inboxContainer.innerHTML += '<div class="no-chats">No chats yet. Start a conversation!</div>';
-      return;
-    }
-
-    const sortedChats = Object.entries(chatsData).sort((a, b) => {
-      return (b[1].lastTimestamp || 0) - (a[1].lastTimestamp || 0);
-    });
-
-    for (const [chatId, chatMeta] of sortedChats) {
-      const users = chatMeta.users || {};
-      const otherUid = Object.keys(users).find(uid => uid !== currentUser.uid);
-      if (!otherUid) continue;
-
-      const otherProfile = await fetchUserProfile(otherUid);
-      const unread = (chatMeta.unreadCounts?.[currentUser.uid]) || 0;
-      const lastMsg = chatMeta.lastMessage || '';
-      const lastSender = chatMeta.lastMessageSender || '';
-      const preview = (lastSender === currentUser.uid) ? `you: ${lastMsg}` : `@${otherProfile.username}: ${lastMsg}`;
-      const lastTime = chatMeta.lastTimestamp || 0;
-
-      const chatDiv = document.createElement('div');
-      chatDiv.className = 'chat-item' + (unread ? ' unread' : '');
-      chatDiv.tabIndex = 0;
-      chatDiv.setAttribute('role', 'button');
-      chatDiv.title = `${otherProfile.username}\n${preview}`;
-      chatDiv.innerHTML = `
-        <div class="avatar-wrapper">
-          <img class="chat-avatar" src="${otherProfile.avatar}" alt="${otherProfile.username} avatar" />
-          ${unread ? `<div class="unread-badge">${unread > 99 ? '99+' : unread}</div>` : ''}
-        </div>
-        <div class="chat-info">
-          <div class="chat-name">${escapeHtml(otherProfile.username)}</div>
-          <div class="chat-last-message">${escapeHtml(preview)}</div>
-        </div>
-        <div class="chat-timestamp">${formatTimestamp(lastTime)}</div>
-      `;
-      chatDiv.onclick = () => {
-        window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;
-      };
-      chatDiv.onkeydown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          chatDiv.click();
-        }
-      };
-      inboxContainer.appendChild(chatDiv);
-    }
-  }
-
-  function renderInboxWithBot() {
-    inboxContainer.innerHTML = '';
-    renderDLSBot(); // Always first
-    renderInbox();  // Others below
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      alert('You must log in to view your inbox.');
-      window.location.href = '/login';
-      return;
-    }
-    currentUser = user;
-    db.ref('/chats').on('value', snapshot => {
-      const allChats = snapshot.val() || {};
-      chatsData = Object.entries(allChats)
-        .filter(([_, data]) => data?.meta?.users?.[currentUser.uid])
-        .reduce((acc, [chatId, data]) => {
-          acc[chatId] = data.meta;
-          return acc;
-        }, {});
-      renderInboxWithBot();
-    });
-  });
+<script>  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+    projectId: "itzhoyoo-f9f7e",  
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+    messagingSenderId: "1094792075584",  
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"  
+  };  
+  firebase.initializeApp(firebaseConfig);  
+  const auth = firebase.auth();  
+  const db = firebase.database();  
+  const inboxContainer = document.getElementById('inboxContainer');  
+  
+  let currentUser = null;  
+  let chatsData = {};  
+  
+  function formatTimestamp(ts) {  
+    if (!ts) return '';  
+    const d = new Date(ts);  
+    const now = new Date();  
+    if (d.toDateString() === now.toDateString()) {  
+      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});  
+    }  
+    return d.toLocaleDateString();  
+  }  
+  
+  function escapeHtml(text) {  
+    const div = document.createElement('div');  
+    div.textContent = text;  
+    return div.innerHTML;  
+  }  
+  
+  async function fetchUserProfile(uid) {  
+    try {  
+      const snap = await db.ref(`/users/${uid}`).once('value');  
+      const user = snap.val();  
+      return {  
+        username: user?.username || 'Unknown',  
+        avatar: user?.avatar || 'https://via.placeholder.com/48?text=👤'  
+      };  
+    } catch {  
+      return { username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤' };  
+    }  
+  }  
+  
+  // DLS BOT Profile  
+  const dlsBotProfile = {  
+    username: "DLS BOT",  
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPB83u2dRl1cIDRmf9GcExk7fhe-BqGiexJZeZCLa1sFWQ93n2fYYqUl0&s=10"  
+  };  
+  
+  function renderDLSBot() {  
+    const chatDiv = document.createElement('div');  
+    chatDiv.className = 'chat-item';  
+    chatDiv.tabIndex = 0;  
+    chatDiv.setAttribute('role', 'button');  
+    chatDiv.title = "DLS BOT\nClick to view admin messages";  
+    chatDiv.innerHTML = `  
+      <div class="avatar-wrapper">  
+        <img class="chat-avatar" src="${dlsBotProfile.avatar}" alt="DLS Bot Avatar" />  
+      </div>  
+      <div class="chat-info">  
+        <div class="chat-name">DLS BOT</div>  
+        <div class="chat-last-message">Click to view messages from admin</div>  
+      </div>  
+      <div class="chat-timestamp"></div>  
+    `;  
+    chatDiv.onclick = showDLSBotPopup;  
+    chatDiv.onkeydown = (e) => {  
+      if (e.key === 'Enter' || e.key === ' ') {  
+        e.preventDefault();  
+        chatDiv.click();  
+      }  
+    };  
+    inboxContainer.appendChild(chatDiv);  
+  }  
+  
+  async function showDLSBotPopup() {  
+    const snapshot = await db.ref(`/dlsbot/${currentUser.uid}`).once('value');  
+    const messages = snapshot.val() || {};  
+  
+    const popup = document.createElement('div');  
+    popup.id = 'dlsBotModal';  
+    popup.style.cssText = `  
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;  
+      background: rgba(0,0,0,0.85); display: flex; align-items: center;  
+      justify-content: center; z-index: 9999;  
+    `;  
+    popup.innerHTML = `  
+      <div style="  
+        background: #1e1e1e; color: #fff; max-width: 420px; width: 100%;  
+        padding: 20px; border-radius: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.6);  
+        max-height: 80vh; overflow-y: auto;  
+      ">  
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">  
+          <img src="${dlsBotProfile.avatar}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px;" />  
+          <div>  
+            <div style="font-weight: bold; font-size: 1.2rem;">${dlsBotProfile.username}</div>  
+            <div style="font-size: 0.9rem; color: #aaa;">Admin Messages</div>  
+          </div>  
+        </div>  
+        ${Object.entries(messages).reverse().map(([id, msg]) => {  
+          const time = formatTimestamp(msg.timestamp || Date.now());  
+          const safeText = escapeHtml(msg.text || '');  
+          const linkBtn = msg.link ? `<div style="margin-top: 6px;"><a href="${msg.link}" target="_blank" style="  
+            display: inline-block; padding: 6px 12px; background: #1da1f2; color: #fff;  
+            border-radius: 8px; text-decoration: none; font-size: 0.85rem;  
+          ">Visit Link</a></div>` : '';  
+          return `  
+            <div style="margin-bottom: 18px; border-bottom: 1px solid #333; padding-bottom: 10px;">  
+              <div style="font-size: 0.95rem;">${safeText}</div>  
+              ${linkBtn}  
+              <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">${time}</div>  
+            </div>  
+          `;  
+        }).join('')}  
+        <button onclick="document.getElementById('dlsBotModal')?.remove()" style="  
+          margin-top: 12px; width: 100%; padding: 10px;  
+          background: #ff3b30; color: white; border: none;  
+          border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer;  
+        ">Close</button>  
+      </div>  
+    `;  
+    document.body.appendChild(popup);  
+  }  
+  
+  async function renderInbox() {  
+    if (!Object.keys(chatsData).length) {  
+      inboxContainer.innerHTML += '<div class="no-chats">No chats yet. Start a conversation!</div>';  
+      return;  
+    }  
+  
+    const sortedChats = Object.entries(chatsData).sort((a, b) => {  
+      return (b[1].lastTimestamp || 0) - (a[1].lastTimestamp || 0);  
+    });  
+  
+    for (const [chatId, chatMeta] of sortedChats) {  
+      const users = chatMeta.users || {};  
+      const otherUid = Object.keys(users).find(uid => uid !== currentUser.uid);  
+      if (!otherUid) continue;  
+  
+      const otherProfile = await fetchUserProfile(otherUid);  
+      const unread = (chatMeta.unreadCounts?.[currentUser.uid]) || 0;  
+      const lastMsg = chatMeta.lastMessage || '';  
+      const lastSender = chatMeta.lastMessageSender || '';  
+      const preview = (lastSender === currentUser.uid) ? `you: ${lastMsg}` : `@${otherProfile.username}: ${lastMsg}`;  
+      const lastTime = chatMeta.lastTimestamp || 0;  
+  
+      const chatDiv = document.createElement('div');  
+      chatDiv.className = 'chat-item' + (unread ? ' unread' : '');  
+      chatDiv.tabIndex = 0;  
+      chatDiv.setAttribute('role', 'button');  
+      chatDiv.title = `${otherProfile.username}\n${preview}`;  
+      chatDiv.innerHTML = `  
+        <div class="avatar-wrapper">  
+          <img class="chat-avatar" src="${otherProfile.avatar}" alt="${otherProfile.username} avatar" />  
+          ${unread ? `<div class="unread-badge">${unread > 99 ? '99+' : unread}</div>` : ''}  
+        </div>  
+        <div class="chat-info">  
+          <div class="chat-name">${escapeHtml(otherProfile.username)}</div>  
+          <div class="chat-last-message">${escapeHtml(preview)}</div>  
+        </div>  
+        <div class="chat-timestamp">${formatTimestamp(lastTime)}</div>  
+      `;  
+      chatDiv.onclick = async () => {  
+        try {  
+          // Mark as read: reset unread count for current user in this chat  
+          await db.ref(`/chats/${chatId}/meta/unreadCounts/${currentUser.uid}`).set(0);  
+        } catch (err) {  
+          console.error("Failed to mark chat as read:", err);  
+        }  
+        // Then navigate to the chat page  
+        window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;  
+      };  
+      chatDiv.onkeydown = (e) => {  
+        if (e.key === 'Enter' || e.key === ' ') {  
+          e.preventDefault();  
+          chatDiv.click();  
+        }  
+      };  
+      inboxContainer.appendChild(chatDiv);  
+    }  
+  }  
+  
+  function renderInboxWithBot() {  
+    inboxContainer.innerHTML = '';  
+    renderDLSBot(); // Always first  
+    renderInbox();  // Others below  
+  }  
+  
+  auth.onAuthStateChanged(user => {  
+    if (!user) {  
+      alert('You must log in to view your inbox.');  
+      window.location.href = '/login';  
+      return;  
+    }  
+    currentUser = user;  
+    db.ref('/chats').on('value', snapshot => {  
+      const allChats = snapshot.val() || {};  
+      chatsData = Object.entries(allChats)  
+        .filter(([_, data]) => data?.meta?.users?.[currentUser.uid])  
+        .reduce((acc, [chatId, data]) => {  
+          acc[chatId] = data.meta;  
+          return acc;  
+        }, {});  
+      renderInboxWithBot();  
+    });  
+  });  
 </script>
 </body>
 </html>
