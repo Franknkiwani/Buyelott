@@ -387,7 +387,21 @@
       </div>
     `;
 
-    // Comment logic
+    // Now the button exists, attach event listener here!
+    const payNowBtn = document.getElementById("payNow");
+    payNowBtn.addEventListener("click", () => {
+      const modal = document.getElementById("paymentMethodModal");
+      modal.style.display = "flex";
+
+      // Set price text
+      document.getElementById("manualAmountText").textContent = `$${price}`;
+      document.getElementById("manualPayLink").href = `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
+      document.getElementById("standardPayLink").href = `https://paypal.me/yourlink/${price}`;
+
+      payNowBtn.disabled = true;
+    });
+
+    // Comment section logic
     const commentInput = document.getElementById("commentInput");
     const postBtn = document.getElementById("postCommentBtn");
     const commentStatus = document.getElementById("commentStatus");
@@ -416,7 +430,6 @@
       }, 2000);
     });
 
-    // Render comments live
     const commentList = document.getElementById("commentList");
     onValue(ref(db, `comments/${productId}`), async (snapshot) => {
       commentList.innerHTML = "";
@@ -427,7 +440,7 @@
       }
 
       const commentEntries = Object.entries(comments);
-      commentEntries.sort((a,b) => (a[1].postedAt || 0) - (b[1].postedAt || 0));
+      commentEntries.sort((a, b) => (a[1].postedAt || 0) - (b[1].postedAt || 0));
 
       for (const [id, comment] of commentEntries) {
         try {
@@ -454,28 +467,7 @@
     });
   });
 
-  // Show modal only (no redirect here)
-  document.getElementById("payNow").addEventListener("click", () => {
-    const modal = document.getElementById("paymentMethodModal");
-    modal.style.display = "flex";
-
-    // Set price text
-    const priceText = `$${price}`;
-    document.getElementById("manualAmountText").textContent = priceText;
-
-    // Set manual pay link (Friends & Family)
-    document.getElementById("manualPayLink").href =
-      `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
-
-    // Set standard pay link (normal PayPal)
-    document.getElementById("standardPayLink").href =
-      `https://paypal.me/yourlink/${price}`;
-
-    // Disable main pay button while modal is open
-    document.getElementById("payNow").disabled = true;
-  });
-
-  // Payment modal buttons: save order, then redirect
+  // Modal payment buttons logic (outside the auth callback)
   document.getElementById("manualPayLink").addEventListener("click", async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
