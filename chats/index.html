@@ -267,9 +267,97 @@
           acc[chatId] = meta.meta;
           return acc;
         }, {});
-      renderInbox();
+      renderInboxWithBot();
     });
   });
+  // DLS BOT Config
+const dlsBotProfile = {
+  username: "DLS BOT",
+  avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPB83u2dRl1cIDRmf9GcExk7fhe-BqGiexJZeZCLa1sFWQ93n2fYYqUl0&s=10"
+};
+
+// Insert DLS Bot to Inbox
+function renderDLSBot() {
+  const chatDiv = document.createElement('div');
+  chatDiv.className = 'chat-item';
+  chatDiv.tabIndex = 0;
+  chatDiv.setAttribute('role', 'button');
+  chatDiv.title = "DLS BOT\nClick to view admin messages";
+  chatDiv.innerHTML = `
+    <div class="avatar-wrapper">
+      <img class="chat-avatar" src="${dlsBotProfile.avatar}" alt="DLS Bot Avatar" />
+    </div>
+    <div class="chat-info">
+      <div class="chat-name">DLS BOT</div>
+      <div class="chat-last-message">Click to view messages from admin</div>
+    </div>
+    <div class="chat-timestamp"></div>
+  `;
+  chatDiv.onclick = showDLSBotPopup;
+  chatDiv.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      chatDiv.click();
+    }
+  };
+  inboxContainer.prepend(chatDiv);
+}
+
+// Show DLS Bot Messages in Popup
+async function showDLSBotPopup() {
+  const snapshot = await db.ref(`/dlsbot/${currentUser.uid}`).once('value');
+  const messages = snapshot.val() || {};
+
+  const popup = document.createElement('div');
+  popup.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85); display: flex; align-items: center;
+    justify-content: center; z-index: 9999;
+  `;
+  popup.innerHTML = `
+    <div style="
+      background: #1e1e1e; color: #fff; max-width: 420px; width: 100%;
+      padding: 20px; border-radius: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      max-height: 80vh; overflow-y: auto; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+    ">
+      <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <img src="${dlsBotProfile.avatar}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px;" />
+        <div>
+          <div style="font-weight: bold; font-size: 1.2rem;">${dlsBotProfile.username}</div>
+          <div style="font-size: 0.9rem; color: #aaa;">Admin Messages</div>
+        </div>
+      </div>
+      ${Object.entries(messages).reverse().map(([id, msg]) => {
+        const time = formatTimestamp(msg.timestamp || Date.now());
+        const safeText = escapeHtml(msg.text || '');
+        const linkBtn = msg.link ? `<div style="margin-top: 6px;"><a href="${msg.link}" target="_blank" style="
+          display: inline-block; padding: 6px 12px; background: #1da1f2; color: #fff;
+          border-radius: 8px; text-decoration: none; font-size: 0.85rem;
+        ">Visit Link</a></div>` : '';
+        return `
+          <div style="margin-bottom: 18px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+            <div style="font-size: 0.95rem;">${safeText}</div>
+            ${linkBtn}
+            <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">${time}</div>
+          </div>
+        `;
+      }).join('')}
+      <button onclick="this.closest('div').remove()" style="
+        margin-top: 12px; width: 100%; padding: 10px;
+        background: #ff3b30; color: white; border: none;
+        border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer;
+      ">Close</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+}
+
+// Hook DLS Bot to Render
+function renderInboxWithBot() {
+  inboxContainer.innerHTML = '';
+  renderDLSBot();
+  renderInbox();
+}
 </script>
 </body>
 </html>
