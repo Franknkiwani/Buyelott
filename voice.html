@@ -1618,50 +1618,5 @@ window.closeLoginModal = function () {
   // Run on resize too (responsive AF)
   window.addEventListener('resize', detectDeviceAndApplyClasses);
 </script>
-<script>
-  const isMobile = window.innerWidth <= 800;
-  let loading = false;
-
-  function loadMore() {
-    if (loading) return;
-    loading = true;
-
-    // Your existing load logic here
-    // Don't forget to reset loading = false at the end
-  }
-
-  if (!isMobile) {
-    // Infinite scroll for desktop
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-        loadMore();
-      }
-    });
-  }
-</script>
-<script>
-  // You can tweak the width if needed (e.g., 768px, 1024px depending on your layout)
-  const hideAdsOn = window.innerWidth >= 800; // large screens and faked desktop mode
-
-  if (hideAdsOn) {
-    const el = document.getElementById('mobileOnly');
-    if (el) el.style.display = 'none';
-
-    // Also optionally trigger auto-load
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
-        if (typeof loadMore === 'function') loadMore();
-      }
-    });
-  }
-  window.addEventListener('scroll', () => {
-  const header = document.querySelector('header');
-  if (window.scrollY > 10) {
-    header.style.boxShadow = '0 2px 10px rgba(0,255,255,0.15)';
-  } else {
-    header.style.boxShadow = 'none';
-  }
-});
-</script>
 </body>
 </html>
