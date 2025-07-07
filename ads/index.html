@@ -2,215 +2,202 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Promote Your Product</title>
+  <title>Promote Your DLS Ad</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-      background: #000;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 20px;
+    /* ===== iOS-ish dark theme ===== */
+    :root { --accent:#00ffb3; --bg:#000; --panel:#111; }
+    * { box-sizing:border-box; }
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+      background:var(--bg); color:#fff; display:flex; flex-direction:column;
+      align-items:center; padding:32px 20px; gap:28px;
     }
-
-    .title {
-      font-size: 1.8em;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .preview {
-      background: #111;
-      border-radius: 20px;
-      overflow: hidden;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-      margin-bottom: 30px;
-    }
-
-    .preview img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-
-    .preview .info {
-      padding: 15px;
-    }
-
-    .desc {
-      font-size: 1.1em;
-      color: #ccc;
-      margin-bottom: 5px;
-    }
-
-    .price {
-      color: #00ffb3;
-      font-size: 1.3em;
-      font-weight: 600;
-    }
-
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .form input {
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      background: #1c1c1c;
-      color: white;
-      font-size: 1em;
-    }
-
-    .form input:focus {
-      outline: 2px solid #00ffb3;
-    }
-
-    .btn {
-      padding: 12px;
-      background: #00ffb3;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background: #00e6a6;
-    }
-
-    .status {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 0.9em;
-      color: #ccc;
-    }
+    h1{font-size:1.8rem;margin:0;font-weight:700;text-align:center;}
+    .card{background:var(--panel);border-radius:20px;box-shadow:0 0 18px rgba(255,255,255,.05);
+          overflow:hidden;max-width:420px;width:100%;}
+    .card img{width:100%;height:200px;object-fit:cover;}
+    .info{padding:16px;}
+    .desc{font-size:1.05rem;color:#ccc;margin-bottom:6px;}
+    .price{color:var(--accent);font-size:1.3rem;font-weight:600;margin:0;}
+    .field,.btn{width:100%;max-width:420px;}
+    .field{padding:12px;border-radius:12px;border:none;background:#1c1c1c;
+           color:#fff;font-size:1rem;}
+    .field:focus{outline:2px solid var(--accent);}
+    .btn{padding:13px;text-align:center;font-weight:700;text-transform:uppercase;
+         border:none;border-radius:12px;background:var(--accent);color:#000;
+         cursor:pointer;transition:.2s;}
+    .btn:hover{background:#00e6a6;}
+    .btn.alt{background:#444;color:#fff;margin-top:-10px;font-size:.9rem;}
+    .hidden{display:none !important;}
+    .status{font-size:.9rem;color:#ccc;text-align:center;max-width:420px;}
+    .paypal-box{margin-top:12px;}
   </style>
 </head>
 <body>
 
-  <div class="title">Promote Your DLS Ad</div>
+  <h1>Promote Your DLS Ad</h1>
 
-  <div class="preview" id="previewBox">
-    <img id="previewImg" src="https://via.placeholder.com/400x300?text=Loading..." alt="Preview" />
+  <!-- === Ad Preview === -->
+  <div class="card" id="previewBox">
+    <img id="previewImg" src="https://via.placeholder.com/400x300?text=Loading..." alt="">
     <div class="info">
-      <div class="desc" id="previewDesc">Loading description...</div>
-      <div class="price" id="previewPrice">$0.00</div>
+      <p class="desc" id="previewDesc">Loading description…</p>
+      <p class="price" id="previewPrice">$0.00</p>
     </div>
   </div>
 
-  <div class="form">
-    <input type="number" id="viewsInput" placeholder="Views per day (1 - 10000)" min="1" max="10000" />
-    <button class="btn" id="startAdBtn">Start Promotion</button>
-    <div class="status" id="statusMsg"></div>
+  <!-- === Views / Pricing === -->
+  <input type="number" class="field" id="viewsInput"
+         placeholder="Views per day (1 – 10 000)" min="1" max="10000">
+
+  <div class="status" id="costDisplay">Daily Cost: $0.000</div>
+
+  <!-- === Action Buttons === -->
+  <button class="btn" id="payBtn">Pay to Promote</button>
+  <button class="btn alt" id="freeBtn">Use FREE $0.100 Credit (100 views)</button>
+
+  <!-- PayPal form (hidden until needed) -->
+  <div class="paypal-box hidden" id="paypalBox">
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" id="paypalForm">
+      <input type="hidden" name="cmd" value="_s-xclick" />
+      <input type="hidden" name="hosted_button_id" value="CYPBY27MX3SY6" />
+      <input type="hidden" name="currency_code" value="USD" />
+      <!-- dynamic amount -->
+      <input type="hidden" name="amount" id="ppAmount" value="0.00" />
+      <input type="image"
+             src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif"
+             border="0" name="submit"
+             title="PayPal - The safer, easier way to pay online!"
+             alt="Buy Now" />
+    </form>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  <div class="status" id="statusMsg"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<script type="module">
+/* ---------- Firebase setup ---------- */
+import { initializeApp }         from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref,
+         get, child, update, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged }
+       from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+const firebaseConfig = {
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e",
+  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId:"1094792075584",
+  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId:"G-LLT6F9WRKH"
+};
 
-    const previewImg = document.getElementById("previewImg");
-    const previewDesc = document.getElementById("previewDesc");
-    const previewPrice = document.getElementById("previewPrice");
-    const viewsInput = document.getElementById("viewsInput");
-    const startAdBtn = document.getElementById("startAdBtn");
-    const statusMsg = document.getElementById("statusMsg");
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
+const auth = getAuth(app);
 
-    let currentUser = null;
+/* ---------- DOM refs ---------- */
+const previewImg   = document.getElementById("previewImg");
+const previewDesc  = document.getElementById("previewDesc");
+const previewPrice = document.getElementById("previewPrice");
+const viewsInput   = document.getElementById("viewsInput");
+const costDisplay  = document.getElementById("costDisplay");
+const payBtn       = document.getElementById("payBtn");
+const freeBtn      = document.getElementById("freeBtn");
+const statusMsg    = document.getElementById("statusMsg");
+const paypalBox    = document.getElementById("paypalBox");
+const ppAmount     = document.getElementById("ppAmount");
 
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    console.log("Detected ID:", id);
+/* ---------- Helpers ---------- */
+const params  = new URLSearchParams(location.search);
+const adId    = params.get("id");
+const CPC     = 0.001;            // cost per view in USD
+const FREE_VIEWS = 100;           // freebies for newbies
 
-    if (!id) {
-      previewDesc.innerText = "❌ Missing ad ID in the URL.";
-      startAdBtn.disabled = true;
-    }
+let user      = null;             // Firebase user
+let adData    = null;             // product data
+let freeUsed  = false;            // whether user spent free credit
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        console.log("User authenticated:", user.uid);
-      } else {
-        statusMsg.innerText = "⚠️ Please login to start promotion.";
-        startAdBtn.disabled = true;
-      }
-    });
+function fmt(n){ return n.toLocaleString(); }
 
-    async function loadAd() {
-      try {
-        const snap = await get(child(ref(db), `dlsaccounts/${id}`));
-        if (!snap.exists()) {
-          previewDesc.innerText = "❌ Ad not found in database.";
-          return;
-        }
+/* ---------- Load product ---------- */
+async function loadAd() {
+  if(!adId) { statusMsg.textContent="❌ Missing ?id in URL"; return; }
+  try{
+    const snap = await get(child(ref(db),`dlsaccounts/${adId}`));
+    if(!snap.exists()){ statusMsg.textContent="❌ Ad not found"; return; }
+    adData = snap.val();
+    previewImg.src   = adData.images?.[0] ||
+                       "https://via.placeholder.com/400x300?text=No+Image";
+    previewDesc.textContent = adData.description?.slice(0,60) || "No description";
+    previewPrice.textContent = `$${adData.price||"0.00"}`;
+  }catch(e){ console.error(e); statusMsg.textContent="🚨 Error loading ad"; }
+}
 
-        const data = snap.val();
-        previewImg.src = data.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image";
-        previewDesc.innerText = data.description?.slice(0, 60) || "No description";
-        previewPrice.innerText = `$${data.price || "0.00"}`;
+/* ---------- Auth & free-credit check ---------- */
+onAuthStateChanged(auth, async (u)=>{
+  if(!u){ statusMsg.textContent="⚠️ Please sign in to promote."; payBtn.disabled=true; freeBtn.disabled=true; return; }
+  user=u;
+  // Check if free credit already used
+  const usnap = await get(child(ref(db),`users/${user.uid}/usedFreeAds`));
+  freeUsed = usnap.exists() && usnap.val()===true;
+  if(freeUsed) freeBtn.classList.add("hidden");
+});
 
-      } catch (e) {
-        console.error("Failed to load ad:", e);
-        previewDesc.innerText = "🚨 Error loading ad data.";
-      }
-    }
+/* ---------- Live cost calc ---------- */
+viewsInput.addEventListener("input", ()=>{
+  const views = Number(viewsInput.value);
+  const cost  = isNaN(views)?0:views*CPC;
+  costDisplay.textContent = `Daily Cost: $${cost.toFixed(3)}`;
+});
 
-    loadAd();
+/* ---------- Save promotion to DB ---------- */
+async function saveCampaign({views, isFree, pricePaid}){
+  const key = `${adId}_${user.uid}`;
+  await set(ref(db,`dlsaccountsads/${key}`),{
+    uid:user.uid,
+    adId,
+    viewsRemaining: views,
+    viewsPerDay:    views,
+    isFree,
+    pricePaid,
+    createdAt: Date.now()
+  });
+}
 
-    startAdBtn.onclick = async () => {
-      const views = parseInt(viewsInput.value);
-      if (isNaN(views) || views < 1 || views > 10000) {
-        statusMsg.innerText = "❌ Enter a number between 1 and 10,000.";
-        return;
-      }
+/* ---------- FREE button ---------- */
+freeBtn.addEventListener("click", async ()=>{
+  if(freeUsed){ statusMsg.textContent="😅 Free credit already used."; return; }
+  try{
+    await saveCampaign({views:FREE_VIEWS,isFree:true,pricePaid:0});
+    await update(ref(db,`users/${user.uid}`),{ usedFreeAds:true });
+    freeBtn.classList.add("hidden");
+    statusMsg.textContent=`✅ Free promo live! ${fmt(FREE_VIEWS)} views coming your way.`;
+  }catch(e){ console.error(e); statusMsg.textContent="❌ Failed to start free promo."; }
+});
 
-      if (!currentUser) {
-        statusMsg.innerText = "⚠️ Login required.";
-        return;
-      }
+/* ---------- PAY button ---------- */
+payBtn.addEventListener("click", ()=>{
+  const views = Number(viewsInput.value);
+  if(isNaN(views)||views<1||views>10000){
+    statusMsg.textContent="❌ Enter 1–10 000 views first."; return;
+  }
+  const price = (views*CPC).toFixed(2);
+  ppAmount.value = price;                     // put cost in the PayPal form
+  paypalBox.classList.remove("hidden");       // reveal PayPal button
+  statusMsg.textContent=`Click PayPal to pay $${price}. After payment you’ll start receiving ${fmt(views)} views/day.`;
+  
+  // 👉 You MAY want to wait for PayPal IPN / webhook before saving.
+  // For demo purposes we save immediately so you can see it in Firebase.
+  saveCampaign({views,isFree:false,pricePaid:+price})
+     .then(()=>console.log("Paid campaign saved"))
+     .catch(e=>console.error("DB save failed",e));
+});
 
-      try {
-        await update(ref(db, `dlsaccountsads/${id}`), {
-          uid: currentUser.uid,
-          viewsPerDay: views,
-          startedAt: Date.now()
-        });
-
-        statusMsg.innerText = "✅ Promotion started successfully!";
-      } catch (e) {
-        console.error("Promotion error:", e);
-        statusMsg.innerText = "❌ Failed to save promotion.";
-      }
-    };
-  </script>
-
+/* ---------- init ---------- */
+loadAd();
+</script>
 </body>
 </html>
