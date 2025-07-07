@@ -355,10 +355,8 @@ let user      = null;
 let adData    = null;
 let freeUsed  = false;
 
-/* Format number with commas */
 function fmt(n){ return n.toLocaleString(); }
 
-/* Load ad data */
 async function loadAd() {
   if(!adId) {
     statusMsg.textContent = "❌ Missing ?id in URL";
@@ -388,7 +386,6 @@ async function loadAd() {
   }
 }
 
-/* Handle user auth and free credit */
 async function onUserAuth(u) {
   if (!u) {
     statusMsg.textContent = "⚠️ Please sign in to promote.";
@@ -401,7 +398,6 @@ async function onUserAuth(u) {
   }
   user = u;
 
-  // Check if free credit used
   const usnap = await get(child(ref(db), `users/${user.uid}/usedFreeAds`));
   freeUsed = usnap.exists() && usnap.val() === true;
   if (freeUsed) freeBtn.classList.add("hidden");
@@ -410,13 +406,11 @@ async function onUserAuth(u) {
   paypalBox.classList.remove("hidden");
   statusMsg.textContent = "Select a views package and click PayPal to pay.";
 
-  // Load user analytics & orders
   await loadUserAnalytics();
 
   loadingOverlay.style.display = "none";
 }
 
-/* If no user, show empty analytics */
 function showNoAdsAnalytics() {
   adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
   ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
@@ -424,7 +418,6 @@ function showNoAdsAnalytics() {
   totalClicksEl.textContent = "0";
 }
 
-/* Sync select with PayPal select and update status */
 viewsSelect.addEventListener("change", () => {
   paypalViewsSelect.value = viewsSelect.value;
 
@@ -435,7 +428,6 @@ viewsSelect.addEventListener("change", () => {
   statusMsg.textContent = `Selected ${fmt(views)} views for $${price.toFixed(2)}. Click PayPal to pay.`;
 });
 
-/* Free credit button logic */
 freeBtn.addEventListener("click", async () => {
   if (freeUsed) {
     statusMsg.textContent = "😅 Free credit already used.";
@@ -453,7 +445,6 @@ freeBtn.addEventListener("click", async () => {
   }
 });
 
-/* Save campaign to Firebase */
 async function saveCampaign({ views, isFree, pricePaid }) {
   if (!user || !adId) return;
   const key = `${adId}_${user.uid}`;
@@ -469,7 +460,6 @@ async function saveCampaign({ views, isFree, pricePaid }) {
   });
 }
 
-/* Load ads analytics for current user */
 async function loadUserAnalytics() {
   adsList.innerHTML = "";
   ordersList.innerHTML = "";
@@ -522,7 +512,6 @@ async function loadUserAnalytics() {
   }
 }
 
-/* Load orders related to user's ads */
 async function loadOrdersForUserAds(adIds) {
   try {
     if(adIds.length === 0) {
@@ -560,7 +549,36 @@ async function loadOrdersForUserAds(adIds) {
   }
 }
 
-/* Initialize the whole shebang */
+/* LOCAL STORAGE: Save purchase info before redirect to PayPal */
+const paypalBtn = document.getElementById("paypalBtn");
+if(paypalBtn) {
+  paypalBtn.addEventListener("click", () => {
+    if(!user) {
+      statusMsg.textContent = "⚠️ You must be signed in to pay.";
+      return;
+    }
+
+    const views = Number(viewsSelect.value.split(" ")[0]);
+    const prices = {1000: 1.00, 5000: 5.00, 10000: 9.00};
+const price = prices[views] || 0;
+
+statusMsg.textContent = `🛒 Saving purchase info locally: ${fmt(views)} views for $${price.toFixed(2)}.`;
+
+// Save purchase info to localStorage for the payment success page to process
+localStorage.setItem('pendingPurchase', JSON.stringify({
+  userId: user.uid,
+  adId,
+  viewsPurchased: views,
+  pricePaid: price,
+  timestamp: Date.now()
+}));
+
+// Redirect user to your PayPal payment page (replace this URL with your actual payment page)
+window.location.href = `/paypal-payment.html?id=${adId}&views=${views}&price=${price.toFixed(2)}`;
+});
+}
+
+/* Initialize everything */
 async function init() {
   loadingOverlay.style.display = "flex";
   await loadAd();
@@ -568,6 +586,7 @@ async function init() {
 }
 
 init();
+
 </script>
 
 </body>
