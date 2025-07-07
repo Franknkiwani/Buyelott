@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Orders • CyberChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .order {
+      background: #111;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+    }
+    .order img {
+      width: 100%;
+      border-radius: 10px;
+      max-height: 180px;
+      object-fit: cover;
+      margin-bottom: 12px;
+    }
+    .order-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .detail-item {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      color: #e0e0e0;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 10px;
+      border: none;
+      padding: 10px 16px;
+      transition: background 0.3s ease;
+      flex: 1 1 150px;
+      min-width: 120px;
+    }
+    .process-btn {
+      background: #6e00ff;
+      color: white;
+    }
+    .process-btn:hover {
+      background: #9f00ff;
+    }
+    .delete-btn {
+      background: #ff0033;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: #ff3366;
+    }
+    .message-btn {
+      background: #0099ff;
+      color: white;
+    }
+    .message-btn:hover {
+      background: #33bbff;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    /* Modal */
+    #modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #modalBox {
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 320px;
+      text-align: center;
+    }
+    #modalBox input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin: 15px 0;
+      background: #222;
+      color: #fff;
+    }
+    #modalBox button {
+      background: #ff0033;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Orders</h1>
+  <div id="ordersContainer">Loading orders...</div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Modal -->
+  <div id="modal">
+    <div id="modalBox">
+      <div style="margin-bottom: 10px; font-weight: bold;">Enter Admin Password</div>
+      <input type="password" id="modalInput" placeholder="Password" />
+      <button id="modalConfirm">Confirm Cancel</button>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, onValue, set, serverTimestamp, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const ordersContainer = document.getElementById("ordersContainer");
+  const toast = document.getElementById("toast");
+  const modal = document.getElementById("modal");
+  const modalInput = document.getElementById("modalInput");
+  const modalConfirm = document.getElementById("modalConfirm");
+
+  let pendingCancelRef = null;
+  let pendingOrderDiv = null;
+  let adminUid = null;
+
+  // Grab logged in user's UID dynamically
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      adminUid = user.uid;
+      // Once we have the UID, start listening for orders
+      startListeningOrders();
+    } else {
+      alert("Not signed in. Please log in.");
+      // Optionally redirect to login page
+      // window.location.href = "/login";
+    }
+  });
+
+  const showToast = (msg) => {
+    toast.textContent = msg;
+    toast.style.display = "block";
+    setTimeout(() => (toast.style.display = "none"), 3000);
+  };
+
+  const showModal = (refToDelete, orderDiv) => {
+    pendingCancelRef = refToDelete;
+    pendingOrderDiv = orderDiv;
+    modal.style.display = "flex";
+    modalInput.value = "";
+    modalInput.focus();
+  };
+
+  modalConfirm.onclick = async () => {
+    const val = modalInput.value;
+    if (val !== "frankNK123$") {
+      showToast("Incorrect password.");
+      return;
+    }
+    await remove(pendingCancelRef);
+    pendingOrderDiv.remove();
+    modal.style.display = "none";
+    showToast("Order cancelled.");
+  };
+
+  function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString();
+  }
+
+  function generateTrackingCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return 'CYBER-' + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  function generateChatId(uid1, uid2) {
+    return [uid1, uid2].sort().join('_');
+  }
+
+  function startListeningOrders() {
+    onValue(ref(db, "orders"), async (snapshot) => {
+      ordersContainer.innerHTML = "";
+      const orders = snapshot.val();
+      if (!orders) {
+        ordersContainer.textContent = "No orders found.";
+        return;
+      }
+
+      let index = 1;
+
+      for (const buyerUid in orders) {
+        for (const orderId in orders[buyerUid]) {
+          const order = orders[buyerUid][orderId];
+          const productSnap = await get(ref(db, "dlsaccounts/" + order.productId));
+          const product = productSnap.exists() ? productSnap.val() : { title: "Unknown", images: [] };
+          const img = product.images?.[0] || "https://via.placeholder.com/500x200?text=No+Image";
+          const orderNumber = String(index++).padStart(4, '0');
+
+          const orderDiv = document.createElement("div");
+          orderDiv.className = "order";
+
+          orderDiv.innerHTML = `
+            <img src="${img}" />
+            <div class="order-title">#${orderNumber} • ${product.title}</div>
+            <div class="detail-grid">
+              <div class="detail-item"><b>Email:</b><br>${order.email}</div>
+              <div class="detail-item"><b>Payment:</b><br>${order.paymentMethod}</div>
+              <div class="detail-item"><b>Status:</b><br>${order.status}</div>
+              <div class="detail-item"><b>Created:</b><br>${formatTimestamp(order.createdAt)}</div>
+              <div class="detail-item"><b>Product ID:</b><br>${order.productId}</div>
+            </div>
+            <div class="actions">
+              <button class="process-btn">Set to Processing</button>
+              <button class="message-btn">Message Buyer</button>
+              <button class="delete-btn">Cancel Order</button>
+            </div>
+          `;
+
+          orderDiv.querySelector(".process-btn").onclick = async () => {
+            await set(ref(db, `processingOrders/${buyerUid}/${orderId}`), {
+              ...order,
+              status: "processing",
+              updatedAt: serverTimestamp()
+            });
+            await remove(ref(db, `orders/${buyerUid}/${orderId}`));
+            orderDiv.remove();
+            showToast("Moved to processing.");
+          };
+
+          orderDiv.querySelector(".message-btn").onclick = async () => {
+            if (!adminUid) {
+              alert("Admin UID not ready. Please refresh.");
+              return;
+            }
+            const trackingCode = generateTrackingCode();
+            await set(ref(db, `tracking/${trackingCode}`), {
+              uid: buyerUid,
+              productId: order.productId,
+              orderId,
+              createdAt: serverTimestamp()
+            });
+
+            const msg = `Your order #${orderNumber} has been received.\nTracking: ${trackingCode}\nhttps://cyberchat.online/product?id=${order.productId}`;
+            const chatId = generateChatId(adminUid, buyerUid);
+            window.open(`https://cyberchat.online/messages?chatId=${chatId}&msg=${encodeURIComponent(msg)}`, "_blank");
+          };
+
+          orderDiv.querySelector(".delete-btn").onclick = () => {
+            showModal(ref(db, `orders/${buyerUid}/${orderId}`), orderDiv);
+          };
+
+          ordersContainer.appendChild(orderDiv);
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>
