@@ -182,8 +182,7 @@
 
   let pendingCancelRef = null;
   let pendingOrderDiv = null;
-
-  let adminUid = null; // will come from logged-in user
+  let adminUid = null;
 
   const showToast = (msg) => {
     toast.textContent = msg;
@@ -300,22 +299,21 @@
               createdAt: serverTimestamp()
             });
 
-            // Save both users to /users
+            // Trustworthy admin profile
             await ensureUser(adminUid, {
-              username: "Admin",
-              avatar: "https://via.placeholder.com/40?text=A"
-            });
-            await ensureUser(buyerUid, {
-              username: "Buyer",
-              avatar: "https://via.placeholder.com/40?text=B"
+              username: "Cyber Support",
+              avatar: "https://i.imgur.com/5bMZ2Kn.png",
+              email: "support@cyberchat.online"
             });
 
-            const msg = `🚚 Your order #${orderNumber} has been received!\n\n🔒 Tracking Code: ${trackingCode}\n📦 Product: ${product.title}\n🔗 View: https://cyberchat.online/product?id=${order.productId}`;
+            // Also ensure buyer exists
+            await ensureUser(buyerUid);
+
+            const msg = `✅ Hello! Your order #${orderNumber} has been received.\n\n🚚 Tracking Code: ${trackingCode}\n🛒 Product: ${product.title}\n🔗 View Product: https://cyberchat.online/product?id=${order.productId}`;
 
             const chatId = generateChatId(adminUid, buyerUid);
             const chatMetaRef = ref(db, `chats/${chatId}/meta`);
             const chatMsgRef = ref(db, `chats/${chatId}/messages`);
-
             const timestamp = Date.now();
 
             await update(chatMetaRef, {
@@ -351,7 +349,6 @@
     });
   }
 
-  // Wait for auth before anything
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       alert("You must be logged in.");
