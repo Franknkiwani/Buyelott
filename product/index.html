@@ -982,9 +982,41 @@ header {
   
       <div class="error" id="step1Error"></div>  
       <button id="step1NextBtn">Send Request</button>  
- <button class="secure-pay-btn" id="payBtn">
-  <svg viewBox="0 0 24 24" class="lock-icon">
-    <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/>
+<button
+  id="payBtn"
+  aria-label="Proceed to secured payment"
+  style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(145deg, #FFD700 0%, #B8860B 100%);
+    color: #2b1a00;
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: 16px 36px;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 0 6px #FFD700, inset 0 2px 8px #FFFACD;
+    cursor: pointer;
+    user-select: none;
+    text-shadow: 0 0 6px #FFD700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    white-space: nowrap;
+  "
+  onmouseover="this.style.transform='scale(1.08)'; this.style.boxShadow='0 0 14px #FFD700, inset 0 3px 12px #FFFACD'; this.style.textShadow='0 0 10px #FFD700';"
+  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 6px #FFD700, inset 0 2px 8px #FFFACD'; this.style.textShadow='0 0 6px #FFD700';"
+>
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+    style="width:24px; height:24px; fill:#2b1a00; filter: drop-shadow(0 0 1px #b8860b); transition: filter 0.25s ease;"
+    ="this.style.filter='drop-shadow(0 0 4px #FFD700)';"
+    onmouseout="this.style.filter='drop-shadow(0 0 1px #b8860b)';"
+  >
+    <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z" />
   </svg>
   BUY NOW
 </button>
