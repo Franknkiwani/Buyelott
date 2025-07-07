@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Secure Checkout</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 24px;
+      color: #111;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .product-img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+
+    .description {
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1da1f2;
+      margin-bottom: 24px;
+    }
+
+    button.secure-pay-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(145deg, #d4af37, #b8860b);
+      color: #fffbe6;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+
+    .secure-pay-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 22px rgba(212, 175, 55, 0.5);
+    }
+
+    .lock-icon {
+      width: 20px;
+      height: 20px;
+      fill: #fffbe6;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container" id="paymentContainer">
+    <div class="loading">Loading product info...</div>
+  </div>
+
+  <!-- Firebase Payment Script -->
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const container = document.getElementById("paymentContainer");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    if (!productId) {
+      container.innerHTML = "<p>Invalid product link.</p>";
+    } else {
+      const productRef = ref(db, `dlsaccounts/${productId}`);
+
+      get(productRef).then(snapshot => {
+        if (!snapshot.exists()) {
+          container.innerHTML = "<p>Product not found.</p>";
+          return;
+        }
+
+        const data = snapshot.val();
+        const title = data.title || "No title";
+        const description = data.description || "No description.";
+        const price = data.price || "0";
+        const image = (data.images && data.images[0]) || "https://via.placeholder.com/500x240?text=No+Image";
+
+        container.innerHTML = `
+          <h1>${title}</h1>
+          <img class="product-img" src="${image}" alt="Product image" />
+          <div class="description">${description}</div>
+          <div class="price">R ${price}</div>
+          <button class="secure-pay-btn" id="securePayBtn">
+            <svg class="lock-icon" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/></svg>
+            Secured Payment
+          </button>
+        `;
+
+        document.getElementById("securePayBtn").addEventListener("click", async () => {
+          const user = auth.currentUser;
+          if (!user) {
+            alert("You must log in first.");
+            return;
+          }
+
+          try {
+            const orderRef = push(ref(db, `orders/${user.uid}`));
+            await set(orderRef, {
+              productId,
+              status: "pending",
+              createdAt: serverTimestamp()
+            });
+
+            // Redirect to your PayPal.me or manual page here
+            window.location.href = `https://paypal.me/yourlink/${price}`;
+          } catch (err) {
+            console.error("Payment error:", err);
+            alert("Something went wrong. Try again later.");
+          }
+        });
+      });
+    }
+
+  </script>
+</body>
+</html>
