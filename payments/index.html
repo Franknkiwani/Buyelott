@@ -217,14 +217,98 @@
     .loading {  
       color: #777;  
       margin-top: 80px;  
-    }  
+    } 
+    .payment-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.payment-modal-content {
+  background: #111;
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  color: #fff;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.payment-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.option-btn {
+  flex: 1;
+  padding: 12px;
+  font-weight: bold;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.option-btn.active {
+  background: #6e00ff;
+}
+
+.payment-section {
+  display: none;
+}
+
+.payment-section.active {
+  display: block;
+}
+
+.pay-method-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #6e00ff, #00d9ff);
+  border-radius: 12px;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 0 16px rgba(100, 0, 255, 0.4);
+}
   </style>  
 </head>  
 <body>  
   <div class="page" id="paymentPage">  
     <div class="loading">Loading secure checkout...</div>  
   </div>  
-  
+  <!-- Payment Options Modal -->
+<div id="paymentMethodModal" class="payment-modal" style="display:none;">
+  <div class="payment-modal-content">
+    <div class="payment-options">
+      <button class="option-btn active" id="manualTab">24 HOUR DELIVERY</button>
+      <button class="option-btn" id="standardTab">7–21 DAYS DELIVERY</button>
+    </div>
+
+    <div id="manualSection" class="payment-section active">
+      <h3>MANUAL PAYMENT</h3>
+      <p>Send <b id="manualAmountText"></b> as <u>friends and family</u> to avoid PayPal long holds and fees.</p>
+      <a id="manualPayLink" target="_blank" class="pay-method-btn">Pay Now</a>
+    </div>
+
+    <div id="standardSection" class="payment-section">
+      <h3>STANDARD PAYPAL</h3>
+      <p>Pay normally with buyer protection. Delivery may take 7–21 days depending on PayPal’s release system.</p>
+      <a id="standardPayLink" target="_blank" class="pay-method-btn">Secure PayPal Checkout</a>
+    </div>
+  </div>
+</div>
   <script type="module">  
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
     import { getDatabase, ref, get, push, set, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";  
@@ -387,6 +471,54 @@
         }
       });
     });  
+    // Show modal on "Pay Securely" button click
+document.getElementById("payNow").addEventListener("click", () => {
+  const modal = document.getElementById("paymentMethodModal");
+  modal.style.display = "flex";
+
+  // Set price text
+  const priceText = `$${price}`;
+  document.getElementById("manualAmountText").textContent = priceText;
+
+  // Set manual pay link (Friends & Family)
+  document.getElementById("manualPayLink").href = 
+    `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
+
+  // Set standard pay link (normal PayPal)
+  document.getElementById("standardPayLink").href = 
+    `https://paypal.me/yourlink/${price}`;
+
+  // Disable main pay button to prevent double click while modal open
+  document.getElementById("payNow").disabled = true;
+});
+
+// Tab switching logic
+const manualTabBtn = document.getElementById("manualTab");
+const standardTabBtn = document.getElementById("standardTab");
+const manualSection = document.getElementById("manualSection");
+const standardSection = document.getElementById("standardSection");
+
+manualTabBtn.addEventListener("click", () => {
+  manualTabBtn.classList.add("active");
+  standardTabBtn.classList.remove("active");
+  manualSection.classList.add("active");
+  standardSection.classList.remove("active");
+});
+
+standardTabBtn.addEventListener("click", () => {
+  standardTabBtn.classList.add("active");
+  manualTabBtn.classList.remove("active");
+  standardSection.classList.add("active");
+  manualSection.classList.remove("active");
+});
+
+// Close modal on outside click
+document.getElementById("paymentMethodModal").addEventListener("click", (e) => {
+  if (e.target.id === "paymentMethodModal") {
+    e.target.style.display = "none";
+    document.getElementById("payNow").disabled = false;
+  }
+});
   </script>  
 </body>  
 </html>
