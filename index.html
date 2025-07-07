@@ -1363,80 +1363,264 @@ main, .product-page, body {
   margin: 0;
   padding: 0;
 }
-
-</style>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-    }
-
-    .sponsored-banner {
-      width: 80%;
-      height: 50px;
-      margin: 12px auto;
-      background: linear-gradient(to right, #2196f3, #21cbf3);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: white;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .sponsored-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+   #adBanner {
+      width: 400px;
+      background: linear-gradient(145deg, #181818, #0f0f0f);
+      border-radius: 22px;
+      border: 2px solid #2f2f2f;
+      box-shadow: inset 0 0 8px 3px rgba(20, 20, 20, 0.85);
       overflow: hidden;
+      position: relative;
+      transition: box-shadow 0.25s ease;
+      padding: 20px;
     }
 
-    .sponsored-left img {
-      height: 36px;
-      width: 36px;
-      border-radius: 8px;
-      object-fit: cover;
+    #adBanner:hover {
+      box-shadow: inset 0 0 10px 4px rgba(60, 60, 60, 0.95);
+      cursor: default;
     }
 
-    .sponsored-text {
-      display: flex;
-      flex-direction: column;
-      font-size: 12px;
-      overflow: hidden;
-    }
-
-    .sponsored-text span:first-child {
-      font-weight: bold;
-      font-size: 13px;
-      color: #e0f7fa;
-    }
-
-    .sponsored-text span:last-child {
-      font-size: 12px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      max-width: 45vw;
-    }
-
-    .sponsored-right a {
+    .sponsoredTag {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(60, 60, 60, 0.3);
+      color: #aaa;
+      font-size: 0.75rem;
+      font-weight: 600;
       padding: 5px 12px;
-      background: white;
-      color: #007aff;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 13px;
-      transition: background 0.2s ease;
+      border-radius: 14px;
+      border: 1px solid rgba(80, 80, 80, 0.4);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      user-select: none;
     }
 
-    .sponsored-right a:hover {
-      background: #f0f0f0;
+    .adContent {
+      display: flex;
+      gap: 20px;
+      align-items: center;
     }
-  </style>
+
+    .adImg {
+      width: 96px;
+      height: 96px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid #2a2a2a;
+      background: #111;
+      flex-shrink: 0;
+    }
+
+    .buyNow {
+      background: #00ffb3;
+      color: #000;
+      font-weight: 800;
+      border: none;
+      border-radius: 14px;
+      padding: 0 28px;
+      font-size: 1.1rem;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
+      user-select: none;
+      flex-grow: 1;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 255, 179, 0.7);
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .buyNow:hover {
+      background: #00d89b;
+      color: #000;
+    }
+
+    .buyNow:active {
+      transform: scale(0.96);
+    }
+
+    .buyNow.noAds {
+      background: #444;
+      color: #aaa;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .adDetails {
+      margin-top: 16px;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      height: 30px;
+    }
+
+    .adTitle {
+      color: #ddd;
+      font-weight: 700;
+      font-size: 1.2rem;
+      line-height: 1.2;
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollLeft 12s linear infinite;
+    }
+
+    @keyframes scrollLeft {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    .adImg {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid #2a2a2a;
+  background: #111;
+  flex-shrink: 0;
+}
+.sponsoredTag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #ff3b3b; /* start with a solid red */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 14px;
+  border: none; /* no border so it's solid */
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  user-select: none;
+  animation: colorShift 5s linear infinite;
+}
+
+/* Change colors every second cycling through a few bold colors */
+@keyframes colorShift {
+  0%   { background: #ff3b3b; }  /* Red */
+  20%  { background: #ff8c00; }  /* Orange */
+  40%  { background: #ffd700; }  /* Gold/Yellow */
+  60%  { background: #32cd32; }  /* Lime Green */
+  80%  { background: #1e90ff; }  /* Dodger Blue */
+  100% { background: #ff3b3b; }  /* Back to Red */
+}
+#adBanner {
+  width: 90%;
+  max-width: 360px;
+  background: linear-gradient(145deg, #181818, #0f0f0f);
+  border-radius: 20px;
+  border: 2px solid #2f2f2f;
+  box-shadow: inset 0 0 8px 3px rgba(20, 20, 20, 0.85);
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.25s ease;
+  padding: 16px;
+  margin: 20px auto;
+}
+
+#adBanner:hover {
+  box-shadow: inset 0 0 10px 4px rgba(60, 60, 60, 0.95);
+  cursor: default;
+}
+
+.sponsoredTag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff3b3b;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  user-select: none;
+  animation: colorShift 5s linear infinite;
+  z-index: 2;
+}
+
+@keyframes colorShift {
+  0%   { background: #ff3b3b; }
+  20%  { background: #ff8c00; }
+  40%  { background: #ffd700; }
+  60%  { background: #32cd32; }
+  80%  { background: #1e90ff; }
+  100% { background: #ff3b3b; }
+}
+
+.adImg {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid #2a2a2a;
+  background: #111;
+}
+
+.adDetails {
+  margin-top: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  height: 26px;
+}
+
+.adTitle {
+  color: #ddd;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  display: inline-block;
+  padding-left: 100%;
+  animation: scrollLeft 10s linear infinite;
+}
+
+@keyframes scrollLeft {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.buyNow {
+  background: #00ffb3;
+  color: #000;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px;
+  font-size: 1rem;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, transform 0.1s ease;
+  user-select: none;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 14px;
+  box-shadow: 0 0 10px rgba(0, 255, 179, 0.6);
+}
+
+.buyNow:hover {
+  background: #00d89b;
+}
+
+.buyNow:active {
+  transform: scale(0.96);
+}
+
+.buyNow.noAds {
+  background: #444;
+  color: #aaa;
+  box-shadow: none;
+  cursor: default;
+}
+</style>
 </head>
 <body>
 
@@ -1452,21 +1636,6 @@ main, .product-page, body {
     <button class="login-btn" id="loginBtn">Login</button>
   </div>
 </header>
-
-<main>
-  <!-- Banner Container -->
-<div class="sponsored-banner">
-  <div class="sponsored-left">
-    <img id="accountImage" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ51hPjuROwjdIhkYp_CNuCvlnrnfTgUPfGFtR1So3BVDMBm8ZxUtNg1bc&s=10" alt="Sponsored Account" />
-    <div class="sponsored-text">
-      <span>Sponsored Account</span>
-      <span id="accountTitle">DLS Accounts For Sale</span>
-    </div>
-  </div>
-  <div class="sponsored-right">
-    <a id="viewBtn" href="https://otieu.com/4/7950037" target="_blank">View</a>
-  </div>
-</div>
 <div id="searchFilterContainer" style="display: none;">
   <div class="search-filter-bar">
     <input type="text" id="searchInput" placeholder="Search accounts..." />
@@ -1479,6 +1648,20 @@ main, .product-page, body {
     </select>
   </div>
 </div>
+<div id="adBanner" role="banner" aria-label="Sponsored Advertisement">
+  <div class="sponsoredTag">Sponsored</div>
+
+  <div class="adContent">
+    <img id="adImg" class="adImg" src="https://via.placeholder.com/96x96?text=Loading" alt="Advertisement image" />
+  </div>
+
+  <button class="buyNow noAds" id="buyNowBtn" aria-label="Buy Now" disabled>Loading...</button>
+
+  <div class="adDetails">
+    <div class="adTitle" id="adText">Loading ad...</div>
+  </div>
+</div>
+<main>
   <div class="product-page">
 
     <!-- ✅ Product Cards Go Here -->
@@ -1512,68 +1695,112 @@ main, .product-page, body {
 </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
     projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
   };
 
-  const fallbackImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ51hPjuROwjdIhkYp_CNuCvlnrnfTgUPfGFtR1So3BVDMBm8ZxUtNg1bc&s=10";
-  const fallbackTitle = "DLS Accounts For Sale";
-  const fallbackLink = "https://otieu.com/4/7950037";
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const imageEl = document.getElementById("accountImage");
-    const titleEl = document.getElementById("accountTitle");
-    const viewBtn = document.getElementById("viewBtn");
+  const adImg = document.getElementById("adImg");
+  const adText = document.getElementById("adText");
+  const buyNowBtn = document.getElementById("buyNowBtn");
 
-    // Show fallback immediately
-    imageEl.src = fallbackImage;
-    titleEl.textContent = fallbackTitle;
-    viewBtn.href = fallbackLink;
+  let ads = [];
+  let currentAd = 0;
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
+  function recordClick(adKey, url) {
+    const adRef = ref(db, `dlsaccountsads/${adKey}`);
+    onValue(adRef, (snap) => {
+      const ad = snap.val();
+      if (!ad) return;
 
-      get(child(ref(db), "sponsored"))
-        .then(snapshot => {
-          if (snapshot.exists()) {
-            const sponsoredData = snapshot.val();
-            const entries = Object.entries(sponsoredData);
+      const newViews = (ad.viewsRemaining || 1) - 1;
+      const newClicks = (ad.clicks || 0) + 1;
 
-            if (entries.length > 0) {
-              // Randomly pick one
-              const [id, data] = entries[Math.floor(Math.random() * entries.length)];
-
-              // Defensive checks
-              const title = data && data.title ? data.title : fallbackTitle;
-              const images = data && Array.isArray(data.images) ? data.images : [];
-              const image = images.length > 0 ? images[0] : fallbackImage;
-              const link = id ? `https://cyberchat.online/product?id=${encodeURIComponent(id)}` : fallbackLink;
-
-              imageEl.src = image;
-              titleEl.textContent = title;
-              viewBtn.href = link;
-            } else {
-              console.warn("Sponsored data empty, using fallback.");
-            }
-          } else {
-            console.warn("No sponsored data found, using fallback.");
-          }
-        })
-        .catch(error => {
-          console.error("Firebase read failed, using fallback.", error);
+      if (newViews >= 0) {
+        update(adRef, {
+          viewsRemaining: newViews,
+          clicks: newClicks
         });
-    } catch (e) {
-      console.error("Firebase init error:", e);
+      }
+      window.location.href = url;
+    }, { onlyOnce: true });
+  }
+
+  function rotateAd() {
+    if (ads.length === 0) return;
+
+    const ad = ads[currentAd];
+    adImg.src = ad.image;
+    adText.textContent = ad.desc;
+    buyNowBtn.disabled = false;
+    buyNowBtn.classList.remove("noAds");
+    buyNowBtn.textContent = `Buy Now — $${ad.price}`;
+    buyNowBtn.onclick = () => {
+      if (ad.key === "fallback") {
+        window.location.href = ad.link;
+      } else {
+        recordClick(ad.key, ad.link);
+      }
+    };
+
+    currentAd = (currentAd + 1) % ads.length;
+  }
+
+  onValue(ref(db, "dlsaccountsads"), async (snapshot) => {
+    const data = snapshot.val();
+    ads = [];
+
+    if (data) {
+      for (const key in data) {
+        const ad = data[key];
+        if (!ad.adId || (ad.viewsRemaining || 0) <= 0) continue;
+
+        try {
+          const res = await fetch(`https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/dlsaccounts/${ad.adId}.json`);
+          const adDetails = await res.json();
+          if (!adDetails) continue;
+
+          ads.push({
+            key,
+            adId: ad.adId,
+            image: adDetails.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image",
+            desc: adDetails.description?.slice(0, 100) || "No description available",
+            price: adDetails.price || "0.00",
+            link: `/product?id=${ad.adId}`,
+            viewsRemaining: ad.viewsRemaining || 0
+          });
+        } catch (err) {
+          console.warn("Error loading ad:", err);
+        }
+      }
     }
+
+    // Fallback if no real ads found
+    if (ads.length === 0) {
+      ads.push({
+        key: "fallback",
+        adId: "fallback",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOw-pM7wu1eqr3-oA1EzDIlOTBEDu_xBQ_hLn-ykDVkWUotqMfZBKka2CY&s=10",
+        desc: "DLS APK Unlimited Coins and Gems",
+        price: "0.00",
+        link: "https://cyberchat.online/dls25mods.html",
+        viewsRemaining: Infinity
+      });
+    }
+
+    rotateAd();
+    setInterval(rotateAd, 8000);
   });
 </script>
 <script type="module">
