@@ -20,7 +20,7 @@
       gap: 20px;
     }
     h1 {
-      font-size: 1.8rem;
+      font-size: 1.3rem;
       margin: 0 0 10px 0;
       font-weight: 700;
       text-align: center;
@@ -234,7 +234,7 @@
   Loading data...
 </div>
 
-<h1>Promote Your DLS Ad & Analytics</h1>
+<h1>Promote Your Account</h1>
 
 <div class="container">
   <!-- Left Panel: Promote -->
@@ -310,10 +310,9 @@
     </div>
   </section>
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, child, update, set, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, child, update, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -345,7 +344,6 @@ const loadingOverlay = document.getElementById("loadingOverlay");
 const totalViewsEl = document.getElementById("totalViews");
 const totalClicksEl = document.getElementById("totalClicks");
 const adsList = document.getElementById("adsList");
-const ordersSection = document.getElementById("ordersSection");
 const ordersList = document.getElementById("ordersList");
 
 /* Helpers */
@@ -390,7 +388,7 @@ async function loadAd() {
   }
 }
 
-/* Auth and free credit check */
+/* Handle user auth and free credit */
 async function onUserAuth(u) {
   if (!u) {
     statusMsg.textContent = "⚠️ Please sign in to promote.";
@@ -403,7 +401,7 @@ async function onUserAuth(u) {
   }
   user = u;
 
-  // Check if free credit already used
+  // Check if free credit used
   const usnap = await get(child(ref(db), `users/${user.uid}/usedFreeAds`));
   freeUsed = usnap.exists() && usnap.val() === true;
   if (freeUsed) freeBtn.classList.add("hidden");
@@ -412,14 +410,21 @@ async function onUserAuth(u) {
   paypalBox.classList.remove("hidden");
   statusMsg.textContent = "Select a views package and click PayPal to pay.";
 
-  // Load user ads analytics & orders
+  // Load user analytics & orders
   await loadUserAnalytics();
 
-  // Hide loading overlay after everything is ready
   loadingOverlay.style.display = "none";
 }
 
-/* Sync selection with hidden PayPal select and update status */
+/* If no user, show empty analytics */
+function showNoAdsAnalytics() {
+  adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
+  ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+  totalViewsEl.textContent = "0";
+  totalClicksEl.textContent = "0";
+}
+
+/* Sync select with PayPal select and update status */
 viewsSelect.addEventListener("change", () => {
   paypalViewsSelect.value = viewsSelect.value;
 
@@ -441,15 +446,14 @@ freeBtn.addEventListener("click", async () => {
     await update(ref(db, `users/${user.uid}`), { usedFreeAds: true });
     freeBtn.classList.add("hidden");
     statusMsg.textContent = `✅ Free promo live! ${fmt(FREE_VIEWS)} views coming your way.`;
-    await loadUserAnalytics(); // update analytics after free promo
+    await loadUserAnalytics();
   } catch (e) {
     console.error(e);
     statusMsg.textContent = "❌ Failed to start free promo.";
   }
 });
 
-/* Save campaign - called only for free promo here.
-   For PayPal paid promos, verify payment server-side then save */
+/* Save campaign to Firebase */
 async function saveCampaign({ views, isFree, pricePaid }) {
   if (!user || !adId) return;
   const key = `${adId}_${user.uid}`;
@@ -465,38 +469,28 @@ async function saveCampaign({ views, isFree, pricePaid }) {
   });
 }
 
-/* Load ads analytics for logged user */
+/* Load ads analytics for current user */
 async function loadUserAnalytics() {
-  // Clear existing
   adsList.innerHTML = "";
   ordersList.innerHTML = "";
   totalViewsEl.textContent = "0";
   totalClicksEl.textContent = "0";
 
   try {
-    // Load ads promoted by this user: keys in dlsaccountsads starting with any adId that user owns.
-    // First get all ads for this adId and user, but user can have multiple ads? To be sure:
-    // We'll find ads under dlsaccountsads where uid == user.uid
-
     const adsSnap = await get(ref(db, "dlsaccountsads"));
     if (!adsSnap.exists()) {
-      adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
-      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      showNoAdsAnalytics();
       return;
     }
 
     const adsData = adsSnap.val();
-
-    // Filter ads by current user uid
     const userAds = Object.entries(adsData).filter(([key, val]) => val.uid === user.uid);
 
     if(userAds.length === 0) {
-      adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
-      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      showNoAdsAnalytics();
       return;
     }
 
-    // Sum totals
     let totalViews = 0;
     let totalClicks = 0;
 
@@ -504,7 +498,6 @@ async function loadUserAnalytics() {
       totalViews += ad.viewsRemaining || 0;
       totalClicks += ad.clicks || 0;
 
-      // Display each ad's stats
       const el = document.createElement("div");
       el.className = "ad-item";
       el.innerHTML = `
@@ -516,10 +509,10 @@ async function loadUserAnalytics() {
       `;
       adsList.appendChild(el);
     }
+
     totalViewsEl.textContent = fmt(totalViews);
     totalClicksEl.textContent = fmt(totalClicks);
 
-    // Load orders for user’s ads
     await loadOrdersForUserAds(userAds.map(([key,val]) => val.adId));
 
   } catch (e) {
@@ -529,7 +522,7 @@ async function loadUserAnalytics() {
   }
 }
 
-/* Load orders for given adIds that belong to this user */
+/* Load orders related to user's ads */
 async function loadOrdersForUserAds(adIds) {
   try {
     if(adIds.length === 0) {
@@ -543,10 +536,6 @@ async function loadOrdersForUserAds(adIds) {
     }
 
     const ordersData = ordersSnap.val();
-    // Filter orders that correspond to the user's ad IDs and match user's uid
-    // Assuming orders have { adId, uid (buyer?), sellerUid (or product owner uid) }
-    // We want orders where order.adId is in adIds AND order.sellerUid === user.uid
-    // If your DB schema differs, adjust accordingly.
 
     const filteredOrders = Object.values(ordersData).filter(order =>
       adIds.includes(order.adId) && order.sellerUid === user.uid
@@ -557,14 +546,11 @@ async function loadOrdersForUserAds(adIds) {
       return;
     }
 
-    // Sort orders newest first (optional)
     filteredOrders.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-    // Render orders list
     filteredOrders.forEach(order => {
       const el = document.createElement("div");
       el.className = "order-item";
-      // Customize display per order structure, example:
       el.textContent = `Order for Ad ID ${order.adId} - Buyer: ${order.uid || 'Unknown'} - Qty: ${order.quantity || 1} - Date: ${new Date(order.createdAt).toLocaleString()}`;
       ordersList.appendChild(el);
     });
@@ -574,19 +560,15 @@ async function loadOrdersForUserAds(adIds) {
   }
 }
 
-/* Initialize everything */
+/* Initialize the whole shebang */
 async function init() {
   loadingOverlay.style.display = "flex";
-
   await loadAd();
-
-  // Wait for auth state and then call onUserAuth
   onAuthStateChanged(auth, onUserAuth);
 }
 
-// Run init on page load
 init();
-
 </script>
+
 </body>
 </html>
