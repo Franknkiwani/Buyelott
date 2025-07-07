@@ -311,7 +311,7 @@
 </div>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, get, push, set, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -364,7 +364,7 @@
       <div class="price">$${price}</div>
 
       <button class="secure-pay-btn" id="payNow">
-        <svg class="lock-icon" viewBox="0 0 24 24">
+        <svg class="lock-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/>
         </svg>
         Pay Securely
@@ -373,34 +373,33 @@
       <div class="delivery-info">Account will be delivered to: <b>${user.email}</b></div>
 
       <div class="trust-badges">
-        <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal">
-        <img src="https://img.icons8.com/color/48/000000/secured-letter.png" alt="Secure SSL">
-        <img src="https://img.icons8.com/color/48/000000/trust.png" alt="Trusted">
+        <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal" />
+        <img src="https://img.icons8.com/color/48/000000/secured-letter.png" alt="Secure SSL" />
+        <img src="https://img.icons8.com/color/48/000000/trust.png" alt="Trusted" />
       </div>
 
       <div id="commentSection">
         <h3>What buyers are saying</h3>
         <textarea id="commentInput" rows="3" placeholder="Write your opinion..."></textarea>
         <button id="postCommentBtn" disabled>Post Comment</button>
-        <div id="commentStatus">Comment posted ✅</div>
+        <div id="commentStatus" style="display:none;">Comment posted ✅</div>
         <div id="commentList"><div class="loading">Loading comments...</div></div>
       </div>
     `;
-
-    // Set up PayPal direct email payment links
-    const productName = encodeURIComponent(title);
-    const priceValue = price;
 
     const payNowBtn = document.getElementById("payNow");
     payNowBtn.addEventListener("click", () => {
       const modal = document.getElementById("paymentMethodModal");
       modal.style.display = "flex";
 
-      document.getElementById("manualAmountText").textContent = `$${priceValue}`;
-      document.getElementById("manualPayLink").href = 
-        `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${productName}&amount=${priceValue}&currency_code=USD`;
-      document.getElementById("standardPayLink").href = 
-        `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${productName}&amount=${priceValue}&currency_code=USD`;
+      // Show the price dynamically in modal (if you have an element for this)
+      document.getElementById("manualAmountText").textContent = `$${price}`;
+
+      // 24 hour PayPal.me with amount (manual)
+      document.getElementById("manualPayLink").href = `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
+
+      // Standard PayPal.me link (replace yourlink)
+      document.getElementById("standardPayLink").href = `https://paypal.me/yourlink/${price}`;
 
       payNowBtn.disabled = true;
     });
@@ -409,7 +408,6 @@
     const commentInput = document.getElementById("commentInput");
     const postBtn = document.getElementById("postCommentBtn");
     const commentStatus = document.getElementById("commentStatus");
-    commentStatus.style.display = "none";
 
     commentInput.addEventListener("input", () => {
       postBtn.disabled = commentInput.value.trim().length < 3;
@@ -465,17 +463,18 @@
           `;
           commentList.appendChild(commentEl);
         } catch {
-          // Fail silently
+          // Fail silently if user info not found
         }
       }
     });
   });
 
-  // Modal payment buttons logic (outside the auth callback)
+  // Modal payment buttons logic (outside auth)
   document.getElementById("manualPayLink").addEventListener("click", async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return alert("Please log in to continue.");
+
     await push(ref(db, `orders/${user.uid}`), {
       productId,
       email: user.email,
@@ -483,6 +482,7 @@
       status: "pending",
       createdAt: serverTimestamp()
     });
+
     window.location.href = e.target.href;
   });
 
@@ -490,6 +490,7 @@
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return alert("Please log in to continue.");
+
     await push(ref(db, `orders/${user.uid}`), {
       productId,
       email: user.email,
@@ -497,10 +498,11 @@
       status: "pending",
       createdAt: serverTimestamp()
     });
+
     window.location.href = e.target.href;
   });
 
-  // Tab switching logic (manual vs standard)
+  // Tab switching logic
   const manualTabBtn = document.getElementById("manualTab");
   const standardTabBtn = document.getElementById("standardTab");
   const manualSection = document.getElementById("manualSection");
