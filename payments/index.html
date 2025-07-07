@@ -311,7 +311,7 @@
 </div>
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, push, set, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -329,12 +329,38 @@ const page = document.getElementById("paymentPage");
 const urlParams = new URLSearchParams(window.location.search);
 const productId = urlParams.get("id");
 
-let price = "0.00"; // Global so we can use it later
+let price = "0.00";
 let title = "CyberChat Product";
 
 function formatDate(ts) {
   const d = new Date(ts);
   return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// Tracking session start time for session duration calc
+const sessionStart = Date.now();
+
+function generateTrackingCode() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "CYBER-" + Date.now() + "-";
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  if (/mobile|iphone|android|ipad|tablet/i.test(ua)) return "Mobile/Tablet";
+  return "Desktop";
+}
+
+async function getUsername(uid) {
+  try {
+    const snap = await get(ref(db, `users/${uid}/username`));
+    if (snap.exists()) return snap.val();
+  } catch {}
+  return null;
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -466,44 +492,51 @@ onAuthStateChanged(auth, async (user) => {
   });
 });
 
-// Payment button logic
-document.getElementById("manualPayLink").addEventListener("click", async (e) => {
+// Payment button logic with metadata and tracking code
+async function handlePaymentClick(e, paymentMethod) {
   e.preventDefault();
   const user = auth.currentUser;
   if (!user) return alert("Please log in to continue.");
-  await push(ref(db, `orders/${user.uid}`), {
-    productId,
-    email: user.email,
-    paymentMethod: "manual",
-    status: "pending",
-    createdAt: serverTimestamp()
-  });
-  window.location.href = e.target.href;
-});
 
-document.getElementById("standardPayLink").addEventListener("click", async (e) => {
-  e.preventDefault();
-  const user = auth.currentUser;
-  if (!user) return alert("Please log in to continue.");
+  const username = await getUsername(user.uid);
+  const sessionDuration = Math.floor((Date.now() - sessionStart) / 1000);
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
+  const device = getDeviceType();
+  const trackingCode = generateTrackingCode();
+
   await push(ref(db, `orders/${user.uid}`), {
     productId,
     email: user.email,
-    paymentMethod: "standard",
+    username: username || null,
+    paymentMethod,
     status: "pending",
-    createdAt: serverTimestamp()
+    createdAt: serverTimestamp(),
+    trackingCode,
+    timezone,
+    device,
+    sessionDuration,
   });
+
   window.location.href = e.target.href;
-});
+}
+
+document.getElementById("manualPayLink").addEventListener("click", (e) => handlePaymentClick(e, "manual"));
+document.getElementById("standardPayLink").addEventListener("click", (e) => handlePaymentClick(e, "standard"));
 
 // Modal tab switching
-document.getElementById("manualTab").addEventListener("click", () => {
+const manualTab = document.getElementById("manualTab");
+const standardTab = document.getElementById("standardTab");
+const manualSection = document.getElementById("manualSection");
+const standardSection = document.getElementById("standardSection");
+
+manualTab.addEventListener("click", () => {
   manualTab.classList.add("active");
   standardTab.classList.remove("active");
   manualSection.classList.add("active");
   standardSection.classList.remove("active");
 });
 
-document.getElementById("standardTab").addEventListener("click", () => {
+standardTab.addEventListener("click", () => {
   standardTab.classList.add("active");
   manualTab.classList.remove("active");
   standardSection.classList.add("active");
