@@ -143,7 +143,7 @@
   </style>
 </head>
 <body>
-  <h1>Orders</h1>
+  <h1>Admin Order Processing</h1>
   <div id="ordersContainer">Loading orders...</div>
 
   <!-- Toast -->
@@ -160,7 +160,7 @@
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, onValue, set, serverTimestamp, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, get, onValue, set, serverTimestamp, remove, push, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -172,7 +172,7 @@
 
   const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const auth = getAuth(app);
+  const auth = getAuth();
 
   const ordersContainer = document.getElementById("ordersContainer");
   const toast = document.getElementById("toast");
@@ -182,20 +182,8 @@
 
   let pendingCancelRef = null;
   let pendingOrderDiv = null;
-  let adminUid = null;
 
-  // Grab logged in user's UID dynamically
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      adminUid = user.uid;
-      // Once we have the UID, start listening for orders
-      startListeningOrders();
-    } else {
-      alert("Not signed in. Please log in.");
-      // Optionally redirect to login page
-      // window.location.href = "/login";
-    }
-  });
+  let adminUid = null; // will come from logged-in user
 
   const showToast = (msg) => {
     toast.textContent = msg;
@@ -237,7 +225,20 @@
     return [uid1, uid2].sort().join('_');
   }
 
-  function startListeningOrders() {
+  async function ensureUser(uid, data = {}) {
+    const userRef = ref(db, `users/${uid}`);
+    const snap = await get(userRef);
+    if (!snap.exists()) {
+      await set(userRef, {
+        username: data.username || `User_${uid.slice(0, 6)}`,
+        avatar: data.avatar || 'https://via.placeholder.com/40?text=👤',
+        email: data.email || '',
+        createdAt: Date.now()
+      });
+    }
+  }
+
+  function loadOrders() {
     onValue(ref(db, "orders"), async (snapshot) => {
       ordersContainer.innerHTML = "";
       const orders = snapshot.val();
@@ -276,6 +277,7 @@
             </div>
           `;
 
+          // Set to Processing
           orderDiv.querySelector(".process-btn").onclick = async () => {
             await set(ref(db, `processingOrders/${buyerUid}/${orderId}`), {
               ...order,
@@ -287,12 +289,10 @@
             showToast("Moved to processing.");
           };
 
+          // Message Buyer
           orderDiv.querySelector(".message-btn").onclick = async () => {
-            if (!adminUid) {
-              alert("Admin UID not ready. Please refresh.");
-              return;
-            }
             const trackingCode = generateTrackingCode();
+
             await set(ref(db, `tracking/${trackingCode}`), {
               uid: buyerUid,
               productId: order.productId,
@@ -300,11 +300,47 @@
               createdAt: serverTimestamp()
             });
 
-            const msg = `Your order #${orderNumber} has been received.\nTracking: ${trackingCode}\nhttps://cyberchat.online/product?id=${order.productId}`;
+            // Save both users to /users
+            await ensureUser(adminUid, {
+              username: "Admin",
+              avatar: "https://via.placeholder.com/40?text=A"
+            });
+            await ensureUser(buyerUid, {
+              username: "Buyer",
+              avatar: "https://via.placeholder.com/40?text=B"
+            });
+
+            const msg = `🚚 Your order #${orderNumber} has been received!\n\n🔒 Tracking Code: ${trackingCode}\n📦 Product: ${product.title}\n🔗 View: https://cyberchat.online/product?id=${order.productId}`;
+
             const chatId = generateChatId(adminUid, buyerUid);
-            window.open(`https://cyberchat.online/messages?chatId=${chatId}&msg=${encodeURIComponent(msg)}`, "_blank");
+            const chatMetaRef = ref(db, `chats/${chatId}/meta`);
+            const chatMsgRef = ref(db, `chats/${chatId}/messages`);
+
+            const timestamp = Date.now();
+
+            await update(chatMetaRef, {
+              users: {
+                [adminUid]: true,
+                [buyerUid]: true
+              },
+              lastMessage: msg,
+              lastTimestamp: timestamp,
+              lastReadTimes: {
+                [adminUid]: timestamp,
+                [buyerUid]: 0
+              }
+            });
+
+            await push(chatMsgRef, {
+              sender: adminUid,
+              text: msg,
+              timestamp
+            });
+
+            window.open(`https://cyberchat.online/messages?chatId=${chatId}`, "_blank");
           };
 
+          // Cancel Order
           orderDiv.querySelector(".delete-btn").onclick = () => {
             showModal(ref(db, `orders/${buyerUid}/${orderId}`), orderDiv);
           };
@@ -314,6 +350,18 @@
       }
     });
   }
+
+  // Wait for auth before anything
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("You must be logged in.");
+      window.location.href = "/";
+      return;
+    }
+
+    adminUid = user.uid;
+    loadOrders();
+  });
 </script>
 </body>
 </html>
