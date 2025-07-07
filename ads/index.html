@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DLS Product Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    img {
+      width: 90%;
+      max-width: 400px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #333;
+      padding: 20px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .price {
+      color: #00ff99;
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+
+    .loading {
+      font-size: 1.2em;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="product" class="card">
+    <div class="loading">Loading product...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Extract ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    async function loadProduct() {
+      if (!productId) {
+        document.getElementById("product").innerHTML = "<p>❌ No product ID found in URL.</p>";
+        return;
+      }
+
+      try {
+        const snapshot = await get(child(ref(db), `dlsaccounts/${productId}`));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const html = `
+            <img src="${data.images?.[0] || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="Product Image">
+            <h2>${data.description || "No description provided"}</h2>
+            <div class="price">$${data.price || "0.00"}</div>
+            <p><strong>Seller:</strong> ${data.seller || "Unknown"}</p>
+          `;
+          document.getElementById("product").innerHTML = html;
+        } else {
+          document.getElementById("product").innerHTML = "<p>⚠️ Product not found.</p>";
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById("product").innerHTML = "<p>🚨 Error loading product.</p>";
+      }
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
