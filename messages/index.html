@@ -589,73 +589,92 @@ return;
     }  
   });  
   
-  chatForm.addEventListener('submit', async (e) => {  
-    e.preventDefault();  
-    const text = messageInput.value.trim();  
-    if (!text) return;  
-  
-    try {  
-      // Save current user profile to /users if missing  
-      await ensureUserInUsersDb(currentUser);  
-  
-      // Check if seller exists, if not save minimal profile (fallback)  
-      if (sellerUid && sellerUid !== currentUser.uid) {  
-        const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');  
-        if (!sellerSnap.exists()) {  
-          await db.ref(`/users/${sellerUid}`).set({  
-            username: sellerName || `Seller_${sellerUid.slice(0,6)}`,  
-            avatar: sellerAvatar || 'https://via.placeholder.com/40?text=👤',  
-            createdAt: Date.now(),  
-          });  
-        }  
-      }  
-  
-      const messagesRef = db.ref(`/chats/${chatId}/messages`);  
-      const newMsgRef = messagesRef.push();  
-      const timestamp = Date.now();  
-  
-      await newMsgRef.set({  
-        sender: currentUser.uid,  
-        text,  
-        timestamp  
-      });  
-  
-      const metaRef = db.ref(`/chats/${chatId}/meta`);  
-      await metaRef.transaction((meta) => {  
-        if (!meta) {  
-          return {  
-            users: {  
-              [currentUser.uid]: true,  
-              [sellerUid]: true,  
-            },  
-            lastMessage: text,  
-            lastTimestamp: timestamp,  
-            lastReadTimes: {  
-              [currentUser.uid]: timestamp,  
-              [sellerUid]: 0,  
-            }  
-          };  
-        }  
-        meta.lastMessage = text;  
-        meta.lastTimestamp = timestamp;  
-        meta.users = meta.users || {};  
-        meta.users[currentUser.uid] = true;  
-        meta.users[sellerUid] = true;  
-        meta.lastReadTimes = meta.lastReadTimes || {};  
-        meta.lastReadTimes[currentUser.uid] = timestamp;  
-        if (!meta.lastReadTimes[sellerUid]) meta.lastReadTimes[sellerUid] = 0;  
-        return meta;  
-      });  
-  
-      messageInput.value = '';  
-      messageInput.focus();  
-      sendBtn.disabled = true;  
-  
-    } catch (err) {  
-      alert('Error sending message. Try again.');  
-      console.error(err);  
-    }  
-  });  
+chatForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  try {
+    // Save current user profile if missing
+    await ensureUserInUsersDb(currentUser);
+
+    // Ensure seller profile exists (fallback)
+    if (sellerUid && sellerUid !== currentUser.uid) {
+      const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
+      if (!sellerSnap.exists()) {
+        await db.ref(`/users/${sellerUid}`).set({
+          username: sellerName || `Seller_${sellerUid.slice(0,6)}`,
+          avatar: sellerAvatar || 'https://via.placeholder.com/40?text=👤',
+          createdAt: Date.now(),
+        });
+      }
+    }
+
+    const messagesRef = db.ref(`/chats/${chatId}/messages`);
+    const newMsgRef = messagesRef.push();
+    const timestamp = Date.now();
+
+    await newMsgRef.set({
+      sender: currentUser.uid,
+      text,
+      timestamp,
+    });
+
+    // Update meta with last message info AND increment unread count for recipient
+    const metaRef = db.ref(`/chats/${chatId}/meta`);
+    await metaRef.transaction((meta) => {
+      if (!meta) {
+        return {
+          users: {
+            [currentUser.uid]: true,
+            [sellerUid]: true,
+          },
+          lastMessage: text,
+          lastTimestamp: timestamp,
+          lastReadTimes: {
+            [currentUser.uid]: timestamp,
+            [sellerUid]: 0,
+          },
+          unreadCounts: {
+            [currentUser.uid]: 0,
+            [sellerUid]: 1,
+          }
+        };
+      }
+
+      meta.lastMessage = text;
+      meta.lastTimestamp = timestamp;
+      meta.users = meta.users || {};
+      meta.users[currentUser.uid] = true;
+      meta.users[sellerUid] = true;
+      meta.lastReadTimes = meta.lastReadTimes || {};
+      meta.lastReadTimes[currentUser.uid] = timestamp;
+      if (!meta.lastReadTimes[sellerUid]) meta.lastReadTimes[sellerUid] = 0;
+
+      meta.unreadCounts = meta.unreadCounts || {};
+      if (typeof meta.unreadCounts[currentUser.uid] !== 'number') meta.unreadCounts[currentUser.uid] = 0;
+      if (typeof meta.unreadCounts[sellerUid] !== 'number') meta.unreadCounts[sellerUid] = 0;
+
+      // Reset unread count for sender (they just read their own message)
+      meta.unreadCounts[currentUser.uid] = 0;
+
+      // Increment unread count for recipient
+      if (sellerUid !== currentUser.uid) {
+        meta.unreadCounts[sellerUid] = (meta.unreadCounts[sellerUid] || 0) + 1;
+      }
+
+      return meta;
+    });
+
+    messageInput.value = '';
+    messageInput.focus();
+    sendBtn.disabled = true;
+
+  } catch (err) {
+    alert('Error sending message. Try again.');
+    console.error(err);
+  }
+});
   
   messageInput.addEventListener('input', () => {  
     sendBtn.disabled = messageInput.value.trim().length === 0;  
