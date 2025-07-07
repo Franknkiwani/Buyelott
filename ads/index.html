@@ -1,87 +1,320 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Promote Your DLS Ad</title>
+  <title>Promote Your DLS Ad & Analytics</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     /* ===== iOS-ish dark theme ===== */
-    :root { --accent:#00ffb3; --bg:#000; --panel:#111; }
+    :root { --accent:#00ffb3; --bg:#000; --panel:#111; --text-muted:#666; }
     * { box-sizing:border-box; }
-    body{
-      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-      background:var(--bg); color:#fff; display:flex; flex-direction:column;
-      align-items:center; padding:32px 20px; gap:28px;
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+      background: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
     }
-    h1{font-size:1.8rem;margin:0;font-weight:700;text-align:center;}
-    .card{background:var(--panel);border-radius:20px;box-shadow:0 0 18px rgba(255,255,255,.05);
-          overflow:hidden;max-width:420px;width:100%;}
-    .card img{width:100%;height:200px;object-fit:cover;}
-    .info{padding:16px;}
-    .desc{font-size:1.05rem;color:#ccc;margin-bottom:6px;}
-    .price{color:var(--accent);font-size:1.3rem;font-weight:600;margin:0;}
-    .field,.btn{width:100%;max-width:420px;}
-    .field{padding:12px;border-radius:12px;border:none;background:#1c1c1c;
-           color:#fff;font-size:1rem;}
-    .field:focus{outline:2px solid var(--accent);}
-    .btn{padding:13px;text-align:center;font-weight:700;text-transform:uppercase;
-         border:none;border-radius:12px;background:var(--accent);color:#000;
-         cursor:pointer;transition:.2s;}
-    .btn:hover{background:#00e6a6;}
-    .btn.alt{background:#444;color:#fff;margin-top:-10px;font-size:.9rem;}
-    .hidden{display:none !important;}
-    .status{font-size:.9rem;color:#ccc;text-align:center;max-width:420px;}
-    .paypal-box{margin-top:12px;}
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 20px;
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      padding: 20px;
+      flex: 1 1 480px;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+    /* Promote panel specifics */
+    #promotePanel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #previewBox {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 255, 179, 0.2);
+      flex-shrink: 0;
+      max-height: 210px;
+    }
+    #previewBox img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+    }
+    .info {
+      padding: 12px 0 0 0;
+    }
+    .desc {
+      font-size: 1.05rem;
+      color: #ccc;
+      margin: 0 0 6px 0;
+    }
+    .price {
+      color: var(--accent);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    select.field {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: #1c1c1c;
+      color: #fff;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+    }
+    .btn {
+      padding: 13px;
+      text-align: center;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+      transition: 0.2s;
+      user-select: none;
+    }
+    .btn:hover {
+      background: #00e6a6;
+    }
+    .btn.alt {
+      background: #444;
+      color: #fff;
+      margin-top: -10px;
+      font-size: 0.9rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .status {
+      font-size: 0.9rem;
+      color: #ccc;
+      text-align: center;
+      max-width: 420px;
+      min-height: 1.3em;
+    }
+    .paypal-box {
+      margin-top: 12px;
+    }
+
+    /* Analytics panel */
+    #analyticsPanel {
+      overflow-y: auto;
+      color: #eee;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #analyticsPanel h2 {
+      margin-top: 0;
+      color: var(--accent);
+      font-weight: 700;
+      text-align: center;
+    }
+    .analytics-summary {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+    }
+    .analytics-summary > div {
+      flex: 1;
+      background: #222;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: inset 0 0 5px rgba(0,255,179,0.3);
+    }
+    .analytics-summary strong {
+      display: block;
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .ads-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .ad-item {
+      background: #222;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: inset 0 0 6px rgba(0,255,179,0.2);
+    }
+    .ad-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .ad-stats {
+      font-size: 0.9rem;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+    }
+    .orders-section {
+      margin-top: 12px;
+      color: #bbb;
+    }
+    .order-item {
+      background: #111;
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+      color: var(--accent);
+      font-size: 1.4rem;
+      font-weight: 700;
+      user-select: none;
+    }
+    #loadingOverlay .spinner {
+      border: 4px solid #222;
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
-  <h1>Promote Your DLS Ad</h1>
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  Loading data...
+</div>
 
-  <!-- === Ad Preview === -->
-  <div class="card" id="previewBox">
-    <img id="previewImg" src="https://via.placeholder.com/400x300?text=Loading..." alt="">
-    <div class="info">
-      <p class="desc" id="previewDesc">Loading description…</p>
-      <p class="price" id="previewPrice">$0.00</p>
+<h1>Promote Your DLS Ad & Analytics</h1>
+
+<div class="container">
+  <!-- Left Panel: Promote -->
+  <section id="promotePanel" class="panel" aria-label="Promotion Section">
+    <div id="previewBox">
+      <img id="previewImg" src="https://via.placeholder.com/400x300?text=Loading..." alt="Ad preview" />
+      <div class="info">
+        <p class="desc" id="previewDesc">Loading description…</p>
+        <p class="price" id="previewPrice">$0.00</p>
+      </div>
     </div>
-  </div>
 
-  <!-- === Views / Pricing === -->
-  <input type="number" class="field" id="viewsInput"
-         placeholder="Views per day (1 – 10 000)" min="1" max="10000">
+    <label for="viewsSelect">Select Views Package</label>
+    <select id="viewsSelect" name="os0" class="field" disabled aria-describedby="statusMsg">
+      <option value="1000 views">1000 views — $1.00</option>
+      <option value="5000 views">5000 views — $5.00</option>
+      <option value="10000 views">10000 views — $9.00</option>
+    </select>
 
-  <div class="status" id="costDisplay">Daily Cost: $0.000</div>
+    <button class="btn alt" id="freeBtn">Use FREE $0.100 Credit (100 views)</button>
 
-  <!-- === Action Buttons === -->
-  <button class="btn" id="payBtn">Pay to Promote</button>
-  <button class="btn alt" id="freeBtn">Use FREE $0.100 Credit (100 views)</button>
+    <div class="paypal-box hidden" id="paypalBox">
+      <form
+        action="https://www.paypal.com/cgi-bin/webscr"
+        method="post"
+        target="_top"
+        id="paypalForm"
+      >
+        <input type="hidden" name="cmd" value="_s-xclick" />
+        <input type="hidden" name="hosted_button_id" value="CYPBY27MX3SY6" />
+        <input type="hidden" name="currency_code" value="USD" />
+        <!-- hidden select synced with main select -->
+        <select name="os0" id="paypalViewsSelect" style="display:none;">
+          <option value="1000 views">1000 views</option>
+          <option value="5000 views">5000 views</option>
+          <option value="10000 views">10000 views</option>
+        </select>
+        <input
+          type="image"
+          src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif"
+          border="0"
+          name="submit"
+          title="PayPal - The safer, easier way to pay online!"
+          alt="Buy Now"
+        />
+      </form>
+    </div>
 
-  <!-- PayPal form (hidden until needed) -->
-  <div class="paypal-box hidden" id="paypalBox">
-    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" id="paypalForm">
-      <input type="hidden" name="cmd" value="_s-xclick" />
-      <input type="hidden" name="hosted_button_id" value="CYPBY27MX3SY6" />
-      <input type="hidden" name="currency_code" value="USD" />
-      <!-- dynamic amount -->
-      <input type="hidden" name="amount" id="ppAmount" value="0.00" />
-      <input type="image"
-             src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif"
-             border="0" name="submit"
-             title="PayPal - The safer, easier way to pay online!"
-             alt="Buy Now" />
-    </form>
-  </div>
+    <div class="status" id="statusMsg" role="status" aria-live="polite"></div>
+  </section>
 
-  <div class="status" id="statusMsg"></div>
+  <!-- Right Panel: Analytics -->
+  <section id="analyticsPanel" class="panel" aria-label="Ads Analytics Section">
+    <h2>Your Ads Performance</h2>
+    <div class="analytics-summary" aria-live="polite">
+      <div>
+        <strong id="totalViews">0</strong>
+        Views Remaining
+      </div>
+      <div>
+        <strong id="totalClicks">0</strong>
+        Clicks
+      </div>
+    </div>
+    <div class="ads-list" id="adsList" aria-live="polite" tabindex="0">
+      <!-- Ad items inserted here dynamically -->
+    </div>
+    <div class="orders-section" id="ordersSection">
+      <h3>Orders</h3>
+      <div id="ordersList" tabindex="0">
+        <!-- Orders inserted here dynamically -->
+      </div>
+    </div>
+  </section>
+</div>
 
 <script type="module">
-/* ---------- Firebase setup ---------- */
-import { initializeApp }         from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref,
-         get, child, update, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged }
-       from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, child, update, set, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -98,106 +331,262 @@ const app  = initializeApp(firebaseConfig);
 const db   = getDatabase(app);
 const auth = getAuth(app);
 
-/* ---------- DOM refs ---------- */
+/* DOM refs */
 const previewImg   = document.getElementById("previewImg");
 const previewDesc  = document.getElementById("previewDesc");
 const previewPrice = document.getElementById("previewPrice");
-const viewsInput   = document.getElementById("viewsInput");
-const costDisplay  = document.getElementById("costDisplay");
-const payBtn       = document.getElementById("payBtn");
-const freeBtn      = document.getElementById("freeBtn");
 const statusMsg    = document.getElementById("statusMsg");
+const viewsSelect  = document.getElementById("viewsSelect");
 const paypalBox    = document.getElementById("paypalBox");
-const ppAmount     = document.getElementById("ppAmount");
+const paypalViewsSelect = document.getElementById("paypalViewsSelect");
+const freeBtn      = document.getElementById("freeBtn");
+const loadingOverlay = document.getElementById("loadingOverlay");
 
-/* ---------- Helpers ---------- */
+const totalViewsEl = document.getElementById("totalViews");
+const totalClicksEl = document.getElementById("totalClicks");
+const adsList = document.getElementById("adsList");
+const ordersSection = document.getElementById("ordersSection");
+const ordersList = document.getElementById("ordersList");
+
+/* Helpers */
 const params  = new URLSearchParams(location.search);
 const adId    = params.get("id");
-const CPC     = 0.001;            // cost per view in USD
-const FREE_VIEWS = 100;           // freebies for newbies
+const FREE_VIEWS = 100;
 
-let user      = null;             // Firebase user
-let adData    = null;             // product data
-let freeUsed  = false;            // whether user spent free credit
+let user      = null;
+let adData    = null;
+let freeUsed  = false;
 
+/* Format number with commas */
 function fmt(n){ return n.toLocaleString(); }
 
-/* ---------- Load product ---------- */
+/* Load ad data */
 async function loadAd() {
-  if(!adId) { statusMsg.textContent="❌ Missing ?id in URL"; return; }
-  try{
-    const snap = await get(child(ref(db),`dlsaccounts/${adId}`));
-    if(!snap.exists()){ statusMsg.textContent="❌ Ad not found"; return; }
+  if(!adId) {
+    statusMsg.textContent = "❌ Missing ?id in URL";
+    viewsSelect.disabled = true;
+    freeBtn.disabled = true;
+    return null;
+  }
+  try {
+    const snap = await get(child(ref(db), `dlsaccounts/${adId}`));
+    if(!snap.exists()) {
+      statusMsg.textContent = "❌ Ad not found";
+      viewsSelect.disabled = true;
+      freeBtn.disabled = true;
+      return null;
+    }
     adData = snap.val();
-    previewImg.src   = adData.images?.[0] ||
-                       "https://via.placeholder.com/400x300?text=No+Image";
+    previewImg.src = adData.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image";
     previewDesc.textContent = adData.description?.slice(0,60) || "No description";
-    previewPrice.textContent = `$${adData.price||"0.00"}`;
-  }catch(e){ console.error(e); statusMsg.textContent="🚨 Error loading ad"; }
+    previewPrice.textContent = `$${adData.price || "0.00"}`;
+    return adData;
+  } catch(e) {
+    console.error(e);
+    statusMsg.textContent = "🚨 Error loading ad";
+    viewsSelect.disabled = true;
+    freeBtn.disabled = true;
+    return null;
+  }
 }
 
-/* ---------- Auth & free-credit check ---------- */
-onAuthStateChanged(auth, async (u)=>{
-  if(!u){ statusMsg.textContent="⚠️ Please sign in to promote."; payBtn.disabled=true; freeBtn.disabled=true; return; }
-  user=u;
+/* Auth and free credit check */
+async function onUserAuth(u) {
+  if (!u) {
+    statusMsg.textContent = "⚠️ Please sign in to promote.";
+    viewsSelect.disabled = true;
+    freeBtn.disabled = true;
+    paypalBox.classList.add("hidden");
+    loadingOverlay.style.display = 'none';
+    showNoAdsAnalytics();
+    return;
+  }
+  user = u;
+
   // Check if free credit already used
-  const usnap = await get(child(ref(db),`users/${user.uid}/usedFreeAds`));
-  freeUsed = usnap.exists() && usnap.val()===true;
-  if(freeUsed) freeBtn.classList.add("hidden");
+  const usnap = await get(child(ref(db), `users/${user.uid}/usedFreeAds`));
+  freeUsed = usnap.exists() && usnap.val() === true;
+  if (freeUsed) freeBtn.classList.add("hidden");
+
+  viewsSelect.disabled = false;
+  paypalBox.classList.remove("hidden");
+  statusMsg.textContent = "Select a views package and click PayPal to pay.";
+
+  // Load user ads analytics & orders
+  await loadUserAnalytics();
+
+  // Hide loading overlay after everything is ready
+  loadingOverlay.style.display = "none";
+}
+
+/* Sync selection with hidden PayPal select and update status */
+viewsSelect.addEventListener("change", () => {
+  paypalViewsSelect.value = viewsSelect.value;
+
+  const views = Number(viewsSelect.value.split(" ")[0]);
+  const prices = {1000: 1.00, 5000: 5.00, 10000: 9.00};
+  const price = prices[views] || 0;
+
+  statusMsg.textContent = `Selected ${fmt(views)} views for $${price.toFixed(2)}. Click PayPal to pay.`;
 });
 
-/* ---------- Live cost calc ---------- */
-viewsInput.addEventListener("input", ()=>{
-  const views = Number(viewsInput.value);
-  const cost  = isNaN(views)?0:views*CPC;
-  costDisplay.textContent = `Daily Cost: $${cost.toFixed(3)}`;
+/* Free credit button logic */
+freeBtn.addEventListener("click", async () => {
+  if (freeUsed) {
+    statusMsg.textContent = "😅 Free credit already used.";
+    return;
+  }
+  try {
+    await saveCampaign({ views: FREE_VIEWS, isFree: true, pricePaid: 0 });
+    await update(ref(db, `users/${user.uid}`), { usedFreeAds: true });
+    freeBtn.classList.add("hidden");
+    statusMsg.textContent = `✅ Free promo live! ${fmt(FREE_VIEWS)} views coming your way.`;
+    await loadUserAnalytics(); // update analytics after free promo
+  } catch (e) {
+    console.error(e);
+    statusMsg.textContent = "❌ Failed to start free promo.";
+  }
 });
 
-/* ---------- Save promotion to DB ---------- */
-async function saveCampaign({views, isFree, pricePaid}){
+/* Save campaign - called only for free promo here.
+   For PayPal paid promos, verify payment server-side then save */
+async function saveCampaign({ views, isFree, pricePaid }) {
+  if (!user || !adId) return;
   const key = `${adId}_${user.uid}`;
-  await set(ref(db,`dlsaccountsads/${key}`),{
-    uid:user.uid,
+  await set(ref(db, `dlsaccountsads/${key}`), {
+    uid: user.uid,
     adId,
     viewsRemaining: views,
-    viewsPerDay:    views,
+    viewsPerDay: views,
     isFree,
     pricePaid,
-    createdAt: Date.now()
+    clicks: 0,
+    createdAt: Date.now(),
   });
 }
 
-/* ---------- FREE button ---------- */
-freeBtn.addEventListener("click", async ()=>{
-  if(freeUsed){ statusMsg.textContent="😅 Free credit already used."; return; }
-  try{
-    await saveCampaign({views:FREE_VIEWS,isFree:true,pricePaid:0});
-    await update(ref(db,`users/${user.uid}`),{ usedFreeAds:true });
-    freeBtn.classList.add("hidden");
-    statusMsg.textContent=`✅ Free promo live! ${fmt(FREE_VIEWS)} views coming your way.`;
-  }catch(e){ console.error(e); statusMsg.textContent="❌ Failed to start free promo."; }
-});
+/* Load ads analytics for logged user */
+async function loadUserAnalytics() {
+  // Clear existing
+  adsList.innerHTML = "";
+  ordersList.innerHTML = "";
+  totalViewsEl.textContent = "0";
+  totalClicksEl.textContent = "0";
 
-/* ---------- PAY button ---------- */
-payBtn.addEventListener("click", ()=>{
-  const views = Number(viewsInput.value);
-  if(isNaN(views)||views<1||views>10000){
-    statusMsg.textContent="❌ Enter 1–10 000 views first."; return;
+  try {
+    // Load ads promoted by this user: keys in dlsaccountsads starting with any adId that user owns.
+    // First get all ads for this adId and user, but user can have multiple ads? To be sure:
+    // We'll find ads under dlsaccountsads where uid == user.uid
+
+    const adsSnap = await get(ref(db, "dlsaccountsads"));
+    if (!adsSnap.exists()) {
+      adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
+      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      return;
+    }
+
+    const adsData = adsSnap.val();
+
+    // Filter ads by current user uid
+    const userAds = Object.entries(adsData).filter(([key, val]) => val.uid === user.uid);
+
+    if(userAds.length === 0) {
+      adsList.innerHTML = '<p style="color:#666;text-align:center;">No ads found.</p>';
+      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      return;
+    }
+
+    // Sum totals
+    let totalViews = 0;
+    let totalClicks = 0;
+
+    for(const [key, ad] of userAds) {
+      totalViews += ad.viewsRemaining || 0;
+      totalClicks += ad.clicks || 0;
+
+      // Display each ad's stats
+      const el = document.createElement("div");
+      el.className = "ad-item";
+      el.innerHTML = `
+        <div class="ad-title">Ad ID: ${ad.adId}</div>
+        <div class="ad-stats">
+          <span>Views Remaining: ${fmt(ad.viewsRemaining || 0)}</span>
+          <span>Clicks: ${fmt(ad.clicks || 0)}</span>
+        </div>
+      `;
+      adsList.appendChild(el);
+    }
+    totalViewsEl.textContent = fmt(totalViews);
+    totalClicksEl.textContent = fmt(totalClicks);
+
+    // Load orders for user’s ads
+    await loadOrdersForUserAds(userAds.map(([key,val]) => val.adId));
+
+  } catch (e) {
+    console.error(e);
+    adsList.innerHTML = '<p style="color:#f55;text-align:center;">Error loading ads analytics.</p>';
+    ordersList.innerHTML = '<p style="color:#f55;text-align:center;">Error loading orders.</p>';
   }
-  const price = (views*CPC).toFixed(2);
-  ppAmount.value = price;                     // put cost in the PayPal form
-  paypalBox.classList.remove("hidden");       // reveal PayPal button
-  statusMsg.textContent=`Click PayPal to pay $${price}. After payment you’ll start receiving ${fmt(views)} views/day.`;
-  
-  // 👉 You MAY want to wait for PayPal IPN / webhook before saving.
-  // For demo purposes we save immediately so you can see it in Firebase.
-  saveCampaign({views,isFree:false,pricePaid:+price})
-     .then(()=>console.log("Paid campaign saved"))
-     .catch(e=>console.error("DB save failed",e));
-});
+}
 
-/* ---------- init ---------- */
-loadAd();
+/* Load orders for given adIds that belong to this user */
+async function loadOrdersForUserAds(adIds) {
+  try {
+    if(adIds.length === 0) {
+      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      return;
+    }
+    const ordersSnap = await get(ref(db, "dlsaccountsorders"));
+    if (!ordersSnap.exists()) {
+      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      return;
+    }
+
+    const ordersData = ordersSnap.val();
+    // Filter orders that correspond to the user's ad IDs and match user's uid
+    // Assuming orders have { adId, uid (buyer?), sellerUid (or product owner uid) }
+    // We want orders where order.adId is in adIds AND order.sellerUid === user.uid
+    // If your DB schema differs, adjust accordingly.
+
+    const filteredOrders = Object.values(ordersData).filter(order =>
+      adIds.includes(order.adId) && order.sellerUid === user.uid
+    );
+
+    if (filteredOrders.length === 0) {
+      ordersList.innerHTML = '<p style="color:#666;text-align:center;">No orders were made.</p>';
+      return;
+    }
+
+    // Sort orders newest first (optional)
+    filteredOrders.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    // Render orders list
+    filteredOrders.forEach(order => {
+      const el = document.createElement("div");
+      el.className = "order-item";
+      // Customize display per order structure, example:
+      el.textContent = `Order for Ad ID ${order.adId} - Buyer: ${order.uid || 'Unknown'} - Qty: ${order.quantity || 1} - Date: ${new Date(order.createdAt).toLocaleString()}`;
+      ordersList.appendChild(el);
+    });
+  } catch (e) {
+    console.error(e);
+    ordersList.innerHTML = '<p style="color:#f55;text-align:center;">Error loading orders.</p>';
+  }
+}
+
+/* Initialize everything */
+async function init() {
+  loadingOverlay.style.display = "flex";
+
+  await loadAd();
+
+  // Wait for auth state and then call onUserAuth
+  onAuthStateChanged(auth, onUserAuth);
+}
+
+// Run init on page load
+init();
+
 </script>
 </body>
 </html>
