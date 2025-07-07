@@ -311,7 +311,7 @@
 </div>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, push, set, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -387,21 +387,25 @@
       </div>
     `;
 
-    // Now the button exists, attach event listener here!
+    // Set up PayPal direct email payment links
+    const productName = encodeURIComponent(title);
+    const priceValue = price;
+
     const payNowBtn = document.getElementById("payNow");
     payNowBtn.addEventListener("click", () => {
       const modal = document.getElementById("paymentMethodModal");
       modal.style.display = "flex";
 
-      // Set price text
-      document.getElementById("manualAmountText").textContent = `$${price}`;
-      document.getElementById("manualPayLink").href = `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
-      document.getElementById("standardPayLink").href = `https://paypal.me/yourlink/${price}`;
+      document.getElementById("manualAmountText").textContent = `$${priceValue}`;
+      document.getElementById("manualPayLink").href = 
+        `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${productName}&amount=${priceValue}&currency_code=USD`;
+      document.getElementById("standardPayLink").href = 
+        `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${productName}&amount=${priceValue}&currency_code=USD`;
 
       payNowBtn.disabled = true;
     });
 
-    // Comment section logic
+    // Comment logic
     const commentInput = document.getElementById("commentInput");
     const postBtn = document.getElementById("postCommentBtn");
     const commentStatus = document.getElementById("commentStatus");
