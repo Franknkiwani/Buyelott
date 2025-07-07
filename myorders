@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Orders</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f9;
+      color: #111;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+
+    .order-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .order-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .order-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #eee;
+    }
+
+    .order-info {
+      flex: 1;
+    }
+
+    .order-info h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .order-info p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .order-status {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      background: #ffe9a5;
+      color: #8d6a00;
+      font-weight: 600;
+    }
+
+    .order-status.bought {
+      background: #d2f8e6;
+      color: #0b734d;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Your Orders</h1>
+  <div class="order-list" id="orderList">Loading...</div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const orderList = document.getElementById("orderList");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        orderList.innerHTML = "<p>Please log in to see your orders.</p>";
+        return;
+      }
+
+      const userOrdersRef = ref(db, `orders/${user.uid}`);
+      onValue(userOrdersRef, async (snapshot) => {
+        const orders = snapshot.val();
+        if (!orders) {
+          orderList.innerHTML = "<p>You haven't bought anything yet 😔</p>";
+          return;
+        }
+
+        orderList.innerHTML = ""; // Clear old content
+
+        for (const orderId in orders) {
+          const { productId, status, createdAt } = orders[orderId];
+
+          // Get product info
+          const productSnap = await get(ref(db, `dlsaccounts/${productId}`));
+          const product = productSnap.exists() ? productSnap.val() : {};
+
+          const title = product.title || "Unnamed Product";
+          const image = (product.images && product.images[0]) || "https://via.placeholder.com/60x60?text=No+Image";
+
+          const card = document.createElement("div");
+          card.className = "order-card";
+          card.innerHTML = `
+            <img src="${image}" alt="Product Image" />
+            <div class="order-info">
+              <h3>${title}</h3>
+              <p>${new Date(createdAt).toLocaleString() || "No date"}</p>
+            </div>
+            <div class="order-status ${status === "bought" ? "bought" : ""}">
+              ${status}
+            </div>
+          `;
+
+          orderList.appendChild(card);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
