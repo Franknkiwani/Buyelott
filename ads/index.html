@@ -282,7 +282,7 @@
         />
       </form>
     </div>
-
+    
     <div class="status" id="statusMsg" role="status" aria-live="polite"></div>
   </section>
 
@@ -550,33 +550,30 @@ async function loadOrdersForUserAds(adIds) {
 }
 
 /* LOCAL STORAGE: Save purchase info before redirect to PayPal */
-const paypalBtn = document.getElementById("paypalBtn");
-if(paypalBtn) {
-  paypalBtn.addEventListener("click", () => {
-    if(!user) {
-      statusMsg.textContent = "⚠️ You must be signed in to pay.";
-      return;
-    }
+const paypalForm = document.getElementById("paypalForm");
+paypalForm.addEventListener("submit", (e) => {
+  if(!user) {
+    e.preventDefault();
+    statusMsg.textContent = "⚠️ You must be signed in to pay.";
+    return;
+  }
 
-    const views = Number(viewsSelect.value.split(" ")[0]);
-    const prices = {1000: 1.00, 5000: 5.00, 10000: 9.00};
-const price = prices[views] || 0;
+  const views = Number(viewsSelect.value.split(" ")[0]);
+  const prices = {1000: 1.00, 5000: 5.00, 10000: 9.00};
+  const price = prices[views] || 0;
 
-statusMsg.textContent = `🛒 Saving purchase info locally: ${fmt(views)} views for $${price.toFixed(2)}.`;
+  statusMsg.textContent = `🛒 Saving purchase info locally: ${fmt(views)} views for $${price.toFixed(2)}.`;
 
-// Save purchase info to localStorage for the payment success page to process
-localStorage.setItem('pendingPurchase', JSON.stringify({
-  userId: user.uid,
-  adId,
-  viewsPurchased: views,
-  pricePaid: price,
-  timestamp: Date.now()
-}));
+  localStorage.setItem('pendingPurchase', JSON.stringify({
+    userId: user.uid,
+    adId,
+    viewsPurchased: views,
+    pricePaid: price,
+    timestamp: Date.now()
+  }));
 
-// Redirect user to your PayPal payment page (replace this URL with your actual payment page)
-window.location.href = `/paypal-payment.html?id=${adId}&views=${views}&price=${price.toFixed(2)}`;
+  // No preventDefault here — let PayPal redirect happen
 });
-}
 
 /* Initialize everything */
 async function init() {
@@ -586,8 +583,6 @@ async function init() {
 }
 
 init();
-
 </script>
-
 </body>
 </html>
