@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Promote Your DLS Account</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Promote Your Product</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-      background-color: #000;
+      background: #000;
       color: white;
-      padding: 30px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 30px;
+      padding: 30px 20px;
     }
 
     .title {
-      font-size: 1.7em;
-      font-weight: 700;
-      margin-top: 10px;
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
 
     .preview {
-      width: 100%;
-      max-width: 400px;
-      background-color: #111;
+      background: #111;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      margin-bottom: 30px;
     }
 
     .preview img {
       width: 100%;
-      height: 220px;
+      height: 200px;
       object-fit: cover;
     }
 
-    .preview .content {
+    .preview .info {
       padding: 15px;
     }
 
-    .preview .desc {
+    .desc {
       font-size: 1.1em;
-      margin-bottom: 8px;
       color: #ccc;
+      margin-bottom: 5px;
     }
 
-    .preview .price {
+    .price {
       color: #00ffb3;
       font-size: 1.3em;
       font-weight: 600;
@@ -63,12 +63,12 @@
     }
 
     .form input {
-      padding: 12px 15px;
+      padding: 12px;
       border-radius: 12px;
       border: none;
-      font-size: 1em;
-      background-color: #1c1c1c;
+      background: #1c1c1c;
       color: white;
+      font-size: 1em;
     }
 
     .form input:focus {
@@ -77,23 +77,24 @@
 
     .btn {
       padding: 12px;
-      background-color: #00ffb3;
+      background: #00ffb3;
+      color: #000;
+      font-weight: bold;
       border: none;
       border-radius: 12px;
-      font-weight: bold;
       text-transform: uppercase;
       cursor: pointer;
-      transition: 0.2s;
     }
 
     .btn:hover {
-      background-color: #00e6a6;
+      background: #00e6a6;
     }
 
     .status {
+      text-align: center;
       margin-top: 10px;
-      color: #ccc;
       font-size: 0.9em;
+      color: #ccc;
     }
   </style>
 </head>
@@ -101,16 +102,16 @@
 
   <div class="title">Promote Your DLS Ad</div>
 
-  <div class="preview" id="adPreview">
-    <img src="" alt="Ad Image" id="previewImg">
-    <div class="content">
-      <div class="desc" id="previewDesc">Loading...</div>
+  <div class="preview" id="previewBox">
+    <img id="previewImg" src="https://via.placeholder.com/400x300?text=Loading..." alt="Preview" />
+    <div class="info">
+      <div class="desc" id="previewDesc">Loading description...</div>
       <div class="price" id="previewPrice">$0.00</div>
     </div>
   </div>
 
   <div class="form">
-    <input type="number" id="viewsInput" placeholder="Enter Views per Day (1 - 10000)" min="1" max="10000">
+    <input type="number" id="viewsInput" placeholder="Views per day (1 - 10000)" min="1" max="10000" />
     <button class="btn" id="startAdBtn">Start Promotion</button>
     <div class="status" id="statusMsg"></div>
   </div>
@@ -135,49 +136,64 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    const id = new URLSearchParams(location.search).get("id");
     const previewImg = document.getElementById("previewImg");
     const previewDesc = document.getElementById("previewDesc");
     const previewPrice = document.getElementById("previewPrice");
     const viewsInput = document.getElementById("viewsInput");
-    const statusMsg = document.getElementById("statusMsg");
     const startAdBtn = document.getElementById("startAdBtn");
+    const statusMsg = document.getElementById("statusMsg");
 
     let currentUser = null;
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    console.log("Detected ID:", id);
+
+    if (!id) {
+      previewDesc.innerText = "❌ Missing ad ID in the URL.";
+      startAdBtn.disabled = true;
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
+        console.log("User authenticated:", user.uid);
       } else {
-        statusMsg.innerText = "⚠️ You must be logged in to promote your ad.";
+        statusMsg.innerText = "⚠️ Please login to start promotion.";
         startAdBtn.disabled = true;
       }
     });
 
-    async function loadAdData() {
-      if (!id) return;
+    async function loadAd() {
+      try {
+        const snap = await get(child(ref(db), `dlsaccounts/${id}`));
+        if (!snap.exists()) {
+          previewDesc.innerText = "❌ Ad not found in database.";
+          return;
+        }
 
-      const snap = await get(child(ref(db), `dlsaccounts/${id}`));
-      if (!snap.exists()) {
-        previewDesc.innerText = "Ad not found.";
-        return;
+        const data = snap.val();
+        previewImg.src = data.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image";
+        previewDesc.innerText = data.description?.slice(0, 60) || "No description";
+        previewPrice.innerText = `$${data.price || "0.00"}`;
+
+      } catch (e) {
+        console.error("Failed to load ad:", e);
+        previewDesc.innerText = "🚨 Error loading ad data.";
       }
-
-      const data = snap.val();
-      previewImg.src = data.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image";
-      previewDesc.innerText = data.description?.slice(0, 60) || "Your ad will appear like this.";
-      previewPrice.innerText = `$${data.price || "0.00"}`;
     }
+
+    loadAd();
 
     startAdBtn.onclick = async () => {
       const views = parseInt(viewsInput.value);
       if (isNaN(views) || views < 1 || views > 10000) {
-        statusMsg.innerText = "❌ Enter a valid number between 1 and 10,000.";
+        statusMsg.innerText = "❌ Enter a number between 1 and 10,000.";
         return;
       }
 
       if (!currentUser) {
-        statusMsg.innerText = "⚠️ Please sign in to promote your ad.";
+        statusMsg.innerText = "⚠️ Login required.";
         return;
       }
 
@@ -187,14 +203,13 @@
           viewsPerDay: views,
           startedAt: Date.now()
         });
-        statusMsg.innerText = "✅ Your promotion is now active!";
+
+        statusMsg.innerText = "✅ Promotion started successfully!";
       } catch (e) {
-        statusMsg.innerText = "❌ Failed to start promotion.";
-        console.error(e);
+        console.error("Promotion error:", e);
+        statusMsg.innerText = "❌ Failed to save promotion.";
       }
     };
-
-    loadAdData();
   </script>
 
 </body>
