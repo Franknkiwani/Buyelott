@@ -1413,17 +1413,75 @@ header {
       statusBox.textContent = "⚠️ Failed to send. Try again.";
     });
   }
-  document.getElementById("payBtn").addEventListener("click", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get("id");
-
-  if (productId) {
-    window.location.href = `payments/?id=${encodeURIComponent(productId)}`;
-  } else {
-    alert("Product ID not found in URL.");
-  }
-});
 </script>
+<script type="module">
+  // Import Firebase from CDN (modular SDK, latest)
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, runTransaction, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
+  // Your real Firebase config here:
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  // Initialize Firebase app once
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let currentUser = null;
+
+  // Wait for auth state to load user
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+  });
+
+  // Your button listener with Firebase logic
+  document.getElementById("payBtn").addEventListener("click", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    if (!productId) {
+      alert("Product ID not found in URL.");
+      return;
+    }
+
+    if (!currentUser) {
+      alert("Please log in to proceed with purchase.");
+      return;
+    }
+
+    try {
+      // Increment clicks
+      const clicksRef = ref(db, `products/${productId}/clicks`);
+      await runTransaction(clicksRef, (current) => (current || 0) + 1);
+
+      // Create new order for this user
+      const ordersRef = ref(db, `orders/${currentUser.uid}`);
+      const newOrderRef = push(ordersRef);
+
+      await set(newOrderRef, {
+        productId,
+        status: "pending",
+        createdAt: serverTimestamp(),
+      });
+
+      // Redirect after DB ops
+      window.location.href = `payments/?id=${encodeURIComponent(productId)}`;
+    } catch (err) {
+      console.error("Purchase error:", err);
+      alert("Something went wrong. Try again later.");
+    }
+  });
+</script>
 </body>
 </html>
