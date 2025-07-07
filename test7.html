@@ -3,170 +3,146 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Firebase Chat with Push</title>
+<title>Unread Messages Notification</title>
 <style>
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #121212; color: #eee; margin: 0; padding: 20px;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: #121212;
+    color: #eee;
   }
-  #messages {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #444;
-    padding: 10px;
-    margin-bottom: 10px;
-    background: #222;
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+    user-select: none;
+    z-index: 9999;
   }
-  #input {
-    width: 80%;
-    padding: 8px;
+  #notification {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  button {
-    padding: 8px 12px;
+  #notification svg {
+    width: 28px;
+    height: 28px;
+    fill: #eee;
+    filter: drop-shadow(0 0 1px #0af);
+    transition: fill 0.2s ease;
   }
-  #status {
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #aaa;
+  #notification:hover svg {
+    fill: #1da1f2;
+  }
+  #badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e0245e;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 12px;
+    user-select: none;
+    box-shadow: 0 0 8px #e0245ecc;
+    min-width: 20px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<h2>🔥 Firebase Chat with Push Notifications</h2>
-
-<div id="user-info"></div>
-<button id="signOutBtn" style="display:none;">Sign Out</button>
-
-<div id="chat-section" style="display:none;">
-  <div id="messages"></div>
-  <input id="input" placeholder="Type your message..." autocomplete="off" />
-  <button id="sendBtn">Send</button>
-</div>
-
-<div id="status">Initializing...</div>
+<header>
+  <div id="notification" role="button" tabindex="0" aria-label="Unread Messages">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M20 2H4C2.9 2 2 2.9 2 4v14l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+    <div id="badge" style="display:none;">0</div>
+  </div>
+</header>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
 
 <script>
-  // Your Firebase config
+  // Your Firebase config here
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
     projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
 
   firebase.initializeApp(firebaseConfig);
-
   const auth = firebase.auth();
   const db = firebase.database();
-  const messaging = firebase.messaging();
 
-  const userInfoEl = document.getElementById('user-info');
-  const signOutBtn = document.getElementById('signOutBtn');
-  const chatSection = document.getElementById('chat-section');
-  const messagesEl = document.getElementById('messages');
-  const inputEl = document.getElementById('input');
-  const sendBtn = document.getElementById('sendBtn');
-  const statusEl = document.getElementById('status');
+  const badgeEl = document.getElementById('badge');
+  const notificationEl = document.getElementById('notification');
 
-  // Sign in anonymously
-  async function signIn() {
-    try {
-      await auth.signInAnonymously();
-      statusEl.textContent = 'Signed in anonymously';
-    } catch (e) {
-      statusEl.textContent = 'Sign-in error: ' + e.message;
+  function updateBadge(count) {
+    if (count > 0) {
+      badgeEl.textContent = count > 99 ? '99+' : count;
+      badgeEl.style.display = 'block';
+    } else {
+      badgeEl.style.display = 'none';
     }
   }
 
-  // Request notification permission and get FCM token
-  async function registerFCMToken(user) {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        statusEl.textContent = 'Notification permission denied';
-        return;
+  function listenUnreadMessages(user) {
+    if (!user) return;
+
+    // Listen for unreadCounts for the logged-in user in all chats
+    const chatsRef = db.ref('/chats');
+
+    chatsRef.on('value', snapshot => {
+      const chats = snapshot.val() || {};
+      let totalUnread = 0;
+
+      for (const chatId in chats) {
+        const meta = chats[chatId].meta;
+        if (meta && meta.unreadCounts && meta.unreadCounts[user.uid]) {
+          totalUnread += meta.unreadCounts[user.uid];
+        }
       }
-      statusEl.textContent = 'Notification permission granted. Getting token...';
-
-      const token = await messaging.getToken({
-        vapidKey: 'BKnnH4sEI54qErGt9B_YCxGyCwpWx-Wk7D-edWaQSt_ZXYmZlwSBYbVx5Li3BjT3Gzr2rYM2dVBwFtpNreYDkjc' // Your public VAPID key
-      });
-
-      if (token) {
-        statusEl.textContent = 'FCM Token received and saved!';
-        await db.ref('fcmTokens/' + user.uid).set(token);
-        console.log('FCM Token:', token);
-      } else {
-        statusEl.textContent = 'No FCM token received.';
-      }
-    } catch (e) {
-      statusEl.textContent = 'Error getting notification permission or token: ' + e.message;
-    }
-  }
-
-  // Listen to new chat messages
-  function listenMessages() {
-    db.ref('messages').limitToLast(50).on('child_added', snapshot => {
-      const msg = snapshot.val();
-      const el = document.createElement('div');
-      el.textContent = `${msg.sender}: ${msg.text}`;
-      messagesEl.appendChild(el);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      updateBadge(totalUnread);
     });
   }
 
-  // Send message to DB
-  async function sendMessage(text, uid) {
-    if (!text.trim()) return;
-    const message = {
-      text,
-      sender: uid,
-      timestamp: Date.now()
-    };
-    await db.ref('messages').push(message);
-    inputEl.value = '';
-  }
-
-  // Auth state change handler
-  auth.onAuthStateChanged(async user => {
+  auth.onAuthStateChanged(user => {
     if (user) {
-      userInfoEl.textContent = `User ID: ${user.uid}`;
-      signOutBtn.style.display = 'inline-block';
-      chatSection.style.display = 'block';
-      statusEl.textContent = 'Registering for push notifications...';
-      await registerFCMToken(user);
-      listenMessages();
+      listenUnreadMessages(user);
     } else {
-      userInfoEl.textContent = 'Not signed in';
-      signOutBtn.style.display = 'none';
-      chatSection.style.display = 'none';
-      statusEl.textContent = 'Please sign in';
-      await signIn();
+      badgeEl.style.display = 'none';
+      // Redirect or show login if needed
+      console.log('Not logged in');
     }
   });
 
-  signOutBtn.onclick = () => auth.signOut();
-
-  sendBtn.onclick = () => {
-    const user = auth.currentUser;
-    if (!user) return;
-    sendMessage(inputEl.value, user.uid);
-  };
-
-  // Optional: Listen for foreground messages
-  messaging.onMessage(payload => {
-    console.log('Foreground message received: ', payload);
-    // You can show a toast or alert here if you want
+  // Optional: add click handler on notification icon
+  notificationEl.addEventListener('click', () => {
+    alert('Open your messages or inbox page here!');
+  });
+  notificationEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      notificationEl.click();
+    }
   });
 </script>
 
