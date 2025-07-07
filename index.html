@@ -5,30 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>dlsaccounts</title>
 <style>
-body {
+/* 🌍 GLOBAL RESET + BASE STYLES */
+* {
   margin: 0;
-  background-color: #000;
-  color: #e0e0e0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background-color: #000000;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 📌 STICKY HEADER */
 header {
-  height: 40px; /* small header height */
-  background-color: #111; /* dark but slightly lighter than body */
-  color: #eee;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  height: 60px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.1);
-  user-select: text; /* let user select header text if needed */
+  justify-content: space-between;
+  padding: 0 20px;
   flex-shrink: 0;
 }
+
+/* ✨ DECORATIVE LINE UNDER HEADER */
+header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(to right, #1f1f1f, #2d2d2d, #1f1f1f);
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.12);
+}
+
+/* 📱 RESPONSIVE MAIN */
+main {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-top: 60px; /* header height */
+  background-color: #000;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ✅ PREVENT DOUBLE SPACING */
+main > *:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* 📏 RESPONSIVE HELPERS */
+@media (max-width: 768px) {
+  header {
+    padding: 0 16px;
+  }
+}
+
 /* Ensure product cards sit neatly under main */
 #productList {
   margin-top: 0 !important;
@@ -112,6 +167,38 @@ header {
     background: rgba(0, 255, 255, 0.25);
     color: #a0ffff;
   }
+main {
+  flex: 1;
+  background-color: #000000;
+  padding-top: 64px; /* match desktop header height */
+  display: block; /* no flex to avoid centering */
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* match mobile header height */
+  }
+}
+  /* Prevent text selection and copying everywhere */
+* {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+  user-select: none;         /* Standard */
+  -webkit-touch-callout: none; /* Disable callout on iOS */
+  -webkit-user-drag: none;     /* Disable dragging images/text */
+}
+
+/* Responsive header tweaks */
+@media (max-width: 480px) {
+  header {
+    height: 50px !important; /* smaller height on mobile */
+    padding: 0 12px !important; /* less horizontal padding */
+  }
 
   .logo-icon-wrapper {
     width: 24px !important;
@@ -133,6 +220,13 @@ header {
     font-size: 0.9rem !important;
   }
 }
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;  /* full width always */
+    height: 50px !important; /* shorter height */
+    padding: 0 12px !important;
+    box-sizing: border-box;  /* avoid overflow */
+  }
 
   /* rest remains the same */
   .logo-icon-wrapper {
@@ -165,6 +259,13 @@ header {
   outline: none;
   box-shadow: 0 0 6px rgba(0, 255, 255, 0.5); /* optional: custom subtle glow for focus */
 }
+@media (max-width: 480px) {
+  header {
+    width: 100% !important;
+    height: 46px !important; /* slightly shorter header */
+    padding: 0 8px !important;
+    box-sizing: border-box;
+  }
 
   .logo {
     gap: 6px !important;
@@ -197,6 +298,13 @@ header {
     gap: 10px !important;
   }
 }
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 42px !important;       /* tighter height */
+    padding: 0 6px !important;     /* minimal padding */
+    gap: 0;
+  }
 
   .logo {
     gap: 4px !important;
@@ -229,6 +337,13 @@ header {
     border-radius: 14px !important;
   }
 }
+@media (max-width: 480px) {
+  header {
+    width: 100%;
+    height: 56px !important;         /* ✅ More height for visibility */
+    padding: 0 12px !important;      /* ✅ Room for breathing */
+    box-sizing: border-box;
+  }
 
   .logo {
     gap: 8px !important;
@@ -841,6 +956,18 @@ body.tablet #productList {
   }
 }
 
+/* 4) When loading, prevent scrolling */
+body.loading {
+  overflow: hidden;
+}
+
+/* Optional — for mobile-specific tuning */
+@media (max-width: 500px) {
+  header {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+  }
+}
 
 #skeletonContainer {
   position: absolute;
@@ -894,6 +1021,15 @@ body.tablet #productList {
     0% { background-position: -400% 0; }
     100% { background-position: 400% 0; }
   }
+main {
+  padding-top: 64px; /* same height as header */
+}
+
+@media (max-width: 500px) {
+  main {
+    padding-top: 56px; /* shorter on mobile if your header is smaller there */
+  }
+}
 
 #productList {
   margin-top: 0 !important; /* kill top margin */
@@ -902,142 +1038,6 @@ body.tablet #productList {
 #productList {
   margin-top: 0 !important;
   padding: 0 12px !important; /* keep horizontal padding if needed */
-}
-
-.search-filter-bar {
-  display: flex;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(28, 28, 30, 0.8);
-  backdrop-filter: saturate(180%) blur(12px);
-  border-radius: 16px;
-  margin: 12px auto;
-  width: 80%;
-  max-width: 600px;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  color: #f0f0f5;
-
-  /* Responsive stacking for mobile */
-  flex-wrap: wrap; 
-  justify-content: center;
-}
-
-.search-filter-bar input,
-.search-filter-bar select {
-  flex: 1 1 200px; /* grow/shrink, min width */
-  min-width: 140px;
-  max-width: 100%;
-  height: 36px;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 400;
-  outline-offset: 2px;
-  outline-color: #0a84ff;
-  background: rgba(44, 44, 46, 0.8);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
-  color: #f0f0f5;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  margin-bottom: 8px; /* space if stacked */
-}
-
-.search-filter-bar input::placeholder {
-  color: #8e8e93;
-}
-
-.search-filter-bar select {
-  max-width: 140px;
-  cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image:
-    url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3e%3cpath fill='%23999' d='M6 7L0 0h12z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px 7px;
-  padding-right: 30px;
-  margin-bottom: 8px;
-}
-
-/* Optional: on wider screens remove bottom margin */
-@media (min-width: 501px) {
-  .search-filter-bar input,
-  .search-filter-bar select {
-    margin-bottom: 0;
-  }
-}
-#searchFilterContainer {
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-#searchFilterContainer.show {
-  display: block !important;
-  opacity: 1;
-}
-/* ✅ Unified CSS Fixes for Cards & Ads */
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
-  padding: 0 8px;
-  margin: 0;
-}
-
-.card,
-.ad-card {
-  margin: 0;
-  padding: 0;
-  border-radius: 12px;
-  background: #1a1a1c;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-}
-
-.card img,
-.ad-card img {
-  border-radius: 12px;
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-#adContainer {
-  margin-top: 12px;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-
-.ad-card {
-  max-width: 350px;
-  padding: 8px;
-}
-
-#productList {
-  padding: 0;
-  margin: 0;
-}
-
-.seller-profile {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Optional: remove weird page padding/margins */
-main, .product-page, body {
-  margin: 0;
-  padding: 0;
 }
 /* Container styling for ads row */
 #adContainer {
@@ -1228,7 +1228,215 @@ main, .product-page, body {
     width: 95%;
   }
 }
+.search-filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(28, 28, 30, 0.8);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-radius: 16px;
+  margin: 12px auto;
+  width: 80%;
+  max-width: 600px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #f0f0f5;
+
+  /* Responsive stacking for mobile */
+  flex-wrap: wrap; 
+  justify-content: center;
+}
+
+.search-filter-bar input,
+.search-filter-bar select {
+  flex: 1 1 200px; /* grow/shrink, min width */
+  min-width: 140px;
+  max-width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 400;
+  outline-offset: 2px;
+  outline-color: #0a84ff;
+  background: rgba(44, 44, 46, 0.8);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  color: #f0f0f5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-bottom: 8px; /* space if stacked */
+}
+
+.search-filter-bar input::placeholder {
+  color: #8e8e93;
+}
+
+.search-filter-bar select {
+  max-width: 140px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image:
+    url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3e%3cpath fill='%23999' d='M6 7L0 0h12z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 7px;
+  padding-right: 30px;
+  margin-bottom: 8px;
+}
+
+/* Optional: on wider screens remove bottom margin */
+@media (min-width: 501px) {
+  .search-filter-bar input,
+  .search-filter-bar select {
+    margin-bottom: 0;
+  }
+}
+#searchFilterContainer {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#searchFilterContainer.show {
+  display: block !important;
+  opacity: 1;
+}
+/* ✅ Unified CSS Fixes for Cards & Ads */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 0 8px;
+  margin: 0;
+}
+
+.card,
+.ad-card {
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  background: #1a1a1c;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.card img,
+.ad-card img {
+  border-radius: 12px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#adContainer {
+  margin-top: 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ad-card {
+  max-width: 350px;
+  padding: 8px;
+}
+
+#productList {
+  padding: 0;
+  margin: 0;
+}
+
+.seller-profile {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Optional: remove weird page padding/margins */
+main, .product-page, body {
+  margin: 0;
+  padding: 0;
+}
+
 </style>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sponsored-banner {
+      width: 80%;
+      height: 50px;
+      margin: 12px auto;
+      background: linear-gradient(to right, #2196f3, #21cbf3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sponsored-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .sponsored-left img {
+      height: 36px;
+      width: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .sponsored-text {
+      display: flex;
+      flex-direction: column;
+      font-size: 12px;
+      overflow: hidden;
+    }
+
+    .sponsored-text span:first-child {
+      font-weight: bold;
+      font-size: 13px;
+      color: #e0f7fa;
+    }
+
+    .sponsored-text span:last-child {
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 45vw;
+    }
+
+    .sponsored-right a {
+      padding: 5px 12px;
+      background: white;
+      color: #007aff;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 13px;
+      transition: background 0.2s ease;
+    }
+
+    .sponsored-right a:hover {
+      background: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
 
@@ -1246,6 +1454,19 @@ main, .product-page, body {
 </header>
 
 <main>
+  <!-- Banner Container -->
+<div class="sponsored-banner">
+  <div class="sponsored-left">
+    <img id="accountImage" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ51hPjuROwjdIhkYp_CNuCvlnrnfTgUPfGFtR1So3BVDMBm8ZxUtNg1bc&s=10" alt="Sponsored Account" />
+    <div class="sponsored-text">
+      <span>Sponsored Account</span>
+      <span id="accountTitle">DLS Accounts For Sale</span>
+    </div>
+  </div>
+  <div class="sponsored-right">
+    <a id="viewBtn" href="https://otieu.com/4/7950037" target="_blank">View</a>
+  </div>
+</div>
 <div id="searchFilterContainer" style="display: none;">
   <div class="search-filter-bar">
     <input type="text" id="searchInput" placeholder="Search accounts..." />
@@ -1289,6 +1510,72 @@ main, .product-page, body {
     <button onclick="closeLoginModal()" class="modal-close">Close</button>
   </div>
 </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.appspot.com",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const fallbackImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ51hPjuROwjdIhkYp_CNuCvlnrnfTgUPfGFtR1So3BVDMBm8ZxUtNg1bc&s=10";
+  const fallbackTitle = "DLS Accounts For Sale";
+  const fallbackLink = "https://otieu.com/4/7950037";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const imageEl = document.getElementById("accountImage");
+    const titleEl = document.getElementById("accountTitle");
+    const viewBtn = document.getElementById("viewBtn");
+
+    // Show fallback immediately
+    imageEl.src = fallbackImage;
+    titleEl.textContent = fallbackTitle;
+    viewBtn.href = fallbackLink;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      get(child(ref(db), "sponsored"))
+        .then(snapshot => {
+          if (snapshot.exists()) {
+            const sponsoredData = snapshot.val();
+            const entries = Object.entries(sponsoredData);
+
+            if (entries.length > 0) {
+              // Randomly pick one
+              const [id, data] = entries[Math.floor(Math.random() * entries.length)];
+
+              // Defensive checks
+              const title = data && data.title ? data.title : fallbackTitle;
+              const images = data && Array.isArray(data.images) ? data.images : [];
+              const image = images.length > 0 ? images[0] : fallbackImage;
+              const link = id ? `https://cyberchat.online/product?id=${encodeURIComponent(id)}` : fallbackLink;
+
+              imageEl.src = image;
+              titleEl.textContent = title;
+              viewBtn.href = link;
+            } else {
+              console.warn("Sponsored data empty, using fallback.");
+            }
+          } else {
+            console.warn("No sponsored data found, using fallback.");
+          }
+        })
+        .catch(error => {
+          console.error("Firebase read failed, using fallback.", error);
+        });
+    } catch (e) {
+      console.error("Firebase init error:", e);
+    }
+  });
+</script>
 <script type="module">
 // ✅ Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
