@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout – DLS Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* --- Basic Reset & Font --- */
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f2f3f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    /* --- Sticky Support Header --- */
+    .support-header {
+      width: 100%;
+      background: #fff;
+      padding: 12px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #eee;
+      border-radius: 0 0 12px 12px;
+    }
+    .support-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .support-links a {
+      text-decoration: none;
+      color: #0070f3;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .support-links a:hover {
+      color: #004bb5;
+    }
+
+    /* --- Main Container --- */
+    .checkout-container {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+      margin-top: 80px;
+      box-sizing: border-box;
+    }
+
+    /* --- Seller Info --- */
+    .seller-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      background: #fafafa;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid #eee;
+    }
+    .seller-info img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ddd;
+    }
+    .seller-info div p {
+      margin: 0;
+      font-size: 12px;
+      color: #777;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .seller-info div strong {
+      font-size: 16px;
+      color: #222;
+      display: block;
+    }
+
+    /* --- Product Info --- */
+    .product-display img {
+      width: 100%;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      object-fit: cover;
+      max-height: 220px;
+    }
+    .product-display h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+      font-weight: 700;
+    }
+    .product-display p {
+      margin: 0;
+      color: #555;
+      font-size: 14px;
+      min-height: 36px;
+    }
+    .price {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111;
+      margin-top: 10px;
+    }
+
+    /* --- PayPal Button --- */
+    #paypal-button-container {
+      margin-top: 20px;
+    }
+
+    /* --- Login Warning --- */
+    #login-warning {
+      margin-top: 16px;
+      color: #b00;
+      font-weight: 600;
+      display: none;
+      text-align: center;
+    }
+
+    /* --- Modal --- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #222;
+    }
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .modal-content input[readonly] {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    .modal-content button {
+      margin-top: 15px;
+      background: #0070f3;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-weight: 600;
+    }
+    .modal-content button:hover {
+      background: #005bb5;
+    }
+    .modal-content .success {
+      margin-top: 12px;
+      color: green;
+      font-weight: bold;
+    }
+    #modal-close {
+      background: #ddd;
+      color: #000;
+      margin-top: 10px;
+      width: 100%;
+      font-weight: 600;
+    }
+    #modal-close:hover {
+      background: #bbb;
+    }
+  </style>
+
+  <!-- Firebase and PayPal SDK scripts loaded dynamically -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentUser = null;
+    let currentProduct = null;
+    let productId = new URLSearchParams(window.location.search).get("id");
+
+    async function loadProduct() {
+      if (!productId) {
+        alert("Product ID missing in URL.");
+        return;
+      }
+
+      const snap = await get(ref(db, `/dlsaccounts/${productId}`));
+      if (!snap.exists()) {
+        alert("Product not found.");
+        return;
+      }
+
+      const product = snap.val();
+      currentProduct = { ...product, id: productId };
+
+      // Update product UI
+      document.getElementById("product-title").textContent = product.title || "Untitled Product";
+      document.getElementById("product-desc").textContent = product.description || "No description available.";
+      document.getElementById("product-price").textContent = `$${Number(product.price).toFixed(2)}`;
+      document.getElementById("product-image").src = product.image || "https://via.placeholder.com/400x220.png?text=No+Image";
+
+      // Load seller info if exists
+      if (product.seller) {
+        const sellerSnap = await get(ref(db, `/users/${product.seller}`));
+        if (sellerSnap.exists()) {
+          const seller = sellerSnap.val();
+          document.getElementById("sellerPic").src = seller.profilePic || "https://via.placeholder.com/48";
+          document.getElementById("sellerName").textContent = seller.username || "Unnamed Seller";
+          document.getElementById("sellerInfo").style.display = "flex";
+        }
+      }
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        document.getElementById("login-warning").style.display = "block";
+        return;
+      }
+      currentUser = user;
+      document.getElementById("userEmail").value = user.email || "";
+      loadProduct().then(loadPayPal);
+    });
+
+    function loadPayPal() {
+      const script = document.createElement("script");
+      script.src = "https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD";
+      script.onload = renderPayPalButton;
+      document.body.appendChild(script);
+    }
+
+    function renderPayPalButton() {
+      if (!currentProduct) {
+        alert("Product not loaded yet.");
+        return;
+      }
+paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'blue',
+          shape: 'pill',
+          label: 'paypal'
+        },
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: { value: Number(currentProduct.price).toFixed(2) },
+              description: currentProduct.title
+            }]
+          });
+        },
+        onApprove: async (data, actions) => {
+          const details = await actions.order.capture();
+          const orderRef = ref(db, `orders/${currentUser.uid}`);
+          const newOrder = push(orderRef);
+
+          await set(newOrder, {
+            productId: currentProduct.id,
+            productTitle: currentProduct.title,
+            price: currentProduct.price,
+            buyerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
+            buyerEmail: details.payer.email_address,
+            paypalOrderID: details.id,
+            createdAt: Date.now()
+          });
+
+          alert("✅ Payment successful! Order saved.");
+        },
+        onCancel: () => alert("❌ Payment canceled."),
+        onError: err => {
+          console.error(err);
+          alert("⚠️ Payment error occurred. Check console.");
+        }
+      }).render("#paypal-button-container");
+    }
+
+    // Modal controls
+    window.showModal = (title) => {
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("userMessage").value = "";
+      document.querySelector(".success").textContent = "";
+      document.getElementById("supportModal").style.display = "flex";
+    };
+
+    window.hideModal = () => {
+      document.getElementById("supportModal").style.display = "none";
+    };
+
+    window.sendSupport = async () => {
+      const email = document.getElementById("userEmail").value.trim();
+      const message = document.getElementById("userMessage").value.trim();
+      if (!email || !message) return alert("Please fill in both email and message.");
+
+      const msgRef = push(ref(db, "contactus"));
+      await set(msgRef, {
+        email,
+        message,
+        timestamp: Date.now()
+      });
+
+      document.querySelector(".success").textContent = "✅ Message sent!";
+      document.getElementById("userMessage").value = "";
+    };
+  </script>
+</head>
+<body>
+
+  <div class="support-header">
+    <div class="support-links">
+      <a href="#" onclick="showModal('Contact Us')">Contact Us</a>
+      <a href="#" onclick="showModal('Report Issue')">Report Issue</a>
+      <a href="#" onclick="showModal('Other Support')">Other Support</a>
+    </div>
+  </div>
+
+  <main class="checkout-container">
+
+    <div id="login-warning" style="display:none;">
+      Please log in to proceed with your purchase.
+    </div>
+
+    <div class="seller-info" id="sellerInfo" style="display:none;">
+      <img id="sellerPic" src="" alt="Seller Profile" />
+      <div>
+        <p>Seller</p>
+        <strong id="sellerName">Loading...</strong>
+      </div>
+    </div>
+
+    <div class="product-display">
+      <img id="product-image" src="https://via.placeholder.com/400x220.png?text=Loading..." alt="Product Image" />
+      <h1 id="product-title">Loading product...</h1>
+      <p id="product-desc">Please wait while we fetch product details.</p>
+      <p class="price" id="product-price"></p>
+    </div>
+
+    <div id="paypal-button-container"></div>
+
+  </main>
+
+  <!-- Modal for Contact/Report/Other -->
+  <div id="supportModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h2 id="modal-title">Support</h2>
+      <input type="email" id="userEmail" readonly placeholder="Your Email" />
+      <textarea id="userMessage" rows="5" placeholder="Write your message here..."></textarea>
+      <button onclick="sendSupport()">Send</button>
+      <button id="modal-close" onclick="hideModal()">Cancel</button>
+      <p class="success"></p>
+    </div>
+  </div>
+
+</body>
+</html>
