@@ -919,6 +919,36 @@ header {
   height: 20px;
   fill: white;
 }
+.secure-pay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(145deg, #d4af37, #b8860b);
+  color: #fffbe6;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.secure-pay-btn:hover {
+  background: linear-gradient(145deg, #b8860b, #d4af37);
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.5);
+}
+
+.lock-icon {
+  width: 20px;
+  height: 20px;
+  fill: #fffbe6;
+}
 
 </style>
 <div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle" style="display: none;">  
@@ -937,13 +967,13 @@ header {
   
       <div class="error" id="step1Error"></div>  
       <button id="step1NextBtn">Send Request</button>  
-  </div>
-  <button class="buy-now-btn" id="payBtn">
-  <svg viewBox="0 0 24 24">
-    <path d="M12 1l9 4v6c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V5l9-4zm0 2.18L5 6.09v4.91c0 4.47 3.11 8.97 7 10.11 3.89-1.14 7-5.64 7-10.11V6.09l-7-2.91zM11 10h2v5h-2v-5zm0-4h2v2h-2V6z"/>
+ <button class="secure-pay-btn" id="payBtn">
+  <svg viewBox="0 0 24 24" class="lock-icon">
+    <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 016 0v3H9V7zm10 5v8H5v-8h14z"/>
   </svg>
-  Buy Now
+  BUY NOW
 </button>
+  </div>
 </div>
     </div>  
   
