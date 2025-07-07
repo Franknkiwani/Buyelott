@@ -1,337 +1,159 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat with Seller</title>
-  <style>
-    /* Reset */
-    * {
-      box-sizing: border-box;
-    }
-    body, html {
-      margin: 0; padding: 0;
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background-color: #121212;
-      color: #eee;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background: #1da1f2;
-      border-bottom: 1px solid #0c7ddb;
-      display: flex;
-      align-items: center;
-      padding: 0 15px;
-      gap: 12px;
-      z-index: 1000;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-      user-select: none;
-    }
-    header img {
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your Inbox</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: #121212;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    background: #1da1f2;
+    color: #fff;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    position: fixed;
+    width: 100%;
+    top: 0; left: 0;
+    z-index: 1000;
+    border-bottom: 2px solid #0c7ddb;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    user-select: none;
+    letter-spacing: 0.03em;
+  }
+  main {
+    margin-top: 64px;
+    flex: 1;
+    overflow-y: auto;
+    background: #121212;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+  }
+  .chat-item:hover,
+  .chat-item:focus-visible {
+    background: #1a1a1a;
+    outline: none;
+  }
+  .avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-right: 14px;
+  }
+  .chat-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+    display: block;
+  }
+  .chat-item.unread .chat-avatar {
+    border-color: #ff3b30;
+  }
+  .unread-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ff3b30;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+    box-shadow: 0 0 4px rgba(255, 59, 48, 0.6);
+    user-select: none;
+  }
+  .chat-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .chat-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+  }
+  .chat-last-message {
+    font-size: 0.9rem;
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+  }
+  .chat-timestamp {
+    font-size: 0.8rem;
+    color: #666;
+    margin-left: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+  .no-chats {
+    margin: 32px 16px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    font-size: 1rem;
+    user-select: none;
+  }
+  .chat-item:focus-visible {
+    outline: 2px solid #1da1f2;
+    outline-offset: 2px;
+  }
+  @media (max-width: 360px) {
+    .chat-avatar {
       width: 44px;
       height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
-      flex-shrink: 0;
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
-    #sellerName {
-      font-weight: 700;
-      font-size: 1.25rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex-grow: 1;
-    }
-
-    #productPreview {
-      margin-top: 60px; /* header height */
-      background: #181818;
-      border-bottom: 1px solid #222;
-      padding: 12px 16px;
-      position: sticky;
-      top: 60px;
-      z-index: 900;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.15s ease;
-    }
-    #productPreview:hover {
-      background-color: #222;
-    }
-    #productPreview img {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #222;
-      box-shadow: 0 0 8px rgba(0,0,0,0.6);
-      flex-shrink: 0;
-    }
-    #productPreview div {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      overflow: hidden;
-    }
-    #productPreview strong {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #eee;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    #productPreview p {
-      margin: 2px 0 0;
-      color: #aaa;
-      font-size: 0.85rem;
-      user-select: none;
-    }
-
-    #chatContainer {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px 16px 90px; /* bottom space for input */
-      background: #121212;
-      scroll-behavior: smooth;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 14px 18px;
+    .chat-name {
       font-size: 1rem;
-      line-height: 1.4;
-      border-radius: 20px;
-      position: relative;
-      word-wrap: break-word;
-      user-select: text;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-      display: inline-block;
-      transition: background-color 0.3s ease;
     }
-    .message.self {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #0f7cf9, #30a0f9);
-      color: #fff;
-      border-bottom-right-radius: 6px;
+    .chat-last-message {
+      font-size: 0.85rem;
     }
-    .message.seller {
-      align-self: flex-start;
-      background: #1a1a1a;
-      color: #eee;
-      border-bottom-left-radius: 6px;
+    .chat-timestamp {
+      font-size: 0.7rem;
+      margin-left: 8px;
     }
-    .message .prefix {
-      font-weight: 600;
-      margin-bottom: 4px;
-      display: block;
-      color: #a0cfff;
-    }
-    .message .timestamp {
-      font-size: 10px;
-      opacity: 0.4;
-      position: absolute;
-      bottom: 6px;
-      right: 12px;
-      user-select: none;
-    }
-    .message a {
-      color: #a0d8ff;
-      text-decoration: underline;
-      word-break: break-word;
-    }
-
-    #chatForm {
-      position: fixed;
-      bottom: 0; left: 0; width: 100%;
-      background: #181818;
-      padding: 12px 16px;
-      display: flex;
-      gap: 12px;
-      box-shadow: 0 -2px 12px rgba(0,0,0,0.7);
-      z-index: 1100;
-    }
-    #messageInput {
-      flex: 1;
-      border-radius: 30px;
-      border: none;
-      padding: 14px 18px;
-      font-size: 1.1rem;
-      background: #222;
-      color: #eee;
-      outline-offset: 2px;
-      outline-color: #1da1f2;
-      caret-color: #1da1f2;
-      transition: background-color 0.3s ease;
-    }
-    #messageInput::placeholder {
-      color: #888;
-    }
-    #messageInput:focus {
-      background-color: #2c2c2c;
-    }
-    #sendBtn {
-      background: #1da1f2;
-      border: none;
-      border-radius: 30px;
-      padding: 0 24px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #000;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-      min-width: 72px;
-    }
-    #sendBtn:disabled {
-      background: #444;
-      cursor: not-allowed;
-    }
-    #sendBtn:hover:not(:disabled) {
-      background: #2b8afc;
-    }
-
-    /* New message badge for demo purposes */
-    #newMessageBadge {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: #e0245e;
-      color: white;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 6px 12px;
-      border-radius: 18px;
-      user-select: none;
-      box-shadow: 0 0 10px #e0245eaa;
-      display: none;
-      z-index: 1200;
-    }
-
-    /* Scrollbar style for chat container */
-    #chatContainer::-webkit-scrollbar {
-      width: 8px;
-    }
-    #chatContainer::-webkit-scrollbar-track {
-      background: #181818;
-    }
-    #chatContainer::-webkit-scrollbar-thumb {
-      background-color: #555;
-      border-radius: 10px;
-    }
-    @media (max-width: 480px) {
-      #productPreview {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      #productPreview img {
-        width: 48px;
-        height: 48px;
-      }
-      #chatContainer {
-        padding-left: 10px;
-        padding-right: 10px;
-        padding-bottom: 80px;
-      }
-      #messageInput {
-        font-size: 1rem;
-      }
-      #sendBtn {
-        min-width: 56px;
-        font-size: 1rem;
-        padding: 0 18px;
-      }
-    }
-    #loadingScreen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background-color: #121212;
-  color: #eee;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 1500;
-  user-select: none;
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-#loadingScreen.hide {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.spinner {
-  border: 4px solid #222;
-  border-top: 4px solid #1da1f2;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 12px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.loadingText {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
-  </style>
+  }
+</style>
 </head>
 <body>
+<header>Your Inbox</header>
+<main id="inboxContainer">
+  <div class="no-chats">Loading chats...</div>
+</main>
 
-<header>
-  <img id="sellerAvatar" src="https://via.placeholder.com/40?text=👤" alt="Seller Avatar" />
-  <div id="sellerName">Loading seller...</div>
-</header>
-
-<div id="productPreview" tabindex="0" aria-label="Product preview"></div>
-
-<div id="chatContainer" role="log" aria-live="polite" aria-relevant="additions"></div>
-
-<form id="chatForm" aria-label="Send a message">
-  <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" aria-required="true" />
-  <button id="sendBtn" type="submit" disabled aria-disabled="true">Send</button>
-</form>
-<div id="loadingScreen" aria-live="polite" aria-label="Loading chat" role="alert">
-  <div class="spinner"></div>
-  <div class="loadingText">Loading chat…</div>
-</div>
-<div id="newMessageBadge" aria-live="assertive" aria-atomic="true">+0</div>
-
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -347,24 +169,20 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const sellerAvatarEl = document.getElementById('sellerAvatar');
-  const sellerNameEl = document.getElementById('sellerName');
-  const productPreviewEl = document.getElementById('productPreview');
-  const chatContainer = document.getElementById('chatContainer');
-  const chatForm = document.getElementById('chatForm');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const newMessageBadge = document.getElementById('newMessageBadge');
+  const inboxContainer = document.getElementById('inboxContainer');
 
   let currentUser = null;
-  let sellerUid = null;
-  let sellerName = '';
-  let sellerAvatar = '';
-  let productId = null;
-  let chatId = null;
+  let chatsData = {};
 
-  let unreadCount = 0;
-  let lastReadTimestamp = 0;
+  function formatTimestamp(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+    return d.toLocaleDateString();
+  }
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -372,401 +190,86 @@
     return div.innerHTML;
   }
 
-  function formatTimestamp(ts) {
-    const date = new Date(ts);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function getChatId(uid1, uid2) {
-    return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
-  }
-
-  function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-
-  function linkify(text) {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
-  }
-
-  // Prefix format: "You - " or "@username - "
-  function createMessagePrefix(senderUid) {
-    if (senderUid === currentUser.uid) return "You - ";
-    else return "@" + (senderUid === sellerUid ? sellerName : "Other") + " - ";
-  }
-
-  function addMessageBubble(text, senderUid, timestamp) {
-    const div = document.createElement('div');
-    div.classList.add('message');
-
-    if (senderUid === currentUser.uid) div.classList.add('self');
-    else if (senderUid === sellerUid) div.classList.add('seller');
-    else div.classList.add('system');
-
-    const prefixText = createMessagePrefix(senderUid);
-    const escapedText = escapeHtml(text);
-    const linkedText = linkify(escapedText);
-
-    div.innerHTML = `
-      <span class="prefix">${prefixText}</span>
-      <span>${linkedText}</span>
-      <span class="timestamp">${formatTimestamp(timestamp)}</span>
-    `;
-
-    chatContainer.appendChild(div);
-
-    // Manage unread badge
-    if (timestamp > lastReadTimestamp && senderUid !== currentUser.uid) {
-      unreadCount++;
-      updateUnreadBadge();
+  async function fetchUserProfile(uid) {
+    try {
+      const snap = await db.ref(`/users/${uid}`).once('value');
+      const user = snap.val();
+      if(user) return {username: user.username || 'Unknown', avatar: user.avatar || 'https://via.placeholder.com/48?text=👤'};
+      return {username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤'};
+    } catch {
+      return {username: 'Unknown', avatar: 'https://via.placeholder.com/48?text=👤'};
     }
   }
 
-  function updateUnreadBadge() {
-    if (unreadCount > 0) {
-      newMessageBadge.textContent = unreadCount > 9 ? "+9" : "+" + unreadCount;
-      newMessageBadge.style.display = 'block';
-    } else {
-      newMessageBadge.style.display = 'none';
+  async function renderInbox() {
+    inboxContainer.innerHTML = '';
+    if (!Object.keys(chatsData).length) {
+      inboxContainer.innerHTML = '<div class="no-chats">No chats yet. Start a conversation!</div>';
+      return;
     }
-  }
+    for (const [chatId, chatMeta] of Object.entries(chatsData)) {
+      const users = chatMeta.users || {};
+      const otherUid = Object.keys(users).find(uid => uid !== currentUser.uid);
+      if (!otherUid) continue;
 
-  function markAllRead() {
-    unreadCount = 0;
-    updateUnreadBadge();
-    lastReadTimestamp = Date.now();
+      const otherProfile = await fetchUserProfile(otherUid);
+      const unread = (chatMeta.unreadCounts && chatMeta.unreadCounts[currentUser.uid]) || 0;
+      const lastMsg = chatMeta.lastMessage || '';
+      const lastSender = chatMeta.lastMessageSender || '';
+      let preview = (lastSender === currentUser.uid) ? `you: ${lastMsg}` : `@${otherProfile.username}: ${lastMsg}`;
+      const lastTime = chatMeta.lastTimestamp || 0;
 
-    // Update lastReadTimes in meta for current user
-    const metaRef = db.ref(`/chats/${chatId}/meta/lastReadTimes/${currentUser.uid}`);
-    metaRef.set(lastReadTimestamp);
-  }
-
-  async function loadChatByChatId(chatIdParam) {
-  const metaRef = db.ref(`/chats/${chatIdParam}/meta`);
-  let metaSnap = await metaRef.once('value');
-  let meta = metaSnap.val();
-
-  if (!meta) {
-    // Meta missing? Create it on the spot
-    // Figure out who’s the other user by splitting chatId
-    const [uid1, uid2] = chatIdParam.split('_');
-    const otherUid = uid1 === currentUser.uid ? uid2 : uid1;
-
-    const newMeta = {
-      users: {
-        [currentUser.uid]: true,
-        [otherUid]: true,
-      },
-      lastMessage: '',
-      lastTimestamp: 0,
-      lastReadTimes: {
-        [currentUser.uid]: 0,
-        [otherUid]: 0,
-      }
-    };
-
-    await metaRef.set(newMeta);
-    meta = newMeta;
-  }
-
-  const otherUsers = Object.keys(meta.users).filter(uid => uid !== currentUser.uid);
-  sellerUid = otherUsers[0];
-
-  // Load seller profile or fallback...
-  // ... rest of your code
-
-  chatId = chatIdParam;
-}
-
-  async function loadChatByProductId(productIdParam) {
-    const productSnap = await db.ref(`/dlsaccounts/${productIdParam}`).once('value');
-    const product = productSnap.val();
-    if (!product) throw new Error('Product not found');
-
-    productPreviewEl.innerHTML = `
-      <a href="https://cyberchat.online/product?id=${productIdParam}" target="_blank" rel="noopener" tabindex="0" aria-label="View product details">
-        <img src="${product.images?.[0] || 'https://via.placeholder.com/80'}" alt="Product" />
-        <div>
-          <strong>${escapeHtml(product.title || 'Unnamed Account')}</strong>
-          <p>Tap to view product 👇</p>
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item' + (unread ? ' unread' : '');
+      chatDiv.title = `${otherProfile.username}\n${preview}`;
+      chatDiv.tabIndex = 0;
+      chatDiv.setAttribute('role', 'button');
+      chatDiv.innerHTML = `
+        <div class="avatar-wrapper">
+          <img class="chat-avatar" src="${otherProfile.avatar}" alt="${otherProfile.username} avatar" />
+          ${unread ? `<div class="unread-badge">${unread > 99 ? '99+' : unread}</div>` : ''}
         </div>
-      </a>
-    `;
+        <div class="chat-info">
+          <div class="chat-name">${escapeHtml(otherProfile.username)}</div>
+          <div class="chat-last-message">${escapeHtml(preview)}</div>
+        </div>
+        <div class="chat-timestamp">${formatTimestamp(lastTime)}</div>
+      `;
 
-    sellerUid = product.seller?.uid;
-    sellerName = product.seller?.username || 'Seller';
-    sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/40?text=👤';
-
-    sellerNameEl.textContent = sellerName;
-    sellerAvatarEl.src = sellerAvatar;
-
-    if (!sellerUid) throw new Error('Seller info missing.');
-
-    chatId = getChatId(currentUser.uid, sellerUid);
-  }
-
-  async function initChat() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const chatIdParam = urlParams.get('chatId');
-    const productIdParam = urlParams.get('product');
-
-    if (chatIdParam) {
-      await loadChatByChatId(chatIdParam);
-    } else if (productIdParam) {
-      await loadChatByProductId(productIdParam);
-    } else {
-      alert('No chatId or product provided in URL.');
-      throw new Error('Missing chatId and product in URL');
-    }
-
-    // Ensure chat meta exists
-    const metaRef = db.ref(`/chats/${chatId}/meta`);
-    const metaSnap = await metaRef.once('value');
-    if (!metaSnap.exists()) {
-      await metaRef.set({
-        users: {
-          [currentUser.uid]: true,
-          [sellerUid]: true,
-        },
-        lastMessage: '',
-        lastTimestamp: 0,
-        lastReadTimes: {
-          [currentUser.uid]: 0,
-          [sellerUid]: 0,
+      chatDiv.onclick = () => {
+        window.location.href = `/messages?chatId=${encodeURIComponent(chatId)}`;
+      };
+      chatDiv.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          chatDiv.click();
         }
-      });
-    }
+      };
 
-    // Load lastReadTimestamp for current user to manage unread badge
-    const lastReadTimes = metaSnap.val()?.lastReadTimes || {};
-    lastReadTimestamp = lastReadTimes[currentUser.uid] || 0;
-  }
-
-  // --- New function to ensure user profile saved in /users ---
-  async function ensureUserInUsersDb(user) {
-    if (!user || !user.uid) return;
-
-    const userRef = db.ref(`/users/${user.uid}`);
-    const snapshot = await userRef.once('value');
-    if (!snapshot.exists()) {
-      await userRef.set({
-        username: user.displayName || `User_${user.uid.slice(0,6)}`,
-        avatar: user.photoURL || 'https://via.placeholder.com/40?text=👤',
-        email: user.email || '',
-        createdAt: Date.now(),
-      });
+      inboxContainer.appendChild(chatDiv);
     }
   }
 
-  auth.onAuthStateChanged(async (user) => {
+  auth.onAuthStateChanged(user => {
     if (!user) {
-      alert('You must log in to chat.');
-window.location.href = '/';
-return;
+      alert('You must log in to view your inbox.');
+      window.location.href = '/login';
+      return;
     }
     currentUser = user;
 
-    try {
-      await initChat();
-
-      // Listen for new messages
-      const messagesRef = db.ref(`/chats/${chatId}/messages`).limitToLast(100);
-      messagesRef.off();
-      messagesRef.on('child_added', (snapshot) => {
-        const msg = snapshot.val();
-        if (msg && msg.text && msg.sender && msg.timestamp) {
-          addMessageBubble(msg.text, msg.sender, msg.timestamp);
-          scrollToBottom();
-
-          if (msg.sender !== currentUser.uid && document.visibilityState !== 'visible') {
-            unreadCount++;
-            updateUnreadBadge();
-          }
-        }
-      });
-
-      window.addEventListener('focus', () => {
-        markAllRead();
-      });
-
-      markAllRead();
-
-      sendBtn.disabled = false;
-      messageInput.focus();
-
-    } catch (error) {
-      alert(error.message);
-      console.error(error);
-    }
-  });
-
-  chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if (!text) return;
-
-    try {
-      // Save current user profile to /users if missing
-      await ensureUserInUsersDb(currentUser);
-
-      // Check if seller exists, if not save minimal profile (fallback)
-      if (sellerUid && sellerUid !== currentUser.uid) {
-        const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');
-        if (!sellerSnap.exists()) {
-          await db.ref(`/users/${sellerUid}`).set({
-            username: sellerName || `Seller_${sellerUid.slice(0,6)}`,
-            avatar: sellerAvatar || 'https://via.placeholder.com/40?text=👤',
-            createdAt: Date.now(),
-          });
-        }
-      }
-
-      const messagesRef = db.ref(`/chats/${chatId}/messages`);
-      const newMsgRef = messagesRef.push();
-      const timestamp = Date.now();
-
-      await newMsgRef.set({
-        sender: currentUser.uid,
-        text,
-        timestamp
-      });
-
-      const metaRef = db.ref(`/chats/${chatId}/meta`);
-      await metaRef.transaction((meta) => {
-        if (!meta) {
-          return {
-            users: {
-              [currentUser.uid]: true,
-              [sellerUid]: true,
-            },
-            lastMessage: text,
-            lastTimestamp: timestamp,
-            lastReadTimes: {
-              [currentUser.uid]: timestamp,
-              [sellerUid]: 0,
-            }
-          };
-        }
-        meta.lastMessage = text;
-        meta.lastTimestamp = timestamp;
-        meta.users = meta.users || {};
-        meta.users[currentUser.uid] = true;
-        meta.users[sellerUid] = true;
-        meta.lastReadTimes = meta.lastReadTimes || {};
-        meta.lastReadTimes[currentUser.uid] = timestamp;
-        if (!meta.lastReadTimes[sellerUid]) meta.lastReadTimes[sellerUid] = 0;
-        return meta;
-      });
-
-      messageInput.value = '';
-      messageInput.focus();
-      sendBtn.disabled = true;
-
-    } catch (err) {
-      alert('Error sending message. Try again.');
-      console.error(err);
-    }
-  });
-
-  messageInput.addEventListener('input', () => {
-    sendBtn.disabled = messageInput.value.trim().length === 0;
-  });
-
-  productPreviewEl.addEventListener('click', () => {
-    const link = productPreviewEl.querySelector('a');
-    if (link) window.open(link.href, '_blank');
-  });
-
-  productPreviewEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      productPreviewEl.click();
-    }
-  });
-  auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    alert('You must log in to chat.');
-window.location.href = '/';
-return;
-  }
-  currentUser = user;
-
-  try {
-    await initChat();
-
-    // Your existing message listener setup here...
-
-    // After everything is loaded and listeners set:
-    document.getElementById('loadingScreen').classList.add('hide');
-
-    sendBtn.disabled = false;
-    messageInput.focus();
-
-  } catch (error) {
-    alert(error.message);
-    console.error(error);
-    // Optionally hide loading screen on error to show something else
-    document.getElementById('loadingScreen').classList.add('hide');
-  }
-});
-(function() {
-  // Create the modal element once
-  const alertEl = document.createElement('div');
-  alertEl.id = 'customAlert';
-  alertEl.setAttribute('aria-modal', 'true');
-  alertEl.setAttribute('role', 'alertdialog');
-  alertEl.style.cssText = `
-    display:none; position:fixed; inset:0; z-index:9999;
-    backdrop-filter:blur(6px); background:rgba(0,0,0,0.4);
-    justify-content:center; align-items:center; 
-  `;
-  alertEl.innerHTML = `
-    <div style="
-      background:#fff; color:#111; padding:24px; max-width:320px; width:90%;
-      border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.15);
-      font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-      Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    ">
-      <h2 id="alertTitle" style="margin-top:0; font-size:1.25rem;">Alert</h2>
-      <p id="alertMessage" style="margin-bottom:24px; font-size:1rem; line-height:1.4;"></p>
-      <button id="alertOkBtn" style="
-        width:100%; padding:12px 0; background:#007AFF; color:#fff; border:none;
-        border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer;
-        user-select:none; transition:background-color 0.3s ease;
-      ">OK</button>
-    </div>
-  `;
-  document.body.appendChild(alertEl);
-
-  const alertTitle = alertEl.querySelector('#alertTitle');
-  const alertMessage = alertEl.querySelector('#alertMessage');
-  const okBtn = alertEl.querySelector('#alertOkBtn');
-
-  // Flag to prevent multiple clicks or re-entrance
-  let isOpen = false;
-
-  window.alert = function(message) {
-    if (isOpen) return; // Prevent multiple alerts stacking
-
-    alertTitle.textContent = 'Alert';
-    alertMessage.textContent = message;
-    alertEl.style.display = 'flex';
-
-    isOpen = true;
-
-    return new Promise((resolve) => {
-      function closeAlert() {
-        alertEl.style.display = 'none';
-        okBtn.removeEventListener('click', closeAlert);
-        isOpen = false;
-        resolve();
-      }
-      okBtn.addEventListener('click', closeAlert);
+    const chatsRef = db.ref('/chats');
+    chatsRef.on('value', snapshot => {
+      const allChats = snapshot.val() || {};
+      chatsData = Object.entries(allChats)
+        .filter(([_, meta]) => meta?.meta?.users && meta.meta.users[currentUser.uid])
+        .reduce((acc, [chatId, meta]) => {
+          acc[chatId] = meta.meta;
+          return acc;
+        }, {});
+      renderInbox();
     });
-  };
-})();
+  });
 </script>
-
 </body>
 </html>
