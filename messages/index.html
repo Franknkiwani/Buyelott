@@ -333,6 +333,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
 
+
 <script>  
   const firebaseConfig = {  
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
@@ -444,41 +445,27 @@
   }  
   
   async function loadChatByChatId(chatIdParam) {  
-  const metaRef = db.ref(`/chats/${chatIdParam}/meta`);  
-  let metaSnap = await metaRef.once('value');  
-  let meta = metaSnap.val();  
+    const metaSnap = await db.ref(`/chats/${chatIdParam}/meta`).once('value');  
+    const meta = metaSnap.val();  
+    if (!meta) throw new Error('Chat meta not found');  
   
-  if (!meta) {  
-    // Meta missing? Create it on the spot  
-    // Figure out who’s the other user by splitting chatId  
-    const [uid1, uid2] = chatIdParam.split('_');  
-    const otherUid = uid1 === currentUser.uid ? uid2 : uid1;  
+    const otherUsers = Object.keys(meta.users || {}).filter(uid => uid !== currentUser.uid);  
+    if (otherUsers.length === 0) throw new Error('No other user found in chat');  
   
-    const newMeta = {  
-      users: {  
-        [currentUser.uid]: true,  
-        [otherUid]: true,  
-      },  
-      lastMessage: '',  
-      lastTimestamp: 0,  
-      lastReadTimes: {  
-        [currentUser.uid]: 0,  
-        [otherUid]: 0,  
-      }  
-    };  
+    sellerUid = otherUsers[0];  
   
-    await metaRef.set(newMeta);  
-    meta = newMeta;  
+    // Load seller profile from /users/{sellerUid} or fallback  
+    const sellerSnap = await db.ref(`/users/${sellerUid}`).once('value');  
+    const seller = sellerSnap.val() || {};  
+    sellerName = seller.username || 'Seller';  
+    sellerAvatar = seller.avatar || 'https://via.placeholder.com/40?text=👤';  
+  
+    sellerNameEl.textContent = sellerName;  
+    sellerAvatarEl.src = sellerAvatar;  
+  
+    productPreviewEl.innerHTML = '';  
+    chatId = chatIdParam;  
   }  
-  
-  const otherUsers = Object.keys(meta.users).filter(uid => uid !== currentUser.uid);  
-  sellerUid = otherUsers[0];  
-  
-  // Load seller profile or fallback...  
-  // ... rest of your code  
-  
-  chatId = chatIdParam;  
-}  
   
   async function loadChatByProductId(productIdParam) {  
     const productSnap = await db.ref(`/dlsaccounts/${productIdParam}`).once('value');  
@@ -767,7 +754,6 @@ return;
     });  
   };  
 })();  
-</script> 
-
+</script>  
 </body>
 </html>
