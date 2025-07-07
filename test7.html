@@ -1,150 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Unread Messages Notification</title>
-<style>
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background: #121212;
-    color: #eee;
-  }
-  header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 20px;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
-    user-select: none;
-    z-index: 9999;
-  }
-  #notification {
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  #notification svg {
-    width: 28px;
-    height: 28px;
-    fill: #eee;
-    filter: drop-shadow(0 0 1px #0af);
-    transition: fill 0.2s ease;
-  }
-  #notification:hover svg {
-    fill: #1da1f2;
-  }
-  #badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: #e0245e;
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 2px 6px;
-    border-radius: 12px;
-    user-select: none;
-    box-shadow: 0 0 8px #e0245ecc;
-    min-width: 20px;
-    text-align: center;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DLS PayPal Checkout - Auth + Real Firebase</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #f7f8fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #111;
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin-top: 0;
+      color: #555;
+      margin-bottom: 20px;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    #paypal-button-container {
+      width: 320px;
+      margin-bottom: 20px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    #not-logged-in-msg {
+      color: #b32420;
+      font-weight: 600;
+      margin-bottom: 20px;
+      max-width: 320px;
+      text-align: center;
+      display: none;
+    }
+
+    .message {
+      width: 320px;
+      padding: 20px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 17px;
+      box-shadow:
+        0 8px 24px rgba(0,0,0,0.12),
+        0 0 0 1px rgba(0,0,0,0.06);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      text-align: center;
+      user-select: none;
+    }
+
+    .message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .success {
+      background: #e6f4ea;
+      color: #1a7f37;
+      border: 1.5px solid #28a745;
+    }
+
+    .error {
+      background: #fdecea;
+      color: #b32420;
+      border: 1.5px solid #dc3545;
+    }
+  </style>
+
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD"></script>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    // Your real Firebase config (from your earlier messages)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Product setup with test price $0.01
+    const product = {
+      id: "dls-premium-001",
+      title: "DLS Premium Account",
+      description: "Full Dream League Soccer setup + coins",
+      price: 0.01
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const paypalContainer = document.getElementById('paypal-button-container');
+      const notLoggedInMsg = document.getElementById('not-logged-in-msg');
+      const successMsg = document.getElementById('success-message');
+      const errorMsg = document.getElementById('error-message');
+
+      function showSuccess(details) {
+        successMsg.textContent = `✅ Thanks ${details.payer.name.given_name}! Your payment of $${product.price.toFixed(2)} was successful.`;
+        successMsg.classList.add('show');
+        errorMsg.classList.remove('show');
+      }
+
+      function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.add('show');
+        successMsg.classList.remove('show');
+      }
+
+      function showNotLoggedIn() {
+        notLoggedInMsg.style.display = 'block';
+        paypalContainer.style.opacity = '0.3';
+        paypalContainer.style.pointerEvents = 'none';
+      }
+
+      function enablePayPal() {
+        notLoggedInMsg.style.display = 'none';
+        paypalContainer.style.opacity = '1';
+        paypalContainer.style.pointerEvents = 'auto';
+      }
+
+      onAuthStateChanged(auth, user => {
+        if (!user) {
+          showNotLoggedIn();
+          return;
+        }
+
+        enablePayPal();
+
+        paypal.Buttons({
+          createOrder: (data, actions) => {
+            return actions.order.create({
+              purchase_units: [{
+                reference_id: product.id,
+                description: product.title,
+                amount: {
+                  currency_code: "USD",
+                  value: product.price.toFixed(2)
+                }
+              }]
+            });
+          },
+
+          onApprove: (data, actions) => {
+            return actions.order.capture().then(details => {
+              // Save order to Firebase under user UID
+              const orderRef = push(ref(db, `orders/${user.uid}`));
+              return set(orderRef, {
+                productId: product.id,
+                productTitle: product.title,
+                price: product.price,
+                buyerName: details.payer.name.given_name + " " + details.payer.name.surname,
+                buyerEmail: details.payer.email_address,
+                paypalOrderID: data.orderID,
+                createdAt: Date.now()
+              }).then(() => {
+                showSuccess(details);
+                // Optional redirect
+                // setTimeout(() => window.location.href = "/thank-you.html", 3000);
+              });
+            });
+          },
+
+          onCancel: (data) => {
+            showError("⚠️ Payment cancelled or not completed. Please try again.");
+          },
+
+          onError: (err) => {
+            console.error("PayPal error:", err);
+            showError("❌ Payment failed due to an error. Please try again.");
+          }
+        }).render('#paypal-button-container');
+      });
+    });
+  </script>
 </head>
 <body>
-
-<header>
-  <div id="notification" role="button" tabindex="0" aria-label="Unread Messages">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M20 2H4C2.9 2 2 2.9 2 4v14l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-    </svg>
-    <div id="badge" style="display:none;">0</div>
-  </div>
-</header>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-
-<script>
-  // Your Firebase config here
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  const badgeEl = document.getElementById('badge');
-  const notificationEl = document.getElementById('notification');
-
-  function updateBadge(count) {
-    if (count > 0) {
-      badgeEl.textContent = count > 99 ? '99+' : count;
-      badgeEl.style.display = 'block';
-    } else {
-      badgeEl.style.display = 'none';
-    }
-  }
-
-  function listenUnreadMessages(user) {
-    if (!user) return;
-
-    // Listen for unreadCounts for the logged-in user in all chats
-    const chatsRef = db.ref('/chats');
-
-    chatsRef.on('value', snapshot => {
-      const chats = snapshot.val() || {};
-      let totalUnread = 0;
-
-      for (const chatId in chats) {
-        const meta = chats[chatId].meta;
-        if (meta && meta.unreadCounts && meta.unreadCounts[user.uid]) {
-          totalUnread += meta.unreadCounts[user.uid];
-        }
-      }
-      updateBadge(totalUnread);
-    });
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      listenUnreadMessages(user);
-    } else {
-      badgeEl.style.display = 'none';
-      // Redirect or show login if needed
-      console.log('Not logged in');
-    }
-  });
-
-  // Optional: add click handler on notification icon
-  notificationEl.addEventListener('click', () => {
-    alert('Open your messages or inbox page here!');
-  });
-  notificationEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      notificationEl.click();
-    }
-  });
-</script>
-
+  <h1>DLS Premium Checkout</h1>
+  <p>Purchase your Dream League Soccer premium account securely.</p>
+  <div id="not-logged-in-msg">⚠️ You must be logged in to buy this product.</div>
+  <div id="paypal-button-container"></div>
+  <div id="success-message" class="message success" aria-live="polite"></div>
+  <div id="error-message" class="message error" aria-live="polite"></div>
 </body>
 </html>
