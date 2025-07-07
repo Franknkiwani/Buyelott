@@ -721,64 +721,88 @@ header {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(18px);
     z-index: 9999;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: opacity 0.3s ease;
   }
 
   /* Modal content container */
   #purchaseModal .modal-content {
-    background: rgba(255 255 255 / 0.08);
-    border-radius: 24px;
+    background: rgba(255 255 255 / 0.1);
+    border-radius: 28px;
     max-width: 400px;
-    margin: 80px auto;
-    padding: 30px 24px;
+    margin: 70px auto 50px auto;
+    padding: 36px 30px 42px 30px;
     color: #fff;
-    box-shadow: 0 10px 40px rgb(29 161 242 / 0.2);
-    backdrop-filter: saturate(180%) blur(25px);
+    box-shadow:
+      0 15px 50px rgb(255 215 0 / 0.2),
+      0 0 40px rgb(255 215 0 / 0.1);
+    backdrop-filter: saturate(200%) blur(30px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    position: relative;
   }
 
+  /* Modal Header */
   #purchaseModal h2 {
-    font-weight: 700;
-    font-size: 24px;
-    margin-bottom: 24px;
+    font-weight: 800;
+    font-size: 26px;
+    margin-bottom: 28px;
     text-align: center;
+    color: #ffda44;
+    text-shadow: 0 0 6px #ffda44cc;
+    letter-spacing: 1.2px;
   }
 
+  /* Labels */
   #purchaseModal label {
     display: block;
-    font-weight: 600;
-    margin-top: 16px;
-    font-size: 14px;
-    color: #cbd5e1;
+    font-weight: 700;
+    margin-top: 18px;
+    font-size: 15px;
+    color: #f0e68c;
+    text-shadow: 0 0 4px #ffda44bb;
   }
 
+  /* Inputs and Select */
   #purchaseModal input, #purchaseModal select {
     width: 100%;
-    margin-top: 8px;
-    padding: 12px 14px;
-    border-radius: 12px;
+    margin-top: 10px;
+    padding: 14px 16px;
+    border-radius: 16px;
     border: none;
-    font-size: 16px;
-    background: rgba(255 255 255 / 0.15);
-    color: white;
-    outline-offset: 2px;
-    outline-color: #1da1f2;
+    font-size: 17px;
+    background: rgba(255 255 255 / 0.18);
+    color: #fff9d0;
+    outline-offset: 3px;
+    outline-color: #ffda44;
     transition: outline-color 0.3s ease;
+    box-shadow: inset 0 0 10px rgba(255 215, 0, 0.3);
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
-  #purchaseModal input:focus, #purchaseModal select:focus {
-    outline-color: #0d8ddb;
+  #purchaseModal input::placeholder,
+  #purchaseModal select::placeholder {
+    color: rgba(255 215 0 / 0.5);
   }
 
+  #purchaseModal input:focus,
+  #purchaseModal select:focus {
+    outline-color: #ffec6e;
+    box-shadow: 0 0 12px rgba(255 215 0 / 0.7);
+    background: rgba(255 255 255 / 0.3);
+  }
+
+  /* Buttons */
   #purchaseModal button {
     margin-top: 28px;
     width: 100%;
-    padding: 14px 0;
+    padding: 16px 0;
     background: #1da1f2;
     border: none;
     border-radius: 16px;
@@ -788,11 +812,17 @@ header {
     cursor: pointer;
     user-select: none;
     transition: background-color 0.3s ease;
+    box-shadow: 0 0 10px #1da1f2cc;
   }
 
   #purchaseModal button:disabled {
     background: #4aa3f3;
     cursor: not-allowed;
+  }
+
+  #purchaseModal button:hover:not(:disabled) {
+    background: #0d8ddb;
+    box-shadow: 0 0 20px #0d8ddbcc;
   }
 
   /* Back button */
@@ -822,134 +852,119 @@ header {
     font-size: 13px;
     margin-top: 8px;
   }
+
   /* === Progress Loader === */
-.progress-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  max-width: 400px;
-}
+  .progress-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 400px;
+  }
 
-.progress-line {
-  position: absolute;
-  top: 28px;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #333;
-  z-index: 0;
-  border-radius: 2px;
-  overflow: hidden;
-}
+  .progress-line {
+    position: absolute;
+    top: 28px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #333;
+    z-index: 0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
 
-.progress-line::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to right, #1da1f2, #00c6ff);
-  animation: fillBar 3s forwards;
-}
+  .progress-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #1da1f2, #00c6ff);
+    animation: fillBar 3s forwards;
+  }
 
-@keyframes fillBar {
-  0% { width: 0%; }
-  33% { width: 33%; }
-  66% { width: 66%; }
-  100% { width: 100%; }
-}
+  @keyframes fillBar {
+    0% { width: 0%; }
+    33% { width: 33%; }
+    66% { width: 66%; }
+    100% { width: 100%; }
+  }
 
-.checkpoint {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 33.33%;
-}
+  .checkpoint {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33.33%;
+  }
 
-.checkpoint .icon {
-  width: 32px;
-  height: 32px;
-  background: #111;
-  padding: 6px;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0,255,255,0.2);
-  transition: all 0.5s ease;
-}
+  .checkpoint .icon {
+    width: 32px;
+    height: 32px;
+    background: #111;
+    padding: 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0,255,255,0.2);
+    transition: all 0.5s ease;
+  }
 
-.checkpoint.active .icon {
-  background: #1da1f2;
-  transform: scale(1.1);
-  box-shadow: 0 0 16px rgba(29,161,242,0.7);
-}
+  .checkpoint.active .icon {
+    background: #1da1f2;
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(29,161,242,0.7);
+  }
 
-.label {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #aaa;
-}
-.buy-now-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #00b894, #00cec9);
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 14px 24px;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(0, 206, 201, 0.3);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
+  .label {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #aaa;
+  }
 
-.buy-now-btn:hover {
-  transform: scale(1.04);
-  box-shadow: 0 8px 20px rgba(0, 206, 201, 0.4);
-}
+  /* === GOLDEN SECURE PAYMENT BUTTON === */
+  .secure-pay-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(145deg, #FFD700 0%, #B8860B 100%);
+    color: #2b1a00;
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: 16px 36px;
+    border: none;
+    border-radius: 20px;
+    box-shadow:
+      0 0 6px #FFD700,
+      inset 0 2px 8px #FFFACD;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-shadow: 0 0 6px #FFD700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+  }
 
-.buy-now-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: white;
-}
-.secure-pay-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(145deg, #d4af37, #b8860b);
-  color: #fffbe6;
-  font-weight: bold;
-  font-size: 1.1rem;
-  padding: 14px 28px;
-  border: none;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  letter-spacing: 0.5px;
-  font-family: 'Segoe UI', sans-serif;
-}
+  .secure-pay-btn:hover {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 14px #FFD700,
+      inset 0 3px 12px #FFFACD;
+    text-shadow: 0 0 10px #FFD700;
+  }
 
-.secure-pay-btn:hover {
-  background: linear-gradient(145deg, #b8860b, #d4af37);
-  transform: scale(1.05);
-  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.5);
-}
+  .secure-pay-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #2b1a00;
+    filter: drop-shadow(0 0 1px #b8860b);
+    transition: filter 0.25s ease;
+  }
 
-.lock-icon {
-  width: 20px;
-  height: 20px;
-  fill: #fffbe6;
-}
-
+  .secure-pay-btn:hover svg {
+    filter: drop-shadow(0 0 4px #FFD700);
+  }
 </style>
 <div id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle" style="display: none;">  
   <div class="modal-content">  
