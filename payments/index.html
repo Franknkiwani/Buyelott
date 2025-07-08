@@ -337,7 +337,6 @@ function formatDate(ts) {
   return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-// Tracking session start time for session duration calc
 const sessionStart = Date.now();
 
 function generateTrackingCode() {
@@ -420,11 +419,13 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("paymentMethodModal").style.display = "flex";
     document.getElementById("manualAmountText").textContent = `$${price}`;
 
+    // Manual PayPal.Me link stays the same:
     document.getElementById("manualPayLink").href =
       `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
 
+    // **Standard pay now goes to your own payment page with productId in query:**
     document.getElementById("standardPayLink").href =
-      `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cashmarco2000@gmail.com&item_name=${encodeURIComponent(title)}&amount=${price}&currency_code=USD`;
+      `payment/?id=${productId}`;
 
     document.getElementById("payNow").disabled = true;
   });
