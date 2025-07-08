@@ -2118,6 +2118,15 @@ window.closeLoginModal = function () {
     const data = snapshot.val();
     hideSkeletons();
 
+    // ✅ Reveal filter bar ONLY if products exist
+    const filterContainer = document.getElementById("searchFilterContainer");
+    if (data && Object.keys(data).length > 0 && filterContainer) {
+      filterContainer.style.display = "block";
+      requestAnimationFrame(() => {
+        filterContainer.classList.add("show");
+      });
+    }
+
     if (!data) {
       window.removeEventListener('scroll', onScroll);
       loading = false;
@@ -2161,14 +2170,6 @@ window.closeLoginModal = function () {
     if (searchInput) searchInput.addEventListener("input", applySearchAndFilter);
     if (filterSelect) filterSelect.addEventListener("change", applySearchAndFilter);
   };
-  setTimeout(() => {
-  const container = document.getElementById("searchFilterContainer");
-  container.style.display = "block";
-  
-  requestAnimationFrame(() => {
-    container.classList.add("show");
-  });
-}, 500);
 </script>
 <script>
   function detectDeviceAndApplyClasses() {
