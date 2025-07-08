@@ -187,7 +187,35 @@
       height: 20px;
       fill: currentColor;
     }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* keep it above other content */
+}
+.balance-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
 
+.balance-buttons button {
+  background: #222;
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+  min-width: 160px;
+  box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+}
+
+.balance-buttons button:hover {
+  background: #444;
+}
   </style>
 </head>
 <body>
@@ -216,7 +244,6 @@
       </div>
     </div>
   </div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -287,6 +314,35 @@
       return;
     }
 
+    // Calculate balances
+    let pendingBalance = 0;
+    let transferredBalance = 0;
+
+    Object.entries(salesData).forEach(([orderId, order]) => {
+      if (order.status === "paid") {
+        const price = Number(order.price) || 0;
+        const isTransferred = !!order.transferred; // expects boolean flag
+        if (isTransferred) {
+          transferredBalance += price;
+        } else {
+          pendingBalance += price * 0.7; // minus 30% fees
+        }
+      }
+    });
+
+    const formatDollars = num => `$${num.toFixed(3)}`;
+
+    salesSection.innerHTML = "";
+
+    // Balance buttons container
+    const balancesDiv = document.createElement("div");
+    balancesDiv.className = "balance-buttons";
+    balancesDiv.innerHTML = `
+      <button title="Pending balance minus 30% fees">Pending Balance: ${formatDollars(pendingBalance)}</button>
+      <button title="Transferred balance (no fees deducted)">Transferred Balance: ${formatDollars(transferredBalance)}</button>
+    `;
+    salesSection.appendChild(balancesDiv);
+
     // Separate paid and others
     const paidOrders = [];
     const otherOrders = [];
@@ -295,8 +351,6 @@
       if (order.status === "paid") paidOrders.push({ orderId, ...order });
       else otherOrders.push({ orderId, ...order });
     });
-
-    salesSection.innerHTML = "";
 
     // Render non-paid first
     otherOrders.forEach(order => {
@@ -342,7 +396,6 @@
         Transfer Account
       `;
       transferBtn.onclick = () => {
-        // Redirect with orderId in URL
         const urlSafeOrderId = encodeURIComponent(order.orderId);
         window.location.href = `/transferaccount/${urlSafeOrderId}`;
       };
@@ -367,7 +420,8 @@
 
     if (!ordersData) {
       ordersSection.innerHTML = "<p>No orders found.</p>";
-      return; }
+      return;
+    }
 
     ordersSection.innerHTML = "";
 
@@ -395,7 +449,6 @@
 
     const btnsDiv = card.querySelector(".buttons");
 
-    // Paid or pending: Show track order button
     if (order.status === "paid" || order.status === "pending") {
       const trackBtn = document.createElement("button");
       trackBtn.className = "track";
@@ -407,7 +460,6 @@
       btnsDiv.appendChild(trackBtn);
     }
 
-    // Failed: Cancel order button
     if (order.status === "failed") {
       const cancelBtn = document.createElement("button");
       cancelBtn.className = "cancel";
@@ -423,13 +475,11 @@
     confirmMessage.textContent = "Are you sure you want to cancel this order? This action cannot be undone.";
     confirmModal.style.display = "flex";
 
-    // Clear previous handlers
     yesBtn.onclick = null;
     cancelBtn.onclick = null;
 
     yesBtn.onclick = async () => {
       try {
-        // Remove from DB
         await remove(ref(db, `${section}/${currentUserId}/${orderId}`));
         confirmModal.style.display = "none";
         if (section === "sales") loadSales();
@@ -445,5 +495,6 @@
   }
 
 </script>
+
 </body>
 </html>
