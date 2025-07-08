@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clean PayPal Checkout</title>
+  <title>PayPal + Firebase Order Tracking</title>
 
-  <!-- Load PayPal SDK synchronously -->
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+
+  <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD"></script>
 
   <style>
@@ -69,10 +73,25 @@
   </div>
 
   <script>
-    // Wait until PayPal SDK is ready
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     window.onload = function () {
       if (!window.paypal) {
-        alert('PayPal SDK failed to load. Please check your internet or client ID.');
+        alert('PayPal SDK failed to load. Check your internet or client ID.');
         return;
       }
 
@@ -83,25 +102,44 @@
           shape: 'pill',
           label: 'paypal'
         },
+
         createOrder: function (data, actions) {
           return actions.order.create({
             purchase_units: [{
               amount: {
-                value: '0.01'  // Change price here or later dynamically
+                value: '0.01' // Change price here or later dynamically
               },
               description: 'DLS Premium Account'
             }]
           });
         },
+
         onApprove: function (data, actions) {
           return actions.order.capture().then(function (details) {
-            alert('Payment completed by ' + details.payer.name.given_name + '!');
-            // Here you can add Firebase or other post-payment logic
+            // Save order to Firebase Realtime Database
+            const orderData = {
+              orderId: details.id,
+              payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+              payerEmail: details.payer.email_address,
+              amount: details.purchase_units[0].amount.value,
+              productDesc: details.purchase_units[0].description,
+              createdAt: new Date().toISOString()
+            };
+
+            return database.ref('orders').push(orderData)
+              .then(() => {
+                alert('Payment completed by ' + details.payer.name.given_name + '! Order saved.');
+              })
+              .catch(err => {
+                alert('Payment succeeded but failed to save order: ' + err.message);
+              });
           });
         },
+
         onCancel: function () {
           alert('Payment cancelled.');
         },
+
         onError: function (err) {
           console.error(err);
           alert('An error occurred during the transaction.');
