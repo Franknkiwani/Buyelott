@@ -5,6 +5,7 @@
   <title>Checkout – DLS Premium</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* ===== Basic styles ===== */
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -13,6 +14,9 @@
       justify-content: center;
       align-items: flex-start;
       padding: 40px 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
     }
 
     .support-header {
@@ -42,6 +46,11 @@
       color: #0070f3;
       font-weight: 500;
       cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .support-links a:hover {
+      color: #0051a8;
     }
 
     .checkout-container {
@@ -52,6 +61,36 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
       padding: 24px;
       margin-top: 80px;
+      z-index: 1;
+      position: relative;
+    }
+
+    /* Seller info */
+    #seller-info {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #seller-info img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+    }
+    #seller-username {
+      font-weight: 600;
+      font-size: 16px;
+      color: #222;
+      user-select: text;
+    }
+    #seller-email {
+      font-size: 13px;
+      color: #555;
+      user-select: text;
     }
 
     .product-display {
@@ -62,17 +101,23 @@
       width: 100%;
       border-radius: 16px;
       margin-bottom: 12px;
+      background: #eee;
+      min-height: 180px;
+      object-fit: contain;
     }
 
     .product-display h1 {
       font-size: 20px;
       margin: 0 0 6px;
+      user-select: text;
+      color: #111;
     }
 
     .product-display p {
       margin: 0;
       color: #555;
       font-size: 14px;
+      user-select: text;
     }
 
     .price {
@@ -80,6 +125,7 @@
       font-weight: 600;
       color: #111;
       margin-top: 10px;
+      user-select: text;
     }
 
     #paypal-button-container {
@@ -92,6 +138,7 @@
       font-weight: 600;
       display: none;
       text-align: center;
+      user-select: none;
     }
 
     /* Modal */
@@ -106,6 +153,7 @@
       background: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
+      backdrop-filter: blur(6px);
     }
 
     .modal-content {
@@ -115,11 +163,13 @@
       max-width: 400px;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      user-select: none;
     }
 
     .modal-content h2 {
       margin-top: 0;
       font-size: 18px;
+      user-select: text;
     }
 
     .modal-content input,
@@ -130,6 +180,8 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
     }
 
     .modal-content button {
@@ -141,12 +193,93 @@
       border-radius: 8px;
       font-size: 14px;
       cursor: pointer;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    .modal-content button:hover {
+      background: #0051a8;
     }
 
     .modal-content .success {
       margin-top: 12px;
       color: green;
       font-weight: bold;
+      user-select: text;
+    }
+
+    /* Loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255 255 255 / 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      color: #222;
+    }
+    #loading-overlay .spinner {
+      border: 5px solid #eee;
+      border-top: 5px solid #0070f3;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    /* PayPal failed load popup */
+    #paypal-error-popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      max-width: 360px;
+      z-index: 10000;
+      display: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #222;
+      user-select: none;
+    }
+    #paypal-error-popup h3 {
+      margin-top: 0;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    #paypal-error-popup p {
+      font-size: 14px;
+      line-height: 1.4;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #paypal-error-popup button {
+      background: #0070f3;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      display: block;
+      margin: 0 auto;
+      transition: background 0.3s ease;
+    }
+    #paypal-error-popup button:hover {
+      background: #0051a8;
     }
   </style>
 
@@ -174,7 +307,22 @@
   let currentProduct = null;
   let productId = new URLSearchParams(window.location.search).get("id");
 
-  // Display product info
+  // Show loading overlay
+  const loadingOverlay = document.createElement("div");
+  loadingOverlay.id = "loading-overlay";
+  loadingOverlay.innerHTML = `
+    <div class="spinner"></div>
+    <div>Loading, please wait...</div>
+  `;
+  document.body.appendChild(loadingOverlay);
+
+  // Show PayPal error popup
+  function showPaypalError() {
+    const popup = document.getElementById("paypal-error-popup");
+    popup.style.display = "block";
+  }
+
+  // Load product & seller info
   async function loadProduct() {
     if (!productId) {
       alert("Product not found.");
@@ -193,28 +341,50 @@
       id: productId
     };
 
-    // Fill in product UI
+    // Fill seller info if exists
+    if (product.seller) {
+      document.getElementById("seller-avatar").src = product.seller.avatar || "https://via.placeholder.com/56?text=No+Image";
+      document.getElementById("seller-username").textContent = product.seller.username || "Unknown Seller";
+      document.getElementById("seller-email").textContent = product.seller.email || "";
+      document.getElementById("seller-info").style.display = "flex";
+    } else {
+      document.getElementById("seller-info").style.display = "none";
+    }
+
+    // Fill product UI
     document.getElementById("product-title").textContent = product.title;
     document.getElementById("product-desc").textContent = product.description || "No description.";
     document.getElementById("product-price").textContent = `$${Number(product.price).toFixed(2)}`;
-    document.getElementById("product-image").src = product.image || "https://via.placeholder.com/400x220.png?text=No+Image";
+    document.getElementById("product-image").src = product.images?.[0] || "https://via.placeholder.com/400x220.png?text=No+Image";
   }
 
   onAuthStateChanged(auth, user => {
     if (!user) {
       document.getElementById("login-warning").style.display = "block";
+      loadingOverlay.style.display = "none"; // Hide loading so they see warning
       return;
     }
 
     currentUser = user;
     document.getElementById("userEmail").value = user.email;
-    loadProduct().then(loadPayPal);
+    loadProduct().then(() => {
+      loadPayPal();
+      loadingOverlay.style.display = "none"; // Hide loading after everything ready
+    }).catch(err => {
+      alert("Failed to load product.");
+      loadingOverlay.style.display = "none";
+      console.error(err);
+    });
   });
 
   function loadPayPal() {
     const script = document.createElement("script");
     script.src = "https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD";
     script.onload = renderPayPalButton;
+    script.onerror = () => {
+      loadingOverlay.style.display = "none";
+      showPaypalError();
+    };
     document.body.appendChild(script);
   }
 
@@ -273,7 +443,7 @@
 
   window.sendSupport = async () => {
     const email = document.getElementById("userEmail").value;
-    const message = document.getElementById("userMessage").value;
+    const message = document.getElementById("userMessage").value.trim();
     if (!email || !message) return alert("Please fill in both fields.");
 
     const msgRef = push(ref(db, "contactus"));
@@ -286,6 +456,13 @@
     document.querySelector(".success").textContent = "✅ Message sent!";
     document.getElementById("userMessage").value = "";
   };
+
+  // Event listeners for support buttons
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("contactBtn").onclick = () => showModal("Contact Us");
+    document.getElementById("reportBtn").onclick = () => showModal("Report Issue");
+    document.getElementById("modal-close").onclick = hideModal;
+  });
 </script>
 </head>
 <body>
@@ -294,32 +471,53 @@
     <div class="support-links">
       <a id="contactBtn">Contact Us</a>
       <a id="reportBtn">Report Issue</a>
-      <a href="/help.html" target="_blank">Help / FAQ</a>
+      <a href="/help.html" target="_blank" rel="noopener">Help / FAQ</a>
     </div>
   </header>
 
-  <div class="checkout-container">
-    <div class="product-display">
+  <div class="checkout-container" role="main" aria-label="Product checkout container">
+    <div id="seller-info" style="display:none;">
+      <img id="seller-avatar" src="" alt="Seller avatar" />
+      <div>
+        <div id="seller-username">Seller Name</div>
+        <div id="seller-email"></div>
+      </div>
+    </div>
+
+    <div class="product-display" aria-live="polite">
       <img id="product-image" src="" alt="Product Image" />
       <h1 id="product-title">Loading...</h1>
       <p id="product-desc">Please wait</p>
       <div class="price" id="product-price">$0.00</div>
     </div>
 
-    <div id="paypal-button-container"></div>
-    <div id="login-warning">⚠️ You must be logged in to pay.</div>
+    <div id="paypal-button-container" aria-label="PayPal payment button container"></div>
+    <div id="login-warning" role="alert">⚠️ You must be logged in to pay.</div>
   </div>
 
-  <!-- Modal -->
-  <div class="modal" id="supportModal">
+  <!-- Support Modal -->
+  <div class="modal" id="supportModal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-content">
       <h2 id="modal-title">Support</h2>
-      <input type="email" id="userEmail" readonly />
-      <textarea id="userMessage" placeholder="Enter your message..." rows="4"></textarea>
-      <button onclick="sendSupport()">Send Message</button>
-      <div class="success"></div>
+      <input type="email" id="userEmail" readonly aria-label="Your email address" />
+      <textarea id="userMessage" placeholder="Enter your message..." rows="4" aria-label="Your message"></textarea>
+      <button onclick="sendSupport()" aria-label="Send support message">Send Message</button>
+      <div class="success" aria-live="polite"></div>
       <button id="modal-close" style="margin-top:10px;background:#ddd;color:#000;">Close</button>
     </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+    <div>Loading, please wait...</div>
+  </div>
+
+  <!-- PayPal Error Popup -->
+  <div id="paypal-error-popup" role="alertdialog" aria-live="assertive" aria-modal="true" aria-labelledby="paypal-error-title" aria-describedby="paypal-error-desc">
+    <h3 id="paypal-error-title">Payment System Unavailable</h3>
+    <p id="paypal-error-desc">It seems your internet is slow or our payment service is down. Please try another payment method or come back later.</p>
+    <button onclick="location.reload()">Try Again</button>
   </div>
 
 </body>
