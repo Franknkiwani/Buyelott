@@ -282,7 +282,97 @@
   text-decoration: none;
   box-shadow: 0 0 16px rgba(100, 0, 255, 0.4);
 }
-  </style>  
+  </style> 
+    <style>
+
+    #notify-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #notify-modal .modal-content {
+      background: #1c1c1e;
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+
+    #notify-modal h2 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+      color: #0a84ff;
+    }
+
+    #notify-modal p.subheader {
+      font-weight: 400;
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: none;
+      background: #2c2c2e;
+      color: #eee;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      box-sizing: border-box;
+      resize: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #999;
+      font-style: italic;
+    }
+
+    button.submit-btn {
+      background: #0a84ff;
+      border: none;
+      border-radius: 18px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 0;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(10,132,255,0.4);
+      transition: background 0.3s ease;
+    }
+
+    button.submit-btn:hover {
+      background: #0066ff;
+    }
+
+    #notify-error {
+      color: #ff453a;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: none;
+      text-align: left;
+    }
+  </style>
 </head>  
 <body>  
   <div class="page" id="paymentPage">  
@@ -309,6 +399,145 @@
     </div>
   </div>
 </div>
+  <div id="notify-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc" style="display:none;">
+    <div class="modal-content">
+      <h2 id="modal-title">Quick Info Needed</h2>
+      <p class="subheader" id="modal-desc">Please provide a note to seller, email, or phone.<br /><strong>WhatsApp recommended.</strong> Email might be too slow — code expires in 5 minutes.</p>
+
+      <div id="notify-error"></div>
+
+      <label for="delivery-address">Note to Seller</label>
+      <textarea id="delivery-address" rows="2" placeholder="Write a note for the seller here..." autocomplete="off"></textarea>
+
+      <label for="email-input">Email</label>
+      <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email" />
+
+      <label for="phone-input">Phone Number</label>
+      <input id="phone-input" type="tel" placeholder="+1234567890" autocomplete="tel" />
+
+      <button class="submit-btn" id="submit-info">Save</button>
+    </div>
+  </div>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth();
+
+  const modal = document.getElementById('notify-modal');
+  const errorDiv = document.getElementById('notify-error');
+  const addressInput = document.getElementById('delivery-address');
+  const emailInput = document.getElementById('email-input');
+  const phoneInput = document.getElementById('phone-input');
+  const submitBtn = document.getElementById('submit-info');
+
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function validatePhone(phone) {
+    return /^\+?[1-9]\d{6,14}$/.test(phone);
+  }
+
+  async function loadDeliveryDetails(uid, userEmail) {
+    try {
+      const userRef = ref(db, `users/${uid}/deliverydetails`);
+      const snap = await get(userRef);
+      if (snap.exists()) {
+        const data = snap.val();
+        addressInput.value = data.noteToSeller || "";
+        emailInput.value = data.email || userEmail || "";
+        phoneInput.value = data.phone || "";
+      } else {
+        // No saved data — autofill email with logged in user email
+        emailInput.value = userEmail || "";
+      }
+    } catch (err) {
+      console.error("Failed to load delivery details:", err);
+      // Even on error, try to autofill email
+      emailInput.value = userEmail || "";
+    }
+  }
+
+  async function saveDeliveryDetails(uid, details) {
+    try {
+      await update(ref(db, `users/${uid}/deliverydetails`), details);
+      alert("Delivery details saved successfully!");
+      modal.style.display = 'none';
+    } catch (err) {
+      errorDiv.textContent = "Failed to save details. Try again.";
+      errorDiv.style.display = "block";
+      console.error("Save error:", err);
+    }
+  }
+
+  submitBtn.onclick = async () => {
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+
+    // Auto-add plus sign if missing
+    let phoneVal = phoneInput.value.trim();
+    if (phoneVal && !phoneVal.startsWith('+')) {
+      phoneInput.value = '+' + phoneVal;
+      phoneVal = phoneInput.value;
+    }
+
+    const noteToSeller = addressInput.value.trim();
+    const email = emailInput.value.trim();
+    const phone = phoneVal;
+
+    // ALL required now
+    if (!noteToSeller || !email || !phone) {
+      errorDiv.textContent = 'Note, Email, and Phone are all required.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      errorDiv.textContent = 'Please enter a valid email address.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      errorDiv.textContent = 'Please enter a valid phone number, including country code.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      errorDiv.textContent = 'You must be logged in to save details.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    await saveDeliveryDetails(user.uid, { noteToSeller, email, phone });
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      await loadDeliveryDetails(user.uid, user.email);
+      modal.style.display = 'flex';
+    } else {
+      modal.style.display = 'none';
+      console.warn("User not logged in, delivery modal hidden");
+    }
+  });
+</script>
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, get, push, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -552,237 +781,5 @@ document.getElementById("paymentMethodModal").addEventListener("click", (e) => {
 });
 </script>
 
-  <style>
-
-    #notify-modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(12px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    #notify-modal .modal-content {
-      background: #1c1c1e;
-      border-radius: 20px;
-      padding: 2rem 2.5rem;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-      text-align: center;
-    }
-
-    #notify-modal h2 {
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 0.25rem;
-      color: #0a84ff;
-    }
-
-    #notify-modal p.subheader {
-      font-weight: 400;
-      font-size: 0.9rem;
-      color: #ccc;
-      margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      text-align: left;
-      margin-bottom: 0.25rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: none;
-      background: #2c2c2e;
-      color: #eee;
-      font-size: 1rem;
-      margin-bottom: 1.2rem;
-      box-sizing: border-box;
-      resize: none;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: #999;
-      font-style: italic;
-    }
-
-    button.submit-btn {
-      background: #0a84ff;
-      border: none;
-      border-radius: 18px;
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 700;
-      padding: 14px 0;
-      width: 100%;
-      cursor: pointer;
-      box-shadow: 0 8px 15px rgba(10,132,255,0.4);
-      transition: background 0.3s ease;
-    }
-
-    button.submit-btn:hover {
-      background: #0066ff;
-    }
-
-    #notify-error {
-      color: #ff453a;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      display: none;
-      text-align: left;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="notify-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc" style="display:none;">
-    <div class="modal-content">
-      <h2 id="modal-title">Quick Info Needed</h2>
-      <p class="subheader" id="modal-desc">Please provide a note to seller, email, or phone.<br /><strong>WhatsApp recommended.</strong> Email might be too slow — code expires in 5 minutes.</p>
-
-      <div id="notify-error"></div>
-
-      <label for="delivery-address">Note to Seller</label>
-      <textarea id="delivery-address" rows="2" placeholder="Write a note for the seller here..." autocomplete="off"></textarea>
-
-      <label for="email-input">Email</label>
-      <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email" />
-
-      <label for="phone-input">Phone Number</label>
-      <input id="phone-input" type="tel" placeholder="+1234567890" autocomplete="tel" />
-
-      <button class="submit-btn" id="submit-info">Save</button>
-    </div>
-  </div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth();
-
-  const modal = document.getElementById('notify-modal');
-  const errorDiv = document.getElementById('notify-error');
-  const addressInput = document.getElementById('delivery-address');
-  const emailInput = document.getElementById('email-input');
-  const phoneInput = document.getElementById('phone-input');
-  const submitBtn = document.getElementById('submit-info');
-
-  function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function validatePhone(phone) {
-    return /^\+?[1-9]\d{6,14}$/.test(phone);
-  }
-
-  async function loadDeliveryDetails(uid, userEmail) {
-    try {
-      const userRef = ref(db, `users/${uid}/deliverydetails`);
-      const snap = await get(userRef);
-      if (snap.exists()) {
-        const data = snap.val();
-        addressInput.value = data.noteToSeller || "";
-        emailInput.value = data.email || userEmail || "";
-        phoneInput.value = data.phone || "";
-      } else {
-        // No saved data — autofill email with logged in user email
-        emailInput.value = userEmail || "";
-      }
-    } catch (err) {
-      console.error("Failed to load delivery details:", err);
-      // Even on error, try to autofill email
-      emailInput.value = userEmail || "";
-    }
-  }
-
-  async function saveDeliveryDetails(uid, details) {
-    try {
-      await update(ref(db, `users/${uid}/deliverydetails`), details);
-      alert("Delivery details saved successfully!");
-      modal.style.display = 'none';
-    } catch (err) {
-      errorDiv.textContent = "Failed to save details. Try again.";
-      errorDiv.style.display = "block";
-      console.error("Save error:", err);
-    }
-  }
-
-  submitBtn.onclick = async () => {
-    errorDiv.style.display = 'none';
-    errorDiv.textContent = '';
-
-    // Auto-add plus sign if missing
-    let phoneVal = phoneInput.value.trim();
-    if (phoneVal && !phoneVal.startsWith('+')) {
-      phoneInput.value = '+' + phoneVal;
-      phoneVal = phoneInput.value;
-    }
-
-    const noteToSeller = addressInput.value.trim();
-    const email = emailInput.value.trim();
-    const phone = phoneVal;
-
-    // ALL required now
-    if (!noteToSeller || !email || !phone) {
-      errorDiv.textContent = 'Note, Email, and Phone are all required.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      errorDiv.textContent = 'Please enter a valid email address.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    if (!validatePhone(phone)) {
-      errorDiv.textContent = 'Please enter a valid phone number, including country code.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      errorDiv.textContent = 'You must be logged in to save details.';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    await saveDeliveryDetails(user.uid, { noteToSeller, email, phone });
-  };
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      await loadDeliveryDetails(user.uid, user.email);
-      modal.style.display = 'flex';
-    } else {
-      modal.style.display = 'none';
-      console.warn("User not logged in, delivery modal hidden");
-    }
-  });
-</script>
 </body>  
 </html>
