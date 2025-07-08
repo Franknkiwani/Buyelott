@@ -1,144 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PayPal + Firebase Checkout</title>
+  <meta charset="UTF-8" />
+  <title>Checkout – DLS Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f2f3f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
 
-<!-- PayPal SDK first (important) -->
-<script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD"></script>
+    .support-header {
+      width: 100%;
+      background: #fff;
+      padding: 12px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #eee;
+      border-radius: 0 0 12px 12px;
+    }
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+    .support-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
 
-<style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-      Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background: #f2f2f7;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-  }
-  .checkout-container {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    width: 360px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  h1 {
-    font-weight: 700;
-    font-size: 24px;
-    margin-bottom: 12px;
-    color: #111;
-  }
-  p.description {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 24px;
-  }
-  p.price {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    color: #111;
-  }
-  img.product-image {
-    width: 100%;
-    height: auto;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    object-fit: cover;
-  }
-  #paypal-button-container {
-    margin-top: 12px;
-  }
-</style>
+    .support-links a {
+      text-decoration: none;
+      color: #0070f3;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .checkout-container {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+      margin-top: 80px;
+    }
+
+    .product-display {
+      margin-bottom: 24px;
+    }
+
+    .product-display img {
+      width: 100%;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+
+    .product-display h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+    }
+
+    .product-display p {
+      margin: 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111;
+      margin-top: 10px;
+    }
+
+    #paypal-button-container {
+      margin-top: 20px;
+    }
+
+    #login-warning {
+      margin-top: 16px;
+      color: #b00;
+      font-weight: 600;
+      display: none;
+      text-align: center;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .modal-content button {
+      margin-top: 15px;
+      background: #0070f3;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .modal-content .success {
+      margin-top: 12px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+
+  <!-- Firebase + PayPal SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentUser = null;
+
+    const product = {
+      id: "dls-premium-001",
+      title: "DLS Premium Account",
+      price: 0.01,
+      image: "https://via.placeholder.com/400x220.png?text=DLS+Premium",
+      description: "Unlock the full premium experience for Dream League Soccer."
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("product-title").textContent = product.title;
+      document.getElementById("product-desc").textContent = product.description;
+      document.getElementById("product-price").textContent = `$${product.price.toFixed(2)}`;
+      document.getElementById("product-image").src = product.image;
+
+      document.getElementById("contactBtn").onclick = () => showModal("Contact Us");
+      document.getElementById("reportBtn").onclick = () => showModal("Report Payment Issue");
+      document.getElementById("modal-close").onclick = () => hideModal();
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        document.getElementById("login-warning").style.display = "block";
+        return;
+      }
+
+      currentUser = user;
+      document.getElementById("userEmail").value = user.email;
+      loadPayPal();
+    });
+
+    function loadPayPal() {
+      const script = document.createElement("script");
+      script.src = "https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD";
+      script.onload = renderPayPalButton;
+      document.body.appendChild(script);
+    }
+
+    function renderPayPalButton() {
+      paypal.Buttons({
+        style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'paypal' },
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: { value: product.price.toFixed(2) },
+              description: product.title
+            }]
+          });
+        },
+        onApprove: async (data, actions) => {
+          const details = await actions.order.capture();
+          const orderRef = ref(db, `orders/${currentUser.uid}`);
+          const newOrder = push(orderRef);
+
+          await set(newOrder, {
+            productId: product.id,
+            productTitle: product.title,
+            price: product.price,
+            buyerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
+            buyerEmail: details.payer.email_address,
+            paypalOrderID: details.id,
+            createdAt: Date.now()
+          });
+
+          alert("✅ Payment successful! Order saved.");
+        },
+        onCancel: () => alert("❌ Payment canceled."),
+        onError: err => {
+          console.error(err);
+          alert("⚠️ Error occurred. Check console.");
+        }
+      }).render("#paypal-button-container");
+    }
+
+    function showModal(title) {
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("userMessage").value = "";
+      document.querySelector(".success").textContent = "";
+      document.getElementById("supportModal").style.display = "flex";
+    }
+
+    function hideModal() {
+      document.getElementById("supportModal").style.display = "none";
+    }
+
+    async function sendSupport() {
+      const email = document.getElementById("userEmail").value;
+      const message = document.getElementById("userMessage").value;
+      if (!email || !message) return alert("Please fill in both fields.");
+
+      const msgRef = push(ref(db, "contactus"));
+      await set(msgRef, {
+        email,
+        message,
+        timestamp: Date.now()
+      });
+
+      document.querySelector(".success").textContent = "✅ Message sent!";
+      document.getElementById("userMessage").value = "";
+    }
+  </script>
 </head>
 <body>
 
-<div class="checkout-container">
-  <img class="product-image" src="https://via.placeholder.com/360x200.png?text=Your+Product" alt="Product Image" />
-  <h1 id="product-title">DLS Premium Account</h1>
-  <p class="description" id="product-description">Digital delivery of a premium Dream League Soccer setup.</p>
-  <p class="price" id="product-price">$0.01 USD</p>
+  <header class="support-header">
+    <div class="support-links">
+      <a id="contactBtn">Contact Us</a>
+      <a id="reportBtn">Report Issue</a>
+      <a href="/help.html" target="_blank">Help / FAQ</a>
+    </div>
+  </header>
 
-  <div id="paypal-button-container"></div>
-</div>
+  <div class="checkout-container">
+    <div class="product-display">
+      <img id="product-image" src="" alt="Product Image" />
+      <h1 id="product-title">Loading...</h1>
+      <p id="product-desc">Please wait</p>
+      <div class="price" id="product-price">$0.00</div>
+    </div>
 
-<script>
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+    <div id="paypal-button-container"></div>
+    <div id="login-warning">⚠️ You must be logged in to pay.</div>
+  </div>
 
-  // Initialize Firebase app and database
-  const app = firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-
-  window.addEventListener('load', () => {
-    if (!window.paypal) {
-      alert('PayPal SDK failed to load. Check your internet or client ID.');
-      return;
-    }
-
-    paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        color: 'blue',
-        shape: 'pill',
-        label: 'paypal'
-      },
-      createOrder: (data, actions) => {
-        return actions.order.create({
-          purchase_units: [{
-            amount: {
-              value: '0.01'
-            },
-            description: 'DLS Premium Account'
-          }]
-        });
-      },
-      onApprove: (data, actions) => {
-        return actions.order.capture().then(details => {
-          const orderData = {
-            orderId: details.id,
-            payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
-            payerEmail: details.payer.email_address,
-            amount: details.purchase_units[0].amount.value,
-            productDesc: details.purchase_units[0].description,
-            createdAt: new Date().toISOString()
-          };
-
-          return database.ref('orders').push(orderData)
-            .then(() => alert(`Payment completed by ${details.payer.name.given_name}! Order saved.`))
-            .catch(err => alert('Payment succeeded but failed to save order: ' + err.message));
-        });
-      },
-      onCancel: () => {
-        alert('Payment cancelled.');
-      },
-      onError: (err) => {
-        console.error(err);
-        alert('An error occurred during the transaction: ' + err.message);
-      }
-    }).render('#paypal-button-container');
-  });
-</script>
+  <!-- Modal -->
+  <div class="modal" id="supportModal">
+    <div class="modal-content">
+      <h2 id="modal-title">Support</h2>
+      <input type="email" id="userEmail" readonly />
+      <textarea id="userMessage" placeholder="Enter your message..." rows="4"></textarea>
+      <button onclick="sendSupport()">Send Message</button>
+      <div class="success"></div>
+      <button id="modal-close" style="margin-top:10px;background:#ddd;color:#000;">Close</button>
+    </div>
+  </div>
 
 </body>
 </html>
