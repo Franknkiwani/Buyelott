@@ -2,12 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Orders</title>
+  <title>DLS Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      background: #f2f2f2;
+    }
+
+    header {
+      background: black;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .tab {
+      padding: 1rem;
+      flex: 1;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      border-color: #000;
+      font-weight: bold;
+    }
+
+    .section {
+      display: none;
+      padding: 1rem;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .order-card {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 6px solid #999;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    .paid {
+      border-color: #4CAF50;
+    }
+
+    .failed {
+      border-color: #F44336;
+    }
+
+    .pending {
+      border-color: #FFC107;
+    }
+
+    .order-card h4 {
+      margin: 0 0 0.5rem;
+    }
+
+    .order-card p {
+      margin: 0.3rem 0;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <header>📊 Your DLS Dashboard</header>
+
+  <div class="tab-bar">
+    <div class="tab active" id="tab-orders">🛒 My Orders</div>
+    <div class="tab" id="tab-sales">📦 My Sales</div>
+  </div>
+
+  <div class="section active" id="orders-section">
+    <p>Loading your orders...</p>
+  </div>
+
+  <div class="section" id="sales-section">
+    <p>Loading your sales...</p>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -23,126 +115,65 @@
     const auth = getAuth();
     const db = getDatabase();
 
-    const ordersSection = document.getElementById("orders");
+    const ordersSection = document.getElementById("orders-section");
+    const salesSection = document.getElementById("sales-section");
 
-    function renderOrders(container, dataObj, userUid) {
+    const tabOrders = document.getElementById("tab-orders");
+    const tabSales = document.getElementById("tab-sales");
+
+    tabOrders.onclick = () => {
+      tabOrders.classList.add("active");
+      tabSales.classList.remove("active");
+      ordersSection.classList.add("active");
+      salesSection.classList.remove("active");
+    };
+
+    tabSales.onclick = () => {
+      tabSales.classList.add("active");
+      tabOrders.classList.remove("active");
+      salesSection.classList.add("active");
+      ordersSection.classList.remove("active");
+    };
+
+    function renderOrders(container, data) {
       container.innerHTML = "";
-      if (!dataObj) {
-        container.innerHTML = "<p style='padding:1rem;color:#888;'>No orders found.</p>";
+      if (!data) {
+        container.innerHTML = "<p>No orders found.</p>";
         return;
       }
 
-      Object.entries(dataObj).forEach(([orderId, order]) => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.style.borderColor = order.status === "paid" ? "#8BC34A" : order.status === "failed" ? "#F44336" : "#ccc";
-
-        div.innerHTML = `
-          <h3>Order ID: ${orderId}</h3>
-          <img src="${order.image ?? '#'}" alt="Product Image" class="product-img">
-          <p><strong>Product:</strong> ${order.product ?? "N/A"}</p>
-          <p><strong>Description:</strong> ${order.description ?? "No description"}</p>
-          <p><strong>Price:</strong> $${order.price ?? "0.00"}</p>
-          <p><strong>Status:</strong> <span style="color: ${order.status === 'paid' ? '#4CAF50' : order.status === 'failed' ? '#F44336' : '#000'}">${order.status}</span></p>
-          <p><strong>Seller UID:</strong> ${order.seller ?? "N/A"}</p>
-          <div class="action-buttons">
-            ${order.status === "paid" ? `<button class="btn success" onclick="transferAccount('${orderId}')">Transfer Account</button>` : ""}
-            ${order.status === "failed" ? `<button class="btn danger" onclick="cancelOrder('${userUid}', '${orderId}')">Cancel Order</button>` : ""}
-          </div>
+      Object.entries(data).reverse().forEach(([id, order]) => {
+        const card = document.createElement("div");
+        card.className = `order-card ${order.status}`;
+        card.innerHTML = `
+          <h4>${order.productTitle ?? "Untitled Product"}</h4>
+          <p><strong>Order ID:</strong> ${id}</p>
+          <p><strong>Price:</strong> $${order.price}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
+          <p><strong>Buyer:</strong> ${order.buyerName ?? "N/A"}</p>
+          <p><strong>Email:</strong> ${order.buyerEmail ?? "N/A"}</p>
+          <p><strong>Created:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
         `;
-
-        container.appendChild(div);
+        container.appendChild(card);
       });
     }
 
-    window.cancelOrder = function(uid, orderId) {
-      const confirmCancel = confirm("Are you sure you want to cancel this order?");
-      if (!confirmCancel) return;
-
-      remove(ref(db, `orders/${uid}/${orderId}`))
-        .then(() => alert("Order canceled successfully."))
-        .catch(err => alert("Error cancelling order: " + err.message));
-    };
-
-    window.transferAccount = function(orderId) {
-      alert("This would trigger a transfer flow for order ID: " + orderId);
-    };
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        const uid = user.uid;
-        const ordersRef = ref(db, `orders/${uid}`);
-        onValue(ordersRef, snapshot => {
-          renderOrders(ordersSection, snapshot.val(), uid);
-        });
-      } else {
-        alert("Please log in to view your orders.");
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Please log in to view your dashboard.");
+        ordersSection.innerHTML = "<p>You must log in to view orders.</p>";
+        salesSection.innerHTML = "<p>You must log in to view sales.</p>";
+        return;
       }
+
+      const uid = user.uid;
+
+      const ordersSnap = await get(ref(db, `orders/${uid}`));
+      renderOrders(ordersSection, ordersSnap.val());
+
+      const salesSnap = await get(ref(db, `sales/${uid}`));
+      renderOrders(salesSection, salesSnap.val());
     });
   </script>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f2f2f2;
-      color: #111;
-    }
-
-    header {
-      background: #000;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.3rem;
-    }
-
-    .section {
-      padding: 1rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      border: 2px solid #ccc;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    }
-
-    .product-img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin: 0.5rem 0;
-    }
-
-    .action-buttons {
-      margin-top: 1rem;
-    }
-
-    .btn {
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-right: 0.5rem;
-    }
-
-    .btn.success {
-      background: #4CAF50;
-      color: white;
-    }
-
-    .btn.danger {
-      background: #F44336;
-      color: white;
-    }
-  </style>
-</head>
-<body>
-  <header>🧾 My Orders</header>
-  <div id="orders" class="section"></div>
 </body>
 </html>
