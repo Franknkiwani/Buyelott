@@ -284,10 +284,11 @@
   </style>
 
   <!-- Firebase + PayPal SDK -->
+</head>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -336,12 +337,8 @@
     }
 
     const product = snap.val();
-    currentProduct = {
-      ...product,
-      id: productId
-    };
+    currentProduct = { ...product, id: productId };
 
-    // Fill seller info if exists
     if (product.seller) {
       document.getElementById("seller-avatar").src = product.seller.avatar || "https://via.placeholder.com/56?text=No+Image";
       document.getElementById("seller-username").textContent = product.seller.username || "Unknown Seller";
@@ -351,7 +348,6 @@
       document.getElementById("seller-info").style.display = "none";
     }
 
-    // Fill product UI
     document.getElementById("product-title").textContent = product.title;
     document.getElementById("product-desc").textContent = product.description || "No description.";
     document.getElementById("product-price").textContent = `$${Number(product.price).toFixed(2)}`;
@@ -361,15 +357,16 @@
   onAuthStateChanged(auth, user => {
     if (!user) {
       document.getElementById("login-warning").style.display = "block";
-      loadingOverlay.style.display = "none"; // Hide loading so they see warning
+      loadingOverlay.style.display = "none";
       return;
     }
 
     currentUser = user;
     document.getElementById("userEmail").value = user.email;
+
     loadProduct().then(() => {
       loadPayPal();
-      loadingOverlay.style.display = "none"; // Hide loading after everything ready
+      loadingOverlay.style.display = "none";
     }).catch(err => {
       alert("Failed to load product.");
       loadingOverlay.style.display = "none";
@@ -389,45 +386,128 @@
   }
 
   function renderPayPalButton() {
-    paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        color: 'blue',
-        shape: 'pill',
-        label: 'paypal'
-      },
-      createOrder: (data, actions) => {
-        return actions.order.create({
-          purchase_units: [{
-            amount: { value: Number(currentProduct.price).toFixed(2) },
-            description: currentProduct.title
-          }]
-        });
-      },
-      onApprove: async (data, actions) => {
+  paypal.Buttons({
+    style: {
+      layout: 'vertical',
+      color: 'blue',
+      shape: 'pill',
+      label: 'paypal'
+    },
+    createOrder: (data, actions) => {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: Number(currentProduct.price).toFixed(2) },
+          description: currentProduct.title
+        }]
+      });
+    },
+    onApprove: async (data, actions) => {
+      const orderRef = push(ref(db, `orders/${currentUser.uid}`));
+      const sellerRef = currentProduct.seller?.uid
+        ? push(ref(db, `sales/${currentProduct.seller.uid}`))
+        : null;
+
+      const baseOrder = {
+        productId: currentProduct.id,
+        productTitle: currentProduct.title,
+        price: currentProduct.price,
+        buyerName: currentUser.displayName || "Customer",
+        buyerEmail: currentUser.email,
+        status: "pending",
+        createdAt: Date.now()
+      };
+
+      await set(orderRef, baseOrder);
+      if (sellerRef) await set(sellerRef, baseOrder);
+
+      try {
         const details = await actions.order.capture();
-        const orderRef = ref(db, `orders/${currentUser.uid}`);
-        const newOrder = push(orderRef);
 
-        await set(newOrder, {
-          productId: currentProduct.id,
-          productTitle: currentProduct.title,
-          price: currentProduct.price,
-          buyerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
-          buyerEmail: details.payer.email_address,
+        const updatedOrder = {
+          ...baseOrder,
           paypalOrderID: details.id,
-          createdAt: Date.now()
-        });
+          status: "paid"
+        };
 
-        alert("✅ Payment successful! Order saved.");
-      },
-      onCancel: () => alert("❌ Payment canceled."),
-      onError: err => {
-        console.error(err);
-        alert("⚠️ Error occurred. Check console.");
+        await set(orderRef, updatedOrder);
+        if (sellerRef) await set(sellerRef, updatedOrder);
+
+// ✅ EmailJS confirmation
+emailjs.send('service_r5vg9am', 'template_c0nm1sr', {
+  name: updatedOrder.buyerName,
+  email: updatedOrder.buyerEmail,
+  title: updatedOrder.productTitle
+}).then(() => {
+  showPaymentOverlay("✅ Payment successful! Confirmation email sent.", true);
+}).catch((error) => {
+  console.error("EmailJS Error:", error);
+  showPaymentOverlay("✅ Payment successful! But email failed to send.", true);
+});
+      } catch (error) {
+        console.error("Payment capture failed:", error);
+        const failedOrder = { ...baseOrder, status: "failed" };
+        await set(orderRef, failedOrder);
+        if (sellerRef) await set(sellerRef, failedOrder);
+        alert("⚠️ Payment failed after approval.");
       }
-    }).render("#paypal-button-container");
+    },
+onCancel: async () => {
+  const failedOrder = {
+    productId: currentProduct.id,
+    productTitle: currentProduct.title,
+    price: currentProduct.price,
+    buyerName: currentUser.displayName || "Customer",
+    buyerEmail: currentUser.email,
+    status: "failed",
+    createdAt: Date.now()
+  };
+
+  // Save to buyer
+  const buyerOrderRef = push(ref(db, `orders/${currentUser.uid}`));
+  await set(buyerOrderRef, failedOrder);
+
+  // Save to seller (if exists)
+  if (currentProduct.seller?.uid) {
+    const sellerSalesRef = push(ref(db, `sales/${currentProduct.seller.uid}`));
+    await set(sellerSalesRef, {
+      ...failedOrder,
+      buyerUid: currentUser.uid,
+      sellerUid: currentProduct.seller.uid,
+    });
   }
+
+  showPaymentOverlay("❌ Payment was canceled.", false);
+},
+
+onError: async (err) => {
+  console.error("PayPal error:", err);
+
+  const failedOrder = {
+    productId: currentProduct.id,
+    productTitle: currentProduct.title,
+    price: currentProduct.price,
+    buyerName: currentUser.displayName || "Customer",
+    buyerEmail: currentUser.email,
+    status: "failed",
+    createdAt: Date.now()
+  };
+
+  // Save to buyer
+  const buyerOrderRef = push(ref(db, `orders/${currentUser.uid}`));
+  await set(buyerOrderRef, failedOrder);
+
+  // Save to seller (if exists)
+  if (currentProduct.seller?.uid) {
+    const sellerSalesRef = push(ref(db, `sales/${currentProduct.seller.uid}`));
+    await set(sellerSalesRef, {
+      ...failedOrder,
+      buyerUid: currentUser.uid,
+      sellerUid: currentProduct.seller.uid,
+    });
+  }
+
+  showPaymentOverlay("⚠️ An error occurred during payment.", false);
+}
 
   // Modal controls
   window.showModal = (title) => {
@@ -463,10 +543,24 @@
     document.getElementById("reportBtn").onclick = () => showModal("Report Issue");
     document.getElementById("modal-close").onclick = hideModal;
   });
-</script>
-</head>
-<body>
+  function showPaymentOverlay(message, isSuccess) {
+  const overlay = document.getElementById("payment-status-overlay");
+  const messageBox = document.getElementById("payment-status-message");
 
+  overlay.style.display = "flex";
+  overlay.style.backgroundColor = isSuccess ? "rgba(0, 128, 0, 0.9)" : "rgba(220, 20, 60, 0.9)"; // green or red
+  messageBox.textContent = message;
+}
+
+function hidePaymentOverlay() {
+  document.getElementById("payment-status-overlay").style.display = "none";
+}
+</script>
+<body>
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+  emailjs.init("SMeLjyyZsaSoBWGgZ"); // Your public key
+</script>
   <header class="support-header">
     <div class="support-links">
       <a id="contactBtn">Contact Us</a>
@@ -519,6 +613,9 @@
     <p id="paypal-error-desc">It seems your internet is slow or our payment service is down. Please try another payment method or come back later.</p>
     <button onclick="location.reload()">Try Again</button>
   </div>
-
+<div id="payment-status-overlay" style="display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; flex-direction:column; font-size:1.5rem; font-weight:bold; color:white;">
+  <div id="payment-status-message"></div>
+  <button onclick="hidePaymentOverlay()" style="margin-top:20px; padding:10px 20px; background:white; color:black; border:none; cursor:pointer; font-weight:bold; border-radius:8px;">Close</button>
+</div>
 </body>
 </html>
