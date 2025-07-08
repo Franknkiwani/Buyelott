@@ -937,20 +937,6 @@ transferredBtn.onclick = () => {
   function validateEmail(email) {  
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);  
   }  
-  function resetPaidCardWidth() {
-  const paidCards = document.querySelectorAll('.order-card.paid');
-  paidCards.forEach(card => {
-    if (card.style.width === '100%') {
-      card.style.width = ''; // remove inline width style
-    }
-  });
-}
-
-// Call it once after your cards load
-resetPaidCardWidth();
-
-// Optional: call again if your cards update dynamically
-// setInterval(resetPaidCardWidth, 2000);
 </script>
 </body>
 </html>
