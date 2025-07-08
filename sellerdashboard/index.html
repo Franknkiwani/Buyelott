@@ -2,64 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Seller Dashboard – DLS Accounts</title>
+  <title>Seller Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f5f6f8;
-      padding: 20px;
-      color: #222;
-    }
-
-    h1 {
-      font-size: 22px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .sale-card {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .sale-card h3 {
-      margin: 0 0 6px;
-      font-size: 17px;
-    }
-
-    .sale-card .details {
-      font-size: 14px;
-      color: #444;
-    }
-
-    .loading {
-      text-align: center;
-      font-size: 15px;
-      color: #888;
-      margin-top: 40px;
-    }
-
-    .error {
-      text-align: center;
-      color: #b00;
-      font-weight: 500;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Seller Sales Dashboard</h1>
-  <div id="salesList" class="loading">Loading sales...</div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -72,49 +20,131 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const salesList = document.getElementById("salesList");
+    const auth = getAuth();
+    const db = getDatabase();
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        salesList.innerHTML = `<p class="error">⚠️ Please sign in to view your sales.</p>`;
+    const salesSection = document.getElementById("sales");
+    const ordersSection = document.getElementById("orders");
+
+    function renderOrders(container, dataObj) {
+      container.innerHTML = "";
+      if (!dataObj) {
+        container.innerHTML = "<p style='padding:1rem;color:#888;'>No orders found.</p>";
         return;
       }
 
-      try {
-        const salesRef = ref(db, `sales/${user.uid}`);
-        const snap = await get(salesRef);
+      Object.entries(dataObj).forEach(([orderId, orderData]) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <h3>Order ID: ${orderId}</h3>
+          <p><strong>Product:</strong> ${orderData.product || "N/A"}</p>
+          <p><strong>Price:</strong> ${orderData.price || "N/A"}</p>
+          <p><strong>Status:</strong> ${orderData.status || "N/A"}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-        if (!snap.exists()) {
-          salesList.innerHTML = `<p class="loading">No sales found yet.</p>`;
-          return;
-        }
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const uid = user.uid;
 
-        const salesData = Object.values(snap.val());
-        salesList.innerHTML = "";
-
-        salesData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-        salesData.forEach(sale => {
-          const div = document.createElement("div");
-          div.className = "sale-card";
-          div.innerHTML = `
-            <h3>${sale.productTitle || "Untitled Product"}</h3>
-            <div class="details">
-              💰 $${Number(sale.price).toFixed(2)}<br />
-              👤 Buyer: ${sale.buyerName || "Unknown"}<br />
-              📧 ${sale.buyerEmail || "No email"}<br />
-              📅 ${new Date(sale.createdAt).toLocaleString()}
-            </div>
-          `;
-          salesList.appendChild(div);
+        const salesRef = ref(db, `sales/${uid}`);
+        onValue(salesRef, snapshot => {
+          renderOrders(salesSection, snapshot.val());
         });
-      } catch (e) {
-        console.error(e);
-        salesList.innerHTML = `<p class="error">❌ Failed to load sales. Please try again.</p>`;
+
+        const ordersRef = ref(db, `otherorders/${uid}`);
+        onValue(ordersRef, snapshot => {
+          renderOrders(ordersSection, snapshot.val());
+        });
+      } else {
+        alert("Please log in to view your dashboard.");
       }
     });
+
+    window.switchTab = function(tab) {
+      document.getElementById("tab-sales").classList.remove("active");
+      document.getElementById("tab-orders").classList.remove("active");
+      document.getElementById("sales").style.display = "none";
+      document.getElementById("orders").style.display = "none";
+
+      document.getElementById(tab).style.display = "block";
+      document.getElementById("tab-" + tab).classList.add("active");
+    };
   </script>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f9;
+      color: #111;
+    }
+
+    header {
+      padding: 1rem;
+      background: #000;
+      color: white;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 1rem;
+      font-size: 1rem;
+      background: #f2f2f2;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .tabs button.active {
+      background: #000;
+      color: white;
+      font-weight: 600;
+    }
+
+    .section {
+      display: none;
+      padding: 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+      margin-bottom: 1rem;
+      padding: 1rem;
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 600px) {
+      .card h3 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>🛍️ Seller Dashboard</header>
+
+  <div class="tabs">
+    <button id="tab-sales" class="active" onclick="switchTab('sales')">Sales</button>
+    <button id="tab-orders" onclick="switchTab('orders')">Orders</button>
+  </div>
+
+  <div id="sales" class="section" style="display: block;"></div>
+  <div id="orders" class="section"></div>
 </body>
 </html>
