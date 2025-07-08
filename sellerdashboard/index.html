@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Seller Dashboard</title>
+  <title>Dashboard – dlsaccounts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -38,9 +38,9 @@
         div.className = "card";
         div.innerHTML = `
           <h3>Order ID: ${orderId}</h3>
-          <p><strong>Product:</strong> ${orderData.product || "N/A"}</p>
-          <p><strong>Price:</strong> ${orderData.price || "N/A"}</p>
-          <p><strong>Status:</strong> ${orderData.status || "N/A"}</p>
+          <p><strong>Product:</strong> ${orderData.product ?? "N/A"}</p>
+          <p><strong>Price:</strong> $${orderData.price ?? "0.00"}</p>
+          <p><strong>Status:</strong> ${orderData.status ?? "unknown"}</p>
         `;
         container.appendChild(div);
       });
@@ -50,15 +50,18 @@
       if (user) {
         const uid = user.uid;
 
+        // Fetch orders YOU SOLD (sales)
         const salesRef = ref(db, `sales/${uid}`);
         onValue(salesRef, snapshot => {
           renderOrders(salesSection, snapshot.val());
         });
 
-        const ordersRef = ref(db, `otherorders/${uid}`);
+        // Fetch orders YOU BOUGHT
+        const ordersRef = ref(db, `orders/${uid}`);
         onValue(ordersRef, snapshot => {
           renderOrders(ordersSection, snapshot.val());
         });
+
       } else {
         alert("Please log in to view your dashboard.");
       }
@@ -137,7 +140,7 @@
   </style>
 </head>
 <body>
-  <header>🛍️ Seller Dashboard</header>
+  <header>📦 My Dashboard</header>
 
   <div class="tabs">
     <button id="tab-sales" class="active" onclick="switchTab('sales')">Sales</button>
