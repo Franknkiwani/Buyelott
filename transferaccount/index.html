@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transfer DLS Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: black;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+
+    .container {
+      padding: 1rem;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .account-img {
+      width: 100%;
+      border-radius: 1rem;
+      margin-top: 1rem;
+    }
+
+    .info {
+      margin-top: 1rem;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+
+    .value {
+      color: #333;
+    }
+
+    button {
+      background: #007aff;
+      color: white;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .status {
+      padding: 0.7rem;
+      border-radius: 0.7rem;
+      background: #eee;
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>Transfer DLS Account</header>
+
+  <div class="container">
+    <div class="card" id="account-details">
+      <div class="status" id="status">Loading...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const orderId = window.location.pathname.split("/").pop(); // extract from URL
+    const statusEl = document.getElementById("status");
+    const container = document.getElementById("account-details");
+
+    async function loadOrder() {
+      try {
+        const snap = await get(ref(db, "/dlsaccounts/" + orderId));
+        if (!snap.exists()) {
+          statusEl.textContent = "❌ Order not found!";
+          return;
+        }
+
+        const data = snap.val();
+        const { price, description, seller, images = [], transferred } = data;
+
+        statusEl.textContent = transferred ? "✅ Already Transferred" : "🕐 Awaiting Transfer";
+
+        const html = `
+          <div class="info"><span class="label">Order ID:</span> <span class="value">${orderId}</span></div>
+          <div class="info"><span class="label">Seller:</span> <span class="value">${seller || "N/A"}</span></div>
+          <div class="info"><span class="label">Price:</span> <span class="value">R${price || "?"}</span></div>
+          <div class="info"><span class="label">Description:</span><div class="value">${description || "No description"}</div></div>
+          ${images.map(img => `<img src="${img}" class="account-img" />`).join("")}
+          ${!transferred ? `<button id="mark-btn">Mark as Transferred</button>` : ""}
+        `;
+
+        container.innerHTML = html;
+
+        if (!transferred) {
+          document.getElementById("mark-btn").addEventListener("click", async () => {
+            await update(ref(db, "/dlsaccounts/" + orderId), { transferred: true });
+            alert("✅ Marked as transferred.");
+            location.reload();
+          });
+        }
+      } catch (err) {
+        statusEl.textContent = "❌ Error loading order.";
+        console.error(err);
+      }
+    }
+
+    loadOrder();
+  </script>
+</body>
+</html>
