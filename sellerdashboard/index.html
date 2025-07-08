@@ -339,404 +339,338 @@ header {
     <button id="modal-cancel-btn" class="ios-btn cancel">Cancel</button>
   </div>
 </div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth();
-  const db = getDatabase();
-
-  const tabSales = document.getElementById("tab-sales");
-  const tabOrders = document.getElementById("tab-orders");
-
-  const salesSection = document.getElementById("sales-section");
-  const ordersSection = document.getElementById("orders-section");
-
-  const confirmModal = document.getElementById("confirm-modal");
-  const confirmMessage = document.getElementById("confirm-message");
-  const yesBtn = confirmModal.querySelector("button.yes");
-  const cancelBtn = confirmModal.querySelector("button.cancel");
-
-  tabSales.onclick = () => {
-    tabSales.classList.add("active");
-    tabOrders.classList.remove("active");
-    salesSection.classList.add("active");
-    ordersSection.classList.remove("active");
-  };
-
-  tabOrders.onclick = () => {
-    tabOrders.classList.add("active");
-    tabSales.classList.remove("active");
-    ordersSection.classList.add("active");
-    salesSection.classList.remove("active");
-  };
-
-  let currentUserId = null;
-
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      alert("Please log in to access your dashboard.");
-      salesSection.innerHTML = "<p>You must be logged in to view sales.</p>";
-      ordersSection.innerHTML = "<p>You must be logged in to view orders.</p>";
-      return;
-    }
-
-    currentUserId = user.uid;
-
-    loadSales();
-    loadOrders();
-  });
-
-  async function loadSales() {
-    salesSection.innerHTML = "<p>Loading your sales...</p>";
-    const salesSnap = await get(ref(db, `sales/${currentUserId}`));
-    const salesData = salesSnap.val();
-
-    if (!salesData) {
-      salesSection.innerHTML = "<p>No sales found.</p>";
-      return;
-    }
-
-    // Calculate balances
-    let pendingBalance = 0;
-    let transferredBalance = 0;
-
-    Object.entries(salesData).forEach(([orderId, order]) => {
-      if (order.status === "paid") {
-        const price = Number(order.price) || 0;
-        const isTransferred = !!order.transferred; // expects boolean flag
-        if (isTransferred) {
-          transferredBalance += price;
-        } else {
-          pendingBalance += price * 0.7; // minus 30% fees
-        }
-      }
-    });
-
-    const formatDollars = num => `$${num.toFixed(3)}`;
-
-    salesSection.innerHTML = "";
-
-    // Balance buttons container
-    const balancesDiv = document.createElement("div");
-    balancesDiv.className = "balance-buttons";
-    balancesDiv.innerHTML = `
-      <button title="Pending balance minus 30% fees">Pending Balance: ${formatDollars(pendingBalance)}</button>
-      <button title="Transferred balance (no fees deducted)">Transferred Balance: ${formatDollars(transferredBalance)}</button>
-    `;
-    salesSection.appendChild(balancesDiv);
-
-    // Separate paid and others
-    const paidOrders = [];
-    const otherOrders = [];
-
-    Object.entries(salesData).forEach(([orderId, order]) => {
-      if (order.status === "paid") paidOrders.push({ orderId, ...order });
-      else otherOrders.push({ orderId, ...order });
-    });
-
-    // Render non-paid first
-    otherOrders.forEach(order => {
-      salesSection.appendChild(createSalesCard(order));
-    });
-
-    // Paid orders last, full width with transfer button
-    paidOrders.forEach(order => {
-      const card = createSalesCard(order, true);
-      salesSection.appendChild(card);
-    });
-  }
-
-  function createSalesCard(order, isPaidFullWidth = false) {
-    const card = document.createElement("div");
-    card.className = `order-card ${order.status}`;
-    if (isPaidFullWidth) card.style.width = "100%";
-
-    card.innerHTML = `
-      <h4>${order.productTitle ?? "Untitled Product"}</h4>
-      <div class="order-info">
-        <p><strong>Order ID:</strong> ${order.orderId}</p>
-        <p><strong>Price:</strong> $${order.price}</p>
-        <p><strong>Status:</strong> ${order.status}</p>
-        <p><strong>Buyer:</strong> ${order.buyerName ?? "N/A"}</p>
-        <p><strong>Email:</strong> ${order.buyerEmail ?? "N/A"}</p>
-        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>
-      </div>
-      <div class="buttons"></div>
-    `;
-
-    const btnsDiv = card.querySelector(".buttons");
-
-    if (order.status === "paid" && isPaidFullWidth) {
-      // Transfer Account button with SVG
-      const transferBtn = document.createElement("button");
-      transferBtn.className = "transfer btn-svg";
-      transferBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 3v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="3" y="17" width="18" height="4" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>
-        </svg>
-        Transfer Account
-      `;
-      transferBtn.onclick = () => {
-        const urlSafeOrderId = encodeURIComponent(order.orderId);
-        window.location.href = `/transferaccount/${urlSafeOrderId}`;
-      };
-      btnsDiv.appendChild(transferBtn);
-    }
-
-    if (order.status === "failed") {
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "cancel";
-      cancelBtn.textContent = "Cancel Order";
-      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "sales");
-      btnsDiv.appendChild(cancelBtn);
-    }
-
-    return card;
-  }
-
-  async function loadOrders() {
-    ordersSection.innerHTML = "<p>Loading your orders...</p>";
-    const ordersSnap = await get(ref(db, `orders/${currentUserId}`));
-    const ordersData = ordersSnap.val();
-
-    if (!ordersData) {
-      ordersSection.innerHTML = "<p>No orders found.</p>";
-      return;
-    }
-
-    ordersSection.innerHTML = "";
-
-    Object.entries(ordersData).forEach(([orderId, order]) => {
-      ordersSection.appendChild(createOrderCard({ orderId, ...order }));
-    });
-  }
-
-  function createOrderCard(order) {
-    const card = document.createElement("div");
-    card.className = `order-card ${order.status}`;
-
-    card.innerHTML = `
-      <h4>${order.productTitle ?? "Untitled Product"}</h4>
-      <div class="order-info">
-        <p><strong>Order ID:</strong> ${order.orderId}</p>
-        <p><strong>Price:</strong> $${order.price}</p>
-        <p><strong>Status:</strong> ${order.status}</p>
-        <p><strong>Seller:</strong> ${order.sellerName ?? "N/A"}</p>
-        <p><strong>Email:</strong> ${order.sellerEmail ?? "N/A"}</p>
-        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>
-      </div>
-      <div class="buttons"></div>
-    `;
-
-    const btnsDiv = card.querySelector(".buttons");
-
-    if (order.status === "paid" || order.status === "pending") {
-      const trackBtn = document.createElement("button");
-      trackBtn.className = "track";
-      trackBtn.textContent = "Track Order";
-      trackBtn.onclick = () => {
-        const safeId = encodeURIComponent(order.orderId);
-        window.location.href = `/track/${safeId}`;
-      };
-      btnsDiv.appendChild(trackBtn);
-    }
-
-    if (order.status === "failed") {
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "cancel";
-      cancelBtn.textContent = "Cancel Order";
-      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "orders");
-      btnsDiv.appendChild(cancelBtn);
-    }
-
-    return card;
-  }
-
-  function confirmCancelOrder(orderId, section) {
-    confirmMessage.textContent = "Are you sure you want to cancel this order? This action cannot be undone.";
-    confirmModal.style.display = "flex";
-
-    yesBtn.onclick = null;
-    cancelBtn.onclick = null;
-
-    yesBtn.onclick = async () => {
-      try {
-        await remove(ref(db, `${section}/${currentUserId}/${orderId}`));
-        confirmModal.style.display = "none";
-        if (section === "sales") loadSales();
-        else loadOrders();
-      } catch (e) {
-        alert("Failed to cancel order: " + e.message);
-      }
-    };
-
-    cancelBtn.onclick = () => {
-      confirmModal.style.display = "none";
-    };
-  }
-// Grab modal elements once
-const balanceModal = document.getElementById("balance-modal");
-const modalTitle = document.getElementById("modal-title");
-const modalMessage = document.getElementById("modal-message");
-const paypalInput = document.getElementById("paypal-input");
-const modalPrimaryBtn = document.getElementById("modal-primary-btn");
-const modalCancelBtn = document.getElementById("modal-cancel-btn");
-
-// Wait for salesSection to render buttons, then attach click handlers
-function attachBalanceButtonHandlers() {
-  const buttons = salesSection.querySelectorAll(".balance-buttons button");
-  if (buttons.length < 2) return;
-
-  const pendingBtn = buttons[0];
-  const transferredBtn = buttons[1];
-
-  // Pending balance modal (no cashout, only cancel)
-  pendingBtn.style.cursor = "pointer";
-  pendingBtn.onclick = () => {
-    modalTitle.textContent = "Pending Balance";
-    modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";
-    paypalInput.style.display = "none";
-    modalPrimaryBtn.style.display = "none";
-    modalCancelBtn.textContent = "Close";
-    openModal();
-  };
-
-  // Transferred balance modal (show amount, paypal input, request payment)
-  transferredBtn.style.cursor = "pointer";
-  transferredBtn.onclick = () => {
-    modalTitle.textContent = "Available Balance";
-    modalMessage.textContent = `This balance is available to you. Enter your PayPal email to request payment.`;
-    paypalInput.style.display = "block";
-    paypalInput.value = ""; // Clear previous input
-    modalPrimaryBtn.style.display = "block";
-    modalPrimaryBtn.textContent = "Request Payment";
-    modalCancelBtn.textContent = "Cancel";
-    openModal();
-
-    modalPrimaryBtn.onclick = async () => {
-      const email = paypalInput.value.trim();
-      if (!email || !validateEmail(email)) {
-        alert("Please enter a valid PayPal email.");
-        return;
-      }
-      modalPrimaryBtn.disabled = true;
-      modalPrimaryBtn.textContent = "Requesting...";
-      try {
-        // Here you should add your payment request logic (e.g. Firebase update, server call, etc.)
-        // For demo, just wait 1 sec and then reset transferredBalance to 0:
-        await new Promise(r => setTimeout(r, 1000));
-
-        // Simulate reset of transferred balance in DB:
-        // NOTE: Replace this with actual DB update to mark funds as requested/paid
-        alert(`Payment request successful for ${email}.`);
-        
-        // Reset balance buttons and reload sales to reflect changes
-        closeModal();
-        loadSales(); // reload sales and balances
-      } catch (e) {
-        alert("Failed to request payment: " + e.message);
-        modalPrimaryBtn.disabled = false;
-        modalPrimaryBtn.textContent = "Request Payment";
-      }
-    };
-  };
-
-  modalCancelBtn.onclick = () => {
-    closeModal();
-  };
-}
-
-function openModal() {
-  balanceModal.style.display = "flex";
-}
-
-function closeModal() {
-  balanceModal.style.display = "none";
-}
-
-// Simple email validation
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-// Run this after sales loaded (and balance buttons created)
-async function loadSales() {
-  salesSection.innerHTML = "<p>Loading your sales...</p>";
-  const salesSnap = await get(ref(db, `sales/${currentUserId}`));
-  const salesData = salesSnap.val();
-
-  if (!salesData) {
-    salesSection.innerHTML = "<p>No sales found.</p>";
-    return;
-  }
-
-  // Calculate balances
-  let pendingBalance = 0;
-  let transferredBalance = 0;
-
-  Object.entries(salesData).forEach(([orderId, order]) => {
-    if (order.status === "paid") {
-      const price = Number(order.price) || 0;
-      const isTransferred = !!order.transferred;
-      if (isTransferred) {
-        transferredBalance += price;
-      } else {
-        pendingBalance += price * 0.7; // minus 30% fees
-      }
-    }
-  });
-
-  const formatDollars = num => `$${num.toFixed(3)}`;
-
-  salesSection.innerHTML = "";
-
-  // Balance buttons container
-  const balancesDiv = document.createElement("div");
-  balancesDiv.className = "balance-buttons";
-  balancesDiv.innerHTML = `
-    <button title="Pending balance minus 30% fees">Pending Balance: ${formatDollars(pendingBalance)}</button>
-    <button title="Transferred balance (no fees deducted)">Transferred Balance: ${formatDollars(transferredBalance)}</button>
-  `;
-  salesSection.appendChild(balancesDiv);
-
-  // Attach click handlers to balance buttons
-  attachBalanceButtonHandlers();
-
-  // The rest of your sales rendering code...
-  // Separate paid and others
-  const paidOrders = [];
-  const otherOrders = [];
-
-  Object.entries(salesData).forEach(([orderId, order]) => {
-    if (order.status === "paid") paidOrders.push({ orderId, ...order });
-    else otherOrders.push({ orderId, ...order });
-  });
-
-  // Render non-paid first
-  otherOrders.forEach(order => {
-    salesSection.appendChild(createSalesCard(order));
-  });
-
-  // Paid orders last, full width with transfer button
-  paidOrders.forEach(order => {
-    const card = createSalesCard(order, true);
-    salesSection.appendChild(card);
-  });
-}
+<script type="module">  
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
+  import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";  
+  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+    projectId: "itzhoyoo-f9f7e",  
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+    messagingSenderId: "1094792075584",  
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"  
+  };  
+  
+  const app = initializeApp(firebaseConfig);  
+  const auth = getAuth();  
+  const db = getDatabase();  
+  
+  // UI Elements  
+  const tabSales = document.getElementById("tab-sales");  
+  const tabOrders = document.getElementById("tab-orders");  
+  const salesSection = document.getElementById("sales-section");  
+  const ordersSection = document.getElementById("orders-section");  
+  const confirmModal = document.getElementById("confirm-modal");  
+  const confirmMessage = document.getElementById("confirm-message");  
+  const yesBtn = confirmModal.querySelector("button.yes");  
+  const cancelBtn = confirmModal.querySelector("button.cancel");  
+  
+  const balanceModal = document.getElementById("balance-modal");  
+  const modalTitle = document.getElementById("modal-title");  
+  const modalMessage = document.getElementById("modal-message");  
+  const paypalInput = document.getElementById("paypal-input");  
+  const modalPrimaryBtn = document.getElementById("modal-primary-btn");  
+  const modalCancelBtn = document.getElementById("modal-cancel-btn");  
+  
+  let currentUserId = null;  
+  
+  // Tab switching  
+  tabSales.onclick = () => {  
+    tabSales.classList.add("active");  
+    tabOrders.classList.remove("active");  
+    salesSection.classList.add("active");  
+    ordersSection.classList.remove("active");  
+  };  
+  
+  tabOrders.onclick = () => {  
+    tabOrders.classList.add("active");  
+    tabSales.classList.remove("active");  
+    ordersSection.classList.add("active");  
+    salesSection.classList.remove("active");  
+  };  
+  
+  // Auth state listener  
+  onAuthStateChanged(auth, async user => {  
+    if (!user) {  
+      alert("Please log in to access your dashboard.");  
+      salesSection.innerHTML = "<p>You must be logged in to view sales.</p>";  
+      ordersSection.innerHTML = "<p>You must be logged in to view orders.</p>";  
+      return;  
+    }  
+  
+    currentUserId = user.uid;  
+    loadSales();  
+    loadOrders();  
+  });  
+  
+  // Load sales with balance calculation & UI  
+  async function loadSales() {  
+    salesSection.innerHTML = "<p>Loading your sales...</p>";  
+    const salesSnap = await get(ref(db, `sales/${currentUserId}`));  
+    const salesData = salesSnap.val();  
+  
+    if (!salesData) {  
+      salesSection.innerHTML = "<p>No sales found.</p>";  
+      return;  
+    }  
+  
+    // Calculate balances  
+    let pendingBalance = 0;  
+    let transferredBalance = 0;  
+  
+    Object.entries(salesData).forEach(([orderId, order]) => {  
+      if (order.status === "paid") {  
+        const price = Number(order.price) || 0;  
+        const isTransferred = !!order.transferred;  
+        if (isTransferred) {  
+          transferredBalance += price;  
+        } else {  
+          pendingBalance += price * 0.7; // minus 30% fees  
+        }  
+      }  
+    });  
+  
+    const formatDollars = num => `$${num.toFixed(3)}`;  
+  
+    salesSection.innerHTML = "";  
+  
+    // Balance buttons container  
+    const balancesDiv = document.createElement("div");  
+    balancesDiv.className = "balance-buttons";  
+    balancesDiv.innerHTML = `  
+      <button title="Pending balance minus 30% fees">Pending Balance: ${formatDollars(pendingBalance)}</button>  
+      <button title="Transferred balance (no fees deducted)">Transferred Balance: ${formatDollars(transferredBalance)}</button>  
+    `;  
+    salesSection.appendChild(balancesDiv);  
+  
+    attachBalanceButtonHandlers(pendingBalance, transferredBalance);  
+  
+    // Separate orders  
+    const paidOrders = [];  
+    const otherOrders = [];  
+  
+    Object.entries(salesData).forEach(([orderId, order]) => {  
+      if (order.status === "paid") paidOrders.push({ orderId, ...order });  
+      else otherOrders.push({ orderId, ...order });  
+    });  
+  
+    otherOrders.forEach(order => {  
+      salesSection.appendChild(createSalesCard(order));  
+    });  
+  
+    paidOrders.forEach(order => {  
+      const card = createSalesCard(order, true);  
+      salesSection.appendChild(card);  
+    });  
+  }  
+  
+  // Sales card creation  
+  function createSalesCard(order, isPaidFullWidth = false) {  
+    const card = document.createElement("div");  
+    card.className = `order-card ${order.status}`;  
+    if (isPaidFullWidth) card.style.width = "100%";  
+  
+    card.innerHTML = `  
+      <h4>${order.productTitle ?? "Untitled Product"}</h4>  
+      <div class="order-info">  
+        <p><strong>Order ID:</strong> ${order.orderId}</p>  
+        <p><strong>Price:</strong> $${order.price}</p>  
+        <p><strong>Status:</strong> ${order.status}</p>  
+        <p><strong>Buyer:</strong> ${order.buyerName ?? "N/A"}</p>  
+        <p><strong>Email:</strong> ${order.buyerEmail ?? "N/A"}</p>  
+        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>  
+      </div>  
+      <div class="buttons"></div>  
+    `;  
+  
+    const btnsDiv = card.querySelector(".buttons");  
+  
+    if (order.status === "paid" && isPaidFullWidth) {  
+      const transferBtn = document.createElement("button");  
+      transferBtn.className = "transfer btn-svg";  
+      transferBtn.innerHTML = `  
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">  
+          <path d="M12 3v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>  
+          <rect x="3" y="17" width="18" height="4" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>  
+        </svg>  
+        Transfer Account  
+      `;  
+      transferBtn.onclick = () => {  
+        const urlSafeOrderId = encodeURIComponent(order.orderId);  
+        window.location.href = `/transferaccount/${urlSafeOrderId}`;  
+      };  
+      btnsDiv.appendChild(transferBtn);  
+    }  
+  
+    if (order.status === "failed") {  
+      const cancelBtn = document.createElement("button");  
+      cancelBtn.className = "cancel";  
+      cancelBtn.textContent = "Cancel Order";  
+      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "sales");  
+      btnsDiv.appendChild(cancelBtn);  
+    }  
+  
+    return card;  
+  }  
+  
+  // Load orders for current user  
+  async function loadOrders() {  
+    ordersSection.innerHTML = "<p>Loading your orders...</p>";  
+    const ordersSnap = await get(ref(db, `orders/${currentUserId}`));  
+    const ordersData = ordersSnap.val();  
+  
+    if (!ordersData) {  
+      ordersSection.innerHTML = "<p>No orders found.</p>";  
+      return;  
+    }  
+  
+    ordersSection.innerHTML = "";  
+  
+    Object.entries(ordersData).forEach(([orderId, order]) => {  
+      ordersSection.appendChild(createOrderCard({ orderId, ...order }));  
+    });  
+  }  
+  
+  // Order card creation  
+  function createOrderCard(order) {  
+    const card = document.createElement("div");  
+    card.className = `order-card ${order.status}`;  
+  
+    card.innerHTML = `  
+      <h4>${order.productTitle ?? "Untitled Product"}</h4>  
+      <div class="order-info">  
+        <p><strong>Order ID:</strong> ${order.orderId}</p>  
+        <p><strong>Price:</strong> $${order.price}</p>  
+        <p><strong>Status:</strong> ${order.status}</p>  
+        <p><strong>Seller:</strong> ${order.sellerName ?? "N/A"}</p>  
+        <p><strong>Email:</strong> ${order.sellerEmail ?? "N/A"}</p>  
+        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>  
+      </div>  
+      <div class="buttons"></div>  
+    `;  
+  
+    const btnsDiv = card.querySelector(".buttons");  
+  
+    if (order.status === "paid" || order.status === "pending") {  
+      const trackBtn = document.createElement("button");  
+      trackBtn.className = "track";  
+      trackBtn.textContent = "Track Order";  
+      trackBtn.onclick = () => {  
+        const safeId = encodeURIComponent(order.orderId);  
+        window.location.href = `/track/${safeId}`;  
+      };  
+      btnsDiv.appendChild(trackBtn);  
+    }  
+  
+    if (order.status === "failed") {  
+      const cancelBtn = document.createElement("button");  
+      cancelBtn.className = "cancel";  
+      cancelBtn.textContent = "Cancel Order";  
+      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "orders");  
+      btnsDiv.appendChild(cancelBtn);  
+    }  
+  
+    return card;  
+  }  
+  
+  // Confirm cancel order modal & logic  
+  function confirmCancelOrder(orderId, section) {  
+    confirmMessage.textContent = "Are you sure you want to cancel this order? This action cannot be undone.";  
+    confirmModal.style.display = "flex";  
+  
+    yesBtn.onclick = null;  
+    cancelBtn.onclick = null;  
+  
+    yesBtn.onclick = async () => {  
+      try {  
+        await remove(ref(db, `${section}/${currentUserId}/${orderId}`));  
+        confirmModal.style.display = "none";  
+        if (section === "sales") loadSales();  
+        else loadOrders();  
+      } catch (e) {  
+        alert("Failed to cancel order: " + e.message);  
+      }  
+    };  
+  
+    cancelBtn.onclick = () => {  
+      confirmModal.style.display = "none";  
+    };  
+  }  
+  
+  // Attach click handlers to balance buttons  
+  function attachBalanceButtonHandlers(pendingBalance, transferredBalance) {  
+    const buttons = salesSection.querySelectorAll(".balance-buttons button");  
+    if (buttons.length < 2) return;  
+  
+    const pendingBtn = buttons[0];  
+    const transferredBtn = buttons[1];  
+  
+    // Pending balance modal  
+    pendingBtn.style.cursor = "pointer";  
+    pendingBtn.onclick = () => {  
+      modalTitle.textContent = "Pending Balance";  
+      modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";  
+      paypalInput.style.display = "none";  
+      modalPrimaryBtn.style.display = "none";  
+      modalCancelBtn.textContent = "Close";  
+      openModal();  
+    };  
+  
+    // Transferred balance modal with PayPal request  
+    transferredBtn.style.cursor = "pointer";  
+    transferredBtn.onclick = () => {  
+      modalTitle.textContent = "Available Balance";  
+      modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
+      paypalInput.style.display = "block";  
+      paypalInput.value = ""; // Clear input  
+      modalPrimaryBtn.style.display = "block";  
+      modalPrimaryBtn.textContent = "Request Payment";  
+      modalCancelBtn.textContent = "Cancel";  
+      openModal();  
+  
+      modalPrimaryBtn.onclick = async () => {  
+        const email = paypalInput.value.trim();  
+        if (!email || !validateEmail(email)) {  
+          alert("Please enter a valid PayPal email.");  
+          return;  
+        }  
+        modalPrimaryBtn.disabled = true;  
+        modalPrimaryBtn.textContent = "Requesting...";  
+        try {  
+          // TODO: Add your payment request logic here (e.g. Firebase update/server call)  
+          await new Promise(r => setTimeout(r, 1000)); // Simulate delay  
+  
+          alert(`Payment request successful for ${email}.`);  
+          closeModal();  
+          loadSales();  
+        } catch (e) {  
+          alert("Failed to request payment: " + e.message);  
+          modalPrimaryBtn.disabled = false;  
+          modalPrimaryBtn.textContent = "Request Payment";  
+        }  
+      };  
+    };  
+  
+    modalCancelBtn.onclick = () => {  
+      closeModal();  
+    };  
+  }  
+  
+  function openModal() {  
+    balanceModal.style.display = "flex";  
+  }  
+  
+  function closeModal() {  
+    balanceModal.style.display = "none";  
+  }  
+  
+  // Basic email format validation  
+  function validateEmail(email) {  
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);  
+  }  
 </script>
 
 </body>
