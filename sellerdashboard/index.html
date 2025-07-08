@@ -741,54 +741,55 @@ header {
       openModal();  
     };  
   
-    // Transferred balance modal with minimum balance check  
-    transferredBtn.style.cursor = "pointer";  
-    transferredBtn.onclick = () => {  
-      if (transferredBalance <= 0.001) {  
-        alert("You need a minimum balance of $0.001 to request a payout.");  
-        return;  
-      }  
+// Transferred balance modal with minimum balance check  
+transferredBtn.style.cursor = "pointer";  
+transferredBtn.onclick = () => {  
+  // Always open modal
+  modalTitle.textContent = "Available Balance";  
+  modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
+  paypalInput.style.display = "block";  
+  paypalInput.value = "";  
+  modalPrimaryBtn.style.display = "block";  
+  modalPrimaryBtn.textContent = "Request Payment";  
+  modalCancelBtn.textContent = "Cancel";  
+  openModal();  
   
-      modalTitle.textContent = "Available Balance";  
-      modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
-      paypalInput.style.display = "block";  
-      paypalInput.value = "";  
-      modalPrimaryBtn.style.display = "block";  
-      modalPrimaryBtn.textContent = "Request Payment";  
-      modalCancelBtn.textContent = "Cancel";  
-      openModal();  
+  modalPrimaryBtn.onclick = async () => {  
+    if (transferredBalance <= 0.001) {  
+      alert("You need a minimum balance of $0.001 to request a payout.");  
+      return; // stop here, don’t proceed  
+    }  
+    
+    const email = paypalInput.value.trim();  
+    if (!email || !validateEmail(email)) {  
+      alert("Please enter a valid PayPal email.");  
+      return;  
+    }  
+    
+    modalPrimaryBtn.disabled = true;  
+    modalPrimaryBtn.textContent = "Requesting...";  
   
-      modalPrimaryBtn.onclick = async () => {  
-        const email = paypalInput.value.trim();  
-        if (!email || !validateEmail(email)) {  
-          alert("Please enter a valid PayPal email.");  
-          return;  
-        }  
-        modalPrimaryBtn.disabled = true;  
-        modalPrimaryBtn.textContent = "Requesting...";  
-  
-        try {  
-          const payoutRef = ref(db, "payoutrequests");  
-          const newRequest = {  
-            userId: currentUserId,  
-            email: email,  
-            amount: transferredBalance,  
-            requestedAt: Date.now(),  
-            status: "pending"  
-          };  
-          await push(payoutRef, newRequest);  
-  
-          alert(`Payment request for $${transferredBalance.toFixed(3)} sent for ${email}.`);  
-          closeModal();  
-          loadSales();  
-        } catch (e) {  
-          alert("Failed to request payment: " + e.message);  
-          modalPrimaryBtn.disabled = false;  
-          modalPrimaryBtn.textContent = "Request Payment";  
-        }  
+    try {  
+      const payoutRef = ref(db, "payoutrequests");  
+      const newRequest = {  
+        userId: currentUserId,  
+        email: email,  
+        amount: transferredBalance,  
+        requestedAt: Date.now(),  
+        status: "pending"  
       };  
-    };  
+      await push(payoutRef, newRequest);  
   
+      alert(`Payment request for $${transferredBalance.toFixed(3)} sent for ${email}.`);  
+      closeModal();  
+      loadSales();  
+    } catch (e) {  
+      alert("Failed to request payment: " + e.message);  
+      modalPrimaryBtn.disabled = false;  
+      modalPrimaryBtn.textContent = "Request Payment";  
+    }  
+  };  
+};
     modalCancelBtn.onclick = () => {  
       closeModal();  
     };  
