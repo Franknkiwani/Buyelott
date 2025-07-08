@@ -2,73 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Transfer DLS Account</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Transfer Account</title>
   <style>
     body {
-      margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #111;
-      color: #eee;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: black;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 500px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
-
-    h1 {
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-    }
-
-    #status {
-      margin-bottom: 1rem;
-      font-weight: bold;
-      color: #0f0;
-    }
-
-    .info {
-      margin-bottom: 1rem;
-    }
-
-    .info .label {
-      display: block;
-      font-size: 0.85rem;
-      color: #aaa;
-    }
-
-    .info .value {
-      font-size: 1.1rem;
-    }
-
     .account-img {
       width: 100%;
-      max-width: 400px;
       border-radius: 1rem;
-      margin: 1rem 0;
-      border: 1px solid #444;
-    }
-
-    button {
-      display: inline-block;
       margin-top: 1rem;
-      padding: 0.8rem 1.4rem;
-      background: #0f0;
-      color: #000;
+    }
+    .info {
+      margin-top: 1rem;
+    }
+    .label {
+      font-weight: bold;
+    }
+    .value {
+      color: #333;
+    }
+    button {
+      background: #007aff;
+      color: white;
+      padding: 0.8rem 1.2rem;
       border: none;
+      border-radius: 999px;
       font-size: 1rem;
-      border-radius: 12px;
-      font-weight: 600;
+      width: 100%;
+      margin-top: 1rem;
       cursor: pointer;
     }
-
-    button:hover {
-      background: #0d0;
+    .status {
+      padding: 0.7rem;
+      border-radius: 0.7rem;
+      background: #eee;
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <header>Transfer DLS Account</header>
 
-  <h1>Transfer Account</h1>
-  <div id="status">Loading...</div>
-  <div id="account-details"></div>
+  <div class="container">
+    <div class="card" id="account-details">
+      <div class="status" id="status">Loading...</div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -82,73 +86,72 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const orderId = decodeURIComponent(window.location.pathname.split("/").pop());
     const statusEl = document.getElementById("status");
     const container = document.getElementById("account-details");
 
-    onAuthStateChanged(auth, async user => {
+    // Grab orderId from URL query string (?id=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("id");
+
+    if (!orderId) {
+      statusEl.textContent = "❌ Order ID missing in URL.";
+    }
+
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        statusEl.textContent = "❌ You must be logged in to access this page.";
+        statusEl.textContent = "❌ Please log in to view this order.";
         return;
       }
+      const currentUserId = user.uid;
 
-      const userId = user.uid;
-      const orderRef = ref(db, `sales/${userId}/${orderId}`);
+      if (!orderId) return;
 
       try {
-        const snap = await get(orderRef);
-        if (!snap.exists()) {
+        // Fetch order from sales of current logged-in seller
+        const orderSnap = await get(ref(db, `/sales/${currentUserId}/${orderId}`));
+        if (!orderSnap.exists()) {
           statusEl.textContent = "❌ Order not found under your account.";
           return;
         }
 
-        const data = snap.val();
-        const { productTitle, price, description, buyerName, buyerEmail, images = [], transferred, createdAt } = data;
+        const data = orderSnap.val();
+        const { price, description, buyerName, buyerEmail, productTitle, createdAt, transferred } = data;
 
         statusEl.textContent = transferred ? "✅ Already Transferred" : "🕐 Awaiting Transfer";
 
-        let html = `
-          <div class="info"><span class="label">Order ID</span><span class="value">${orderId}</span></div>
-          <div class="info"><span class="label">Product Title</span><span class="value">${productTitle || "Untitled"}</span></div>
-          <div class="info"><span class="label">Price</span><span class="value">$${price || "0.00"}</span></div>
-          <div class="info"><span class="label">Buyer Name</span><span class="value">${buyerName || "N/A"}</span></div>
-          <div class="info"><span class="label">Buyer Email</span><span class="value">${buyerEmail || "N/A"}</span></div>
-          <div class="info"><span class="label">Description</span><span class="value">${description || "No description."}</span></div>
-          <div class="info"><span class="label">Created At</span><span class="value">${createdAt ? new Date(createdAt).toLocaleString() : "N/A"}</span></div>
+        const html = `
+          <div class="info"><span class="label">Order ID:</span> <span class="value">${orderId}</span></div>
+          <div class="info"><span class="label">Product:</span> <span class="value">${productTitle || "N/A"}</span></div>
+          <div class="info"><span class="label">Buyer:</span> <span class="value">${buyerName || "N/A"}</span></div>
+          <div class="info"><span class="label">Buyer Email:</span> <span class="value">${buyerEmail || "N/A"}</span></div>
+          <div class="info"><span class="label">Price:</span> <span class="value">R${price || "?"}</span></div>
+          <div class="info"><span class="label">Description:</span><div class="value">${description || "No description"}</div></div>
+          <div class="info"><span class="label">Created At:</span> <span class="value">${createdAt ? new Date(createdAt).toLocaleString() : "N/A"}</span></div>
+          ${!transferred ? `<button id="mark-btn">Mark as Transferred</button>` : ""}
         `;
-
-        if (images.length > 0) {
-          html += images.map(img => `<img class="account-img" src="${img}" alt="Account Image" />`).join('');
-        }
-
-        if (!transferred) {
-          html += `<button id="markBtn">Mark as Transferred</button>`;
-        }
 
         container.innerHTML = html;
 
-        const markBtn = document.getElementById("markBtn");
-        if (markBtn) {
-          markBtn.addEventListener("click", async () => {
-            await update(orderRef, { transferred: true });
+        if (!transferred) {
+          document.getElementById("mark-btn").addEventListener("click", async () => {
+            await update(ref(db, `/sales/${currentUserId}/${orderId}`), { transferred: true });
             alert("✅ Marked as transferred.");
             location.reload();
           });
         }
-
       } catch (err) {
         statusEl.textContent = "❌ Error loading order.";
         console.error(err);
       }
     });
   </script>
-
 </body>
 </html>
