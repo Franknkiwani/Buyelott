@@ -401,136 +401,6 @@ header {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-/* ========== MODALS ========== */
-#balance-modal,
-#confirm-modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  background-color: rgba(0, 0, 0, 0.7); /* dimmed bg */
-  justify-content: center;
-  align-items: center;
-}
-
-#balance-modal .modal-content,
-#confirm-modal .modal-content {
-  background: #111; /* black base */
-  color: #fff;
-  width: 80%;
-  max-width: 400px;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-#balance-modal input,
-#balance-modal button,
-#confirm-modal button {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-}
-
-#balance-modal input {
-  background: #222;
-  color: #fff;
-  border: 1px solid #333;
-}
-
-#balance-modal button,
-#confirm-modal button {
-  background: #0a84ff;
-  color: #fff;
-  transition: background 0.2s;
-}
-
-#balance-modal button:hover,
-#confirm-modal button:hover {
-  background: #006fd6;
-}
-
-/* Cancel buttons */
-button.cancel,
-#modal-cancel-btn {
-  background: #555;
-}
-
-button.cancel:hover,
-#modal-cancel-btn:hover {
-  background: #777;
-}
-
-/* ========== CARDS ========== */
-.order-card {
-  background: #fff;
-  color: #000;
-  width: 80%;
-  margin: 1rem auto;
-  border-radius: 1rem;
-  padding: 1rem;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  transition: transform 0.2s ease;
-}
-
-.order-card:hover {
-  transform: translateY(-4px);
-}
-
-.order-info p {
-  margin: 0.3rem 0;
-}
-
-/* Make buttons inside cards look native */
-.order-card button {
-  margin-top: 1rem;
-  background: #0a84ff;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.order-card button:hover {
-  background: #006fd6;
-}
-
-/* Balance buttons */
-.balance-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin: 1rem auto;
-}
-
-.balance-buttons button {
-  background: #1c1c1e;
-  color: #fff;
-  border: none;
-  padding: 0.8rem 1.2rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s ease;
-}
-
-.balance-buttons button:hover {
-  background: #333;
-}
   </style>
 </head>
 <body>
@@ -717,7 +587,7 @@ button.cancel:hover,
   function createSalesCard(order, isPaidFullWidth = false) {  
     const card = document.createElement("div");  
     card.className = `order-card ${order.status}`;  
-    if (isPaidFullWidth) card.style.width = "100%";  
+    if (isPaidFullWidth) card.style.width = "90%";  
   
     card.innerHTML = `  
       <h4>${order.productTitle ?? "Untitled Product"}</h4>  
