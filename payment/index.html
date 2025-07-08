@@ -151,127 +151,142 @@
   </style>
 
   <!-- Firebase + PayPal SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let currentUser = null;
+  let currentProduct = null;
+  let productId = new URLSearchParams(window.location.search).get("id");
+
+  // Display product info
+  async function loadProduct() {
+    if (!productId) {
+      alert("Product not found.");
+      return;
+    }
+
+    const snap = await get(ref(db, `/dlsaccounts/${productId}`));
+    if (!snap.exists()) {
+      alert("Product not found in database.");
+      return;
+    }
+
+    const product = snap.val();
+    currentProduct = {
+      ...product,
+      id: productId
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    // Fill in product UI
+    document.getElementById("product-title").textContent = product.title;
+    document.getElementById("product-desc").textContent = product.description || "No description.";
+    document.getElementById("product-price").textContent = `$${Number(product.price).toFixed(2)}`;
+    document.getElementById("product-image").src = product.image || "https://via.placeholder.com/400x220.png?text=No+Image";
+  }
 
-    let currentUser = null;
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      document.getElementById("login-warning").style.display = "block";
+      return;
+    }
 
-    const product = {
-      id: "dls-premium-001",
-      title: "DLS Premium Account",
-      price: 0.01,
-      image: "https://via.placeholder.com/400x220.png?text=DLS+Premium",
-      description: "Unlock the full premium experience for Dream League Soccer."
-    };
+    currentUser = user;
+    document.getElementById("userEmail").value = user.email;
+    loadProduct().then(loadPayPal);
+  });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("product-title").textContent = product.title;
-      document.getElementById("product-desc").textContent = product.description;
-      document.getElementById("product-price").textContent = `$${product.price.toFixed(2)}`;
-      document.getElementById("product-image").src = product.image;
+  function loadPayPal() {
+    const script = document.createElement("script");
+    script.src = "https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD";
+    script.onload = renderPayPalButton;
+    document.body.appendChild(script);
+  }
 
-      document.getElementById("contactBtn").onclick = () => showModal("Contact Us");
-      document.getElementById("reportBtn").onclick = () => showModal("Report Payment Issue");
-      document.getElementById("modal-close").onclick = () => hideModal();
-    });
+  function renderPayPalButton() {
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'pill',
+        label: 'paypal'
+      },
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: Number(currentProduct.price).toFixed(2) },
+            description: currentProduct.title
+          }]
+        });
+      },
+      onApprove: async (data, actions) => {
+        const details = await actions.order.capture();
+        const orderRef = ref(db, `orders/${currentUser.uid}`);
+        const newOrder = push(orderRef);
 
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        document.getElementById("login-warning").style.display = "block";
-        return;
+        await set(newOrder, {
+          productId: currentProduct.id,
+          productTitle: currentProduct.title,
+          price: currentProduct.price,
+          buyerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
+          buyerEmail: details.payer.email_address,
+          paypalOrderID: details.id,
+          createdAt: Date.now()
+        });
+
+        alert("✅ Payment successful! Order saved.");
+      },
+      onCancel: () => alert("❌ Payment canceled."),
+      onError: err => {
+        console.error(err);
+        alert("⚠️ Error occurred. Check console.");
       }
+    }).render("#paypal-button-container");
+  }
 
-      currentUser = user;
-      document.getElementById("userEmail").value = user.email;
-      loadPayPal();
+  // Modal controls
+  window.showModal = (title) => {
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("userMessage").value = "";
+    document.querySelector(".success").textContent = "";
+    document.getElementById("supportModal").style.display = "flex";
+  };
+
+  window.hideModal = () => {
+    document.getElementById("supportModal").style.display = "none";
+  };
+
+  window.sendSupport = async () => {
+    const email = document.getElementById("userEmail").value;
+    const message = document.getElementById("userMessage").value;
+    if (!email || !message) return alert("Please fill in both fields.");
+
+    const msgRef = push(ref(db, "contactus"));
+    await set(msgRef, {
+      email,
+      message,
+      timestamp: Date.now()
     });
 
-    function loadPayPal() {
-      const script = document.createElement("script");
-      script.src = "https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD";
-      script.onload = renderPayPalButton;
-      document.body.appendChild(script);
-    }
-
-    function renderPayPalButton() {
-      paypal.Buttons({
-        style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'paypal' },
-        createOrder: (data, actions) => {
-          return actions.order.create({
-            purchase_units: [{
-              amount: { value: product.price.toFixed(2) },
-              description: product.title
-            }]
-          });
-        },
-        onApprove: async (data, actions) => {
-          const details = await actions.order.capture();
-          const orderRef = ref(db, `orders/${currentUser.uid}`);
-          const newOrder = push(orderRef);
-
-          await set(newOrder, {
-            productId: product.id,
-            productTitle: product.title,
-            price: product.price,
-            buyerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
-            buyerEmail: details.payer.email_address,
-            paypalOrderID: details.id,
-            createdAt: Date.now()
-          });
-
-          alert("✅ Payment successful! Order saved.");
-        },
-        onCancel: () => alert("❌ Payment canceled."),
-        onError: err => {
-          console.error(err);
-          alert("⚠️ Error occurred. Check console.");
-        }
-      }).render("#paypal-button-container");
-    }
-
-    function showModal(title) {
-      document.getElementById("modal-title").textContent = title;
-      document.getElementById("userMessage").value = "";
-      document.querySelector(".success").textContent = "";
-      document.getElementById("supportModal").style.display = "flex";
-    }
-
-    function hideModal() {
-      document.getElementById("supportModal").style.display = "none";
-    }
-
-    async function sendSupport() {
-      const email = document.getElementById("userEmail").value;
-      const message = document.getElementById("userMessage").value;
-      if (!email || !message) return alert("Please fill in both fields.");
-
-      const msgRef = push(ref(db, "contactus"));
-      await set(msgRef, {
-        email,
-        message,
-        timestamp: Date.now()
-      });
-
-      document.querySelector(".success").textContent = "✅ Message sent!";
-      document.getElementById("userMessage").value = "";
-    }
-  </script>
+    document.querySelector(".success").textContent = "✅ Message sent!";
+    document.getElementById("userMessage").value = "";
+  };
+</script>
 </head>
 <body>
 
