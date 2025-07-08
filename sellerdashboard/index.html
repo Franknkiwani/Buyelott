@@ -301,6 +301,106 @@ header {
 .ios-btn.cancel:hover {
   background: #666;
 }
+/* Modal overlay - full screen, centered content */
+#confirm-modal,
+#balance-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4); /* subtle dark overlay */
+  display: none; /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Modal content box */
+#confirm-modal > div,
+#balance-modal > div {
+  background: #fff;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  box-sizing: border-box;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Make sure buttons inside modal are spaced nicely */
+#confirm-modal button,
+#balance-modal button {
+  margin: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+/* Example button styles */
+#confirm-modal button.yes {
+  background-color: #007aff;
+  color: white;
+}
+
+#confirm-modal button.cancel,
+#balance-modal button#modal-cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+#balance-modal button#modal-primary-btn {
+  background-color: #007aff;
+  color: white;
+}
+
+/* Responsive tweak for super small screens */
+@media (max-width: 400px) {
+  #confirm-modal > div,
+  #balance-modal > div {
+    width: 95%;
+    padding: 1rem;
+  }
+}
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* above modals */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #007aff;
+  font-size: 1.5rem;
+}
+
+.spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #007aff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -338,6 +438,10 @@ header {
     <button id="modal-primary-btn" class="ios-btn primary">Action</button>
     <button id="modal-cancel-btn" class="ios-btn cancel">Cancel</button>
   </div>
+</div>
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p>Loading...</p>
 </div>
 <script type="module">  
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
@@ -406,16 +510,18 @@ header {
     loadOrders();  
   });  
   
-  // Load sales with balance calculation & UI  
-  async function loadSales() {  
-    salesSection.innerHTML = "<p>Loading your sales...</p>";  
-    const salesSnap = await get(ref(db, `sales/${currentUserId}`));  
-    const salesData = salesSnap.val();  
-  
-    if (!salesData) {  
-      salesSection.innerHTML = "<p>No sales found.</p>";  
-      return;  
-    }  
+async function loadSales() {
+  showLoading();  // Show the loading screen right at start
+
+  try {
+    salesSection.innerHTML = "<p>Loading your sales...</p>";
+    const salesSnap = await get(ref(db, `sales/${currentUserId}`));
+    const salesData = salesSnap.val();
+
+    if (!salesData) {
+      salesSection.innerHTML = "<p>No sales found.</p>";
+      return;
+    }
   
     // Calculate balances  
     let pendingBalance = 0;  
@@ -516,16 +622,18 @@ header {
     return card;  
   }  
   
-  // Load orders for current user  
-  async function loadOrders() {  
-    ordersSection.innerHTML = "<p>Loading your orders...</p>";  
-    const ordersSnap = await get(ref(db, `orders/${currentUserId}`));  
-    const ordersData = ordersSnap.val();  
-  
-    if (!ordersData) {  
-      ordersSection.innerHTML = "<p>No orders found.</p>";  
-      return;  
-    }  
+async function loadOrders() {
+  showLoading(); // show loading spinner
+
+  try {
+    ordersSection.innerHTML = "<p>Loading your orders...</p>";
+    const ordersSnap = await get(ref(db, `orders/${currentUserId}`));
+    const ordersData = ordersSnap.val();
+
+    if (!ordersData) {
+      ordersSection.innerHTML = "<p>No orders found.</p>";
+      return;
+    }
   
     ordersSection.innerHTML = "";  
   
@@ -602,62 +710,75 @@ header {
   
   // Attach click handlers to balance buttons  
   function attachBalanceButtonHandlers(pendingBalance, transferredBalance) {  
-    const buttons = salesSection.querySelectorAll(".balance-buttons button");  
-    if (buttons.length < 2) return;  
-  
-    const pendingBtn = buttons[0];  
-    const transferredBtn = buttons[1];  
-  
-    // Pending balance modal  
-    pendingBtn.style.cursor = "pointer";  
-    pendingBtn.onclick = () => {  
-      modalTitle.textContent = "Pending Balance";  
-      modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";  
-      paypalInput.style.display = "none";  
-      modalPrimaryBtn.style.display = "none";  
-      modalCancelBtn.textContent = "Close";  
-      openModal();  
+  const buttons = salesSection.querySelectorAll(".balance-buttons button");  
+  if (buttons.length < 2) return;  
+
+  const pendingBtn = buttons[0];  
+  const transferredBtn = buttons[1];  
+
+  // Pending balance modal (no change)  
+  pendingBtn.style.cursor = "pointer";  
+  pendingBtn.onclick = () => {  
+    modalTitle.textContent = "Pending Balance";  
+    modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";  
+    paypalInput.style.display = "none";  
+    modalPrimaryBtn.style.display = "none";  
+    modalCancelBtn.textContent = "Close";  
+    openModal();  
+  };  
+
+  // Transferred balance modal with minimum balance check  
+  transferredBtn.style.cursor = "pointer";  
+  transferredBtn.onclick = () => {  
+    if (transferredBalance <= 0.001) {  
+      alert("You need a minimum balance of $0.001 to request a payout.");  
+      return;  
+    }  
+
+    modalTitle.textContent = "Available Balance";  
+    modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
+    paypalInput.style.display = "block";  
+    paypalInput.value = "";  
+    modalPrimaryBtn.style.display = "block";  
+    modalPrimaryBtn.textContent = "Request Payment";  
+    modalCancelBtn.textContent = "Cancel";  
+    openModal();  
+
+    modalPrimaryBtn.onclick = async () => {  
+      const email = paypalInput.value.trim();  
+      if (!email || !validateEmail(email)) {  
+        alert("Please enter a valid PayPal email.");  
+        return;  
+      }  
+      modalPrimaryBtn.disabled = true;  
+      modalPrimaryBtn.textContent = "Requesting...";  
+
+      try {  
+        const payoutRef = ref(db, "payoutrequests");  
+        const newRequest = {  
+          userId: currentUserId,  
+          email: email,  
+          amount: transferredBalance,  
+          requestedAt: Date.now(),  
+          status: "pending"  
+        };  
+        await push(payoutRef, newRequest);  
+
+        alert(`Payment request for $${transferredBalance.toFixed(3)} sent for ${email}.`);  
+        closeModal();  
+        loadSales();  
+      } catch (e) {  
+        alert("Failed to request payment: " + e.message);  
+        modalPrimaryBtn.disabled = false;  
+        modalPrimaryBtn.textContent = "Request Payment";  
+      }  
     };  
-  
-    // Transferred balance modal with PayPal request  
-    transferredBtn.style.cursor = "pointer";  
-    transferredBtn.onclick = () => {  
-      modalTitle.textContent = "Available Balance";  
-      modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
-      paypalInput.style.display = "block";  
-      paypalInput.value = ""; // Clear input  
-      modalPrimaryBtn.style.display = "block";  
-      modalPrimaryBtn.textContent = "Request Payment";  
-      modalCancelBtn.textContent = "Cancel";  
-      openModal();  
-  
-      modalPrimaryBtn.onclick = async () => {  
-        const email = paypalInput.value.trim();  
-        if (!email || !validateEmail(email)) {  
-          alert("Please enter a valid PayPal email.");  
-          return;  
-        }  
-        modalPrimaryBtn.disabled = true;  
-        modalPrimaryBtn.textContent = "Requesting...";  
-        try {  
-          // TODO: Add your payment request logic here (e.g. Firebase update/server call)  
-          await new Promise(r => setTimeout(r, 1000)); // Simulate delay  
-  
-          alert(`Payment request successful for ${email}.`);  
-          closeModal();  
-          loadSales();  
-        } catch (e) {  
-          alert("Failed to request payment: " + e.message);  
-          modalPrimaryBtn.disabled = false;  
-          modalPrimaryBtn.textContent = "Request Payment";  
-        }  
-      };  
-    };  
-  
-    modalCancelBtn.onclick = () => {  
-      closeModal();  
-    };  
-  }  
+  };  
+
+  modalCancelBtn.onclick = () => {  
+    closeModal();  
+  };  
+}
   
   function openModal() {  
     balanceModal.style.display = "flex";  
@@ -671,6 +792,13 @@ header {
   function validateEmail(email) {  
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);  
   }  
+} catch (error) {
+    ordersSection.innerHTML = "<p>Error loading orders.</p>";
+    console.error(error);
+  } finally {
+    hideLoading(); // hide loading spinner no matter what
+  }
+}
 </script>
 
 </body>
