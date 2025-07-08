@@ -1629,7 +1629,7 @@ main, .product-page, body {
     <div class="logo-icon-wrapper">
       <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
     </div>
-    <div class="logo-text">DLSACCOUNTS</div>
+    <div class="logo-text">DLS-ACCOUNTS</div>
   </div>
   <div class="user-area" id="userArea">
     <!-- Profile pic or login button shows here -->
@@ -1648,18 +1648,16 @@ main, .product-page, body {
     </select>
   </div>
 </div>
-<div id="adBanner" role="banner" aria-label="Sponsored Advertisement">
+<div id="adBanner" role="banner" aria-label="Sponsored Advertisement" style="display: none;">
   <div class="sponsoredTag">Sponsored</div>
-
   <div class="adContent">
     <img id="adImg" class="adImg" src="https://via.placeholder.com/96x96?text=Loading" alt="Advertisement image" />
   </div>
-
   <button class="buyNow noAds" id="buyNowBtn" aria-label="Buy Now" disabled>Loading...</button>
-
   <div class="adDetails">
     <div class="adTitle" id="adText">Loading ad...</div>
   </div>
+</div>
 </div>
 <main>
   <div class="product-page">
@@ -1711,14 +1709,30 @@ main, .product-page, body {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  const adBanner = document.getElementById("adBanner");
   const adImg = document.getElementById("adImg");
   const adText = document.getElementById("adText");
   const buyNowBtn = document.getElementById("buyNowBtn");
 
   let ads = [];
   let currentAd = 0;
+  let isClicking = false;
+
+  function decrementView(ad) {
+    if (ad.key !== "fallback" && ad.viewsRemaining > 0) {
+      const adRef = ref(db, `dlsaccountsads/${ad.key}`);
+      update(adRef, {
+        viewsRemaining: ad.viewsRemaining - 1
+      });
+      // Also update local value to avoid double-decrement
+      ad.viewsRemaining--;
+    }
+  }
 
   function recordClick(adKey, url) {
+    if (isClicking) return;
+    isClicking = true;
+
     const adRef = ref(db, `dlsaccountsads/${adKey}`);
     onValue(adRef, (snap) => {
       const ad = snap.val();
@@ -1733,6 +1747,7 @@ main, .product-page, body {
           clicks: newClicks
         });
       }
+
       window.location.href = url;
     }, { onlyOnce: true });
   }
@@ -1741,17 +1756,34 @@ main, .product-page, body {
     if (ads.length === 0) return;
 
     const ad = ads[currentAd];
-    adImg.src = ad.image;
-    adText.textContent = ad.desc;
-    buyNowBtn.disabled = false;
-    buyNowBtn.classList.remove("noAds");
-    buyNowBtn.textContent = `Buy Now — $${ad.price}`;
-    buyNowBtn.onclick = () => {
-      if (ad.key === "fallback") {
-        window.location.href = ad.link;
-      } else {
-        recordClick(ad.key, ad.link);
-      }
+    adBanner.style.display = "none"; // Hide until image loads
+
+    const tempImg = new Image();
+    tempImg.src = ad.image;
+
+    tempImg.onload = () => {
+      adImg.src = ad.image;
+      adImg.alt = ad.desc || "Ad";
+      adText.textContent = ad.desc || "No description available";
+      buyNowBtn.disabled = false;
+      buyNowBtn.classList.remove("noAds");
+      buyNowBtn.textContent = `Buy Now — $${ad.price}`;
+      buyNowBtn.onclick = () => {
+        if (ad.key === "fallback") {
+          window.location.href = ad.link;
+        } else {
+          recordClick(ad.key, ad.link);
+        }
+      };
+
+      // 👇 Subtract 1 view when ad is shown
+      decrementView(ad);
+
+      adBanner.style.display = "block";
+    };
+
+    tempImg.onerror = () => {
+      console.warn("Image failed to load:", ad.image);
     };
 
     currentAd = (currentAd + 1) % ads.length;
