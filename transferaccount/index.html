@@ -85,6 +85,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -94,22 +95,30 @@
       projectId: "itzhoyoo-f9f7e",
       storageBucket: "itzhoyoo-f9f7e.filestorage.app",
       messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    const orderId = window.location.pathname.split("/").pop(); // extract from URL
+    const orderId = window.location.pathname.split("/").pop(); // e.g., /transferaccount/-abcXYZ
+
     const statusEl = document.getElementById("status");
     const container = document.getElementById("account-details");
 
-    async function loadOrder() {
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        statusEl.textContent = "⚠️ Please log in to view this order.";
+        return;
+      }
+
+      const userId = user.uid;
+
       try {
-        const snap = await get(ref(db, "/dlsaccounts/" + orderId));
+        const snap = await get(ref(db, `sales/${userId}/${orderId}`));
         if (!snap.exists()) {
-          statusEl.textContent = "❌ Order not found!";
+          statusEl.textContent = "❌ Order not found under your account.";
           return;
         }
 
@@ -131,18 +140,17 @@
 
         if (!transferred) {
           document.getElementById("mark-btn").addEventListener("click", async () => {
-            await update(ref(db, "/dlsaccounts/" + orderId), { transferred: true });
+            await update(ref(db, `sales/${userId}/${orderId}`), { transferred: true });
             alert("✅ Marked as transferred.");
             location.reload();
           });
         }
+
       } catch (err) {
         statusEl.textContent = "❌ Error loading order.";
         console.error(err);
       }
-    }
-
-    loadOrder();
+    });
   </script>
 </body>
 </html>
