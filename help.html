@@ -1,272 +1,500 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contact Us</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DLSAccounts Header with Popups & Email</title>
+<style>
+  body, html {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #121212;
+    color: #eee;
+  }
+  
+  
+  .btn {
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.5rem 1.3rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+    min-width: 120px;
+    font-family: inherit;
+    color: white;
+    text-shadow: 0 0 3px rgba(255,255,255,0.5);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .btn.left {
+    background-color: #2978b5; /* royal blue */
+    box-shadow: 0 4px 10px rgba(41, 120, 181, 0.7);
+  }
+  .btn.left:hover,
+  .btn.left:focus {
+    background-color: #3a8fcb;
+    box-shadow: 0 6px 14px rgba(58, 143, 203, 0.9);
+    outline: none;
+  }
+  .btn.left:active {
+    background-color: #205c86;
+    box-shadow: 0 2px 6px rgba(32, 92, 134, 0.7);
+  }
+
+  .btn.center {
+    background-color: #7d8ca3; /* cool slate gray */
+    box-shadow: 0 4px 10px rgba(125, 140, 163, 0.7);
+  }
+  .btn.center:hover,
+  .btn.center:focus {
+    background-color: #8f9db3;
+    box-shadow: 0 6px 14px rgba(143, 157, 179, 0.9);
+    outline: none;
+  }
+  .btn.center:active {
+    background-color: #657388;
+    box-shadow: 0 2px 6px rgba(101, 115, 136, 0.7);
+  }
+
+  .btn.right {
+    background-color: #d2691e; /* burnt sienna */
+    box-shadow: 0 4px 10px rgba(210, 105, 30, 0.7);
+  }
+  .btn.right:hover,
+  .btn.right:focus {
+    background-color: #db7a30;
+    box-shadow: 0 6px 14px rgba(219, 122, 48, 0.9);
+    outline: none;
+  }
+  .btn.right:active {
+    background-color: #a85115;
+    box-shadow: 0 2px 6px rgba(168, 81, 21, 0.7);
+  }
+
+  .left, .center, .right {
+    flex: 1;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  /* Responsive stacking */
+  @media (max-width: 480px) {
+    header {
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 1rem;
+    }
+    .left, .center, .right {
+      flex: none;
+      text-align: center !important;
+      width: 100%;
+    }
+    .btn {
+      min-width: auto;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      display: block;
+    }
+  }
+
+  /* Popup overlay */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  /* Popup content */
+  .popup-content {
+    background: #1c1c1c;
+    color: #eee;
+    max-width: 600px;
+    width: 90%;
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    position: relative;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+
+  .popup-content h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.8rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+  }
+
+  .popup-content p {
+    line-height: 1.5;
+    margin: 1rem 0;
+    font-size: 1rem;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #bbb;
+    user-select: none;
+    font-weight: 700;
+    transition: color 0.2s ease;
+  }
+
+  .popup-close:hover {
+    color: white;
+  }
+  h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    .faq-container {
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .faq-item {
+      background: var(--card);
+      border-radius: 18px;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-question {
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 1.5rem;
+    }
+
+    .faq-answer.open {
+      max-height: 1000px;
+      padding: 1rem 1.5rem;
+    }
+
+    .faq-question::after {
+      content: '+';
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .faq-question.active::after {
+      content: '-';
+    }
+
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+</style>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    :root {
+      --bg: #f9f9f9;
+      --text: #111;
+      --accent: #007aff;
+      --card: #ffffffcc;
     }
 
     body {
-      background: #f0f2f5;
       margin: 0;
-      padding: 2rem 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 600px;
-      background: #fff;
-      border-radius: 28px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-      padding: 2rem;
-    }
-
-    h1, h2 {
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-      color: #111;
-      text-align: center;
-    }
-
-    .user-info {
-      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      padding: 2rem 1rem;
     }
 
-    .user-info img {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #eee;
-    }
-
-    .user-info .meta p {
-      margin: 0;
-      line-height: 1.4;
-      font-size: 0.9rem;
-      color: #555;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 1rem;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      resize: vertical;
-      min-height: 100px;
-      font-size: 1rem;
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
       margin-bottom: 1rem;
+      color: #000;
     }
 
-    button {
+    .faq-container {
+      max-width: 700px;
       width: 100%;
-      padding: 0.85rem;
-      background-color: #007aff;
-      color: white;
-      border: none;
-      border-radius: 16px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
     }
 
-    button:hover {
-      background-color: #005ecb;
-    }
-
-    #loginPrompt {
-      text-align: center;
-      color: #666;
-    }
-
-    .message-card {
-      background: #fafafa;
+    .faq-item {
+      background: var(--card);
       border-radius: 18px;
-      padding: 1rem;
-      margin-bottom: 0.8rem;
-      border: 1px solid #ddd;
-      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: all 0.3s ease;
     }
 
-    .message-meta {
-      color: #777;
-      font-size: 0.8rem;
-      margin-bottom: 0.4rem;
+    .faq-question {
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
     }
 
-    #customAlert {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #007aff;
-      color: white;
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 1.5rem;
+    }
+
+    .faq-answer.open {
+      max-height: 1000px;
       padding: 1rem 1.5rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      display: none;
-      z-index: 1000;
     }
 
-    .divider {
-      margin: 2rem 0 1rem;
-      border-top: 1px solid #ddd;
+    .faq-question::after {
+      content: '+';
+      font-size: 1.2rem;
+      color: var(--accent);
     }
 
-    .received-section {
-      background: #fdfdfd;
-      border: 2px dashed #007aff33;
-      padding: 1rem;
-      border-radius: 20px;
-      margin-top: 1rem;
+    .faq-question.active::after {
+      content: '-';
     }
 
-    .received-section h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      color: #007aff;
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Contact Us</h1>
-    <div id="authSection">
-      <div id="userCard" style="display:none">
-        <div class="user-info">
-          <img id="userPic" src="" alt="Profile Picture">
-          <div class="meta">
-            <p id="userName">Username</p>
-            <p id="userEmail">Email</p>
-          </div>
-        </div>
-        <textarea id="contactMessage" placeholder="Type your message..."></textarea>
-        <button onclick="submitContact()">Send Message</button>
 
-        <div class="divider"></div>
-        <h2>Your Messages</h2>
-        <div id="userMessages"></div>
-
-        <div class="received-section">
-          <h2>Received Messages</h2>
-          <div id="receivedMessages"></div>
-        </div>
-      </div>
-
-      <div id="loginPrompt" style="display:none">
-        <p>You need to be signed in to contact us.</p>
-        <button onclick="signIn()">Sign In</button>
+<header>
+  <div class="left">
+    <button class="btn left" id="privacyBtn">Privacy Policy</button>
+  </div>
+  <div class="center">
+    <button class="btn center" id="termsBtn">Terms of Service</button>
+  </div>
+  <div class="right">
+    <button class="btn right" id="contactBtn">Contact Us</button>
+  </div>
+</header>
+  <h1>Help & FAQ</h1>
+  <div class="faq-container">
+    
+    <div class="faq-item">
+      <button class="faq-question">What is DLSAccounts?</button>
+      <div class="faq-answer">
+        <p>DLSAccounts is a marketplace where users can buy or sell Dream League Soccer accounts. Every account is manually reviewed to ensure safety and value.</p>
       </div>
     </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Is it safe to buy an account here?</button>
+      <div class="faq-answer">
+        <p>Yes, we prioritize verified sellers and offer customer support for any disputes. Never pay outside the platform to stay protected.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">How do I post an account for sale?</button>
+      <div class="faq-answer">
+        <p>After logging in, click “Post Account,” upload screenshots, enter price, description, and submit. Your listing will be reviewed and go live shortly.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">What payment methods are accepted?</button>
+      <div class="faq-answer">
+        <p>We currently support PayPal, Card payments, and local bank transfer in select regions. More options are coming soon.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">I didn't receive my account. What do I do?</button>
+      <div class="faq-answer">
+        <p>Reach out to our support team immediately via the chat or dlsacc.marketplace@gmail.com. We’ll investigate and resolve it as fast as possible.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">How can I contact support?</button>
+      <div class="faq-answer">
+        <p>You can email us, use the in-site chat, or reach us via social media (@dlsaccounts). Support is online daily from 9AM–10PM (GMT).</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Can I get a refund?</button>
+      <div class="faq-answer">
+        <p>Refunds are only processed if the account is invalid or significantly different from its description. Please report issues within 24 hours of purchase.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Why was my listing removed?</button>
+      <div class="faq-answer">
+        <p>Listings that are fake, duplicate, overpriced, or against our terms are removed. You'll receive an email explaining why.</p>
+      </div>
+    </div
+
   </div>
 
-  <div id="customAlert"></div>
+  <div class="footer">
+    &copy; 2025 dlsaccounts.store All rights reserved.
+  </div>
+<!-- Privacy Policy Popup -->
+<div class="popup-overlay" id="privacyPopup" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+  <div class="popup-content">
+    <span class="popup-close" aria-label="Close" tabindex="0" id="closePrivacy">&times;</span>
+    <h2 id="privacyTitle">Privacy Policy</h2>
+    <p>
+      At DLSAccounts.store, we value your privacy. We collect only the necessary data to facilitate the buying and selling of Dream League Soccer accounts.
+    </p>
+    <p>
+      Your information, including email and payment details, is securely processed and never shared with third parties except as required for transactions or legal compliance.
+    </p>
+    <p>
+      We use cookies solely to improve site functionality and user experience. You can manage cookie preferences in your browser settings.
+    </p>
+    <p>
+      If you have questions regarding your data, contact our support team anytime.
+    </p>
+  </div>
+</div>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<!-- Terms of Service Popup -->
+<div class="popup-overlay" id="termsPopup" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+  <div class="popup-content">
+    <span class="popup-close" aria-label="Close" tabindex="0" id="closeTerms">&times;</span>
+    <h2 id="termsTitle">Terms of Service</h2>
+    <p>
+      Welcome to DLSAccounts.store. By using our marketplace, you agree to comply with the following terms:
+    </p>
+    <ul>
+      <li>You must be at least 18 years old to buy or sell accounts.</li>
+      <li>All listings must accurately describe the account and be owned by the seller.</li>
+      <li>Payments must be made through the platform for protection; avoid off-site transactions.</li>
+      <li>Refunds are provided only when accounts are invalid or significantly misrepresented.</li>
+      <li>We reserve the right to remove listings that violate our policies or appear fraudulent.</li>
+    </ul>
+    <p>
+      By participating, you accept all responsibilities and acknowledge our right to enforce these rules.
+    </p>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<script>
+  // Email link with prebuilt subject & body
+  document.getElementById('contactBtn').addEventListener('click', () => {
+    const email = 'dlsacc.marketplace@gmail.com';
+    const subject = encodeURIComponent('Inquiry Regarding DLSAccounts Marketplace');
+    const body = encodeURIComponent('Hello DLSAccounts Team,\n\nI would like to inquire about...\n\nThanks!');
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  });
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getDatabase(app);
+  // Popup logic
+  function openPopup(popupId) {
+    document.getElementById(popupId).style.display = 'flex';
+  }
+  function closePopup(popupId) {
+    document.getElementById(popupId).style.display = 'none';
+  }
 
-    const userCard = document.getElementById('userCard');
-    const loginPrompt = document.getElementById('loginPrompt');
+  // Open privacy
+  document.getElementById('privacyBtn').addEventListener('click', () => openPopup('privacyPopup'));
+  // Open terms
+  document.getElementById('termsBtn').addEventListener('click', () => openPopup('termsPopup'));
 
-    let currentUser = null;
+  // Close buttons
+  document.getElementById('closePrivacy').addEventListener('click', () => closePopup('privacyPopup'));
+  document.getElementById('closeTerms').addEventListener('click', () => closePopup('termsPopup'));
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        userCard.style.display = 'block';
-        loginPrompt.style.display = 'none';
-        document.getElementById('userName').textContent = user.displayName || 'No Username';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userPic').src = user.photoURL || 'https://via.placeholder.com/56';
+  // Close popup on ESC key for accessibility
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closePopup('privacyPopup');
+      closePopup('termsPopup');
+    }
+  });
 
-        loadMessages(user.uid);
-      } else {
-        userCard.style.display = 'none';
-        loginPrompt.style.display = 'block';
+  // Allow closing popup when clicking outside content
+  document.querySelectorAll('.popup-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        overlay.style.display = 'none';
       }
     });
+  });
 
-    function signIn() {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).catch(() => showAlert("Sign-in failed."));
-    }
-
-    function submitContact() {
-      const message = document.getElementById('contactMessage').value.trim();
-      if (!message) return showAlert("Please write something.");
-
-      push(ref(db, "help/contact"), {
-        uid: currentUser.uid,
-        email: currentUser.email,
-        username: currentUser.displayName || "No Username",
-        profile: currentUser.photoURL || "",
-        message,
-        timestamp: Date.now()
-      }).then(() => {
-        showAlert("Message sent!");
-        document.getElementById('contactMessage').value = '';
-      }).catch(() => showAlert("Failed to send."));
-    }
-
-    function loadMessages(uid) {
-      const userBox = document.getElementById("userMessages");
-      const receivedBox = document.getElementById("receivedMessages");
-
-      onValue(ref(db, "help/contact"), (snapshot) => {
-        userBox.innerHTML = "";
-        receivedBox.innerHTML = "";
-        snapshot.forEach((child) => {
-          const msg = child.val();
-          const el = document.createElement('div');
-          el.className = "message-card";
-          el.innerHTML = `
-            <div class="message-meta">
-              ${msg.username || "Anonymous"} • ${new Date(msg.timestamp).toLocaleString()}
-            </div>
-            <div>${msg.message}</div>
-          `;
-          if (msg.uid === uid) {
-            userBox.appendChild(el);
-          } else {
-            receivedBox.appendChild(el);
-          }
+  // Make close buttons keyboard accessible
+  document.querySelectorAll('.popup-close').forEach(btn => {
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  });
+    const questions = document.querySelectorAll('.faq-question');
+    questions.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const isActive = btn.classList.contains('active');
+        questions.forEach(q => {
+          q.classList.remove('active');
+          q.nextElementSibling.classList.remove('open');
         });
+        if (!isActive) {
+          btn.classList.add('active');
+          btn.nextElementSibling.classList.add('open');
+        }
       });
-    }
+    });
+</script>
 
-    function showAlert(message) {
-      const alertBox = document.getElementById("customAlert");
-      alertBox.textContent = message;
-      alertBox.style.display = "block";
-      setTimeout(() => alertBox.style.display = "none", 3000);
-    }
-  </script>
 </body>
 </html>
