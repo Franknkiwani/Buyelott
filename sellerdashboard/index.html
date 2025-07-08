@@ -216,6 +216,91 @@ header {
 .balance-buttons button:hover {
   background: #444;
 }
+/* iOS modal styling */
+.ios-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(6px);
+}
+
+.ios-modal-content {
+  background: #121212;
+  border-radius: 20px;
+  max-width: 360px;
+  width: 90%;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-align: center;
+  color: #eee;
+}
+
+.ios-modal-content h3 {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.ios-modal-content p {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+  color: #ccc;
+}
+
+.ios-modal-content input[type="email"] {
+  background: #222;
+  border: 1px solid #444;
+  color: #eee;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  width: 100%;
+  margin-bottom: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.ios-modal-content input[type="email"]:focus {
+  border-color: #00aaff;
+}
+
+.ios-btn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 0.6rem;
+  transition: background-color 0.3s ease;
+}
+
+.ios-btn.primary {
+  background: #00aaff;
+  color: #121212;
+}
+
+.ios-btn.primary:hover {
+  background: #008fcc;
+}
+
+.ios-btn.cancel {
+  background: #444;
+  color: #ccc;
+}
+
+.ios-btn.cancel:hover {
+  background: #666;
+}
   </style>
 </head>
 <body>
@@ -244,6 +329,16 @@ header {
       </div>
     </div>
   </div>
+  <!-- iOS style modal wrapper (hidden by default) -->
+<div id="balance-modal" class="ios-modal" style="display:none;">
+  <div class="ios-modal-content">
+    <h3 id="modal-title">Title</h3>
+    <p id="modal-message">Message text here...</p>
+    <input id="paypal-input" type="email" placeholder="Enter your PayPal email" style="display:none;" />
+    <button id="modal-primary-btn" class="ios-btn primary">Action</button>
+    <button id="modal-cancel-btn" class="ios-btn cancel">Cancel</button>
+  </div>
+</div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -493,7 +588,155 @@ header {
       confirmModal.style.display = "none";
     };
   }
+// Grab modal elements once
+const balanceModal = document.getElementById("balance-modal");
+const modalTitle = document.getElementById("modal-title");
+const modalMessage = document.getElementById("modal-message");
+const paypalInput = document.getElementById("paypal-input");
+const modalPrimaryBtn = document.getElementById("modal-primary-btn");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
 
+// Wait for salesSection to render buttons, then attach click handlers
+function attachBalanceButtonHandlers() {
+  const buttons = salesSection.querySelectorAll(".balance-buttons button");
+  if (buttons.length < 2) return;
+
+  const pendingBtn = buttons[0];
+  const transferredBtn = buttons[1];
+
+  // Pending balance modal (no cashout, only cancel)
+  pendingBtn.style.cursor = "pointer";
+  pendingBtn.onclick = () => {
+    modalTitle.textContent = "Pending Balance";
+    modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";
+    paypalInput.style.display = "none";
+    modalPrimaryBtn.style.display = "none";
+    modalCancelBtn.textContent = "Close";
+    openModal();
+  };
+
+  // Transferred balance modal (show amount, paypal input, request payment)
+  transferredBtn.style.cursor = "pointer";
+  transferredBtn.onclick = () => {
+    modalTitle.textContent = "Available Balance";
+    modalMessage.textContent = `This balance is available to you. Enter your PayPal email to request payment.`;
+    paypalInput.style.display = "block";
+    paypalInput.value = ""; // Clear previous input
+    modalPrimaryBtn.style.display = "block";
+    modalPrimaryBtn.textContent = "Request Payment";
+    modalCancelBtn.textContent = "Cancel";
+    openModal();
+
+    modalPrimaryBtn.onclick = async () => {
+      const email = paypalInput.value.trim();
+      if (!email || !validateEmail(email)) {
+        alert("Please enter a valid PayPal email.");
+        return;
+      }
+      modalPrimaryBtn.disabled = true;
+      modalPrimaryBtn.textContent = "Requesting...";
+      try {
+        // Here you should add your payment request logic (e.g. Firebase update, server call, etc.)
+        // For demo, just wait 1 sec and then reset transferredBalance to 0:
+        await new Promise(r => setTimeout(r, 1000));
+
+        // Simulate reset of transferred balance in DB:
+        // NOTE: Replace this with actual DB update to mark funds as requested/paid
+        alert(`Payment request successful for ${email}.`);
+        
+        // Reset balance buttons and reload sales to reflect changes
+        closeModal();
+        loadSales(); // reload sales and balances
+      } catch (e) {
+        alert("Failed to request payment: " + e.message);
+        modalPrimaryBtn.disabled = false;
+        modalPrimaryBtn.textContent = "Request Payment";
+      }
+    };
+  };
+
+  modalCancelBtn.onclick = () => {
+    closeModal();
+  };
+}
+
+function openModal() {
+  balanceModal.style.display = "flex";
+}
+
+function closeModal() {
+  balanceModal.style.display = "none";
+}
+
+// Simple email validation
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Run this after sales loaded (and balance buttons created)
+async function loadSales() {
+  salesSection.innerHTML = "<p>Loading your sales...</p>";
+  const salesSnap = await get(ref(db, `sales/${currentUserId}`));
+  const salesData = salesSnap.val();
+
+  if (!salesData) {
+    salesSection.innerHTML = "<p>No sales found.</p>";
+    return;
+  }
+
+  // Calculate balances
+  let pendingBalance = 0;
+  let transferredBalance = 0;
+
+  Object.entries(salesData).forEach(([orderId, order]) => {
+    if (order.status === "paid") {
+      const price = Number(order.price) || 0;
+      const isTransferred = !!order.transferred;
+      if (isTransferred) {
+        transferredBalance += price;
+      } else {
+        pendingBalance += price * 0.7; // minus 30% fees
+      }
+    }
+  });
+
+  const formatDollars = num => `$${num.toFixed(3)}`;
+
+  salesSection.innerHTML = "";
+
+  // Balance buttons container
+  const balancesDiv = document.createElement("div");
+  balancesDiv.className = "balance-buttons";
+  balancesDiv.innerHTML = `
+    <button title="Pending balance minus 30% fees">Pending Balance: ${formatDollars(pendingBalance)}</button>
+    <button title="Transferred balance (no fees deducted)">Transferred Balance: ${formatDollars(transferredBalance)}</button>
+  `;
+  salesSection.appendChild(balancesDiv);
+
+  // Attach click handlers to balance buttons
+  attachBalanceButtonHandlers();
+
+  // The rest of your sales rendering code...
+  // Separate paid and others
+  const paidOrders = [];
+  const otherOrders = [];
+
+  Object.entries(salesData).forEach(([orderId, order]) => {
+    if (order.status === "paid") paidOrders.push({ orderId, ...order });
+    else otherOrders.push({ orderId, ...order });
+  });
+
+  // Render non-paid first
+  otherOrders.forEach(order => {
+    salesSection.appendChild(createSalesCard(order));
+  });
+
+  // Paid orders last, full width with transfer button
+  paidOrders.forEach(order => {
+    const card = createSalesCard(order, true);
+    salesSection.appendChild(card);
+  });
+}
 </script>
 
 </body>
