@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seller Dashboard – dlsaccounts.store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #121212;
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0; padding: 2rem; max-width: 900px; margin-left: auto; margin-right: auto;
+    }
+    h1 {
+      text-align: center; font-weight: 900; font-size: 2.2rem; margin-bottom: 1rem;
+      color: #0ff;
+      text-shadow:
+        0 0 6px #0ff,
+        0 0 12px #0ff;
+    }
+    .top-balance {
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(145deg, #111, #222);
+      border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;
+      box-shadow: inset 0 0 15px #0ff88a44;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0f0;
+      user-select: none;
+    }
+    .payout-btn {
+      background: #00bb55;
+      border: none;
+      border-radius: 18px;
+      padding: 0.7rem 1.5rem;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      box-shadow:
+        0 0 10px #00bb55,
+        inset 0 0 12px #00bb55;
+    }
+    .payout-btn:hover {
+      background: #00dd77;
+      box-shadow:
+        0 0 18px #00dd77,
+        inset 0 0 16px #00dd77;
+    }
+    .card {
+      background: rgba(10,10,10,0.7);
+      border-radius: 18px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow:
+        inset 0 0 8px #0ff5,
+        0 0 12px #0ff4;
+      user-select: none;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.3rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+      color: #0f0;
+    }
+    .stat {
+      background: #151515;
+      padding: 1rem;
+      border-radius: 14px;
+      box-shadow:
+        inset 0 0 6px #0f0,
+        0 0 8px #0f0;
+    }
+    #listings {
+      font-size: 1.1rem;
+      color: #ccc;
+      user-select: text;
+    }
+    /* Promoted Ads styling */
+    #adsSummary div {
+      padding: 0.9rem;
+      margin-bottom: 1rem;
+      background: #1f1f1f;
+      border-radius: 14px;
+      box-shadow: inset 0 0 6px #000;
+      font-size: 0.95rem;
+    }
+    #adsSummary div > div:first-child {
+      font-weight: 700;
+      color: #0ff;
+      margin-bottom: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>👤 Seller Dashboard</h1>
+
+  <div class="top-balance">
+    <div>Balance: <b id="balanceAmount">$0.00</b></div>
+    <button class="payout-btn" id="requestPayoutBtn">Request Payout</button>
+  </div>
+
+  <div class="card">
+    <h2>📊 Overview</h2>
+    <div class="stats-grid">
+      <div class="stat">📦 Listings<br><b id="listingCount">0</b></div>
+      <div class="stat">👀 Views<br><b id="totalViews">0</b></div>
+      <div class="stat">💰 Sales Cut<br><b id="salesCut">$0.00</b></div>
+      <div class="stat">🎯 Ads Spent<br><b id="adsSpent">$0.00</b></div>
+    </div>
+  </div>
+
+  <div class="card" id="listingsCard">
+    <h2>🛒 Your Listings</h2>
+    <div id="listings">Loading your listings...</div>
+  </div>
+
+  <div class="card" id="adAnalyticsCard">
+    <h2>📢 Your Promoted Ads</h2>
+    <div id="adsSummary"><p style="text-align:center;color:#888;">Loading ads...</p></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const balanceEl = document.getElementById("balanceAmount");
+    const listingCountEl = document.getElementById("listingCount");
+    const totalViewsEl = document.getElementById("totalViews");
+    const salesCutEl = document.getElementById("salesCut");
+    const adsSpentEl = document.getElementById("adsSpent");
+    const listingsEl = document.getElementById("listings");
+    const adsSummary = document.getElementById("adsSummary");
+    const requestPayoutBtn = document.getElementById("requestPayoutBtn");
+
+    // Auto-init balance with 0.01 if missing, and fetch balance
+    async function loadBalance(uid) {
+      const balRef = ref(db, `dlsaccountsbalance/${uid}`);
+      const balSnap = await get(balRef);
+      if (!balSnap.exists()) {
+        await update(balRef, 0.01);
+        balanceEl.textContent = "$0.01";
+      } else {
+        const bal = parseFloat(balSnap.val());
+        balanceEl.textContent = `$${bal.toFixed(2)}`;
+      }
+    }
+
+    // Load Listings count and list basic titles
+    async function loadListings(uid) {
+      const listingsRef = ref(db, "dlsaccounts");
+      const snap = await get(listingsRef);
+      if (!snap.exists()) {
+        listingsEl.textContent = "You have no listings.";
+        listingCountEl.textContent = "0";
+        return;
+      }
+      const data = snap.val();
+      const userListings = Object.entries(data).filter(([key, val]) => val.seller?.uid === uid);
+      listingCountEl.textContent = userListings.length;
+      if (userListings.length === 0) {
+        listingsEl.textContent = "You have no listings.";
+        return;
+      }
+
+      listingsEl.innerHTML = userListings.map(([key, val]) =>
+        `<div style="margin-bottom:0.4rem;">• ${val.title || "Untitled"}</div>`
+      ).join("");
+    }
+
+    // Load Ad analytics for this user
+    async function loadSellerAds(uid) {
+      try {
+        const adsSnap = await get(ref(db, "dlsaccountsads"));
+        if (!adsSnap.exists()) {
+          adsSummary.innerHTML = '<p style="text-align:center;color:#888;">You have no promoted ads yet.</p>';
+          return;
+        }
+        const allAds = adsSnap.val();
+        const userAds = Object.values(allAds).filter(ad => ad.uid === uid);
+        if (userAds.length === 0) {
+          adsSummary.innerHTML = '<p style="text-align:center;color:#888;">You have no promoted ads yet.</p>';
+          return;
+        }
+        adsSummary.innerHTML = "";
+        userAds.forEach(ad => {
+          const adBox = document.createElement("div");
+          adBox.style.padding = "0.8rem";
+          adBox.style.marginBottom = "0.8rem";
+          adBox.style.borderRadius = "14px";
+          adBox.style.background = "#1f1f1f";
+          adBox.style.boxShadow = "inset 0 0 6px #000";
+          adBox.innerHTML = `
+            <div style="font-weight:bold;">🪧 Ad ID: <span style="color:#0ff;">${ad.adId}</span></div>
+            <div style="font-size:0.9rem;margin:4px 0;">
+              👀 Views Remaining: <b>${ad.viewsRemaining ?? 0}</b><br>
+              🖱️ Clicks: <b>${ad.clicks ?? 0}</b><br>
+              💵 Paid: <b>${ad.isFree ? "Free" : `$${parseFloat(ad.pricePaid).toFixed(2)}`}</b><br>
+              📅 Started: ${new Date(ad.createdAt).toLocaleDateString()}
+            </div>
+          `;
+          adsSummary.appendChild(adBox);
+        });
+      } catch (e) {
+        console.error("Error loading ads:", e);
+        adsSummary.innerHTML = '<p style="color:#f55;text-align:center;">Error loading promoted ads.</p>';
+      }
+    }
+
+    // Load overview stats (dummy placeholders for now, you can customize)
+    async function loadOverview(uid) {
+      // Example: total views, sales cut, ads spent, calculate from your DB if you want
+      // For now, show placeholders:
+      totalViewsEl.textContent = "8420";
+      salesCutEl.textContent = "$32.50";
+      adsSpentEl.textContent = "$4.00";
+    }
+
+    // Handle payout button click (UI only - no backend)
+    requestPayoutBtn.onclick = () => {
+      alert("💸 Payout request sent! We'll review and pay you soon.");
+    };
+
+    // Load all on auth
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        balanceEl.textContent = "Sign in to view balance";
+        listingsEl.textContent = "Sign in to see listings";
+        adsSummary.innerHTML = '<p style="text-align:center;color:#888;">Sign in to view ads</p>';
+        return;
+      }
+      const uid = user.uid;
+      await loadBalance(uid);
+      await loadListings(uid);
+      await loadSellerAds(uid);
+      await loadOverview(uid);
+    });
+  </script>
+</body>
+</html>
