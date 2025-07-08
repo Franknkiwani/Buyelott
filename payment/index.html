@@ -1,152 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PayPal + Firebase Order Tracking</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PayPal + Firebase Checkout</title>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+<!-- PayPal SDK first (important) -->
+<script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD"></script>
 
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&currency=USD"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #f2f2f7;
-      margin: 0; padding: 20px;
-      display: flex; justify-content: center; align-items: flex-start;
-      min-height: 100vh;
-    }
-    .checkout-container {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      width: 360px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    h1 {
-      font-weight: 700;
-      font-size: 24px;
-      margin-bottom: 12px;
-      color: #111;
-    }
-    p.description {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 24px;
-    }
-    p.price {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 24px;
-      color: #111;
-    }
-    img.product-image {
-      width: 100%;
-      height: auto;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      object-fit: cover;
-    }
-    #paypal-button-container {
-      margin-top: 12px;
-    }
-  </style>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+      Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: #f2f2f7;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+  .checkout-container {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    width: 360px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: #111;
+  }
+  p.description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  p.price {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #111;
+  }
+  img.product-image {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+  }
+  #paypal-button-container {
+    margin-top: 12px;
+  }
+</style>
 </head>
 <body>
 
-  <div class="checkout-container">
-    <img class="product-image" src="https://via.placeholder.com/360x200.png?text=Your+Product" alt="Product Image" />
-    <h1 id="product-title">DLS Premium Account</h1>
-    <p class="description" id="product-description">
-      Digital delivery of a premium Dream League Soccer setup.
-    </p>
-    <p class="price" id="product-price">$0.01 USD</p>
+<div class="checkout-container">
+  <img class="product-image" src="https://via.placeholder.com/360x200.png?text=Your+Product" alt="Product Image" />
+  <h1 id="product-title">DLS Premium Account</h1>
+  <p class="description" id="product-description">Digital delivery of a premium Dream League Soccer setup.</p>
+  <p class="price" id="product-price">$0.01 USD</p>
 
-    <div id="paypal-button-container"></div>
-  </div>
+  <div id="paypal-button-container"></div>
+</div>
 
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+  // Initialize Firebase app and database
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
 
-    window.onload = function () {
-      if (!window.paypal) {
-        alert('PayPal SDK failed to load. Check your internet or client ID.');
-        return;
+  window.addEventListener('load', () => {
+    if (!window.paypal) {
+      alert('PayPal SDK failed to load. Check your internet or client ID.');
+      return;
+    }
+
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'pill',
+        label: 'paypal'
+      },
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: '0.01'
+            },
+            description: 'DLS Premium Account'
+          }]
+        });
+      },
+      onApprove: (data, actions) => {
+        return actions.order.capture().then(details => {
+          const orderData = {
+            orderId: details.id,
+            payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+            payerEmail: details.payer.email_address,
+            amount: details.purchase_units[0].amount.value,
+            productDesc: details.purchase_units[0].description,
+            createdAt: new Date().toISOString()
+          };
+
+          return database.ref('orders').push(orderData)
+            .then(() => alert(`Payment completed by ${details.payer.name.given_name}! Order saved.`))
+            .catch(err => alert('Payment succeeded but failed to save order: ' + err.message));
+        });
+      },
+      onCancel: () => {
+        alert('Payment cancelled.');
+      },
+      onError: (err) => {
+        console.error(err);
+        alert('An error occurred during the transaction: ' + err.message);
       }
-
-      paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'pill',
-          label: 'paypal'
-        },
-
-        createOrder: function (data, actions) {
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: '0.01' // Change price here or later dynamically
-              },
-              description: 'DLS Premium Account'
-            }]
-          });
-        },
-
-        onApprove: function (data, actions) {
-          return actions.order.capture().then(function (details) {
-            // Save order to Firebase Realtime Database
-            const orderData = {
-              orderId: details.id,
-              payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
-              payerEmail: details.payer.email_address,
-              amount: details.purchase_units[0].amount.value,
-              productDesc: details.purchase_units[0].description,
-              createdAt: new Date().toISOString()
-            };
-
-            return database.ref('orders').push(orderData)
-              .then(() => {
-                alert('Payment completed by ' + details.payer.name.given_name + '! Order saved.');
-              })
-              .catch(err => {
-                alert('Payment succeeded but failed to save order: ' + err.message);
-              });
-          });
-        },
-
-        onCancel: function () {
-          alert('Payment cancelled.');
-        },
-
-        onError: function (err) {
-          console.error(err);
-          alert('An error occurred during the transaction.');
-        }
-      }).render('#paypal-button-container');
-    };
-  </script>
+    }).render('#paypal-button-container');
+  });
+</script>
 
 </body>
 </html>
