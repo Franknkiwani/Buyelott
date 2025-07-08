@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard – dlsaccounts</title>
+  <title>My Orders</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -23,131 +23,126 @@
     const auth = getAuth();
     const db = getDatabase();
 
-    const salesSection = document.getElementById("sales");
     const ordersSection = document.getElementById("orders");
 
-    function renderOrders(container, dataObj) {
+    function renderOrders(container, dataObj, userUid) {
       container.innerHTML = "";
       if (!dataObj) {
         container.innerHTML = "<p style='padding:1rem;color:#888;'>No orders found.</p>";
         return;
       }
 
-      Object.entries(dataObj).forEach(([orderId, orderData]) => {
+      Object.entries(dataObj).forEach(([orderId, order]) => {
         const div = document.createElement("div");
         div.className = "card";
+        div.style.borderColor = order.status === "paid" ? "#8BC34A" : order.status === "failed" ? "#F44336" : "#ccc";
+
         div.innerHTML = `
           <h3>Order ID: ${orderId}</h3>
-          <p><strong>Product:</strong> ${orderData.product ?? "N/A"}</p>
-          <p><strong>Price:</strong> $${orderData.price ?? "0.00"}</p>
-          <p><strong>Status:</strong> ${orderData.status ?? "unknown"}</p>
+          <img src="${order.image ?? '#'}" alt="Product Image" class="product-img">
+          <p><strong>Product:</strong> ${order.product ?? "N/A"}</p>
+          <p><strong>Description:</strong> ${order.description ?? "No description"}</p>
+          <p><strong>Price:</strong> $${order.price ?? "0.00"}</p>
+          <p><strong>Status:</strong> <span style="color: ${order.status === 'paid' ? '#4CAF50' : order.status === 'failed' ? '#F44336' : '#000'}">${order.status}</span></p>
+          <p><strong>Seller UID:</strong> ${order.seller ?? "N/A"}</p>
+          <div class="action-buttons">
+            ${order.status === "paid" ? `<button class="btn success" onclick="transferAccount('${orderId}')">Transfer Account</button>` : ""}
+            ${order.status === "failed" ? `<button class="btn danger" onclick="cancelOrder('${userUid}', '${orderId}')">Cancel Order</button>` : ""}
+          </div>
         `;
+
         container.appendChild(div);
       });
     }
 
+    window.cancelOrder = function(uid, orderId) {
+      const confirmCancel = confirm("Are you sure you want to cancel this order?");
+      if (!confirmCancel) return;
+
+      remove(ref(db, `orders/${uid}/${orderId}`))
+        .then(() => alert("Order canceled successfully."))
+        .catch(err => alert("Error cancelling order: " + err.message));
+    };
+
+    window.transferAccount = function(orderId) {
+      alert("This would trigger a transfer flow for order ID: " + orderId);
+    };
+
     onAuthStateChanged(auth, user => {
       if (user) {
         const uid = user.uid;
-
-        // Fetch orders YOU SOLD (sales)
-        const salesRef = ref(db, `sales/${uid}`);
-        onValue(salesRef, snapshot => {
-          renderOrders(salesSection, snapshot.val());
-        });
-
-        // Fetch orders YOU BOUGHT
         const ordersRef = ref(db, `orders/${uid}`);
         onValue(ordersRef, snapshot => {
-          renderOrders(ordersSection, snapshot.val());
+          renderOrders(ordersSection, snapshot.val(), uid);
         });
-
       } else {
-        alert("Please log in to view your dashboard.");
+        alert("Please log in to view your orders.");
       }
     });
-
-    window.switchTab = function(tab) {
-      document.getElementById("tab-sales").classList.remove("active");
-      document.getElementById("tab-orders").classList.remove("active");
-      document.getElementById("sales").style.display = "none";
-      document.getElementById("orders").style.display = "none";
-
-      document.getElementById(tab).style.display = "block";
-      document.getElementById("tab-" + tab).classList.add("active");
-    };
   </script>
   <style>
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f9f9f9;
+      background: #f2f2f2;
       color: #111;
     }
 
     header {
-      padding: 1rem;
       background: #000;
       color: white;
-      font-size: 1.3rem;
+      padding: 1rem;
       text-align: center;
-    }
-
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .tabs button {
-      flex: 1;
-      padding: 1rem;
-      font-size: 1rem;
-      background: #f2f2f2;
-      border: none;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .tabs button.active {
-      background: #000;
-      color: white;
-      font-weight: 600;
+      font-size: 1.3rem;
     }
 
     .section {
-      display: none;
       padding: 1rem;
     }
 
     .card {
       background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
-      margin-bottom: 1rem;
+      border: 2px solid #ccc;
       padding: 1rem;
-      transition: 0.3s ease;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
-    .card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .product-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 0.5rem 0;
     }
 
-    @media (max-width: 600px) {
-      .card h3 {
-        font-size: 1rem;
-      }
+    .action-buttons {
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+
+    .btn.success {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn.danger {
+      background: #F44336;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <header>📦 My Dashboard</header>
-
-  <div class="tabs">
-    <button id="tab-sales" class="active" onclick="switchTab('sales')">Sales</button>
-    <button id="tab-orders" onclick="switchTab('orders')">Orders</button>
-  </div>
-
-  <div id="sales" class="section" style="display: block;"></div>
+  <header>🧾 My Orders</header>
   <div id="orders" class="section"></div>
 </body>
 </html>
