@@ -432,17 +432,18 @@
         await set(orderRef, updatedOrder);
         if (sellerRef) await set(sellerRef, updatedOrder);
 
-// ✅ EmailJS confirmation
-emailjs.send('service_r5vg9am', 'template_c0nm1sr', {
-  name: updatedOrder.buyerName,
-  email: updatedOrder.buyerEmail,
-  title: updatedOrder.productTitle
-}).then(() => {
-  showPaymentOverlay("✅ Payment successful! Confirmation email sent.", true);
-}).catch((error) => {
-  console.error("EmailJS Error:", error);
-  showPaymentOverlay("✅ Payment successful! But email failed to send.", true);
-});
+        // ✅ EmailJS confirmation
+        emailjs.send('service_r5vg9am', 'template_c0nm1sr', {
+          name: updatedOrder.buyerName,
+          email: updatedOrder.buyerEmail,
+          title: updatedOrder.productTitle
+        }).then(() => {
+          alert("✅ Payment successful! Confirmation email sent.");
+        }).catch((error) => {
+          console.error("EmailJS Error:", error);
+          alert("✅ Payment successful! But email failed to send.");
+        });
+
       } catch (error) {
         console.error("Payment capture failed:", error);
         const failedOrder = { ...baseOrder, status: "failed" };
@@ -451,62 +452,51 @@ emailjs.send('service_r5vg9am', 'template_c0nm1sr', {
         alert("⚠️ Payment failed after approval.");
       }
     },
-onCancel: async () => {
-  const failedOrder = {
-    productId: currentProduct.id,
-    productTitle: currentProduct.title,
-    price: currentProduct.price,
-    buyerName: currentUser.displayName || "Customer",
-    buyerEmail: currentUser.email,
-    status: "failed",
-    createdAt: Date.now()
-  };
+    onCancel: async () => {
+      const failedOrder = {
+        productId: currentProduct.id,
+        productTitle: currentProduct.title,
+        price: currentProduct.price,
+        buyerName: currentUser.displayName || "Customer",
+        buyerEmail: currentUser.email,
+        status: "failed",
+        createdAt: Date.now()
+      };
 
-  // Save to buyer
-  const buyerOrderRef = push(ref(db, `orders/${currentUser.uid}`));
-  await set(buyerOrderRef, failedOrder);
+      const orderRef = push(ref(db, `orders/${currentUser.uid}`));
+      const sellerRef = currentProduct.seller?.uid
+        ? push(ref(db, `sales/${currentProduct.seller.uid}`))
+        : null;
 
-  // Save to seller (if exists)
-  if (currentProduct.seller?.uid) {
-    const sellerSalesRef = push(ref(db, `sales/${currentProduct.seller.uid}`));
-    await set(sellerSalesRef, {
-      ...failedOrder,
-      buyerUid: currentUser.uid,
-      sellerUid: currentProduct.seller.uid,
-    });
-  }
+      await set(orderRef, failedOrder);
+      if (sellerRef) await set(sellerRef, failedOrder);
 
-  showPaymentOverlay("❌ Payment was canceled.", false);
-},
+      alert("❌ Payment canceled. Order marked as failed.");
+    },
+    onError: async (err) => {
+      console.error("PayPal error:", err);
 
-onError: async (err) => {
-  console.error("PayPal error:", err);
+      const failedOrder = {
+        productId: currentProduct.id,
+        productTitle: currentProduct.title,
+        price: currentProduct.price,
+        buyerName: currentUser.displayName || "Customer",
+        buyerEmail: currentUser.email,
+        status: "failed",
+        createdAt: Date.now()
+      };
 
-  const failedOrder = {
-    productId: currentProduct.id,
-    productTitle: currentProduct.title,
-    price: currentProduct.price,
-    buyerName: currentUser.displayName || "Customer",
-    buyerEmail: currentUser.email,
-    status: "failed",
-    createdAt: Date.now()
-  };
+      const orderRef = push(ref(db, `orders/${currentUser.uid}`));
+      const sellerRef = currentProduct.seller?.uid
+        ? push(ref(db, `sales/${currentProduct.seller.uid}`))
+        : null;
 
-  // Save to buyer
-  const buyerOrderRef = push(ref(db, `orders/${currentUser.uid}`));
-  await set(buyerOrderRef, failedOrder);
+      await set(orderRef, failedOrder);
+      if (sellerRef) await set(sellerRef, failedOrder);
 
-  // Save to seller (if exists)
-  if (currentProduct.seller?.uid) {
-    const sellerSalesRef = push(ref(db, `sales/${currentProduct.seller.uid}`));
-    await set(sellerSalesRef, {
-      ...failedOrder,
-      buyerUid: currentUser.uid,
-      sellerUid: currentProduct.seller.uid,
-    });
-  }
-
-  showPaymentOverlay("⚠️ An error occurred during payment.", false);
+      alert("❌ An error occurred. Order marked as failed.");
+    }
+  }).render("#paypal-button-container");
 }
 
   // Modal controls
@@ -543,18 +533,6 @@ onError: async (err) => {
     document.getElementById("reportBtn").onclick = () => showModal("Report Issue");
     document.getElementById("modal-close").onclick = hideModal;
   });
-  function showPaymentOverlay(message, isSuccess) {
-  const overlay = document.getElementById("payment-status-overlay");
-  const messageBox = document.getElementById("payment-status-message");
-
-  overlay.style.display = "flex";
-  overlay.style.backgroundColor = isSuccess ? "rgba(0, 128, 0, 0.9)" : "rgba(220, 20, 60, 0.9)"; // green or red
-  messageBox.textContent = message;
-}
-
-function hidePaymentOverlay() {
-  document.getElementById("payment-status-overlay").style.display = "none";
-}
 </script>
 <body>
 <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
@@ -613,9 +591,6 @@ function hidePaymentOverlay() {
     <p id="paypal-error-desc">It seems your internet is slow or our payment service is down. Please try another payment method or come back later.</p>
     <button onclick="location.reload()">Try Again</button>
   </div>
-<div id="payment-status-overlay" style="display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; flex-direction:column; font-size:1.5rem; font-weight:bold; color:white;">
-  <div id="payment-status-message"></div>
-  <button onclick="hidePaymentOverlay()" style="margin-top:20px; padding:10px 20px; background:white; color:black; border:none; cursor:pointer; font-weight:bold; border-radius:8px;">Close</button>
-</div>
+
 </body>
 </html>
