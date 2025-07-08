@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>DLS Dashboard</title>
+  <title>DLS Dashboard - Sales First</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -33,6 +33,8 @@
       cursor: pointer;
       font-weight: 500;
       border-bottom: 3px solid transparent;
+      user-select: none;
+      transition: border-color 0.3s ease;
     }
 
     .tab.active {
@@ -56,6 +58,9 @@
       border-left: 6px solid #999;
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
     .paid {
@@ -74,106 +79,371 @@
       margin: 0 0 0.5rem;
     }
 
-    .order-card p {
-      margin: 0.3rem 0;
+    .order-info p {
+      margin: 0;
       font-size: 0.95rem;
     }
+
+    .buttons {
+      margin-top: 0.6rem;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    button, .btn-svg {
+      cursor: pointer;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button.cancel {
+      background: #F44336;
+      color: white;
+    }
+
+    button.cancel:hover {
+      background: #D32F2F;
+    }
+
+    button.track {
+      background: #2196F3;
+      color: white;
+    }
+
+    button.track:hover {
+      background: #1976D2;
+    }
+
+    button.transfer {
+      background: #4CAF50;
+      color: white;
+    }
+
+    button.transfer:hover {
+      background: #388E3C;
+    }
+
+    /* Modal Styles */
+    #confirm-modal {
+      position: fixed;
+      top: 0; left: 0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #confirm-modal .modal-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    #confirm-modal .modal-buttons {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    #confirm-modal button {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    #confirm-modal button.yes {
+      background: #4CAF50;
+      color: white;
+      border: none;
+    }
+
+    #confirm-modal button.cancel {
+      background: #F44336;
+      color: white;
+      border: none;
+    }
+
+    /* SVG icon styling */
+    .btn-svg svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
   </style>
 </head>
 <body>
   <header>📊 Your DLS Dashboard</header>
 
   <div class="tab-bar">
-    <div class="tab active" id="tab-orders">🛒 My Orders</div>
-    <div class="tab" id="tab-sales">📦 My Sales</div>
+    <div class="tab active" id="tab-sales">📦 My Sales</div>
+    <div class="tab" id="tab-orders">🛒 My Orders</div>
   </div>
 
-  <div class="section active" id="orders-section">
-    <p>Loading your orders...</p>
-  </div>
-
-  <div class="section" id="sales-section">
+  <div class="section active" id="sales-section">
     <p>Loading your sales...</p>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  <div class="section" id="orders-section">
+    <p>Loading your orders...</p>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-    };
+  <!-- Confirm modal -->
+  <div id="confirm-modal">
+    <div class="modal-content">
+      <p id="confirm-message">Are you sure?</p>
+      <div class="modal-buttons">
+        <button class="yes">Yes</button>
+        <button class="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getDatabase();
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    const ordersSection = document.getElementById("orders-section");
-    const salesSection = document.getElementById("sales-section");
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  };
 
-    const tabOrders = document.getElementById("tab-orders");
-    const tabSales = document.getElementById("tab-sales");
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth();
+  const db = getDatabase();
 
-    tabOrders.onclick = () => {
-      tabOrders.classList.add("active");
-      tabSales.classList.remove("active");
-      ordersSection.classList.add("active");
-      salesSection.classList.remove("active");
-    };
+  const tabSales = document.getElementById("tab-sales");
+  const tabOrders = document.getElementById("tab-orders");
 
-    tabSales.onclick = () => {
-      tabSales.classList.add("active");
-      tabOrders.classList.remove("active");
-      salesSection.classList.add("active");
-      ordersSection.classList.remove("active");
-    };
+  const salesSection = document.getElementById("sales-section");
+  const ordersSection = document.getElementById("orders-section");
 
-    function renderOrders(container, data) {
-      container.innerHTML = "";
-      if (!data) {
-        container.innerHTML = "<p>No orders found.</p>";
-        return;
-      }
+  const confirmModal = document.getElementById("confirm-modal");
+  const confirmMessage = document.getElementById("confirm-message");
+  const yesBtn = confirmModal.querySelector("button.yes");
+  const cancelBtn = confirmModal.querySelector("button.cancel");
 
-      Object.entries(data).reverse().forEach(([id, order]) => {
-        const card = document.createElement("div");
-        card.className = `order-card ${order.status}`;
-        card.innerHTML = `
-          <h4>${order.productTitle ?? "Untitled Product"}</h4>
-          <p><strong>Order ID:</strong> ${id}</p>
-          <p><strong>Price:</strong> $${order.price}</p>
-          <p><strong>Status:</strong> ${order.status}</p>
-          <p><strong>Buyer:</strong> ${order.buyerName ?? "N/A"}</p>
-          <p><strong>Email:</strong> ${order.buyerEmail ?? "N/A"}</p>
-          <p><strong>Created:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-        `;
-        container.appendChild(card);
-      });
+  tabSales.onclick = () => {
+    tabSales.classList.add("active");
+    tabOrders.classList.remove("active");
+    salesSection.classList.add("active");
+    ordersSection.classList.remove("active");
+  };
+
+  tabOrders.onclick = () => {
+    tabOrders.classList.add("active");
+    tabSales.classList.remove("active");
+    ordersSection.classList.add("active");
+    salesSection.classList.remove("active");
+  };
+
+  let currentUserId = null;
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      alert("Please log in to access your dashboard.");
+      salesSection.innerHTML = "<p>You must be logged in to view sales.</p>";
+      ordersSection.innerHTML = "<p>You must be logged in to view orders.</p>";
+      return;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        alert("Please log in to view your dashboard.");
-        ordersSection.innerHTML = "<p>You must log in to view orders.</p>";
-        salesSection.innerHTML = "<p>You must log in to view sales.</p>";
-        return;
-      }
+    currentUserId = user.uid;
 
-      const uid = user.uid;
+    loadSales();
+    loadOrders();
+  });
 
-      const ordersSnap = await get(ref(db, `orders/${uid}`));
-      renderOrders(ordersSection, ordersSnap.val());
+  async function loadSales() {
+    salesSection.innerHTML = "<p>Loading your sales...</p>";
+    const salesSnap = await get(ref(db, `sales/${currentUserId}`));
+    const salesData = salesSnap.val();
 
-      const salesSnap = await get(ref(db, `sales/${uid}`));
-      renderOrders(salesSection, salesSnap.val());
+    if (!salesData) {
+      salesSection.innerHTML = "<p>No sales found.</p>";
+      return;
+    }
+
+    // Separate paid and others
+    const paidOrders = [];
+    const otherOrders = [];
+
+    Object.entries(salesData).forEach(([orderId, order]) => {
+      if (order.status === "paid") paidOrders.push({ orderId, ...order });
+      else otherOrders.push({ orderId, ...order });
     });
-  </script>
+
+    salesSection.innerHTML = "";
+
+    // Render non-paid first
+    otherOrders.forEach(order => {
+      salesSection.appendChild(createSalesCard(order));
+    });
+
+    // Paid orders last, full width with transfer button
+    paidOrders.forEach(order => {
+      const card = createSalesCard(order, true);
+      salesSection.appendChild(card);
+    });
+  }
+
+  function createSalesCard(order, isPaidFullWidth = false) {
+    const card = document.createElement("div");
+    card.className = `order-card ${order.status}`;
+    if (isPaidFullWidth) card.style.width = "100%";
+
+    card.innerHTML = `
+      <h4>${order.productTitle ?? "Untitled Product"}</h4>
+      <div class="order-info">
+        <p><strong>Order ID:</strong> ${order.orderId}</p>
+        <p><strong>Price:</strong> $${order.price}</p>
+        <p><strong>Status:</strong> ${order.status}</p>
+        <p><strong>Buyer:</strong> ${order.buyerName ?? "N/A"}</p>
+        <p><strong>Email:</strong> ${order.buyerEmail ?? "N/A"}</p>
+        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>
+      </div>
+      <div class="buttons"></div>
+    `;
+
+    const btnsDiv = card.querySelector(".buttons");
+
+    if (order.status === "paid" && isPaidFullWidth) {
+      // Transfer Account button with SVG
+      const transferBtn = document.createElement("button");
+      transferBtn.className = "transfer btn-svg";
+      transferBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="17" width="18" height="4" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        Transfer Account
+      `;
+      transferBtn.onclick = () => {
+        // Redirect with orderId in URL
+        const urlSafeOrderId = encodeURIComponent(order.orderId);
+        window.location.href = `/transferaccount/${urlSafeOrderId}`;
+      };
+      btnsDiv.appendChild(transferBtn);
+    }
+
+    if (order.status === "failed") {
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "cancel";
+      cancelBtn.textContent = "Cancel Order";
+      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "sales");
+      btnsDiv.appendChild(cancelBtn);
+    }
+
+    return card;
+  }
+
+  async function loadOrders() {
+    ordersSection.innerHTML = "<p>Loading your orders...</p>";
+    const ordersSnap = await get(ref(db, `orders/${currentUserId}`));
+    const ordersData = ordersSnap.val();
+
+    if (!ordersData) {
+      ordersSection.innerHTML = "<p>No orders found.</p>";
+      return; }
+
+    ordersSection.innerHTML = "";
+
+    Object.entries(ordersData).forEach(([orderId, order]) => {
+      ordersSection.appendChild(createOrderCard({ orderId, ...order }));
+    });
+  }
+
+  function createOrderCard(order) {
+    const card = document.createElement("div");
+    card.className = `order-card ${order.status}`;
+
+    card.innerHTML = `
+      <h4>${order.productTitle ?? "Untitled Product"}</h4>
+      <div class="order-info">
+        <p><strong>Order ID:</strong> ${order.orderId}</p>
+        <p><strong>Price:</strong> $${order.price}</p>
+        <p><strong>Status:</strong> ${order.status}</p>
+        <p><strong>Seller:</strong> ${order.sellerName ?? "N/A"}</p>
+        <p><strong>Email:</strong> ${order.sellerEmail ?? "N/A"}</p>
+        <p><strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>
+      </div>
+      <div class="buttons"></div>
+    `;
+
+    const btnsDiv = card.querySelector(".buttons");
+
+    // Paid or pending: Show track order button
+    if (order.status === "paid" || order.status === "pending") {
+      const trackBtn = document.createElement("button");
+      trackBtn.className = "track";
+      trackBtn.textContent = "Track Order";
+      trackBtn.onclick = () => {
+        const safeId = encodeURIComponent(order.orderId);
+        window.location.href = `/track/${safeId}`;
+      };
+      btnsDiv.appendChild(trackBtn);
+    }
+
+    // Failed: Cancel order button
+    if (order.status === "failed") {
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "cancel";
+      cancelBtn.textContent = "Cancel Order";
+      cancelBtn.onclick = () => confirmCancelOrder(order.orderId, "orders");
+      btnsDiv.appendChild(cancelBtn);
+    }
+
+    return card;
+  }
+
+  function confirmCancelOrder(orderId, section) {
+    confirmMessage.textContent = "Are you sure you want to cancel this order? This action cannot be undone.";
+    confirmModal.style.display = "flex";
+
+    // Clear previous handlers
+    yesBtn.onclick = null;
+    cancelBtn.onclick = null;
+
+    yesBtn.onclick = async () => {
+      try {
+        // Remove from DB
+        await remove(ref(db, `${section}/${currentUserId}/${orderId}`));
+        confirmModal.style.display = "none";
+        if (section === "sales") loadSales();
+        else loadOrders();
+      } catch (e) {
+        alert("Failed to cancel order: " + e.message);
+      }
+    };
+
+    cancelBtn.onclick = () => {
+      confirmModal.style.display = "none";
+    };
+  }
+
+</script>
 </body>
 </html>
