@@ -419,13 +419,13 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("paymentMethodModal").style.display = "flex";
     document.getElementById("manualAmountText").textContent = `$${price}`;
 
-    // Manual PayPal.Me link stays the same:
+    // Manual PayPal.me link remains unchanged:
     document.getElementById("manualPayLink").href =
       `https://www.paypal.com/paypalme/farainkiwani456/${price}?country.x=ZA&locale.x=en_US`;
 
-    // **Standard pay now goes to your own payment page with productId in query:**
+    // **Absolute path to your payment page here:**
     document.getElementById("standardPayLink").href =
-  `/payment/?id=${productId}`;
+      `/payment/?id=${productId}`;
 
     document.getElementById("payNow").disabled = true;
   });
