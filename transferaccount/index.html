@@ -17,6 +17,9 @@
     max-width: 700px; margin: 2rem auto; background: white; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     padding: 2rem;
   }
+  .countdown {
+    font-weight: bold; font-size: 1.1rem; color: #d9534f; margin-bottom: 1rem; text-align: center;
+  }
   .top-info {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
   }
@@ -41,8 +44,8 @@
     0% { transform: translateY(0); }
     100% { transform: translateY(10px); }
   }
-  .countdown {
-    font-weight: bold; font-size: 1.1rem; color: #d9534f; margin-bottom: 1rem; text-align: center;
+  .status-msg {
+    margin: 1rem 0; font-weight: 600; color: #333; text-align: center;
   }
   .ready-btn {
     display: block; width: 100%; padding: 1rem; background: #007aff; color: white; border: none; border-radius: 999px;
@@ -50,9 +53,6 @@
   }
   .ready-btn:disabled {
     background: #999; cursor: default;
-  }
-  .status-msg {
-    margin: 1rem 0; font-weight: 600; color: #333;
   }
 </style>
 </head>
@@ -64,11 +64,10 @@
 
     <div class="top-info">
       <div class="profile" id="seller-profile">
-        <!-- Seller profile pic & name & tag here -->
+        <!-- Seller info here -->
       </div>
 
       <div class="middle-swap">
-        <!-- SVG swap icon -->
         <svg class="swap-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M4 7h16M4 17h16M14 3l7 7-7 7" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -88,11 +87,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-    // EmailJS SDK (for sending email)
-    import emailjs from "https://cdn.emailjs.com/dist/email.min.js";
-
-    emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS user id
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -153,16 +147,18 @@
       try {
         if (!orderId) {
           paymentStatusEl.textContent = "❌ No order ID provided!";
+          readyBtn.disabled = true;
           return;
         }
         const user = auth.currentUser;
         if (!user) {
           paymentStatusEl.textContent = "❌ Please login to see this page.";
+          readyBtn.disabled = true;
           return;
         }
         currentUser = user;
 
-        // Load order from sales (seller side)
+        // Load order from seller's sales path
         const orderRef = ref(db, `sales/${user.uid}/${orderId}`);
         const orderSnap = await get(orderRef);
 
@@ -176,7 +172,7 @@
 
         // Show buyer paid full price message
         if (orderData.status === "paid" && orderData.price && !orderData.transferred) {
-          paymentStatusEl.textContent = `💰 Buyer paid full amount R${orderData.price}. Waiting for you to transfer the account.`;
+          paymentStatusEl.textContent = `💰 Buyer paid full amount $${orderData.price}. Waiting for you to transfer the account.`;
         } else if (orderData.transferred) {
           paymentStatusEl.textContent = "✅ Account already transferred.";
           readyBtn.disabled = true;
@@ -195,14 +191,14 @@
 
         startCountdown(transferStartTime);
 
-        // Load seller Google profile info
+        // Show seller Google profile info
         sellerProfileEl.innerHTML = `
           <img src="${user.photoURL || 'https://via.placeholder.com/80'}" alt="Seller profile" />
           <div>${user.displayName || "Seller"}</div>
           <div class="tag">Seller</div>
         `;
 
-        // Load buyer info from order data
+        // Show buyer info from order data (you need to store buyerName and buyerPhotoURL on order in Firebase)
         buyerInfoEl.innerHTML = `
           <img src="${orderData.buyerPhotoURL || 'https://via.placeholder.com/80'}" alt="Buyer profile" />
           <div>${orderData.buyerName || "Buyer"}</div>
@@ -219,32 +215,15 @@
       if (!orderData) return;
 
       readyBtn.disabled = true;
-      readyBtn.textContent = "Sending email...";
+      readyBtn.textContent = "Marked as ready to transfer";
 
-      // Send email with EmailJS
+      // You can extend here to update Firebase status if needed
       try {
-        const templateParams = {
-          order_id: orderId,
-          seller_name: currentUser.displayName,
-          buyer_name: orderData.buyerName,
-          buyer_email: orderData.buyerEmail,
-          price: orderData.price,
-        };
-
-        await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
-
-        alert("✅ Email sent! Marketplace notified.");
-      } catch (e) {
-        alert("❌ Failed to send email: " + e.message);
-        readyBtn.disabled = false;
-        readyBtn.textContent = "Ready to Transfer";
-        return;
+        const orderRef = ref(db, `sales/${currentUser.uid}/${orderId}`);
+        await update(orderRef, { readyToTransfer: true });
+      } catch(e) {
+        console.error("Failed to update ready status", e);
       }
-
-      // Optionally mark transferred or just leave as is
-      // await update(ref(db, `sales/${currentUser.uid}/${orderId}`), { readyToTransfer: true });
-
-      readyBtn.textContent = "Ready to Transfer";
     };
 
     onAuthStateChanged(auth, user => {
@@ -256,8 +235,5 @@
       }
     });
   </script>
-
-  <!-- EmailJS SDK -->
-  <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </body>
 </html>
