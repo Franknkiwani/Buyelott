@@ -721,80 +721,95 @@ header {
       confirmModal.style.display = "none";  
     };  
   }  
-  
-  // Attach click handlers to balance buttons  
-  function attachBalanceButtonHandlers(pendingBalance, transferredBalance) {  
-    const buttons = salesSection.querySelectorAll(".balance-buttons button");  
-    if (buttons.length < 2) return;  
-  
-    const pendingBtn = buttons[0];  
-    const transferredBtn = buttons[1];  
-  
-    // Pending balance modal (no action)  
-    pendingBtn.style.cursor = "pointer";  
-    pendingBtn.onclick = () => {  
-      modalTitle.textContent = "Pending Balance";  
-      modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";  
-      paypalInput.style.display = "none";  
-      modalPrimaryBtn.style.display = "none";  
-      modalCancelBtn.textContent = "Close";  
-      openModal();  
-    };  
-  
-    // Transferred balance modal with minimum balance check  
-    transferredBtn.style.cursor = "pointer";  
-    transferredBtn.onclick = () => {  
+ 
+  fufunction attachBalanceButtonHandlers(pendingBalance, transferredBalance) {  
+  const buttons = salesSection.querySelectorAll(".balance-buttons button");  
+  if (buttons.length < 2) return;  
+
+  const pendingBtn = buttons[0];  
+  const transferredBtn = buttons[1];  
+
+  // Helper to show iOS-style modal alert with just a message and close button
+  function showModalAlert(title, message) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    paypalInput.style.display = "none";
+    modalPrimaryBtn.style.display = "none";
+    modalCancelBtn.textContent = "Close";
+    modalCancelBtn.onclick = () => {
+      closeModal();
+      // Reset cancel button onclick after close to default
+      modalCancelBtn.onclick = null;
+    };
+    openModal();
+  }
+
+  // Pending balance modal (info only)  
+  pendingBtn.style.cursor = "pointer";  
+  pendingBtn.onclick = () => {  
+    modalTitle.textContent = "Pending Balance";  
+    modalMessage.textContent = "This amount is from buyers who have paid but the funds are not available until you transfer the accounts. You cannot request cashout now.";  
+    paypalInput.style.display = "none";  
+    modalPrimaryBtn.style.display = "none";  
+    modalCancelBtn.textContent = "Close";  
+    openModal();  
+  };  
+
+  // Transferred balance modal with minimum balance check  
+  transferredBtn.style.cursor = "pointer";  
+  transferredBtn.onclick = () => {  
+    // Always open modal with form
+    modalTitle.textContent = "Available Balance";  
+    modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
+    paypalInput.style.display = "block";  
+    paypalInput.value = "";  
+    modalPrimaryBtn.style.display = "block";  
+    modalPrimaryBtn.textContent = "Request Payment";  
+    modalCancelBtn.textContent = "Cancel";  
+    openModal();  
+
+    modalPrimaryBtn.onclick = async () => {  
       if (transferredBalance <= 0.001) {  
-        alert("You need a minimum balance of $0.001 to request a payout.");  
+        showModalAlert("Balance Too Low", "You need a minimum balance of $0.001 to request a payout.");  
         return;  
       }  
-  
-      modalTitle.textContent = "Available Balance";  
-      modalMessage.textContent = "This balance is available to you. Enter your PayPal email to request payment.";  
-      paypalInput.style.display = "block";  
-      paypalInput.value = "";  
-      modalPrimaryBtn.style.display = "block";  
-      modalPrimaryBtn.textContent = "Request Payment";  
-      modalCancelBtn.textContent = "Cancel";  
-      openModal();  
-  
-      modalPrimaryBtn.onclick = async () => {  
-        const email = paypalInput.value.trim();  
-        if (!email || !validateEmail(email)) {  
-          alert("Please enter a valid PayPal email.");  
-          return;  
-        }  
-        modalPrimaryBtn.disabled = true;  
-        modalPrimaryBtn.textContent = "Requesting...";  
-  
-        try {  
-          const payoutRef = ref(db, "payoutrequests");  
-          const newRequest = {  
-            userId: currentUserId,  
-            email: email,  
-            amount: transferredBalance,  
-            requestedAt: Date.now(),  
-            status: "pending"  
-          };  
-          await push(payoutRef, newRequest);  
-  
-          alert(`Payment request for $${transferredBalance.toFixed(3)} sent for ${email}.`);  
-          closeModal();  
-          loadSales();  
-        } catch (e) {  
-          alert("Failed to request payment: " + e.message);  
-          modalPrimaryBtn.disabled = false;  
-          modalPrimaryBtn.textContent = "Request Payment";  
-        }  
-      };  
+
+      const email = paypalInput.value.trim();  
+      if (!email || !validateEmail(email)) {  
+        showModalAlert("Invalid Email", "Please enter a valid PayPal email.");  
+        return;  
+      }  
+
+      modalPrimaryBtn.disabled = true;  
+      modalPrimaryBtn.textContent = "Requesting...";  
+
+      try {  
+        const payoutRef = ref(db, "payoutrequests");  
+        const newRequest = {  
+          userId: currentUserId,  
+          email: email,  
+          amount: transferredBalance,  
+          requestedAt: Date.now(),  
+          status: "pending"  
+        };  
+        await push(payoutRef, newRequest);  
+
+        showModalAlert("Request Sent", `Payment request for $${transferredBalance.toFixed(3)} sent for ${email}.`);  
+        closeModal();  
+        loadSales();  
+      } catch (e) {  
+        showModalAlert("Request Failed", "Failed to request payment: " + e.message);  
+        modalPrimaryBtn.disabled = false;  
+        modalPrimaryBtn.textContent = "Request Payment";  
+      }  
     };  
-  
-    modalCancelBtn.onclick = () => {  
-      closeModal();  
-    };  
-  }  
-  
-  function openModal() {  
+  };  
+
+  modalCancelBtn.onclick = () => {  
+    closeModal();  
+  };  
+}
+ function openModal() {  
     balanceModal.style.display = "flex";  
   }  
   
