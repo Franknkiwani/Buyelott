@@ -2,82 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Seller Dashboard – DLS Accounts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Seller Dashboard – DLSAccounts</title>
   <style>
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-      background: #101010;
-      color: #f2f2f2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f6f8;
+      padding: 20px;
+      color: #222;
     }
-    header {
+
+    h1 {
+      font-size: 22px;
       text-align: center;
-      font-size: 1.5rem;
-      padding: 1rem;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid #2a2a2a;
+      margin-bottom: 20px;
     }
-    .dashboard {
-      padding: 1rem;
-      display: grid;
-      gap: 1.5rem;
-      max-width: 700px;
-      margin: auto;
+
+    .sale-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      padding: 16px;
+      margin-bottom: 16px;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid #2c2c2c;
-      border-radius: 1rem;
-      padding: 1rem;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(12px);
+
+    .sale-card h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
     }
-    .card h2 {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
+
+    .sale-card .details {
+      font-size: 14px;
+      color: #444;
     }
-    .metric {
-      font-size: 2rem;
-      font-weight: bold;
+
+    .loading {
       text-align: center;
-      margin: 0.5rem 0;
+      font-size: 15px;
+      color: #888;
+      margin-top: 40px;
     }
-    .ad-item, .order-item {
-      font-size: 0.95rem;
-      margin-top: 0.75rem;
-      border-top: 1px solid #333;
-      padding-top: 0.75rem;
-    }
-    .note {
+
+    .error {
       text-align: center;
-      color: #999;
-      font-size: 0.9rem;
+      color: #b00;
+      font-weight: 500;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <header>📈 Seller Dashboard</header>
-  <div class="dashboard">
-    <div class="card">
-      <h2>Your Ad Performance</h2>
-      <div class="metric"><span id="totalViews">0</span> Views</div>
-      <div class="metric" style="font-size:1.5rem"><span id="totalClicks">0</span> Clicks</div>
-      <div id="adsList" class="note">Loading ads...</div>
-    </div>
+  <h1>Seller Sales Dashboard</h1>
+  <div id="salesList" class="loading">Loading sales...</div>
 
-    <div class="card">
-      <h2>Recent Orders</h2>
-      <div id="ordersList" class="note">Loading orders...</div>
-    </div>
-  </div>
-
-  <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -90,88 +72,48 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
     const auth = getAuth(app);
+    const db = getDatabase(app);
+    const salesList = document.getElementById("salesList");
 
-    const totalViewsEl = document.getElementById("totalViews");
-    const totalClicksEl = document.getElementById("totalClicks");
-    const adsList = document.getElementById("adsList");
-    const ordersList = document.getElementById("ordersList");
-
-    function fmt(n) {
-      return n.toLocaleString();
-    }
-
-    async function loadDashboard(user) {
-      try {
-        const adsSnap = await get(ref(db, "dlsaccountsads"));
-        const ordersSnap = await get(ref(db, "dlsaccountsorders"));
-
-        let totalViews = 0;
-        let totalClicks = 0;
-        let adsHTML = "";
-        let ordersHTML = "";
-
-        if (adsSnap.exists()) {
-          const adsData = adsSnap.val();
-          const userAds = Object.values(adsData).filter(ad => ad.uid === user.uid);
-
-          if (userAds.length === 0) {
-            adsHTML = `<div class="note">No promoted ads yet.</div>`;
-          } else {
-            userAds.forEach(ad => {
-              totalViews += ad.viewsRemaining || 0;
-              totalClicks += ad.clicks || 0;
-              adsHTML += `
-                <div class="ad-item">
-                  Ad ID: ${ad.adId} <br />
-                  Views: ${fmt(ad.viewsRemaining || 0)} | Clicks: ${fmt(ad.clicks || 0)}
-                </div>
-              `;
-            });
-          }
-        }
-
-        if (ordersSnap.exists()) {
-          const ordersData = ordersSnap.val();
-          const userOrders = Object.values(ordersData).filter(order => order.sellerUid === user.uid);
-
-          if (userOrders.length === 0) {
-            ordersHTML = `<div class="note">No orders yet.</div>`;
-          } else {
-            userOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            userOrders.forEach(order => {
-              ordersHTML += `
-                <div class="order-item">
-                  Order for Ad ID: ${order.adId} <br />
-                  Buyer: ${order.uid || 'Unknown'} <br />
-                  Qty: ${order.quantity || 1} <br />
-                  Date: ${new Date(order.createdAt).toLocaleString()}
-                </div>
-              `;
-            });
-          }
-        }
-
-        totalViewsEl.textContent = fmt(totalViews);
-        totalClicksEl.textContent = fmt(totalClicks);
-        adsList.innerHTML = adsHTML || `<div class="note">No data.</div>`;
-        ordersList.innerHTML = ordersHTML || `<div class="note">No orders yet.</div>`;
-
-      } catch (e) {
-        console.error(e);
-        adsList.innerHTML = `<div class="note">Error loading ads.</div>`;
-        ordersList.innerHTML = `<div class="note">Error loading orders.</div>`;
-      }
-    }
-
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (!user) {
-        adsList.innerHTML = `<div class="note">Please sign in to view your dashboard.</div>`;
-        ordersList.innerHTML = `<div class="note">Login required.</div>`;
+        salesList.innerHTML = `<p class="error">⚠️ Please sign in to view your sales.</p>`;
         return;
       }
-      loadDashboard(user);
+
+      try {
+        const salesRef = ref(db, `sales/${user.uid}`);
+        const snap = await get(salesRef);
+
+        if (!snap.exists()) {
+          salesList.innerHTML = `<p class="loading">No sales found yet.</p>`;
+          return;
+        }
+
+        const salesData = Object.values(snap.val());
+        salesList.innerHTML = "";
+
+        salesData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        salesData.forEach(sale => {
+          const div = document.createElement("div");
+          div.className = "sale-card";
+          div.innerHTML = `
+            <h3>${sale.productTitle || "Untitled Product"}</h3>
+            <div class="details">
+              💰 $${Number(sale.price).toFixed(2)}<br />
+              👤 Buyer: ${sale.buyerName || "Unknown"}<br />
+              📧 ${sale.buyerEmail || "No email"}<br />
+              📅 ${new Date(sale.createdAt).toLocaleString()}
+            </div>
+          `;
+          salesList.appendChild(div);
+        });
+      } catch (e) {
+        console.error(e);
+        salesList.innerHTML = `<p class="error">❌ Failed to load sales. Please try again.</p>`;
+      }
     });
   </script>
 </body>
