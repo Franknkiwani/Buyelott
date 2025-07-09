@@ -443,8 +443,364 @@ button#logoutBtn:focus {
   display: none;  /* Initially hidden */
 }
 </style>
+<style>
+  :root {
+    --bg-dark: #1c1c1e;
+    --card-bg: #2c2c2e;
+    --border-color: #3a3a3c;
+    --text-main: #e5e5e7;
+    --text-subtle: #999;
+    --accent: #007aff;
+    --danger: #ff3b30;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 10;
+  }
+
+  #logoutBtn {
+    background: transparent;
+    color: var(--danger);
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  #logoutBtn:hover {
+    text-decoration: underline;
+  }
+
+  #profileContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  #profileAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  #profileName {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .sections {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+  }
+
+  .section-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+
+  .section-card:hover {
+    background: #333336;
+  }
+
+  .section-icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    flex-grow: 1;
+  }
+
+  .section-arrow {
+    font-size: 1.2rem;
+    color: var(--text-subtle);
+  }
+
+  #messagesBadge {
+    background: var(--danger);
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-radius: 9999px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    display: none;
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 999;
+    color: var(--text-main);
+  }
+
+  #spinner {
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  #upgradeBtn {
+  margin-left: auto;
+  background: linear-gradient(135deg, #007aff, #5ac8fa); /* iOS Blue to Aqua */
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(90, 200, 250, 0.3);
+  white-space: nowrap;
+}
+
+#upgradeBtn:hover {
+  background: linear-gradient(135deg, #006ae6, #48bafc);
+  box-shadow: 0 3px 8px rgba(90, 200, 250, 0.45);
+  transform: scale(1.03);
+}
+#upgradeBtn {
+  position: relative;
+  margin-left: auto;
+  background: linear-gradient(135deg, #007aff, #5ac8fa);
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* ✨ Animated border aura */
+#upgradeBtn::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ff3b30, #ff9500, #34c759, #007aff, #5ac8fa, #af52de);
+  background-size: 400% 400%;
+  animation: borderFlow 3s ease infinite;
+  z-index: -1;
+}
+
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Mask inner background so border shows outside only */
+#upgradeBtn::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  background: linear-gradient(135deg, #007aff, #5ac8fa);
+  border-radius: 9999px;
+  z-index: -1;
+}
+/* Modal backdrop */
+#upgradeModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 28, 30, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10000;
+  user-select: none;
+}
+
+#upgradeModal[hidden] {
+  display: none;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  outline: none;
+}
+
+.modal-content {
+  background: #2c2c2e;
+  border-radius: 20px;
+  max-width: 360px;
+  width: 100%;
+  padding: 24px 28px 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  color: #e5e5e7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-content header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-content header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #007aff;
+}
+
+.modal-content header button {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.modal-content header button:hover {
+  color: #007aff;
+}
+
+.modal-content section ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #c6c6c8;
+}
+
+.modal-content section ul li {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #0a84ff;
+  margin-left: 8px;
+}
+
+.badge-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  user-select: none;
+}
+
+.modal-content footer {
+  display: flex;
+  justify-content: center;
+}
+
+#confirmUpgradeBtn {
+  background: linear-gradient(135deg, #007aff, #5ac8fa);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  width: 100%;
+}
+
+#confirmUpgradeBtn:hover {
+  background: linear-gradient(135deg, #005fcc, #48bafc);
+}
+#upgradeModal .price-text {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #ddd;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+</style>
   </style>
 </head>
+<script src="https://www.paypal.com/sdk/js?client-id=AT0jEASmVR8P7NHaFDwCSyaLNjhZkGYzugZSg8X68H2JZSJwdczco8_7Hizgil5gbKgGkTluag2caBW5&currency=USD"></script>
 <body>
   <div class="container" role="main" aria-label="Admin panel container">
     <header>
@@ -456,6 +812,7 @@ button#logoutBtn:focus {
     <section id="profileContainer" aria-label="User Profile">
       <img id="profileAvatar" src="https://via.placeholder.com/56?text=👤" alt="User Avatar" />
       <span id="profileName">Loading...</span>
+<button id="upgradeBtn">Upgrade</button>
     </section>
 
 <!-- Main Sections -->
@@ -505,11 +862,70 @@ button#logoutBtn:focus {
     <div id="spinner"></div>
     <div id="overlayText">Loading...</div>
   </div>
+<!-- Upgrade Modal -->
+<div id="upgradeModal" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle" aria-describedby="upgradeDesc"
+     style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10001;">
+  <div style="background: #fff; border-radius: 18px; max-width: 400px; padding: 24px; color: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; box-shadow: 0 8px 32px rgba(0,0,0,0.25);">
+    <h2 id="upgradeTitle" style="margin-top: 0; color: #1da1f2; text-align: center;">Upgrade to Premium</h2>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+    <p id="upgradeDesc" style="font-size: 1rem; margin-bottom: 20px; color: #333;">
+      Benefits:
+    </p>
+
+    <ul style="padding-left: 20px; color: #444; margin-top: -10px; margin-bottom: 20px;">
+      <li><strong>Verified badge</strong> <span style="color:#1da1f2;">✔️</span> next to your name</li>
+      <li><strong>Fast customer care</strong> priority support</li>
+      <li><strong>Your accounts appear on top</strong> in listings</li>
+    </ul>
+
+    <!-- Centered Pricing -->
+    <div style="text-align: center; font-weight: 600; font-size: 1.1rem; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;">
+      Price: $1.99 / 30 days
+    </div>
+
+    <div id="paypal-button-container" style="display: flex; justify-content: center;"></div>
+
+    <button id="closeUpgradeModal" style="margin-top: 18px; background: #eee; border: none; border-radius: 12px; padding: 10px 18px; cursor: pointer; font-weight: 600; width: 100%;">
+      Cancel
+    </button>
+  </div>
+</div>
+<!-- ✅ iOS-Style Dark Loading Screen -->
+<div id="loadingOverlay" style="
+  position: fixed;
+  inset: 0;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+">
+  <div style="
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top: 4px solid #1da1f2;
+    animation: spin 1s linear infinite;
+  "></div>
+</div>
+
+<style>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+
+<!-- 🔌 Firebase + PayPal SDKs -->
+<script src="https://www.paypal.com/sdk/js?client-id=AT0jEASmVR8P7NHaFDwCSyaLNjhZkGYzugZSg8X68H2JZSJwdczco8_7Hizgil5gbKgGkTluag2caBW5&currency=USD"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+
 <script>
+document.addEventListener("DOMContentLoaded", () => {
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -519,109 +935,156 @@ button#logoutBtn:focus {
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
   };
-
   firebase.initializeApp(firebaseConfig);
-
   const auth = firebase.auth();
+
   const overlay = document.getElementById("overlay");
   const overlayText = document.getElementById("overlayText");
   const logoutBtn = document.getElementById("logoutBtn");
   const profileAvatar = document.getElementById("profileAvatar");
   const profileName = document.getElementById("profileName");
-  const badge = document.getElementById('messagesBadge');
+  const badge = document.getElementById("messagesBadge");
+  const upgradeBtn = document.getElementById("upgradeBtn");
+  const upgradeModal = document.getElementById("upgradeModal");
+  const closeUpgradeModal = document.getElementById("closeUpgradeModal");
+
+  function hideLoading() {
+    const loading = document.getElementById('loadingOverlay');
+    loading.style.opacity = '0';
+    setTimeout(() => loading.style.display = 'none', 300);
+  }
 
   function showOverlay(text) {
-    overlayText.textContent = text;
-    overlay.style.display = "flex";
+    if (overlayText && overlay) {
+      overlayText.textContent = text;
+      overlay.style.display = "flex";
+    }
   }
 
   function hideOverlay() {
-    overlay.style.display = "none";
+    if (overlay) overlay.style.display = "none";
   }
 
-  // Update unread messages count for the logged-in user
-  function updateUnreadMessagesCount(uid) {
-    const messagesRef = firebase.database().ref('messages');
+  auth.onAuthStateChanged((user) => {
+    if (!user) return window.location.href = "/";
 
-    messagesRef.orderByChild('to').equalTo(uid).on('value', snapshot => {
-      if (!snapshot.exists()) {
-        // No messages at all
-        badge.style.display = 'inline-block';
-        badge.textContent = 'No messages';
-        badge.style.background = 'transparent';
-        badge.style.color = '#999';
-        badge.style.boxShadow = 'none';
-        badge.style.minWidth = 'auto';
-        badge.style.height = 'auto';
-        badge.style.lineHeight = 'normal';
-        badge.style.padding = '0 4px';
-        badge.style.fontWeight = '400';
-        badge.style.fontSize = '0.75rem';
-        return;
-      }
+    const uid = user.uid;
+    profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
+    profileAvatar.alt = user.displayName || "User";
+    profileName.textContent = user.displayName || user.email || "User";
 
-      let unreadCount = 0;
-      snapshot.forEach(msgSnap => {
-        const msg = msgSnap.val();
-        if (msg.read === false) unreadCount++;
-      });
+    updateUnreadMessagesCount(uid);
+    checkPremiumStatus(uid);
 
-      if (unreadCount > 0) {
-        badge.style.display = 'inline-block';
-        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-        badge.style.background = '#ff3b30';
-        badge.style.color = 'white';
-        badge.style.boxShadow = '0 0 6px rgba(255,59,48,0.6)';
-        badge.style.minWidth = '20px';
-        badge.style.height = '20px';
-        badge.style.lineHeight = '20px';
-        badge.style.padding = '0 6px';
-        badge.style.fontWeight = '700';
-        badge.style.fontSize = '0.75rem';
-      } else {
-        badge.style.display = 'inline-block';
-        badge.textContent = 'No messages';
-        badge.style.background = 'transparent';
-        badge.style.color = '#999';
-        badge.style.boxShadow = 'none';
-        badge.style.minWidth = 'auto';
-        badge.style.height = 'auto';
-        badge.style.lineHeight = 'normal';
-        badge.style.padding = '0 4px';
-        badge.style.fontWeight = '400';
-        badge.style.fontSize = '0.75rem';
-      }
-    });
-  }
-
-  // Auth state listener
-  showOverlay("Checking authentication...");
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      hideOverlay();
-
-      // Update profile UI
-      profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${user.uid}`;
-      profileAvatar.alt = `${user.displayName || "User"} Avatar`;
-      profileName.textContent = user.displayName || user.email || "User";
-
-      // Start watching unread messages
-      updateUnreadMessagesCount(user.uid);
-
-    } else {
-      window.location.href = "/";
-    }
+    hideOverlay();
+    hideLoading();
   });
 
-  logoutBtn.addEventListener("click", () => {
+  logoutBtn?.addEventListener("click", () => {
     showOverlay("Logging out...");
     auth.signOut().then(() => {
       window.location.href = "/";
-    }).catch(err => {
+    }).catch((err) => {
       hideOverlay();
       alert("Logout failed: " + err.message);
     });
   });
+
+  function updateUnreadMessagesCount(uid) {
+    const messagesRef = firebase.database().ref("messages");
+    messagesRef.orderByChild("to").equalTo(uid).on("value", (snapshot) => {
+      let unreadCount = 0;
+      snapshot.forEach((msgSnap) => {
+        if (msgSnap.val().read === false) unreadCount++;
+      });
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
+        badge.style.background = "#ff3b30";
+        badge.style.color = "#fff";
+        badge.style.display = "inline-block";
+      } else {
+        badge.textContent = "No messages";
+        badge.style.background = "transparent";
+        badge.style.color = "#999";
+        badge.style.display = "inline-block";
+      }
+    });
+  }
+
+  upgradeBtn?.addEventListener("click", () => {
+    upgradeModal.style.display = "flex";
+  });
+
+  closeUpgradeModal?.addEventListener("click", () => {
+    upgradeModal.style.display = "none";
+  });
+
+  if (typeof paypal !== "undefined") {
+    paypal.Buttons({
+      style: {
+        shape: "pill",
+        color: "blue",
+        label: "pay",
+        layout: "vertical",
+        height: 45,
+      },
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: "1.99" },
+            description: "CyberChat Premium – 30 Days"
+          }]
+        });
+      },
+      onApprove: (data, actions) => {
+        showOverlay("Processing payment...");
+        return actions.order.capture().then((details) => {
+          const uid = auth.currentUser.uid;
+          const premiumUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
+          firebase.database().ref(`users/${uid}`).update({
+            isPremium: true,
+            premiumUntil,
+            verified: true
+          }).then(() => {
+            hideOverlay();
+            alert(`You're now Premium! ✔️ Thanks ${details.payer.name.given_name}`);
+            upgradeModal.style.display = "none";
+            updatePremiumUI();
+          }).catch((err) => {
+            hideOverlay();
+            alert("Failed to update premium: " + err.message);
+          });
+        });
+      },
+      onError: (err) => {
+        alert("Payment failed. Try again later.");
+      }
+    }).render("#paypal-button-container");
+  }
+
+  function checkPremiumStatus(uid) {
+    const ref = firebase.database().ref(`users/${uid}`);
+    ref.once("value").then((snap) => {
+      const user = snap.val();
+      const now = Date.now();
+      if (user?.premiumUntil && now > user.premiumUntil) {
+        ref.update({ isPremium: false, verified: false });
+      }
+      updatePremiumUI();
+    });
+  }
+
+  function updatePremiumUI() {
+    const uid = auth.currentUser.uid;
+    firebase.database().ref(`users/${uid}`).once("value").then((snap) => {
+      const user = snap.val();
+      if (user?.isPremium && user.premiumUntil > Date.now()) {
+        if (upgradeBtn) upgradeBtn.style.display = "none";
+        profileName.innerHTML = `${user.username || user.email} <span style="color:#1da1f2;">✔️</span>`;
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>
