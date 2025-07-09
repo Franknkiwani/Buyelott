@@ -822,46 +822,72 @@ button#logoutBtn:focus {
 <button id="upgradeBtn">Upgrade</button>
     </section>
 
-<!-- Main Sections -->
 <main>
-  <div class="sections" role="list">
+  <div class="sections" role="list" style="display: flex; flex-direction: column; gap: 16px; max-width: 400px; margin: 0 auto;">
+
     <!-- Sell Accounts -->
     <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
          onclick="location.href='/sellaccounts'" 
-         onkeypress="if(event.key==='Enter') location.href='/sellaccounts'">
-      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M3 7h18M3 12h18M3 17h18" />
+         onkeypress="if(event.key==='Enter') location.href='/sellaccounts'"
+         style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px 16px; border-radius: 14px; background: #f0f4ff;">
+      
+      <!-- Wallet Icon -->
+      <svg class="section-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#004aad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect>
+        <path d="M16 3h-8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"></path>
+        <circle cx="18" cy="13" r="1"></circle>
       </svg>
-      <span class="section-label">Sell Accounts</span>
+
+      <div class="section-content" style="display: flex; flex-direction: column;">
+        <span class="section-label" style="font-weight: 700; font-size: 1.2rem; color: #002b70;">Sell Accounts</span>
+        <small class="section-subtitle" style="font-size: 0.9rem; color: #555;">List your accounts for sale — easy and fast.</small>
+      </div>
     </div>
 
     <!-- Dashboard -->
     <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
          onclick="location.href='/dashboard'" 
-         onkeypress="if(event.key==='Enter') location.href='/dashboard'">
-      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M3 7h18M3 12h18M3 17h18" />
+         onkeypress="if(event.key==='Enter') location.href='/dashboard'"
+         style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px 16px; border-radius: 14px; background: #f0f4ff;">
+      
+      <!-- Speedometer / Gauge Icon -->
+      <svg class="section-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#004aad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 6v6l4 2"></path>
       </svg>
-      <span class="section-label">Dashboard</span>
+
+      <div class="section-content" style="display: flex; flex-direction: column;">
+        <span class="section-label" style="font-weight: 700; font-size: 1.2rem; color: #002b70;">Dashboard</span>
+        <small class="section-subtitle" style="font-size: 0.9rem; color: #555;">Your stats, earnings & account overview.</small>
+      </div>
     </div>
 
-    <!-- Messages -->
-    <div class="section-card" tabindex="0" role="listitem button" aria-pressed="false" 
-         onclick="location.href='/chats'" 
-         onkeypress="if(event.key==='Enter') location.href='/chats'" 
-         style="position: relative;">
-      <svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-      <span class="section-label">Messages</span>
-      <span id="messagesBadge" aria-label="Unread messages count" role="status" 
-            style="position: absolute; top: 12px; right: 20px;
-                   background: #ff3b30; color: white; font-weight: 700; font-size: 0.75rem;
-                   min-width: 18px; height: 18px; line-height: 18px; border-radius: 9999px;
-                   padding: 0 6px; user-select: none; pointer-events: none; text-align: center;
-                   box-shadow: 0 0 6px rgba(255,59,48,0.6); white-space: nowrap;"></span>
+<!-- Messages -->
+<div class="section-card" tabindex="0" role="listitem button" aria-pressed="false"
+     onclick="location.href='/chats'"
+     onkeypress="if(event.key==='Enter') location.href='/chats'"
+     style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 12px 16px; border-radius: 14px; background: #f0f4ff; position: relative;">
+
+  <div style="display: flex; align-items: center; gap: 12px; flex-grow: 1; min-width: 0;">
+    <!-- Chat Bubble Icon -->
+    <svg class="section-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#004aad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+
+    <div style="display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+      <span class="section-label" style="font-weight: 700; font-size: 1.2rem; color: #002b70; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Messages</span>
+      <small class="section-subtitle" style="font-size: 0.9rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Chat with buyers & support.</small>
     </div>
   </div>
+
+  <!-- Badge on the far right -->
+  <span id="messagesBadge" aria-label="Unread messages count" role="status"
+        style="background: #ff3b30; color: white; font-weight: 700; font-size: 0.75rem;
+               min-width: 24px; height: 24px; line-height: 24px; border-radius: 9999px;
+               padding: 0 8px; user-select: none; pointer-events: none; text-align: center;
+               box-shadow: 0 0 6px rgba(255,59,48,0.6); white-space: nowrap;">
+  </span>
+</div>
 </main>
 </div>
   <!-- Loading overlay -->
@@ -871,8 +897,43 @@ button#logoutBtn:focus {
   </div>
 <!-- Upgrade Modal -->
 <div id="upgradeModal" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle" aria-describedby="upgradeDesc"
-     style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10001;">
-  <div style="background: #fff; border-radius: 18px; max-width: 400px; padding: 24px; color: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; box-shadow: 0 8px 32px rgba(0,0,0,0.25);">
+     style="
+       position: fixed;
+       top: 0; left: 0; right: 0; bottom: 0;
+       width: 100vw;
+       height: 100vh;
+       background: #fff;
+       display: none;
+       flex-direction: column;
+       overflow-y: auto;
+       z-index: 10001;
+       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+     ">
+  
+  <!-- Close Button (top-right) -->
+  <button onclick="document.getElementById('upgradeModal').style.display='none'; document.body.style.overflow='';"
+    style="
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+    " aria-label="Close Modal">×</button>
+
+  <!-- Inner Content -->
+  <div style="
+    max-width: 480px;
+    margin: 80px auto 40px;
+    padding: 24px;
+    color: #000;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  ">
     <h2 id="upgradeTitle" style="margin-top: 0; color: #1da1f2; text-align: center;">Upgrade to Premium</h2>
 
     <p id="upgradeDesc" style="font-size: 1rem; margin-bottom: 20px; color: #333;">
@@ -885,14 +946,15 @@ button#logoutBtn:focus {
       <li><strong>Your accounts appear on top</strong> in listings</li>
     </ul>
 
-    <!-- Centered Pricing -->
     <div style="text-align: center; font-weight: 600; font-size: 1.1rem; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;">
       Price: $1.99 / 30 days
     </div>
 
-    <div id="paypal-button-container" style="display: flex; justify-content: center;"></div>
+    <div id="paypal-button-container" style="display: flex; justify-content: center; flex-direction: column; gap: 12px;"></div>
 
-    <button id="closeUpgradeModal" style="margin-top: 18px; background: #eee; border: none; border-radius: 12px; padding: 10px 18px; cursor: pointer; font-weight: 600; width: 100%;">
+    <button id="closeUpgradeModal"
+      onclick="document.getElementById('upgradeModal').style.display='none'; document.body.style.overflow='';"
+      style="margin-top: 18px; background: #eee; border: none; border-radius: 12px; padding: 10px 18px; cursor: pointer; font-weight: 600; width: 100%;">
       Cancel
     </button>
   </div>
