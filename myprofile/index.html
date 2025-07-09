@@ -56,6 +56,7 @@ body, html {
   padding: 0;
   width: 100%;
   overflow-x: hidden; /* prevent horizontal scroll caused by oversize */
+  overflow-y: auto; /* allow vertical scrolling */
 }
 
 header h1 {
@@ -798,13 +799,19 @@ button#logoutBtn:focus {
   margin-bottom: 12px;
 }
 </style>
-  </style>
+<style>
+  /* Let PayPal modal scroll */
+  body.paypal-card-modal-open {
+    position: static !important;
+    overflow: visible !important;
+  }
+</style>
 </head>
 <script src="https://www.paypal.com/sdk/js?client-id=AT0jEASmVR8P7NHaFDwCSyaLNjhZkGYzugZSg8X68H2JZSJwdczco8_7Hizgil5gbKgGkTluag2caBW5&currency=USD"></script>
 <body>
   <div class="container" role="main" aria-label="Admin panel container">
     <header>
-      <h1>Admin Panel</h1>
+      <h1>MY PROFILE</h1>
       <button id="logoutBtn" aria-label="Logout">Logout</button>
     </header>
 
@@ -1085,6 +1092,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+// Detect PayPal card modal open
+const observer = new MutationObserver(() => {
+  const paypalModal = document.querySelector('iframe[name^="__pp"]');
+  if (paypalModal && paypalModal.offsetParent !== null) {
+    document.body.classList.add("paypal-card-modal-open");
+  } else {
+    document.body.classList.remove("paypal-card-modal-open");
+  }
+});
+
+observer.observe(document.body, { childList: true, subtree: true });
 </script>
 </body>
 </html>
