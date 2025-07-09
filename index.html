@@ -1620,21 +1620,88 @@ main, .product-page, body {
   box-shadow: none;
   cursor: default;
 }
+/* 🔵 Remove blue tap highlight on buttons & interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* 🚫 Prevent background scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ✨ Optional: smooth out modal scroll */
+#notificationsModal {
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon-wrapper">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" />
-    </div>
-    <div class="logo-text">DLS-ACCOUNTS</div>
-  </div>
-  <div class="user-area" id="userArea">
-    <!-- Profile pic or login button shows here -->
-    <button class="login-btn" id="loginBtn">Login</button>
-  </div>
+<header>    
+  <div class="logo" style="display:flex; align-items:center; gap:8px;">    
+    <div class="logo-icon-wrapper" style="width:32px; height:32px;">    
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1TM5EXH0s0cKQ0xBJZ81Mw_6qrOZyyRCDcGURCBVOWmJG3YxCO1I8N8c&s=10" alt="DLS Logo" style="width:100%; height:100%; object-fit:contain;"/>    
+    </div>    
+    <div class="logo-text" style="font-weight:700; font-size:1.15rem; color:#fff; user-select:none;">DLS-ACCOUNTS</div>    
+  </div>    
+  <div class="user-area" id="userArea" style="display:flex; align-items:center; gap:10px;">    
+  
+    <!-- Notification Icon Button -->  
+    <button  
+      id="notificationBtn"  
+      class="notification-btn"  
+      onclick="openNotifications()"  
+      aria-label="Notifications"  
+      style="  
+        position: relative;  
+        background: none;  
+        border: none;  
+        cursor: pointer;  
+        padding: 6px;  
+        display: flex;  
+        align-items: center;  
+        justify-content: center;  
+      "  
+    >  
+      <svg  
+        xmlns="http://www.w3.org/2000/svg"  
+        width="24"  
+        height="24"  
+        fill="none"  
+        stroke="#fff"  
+        stroke-width="1.8"  
+        stroke-linecap="round"  
+        stroke-linejoin="round"  
+      >  
+        <path d="M15 17h-6a3 3 0 0 1-3-3v-3a6 6 0 1 1 12 0v3a3 3 0 0 1-3 3z" />  
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />  
+      </svg>  
+  
+      <!-- Red dot for notifications -->  
+      <span  
+        id="notificationDot"  
+        style="  
+          position: absolute;  
+          top: 4px;  
+          right: 4px;  
+          width: 8px;  
+          height: 8px;  
+          background: #ff3b30;  
+          border-radius: 50%;  
+          display: none;  
+          box-shadow: 0 0 6px #ff3b30aa;  
+        "  
+      ></span>  
+    </button>  
+  
+    <!-- Login button placeholder, replaced or cloned by JS -->  
+    <button class="login-btn" id="loginBtn" style="padding:6px 12px; font-weight:600; border-radius:8px; background:#007AFF; color:#fff; border:none; cursor:pointer;">  
+      Login  
+    </button>    
+  </div>    
 </header>
 <div id="searchFilterContainer" style="display: none;">
   <div class="search-filter-bar">
@@ -1691,6 +1758,200 @@ main, .product-page, body {
     <button onclick="closeLoginModal()" class="modal-close">Close</button>
   </div>
 </div>
+<!-- Notifications Modal -->
+<!-- Notifications Modal -->
+<div id="notificationsModal" style="
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  overflow-y: auto;
+">
+  <div style="
+    background: #121212;
+    max-width: 480px;
+    margin: 5% auto;
+    border-radius: 12px;
+    padding: 20px;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  ">
+    <header style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0;">Notifications</h2>
+      <button id="closeNotificationsBtn" style="
+        background:none; border:none; font-size: 1.5rem; color:#eee; cursor:pointer;
+      ">&times;</button>
+    </header>
+
+    <!-- Tab Switcher -->
+    <div style="display: flex; gap: 10px; margin: 16px 0;">
+      <button id="tabPublic" style="flex:1; padding:8px; border:none; border-radius:8px; background:#333; color:#fff;">Public</button>
+      <button id="tabPrivate" style="flex:1; padding:8px; border:none; border-radius:8px; background:#555; color:#fff;">Private</button>
+    </div>
+
+    <!-- List -->
+    <ul id="notificationsList" style="list-style:none; padding:0; max-height: 50vh; overflow-y:auto;"></ul>
+
+<!-- Clear Button (Private only) -->
+<button id="clearNotificationsBtn" style="
+  margin-top:12px;
+  display:none;
+  background:#ff3b30;
+  border:none;
+  color:#fff;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+">
+  Clear Notifications
+</button>
+  </div>
+</div>
+<!-- ✅ LOGIN MODAL UI --><div id="authModal" class="auth-modal" style="display: none">
+  <div class="auth-content">
+    <button class="close-btn" onclick="closeAuthModal()">&times;</button><div class="auth-avatar">
+  <img src="https://via.placeholder.com/72x72.png?text=👤" alt="avatar" />
+</div>
+
+<h2 id="authTitle">Welcome Back</h2>
+
+<div class="auth-tabs">
+  <button onclick="switchAuthMode('login')" id="tabLogin" class="active">Login</button>
+  <button onclick="switchAuthMode('register')" id="tabRegister">Register</button>
+</div>
+
+<form id="authForm">
+  <div id="fieldUsername" class="auth-field" style="display: none">
+    <input type="text" id="authUsername" placeholder="Username" autocomplete="username" />
+  </div>
+  <div class="auth-field">
+    <input type="email" id="authEmail" placeholder="Email" autocomplete="email" />
+  </div>
+  <div class="auth-field">
+    <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" />
+  </div>
+
+  <div id="resetPassword" style="text-align:right; display:none">
+    <a href="#" onclick="resetPassword()">Forgot password?</a>
+  </div>
+
+  <button type="submit" class="auth-action-btn">Continue</button>
+</form>
+
+<div class="divider">or</div>
+
+<button onclick="loginWithGoogle()" class="google-btn">
+  <img src="https://img.icons8.com/color/48/google-logo.png" width="20" />
+  Continue with Google
+</button>
+
+<div id="authMessage" class="auth-message"></div>
+
+  </div>
+</div><!-- ✅ AUTH MODAL CSS --><style>
+  .auth-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    overflow-y: auto;
+  }
+  .auth-content {
+    background: #1c1c1e;
+    color: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    position: relative;
+  }
+  .auth-avatar img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+  }
+  .auth-tabs button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-weight: 600;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .auth-tabs .active {
+    color: #fff;
+    border-bottom: 2px solid #007aff;
+  }
+  .auth-field {
+    margin: 12px 0;
+  }
+  .auth-field input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #2c2c2e;
+    color: white;
+    font-size: 16px;
+  }
+  .auth-action-btn {
+    margin-top: 12px;
+    background: #007aff;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .divider {
+    margin: 18px 0;
+    color: #aaa;
+  }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+    border-radius: 12px;
+    color: #333;
+    border: none;
+    width: 100%;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .auth-message {
+    margin-top: 12px;
+    color: #ff3b30;
+    font-weight: 500;
+  }
+</style>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -1836,15 +2097,23 @@ main, .product-page, body {
   });
 </script>
 <script type="module">
-// ✅ Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  onAuthStateChanged,
-  signOut
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  remove,
+  get
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ✅ Firebase config
 const firebaseConfig = {
@@ -1862,78 +2131,194 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const db = getDatabase(app);
 
 // ✅ DOM refs
 const userArea = document.getElementById('userArea');
 const loginBtn = document.getElementById('loginBtn');
 
-// ✅ Login button click
-loginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider).catch(console.error);
-});
+// ✅ Login with Google
+function loginWithGoogle() {
+  signInWithPopup(auth, provider).catch(showAuthMessage);
+}
 
-// ✅ Track auth state
+// ✅ Handle login/logout UI
 onAuthStateChanged(auth, (user) => {
   window.isUserLoggedIn = !!user;
   userArea.innerHTML = '';
 
   if (user) {
-    // 🔓 Show profile image
     const img = document.createElement('img');
     img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
     img.alt = user.displayName || 'User';
-    img.title = user.displayName || 'User';
     img.className = 'profile-pic';
-    img.addEventListener('click', () => {
-      window.location.href = '/myprofile';
-    });
+    img.addEventListener('click', () => window.location.href = '/myprofile');
+
+    const notifBtn = document.createElement('button');
+    notifBtn.id = 'notificationBtn';
+    notifBtn.setAttribute('aria-label', 'Notifications');
+    notifBtn.style.cssText = "position:relative;background:none;border:none;cursor:pointer;padding:6px;";
+    notifBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 17h-6a3 3 0 0 1-3-3v-3a6 6 0 1 1 12 0v3a3 3 0 0 1-3 3z" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+      <span id="notificationDot" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#FF3B30;border-radius:50%;display:none;box-shadow:0 0 6px #FF3B30AA;"></span>
+    `;
+    notifBtn.addEventListener('click', () => openNotifications());
+
+    userArea.appendChild(notifBtn);
     userArea.appendChild(img);
 
-    // 🧹 Auto-close modal
-    closeLoginModal();
-  } else {
-    // 🚫 Show cloned login button
-    const clonedBtn = loginBtn.cloneNode(true);
-    clonedBtn.addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(console.error);
+    const notifDot = notifBtn.querySelector('#notificationDot');
+    const userNotifsRef = ref(db, 'notifications/' + user.uid);
+    onValue(userNotifsRef, (snap) => {
+      const data = snap.val() || {};
+      const hasUnread = Object.values(data).some(n => !n.read);
+      notifDot.style.display = hasUnread ? 'block' : 'none';
     });
-    userArea.appendChild(clonedBtn);
+  } else {
+    const cloned = loginBtn.cloneNode(true);
+    cloned.addEventListener('click', () => openAuthModal());
+    userArea.appendChild(cloned);
+    const dot = document.getElementById('notificationDot');
+    if (dot) dot.style.display = 'none';
   }
 });
 
-// ✅ Show login modal if user not logged in and clicked outside allowed area
-document.body.addEventListener('click', (e) => {
+// ✅ AUTH MODAL UI LOGIC
+const authForm = document.getElementById("authForm");
+const authMessage = document.getElementById("authMessage");
+let authMode = "login"; // or "register"
+
+function openAuthModal() {
+  const modal = document.getElementById("authModal");
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("show"), 10);
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById("authModal");
+  modal.classList.remove("show");
+  setTimeout(() => modal.style.display = "none", 300);
+}
+
+function switchAuthMode(mode) {
+  authMode = mode;
+  document.getElementById("tabLogin").classList.toggle("active", mode === "login");
+  document.getElementById("tabRegister").classList.toggle("active", mode === "register");
+  document.getElementById("fieldUsername").style.display = mode === "register" ? "block" : "none";
+  document.getElementById("resetPassword").style.display = mode === "login" ? "block" : "none";
+  document.getElementById("authTitle").textContent = mode === "login" ? "Welcome Back" : "Create Account";
+  authMessage.textContent = "";
+}
+
+function resetPassword() {
+  const email = document.getElementById("authEmail").value;
+  if (!email) return showAuthMessage("Enter your email to reset password.");
+  sendPasswordResetEmail(auth, email)
+    .then(() => showAuthMessage("Password reset link sent to email."))
+    .catch(showAuthMessage);
+}
+
+function showAuthMessage(msg) {
+  authMessage.textContent = typeof msg === "string" ? msg : msg.message;
+}
+
+authForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  if (authMode === "login") {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(closeAuthModal)
+      .catch(showAuthMessage);
+  } else {
+    const username = document.getElementById("authUsername").value;
+    if (!username) return showAuthMessage("Username is required.");
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        const uid = auth.currentUser.uid;
+        return getDatabase().ref(`/users/${uid}`).set({ username, email });
+      })
+      .then(closeAuthModal)
+      .catch(showAuthMessage);
+  }
+});
+
+window.loginWithGoogle = loginWithGoogle;
+window.closeAuthModal = closeAuthModal;
+window.switchAuthMode = switchAuthMode;
+window.resetPassword = resetPassword;
+
+// ✅ NOTIFICATIONS MODAL
+const modal = document.getElementById('notificationsModal');
+const closeBtn = document.getElementById('closeNotificationsBtn');
+const list = document.getElementById('notificationsList');
+const tabPublic = document.getElementById('tabPublic');
+const tabPrivate = document.getElementById('tabPrivate');
+const clearBtn = document.getElementById('clearNotificationsBtn');
+let currentTab = 'public';
+
+window.openNotifications = function () {
+  if (!window.isUserLoggedIn) return alert("Login to view notifications.");
+  modal.style.display = 'block';
+  document.body.classList.add('modal-open');
+  switchToTab(currentTab);
+};
+
+closeBtn?.addEventListener('click', () => {
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+});
+
+tabPublic?.addEventListener('click', () => switchToTab('public'));
+tabPrivate?.addEventListener('click', () => switchToTab('private'));
+
+clearBtn?.addEventListener('click', async () => {
   const user = auth.currentUser;
-  const clickedEl = e.target;
-
-  const isAllowedClick =
-    user || // Logged in? All good
-    clickedEl.closest('#loginModal') ||
-    clickedEl.closest('#loginBtn') ||
-    clickedEl.closest('.google-login') ||
-    clickedEl.classList.contains('modal-close');
-
-  if (!isAllowedClick) {
-    e.preventDefault();
-    e.stopPropagation();
-    const modal = document.getElementById('loginModal');
-    if (modal && modal.style.display !== 'flex') {
-      modal.style.display = 'flex';
-    }
+  if (!user) return;
+  const refPath = ref(db, `notifications/${user.uid}`);
+  const snap = await get(refPath);
+  if (snap.exists()) {
+    Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/${user.uid}/${key}`)));
+    list.innerHTML = '<li style="padding:10px;color:#888;">All private notifications cleared.</li>';
+    clearBtn.style.display = 'none';
   }
 });
 
-// 🟢 Manual login trigger (e.g. from modal button)
-window.triggerLogin = function () {
-  signInWithPopup(auth, provider).catch(console.error);
-  closeLoginModal();
-};
+function switchToTab(tab) {
+  currentTab = tab;
+  tabPublic.style.background = tab === 'public' ? '#007aff' : '#333';
+  tabPrivate.style.background = tab === 'private' ? '#007aff' : '#333';
+  list.innerHTML = '<li style="padding: 10px;">Loading...</li>';
 
-// ❌ Close modal utility
-window.closeLoginModal = function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "none";
-};
+  const path = tab === 'public' ? 'notifications/public' : `notifications/${auth.currentUser.uid}`;
+  onValue(ref(db, path), (snap) => {
+    const data = snap.val() || {};
+    renderNotifications(data);
+    clearBtn.style.display = tab === 'private' && Object.keys(data).length > 0 ? 'block' : 'none';
+  });
+}
+
+function renderNotifications(data) {
+  const entries = Object.entries(data || {}).slice(-5).reverse();
+  list.innerHTML = '';
+  if (entries.length === 0) {
+    list.innerHTML = `<li style="padding: 10px; color: #888;">No notifications.</li>`;
+    return;
+  }
+
+  entries.forEach(([_, notif]) => {
+    const li = document.createElement('li');
+    li.style.padding = '10px 8px';
+    li.style.borderBottom = '1px solid #222';
+    li.style.fontWeight = notif.read === false ? 'bold' : 'normal';
+    li.textContent = notif.message || '[No message]';
+    list.appendChild(li);
+  });
+}
 </script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
