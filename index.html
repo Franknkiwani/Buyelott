@@ -2529,25 +2529,82 @@ function switchToTab(tab) {
     clearBtn.style.display = Object.keys(data).length > 0 ? 'block' : 'none';  
   });  
 }  
-  
-function renderNotifications(data) {  
-  const entries = Object.entries(data || {}).slice(-5).reverse();  
-  list.innerHTML = '';  
-  if (entries.length === 0) {  
-    list.innerHTML = `<li style="padding: 10px; color: #888;">No notifications.</li>`;  
-    return;  
-  }  
-  
-  entries.forEach(([_, notif]) => {  
-    const li = document.createElement('li');  
-    li.style.padding = '10px 8px';  
-    li.style.borderBottom = '1px solid #222';  
-    li.style.fontWeight = notif.read === false ? 'bold' : 'normal';  
-    li.textContent = notif.message || '[No message]';  
-    list.appendChild(li);  
-  });  
-}  
-</script>  <!-- Firebase -->
+// Helper function to convert timestamps into “time ago” text
+function timeAgo(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+
+  const years = Math.floor(days / 365);
+  return `${years}y ago`;
+}
+
+// Updated renderNotifications with "Visit" button if a URL exists
+function renderNotifications(data) {
+  const entries = Object.entries(data || {}).slice(-5).reverse();
+  list.innerHTML = '';
+  if (entries.length === 0) {
+    list.innerHTML = `<li style="padding: 10px; color: #888;">No notifications.</li>`;
+    return;
+  }
+
+  entries.forEach(([_, notif]) => {
+    const li = document.createElement('li');
+    li.style.padding = '10px 8px';
+    li.style.borderBottom = '1px solid #222';
+    li.style.fontWeight = notif.read === false ? 'bold' : 'normal';
+    li.style.display = 'flex';
+    li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
+    li.style.gap = '10px';
+
+    const messageDiv = document.createElement('div');
+    const messageText = notif.message || '[No message]';
+    const timeText = notif.createdAt ? ` — ${timeAgo(notif.createdAt)}` : '';
+    messageDiv.textContent = messageText + timeText;
+    messageDiv.style.flex = '1';
+
+    li.appendChild(messageDiv);
+
+    if (notif.url) {
+      const visitBtn = document.createElement('button');
+      visitBtn.textContent = 'Visit';
+      visitBtn.style.cssText = `
+        background: #007aff;
+        color: #fff;
+        border: none;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+      `;
+      visitBtn.onclick = () => {
+        window.open(notif.url, '_blank');
+      };
+      li.appendChild(visitBtn);
+    }
+
+    list.appendChild(li);
+  });
+}
+</script> 
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 <script>
