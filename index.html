@@ -1636,6 +1636,124 @@ body.modal-open {
   overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
+  .auth-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    overflow-y: auto;
+  }
+  .auth-content {
+    background: #1c1c1e;
+    color: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    position: relative;
+  }
+  .auth-avatar img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+  }
+  .auth-tabs button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-weight: 600;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .auth-tabs .active {
+    color: #fff;
+    border-bottom: 2px solid #007aff;
+  }
+  .auth-field {
+    margin: 12px 0;
+  }
+  .auth-field input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #2c2c2e;
+    color: white;
+    font-size: 16px;
+  }
+  .auth-action-btn {
+    margin-top: 12px;
+    background: #007aff;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .divider {
+    margin: 18px 0;
+    color: #aaa;
+  }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+    border-radius: 12px;
+    color: #333;
+    border: none;
+    width: 100%;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .auth-message {
+    margin-top: 12px;
+    color: #ff3b30;
+    font-weight: 500;
+  }
+.auth-avatar {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #444;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+.auth-avatar:hover {
+  box-shadow: 0 0 0 3px #007aff88;
+}
+.auth-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 </style>
 </head>
 <body>
@@ -1742,22 +1860,6 @@ body.modal-open {
 
   </div>
 </main>
-<!-- 🔐 Login Modal -->
-<div id="loginModal" class="login-modal" onclick="closeLoginModal()">
-  <div class="login-modal-content" onclick="event.stopPropagation()">
-    <h2>Please Log In</h2>
-    <p>We require each user to be logged in for the safety of our community and to uniquely identify every action made.</p>
-
-    <!-- Google Login Button -->
-    <button id="loginBtn" class="google-login" onclick="triggerLogin()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
-      <span>Continue with Google</span>
-    </button>
-
-    <!-- Close Button -->
-    <button onclick="closeLoginModal()" class="modal-close">Close</button>
-  </div>
-</div>
 <!-- Notifications Modal -->
 <!-- Notifications Modal -->
 <div id="notificationsModal" style="
@@ -1810,148 +1912,51 @@ body.modal-open {
 </button>
   </div>
 </div>
-<!-- ✅ LOGIN MODAL UI --><div id="authModal" class="auth-modal" style="display: none">
+<!-- ✅ LOGIN MODAL UI -->
+<div id="authModal" class="auth-modal" style="display: none">
   <div class="auth-content">
-    <button class="close-btn" onclick="closeAuthModal()">&times;</button><div class="auth-avatar">
-  <img src="https://via.placeholder.com/72x72.png?text=👤" alt="avatar" />
+    <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+
+    <div class="auth-avatar" onclick="triggerAvatarUpload()">
+      <img id="avatarPreview" src="https://via.placeholder.com/72x72.png?text=+" alt="Avatar" />
+      <input type="file" id="avatarInput" accept="image/*" style="display: none" />
+    </div>
+
+    <h2 id="authTitle">Welcome Back</h2>
+
+    <div class="auth-tabs">
+      <button onclick="switchAuthMode('login')" id="tabLogin" class="active">Login</button>
+      <button onclick="switchAuthMode('register')" id="tabRegister">Register</button>
+    </div>
+
+    <form id="authForm">
+      <div id="fieldUsername" class="auth-field" style="display: none">
+        <input type="text" id="authUsername" placeholder="Username" autocomplete="username" />
+      </div>
+      <div class="auth-field">
+        <input type="email" id="authEmail" placeholder="Email" autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" />
+      </div>
+
+      <div id="resetPassword" style="text-align:right; display:none">
+        <a href="#" onclick="resetPassword()">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="auth-action-btn">Continue</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <button onclick="loginWithGoogle()" class="google-btn">
+      <img src="https://img.icons8.com/color/48/google-logo.png" width="20" />
+      Continue with Google
+    </button>
+
+    <div id="authMessage" class="auth-message"></div>
+  </div>
 </div>
-
-<h2 id="authTitle">Welcome Back</h2>
-
-<div class="auth-tabs">
-  <button onclick="switchAuthMode('login')" id="tabLogin" class="active">Login</button>
-  <button onclick="switchAuthMode('register')" id="tabRegister">Register</button>
-</div>
-
-<form id="authForm">
-  <div id="fieldUsername" class="auth-field" style="display: none">
-    <input type="text" id="authUsername" placeholder="Username" autocomplete="username" />
-  </div>
-  <div class="auth-field">
-    <input type="email" id="authEmail" placeholder="Email" autocomplete="email" />
-  </div>
-  <div class="auth-field">
-    <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" />
-  </div>
-
-  <div id="resetPassword" style="text-align:right; display:none">
-    <a href="#" onclick="resetPassword()">Forgot password?</a>
-  </div>
-
-  <button type="submit" class="auth-action-btn">Continue</button>
-</form>
-
-<div class="divider">or</div>
-
-<button onclick="loginWithGoogle()" class="google-btn">
-  <img src="https://img.icons8.com/color/48/google-logo.png" width="20" />
-  Continue with Google
-</button>
-
-<div id="authMessage" class="auth-message"></div>
-
-  </div>
-</div><!-- ✅ AUTH MODAL CSS --><style>
-  .auth-modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    overflow-y: auto;
-  }
-  .auth-content {
-    background: #1c1c1e;
-    color: white;
-    padding: 32px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    text-align: center;
-    position: relative;
-  }
-  .auth-avatar img {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    margin-bottom: 16px;
-  }
-  .auth-tabs button {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-weight: 600;
-    margin: 0 10px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .auth-tabs .active {
-    color: #fff;
-    border-bottom: 2px solid #007aff;
-  }
-  .auth-field {
-    margin: 12px 0;
-  }
-  .auth-field input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background: #2c2c2e;
-    color: white;
-    font-size: 16px;
-  }
-  .auth-action-btn {
-    margin-top: 12px;
-    background: #007aff;
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .divider {
-    margin: 18px 0;
-    color: #aaa;
-  }
-  .google-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px;
-    background: white;
-    border-radius: 12px;
-    color: #333;
-    border: none;
-    width: 100%;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  .close-btn {
-    position: absolute;
-    top: 12px; right: 12px;
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  .auth-message {
-    margin-top: 12px;
-    color: #ff3b30;
-    font-weight: 500;
-  }
-</style>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -2105,14 +2110,17 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  onAuthStateChanged
+  onAuthStateChanged,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import {
   getDatabase,
   ref,
   onValue,
   remove,
-  get
+  get,
+  set,
+  update
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ✅ Firebase config
@@ -2133,27 +2141,50 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getDatabase(app);
 
+// ✅ Imgur Client ID
+const IMGUR_CLIENT_ID = "891e5bb4aa94282";
+
 // ✅ DOM refs
 const userArea = document.getElementById('userArea');
 const loginBtn = document.getElementById('loginBtn');
+const avatarInput = document.getElementById("avatarInput");
+const avatarPreview = document.getElementById("avatarPreview");
 
-// ✅ Login with Google
+// Auth modal elements
+const authForm = document.getElementById("authForm");
+const authMessage = document.getElementById("authMessage");
+let authMode = "login"; // "login" or "register"
+
+// ------------------------------
+// 1. LOGIN WITH GOOGLE
 function loginWithGoogle() {
   signInWithPopup(auth, provider).catch(showAuthMessage);
 }
 
-// ✅ Handle login/logout UI
-onAuthStateChanged(auth, (user) => {
+// ------------------------------
+// 2. HANDLE AUTH STATE & UI UPDATES
+onAuthStateChanged(auth, async (user) => {
   window.isUserLoggedIn = !!user;
-  userArea.innerHTML = '';
+  userArea.innerHTML = "";
 
   if (user) {
+    // Try to load profilePic from Firebase DB
+    const userRef = ref(db, `users/${user.uid}`);
+    const snap = await get(userRef);
+    let profilePicUrl = user.photoURL || 'https://via.placeholder.com/36?text=U';
+    if (snap.exists() && snap.val().profilePic) {
+      profilePicUrl = snap.val().profilePic;
+    }
+
+    // Create profile pic element
     const img = document.createElement('img');
-    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';
-    img.alt = user.displayName || 'User';
+    img.src = profilePicUrl;
+    img.alt = user.displayName || "User";
     img.className = 'profile-pic';
+    img.style.cursor = "pointer";
     img.addEventListener('click', () => window.location.href = '/myprofile');
 
+    // Notifications button
     const notifBtn = document.createElement('button');
     notifBtn.id = 'notificationBtn';
     notifBtn.setAttribute('aria-label', 'Notifications');
@@ -2170,6 +2201,7 @@ onAuthStateChanged(auth, (user) => {
     userArea.appendChild(notifBtn);
     userArea.appendChild(img);
 
+    // Notification red dot logic
     const notifDot = notifBtn.querySelector('#notificationDot');
     const userNotifsRef = ref(db, 'notifications/' + user.uid);
     onValue(userNotifsRef, (snap) => {
@@ -2178,31 +2210,28 @@ onAuthStateChanged(auth, (user) => {
       notifDot.style.display = hasUnread ? 'block' : 'none';
     });
   } else {
+    // Not logged in - show login button
     const cloned = loginBtn.cloneNode(true);
     cloned.addEventListener('click', () => openAuthModal());
     userArea.appendChild(cloned);
+
     const dot = document.getElementById('notificationDot');
     if (dot) dot.style.display = 'none';
   }
 });
 
-// ✅ AUTH MODAL UI LOGIC
-const authForm = document.getElementById("authForm");
-const authMessage = document.getElementById("authMessage");
-let authMode = "login"; // or "register"
-
+// ------------------------------
+// 3. AUTH MODAL UI LOGIC
 function openAuthModal() {
   const modal = document.getElementById("authModal");
   modal.style.display = "flex";
   setTimeout(() => modal.classList.add("show"), 10);
 }
-
 function closeAuthModal() {
   const modal = document.getElementById("authModal");
   modal.classList.remove("show");
   setTimeout(() => modal.style.display = "none", 300);
 }
-
 function switchAuthMode(mode) {
   authMode = mode;
   document.getElementById("tabLogin").classList.toggle("active", mode === "login");
@@ -2211,8 +2240,14 @@ function switchAuthMode(mode) {
   document.getElementById("resetPassword").style.display = mode === "login" ? "block" : "none";
   document.getElementById("authTitle").textContent = mode === "login" ? "Welcome Back" : "Create Account";
   authMessage.textContent = "";
-}
 
+  // Reset avatar preview on mode switch
+  if (mode === "register") {
+    avatarPreview.src = "https://via.placeholder.com/72x72.png?text=+";
+  } else {
+    avatarPreview.src = "";
+  }
+}
 function resetPassword() {
   const email = document.getElementById("authEmail").value;
   if (!email) return showAuthMessage("Enter your email to reset password.");
@@ -2220,14 +2255,63 @@ function resetPassword() {
     .then(() => showAuthMessage("Password reset link sent to email."))
     .catch(showAuthMessage);
 }
-
 function showAuthMessage(msg) {
   authMessage.textContent = typeof msg === "string" ? msg : msg.message;
 }
 
-authForm.addEventListener("submit", (e) => {
+// Trigger file input click for avatar upload on register mode only
+window.triggerAvatarUpload = function () {
+  if (authMode === "register") avatarInput.click();
+};
+
+// Handle avatar file selection & upload to Imgur
+avatarInput.addEventListener("change", async () => {
+  const file = avatarInput.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    showAuthMessage("Only image files are allowed.");
+    return;
+  }
+  showAuthMessage("Uploading avatar...");
+
+  // Convert file to base64
+  const base64 = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(",")[1]);
+    reader.onerror = () => rej("Failed to read file.");
+    reader.readAsDataURL(file);
+  });
+
+  // Upload to Imgur
+  try {
+    const res = await fetch("https://api.imgur.com/3/image", {
+      method: "POST",
+      headers: {
+        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ image: base64, type: "base64" })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error("Imgur upload failed");
+    const imgUrl = data.data.link;
+
+    // Show preview
+    avatarPreview.src = imgUrl;
+    showAuthMessage("Avatar uploaded. Complete registration!");
+
+    // Store imgUrl temporarily on the window, to save to Firebase after registration
+    window.tempAvatarUrl = imgUrl;
+  } catch (e) {
+    showAuthMessage("Upload failed: " + e.message);
+  }
+});
+
+// ------------------------------
+// 4. AUTH FORM SUBMISSION (LOGIN/REGISTER)
+authForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = document.getElementById("authEmail").value;
+  const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value;
 
   if (authMode === "login") {
@@ -2235,24 +2319,34 @@ authForm.addEventListener("submit", (e) => {
       .then(closeAuthModal)
       .catch(showAuthMessage);
   } else {
-    const username = document.getElementById("authUsername").value;
+    const username = document.getElementById("authUsername").value.trim();
     if (!username) return showAuthMessage("Username is required.");
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        const uid = auth.currentUser.uid;
-        return getDatabase().ref(`/users/${uid}`).set({ username, email });
-      })
-      .then(closeAuthModal)
-      .catch(showAuthMessage);
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+
+      const uid = auth.currentUser.uid;
+      // Save username, email, and avatar URL (if any)
+      const userData = { username, email };
+      if (window.tempAvatarUrl) userData.profilePic = window.tempAvatarUrl;
+
+      await set(ref(db, `/users/${uid}`), userData);
+
+      // Update Firebase Auth profile photoURL if avatar uploaded
+      if (window.tempAvatarUrl) {
+        await updateProfile(auth.currentUser, { photoURL: window.tempAvatarUrl });
+      }
+
+      window.tempAvatarUrl = null;
+      closeAuthModal();
+    } catch (err) {
+      showAuthMessage(err.message);
+    }
   }
 });
 
-window.loginWithGoogle = loginWithGoogle;
-window.closeAuthModal = closeAuthModal;
-window.switchAuthMode = switchAuthMode;
-window.resetPassword = resetPassword;
-
-// ✅ NOTIFICATIONS MODAL
+// ------------------------------
+// 5. NOTIFICATIONS MODAL LOGIC
 const modal = document.getElementById('notificationsModal');
 const closeBtn = document.getElementById('closeNotificationsBtn');
 const list = document.getElementById('notificationsList');
