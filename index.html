@@ -2101,272 +2101,244 @@ body.modal-open {
     setInterval(rotateAd, 8000);
   });
 </script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  onValue,
-  remove,
-  get,
-  set,
-  update
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-// ✅ Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-// ✅ Init Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-const db = getDatabase(app);
-
-// ✅ Imgur Client ID
-const IMGUR_CLIENT_ID = "891e5bb4aa94282";
-
-// ✅ DOM refs
-const userArea = document.getElementById('userArea');
-const loginBtn = document.getElementById('loginBtn');
-const avatarInput = document.getElementById("avatarInput");
-const avatarPreview = document.getElementById("avatarPreview");
-
-// Auth modal elements
-const authForm = document.getElementById("authForm");
-const authMessage = document.getElementById("authMessage");
-let authMode = "login"; // "login" or "register"
-
-// ------------------------------
-// 1. LOGIN WITH GOOGLE
-function loginWithGoogle() {
-  signInWithPopup(auth, provider).catch(showAuthMessage);
-}
-
-// ------------------------------
-// 2. HANDLE AUTH STATE & UI UPDATES
-onAuthStateChanged(auth, async (user) => {
-  window.isUserLoggedIn = !!user;
-  userArea.innerHTML = "";
-
-  if (user) {
-    // Try to load profilePic from Firebase DB
-    const userRef = ref(db, `users/${user.uid}`);
-    const snap = await get(userRef);
-    let profilePicUrl = user.photoURL || 'https://via.placeholder.com/36?text=U';
-    if (snap.exists() && snap.val().profilePic) {
-      profilePicUrl = snap.val().profilePic;
-    }
-
-    // Create profile pic element
-    const img = document.createElement('img');
-    img.src = profilePicUrl;
-    img.alt = user.displayName || "User";
-    img.className = 'profile-pic';
-    img.style.cursor = "pointer";
-    img.addEventListener('click', () => window.location.href = '/myprofile');
-
-    // Notifications button
-    const notifBtn = document.createElement('button');
-    notifBtn.id = 'notificationBtn';
-    notifBtn.setAttribute('aria-label', 'Notifications');
-    notifBtn.style.cssText = "position:relative;background:none;border:none;cursor:pointer;padding:6px;";
-    notifBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 17h-6a3 3 0 0 1-3-3v-3a6 6 0 1 1 12 0v3a3 3 0 0 1-3 3z" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-      <span id="notificationDot" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#FF3B30;border-radius:50%;display:none;box-shadow:0 0 6px #FF3B30AA;"></span>
-    `;
-    notifBtn.addEventListener('click', () => openNotifications());
-
-    userArea.appendChild(notifBtn);
-    userArea.appendChild(img);
-
-    // Notification red dot logic
-    const notifDot = notifBtn.querySelector('#notificationDot');
-    const userNotifsRef = ref(db, 'notifications/' + user.uid);
-    onValue(userNotifsRef, (snap) => {
-      const data = snap.val() || {};
-      const hasUnread = Object.values(data).some(n => !n.read);
-      notifDot.style.display = hasUnread ? 'block' : 'none';
-    });
-  } else {
-    // Not logged in - show login button
-    const cloned = loginBtn.cloneNode(true);
-    cloned.addEventListener('click', () => openAuthModal());
-    userArea.appendChild(cloned);
-
-    const dot = document.getElementById('notificationDot');
-    if (dot) dot.style.display = 'none';
-  }
-});
-
-// ------------------------------
-// 3. AUTH MODAL UI LOGIC
-function openAuthModal() {
-  const modal = document.getElementById("authModal");
-  modal.style.display = "flex";
-  setTimeout(() => modal.classList.add("show"), 10);
-}
-function closeAuthModal() {
-  const modal = document.getElementById("authModal");
-  modal.classList.remove("show");
-  setTimeout(() => modal.style.display = "none", 300);
-}
-function switchAuthMode(mode) {
-  authMode = mode;
-  document.getElementById("tabLogin").classList.toggle("active", mode === "login");
-  document.getElementById("tabRegister").classList.toggle("active", mode === "register");
-  document.getElementById("fieldUsername").style.display = mode === "register" ? "block" : "none";
-  document.getElementById("resetPassword").style.display = mode === "login" ? "block" : "none";
-  document.getElementById("authTitle").textContent = mode === "login" ? "Welcome Back" : "Create Account";
-  authMessage.textContent = "";
-
-  // Reset avatar preview on mode switch
-  if (mode === "register") {
-    avatarPreview.src = "https://via.placeholder.com/72x72.png?text=+";
-  } else {
-    avatarPreview.src = "";
-  }
-}
-function resetPassword() {
-  const email = document.getElementById("authEmail").value;
-  if (!email) return showAuthMessage("Enter your email to reset password.");
-  sendPasswordResetEmail(auth, email)
-    .then(() => showAuthMessage("Password reset link sent to email."))
-    .catch(showAuthMessage);
-}
-function showAuthMessage(msg) {
-  authMessage.textContent = typeof msg === "string" ? msg : msg.message;
-}
-
-// Trigger file input click for avatar upload on register mode only
-window.triggerAvatarUpload = function () {
-  if (authMode === "register") avatarInput.click();
-};
-
-// Handle avatar file selection & upload to Imgur
-avatarInput.addEventListener("change", async () => {
-  const file = avatarInput.files[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    showAuthMessage("Only image files are allowed.");
-    return;
-  }
-  showAuthMessage("Uploading avatar...");
-
-  // Convert file to base64
-  const base64 = await new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result.split(",")[1]);
-    reader.onerror = () => rej("Failed to read file.");
-    reader.readAsDataURL(file);
-  });
-
-  // Upload to Imgur
-  try {
-    const res = await fetch("https://api.imgur.com/3/image", {
-      method: "POST",
-      headers: {
-        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ image: base64, type: "base64" })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error("Imgur upload failed");
-    const imgUrl = data.data.link;
-
-    // Show preview
-    avatarPreview.src = imgUrl;
-    showAuthMessage("Avatar uploaded. Complete registration!");
-
-    // Store imgUrl temporarily on the window, to save to Firebase after registration
-    window.tempAvatarUrl = imgUrl;
-  } catch (e) {
-    showAuthMessage("Upload failed: " + e.message);
-  }
-});
-
-// ------------------------------
-// 4. AUTH FORM SUBMISSION (LOGIN/REGISTER)
-authForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
-
-  if (authMode === "login") {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(closeAuthModal)
-      .catch(showAuthMessage);
-  } else {
-    const username = document.getElementById("authUsername").value.trim();
-    if (!username) return showAuthMessage("Username is required.");
-
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-
-      const uid = auth.currentUser.uid;
-      // Save username, email, and avatar URL (if any)
-      const userData = { username, email };
-      if (window.tempAvatarUrl) userData.profilePic = window.tempAvatarUrl;
-
-      await set(ref(db, `/users/${uid}`), userData);
-
-      // Update Firebase Auth profile photoURL if avatar uploaded
-      if (window.tempAvatarUrl) {
-        await updateProfile(auth.currentUser, { photoURL: window.tempAvatarUrl });
-      }
-
-      window.tempAvatarUrl = null;
-      closeAuthModal();
-    } catch (err) {
-      showAuthMessage(err.message);
-    }
-  }
-});
-
-// ------------------------------
-// 5. NOTIFICATIONS MODAL LOGIC
-const modal = document.getElementById('notificationsModal');
-const closeBtn = document.getElementById('closeNotificationsBtn');
-const list = document.getElementById('notificationsList');
-const tabPublic = document.getElementById('tabPublic');
-const tabPrivate = document.getElementById('tabPrivate');
-const clearBtn = document.getElementById('clearNotificationsBtn');
-let currentTab = 'public';
-
-window.openNotifications = function () {
-  if (!window.isUserLoggedIn) return alert("Login to view notifications.");
-  modal.style.display = 'block';
-  document.body.classList.add('modal-open');
-  switchToTab(currentTab);
-};
-
-closeBtn?.addEventListener('click', () => {
-  modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
-});
-
+<script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
+import {  
+  getAuth,  
+  GoogleAuthProvider,  
+  signInWithPopup,  
+  createUserWithEmailAndPassword,  
+  signInWithEmailAndPassword,  
+  sendPasswordResetEmail,  
+  onAuthStateChanged  
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
+import {  
+  getDatabase,  
+  ref,  
+  onValue,  
+  remove,  
+  get,  
+  set  
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";  
+  
+// ✅ Firebase config  
+const firebaseConfig = {  
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+  projectId: "itzhoyoo-f9f7e",  
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+  messagingSenderId: "1094792075584",  
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",  
+  measurementId: "G-LLT6F9WRKH"  
+};  
+  
+// ✅ Init Firebase  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const provider = new GoogleAuthProvider();  
+const db = getDatabase(app);  
+  
+// ✅ DOM refs  
+const userArea = document.getElementById('userArea');  
+const loginBtn = document.getElementById('loginBtn');  
+const avatarInput = document.getElementById("avatarInput");  
+const avatarPreview = document.getElementById("avatarPreview");  
+const IMGUR_CLIENT_ID = "891e5bb4aa94282";  
+  
+// ✅ Login with Google  
+function loginWithGoogle() {  
+  signInWithPopup(auth, provider).catch(showAuthMessage);  
+}  
+  
+// ✅ Handle login/logout UI  
+onAuthStateChanged(auth, (user) => {  
+  window.isUserLoggedIn = !!user;  
+  userArea.innerHTML = '';  
+  
+  if (user) {  
+    const img = document.createElement('img');  
+    img.src = user.photoURL || 'https://via.placeholder.com/36?text=U';  
+    img.alt = user.displayName || 'User';  
+    img.className = 'profile-pic';  
+    img.addEventListener('click', () => window.location.href = '/myprofile');  
+  
+    const notifBtn = document.createElement('button');  
+    notifBtn.id = 'notificationBtn';  
+    notifBtn.setAttribute('aria-label', 'Notifications');  
+    notifBtn.style.cssText = "position:relative;background:none;border:none;cursor:pointer;padding:6px;";  
+    notifBtn.innerHTML = `  
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">  
+        <path d="M15 17h-6a3 3 0 0 1-3-3v-3a6 6 0 1 1 12 0v3a3 3 0 0 1-3 3z" />  
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />  
+      </svg>  
+      <span id="notificationDot" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#FF3B30;border-radius:50%;display:none;box-shadow:0 0 6px #FF3B30AA;"></span>  
+    `;  
+    notifBtn.addEventListener('click', () => openNotifications());  
+  
+    userArea.appendChild(notifBtn);  
+    userArea.appendChild(img);  
+  
+    const notifDot = notifBtn.querySelector('#notificationDot');  
+    const userNotifsRef = ref(db, 'notifications/' + user.uid);  
+    onValue(userNotifsRef, (snap) => {  
+      const data = snap.val() || {};  
+      const hasUnread = Object.values(data).some(n => !n.read);  
+      notifDot.style.display = hasUnread ? 'block' : 'none';  
+    });  
+  } else {  
+    const cloned = loginBtn.cloneNode(true);  
+    cloned.addEventListener('click', () => openAuthModal());  
+    userArea.appendChild(cloned);  
+    const dot = document.getElementById('notificationDot');  
+    if (dot) dot.style.display = 'none';  
+  }  
+});  
+  
+// ✅ AUTH MODAL UI LOGIC  
+const authForm = document.getElementById("authForm");  
+const authMessage = document.getElementById("authMessage");  
+let authMode = "login"; // or "register"  
+  
+function openAuthModal() {  
+  const modal = document.getElementById("authModal");  
+  modal.style.display = "flex";  
+  setTimeout(() => modal.classList.add("show"), 10);  
+}  
+  
+function closeAuthModal() {  
+  const modal = document.getElementById("authModal");  
+  modal.classList.remove("show");  
+  setTimeout(() => modal.style.display = "none", 300);  
+}  
+  
+function switchAuthMode(mode) {  
+  authMode = mode;  
+  document.getElementById("tabLogin").classList.toggle("active", mode === "login");  
+  document.getElementById("tabRegister").classList.toggle("active", mode === "register");  
+  document.getElementById("fieldUsername").style.display = mode === "register" ? "block" : "none";  
+  document.getElementById("resetPassword").style.display = mode === "login" ? "block" : "none";  
+  document.getElementById("authTitle").textContent = mode === "login" ? "Welcome Back" : "Create Account";  
+  authMessage.textContent = "";  
+}  
+  
+function resetPassword() {  
+  const email = document.getElementById("authEmail").value;  
+  if (!email) return showAuthMessage("Enter your email to reset password.");  
+  sendPasswordResetEmail(auth, email)  
+    .then(() => showAuthMessage("Password reset link sent to email."))  
+    .catch(showAuthMessage);  
+}  
+  
+function showAuthMessage(msg) {  
+  authMessage.textContent = typeof msg === "string" ? msg : msg.message;  
+}  
+  
+authForm.addEventListener("submit", async (e) => {  
+  e.preventDefault();  
+  const email = document.getElementById("authEmail").value;  
+  const password = document.getElementById("authPassword").value;  
+  
+  if (authMode === "login") {  
+    signInWithEmailAndPassword(auth, email, password)  
+      .then(closeAuthModal)  
+      .catch(showAuthMessage);  
+  } else {  
+    const username = document.getElementById("authUsername").value;  
+    if (!username) return showAuthMessage("Username is required.");  
+  
+    // Get uploaded avatar URL or fallback empty string  
+    const profilePic = avatarPreview.dataset.uploaded || "";  
+  
+    try {  
+      // Create user  
+      await createUserWithEmailAndPassword(auth, email, password);  
+      const uid = auth.currentUser.uid;  
+  
+      // Save user data including profilePic  
+      await set(ref(db, `/users/${uid}`), { username, email, profilePic });  
+  
+      closeAuthModal();  
+    } catch (error) {  
+      showAuthMessage(error);  
+    }  
+  }  
+});  
+  
+// Avatar upload handler  
+window.triggerAvatarUpload = function () {  
+  if (authMode === "register") avatarInput.click();  
+};  
+  
+avatarInput.addEventListener("change", async () => {  
+  const file = avatarInput.files[0];  
+  if (!file) return;  
+  
+  try {  
+    showAuthMessage("Uploading profile pic...");  
+  
+    const base64 = await toBase64(file);  
+    const imgurUrl = await uploadToImgur(base64);  
+  
+    avatarPreview.src = imgurUrl;  
+    avatarPreview.dataset.uploaded = imgurUrl;  
+    showAuthMessage("Profile picture ready.");  
+  } catch (err) {  
+    showAuthMessage("Failed to upload image.");  
+    console.error(err);  
+  }  
+});  
+  
+function toBase64(file) {  
+  return new Promise((resolve, reject) => {  
+    const reader = new FileReader();  
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);  
+    reader.onerror = reject;  
+    reader.readAsDataURL(file);  
+  });  
+}  
+  
+async function uploadToImgur(base64) {  
+  const res = await fetch("https://api.imgur.com/3/image", {  
+    method: "POST",  
+    headers: {  
+      Authorization: "Client-ID " + IMGUR_CLIENT_ID,  
+      "Content-Type": "application/json"  
+    },  
+    body: JSON.stringify({ image: base64, type: "base64" })  
+  });  
+  
+  const data = await res.json();  
+  if (!data.success) throw new Error("Imgur upload failed");  
+  return data.data.link;  
+}  
+  
+window.loginWithGoogle = loginWithGoogle;  
+window.closeAuthModal = closeAuthModal;  
+window.switchAuthMode = switchAuthMode;  
+window.resetPassword = resetPassword;  
+  
+// ✅ NOTIFICATIONS MODAL  
+const modal = document.getElementById('notificationsModal');  
+const closeBtn = document.getElementById('closeNotificationsBtn');  
+const list = document.getElementById('notificationsList');  
+const tabPublic = document.getElementById('tabPublic');  
+const tabPrivate = document.getElementById('tabPrivate');  
+const clearBtn = document.getElementById('clearNotificationsBtn');  
+let currentTab = 'public';  
+  
+window.openNotifications = function () {  
+  if (!window.isUserLoggedIn) return alert("Login to view notifications.");  
+  modal.style.display = 'block';  
+  document.body.classList.add('modal-open');  
+  switchToTab(currentTab);  
+};  
+  
+closeBtn?.addEventListener('click', () => {  
+  modal.style.display = 'none';  
+  document.body.classList.remove('modal-open');  
+});  
+  
 tabPublic?.addEventListener('click', () => switchToTab('public'));
 tabPrivate?.addEventListener('click', () => switchToTab('private'));
 
