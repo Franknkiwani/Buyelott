@@ -2223,7 +2223,7 @@ import {
   signInWithEmailAndPassword,  
   sendPasswordResetEmail,  
   onAuthStateChanged,
-  updateProfile  // <--- Added this  
+  updateProfile  
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
 import {  
   getDatabase,  
@@ -2307,12 +2307,24 @@ onAuthStateChanged(auth, (user) => {
     userArea.appendChild(img);  
   
     const notifDot = notifBtn.querySelector('#notificationDot');  
-    const userNotifsRef = ref(db, 'notifications/' + user.uid);  
-    onValue(userNotifsRef, (snap) => {  
-      const data = snap.val() || {};  
-      const hasUnread = Object.values(data).some(n => !n.read);  
-      notifDot.style.display = hasUnread ? 'block' : 'none';  
-    });  
+
+    const privateRef = ref(db, `notifications/${user.uid}`);  
+    const publicRef = ref(db, 'notifications/public');  
+
+    function updateDot() {  
+      Promise.all([get(privateRef), get(publicRef)]).then(([privateSnap, publicSnap]) => {  
+        const privData = privateSnap.val() || {};  
+        const pubData = publicSnap.val() || {};  
+  
+        const privUnread = Object.values(privData).some(n => !n.read);  
+        const pubUnread = Object.values(pubData).some(n => !n.read);  
+  
+        notifDot.style.display = (privUnread || pubUnread) ? 'block' : 'none';  
+      });  
+    }  
+
+    onValue(privateRef, updateDot);  
+    onValue(publicRef, updateDot);  
   } else {  
     const cloned = loginBtn.cloneNode(true);  
     cloned.addEventListener('click', () => openAuthModal());  
@@ -2380,9 +2392,8 @@ authForm.addEventListener("submit", async (e) => {
   
     try {  
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);  
-      const user = userCredential.user;  // get the user object  
+      const user = userCredential.user;  
   
-      // *** THIS IS THE CRUCIAL PART ***  
       await updateProfile(user, {  
         displayName: username,  
         photoURL: avatar,  
@@ -2454,7 +2465,7 @@ window.closeAuthModal = closeAuthModal;
 window.switchAuthMode = switchAuthMode;  
 window.resetPassword = resetPassword;  
   
-// Notifications modal & logic (unchanged from your original, kept here for completeness)  
+// Notifications modal & logic  
 const modal = document.getElementById('notificationsModal');  
 const closeBtn = document.getElementById('closeNotificationsBtn');  
 const list = document.getElementById('notificationsList');  
@@ -2481,13 +2492,25 @@ tabPrivate?.addEventListener('click', () => switchToTab('private'));
 clearBtn?.addEventListener('click', async () => {  
   const user = auth.currentUser;  
   if (!user) return;  
-  const refPath = ref(db, `notifications/${user.uid}`);  
-  const snap = await get(refPath);  
-  if (snap.exists()) {  
-    Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/${user.uid}/${key}`)));  
-    list.innerHTML = '<li style="padding:10px;color:#888;">All private notifications cleared.</li>';  
-    clearBtn.style.display = 'none';  
-  }  
+
+  if(currentTab === 'private') {
+    const refPath = ref(db, `notifications/${user.uid}`);
+    const snap = await get(refPath);
+    if (snap.exists()) {
+      Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/${user.uid}/${key}`)));
+      list.innerHTML = '<li style="padding:10px;color:#888;">All private notifications cleared.</li>';
+      clearBtn.style.display = 'none';
+    }
+  } else if (currentTab === 'public') {
+    // Assuming admin access, clear all public notifications
+    const refPath = ref(db, `notifications/public`);
+    const snap = await get(refPath);
+    if (snap.exists()) {
+      Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/public/${key}`)));
+      list.innerHTML = '<li style="padding:10px;color:#888;">All public notifications cleared.</li>';
+      clearBtn.style.display = 'none';
+    }
+  }
 });  
   
 function switchToTab(tab) {  
@@ -2500,7 +2523,7 @@ function switchToTab(tab) {
   onValue(ref(db, path), (snap) => {  
     const data = snap.val() || {};  
     renderNotifications(data);  
-    clearBtn.style.display = tab === 'private' && Object.keys(data).length > 0 ? 'block' : 'none';  
+    clearBtn.style.display = Object.keys(data).length > 0 ? 'block' : 'none';  
   });  
 }  
   
@@ -2521,8 +2544,7 @@ function renderNotifications(data) {
     list.appendChild(li);  
   });  
 }  
-</script>
-  <!-- Firebase -->
+</script>  <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 <script>
