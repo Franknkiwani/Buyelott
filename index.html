@@ -1931,13 +1931,13 @@ body.modal-open {
 
     <form id="authForm">
       <div id="fieldUsername" class="auth-field" style="display: none">
-        <input type="text" id="authUsername" placeholder="Username" autocomplete="username" />
+        <input type="text" id="authUsername" placeholder="Username" autocomplete="username" required />
       </div>
       <div class="auth-field">
-        <input type="email" id="authEmail" placeholder="Email" autocomplete="email" />
+        <input type="email" id="authEmail" placeholder="Email" autocomplete="email" required />
       </div>
       <div class="auth-field">
-        <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" />
+        <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required />
       </div>
 
       <div id="resetPassword" style="text-align:right; display:none">
@@ -1957,6 +1957,118 @@ body.modal-open {
     <div id="authMessage" class="auth-message"></div>
   </div>
 </div>
+
+<style>
+  body.modal-open {
+    overflow: hidden;
+  }
+  .auth-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    overflow-y: auto;
+  }
+  .auth-content {
+    background: #1c1c1e;
+    color: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    position: relative;
+  }
+  .auth-avatar {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+  }
+  .auth-avatar img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    border: 2px solid #444;
+    object-fit: cover;
+  }
+  .auth-tabs button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-weight: 600;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .auth-tabs .active {
+    color: #fff;
+    border-bottom: 2px solid #007aff;
+  }
+  .auth-field {
+    margin: 12px 0;
+  }
+  .auth-field input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #2c2c2e;
+    color: white;
+    font-size: 16px;
+  }
+  .auth-action-btn {
+    margin-top: 12px;
+    background: #007aff;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .divider {
+    margin: 18px 0;
+    color: #aaa;
+  }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+    border-radius: 12px;
+    color: #333;
+    border: none;
+    width: 100%;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .auth-message {
+    margin-top: 12px;
+    color: #ff3b30;
+    font-weight: 500;
+  }
+</style>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -2121,7 +2233,6 @@ import {
   set  
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";  
   
-// ✅ Firebase config  
 const firebaseConfig = {  
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
@@ -2133,25 +2244,40 @@ const firebaseConfig = {
   measurementId: "G-LLT6F9WRKH"  
 };  
   
-// ✅ Init Firebase  
 const app = initializeApp(firebaseConfig);  
 const auth = getAuth(app);  
 const provider = new GoogleAuthProvider();  
 const db = getDatabase(app);  
   
-// ✅ DOM refs  
 const userArea = document.getElementById('userArea');  
 const loginBtn = document.getElementById('loginBtn');  
 const avatarInput = document.getElementById("avatarInput");  
 const avatarPreview = document.getElementById("avatarPreview");  
 const IMGUR_CLIENT_ID = "891e5bb4aa94282";  
   
-// ✅ Login with Google  
-function loginWithGoogle() {  
-  signInWithPopup(auth, provider).catch(showAuthMessage);  
+// Google login with user data saving  
+async function loginWithGoogle() {  
+  try {  
+    const result = await signInWithPopup(auth, provider);  
+    const user = result.user;  
+    const uid = user.uid;  
+  
+    const userRef = ref(db, `/users/${uid}`);  
+    const snapshot = await get(userRef);  
+  
+    if (!snapshot.exists()) {  
+      await set(userRef, {  
+        username: user.displayName || "unknown",  
+        email: user.email,  
+        avatar: user.photoURL || "",  
+        createdAt: Date.now()  
+      });  
+    }  
+  } catch (error) {  
+    showAuthMessage(error);  
+  }  
 }  
   
-// ✅ Handle login/logout UI  
 onAuthStateChanged(auth, (user) => {  
   window.isUserLoggedIn = !!user;  
   userArea.innerHTML = '';  
@@ -2195,21 +2321,22 @@ onAuthStateChanged(auth, (user) => {
   }  
 });  
   
-// ✅ AUTH MODAL UI LOGIC  
 const authForm = document.getElementById("authForm");  
 const authMessage = document.getElementById("authMessage");  
-let authMode = "login"; // or "register"  
+let authMode = "login";  
   
 function openAuthModal() {  
   const modal = document.getElementById("authModal");  
   modal.style.display = "flex";  
   setTimeout(() => modal.classList.add("show"), 10);  
+  document.body.style.overflow = "hidden"; // lock scroll  
 }  
   
 function closeAuthModal() {  
   const modal = document.getElementById("authModal");  
   modal.classList.remove("show");  
   setTimeout(() => modal.style.display = "none", 300);  
+  document.body.style.overflow = ""; // unlock scroll  
 }  
   
 function switchAuthMode(mode) {  
@@ -2236,7 +2363,7 @@ function showAuthMessage(msg) {
   
 authForm.addEventListener("submit", async (e) => {  
   e.preventDefault();  
-  const email = document.getElementById("authEmail").value;  
+  const email = document.getElementById("authEmail").value.trim();  
   const password = document.getElementById("authPassword").value;  
   
   if (authMode === "login") {  
@@ -2244,19 +2371,22 @@ authForm.addEventListener("submit", async (e) => {
       .then(closeAuthModal)  
       .catch(showAuthMessage);  
   } else {  
-    const username = document.getElementById("authUsername").value;  
+    const username = document.getElementById("authUsername").value.trim();  
     if (!username) return showAuthMessage("Username is required.");  
   
-    // Get uploaded avatar URL or fallback empty string  
-    const profilePic = avatarPreview.dataset.uploaded || "";  
+    const avatar = avatarPreview.dataset.uploaded || "";  
+    if (!avatar) return showAuthMessage("Please upload an avatar.");  
   
     try {  
-      // Create user  
-      await createUserWithEmailAndPassword(auth, email, password);  
-      const uid = auth.currentUser.uid;  
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);  
+      const uid = userCredential.user.uid;  
   
-      // Save user data including profilePic  
-      await set(ref(db, `/users/${uid}`), { username, email, profilePic });  
+      await set(ref(db, `/users/${uid}`), {  
+        username,  
+        email,  
+        avatar,  
+        createdAt: Date.now()  
+      });  
   
       closeAuthModal();  
     } catch (error) {  
@@ -2265,7 +2395,6 @@ authForm.addEventListener("submit", async (e) => {
   }  
 });  
   
-// Avatar upload handler  
 window.triggerAvatarUpload = function () {  
   if (authMode === "register") avatarInput.click();  
 };  
@@ -2318,7 +2447,7 @@ window.closeAuthModal = closeAuthModal;
 window.switchAuthMode = switchAuthMode;  
 window.resetPassword = resetPassword;  
   
-// ✅ NOTIFICATIONS MODAL  
+// Notifications modal & logic (unchanged from your original, kept here for completeness)  
 const modal = document.getElementById('notificationsModal');  
 const closeBtn = document.getElementById('closeNotificationsBtn');  
 const list = document.getElementById('notificationsList');  
@@ -2339,52 +2468,52 @@ closeBtn?.addEventListener('click', () => {
   document.body.classList.remove('modal-open');  
 });  
   
-tabPublic?.addEventListener('click', () => switchToTab('public'));
-tabPrivate?.addEventListener('click', () => switchToTab('private'));
-
-clearBtn?.addEventListener('click', async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-  const refPath = ref(db, `notifications/${user.uid}`);
-  const snap = await get(refPath);
-  if (snap.exists()) {
-    Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/${user.uid}/${key}`)));
-    list.innerHTML = '<li style="padding:10px;color:#888;">All private notifications cleared.</li>';
-    clearBtn.style.display = 'none';
-  }
-});
-
-function switchToTab(tab) {
-  currentTab = tab;
-  tabPublic.style.background = tab === 'public' ? '#007aff' : '#333';
-  tabPrivate.style.background = tab === 'private' ? '#007aff' : '#333';
-  list.innerHTML = '<li style="padding: 10px;">Loading...</li>';
-
-  const path = tab === 'public' ? 'notifications/public' : `notifications/${auth.currentUser.uid}`;
-  onValue(ref(db, path), (snap) => {
-    const data = snap.val() || {};
-    renderNotifications(data);
-    clearBtn.style.display = tab === 'private' && Object.keys(data).length > 0 ? 'block' : 'none';
-  });
-}
-
-function renderNotifications(data) {
-  const entries = Object.entries(data || {}).slice(-5).reverse();
-  list.innerHTML = '';
-  if (entries.length === 0) {
-    list.innerHTML = `<li style="padding: 10px; color: #888;">No notifications.</li>`;
-    return;
-  }
-
-  entries.forEach(([_, notif]) => {
-    const li = document.createElement('li');
-    li.style.padding = '10px 8px';
-    li.style.borderBottom = '1px solid #222';
-    li.style.fontWeight = notif.read === false ? 'bold' : 'normal';
-    li.textContent = notif.message || '[No message]';
-    list.appendChild(li);
-  });
-}
+tabPublic?.addEventListener('click', () => switchToTab('public'));  
+tabPrivate?.addEventListener('click', () => switchToTab('private'));  
+  
+clearBtn?.addEventListener('click', async () => {  
+  const user = auth.currentUser;  
+  if (!user) return;  
+  const refPath = ref(db, `notifications/${user.uid}`);  
+  const snap = await get(refPath);  
+  if (snap.exists()) {  
+    Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/${user.uid}/${key}`)));  
+    list.innerHTML = '<li style="padding:10px;color:#888;">All private notifications cleared.</li>';  
+    clearBtn.style.display = 'none';  
+  }  
+});  
+  
+function switchToTab(tab) {  
+  currentTab = tab;  
+  tabPublic.style.background = tab === 'public' ? '#007aff' : '#333';  
+  tabPrivate.style.background = tab === 'private' ? '#007aff' : '#333';  
+  list.innerHTML = '<li style="padding: 10px;">Loading...</li>';  
+  
+  const path = tab === 'public' ? 'notifications/public' : `notifications/${auth.currentUser.uid}`;  
+  onValue(ref(db, path), (snap) => {  
+    const data = snap.val() || {};  
+    renderNotifications(data);  
+    clearBtn.style.display = tab === 'private' && Object.keys(data).length > 0 ? 'block' : 'none';  
+  });  
+}  
+  
+function renderNotifications(data) {  
+  const entries = Object.entries(data || {}).slice(-5).reverse();  
+  list.innerHTML = '';  
+  if (entries.length === 0) {  
+    list.innerHTML = `<li style="padding: 10px; color: #888;">No notifications.</li>`;  
+    return;  
+  }  
+  
+  entries.forEach(([_, notif]) => {  
+    const li = document.createElement('li');  
+    li.style.padding = '10px 8px';  
+    li.style.borderBottom = '1px solid #222';  
+    li.style.fontWeight = notif.read === false ? 'bold' : 'normal';  
+    li.textContent = notif.message || '[No message]';  
+    list.appendChild(li);  
+  });  
+}  
 </script>
   <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
