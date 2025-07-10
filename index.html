@@ -2274,10 +2274,13 @@ async function loginWithGoogle() {
         createdAt: Date.now()  
       });  
     }  
+    
+    closeAuthModal(); // Boom! Close the login modal immediately on success
+
   } catch (error) {  
     showAuthMessage(error);  
   }  
-}  
+}
   
 onAuthStateChanged(auth, (user) => {  
   window.isUserLoggedIn = !!user;  
