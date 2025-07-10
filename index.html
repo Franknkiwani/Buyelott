@@ -2505,30 +2505,64 @@ clearBtn?.addEventListener('click', async () => {
       clearBtn.style.display = 'none';
     }
   } else if (currentTab === 'public') {
-    // Assuming admin access, clear all public notifications
-    const refPath = ref(db, `notifications/public`);
-    const snap = await get(refPath);
+    const publicRef = ref(db, 'notifications/public');
+    const snap = await get(publicRef);
     if (snap.exists()) {
-      Object.keys(snap.val()).forEach(key => remove(ref(db, `notifications/public/${key}`)));
-      list.innerHTML = '<li style="padding:10px;color:#888;">All public notifications cleared.</li>';
+      // Instead of deleting, mark all as cleared for this user
+      const clearedUpdates = {};
+      Object.keys(snap.val()).forEach(key => {
+        clearedUpdates[key] = true;
+      });
+
+      // Save cleared flags under user profile
+      await set(ref(db, `users/${user.uid}/clearedPublic`), clearedUpdates);
+
+      list.innerHTML = '<li style="padding:10px;color:#888;">All public notifications cleared for you.</li>';
       clearBtn.style.display = 'none';
     }
   }
-});  
-  
-function switchToTab(tab) {  
-  currentTab = tab;  
-  tabPublic.style.background = tab === 'public' ? '#007aff' : '#333';  
-  tabPrivate.style.background = tab === 'private' ? '#007aff' : '#333';  
-  list.innerHTML = '<li style="padding: 10px;">Loading...</li>';  
-  
-  const path = tab === 'public' ? 'notifications/public' : `notifications/${auth.currentUser.uid}`;  
-  onValue(ref(db, path), (snap) => {  
-    const data = snap.val() || {};  
-    renderNotifications(data);  
-    clearBtn.style.display = Object.keys(data).length > 0 ? 'block' : 'none';  
-  });  
-}  
+});
+async function switchToTab(tab) {
+  currentTab = tab;
+  tabPublic.style.background = tab === 'public' ? '#007aff' : '#333';
+  tabPrivate.style.background = tab === 'private' ? '#007aff' : '#333';
+  list.innerHTML = '<li style="padding: 10px;">Loading...</li>';
+
+  const user = auth.currentUser;
+  if (!user) {
+    list.innerHTML = '<li style="padding: 10px; color: #888;">Please log in to see notifications.</li>';
+    clearBtn.style.display = 'none';
+    return;
+  }
+
+  if (tab === 'public') {
+    // Fetch public notifications and user cleared keys
+    const [publicSnap, clearedSnap] = await Promise.all([
+      get(ref(db, 'notifications/public')),
+      get(ref(db, `users/${user.uid}/clearedPublic`))
+    ]);
+
+    const publicData = publicSnap.val() || {};
+    const clearedData = clearedSnap.val() || {};
+
+    // Filter out cleared public notifications
+    const filteredData = Object.fromEntries(
+      Object.entries(publicData).filter(([key]) => !clearedData[key])
+    );
+
+    renderNotifications(filteredData);
+    clearBtn.style.display = Object.keys(filteredData).length > 0 ? 'block' : 'none';
+
+  } else {
+    // Listen live to private notifications
+    onValue(ref(db, `notifications/${user.uid}`), (snap) => {
+      const data = snap.val() || {};
+      renderNotifications(data);
+      clearBtn.style.display = Object.keys(data).length > 0 ? 'block' : 'none';
+    });
+  }
+}
+
 // Helper function to convert timestamps into “time ago” text
 function timeAgo(timestamp) {
   const now = Date.now();
