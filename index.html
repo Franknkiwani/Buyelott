@@ -2222,7 +2222,8 @@ import {
   createUserWithEmailAndPassword,  
   signInWithEmailAndPassword,  
   sendPasswordResetEmail,  
-  onAuthStateChanged  
+  onAuthStateChanged,
+  updateProfile  // <--- Added this  
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
 import {  
   getDatabase,  
@@ -2379,9 +2380,15 @@ authForm.addEventListener("submit", async (e) => {
   
     try {  
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);  
-      const uid = userCredential.user.uid;  
+      const user = userCredential.user;  // get the user object  
   
-      await set(ref(db, `/users/${uid}`), {  
+      // *** THIS IS THE CRUCIAL PART ***  
+      await updateProfile(user, {  
+        displayName: username,  
+        photoURL: avatar,  
+      });  
+  
+      await set(ref(db, `/users/${user.uid}`), {  
         username,  
         email,  
         avatar,  
