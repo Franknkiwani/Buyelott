@@ -853,6 +853,93 @@ button#logoutBtn:focus {
   /* ...existing styles... */
   z-index: 15000; /* higher than loading overlay */
 }
+   .profile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .profile img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+    }
+
+    .profile span {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .badge svg {
+      vertical-align: middle;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      width: 90%;
+      max-width: 1000px;
+    }
+
+    .feature {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 10px #00000033;
+      position: relative;
+    }
+
+    .feature h3 {
+      margin-top: 0;
+    }
+
+    .feature .action {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: #1da1f2;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    #pushBanner {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      transition: 0.4s ease;
+      z-index: 1000;
+      font-size: 0.9rem;
+    }
+
+    #pushBanner img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
 </style>
 <style>
   /* Let PayPal modal scroll */
@@ -1067,7 +1154,46 @@ button#logoutBtn:focus {
   to { transform: rotate(360deg); }
 }
 </style>
+  <div class="profile">
+    <img id="avatar" src="https://i.pravatar.cc/48" alt="User">
+    <span id="username">Loading...</span>
+    <div class="badge" id="badgeStatus">
+      <span>Checking...</span>
+    </div>
+  </div>
 
+  <div class="features">
+    <div class="feature">
+      <h3>Live Group Chat</h3>
+      <p>Instantly chat with the whole community in real time.</p>
+      <button class="action" data-page="livegroupchat">Open</button>
+    </div>
+    <div class="feature">
+      <h3>Live Support</h3>
+      <p>Talk to support staff instantly whenever you need help.</p>
+      <button class="action" data-page="livesupport">Open</button>
+    </div>
+    <div class="feature">
+      <h3>DLS Account Giveaway</h3>
+      <p>Free DLS accounts every week for lucky members.</p>
+      <button class="action" data-page="dlsfree">Open</button>
+    </div>
+    <div class="feature">
+      <h3>Analytics Pro</h3>
+      <p>Advanced post insights, reach, and CPM tools.</p>
+      <button class="action" data-page="analyticspro">Open</button>
+    </div>
+    <div class="feature">
+      <h3>Thumbnail Vault</h3>
+      <p>Get access to the best thumbnail templates and AI helpers.</p>
+      <button class="action" data-page="thumbvault">Open</button>
+    </div>
+  </div>
+
+  <div id="pushBanner">
+    <img id="pushBannerIcon" src="https://i.pravatar.cc/40" />
+    <span id="pushBannerMessage">This is a message</span>
+  </div>
 <!-- 🔌 Firebase + PayPal SDKs -->
 <script src="https://www.paypal.com/sdk/js?client-id=AT0jEASmVR8P7NHaFDwCSyaLNjhZkGYzugZSg8X68H2JZSJwdczco8_7Hizgil5gbKgGkTluag2caBW5&currency=USD"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
@@ -1295,5 +1421,80 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(document.body, { childList: true, subtree: true });
 </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    function showPushBanner(message) {
+      const banner = document.getElementById("pushBanner");
+      const bannerMsg = document.getElementById("pushBannerMessage");
+      bannerMsg.textContent = message;
+      banner.style.top = "20px";
+      setTimeout(() => {
+        banner.style.top = "-100px";
+      }, 3000);
+    }
+
+    let isPremium = false;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        showPushBanner("Not logged in");
+        return;
+      }
+
+      const uid = user.uid;
+      document.getElementById("avatar").src = user.photoURL || `https://i.pravatar.cc/48?u=${uid}`;
+      document.getElementById("username").textContent = user.displayName || user.email || "User";
+
+      const badgeBox = document.getElementById("badgeStatus");
+      const userRef = ref(db, `users/${uid}`);
+      get(userRef).then(snapshot => {
+        const data = snapshot.val();
+        const now = Date.now();
+
+        if (data?.isPremium && data.premiumUntil > now) {
+          isPremium = true;
+          badgeBox.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#FFD700">
+              <path d="M12 2L15 9H22L17 14L19 21L12 17L5 21L7 14L2 9H9L12 2Z"/>
+            </svg> <span>Premium</span>
+          `;
+        } else {
+          badgeBox.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#999" viewBox="0 0 24 24">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 13 12 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26a1.5 1.5 0 0 0-2.12-2.12 1.5 1.5 0 0 0-.29 1.65H8c.14-2.36 2.1-4.22 4.5-4.22 2.48 0 4.5 2.02 4.5 4.5 0 1.27-.53 2.41-1.43 3.25z"/>
+            </svg> <span>Not Premium</span>
+          `;
+        }
+      });
+    });
+
+    document.querySelectorAll(".action").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!isPremium) {
+          showPushBanner("Premium only! 🚫");
+          return;
+        }
+        const page = button.dataset.page;
+        window.location.href = `/${page}`;
+      });
+    });
+  </script>
 </body>
 </html>
