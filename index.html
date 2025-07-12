@@ -2330,6 +2330,16 @@ body.sidebar-open {
   z-index: 10001 !important;
   position: fixed; /* Make sure it stays fixed */
 }
+#menuBtn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+#menuBtn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 </style>
  <button id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sideMenu">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -2394,6 +2404,14 @@ body.sidebar-open {
 
     </nav>
   <div id="backdrop"></div>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const btn = document.getElementById('menuBtn');
+      if (btn) btn.classList.add('visible');
+    }, 3000); // 3 seconds delay
+  });
+</script>
     <script>
   const menuBtn = document.getElementById('menuBtn');
   const sideMenu = document.getElementById('sideMenu');
