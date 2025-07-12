@@ -1291,6 +1291,20 @@ const observer = new MutationObserver(() => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
+// Run this once in your admin or browser console after firebase is initialized
+firebase.database().ref("users").once("value").then((snapshot) => {
+  snapshot.forEach((userSnap) => {
+    const userData = userSnap.val();
+    const uid = userSnap.key;
+
+    if (userData.isPremium && !userData.badgeType) {
+      firebase.database().ref(`users/${uid}`).update({
+        badgeType: "modern"
+      });
+    }
+  });
+  console.log("✅ All old premium users upgraded to modern badge.");
+});
 </script>
 </body>
 </html>
