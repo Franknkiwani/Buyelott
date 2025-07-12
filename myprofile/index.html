@@ -798,6 +798,58 @@ button#logoutBtn:focus {
   margin-top: 12px;
   margin-bottom: 12px;
 }
+#pushBanner {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.95);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 90vw;
+  width: fit-content;
+  z-index: 10000;
+  transition: top 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#pushBannerIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #1da1f2;
+}
+
+#pushBannerTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1da1f2;
+  margin-bottom: 2px;
+}
+
+#pushBannerMessage {
+  font-size: 0.92rem;
+  color: #ddd;
+  line-height: 1.2;
+}
+
+.pushBannerTextContainer {
+  display: flex;
+  flex-direction: column;
+}
+#pushBanner {
+  /* ...existing styles... */
+  z-index: 15000; /* higher than loading overlay */
+}
 </style>
 <style>
   /* Let PayPal modal scroll */
@@ -980,7 +1032,33 @@ button#logoutBtn:focus {
     animation: spin 1s linear infinite;
   "></div>
 </div>
-
+<!-- 🔔 Floating Push Banner -->
+<div id="pushBanner" style="
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 420px;
+  background: #1c1c1e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 12999;
+  transition: top 0.4s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+">
+  <img id="pushBannerIcon" src="https://i.pravatar.cc/40" alt="icon" style="width: 40px; height: 40px; border-radius: 12px; margin-right: 12px; object-fit: cover;">
+  <div>
+    <div id="pushBannerTitle" style="font-weight: 600; font-size: 15px;">Notification</div>
+    <div id="pushBannerMessage" style="font-size: 14px; color: #ccc;">Message goes here...</div>
+  </div>
+</div>
 <style>
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -994,6 +1072,32 @@ button#logoutBtn:focus {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 
 <script>
+function showPushBanner({
+  title = "Notification",
+  message = "",
+  icon = "https://i.pravatar.cc/40",
+  duration = 4000
+} = {}) {
+  const banner = document.getElementById("pushBanner");
+  const bannerIcon = document.getElementById("pushBannerIcon");
+  const bannerTitle = document.getElementById("pushBannerTitle");
+  const bannerMessage = document.getElementById("pushBannerMessage");
+
+  if (!banner || !bannerIcon || !bannerTitle || !bannerMessage) return;
+
+  bannerIcon.src = icon;
+  bannerTitle.textContent = title;
+  bannerMessage.textContent = message;
+
+  banner.style.top = "20px";
+  banner.style.opacity = "1";
+
+  setTimeout(() => {
+    banner.style.top = "-100px";
+    banner.style.opacity = "0";
+  }, duration);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -1019,8 +1123,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function hideLoading() {
     const loading = document.getElementById('loadingOverlay');
-    loading.style.opacity = '0';
-    setTimeout(() => loading.style.display = 'none', 300);
+    if (loading) {
+      loading.style.opacity = '0';
+      setTimeout(() => loading.style.display = 'none', 300);
+    }
   }
 
   function showOverlay(text) {
@@ -1035,7 +1141,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   auth.onAuthStateChanged((user) => {
-    if (!user) return window.location.href = "/";
+    if (!user) {
+      showPushBanner({
+        title: "Access Denied",
+        message: "You must sign in to access this page.",
+        icon: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png",
+        duration: 2000
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      return;
+    }
 
     const uid = user.uid;
     profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
@@ -1072,10 +1189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         badge.style.color = "#fff";
         badge.style.display = "inline-block";
       } else {
-        badge.textContent = "No messages";
-        badge.style.background = "transparent";
-        badge.style.color = "#999";
-        badge.style.display = "inline-block";
+        badge.style.display = "none";
       }
     });
   }
@@ -1154,7 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-// Detect PayPal card modal open
+
 const observer = new MutationObserver(() => {
   const paypalModal = document.querySelector('iframe[name^="__pp"]');
   if (paypalModal && paypalModal.offsetParent !== null) {
@@ -1163,7 +1277,6 @@ const observer = new MutationObserver(() => {
     document.body.classList.remove("paypal-card-modal-open");
   }
 });
-
 observer.observe(document.body, { childList: true, subtree: true });
 </script>
 </body>
