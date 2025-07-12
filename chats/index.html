@@ -6,43 +6,37 @@
 <title>Your Inbox</title>
 <style>
   body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     background: #121212;
     color: #eee;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex; flex-direction: column; height: 100vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  header {
-  background: #1da1f2;
-  color: #fff;
-  padding: 16px 20px;
-  font-weight: 700;
-  font-size: 1.5rem;
-  position: fixed;
-  width: calc(100% - 32px); /* To leave space for border-radius */
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  user-select: none;
-  letter-spacing: 0.03em;
-  text-align: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-main {
-  padding-top: 100px; /* Leaves space for the floating curved header */
-  flex: 1;
-  overflow-y: auto;
-  background: #121212;
-  -webkit-overflow-scrolling: touch;
-}
+  main {
+    padding-top: 24px;
+    flex: 1;
+    overflow-y: auto;
+    background: #121212;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .inbox-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 16px auto 8px;
+    color: #fff;
+    letter-spacing: 0.02em;
+    user-select: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
   .chat-item {
     display: flex;
     align-items: center;
@@ -51,16 +45,19 @@ main {
     cursor: pointer;
     transition: background-color 0.18s ease;
   }
+
   .chat-item:hover,
   .chat-item:focus-visible {
     background: #1a1a1a;
     outline: none;
   }
+
   .avatar-wrapper {
     position: relative;
     flex-shrink: 0;
     margin-right: 14px;
   }
+
   .chat-avatar {
     width: 50px;
     height: 50px;
@@ -71,9 +68,11 @@ main {
     transition: border-color 0.3s ease;
     display: block;
   }
+
   .chat-item.unread .chat-avatar {
     border-color: #ff3b30;
   }
+
   .unread-badge {
     position: absolute;
     top: -4px;
@@ -90,6 +89,7 @@ main {
     box-shadow: 0 0 4px rgba(255, 59, 48, 0.6);
     user-select: none;
   }
+
   .chat-info {
     flex: 1;
     min-width: 0;
@@ -97,6 +97,7 @@ main {
     flex-direction: column;
     justify-content: center;
   }
+
   .chat-name {
     font-weight: 700;
     font-size: 1.15rem;
@@ -105,6 +106,7 @@ main {
     text-overflow: ellipsis;
     color: #fff;
   }
+
   .chat-last-message {
     font-size: 0.9rem;
     color: #bbb;
@@ -113,6 +115,7 @@ main {
     text-overflow: ellipsis;
     margin-top: 4px;
   }
+
   .chat-timestamp {
     font-size: 0.8rem;
     color: #666;
@@ -122,6 +125,7 @@ main {
     font-variant-numeric: tabular-nums;
     user-select: none;
   }
+
   .no-chats {
     margin: 32px 16px;
     text-align: center;
@@ -130,15 +134,34 @@ main {
     font-size: 1rem;
     user-select: none;
   }
+
   .chat-item:focus-visible {
     outline: 2px solid #1da1f2;
     outline-offset: 2px;
   }
- 
+  @keyframes rainbowFade {
+  0%   { color: #1da1f2; }   /* Twitter Blue */
+  20%  { color: #ff3b30; }   /* Red */
+  40%  { color: #ffcc00; }   /* Yellow */
+  60%  { color: #34c759; }   /* Green */
+  80%  { color: #5856d6; }   /* Purple */
+  100% { color: #1da1f2; }   /* Back to blue */
+}
+
+.inbox-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 20px auto 12px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  animation: rainbowFade 6s infinite ease-in-out;
+}
 </style>
 </head>
 <body>
-<header>Your Inbox</header>
+<h1 class="inbox-title">INBOX</h1>
 <main id="inboxContainer">
   <div class="no-chats">Loading chats...</div>
 </main>
@@ -164,14 +187,19 @@ main {
   let currentUser = null;
   let chatsData = {};
 
+  // ✅ Relative timestamp formatting
   function formatTimestamp(ts) {
     if (!ts) return '';
-    const d = new Date(ts);
     const now = new Date();
-    if (d.toDateString() === now.toDateString()) {
-      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    }
-    return d.toLocaleDateString();
+    const date = new Date(ts);
+    const seconds = Math.floor((now - date) / 1000);
+
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} day${Math.floor(seconds / 86400) > 1 ? 's' : ''} ago`;
+    if (seconds < 2592000) return `${Math.floor(seconds / 604800)} week${Math.floor(seconds / 604800) > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
   }
 
   function escapeHtml(text) {
@@ -193,7 +221,6 @@ main {
     }
   }
 
-  // DLS BOT Profile
   const dlsBotProfile = {
     username: "DLS BOT",
     avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPB83u2dRl1cIDRmf9GcExk7fhe-BqGiexJZeZCLa1sFWQ93n2fYYqUl0&s=10"
