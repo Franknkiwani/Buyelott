@@ -1070,7 +1070,6 @@ button#logoutBtn:focus {
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
-
 <script>
 function showPushBanner({
   title = "Notification",
@@ -1099,7 +1098,7 @@ function showPushBanner({
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
@@ -1141,33 +1140,30 @@ const firebaseConfig = {
   }
 
   auth.onAuthStateChanged((user) => {
-  if (!user) {
-    showPushBanner({
-      title: "Access Denied",
-      message: "You must sign in to access this page.",
-      icon: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png",
-      duration: 2000
-    });
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 2000);
-    return;
-  }
+    if (!user) {
+      showPushBanner({
+        title: "Access Denied",
+        message: "You must sign in to access this page.",
+        icon: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png",
+        duration: 2000
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      return;
+    }
 
-  const uid = user.uid;
-  profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
-  profileAvatar.alt = user.displayName || "User";
-  profileName.textContent = user.displayName || user.email || "User";
+    const uid = user.uid;
+    profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
+    profileAvatar.alt = user.displayName || "User";
+    profileName.textContent = user.displayName || user.email || "User";
 
-  // <-- ADD TEMP PREMIUM BADGE FUNCTION CALL HERE:
-  activateTemporaryPremium(profileName);
+    updateUnreadMessagesCount(uid);
+    checkPremiumStatus(uid);
 
-  updateUnreadMessagesCount(uid);
-  checkPremiumStatus(uid);
-
-  hideOverlay();
-  hideLoading();
-});
+    hideOverlay();
+    hideLoading();
+  });
 
   logoutBtn?.addEventListener("click", () => {
     showOverlay("Logging out...");
@@ -1231,7 +1227,7 @@ const firebaseConfig = {
             isPremium: true,
             premiumUntil,
             verified: true,
-            badgeType: "modern" // 🆕 NEW BADGE
+            badgeType: "modern"
           }).then(() => {
             hideOverlay();
             alert(`You're now Premium! ✔️ Thanks ${details.payer.name.given_name}`);
@@ -1275,8 +1271,6 @@ const firebaseConfig = {
               <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10 10-4.477 10-10zm-6.707-2.293l-5.657 5.657-2.121-2.121-1.415 1.414 3.536 3.536 7.071-7.071-1.414-1.415z"/>
             </svg>
           `;
-        } else {
-          badgeHTML = `<span style="color:#1da1f2;">✔️</span>`;
         }
 
         profileName.innerHTML = `${user.username || user.email}${badgeHTML}`;
@@ -1294,25 +1288,6 @@ const observer = new MutationObserver(() => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
-function activateTemporaryPremium(nameEl) {
-  if (!nameEl) return;
-
-  // Add a temporary badge (simple blue checkmark)
-  nameEl.innerHTML += `
-<svg id="tempBadge" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" style="margin-left: 6px; vertical-align: middle;">
-  <circle cx="16" cy="16" r="16" fill="#1DA1F2"/>
-  <path fill="#fff" d="M14 21.2l-5.6-5.6L10 14l4 4 8-8 1.6 1.6z"/>
-</svg>`;
-
-  console.log("✅ Temporary premium active");
-
-  // Remove after 20 seconds
-  setTimeout(() => {
-    const badge = document.getElementById("tempBadge");
-    if (badge) badge.remove();
-    console.log("⏳ Temporary premium expired");
-  }, 20000);
-}
 </script>
 </body>
 </html>
