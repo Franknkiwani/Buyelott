@@ -1209,12 +1209,12 @@ document.addEventListener("DOMContentLoaded", () => {
         color: "blue",
         label: "pay",
         layout: "vertical",
-        : 45,
+        height: 45,
       },
       createOrder: (data, actions) => {
         return actions.order.create({
           purchase_units: [{
-            amount: { value: "0.01" },
+            amount: { value: "1.99" },
             description: "CyberChat Premium – 30 Days"
           }]
         });
