@@ -1336,5 +1336,42 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+<script>
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) return;
+
+  const uid = user.uid;
+  const tempUntil = Date.now() + 20000; // 20 seconds from now
+
+  // Temporarily mark user as premium in-memory (no DB write)
+  window.isTempPremium = true;
+
+  // Optional: show verified badge or premium UI
+  showPremiumUI(); // your function to visually update UI
+
+  // Remove it after 20 seconds
+  setTimeout(() => {
+    window.isTempPremium = false;
+    removePremiumUI(); // your function to revert UI
+    console.log("⏳ Temporary premium expired");
+  }, 20000);
+});
+
+function showPremiumUI() {
+  const name = document.getElementById("profileName");
+  if (name && !name.innerHTML.includes("✔️")) {
+    name.innerHTML += ` <span style="color:#1da1f2;">✔️</span>`;
+  }
+  // You can also show premium features conditionally
+}
+
+function removePremiumUI() {
+  const name = document.getElementById("profileName");
+  if (name) {
+    name.innerHTML = name.textContent.replace("✔️", "").trim();
+  }
+  // Optionally hide premium-only stuff
+}
+</script>
 </body>
 </html>
