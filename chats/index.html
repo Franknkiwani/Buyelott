@@ -226,13 +226,13 @@
     avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPB83u2dRl1cIDRmf9GcExk7fhe-BqGiexJZeZCLa1sFWQ93n2fYYqUl0&s=10"
   };
 
-  // DLS BOT now redirects to a full chat thread instead of popup
+  // DLS BOT now redirects to a dedicated page with user UID as query param
   function renderDLSBot() {
     const chatDiv = document.createElement('div');
     chatDiv.className = 'chat-item';
     chatDiv.tabIndex = 0;
     chatDiv.setAttribute('role', 'button');
-    chatDiv.title = "DLS BOT\nClick to chat with your assistant";
+    chatDiv.title = "DLS BOT\nClick to open your personalized assistant";
     chatDiv.innerHTML = `
       <div class="avatar-wrapper">
         <img class="chat-avatar" src="${dlsBotProfile.avatar}" alt="DLS Bot Avatar" />
@@ -244,8 +244,8 @@
       <div class="chat-timestamp"></div>
     `;
     chatDiv.onclick = () => {
-      const botChatId = `dlsbot-${currentUser.uid}`;
-      window.location.href = `/messages?chatId=${encodeURIComponent(botChatId)}`;
+      if (!currentUser) return alert("You need to be logged in to chat with DLS BOT.");
+      window.location.href = `/dlsbot?uid=${encodeURIComponent(currentUser.uid)}`;
     };
     chatDiv.onkeydown = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -309,8 +309,8 @@
 
   function renderInboxWithBot() {
     inboxContainer.innerHTML = '';
-    renderDLSBot(); // Always first
-    renderInbox();  // Others below
+    renderDLSBot(); // Bot always on top
+    renderInbox();  // Then regular chats
   }
 
   auth.onAuthStateChanged(user => {
