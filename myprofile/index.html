@@ -1227,7 +1227,8 @@ document.addEventListener("DOMContentLoaded", () => {
           firebase.database().ref(`users/${uid}`).update({
             isPremium: true,
             premiumUntil,
-            verified: true
+            verified: true,
+            badgeType: "modern" // 🆕 NEW BADGE
           }).then(() => {
             hideOverlay();
             alert(`You're now Premium! ✔️ Thanks ${details.payer.name.given_name}`);
@@ -1263,7 +1264,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const user = snap.val();
       if (user?.isPremium && user.premiumUntil > Date.now()) {
         if (upgradeBtn) upgradeBtn.style.display = "none";
-        profileName.innerHTML = `${user.username || user.email} <span style="color:#1da1f2;">✔️</span>`;
+
+        let badgeHTML = "";
+        if (user.badgeType === "modern") {
+          badgeHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#1DA1F2" viewBox="0 0 24 24" style="vertical-align: middle; margin-left: 6px;">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10 10-4.477 10-10zm-6.707-2.293l-5.657 5.657-2.121-2.121-1.415 1.414 3.536 3.536 7.071-7.071-1.414-1.415z"/>
+            </svg>
+          `;
+        } else {
+          badgeHTML = `<span style="color:#1da1f2;">✔️</span>`;
+        }
+
+        profileName.innerHTML = `${user.username || user.email}${badgeHTML}`;
       }
     });
   }
