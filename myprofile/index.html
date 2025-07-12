@@ -1099,7 +1099,7 @@ function showPushBanner({
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
@@ -1141,30 +1141,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   auth.onAuthStateChanged((user) => {
-    if (!user) {
-      showPushBanner({
-        title: "Access Denied",
-        message: "You must sign in to access this page.",
-        icon: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png",
-        duration: 2000
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-      return;
-    }
+  if (!user) {
+    showPushBanner({
+      title: "Access Denied",
+      message: "You must sign in to access this page.",
+      icon: "https://cdn-icons-png.flaticon.com/512/1828/1828490.png",
+      duration: 2000
+    });
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 2000);
+    return;
+  }
 
-    const uid = user.uid;
-    profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
-    profileAvatar.alt = user.displayName || "User";
-    profileName.textContent = user.displayName || user.email || "User";
+  const uid = user.uid;
+  profileAvatar.src = user.photoURL || `https://i.pravatar.cc/56?u=${uid}`;
+  profileAvatar.alt = user.displayName || "User";
+  profileName.textContent = user.displayName || user.email || "User";
 
-    updateUnreadMessagesCount(uid);
-    checkPremiumStatus(uid);
+  // <-- ADD TEMP PREMIUM BADGE FUNCTION CALL HERE:
+  activateTemporaryPremium(profileName);
 
-    hideOverlay();
-    hideLoading();
-  });
+  updateUnreadMessagesCount(uid);
+  checkPremiumStatus(uid);
+
+  hideOverlay();
+  hideLoading();
+});
 
   logoutBtn?.addEventListener("click", () => {
     showOverlay("Logging out...");
@@ -1291,86 +1294,20 @@ const observer = new MutationObserver(() => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
-</script>
-<script>
-function fixOldPremiumUsers() {
-  const db = firebase.database();
-  const usersRef = db.ref("users");
+function activateTemporaryPremium(nameEl) {
+  if (!nameEl) return;
 
-  usersRef.once("value").then(snapshot => {
-    let updated = 0;
+  // Add a temporary badge (simple blue checkmark)
+  nameEl.innerHTML += ` <span id="tempBadge" style="color:#1da1f2;">✔️</span>`;
 
-    snapshot.forEach(child => {
-      const user = child.val();
-      const uid = child.key;
+  console.log("✅ Temporary premium active");
 
-      // Check if user has Premium but no verified badge or no username fallback
-      if (user.isPremium && (!user.verified || !user.username)) {
-        const newData = {
-          verified: true
-        };
-
-        // Optional: auto-fill username from email if missing
-        if (!user.username && user.email) {
-          newData.username = user.email.split("@")[0];
-        }
-
-        usersRef.child(uid).update(newData);
-        updated++;
-      }
-    });
-
-    alert(`✅ Fixed ${updated} old premium users.`);
-  }).catch(err => {
-    console.error("Error fixing users:", err);
-    alert("❌ Error fixing users. See console.");
-  });
-}
-
-// ✅ Run only ONCE manually:
-document.addEventListener("DOMContentLoaded", () => {
-  firebase.auth().onAuthStateChanged(user => {
-    if (user?.email === "your@email.com") { // Replace with your admin email or UID
-      fixOldPremiumUsers();
-    }
-  });
-});
-</script>
-<script>
-firebase.auth().onAuthStateChanged((user) => {
-  if (!user) return;
-
-  const uid = user.uid;
-  const tempUntil = Date.now() + 20000; // 20 seconds from now
-
-  // Temporarily mark user as premium in-memory (no DB write)
-  window.isTempPremium = true;
-
-  // Optional: show verified badge or premium UI
-  showPremiumUI(); // your function to visually update UI
-
-  // Remove it after 20 seconds
+  // Remove after 20 seconds
   setTimeout(() => {
-    window.isTempPremium = false;
-    removePremiumUI(); // your function to revert UI
+    const badge = document.getElementById("tempBadge");
+    if (badge) badge.remove();
     console.log("⏳ Temporary premium expired");
   }, 20000);
-});
-
-function showPremiumUI() {
-  const name = document.getElementById("profileName");
-  if (name && !name.innerHTML.includes("✔️")) {
-    name.innerHTML += ` <span style="color:#1da1f2;">✔️</span>`;
-  }
-  // You can also show premium features conditionally
-}
-
-function removePremiumUI() {
-  const name = document.getElementById("profileName");
-  if (name) {
-    name.innerHTML = name.textContent.replace("✔️", "").trim();
-  }
-  // Optionally hide premium-only stuff
 }
 </script>
 </body>
