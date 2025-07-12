@@ -1298,7 +1298,10 @@ function activateTemporaryPremium(nameEl) {
   if (!nameEl) return;
 
   // Add a temporary badge (simple blue checkmark)
-  nameEl.innerHTML += ` <span id="tempBadge" style="color:#1da1f2;">✔️</span>`;
+  nameEl.innerHTML += `
+  <svg id="tempBadge" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#1da1f2" viewBox="0 0 24 24" style="vertical-align: middle; margin-left: 6px;">
+    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10 10-4.477 10-10zm-6.707-2.293l-5.657 5.657-2.121-2.121-1.415 1.414 3.536 3.536 7.071-7.071-1.414-1.415z"/>
+  </svg>`;
 
   console.log("✅ Temporary premium active");
 
