@@ -1291,19 +1291,49 @@ const observer = new MutationObserver(() => {
   }
 });
 observer.observe(document.body, { childList: true, subtree: true });
-// Run this once in your admin or browser console after firebase is initialized
-firebase.database().ref("users").once("value").then((snapshot) => {
-  snapshot.forEach((userSnap) => {
-    const userData = userSnap.val();
-    const uid = userSnap.key;
+</script>
+<script>
+function fixOldPremiumUsers() {
+  const db = firebase.database();
+  const usersRef = db.ref("users");
 
-    if (userData.isPremium && !userData.badgeType) {
-      firebase.database().ref(`users/${uid}`).update({
-        badgeType: "modern"
-      });
+  usersRef.once("value").then(snapshot => {
+    let updated = 0;
+
+    snapshot.forEach(child => {
+      const user = child.val();
+      const uid = child.key;
+
+      // Check if user has Premium but no verified badge or no username fallback
+      if (user.isPremium && (!user.verified || !user.username)) {
+        const newData = {
+          verified: true
+        };
+
+        // Optional: auto-fill username from email if missing
+        if (!user.username && user.email) {
+          newData.username = user.email.split("@")[0];
+        }
+
+        usersRef.child(uid).update(newData);
+        updated++;
+      }
+    });
+
+    alert(`✅ Fixed ${updated} old premium users.`);
+  }).catch(err => {
+    console.error("Error fixing users:", err);
+    alert("❌ Error fixing users. See console.");
+  });
+}
+
+// ✅ Run only ONCE manually:
+document.addEventListener("DOMContentLoaded", () => {
+  firebase.auth().onAuthStateChanged(user => {
+    if (user?.email === "your@email.com") { // Replace with your admin email or UID
+      fixOldPremiumUsers();
     }
   });
-  console.log("✅ All old premium users upgraded to modern badge.");
 });
 </script>
 </body>
