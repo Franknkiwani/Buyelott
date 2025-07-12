@@ -853,101 +853,122 @@ button#logoutBtn:focus {
   /* ...existing styles... */
   z-index: 15000; /* higher than loading overlay */
 }
-   .profile {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+/* Profile section */
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
 
-    .profile img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-    }
+.profile img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-    .profile span {
-      font-size: 1rem;
-      font-weight: 600;
-    }
+.profile span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #eee;
+}
 
-    .badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.9rem;
-    }
+/* Badge next to profile name */
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: gold; /* golden badge color */
+}
 
-    .badge svg {
-      vertical-align: middle;
-    }
+.badge svg {
+  vertical-align: middle;
+  width: 18px;
+  height: 18px;
+  fill: gold;
+}
 
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      width: 90%;
-      max-width: 1000px;
-    }
-
-    .feature {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 18px;
-      padding: 20px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 0 10px #00000033;
-      position: relative;
-    }
-
-    .feature h3 {
-      margin-top: 0;
-    }
-
-    .feature .action {
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
-      background: #1da1f2;
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    #pushBanner {
-      position: fixed;
-      top: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #222;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
-      transition: 0.4s ease;
-      z-index: 1000;
-      font-size: 0.9rem;
-    }
-
-    #pushBanner img {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-    }
-    .features-container {
+/* Container for feature cards */
+.features-container {
   width: 90%;
-  max-width: 900px; /* optional max width for big screens */
-  margin: 0 auto; /* center container horizontally */
+  max-width: 900px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
-  gap: 20px; /* spacing between cards */
-  justify-content: center; /* center grid horizontally */
+  grid-template-columns: repeat(2, 1fr); /* 2 per row */
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Individual feature card */
+.feature {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 20px 24px 56px; /* bottom padding for action button */
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 10px #00000033;
+  position: relative;
+  color: #eee;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.feature h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Call to action button inside feature card */
+.feature .action {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: #1da1f2;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(29, 161, 242, 0.6);
+}
+
+.feature .action:hover {
+  background-color: #0d8ddb;
+}
+
+/* Push banner styles */
+#pushBanner {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  transition: 0.4s ease;
+  z-index: 1000;
+  font-size: 0.9rem;
+}
+
+#pushBanner img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 </style>
 <style>
