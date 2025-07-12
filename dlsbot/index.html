@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DLS BOT Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: #121212;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1da1f2;
+      padding: 20px;
+      font-size: 1.4rem;
+      text-align: center;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    main {
+      padding: 24px;
+      flex: 1;
+    }
+
+    label {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ccc;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 10px;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #333;
+      margin-bottom: 20px;
+    }
+
+    .bot-response {
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+      font-size: 1rem;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.8rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <header>DLS BOT Assistant</header>
+
+  <main>
+    <label for="questionSelect">What do you want help with?</label>
+    <select id="questionSelect">
+      <option disabled selected>Choose a topic</option>
+      <option value="buy">How do I buy a DLS account?</option>
+      <option value="transfer">How do I transfer the account to my device?</option>
+      <option value="delivery">How fast is delivery after payment?</option>
+      <option value="secure">Is it safe to buy DLS accounts here?</option>
+      <option value="recovery">What if I lose access to my account?</option>
+      <option value="aboutStore">What is DLSAccounts.Store?</option>
+    </select>
+
+    <div class="bot-response" id="botAnswer">
+      👋 I’m DLS BOT. Select a question above to get started.
+    </div>
+  </main>
+
+  <footer>CyberChat • Powered by DLS BOT 🤖</footer>
+
+  <script>
+    const botAnswer = document.getElementById('botAnswer');
+    const questionSelect = document.getElementById('questionSelect');
+
+    const responses = {
+      buy: `🛒 To buy a DLS account, just browse the accounts at https://cyberchat.online/dlsaccounts. Click "Buy Now" and follow the instructions. You’ll need to provide a valid email to receive delivery details.`,
+      transfer: `📲 After you purchase, you’ll receive the login details for the account. Log out of your current DLS app, then log in using the new credentials on your device. Need help? DM support.`,
+      delivery: `⚡ Delivery is usually instant or within 15 minutes. If you don’t receive your account in that time, contact support immediately.`,
+      secure: `🔒 Yes, it’s safe. All accounts are verified before listing. We never reuse or recycle sold accounts. Plus, you can request a refund if anything goes wrong.`,
+      recovery: `🛠️ If you lose access to your account, contact support ASAP. If it’s within 7 days of purchase and you didn’t change the credentials, we can help recover it.`,
+      aboutStore: `🏪 DLSAccounts.Store is a trusted marketplace powered by CyberChat where you can buy Dream League Soccer accounts securely, with fast delivery and 24/7 support.`
+    };
+
+    questionSelect.addEventListener('change', () => {
+      const val = questionSelect.value;
+      botAnswer.textContent = responses[val] || "❓ Sorry, I don't have info for that yet.";
+    });
+  </script>
+</body>
+</html>
