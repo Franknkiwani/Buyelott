@@ -3065,6 +3065,25 @@ function renderNotifications(data) {
   let lastKey = null;
   let loading = false;
   let allProducts = [];
+  let adsList = [];
+  let premiumUsers = {}; // { uid: true }
+
+  // Load premium users once
+  async function loadPremiumUsers() {
+    const snapshot = await db.ref('/premiumUsers').once('value');
+    premiumUsers = snapshot.val() || {};
+  }
+
+  // Load ads once
+  async function loadAds() {
+    if (adsList.length > 0) return; // Already loaded
+
+    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
+    const adsData = adsSnapshot.val();
+    if (!adsData) return;
+
+    adsList = Object.entries(adsData).map(([id, ad]) => ({ id, ...ad }));
+  }
 
   function showSkeletons() {
     document.body.classList.add("loading");
@@ -3093,20 +3112,25 @@ function renderNotifications(data) {
     return array;
   }
 
-  function renderProduct(product, id) {
+  function renderProductWithPremium(id, product) {
     const mainImage = product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image';
     const sellerAvatar = product.seller?.avatar || 'https://via.placeholder.com/32?text=👤';
     const sellerUsername = product.seller?.username || 'Unknown Seller';
     const verifiedBadge = product.seller?.verified ? '<span style="color:#1da1f2; font-weight:bold;">✔</span>' : '';
+
+    const isPremium = product.seller?.uid && premiumUsers[product.seller.uid];
+    const premiumBadge = isPremium ? '<span class="premium-badge">★ PREMIUM</span>' : '';
+    const premiumHighlightClass = isPremium ? 'premium-highlight' : '';
+
     const messageBtnHTML = `<button class="message-btn" onclick="messageUser('${id}')">Message</button>`;
 
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = `card ${premiumHighlightClass}`;
     card.innerHTML = `
       <img src="${mainImage}" alt="Product Image" style="width:100%; border-radius: 12px;" loading="lazy" />
       <button class="view-all-btn" onclick='openModal(${JSON.stringify(product.images || [])})'>View All</button>
       <div class="card-content">
-        <div class="card-title">${product.title || 'Untitled'}</div>
+        <div class="card-title">${product.title || 'Untitled'} ${premiumBadge}</div>
         <div class="card-description">${product.description || ''}</div>
         <div class="seller-profile" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
           <img src="${sellerAvatar}" alt="Seller Avatar" style="width:32px; height:32px; border-radius:50%;" loading="lazy" />
@@ -3122,10 +3146,48 @@ function renderNotifications(data) {
     document.getElementById("productList").appendChild(card);
   }
 
-  function renderAllProducts(products) {
+  function renderAd(ad) {
+    const container = document.getElementById("productList");
+    const adCard = document.createElement("div");
+    adCard.className = "ad-card";
+
+    const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
+    const adTitle = ad.title?.trim() || "Sponsored Ad";
+    const adUrl = ad.url?.trim() || "#";
+
+    adCard.innerHTML = `
+      <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
+        <div class="sponsored-badge">Sponsored</div>
+        <img src="${adImage}" alt="${adTitle}" loading="lazy" />
+        <div class="ad-content">
+          <div class="ad-footer">
+            <button class="visit-ad-btn">Visit Ad</button>
+            <div class="ad-title">${adTitle}</div>
+          </div>
+        </div>
+      </a>
+    `;
+
+    container.appendChild(adCard);
+  }
+
+  function renderProductsWithAds(products) {
     const productList = document.getElementById("productList");
     productList.innerHTML = '';
-    products.forEach(([id, product]) => renderProduct(product, id));
+
+    const AD_INTERVAL = 5;
+    let adIndex = 0;
+
+    for (let i = 0; i < products.length; i++) {
+      const [id, product] = products[i];
+      renderProductWithPremium(id, product);
+
+      if ((i + 1) % AD_INTERVAL === 0 && adsList.length > 0) {
+        const ad = adsList[adIndex % adsList.length];
+        renderAd(ad);
+        adIndex++;
+      }
+    }
   }
 
   function applySearchAndFilter() {
@@ -3148,46 +3210,12 @@ function renderNotifications(data) {
       filtered = filtered.filter(([_, p]) => p.seller?.verified === true);
     }
 
-    renderAllProducts(filtered);
+    renderProductsWithAds(filtered);
   }
 
   function messageUser(productId) {
     if (!productId) return alert("Missing product ID.");
     window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
-  }
-
-  async function loadAds() {
-    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
-    const adsData = adsSnapshot.val();
-    if (!adsData) return;
-
-    const adsEntries = shuffleArray(Object.entries(adsData));
-    const container = document.createElement('div');
-    container.id = 'adContainer';
-
-    for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
-      const adCard = document.createElement("div");
-      adCard.className = "ad-card";
-      const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
-      const adTitle = ad.title?.trim() || "Sponsored Ad";
-      const adUrl = ad.url?.trim() || "#";
-
-      adCard.innerHTML = `
-        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
-          <div class="sponsored-badge">Sponsored</div>
-          <img src="${adImage}" alt="${adTitle}" loading="lazy">
-          <div class="ad-content">
-            <div class="ad-footer">
-              <button class="visit-ad-btn">Visit Ad</button>
-              <div class="ad-title">${adTitle}</div>
-            </div>
-          </div>
-        </a>
-      `;
-      container.appendChild(adCard);
-    }
-
-    document.getElementById("productList").appendChild(container);
   }
 
   function openModal(images) {
@@ -3227,7 +3255,6 @@ function renderNotifications(data) {
     const data = snapshot.val();
     hideSkeletons();
 
-    // ✅ Reveal filter bar ONLY if products exist
     const filterContainer = document.getElementById("searchFilterContainer");
     if (data && Object.keys(data).length > 0 && filterContainer) {
       filterContainer.style.display = "block";
@@ -3250,14 +3277,12 @@ function renderNotifications(data) {
       window.removeEventListener('scroll', onScroll);
     }
 
-    entries = shuffleArray(entries);
-
+    // No shuffle here to keep order consistent (you can shuffle once at first load if you want)
     for (const [id, product] of entries) {
       allProducts.push([id, product]);
     }
 
-    applySearchAndFilter(); // render with filters
-    await loadAds();
+    applySearchAndFilter();
     loading = false;
   }
 
@@ -3270,7 +3295,9 @@ function renderNotifications(data) {
     }
   }
 
-  window.onload = () => {
+  window.onload = async () => {
+    await loadPremiumUsers();
+    await loadAds();
     loadMore();
     window.addEventListener('scroll', onScroll);
     const searchInput = document.getElementById("searchInput");
