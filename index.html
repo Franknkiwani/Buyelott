@@ -2432,8 +2432,7 @@ body.sidebar-open {
       </a>
 
     </nav>
-  <div id="backdrop"></div>
-  <!-- 📱 Sexy AF iOS-Style Email Popup -->
+ <!-- 📱 Sexy AF iOS-Style Email Popup -->
 <div id="emailPopup" style="
   position: fixed; top: 0; left: 0;
   width: 100vw; height: 100vh;
@@ -2484,7 +2483,7 @@ body.sidebar-open {
       ">Subscribe Now</button>
     </form>
     <p id="popupStatus" style="font-size: 13px; color: green; margin-top: 12px;"></p>
-    <button onclick="closePopup()" style="
+    <button id="popupCloseBtn" style="
       margin-top: 16px;
       font-size: 13px;
       background: none;
@@ -2495,9 +2494,8 @@ body.sidebar-open {
   </div>
 </div>
 
-<!-- 🔥 Firebase + Smart Popup Logic -->
+<!-- Firebase + Smart Popup Logic -->
 <script type="module">
-  // Firebase v11+
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
@@ -2517,51 +2515,67 @@ body.sidebar-open {
 
   const popup = document.getElementById('emailPopup');
   const status = document.getElementById('popupStatus');
+  const closeBtn = document.getElementById('popupCloseBtn');
 
-  const visitCount = parseInt(localStorage.getItem('dls_visits') || '0') + 1;
+  // Load localStorage state
+  let visitCount = parseInt(localStorage.getItem('dls_visits') || '0');
   const subscribedDate = localStorage.getItem('dls_subscribed_date');
-  const shouldReshowAfter = localStorage.getItem('dls_resubscribe_wait'); // in days
+  const reshowWaitDays = parseInt(localStorage.getItem('dls_resubscribe_wait') || '7');
 
-  // Save updated visit count
-  localStorage.setItem('dls_visits', visitCount);
-
+  // Helper: days between dates
   function daysSince(dateStr) {
     const then = new Date(dateStr);
     const now = new Date();
     return Math.floor((now - then) / (1000 * 60 * 60 * 24));
   }
 
-  // Determine if popup should show
+  // Should show popup logic
   function shouldShowPopup() {
-    if (!subscribedDate) return visitCount === 1 || visitCount % 5 === 0;
-
-    const days = daysSince(subscribedDate);
-    return days >= parseInt(shouldReshowAfter || '7');
+    if (!subscribedDate) {
+      // No subscription yet, show on first visit or every 5 visits
+      return visitCount === 0 || visitCount % 5 === 0;
+    } else {
+      // Subscribed: only show if wait passed (7 or 14 days)
+      return daysSince(subscribedDate) >= reshowWaitDays;
+    }
   }
 
-  // 👀 Show popup if rules match
+  // Update visit count and save
+  visitCount++;
+  localStorage.setItem('dls_visits', visitCount.toString());
+
+  // Show popup if logic says so
   if (shouldShowPopup()) {
     setTimeout(() => {
       popup.style.display = 'flex';
     }, 1200);
   }
 
+  // Close popup function
   function closePopup() {
     popup.style.display = 'none';
   }
 
+  // Hook close button
+  closeBtn.addEventListener('click', () => {
+    closePopup();
+  });
+
+  // Subscribe form handler
   document.getElementById('popupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('popupEmail').value.trim();
 
+    // Email validation regex (simple but effective)
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
     if (!isValidEmail) {
       status.textContent = "❌ Please enter a valid email like frank@gmail.com";
       status.style.color = "red";
       return;
     }
 
-    // Progress effect
+    // Show subscribing progress
     status.style.color = "#007aff";
     let percent = 0;
     status.textContent = "⏳ Subscribing... 0%";
@@ -2579,17 +2593,17 @@ body.sidebar-open {
     }, 130);
 
     try {
+      // Save email to Firebase DB
       await push(ref(db, 'emails'), email);
 
-      // 💾 Save subscribed date + random re-show wait (7 or 14 days)
+      // Save subscription date and random 7 or 14 day wait
       localStorage.setItem('dls_subscribed_date', new Date().toISOString());
-      const waitDays = [7, 14][Math.floor(Math.random() * 2)];
-      localStorage.setItem('dls_resubscribe_wait', waitDays.toString());
-    } catch (err) {
+      localStorage.setItem('dls_resubscribe_wait', [7, 14][Math.floor(Math.random() * 2)].toString());
+    } catch (error) {
       clearInterval(interval);
       status.textContent = "❌ Couldn't save email. Try again.";
       status.style.color = "red";
-      console.error(err);
+      console.error(error);
     }
   });
 </script>
