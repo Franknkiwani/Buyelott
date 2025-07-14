@@ -2749,6 +2749,7 @@ body.sidebar-open {
       update(adRef, {
         viewsRemaining: ad.viewsRemaining - 1
       });
+      // Also update local value to avoid double-decrement
       ad.viewsRemaining--;
     }
   }
@@ -2756,26 +2757,31 @@ body.sidebar-open {
   function recordClick(adKey, url) {
     if (isClicking) return;
     isClicking = true;
+
     const adRef = ref(db, `dlsaccountsads/${adKey}`);
     onValue(adRef, (snap) => {
       const ad = snap.val();
       if (!ad) return;
+
       const newViews = (ad.viewsRemaining || 1) - 1;
       const newClicks = (ad.clicks || 0) + 1;
+
       if (newViews >= 0) {
         update(adRef, {
           viewsRemaining: newViews,
           clicks: newClicks
         });
       }
+
       window.location.href = url;
     }, { onlyOnce: true });
   }
 
   function rotateAd() {
     if (ads.length === 0) return;
+
     const ad = ads[currentAd];
-    adBanner.style.display = "none";
+    adBanner.style.display = "none"; // Hide until image loads
 
     const tempImg = new Image();
     tempImg.src = ad.image;
@@ -2794,7 +2800,10 @@ body.sidebar-open {
           recordClick(ad.key, ad.link);
         }
       };
+
+      // 👇 Subtract 1 view when ad is shown
       decrementView(ad);
+
       adBanner.style.display = "block";
     };
 
@@ -2805,51 +2814,51 @@ body.sidebar-open {
     currentAd = (currentAd + 1) % ads.length;
   }
 
-  export async function startBannerAds() {
-    onValue(ref(db, "dlsaccountsads"), async (snapshot) => {
-      const data = snapshot.val();
-      ads = [];
+  onValue(ref(db, "dlsaccountsads"), async (snapshot) => {
+    const data = snapshot.val();
+    ads = [];
 
-      if (data) {
-        for (const key in data) {
-          const ad = data[key];
-          if (!ad.adId || (ad.viewsRemaining || 0) <= 0) continue;
-          try {
-            const res = await fetch(`https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/dlsaccounts/${ad.adId}.json`);
-            const adDetails = await res.json();
-            if (!adDetails) continue;
+    if (data) {
+      for (const key in data) {
+        const ad = data[key];
+        if (!ad.adId || (ad.viewsRemaining || 0) <= 0) continue;
 
-            ads.push({
-              key,
-              adId: ad.adId,
-              image: adDetails.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image",
-              desc: adDetails.description?.slice(0, 100) || "No description available",
-              price: adDetails.price || "0.00",
-              link: `/product?id=${ad.adId}`,
-              viewsRemaining: ad.viewsRemaining || 0
-            });
-          } catch (err) {
-            console.warn("Error loading ad:", err);
-          }
+        try {
+          const res = await fetch(`https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/dlsaccounts/${ad.adId}.json`);
+          const adDetails = await res.json();
+          if (!adDetails) continue;
+
+          ads.push({
+            key,
+            adId: ad.adId,
+            image: adDetails.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image",
+            desc: adDetails.description?.slice(0, 100) || "No description available",
+            price: adDetails.price || "0.00",
+            link: `/product?id=${ad.adId}`,
+            viewsRemaining: ad.viewsRemaining || 0
+          });
+        } catch (err) {
+          console.warn("Error loading ad:", err);
         }
       }
+    }
 
-      if (ads.length === 0) {
-        ads.push({
-          key: "fallback",
-          adId: "fallback",
-          image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmds7FrheoR93hxc6cCYjFjj5Xq6qEdi0iKPdH1FgMCULF-QIAh_tpQs&s=10",
-          desc: "DLS APK Unlimited Coins and Gems",
-          price: "Free",
-          link: "https://cyberchat.online/lockedcontentdls",
-          viewsRemaining: Infinity
-        });
-      }
+    // Fallback if no real ads found
+    if (ads.length === 0) {
+      ads.push({
+        key: "fallback",
+        adId: "fallback",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmds7FrheoR93hxc6cCYjFjj5Xq6qEdi0iKPdH1FgMCULF-QIAh_tpQs&s=10",
+        desc: "DLS APK Unlimited Coins and Gems",
+        price: "Free",
+        link: "https://cyberchat.online/lockedcontentdls",
+        viewsRemaining: Infinity
+      });
+    }
 
-      rotateAd();
-      setInterval(rotateAd, 8000);
-    });
-  }
+    rotateAd();
+    setInterval(rotateAd, 8000);
+  });
 </script>
 <script type="module">  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
