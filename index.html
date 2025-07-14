@@ -2369,6 +2369,76 @@ body.sidebar-open {
   opacity: 1;
   pointer-events: auto;
 }
+.ad-card {
+  width: 98%;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 0;
+  border-radius: 16px;
+  background: cyan; /* solid black */
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  color: #eee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.ad-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.8);
+}
+
+/* Visit Ad bar - full width top section with curved top edges */
+.visit-ad-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  text-align: center;
+  background: #ff0057; /* bright pink/red */
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 10px #ff0057;
+  transition: box-shadow 0.3s ease;
+}
+
+.visit-ad-btn:hover {
+  box-shadow: 0 0 20px #ffbd00;
+}
+
+.sponsored-badge {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  background: black;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+/* Title styling - glass dark border */
+.ad-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  margin-top: 12px;
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.1);
+  width: fit-content;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
 </style>
  <button id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sideMenu">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -3235,10 +3305,11 @@ function renderNotifications(data) {
   const db = firebase.database();
 
   const LIMIT = 5;
-  const ADS_LIMIT = 1;
   let lastKey = null;
   let loading = false;
   let allProducts = [];
+  let allAds = []; // <-- store all ads here
+  let currentAdIndex = 0; // <-- to rotate ads
 
   function showSkeletons() {
     document.body.classList.add("loading");
@@ -3296,10 +3367,48 @@ function renderNotifications(data) {
     document.getElementById("productList").appendChild(card);
   }
 
-  function renderAllProducts(products) {
-    const productList = document.getElementById("productList");
-    productList.innerHTML = '';
-    products.forEach(([id, product]) => renderProduct(product, id));
+  // New: Render an ad card (same style as before)
+ function renderAd(ad, adKey) {
+  const container = document.getElementById("productList");
+  const adCard = document.createElement("div");
+  adCard.className = "ad-card";
+  const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
+  const adTitle = ad.title?.trim() || "Sponsored Ad";
+  const adUrl = ad.url?.trim() || "#";
+
+  adCard.innerHTML = `
+    <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link" style="display:block; text-decoration:none; color:inherit;">
+      <div class="sponsored-badge">Sponsored</div>
+      <img src="${adImage}" alt="${adTitle}" loading="lazy" style="border-radius: 12px 12px 0 0; width: 100%;" />
+      <div class="ad-content" style="padding: 12px;">
+        <div class="ad-footer" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div class="visit-ad-btn" role="button" tabindex="0" style="width: 100%; text-align: center;">Visit Ad</div>
+          <div class="ad-title" style="width: 100%; text-align: center;">${adTitle}</div>
+        </div>
+      </div>
+    </a>
+  `;
+
+  container.appendChild(adCard);
+}
+
+  // New: Render products interleaved with ads after every 5 products
+  function renderMixedFeed(filteredProducts) {
+    const container = document.getElementById("productList");
+    container.innerHTML = '';
+    let adCount = allAds.length;
+    let adIdx = 0;
+
+    for (let i = 0; i < filteredProducts.length; i++) {
+      const [id, product] = filteredProducts[i];
+      renderProduct(product, id);
+
+      // Insert an ad after every 5 products, cycle ads to avoid repeats
+      if ((i + 1) % 5 === 0 && adCount > 0) {
+        renderAd(allAds[adIdx], `ad-${adIdx}`);
+        adIdx = (adIdx + 1) % adCount; // cycle ads
+      }
+    }
   }
 
   function applySearchAndFilter() {
@@ -3322,7 +3431,8 @@ function renderNotifications(data) {
       filtered = filtered.filter(([_, p]) => p.seller?.verified === true);
     }
 
-    renderAllProducts(filtered);
+    // Use mixed render with ads every 5 products
+    renderMixedFeed(filtered);
   }
 
   function messageUser(productId) {
@@ -3330,38 +3440,13 @@ function renderNotifications(data) {
     window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
   }
 
+  // New: Load all ads once and cache in allAds array
   async function loadAds() {
-    const adsSnapshot = await db.ref("/dlsaccountsads").limitToFirst(ADS_LIMIT).once("value");
+    const adsSnapshot = await db.ref("/dlsaccountsads").once("value");
     const adsData = adsSnapshot.val();
     if (!adsData) return;
 
-    const adsEntries = shuffleArray(Object.entries(adsData));
-    const container = document.createElement('div');
-    container.id = 'adContainer';
-
-    for (const [id, ad] of adsEntries.slice(0, ADS_LIMIT)) {
-      const adCard = document.createElement("div");
-      adCard.className = "ad-card";
-      const adImage = ad.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Ad+Image';
-      const adTitle = ad.title?.trim() || "Sponsored Ad";
-      const adUrl = ad.url?.trim() || "#";
-
-      adCard.innerHTML = `
-        <a href="${adUrl}" target="_blank" rel="noopener noreferrer" aria-label="Sponsored Ad: ${adTitle}" class="ad-link">
-          <div class="sponsored-badge">Sponsored</div>
-          <img src="${adImage}" alt="${adTitle}" loading="lazy">
-          <div class="ad-content">
-            <div class="ad-footer">
-              <button class="visit-ad-btn">Visit Ad</button>
-              <div class="ad-title">${adTitle}</div>
-            </div>
-          </div>
-        </a>
-      `;
-      container.appendChild(adCard);
-    }
-
-    document.getElementById("productList").appendChild(container);
+    allAds = shuffleArray(Object.values(adsData));
   }
 
   function openModal(images) {
@@ -3401,7 +3486,7 @@ function renderNotifications(data) {
     const data = snapshot.val();
     hideSkeletons();
 
-    // ✅ Reveal filter bar ONLY if products exist
+    // Show filter bar if products exist
     const filterContainer = document.getElementById("searchFilterContainer");
     if (data && Object.keys(data).length > 0 && filterContainer) {
       filterContainer.style.display = "block";
@@ -3431,7 +3516,6 @@ function renderNotifications(data) {
     }
 
     applySearchAndFilter(); // render with filters
-    await loadAds();
     loading = false;
   }
 
@@ -3444,7 +3528,8 @@ function renderNotifications(data) {
     }
   }
 
-  window.onload = () => {
+  window.onload = async () => {
+    await loadAds(); // Load ads once on page load
     loadMore();
     window.addEventListener('scroll', onScroll);
     const searchInput = document.getElementById("searchInput");
