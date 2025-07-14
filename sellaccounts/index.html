@@ -432,31 +432,43 @@ input, textarea {
 
   let currentUser = null;
   let selectedFiles = [];
+async function ensureUserProfile(user) {
+  const userRef = db.ref('/users/' + user.uid);
+  const snapshot = await userRef.get();
+  if (!snapshot.exists()) {
+    await userRef.set({
+      username: user.displayName || '',
+      email: user.email,
+      avatar: user.photoURL || '',
+      verified: false  // This is the magic flag you want on new users
+    });
+    console.log(`New user profile created with verified: false`);
+  }
+}
+ auth.onAuthStateChanged(async user => {  // <-- async here
+  currentUser = user;
+  if(user) {
+    loginContainer.classList.remove('show');
+    formContainer.classList.add('show');  // show form on login
+    accountsSection.style.display = 'none';
+    await ensureUserProfile(user);         // <-- your new profile check/creation
+    switchSection(true);
+  } else {
+    formContainer.classList.remove('show');
+    accountsSection.style.display = 'none';
+    loginContainer.classList.add('show');
+    // Reset tab states on logout
+    tabCreate.setAttribute('aria-selected', 'true');
+    tabCreate.style.color = '#d55';
+    tabCreate.style.borderBottomColor = '#d55';
+    tabCreate.tabIndex = 0;
 
-  // Show login or form depending on user
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    if(user) {
-      loginContainer.classList.remove('show');
-      // Default to create tab on login
-      switchSection(true);
-    } else {
-      formContainer.classList.remove('show');
-      accountsSection.style.display = 'none';
-      loginContainer.classList.add('show');
-      // Reset tab states on logout
-      tabCreate.setAttribute('aria-selected', 'true');
-      tabCreate.style.color = '#d55';
-      tabCreate.style.borderBottomColor = '#d55';
-      tabCreate.tabIndex = 0;
-
-      tabAccounts.setAttribute('aria-selected', 'false');
-      tabAccounts.style.color = '#888';
-      tabAccounts.style.borderBottomColor = 'transparent';
-      tabAccounts.tabIndex = -1;
-    }
-  });
-
+    tabAccounts.setAttribute('aria-selected', 'false');
+    tabAccounts.style.color = '#888';
+    tabAccounts.style.borderBottomColor = 'transparent';
+    tabAccounts.tabIndex = -1;
+  }
+});
   // Google login button click
   googleLoginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -748,84 +760,129 @@ async function loadUserProducts() {
       details.appendChild(price);
 
       // Container for buttons side by side
-      const btnGroup = document.createElement('div');
-      btnGroup.style.cssText = `
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 8px;
-      `;
+      // Container for buttons side by side
+const btnGroup = document.createElement('div');
+btnGroup.style.cssText = `
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+`;
 
-      // Promote button
-      const promoteBtn = document.createElement('button');
-      promoteBtn.textContent = 'Promote';
-      promoteBtn.style.cssText = `
-        padding: 10px 20px;
-        background: linear-gradient(135deg, #d53e3e, #f77a7a);
-        border: none;
-        border-radius: 25px;
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        flex: 1 1 auto;
-        min-width: 120px;
-        transition: background 0.3s ease;
-      `;
-      promoteBtn.onmouseenter = () => {
-        promoteBtn.style.background = 'linear-gradient(135deg, #f44336, #ff867c)';
-      };
-      promoteBtn.onmouseleave = () => {
-        promoteBtn.style.background = 'linear-gradient(135deg, #d53e3e, #f77a7a)';
-      };
-      promoteBtn.onclick = () => {
-        window.location.href = `/ads?id=${key}`;
-      };
-      btnGroup.appendChild(promoteBtn);
+// Promote button
+const promoteBtn = document.createElement('button');
+promoteBtn.textContent = 'Promote';
+promoteBtn.style.cssText = `
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #d53e3e, #f77a7a);
+  border: none;
+  border-radius: 25px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 120px;
+  transition: background 0.3s ease;
+`;
+promoteBtn.onmouseenter = () => {
+  promoteBtn.style.background = 'linear-gradient(135deg, #f44336, #ff867c)';
+};
+promoteBtn.onmouseleave = () => {
+  promoteBtn.style.background = 'linear-gradient(135deg, #d53e3e, #f77a7a)';
+};
+promoteBtn.onclick = () => {
+  window.location.href = `/ads?id=${key}`;
+};
+btnGroup.appendChild(promoteBtn);
 
-      // Delete button
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete';
-      deleteBtn.title = 'Delete product';
-      deleteBtn.style.cssText = `
-        padding: 10px 20px;
-        background: #ff4444;
-        border: none;
-        border-radius: 25px;
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        flex: 1 1 auto;
-        min-width: 120px;
-        transition: background 0.3s ease;
-      `;
-      deleteBtn.onmouseenter = () => {
-        deleteBtn.style.background = '#ff0000';
-      };
-      deleteBtn.onmouseleave = () => {
-        deleteBtn.style.background = '#ff4444';
-      };
-      deleteBtn.onclick = async () => {
-        if (confirm('Are you sure you want to delete this product?')) {
-          try {
-            await db.ref(`/dlsaccounts/${key}`).remove();
-            card.remove();
-          } catch (err) {
-            alert('Failed to delete: ' + err.message);
-          }
-        }
-      };
-      btnGroup.appendChild(deleteBtn);
+// Share button
+const shareBtn = document.createElement('button');
+shareBtn.textContent = 'Share';
+shareBtn.title = 'Share this product';
+shareBtn.style.cssText = `
+  padding: 10px 20px;
+  background: #007bff;
+  border: none;
+  border-radius: 25px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 120px;
+  transition: background 0.3s ease;
+`;
+shareBtn.onmouseenter = () => {
+  shareBtn.style.background = '#0056b3';
+};
+shareBtn.onmouseleave = () => {
+  shareBtn.style.background = '#007bff';
+};
+shareBtn.onclick = () => {
+  const shareUrl = `${window.location.origin}/product?id=${key}`;
 
-      details.appendChild(btnGroup);
-      card.appendChild(details);
-
-      accountsList.appendChild(card);
+  if (navigator.share) {
+    navigator.share({
+      title: product.title || 'Check out this product',
+      url: shareUrl
+    }).catch(err => {
+      console.error('Share failed:', err);
+      alert('Sharing failed: ' + err.message);
     });
-  } catch (err) {
-    accountsList.innerHTML = `<p style="color:#d55; text-align:center;">Failed to load your accounts: ${err.message}</p>`;
+  } else {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert('Product link copied to clipboard:\n' + shareUrl);
+    }).catch(() => {
+      alert('Failed to copy link. Here it is:\n' + shareUrl);
+    });
   }
+};
+btnGroup.appendChild(shareBtn);
+
+// Delete button
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = 'Delete';
+deleteBtn.title = 'Delete product';
+deleteBtn.style.cssText = `
+  padding: 10px 20px;
+  background: #ff4444;
+  border: none;
+  border-radius: 25px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 120px;
+  transition: background 0.3s ease;
+`;
+deleteBtn.onmouseenter = () => {
+  deleteBtn.style.background = '#ff0000';
+};
+deleteBtn.onmouseleave = () => {
+  deleteBtn.style.background = '#ff4444';
+};
+deleteBtn.onclick = async () => {
+  if (confirm('Are you sure you want to delete this product?')) {
+    try {
+      await db.ref(`/dlsaccounts/${key}`).remove();
+      card.remove();
+    } catch (err) {
+      alert('Failed to delete: ' + err.message);
+    }
+  }
+};
+btnGroup.appendChild(deleteBtn);
+
+details.appendChild(btnGroup);
+card.appendChild(details);
+
+accountsList.appendChild(card);
+});
+} catch (err) {
+  accountsList.innerHTML = `<p style="color:#d55; text-align:center;">Failed to load your accounts: ${err.message}</p>`;
+}
 }
 window.addEventListener('load', () => {
   const loader = document.getElementById('loadingScreen');
