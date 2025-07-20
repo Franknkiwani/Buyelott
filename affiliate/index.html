@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DLS AFFILIATE</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height: 100%;
+      background-color: #0e0e0e;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: none; /* hidden until logged in */
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+    }
+
+    .grid {
+      width: 100%;
+      display: grid;
+      gap: 20px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 1.7rem;
+      font-weight: 600;
+    }
+
+    .affiliate-box {
+      margin-top: 30px;
+      width: 80%;
+      border: 2px solid #00cc66;
+      border-radius: 12px;
+      padding: 15px;
+      background-color: #121212;
+      word-break: break-all;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #00ff99;
+      user-select: text;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .copy-btn {
+      margin-top: 15px;
+      width: 80%;
+      padding: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: #00cc66;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+
+    .copy-btn:hover {
+      background-color: #00e673;
+    }
+
+    /* Login Modal */
+    #loginModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(14,14,14,0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    #loginModal h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    #loginBtn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #4285f4;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(66,133,244,0.6);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    #loginBtn:hover {
+      background-color: #357ae8;
+    }
+
+    #loginBtn img {
+      height: 20px;
+      width: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login modal blocks everything if not logged in -->
+  <div id="loginModal">
+    <h2>Welcome to DLS Affiliate</h2>
+    <button id="loginBtn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" />
+      Sign in with Google
+    </button>
+  </div>
+
+  <!-- Main app container, shown after login -->
+  <div id="app" class="flex-col">
+
+    <h1>DLS AFFILIATE</h1>
+
+    <div class="grid">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">VIEWS</div>
+          <div class="card-value" id="viewsCount">0</div>
+        </div>
+        <div class="card">
+          <div class="card-title">CLICKS</div>
+          <div class="card-value" id="clicksCount">0</div>
+        </div>
+      </div>
+
+      <div class="card full-width">
+        <div class="card-title">EARNINGS</div>
+        <div class="card-value" id="earningsCount">$0.000</div>
+      </div>
+    </div>
+
+    <div class="affiliate-box" id="affiliateLink">Loading referral link...</div>
+    <button class="copy-btn" id="copyBtn">Copy Link</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+
+  <script>
+    // Your real Firebase config here
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const loginModal = document.getElementById('loginModal');
+    const app = document.getElementById('app');
+    const loginBtn = document.getElementById('loginBtn');
+    const viewsCount = document.getElementById('viewsCount');
+    const clicksCount = document.getElementById('clicksCount');
+    const earningsCount = document.getElementById('earningsCount');
+    const affiliateLink = document.getElementById('affiliateLink');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Google Sign-In provider
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    loginBtn.addEventListener('click', () => {
+      auth.signInWithPopup(provider).catch(err => {
+        alert("Login failed: " + err.message);
+      });
+    });
+
+    // Function to create initial user data in db if not exists
+    function initializeUserData(uid, displayName, email) {
+      const userRef = db.ref('users/' + uid);
+      userRef.once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+          userRef.set({
+            displayName: displayName || "Anonymous",
+            email: email || "",
+            stats: {
+              views: 0,
+              clicks: 0,
+              earnings: 0
+            },
+            createdAt: Date.now()
+          });
+        }
+      });
+    }
+
+    // Update UI with stats from database
+    function updateStats(uid) {
+      const statsRef = db.ref('users/' + uid + '/stats');
+      statsRef.on('value', snapshot => {
+        const stats = snapshot.val() || { views: 0, clicks: 0, earnings: 0 };
+        viewsCount.textContent = stats.views || 0;
+        clicksCount.textContent = stats.clicks || 0;
+        earningsCount.textContent = `$${(stats.earnings || 0).toFixed(3)}`;
+      });
+    }
+
+    // Build referral link
+    function buildReferralLink(uid) {
+      return `${window.location.origin}/refer=${uid}`;
+    }
+
+    // Update referral link UI
+    function updateReferralLink(uid) {
+      const link = buildReferralLink(uid);
+      affiliateLink.textContent = link;
+    }
+
+    // Copy referral link on button click
+    copyBtn.addEventListener('click', () => {
+      const text = affiliateLink.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = copyBtn.textContent;
+        copyBtn.textContent = "Copied!";
+        copyBtn.disabled = true;
+        setTimeout(() => {
+          copyBtn.textContent = original;
+          copyBtn.disabled = false;
+        }, 1500);
+      });
+    });
+
+    // Listen to auth state changes
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // Hide login, show app
+        loginModal.style.display = 'none';
+        app.style.display = 'flex';
+
+        // Initialize user data in db
+        initializeUserData(user.uid, user.displayName, user.email);
+
+        // Load and update stats
+        updateStats(user.uid);
+
+        // Show referral link
+        updateReferralLink(user.uid);
+      } else {
+        // Show login modal, hide app
+        loginModal.style.display = 'flex';
+        app.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
