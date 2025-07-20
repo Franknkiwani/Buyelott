@@ -2,218 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DLS AFFILIATE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Reset */
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
-      padding: 0;
-    }
-
-    body, html {
-      height: 100%;
-      background-color: #0e0e0e;
+      background: #0d0d0d;
       color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
     }
-
-    #app {
-      padding: 40px 20px;
-      max-width: 600px;
-      margin: 0 auto;
-      display: none; /* hidden until logged in */
-      flex-direction: column;
-      align-items: center;
-    }
-
     h1 {
       text-align: center;
+      margin-top: 2rem;
       font-size: 2rem;
-      margin-bottom: 40px;
       letter-spacing: 2px;
     }
-
-    .grid {
-      width: 100%;
-      display: grid;
-      gap: 20px;
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
     }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    .card {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 18px;
-      box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+    .stat {
+      background: #1c1c1c;
+      padding: 1.5rem;
+      border-radius: 10px;
+      min-width: 130px;
+      flex: 1 1 120px;
       text-align: center;
     }
-
-    .card-title {
-      font-size: 0.85rem;
-      color: #aaa;
-      margin-bottom: 8px;
-    }
-
-    .card-value {
-      font-size: 1.7rem;
-      font-weight: 600;
-    }
-
-    .affiliate-box {
-      margin-top: 30px;
+    .link-box {
+      margin: 2rem auto;
       width: 80%;
-      border: 2px solid #00cc66;
-      border-radius: 12px;
-      padding: 15px;
-      background-color: #121212;
+      border: 2px solid #00ff66;
+      padding: 1rem;
+      border-radius: 10px;
       word-break: break-all;
       text-align: center;
-      font-size: 0.95rem;
-      color: #00ff99;
-      user-select: text;
-      margin-left: auto;
-      margin-right: auto;
     }
-
     .copy-btn {
-      margin-top: 15px;
-      width: 80%;
-      padding: 15px;
-      font-size: 1rem;
-      font-weight: 600;
-      background-color: #00cc66;
+      width: 100%;
+      background: #00ff66;
       color: #000;
+      padding: 1rem;
       border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-      margin-left: auto;
-      margin-right: auto;
-      display: block;
-    }
-
-    .copy-btn:hover {
-      background-color: #00e673;
-    }
-
-    /* Login Modal */
-    #loginModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(14,14,14,0.95);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-    }
-
-    #loginModal h2 {
-      margin-bottom: 20px;
-      font-weight: 600;
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-    }
-
-    #loginBtn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background-color: #4285f4;
-      color: white;
-      font-weight: 600;
+      margin-top: 1rem;
+      font-weight: bold;
       font-size: 1rem;
-      padding: 14px 24px;
-      border: none;
-      border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(66,133,244,0.6);
-      transition: background-color 0.3s ease;
-      user-select: none;
+      border-radius: 10px;
+    }
+    .login-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
       justify-content: center;
-      max-width: 300px;
-      margin: 0 auto;
+      align-items: center;
+      z-index: 999;
     }
-
-    #loginBtn:hover {
-      background-color: #357ae8;
+    .google-btn {
+      background: #fff;
+      color: #000;
+      padding: 0.75rem 2rem;
+      border-radius: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
     }
-
-    #loginBtn img {
+    .google-btn img {
       height: 20px;
-      width: 20px;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 400px) {
-      h1 {
-        font-size: 1.6rem;
-      }
-      .card-value {
-        font-size: 1.3rem;
-      }
-      .copy-btn, .affiliate-box {
-        width: 90%;
-      }
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <!-- Login modal blocks everything if not logged in -->
-  <div id="loginModal">
-    <h2>Welcome to DLS Affiliate</h2>
-    <button id="loginBtn">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" />
+  <div class="login-screen" id="loginScreen">
+    <div class="google-btn" onclick="signInWithGoogle()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
       Sign in with Google
-    </button>
-  </div>
-
-  <!-- Main app container, shown after login -->
-  <div id="app" class="flex-col">
-
-    <h1>DLS AFFILIATE</h1>
-
-    <div class="grid">
-      <div class="two-col">
-        <div class="card">
-          <div class="card-title">VIEWS</div>
-          <div class="card-value" id="viewsCount">0</div>
-        </div>
-        <div class="card">
-          <div class="card-title">CLICKS</div>
-          <div class="card-value" id="clicksCount">0</div>
-        </div>
-      </div>
-
-      <div class="card full-width">
-        <div class="card-title">EARNINGS</div>
-        <div class="card-value" id="earningsCount">$0.000</div>
-      </div>
     </div>
-
-    <div class="affiliate-box" id="affiliateLink">Loading referral link...</div>
-    <button class="copy-btn" id="copyBtn">Copy Link</button>
   </div>
 
-  <!-- Firebase SDK modular -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  <h1>DLS AFFILIATE</h1>
 
-    // Your Firebase config
+  <div class="stats">
+    <div class="stat">
+      <div>👁️ Views</div>
+      <div id="views">0</div>
+    </div>
+    <div class="stat">
+      <div>🖱️ Clicks</div>
+      <div id="clicks">0</div>
+    </div>
+    <div class="stat" style="flex: 1 1 100%">
+      <div>💰 Earnings</div>
+      <div id="earnings">$0.000</div>
+    </div>
+  </div>
+
+  <div class="link-box" id="refLink"></div>
+  <button class="copy-btn" onclick="copyLink()">COPY LINK</button>
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -224,91 +124,60 @@
       appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
       measurementId: "G-LLT6F9WRKH"
     };
+    firebase.initializeApp(firebaseConfig);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let uid = null;
 
-    const loginModal = document.getElementById('loginModal');
-    const appDiv = document.getElementById('app');
-    const loginBtn = document.getElementById('loginBtn');
-    const viewsCount = document.getElementById('viewsCount');
-    const clicksCount = document.getElementById('clicksCount');
-    const earningsCount = document.getElementById('earningsCount');
-    const affiliateLink = document.getElementById('affiliateLink');
-    const copyBtn = document.getElementById('copyBtn');
-
-    loginBtn.addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(err => {
-        alert('Login failed: ' + err.message);
-      });
-    });
-
-    function initializeUserData(uid, displayName, email) {
-      const userRef = ref(db, 'users/' + uid);
-      get(userRef).then(snapshot => {
-        if (!snapshot.exists()) {
-          set(userRef, {
-            displayName: displayName || "Anonymous",
-            email: email || "",
-            stats: {
-              views: 0,
-              clicks: 0,
-              earnings: 0
-            },
-            createdAt: Date.now()
-          });
-        }
-      });
-    }
-
-    function updateStats(uid) {
-      const statsRef = ref(db, 'users/' + uid + '/stats');
-      onValue(statsRef, (snapshot) => {
-        const stats = snapshot.val() || { views: 0, clicks: 0, earnings: 0 };
-        viewsCount.textContent = stats.views || 0;
-        clicksCount.textContent = stats.clicks || 0;
-        earningsCount.textContent = `$${(stats.earnings || 0).toFixed(3)}`;
-      });
-    }
-
-    function buildReferralLink(uid) {
-      return `${window.location.origin}/refer=${uid}`;
-    }
-
-    function updateReferralLink(uid) {
-      const link = buildReferralLink(uid);
-      affiliateLink.textContent = link;
-    }
-
-    copyBtn.addEventListener('click', () => {
-      const text = affiliateLink.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const original = copyBtn.textContent;
-        copyBtn.textContent = "Copied!";
-        copyBtn.disabled = true;
-        setTimeout(() => {
-          copyBtn.textContent = original;
-          copyBtn.disabled = false;
-        }, 1500);
-      });
-    });
-
-    onAuthStateChanged(auth, user => {
+    auth.onAuthStateChanged(user => {
       if (user) {
-        loginModal.style.display = 'none';
-        appDiv.style.display = 'flex';
+        uid = user.uid;
+        document.getElementById("loginScreen").style.display = "none";
 
-        initializeUserData(user.uid, user.displayName, user.email);
-        updateStats(user.uid);
-        updateReferralLink(user.uid);
+        // Save user to Firebase
+        db.ref("users/" + uid).update({
+          name: user.displayName || "",
+          email: user.email,
+          photoURL: user.photoURL || "",
+          joinedAt: Date.now()
+        });
+
+        // Load stats
+        db.ref("users/" + uid + "/stats").on("value", snap => {
+          const stats = snap.val() || {};
+          document.getElementById("views").textContent = stats.views || 0;
+          document.getElementById("clicks").textContent = stats.clicks || 0;
+          document.getElementById("earnings").textContent = "$" + (stats.earnings || "0.000");
+        });
+
+        // Show referral link
+        const link = `${window.location.origin}/refer/?id=${uid}`;
+        document.getElementById("refLink").textContent = link;
+        window.referralLink = link;
+
       } else {
-        loginModal.style.display = 'flex';
-        appDiv.style.display = 'none';
+        document.getElementById("loginScreen").style.display = "flex";
       }
     });
-  </script>
 
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.referralLink)
+        .then(() => alert("Copied!"))
+        .catch(() => alert("Copy failed"));
+    }
+
+    // If opened via refer/?id=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const referId = urlParams.get("id");
+    if (referId) {
+      // Save or track stats here
+    }
+  </script>
 </body>
 </html>
