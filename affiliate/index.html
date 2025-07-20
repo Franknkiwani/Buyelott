@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DLS AFFILIATE</title>
   <style>
     body {
@@ -12,48 +12,80 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       user-select: none;
     }
+
+    .container {
+      width: 80%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+
     h1 {
       text-align: center;
-      margin-top: 2rem;
       font-size: 2rem;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
     }
+
     .stats {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
-      margin-top: 2rem;
+      margin-bottom: 2rem;
     }
+
     .stat {
-      background: #1c1c1c;
-      padding: 1.5rem;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 1.2rem;
+      border-radius: 15px;
       min-width: 130px;
-      flex: 1 1 120px;
+      flex: 1 1 100px;
       text-align: center;
+      box-shadow: 0 2px 8px rgba(0,255,102,0.05);
     }
+
     .link-box {
-      margin: 2rem auto;
-      width: 80%;
-      border: 2px solid #00ff66;
+      border: 1px solid #00ff66;
       padding: 1rem;
       border-radius: 10px;
-      word-break: break-all;
+      background: rgba(0, 0, 0, 0.3);
       text-align: center;
+      word-break: break-word;
     }
+
     .copy-btn {
       width: 100%;
-      background: #00ff66;
+      background: linear-gradient(135deg, #00ff66, #00cc99);
       color: #000;
       padding: 1rem;
-      border: none;
       margin-top: 1rem;
       font-weight: bold;
       font-size: 1rem;
-      cursor: pointer;
+      border: none;
       border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 255, 102, 0.2);
+      cursor: pointer;
+      transition: 0.2s ease;
     }
+
+    .copy-btn:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 16px rgba(0, 255, 102, 0.3);
+    }
+
+    .logs {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #bbb;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem;
+      border-radius: 10px;
+      white-space: pre-line;
+    }
+
     .login-screen {
       position: fixed;
       top: 0; left: 0;
@@ -65,6 +97,7 @@
       align-items: center;
       z-index: 999;
     }
+
     .google-btn {
       background: #fff;
       color: #000;
@@ -76,10 +109,12 @@
       gap: 0.5rem;
       cursor: pointer;
     }
+
     .google-btn img {
       height: 20px;
     }
   </style>
+
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
@@ -93,25 +128,31 @@
     </div>
   </div>
 
-  <h1>DLS AFFILIATE</h1>
+  <div class="container">
+    <h1>DLS AFFILIATE</h1>
 
-  <div class="stats">
-    <div class="stat">
-      <div>👁️ Views</div>
-      <div id="views">0</div>
+    <div class="stats">
+      <div class="stat">
+        <div>👁️ Views</div>
+        <div id="views">0</div>
+      </div>
+      <div class="stat">
+        <div>🖱️ Clicks</div>
+        <div id="clicks">0</div>
+      </div>
+      <div class="stat" style="flex: 1 1 100%;">
+        <div>💰 Earnings</div>
+        <div id="earnings">$0.000</div>
+      </div>
     </div>
-    <div class="stat">
-      <div>🖱️ Clicks</div>
-      <div id="clicks">0</div>
-    </div>
-    <div class="stat" style="flex: 1 1 100%">
-      <div>💰 Earnings</div>
-      <div id="earnings">$0.000</div>
+
+    <div class="link-box" id="refLink"></div>
+    <button class="copy-btn" onclick="copyLink()">COPY LINK</button>
+
+    <div class="logs" id="logs">
+      Loading logs...
     </div>
   </div>
-
-  <div class="link-box" id="refLink"></div>
-  <button class="copy-btn" onclick="copyLink()">COPY LINK</button>
 
   <script>
     const firebaseConfig = {
@@ -135,7 +176,6 @@
         uid = user.uid;
         document.getElementById("loginScreen").style.display = "none";
 
-        // Save user to Firebase
         db.ref("users/" + uid).update({
           name: user.displayName || "",
           email: user.email,
@@ -156,6 +196,21 @@
         document.getElementById("refLink").textContent = link;
         window.referralLink = link;
 
+        // Load earnings logs
+        db.ref("users/" + uid + "/logs").on("value", snap => {
+          const logs = snap.val();
+          const logsBox = document.getElementById("logs");
+          if (logs) {
+            const entries = Object.entries(logs).sort((a, b) => b[1].time - a[1].time);
+            logsBox.innerHTML = entries.map(([key, log]) => {
+              const date = new Date(log.time).toLocaleString();
+              return `You earned $${log.amount.toFixed(3)} on ${date}`;
+            }).join("\n");
+          } else {
+            logsBox.textContent = "No transactions yet.";
+          }
+        });
+
       } else {
         document.getElementById("loginScreen").style.display = "flex";
       }
@@ -172,11 +227,11 @@
         .catch(() => alert("Copy failed"));
     }
 
-    // If opened via refer/?id=...
+    // Track if visiting via referral
     const urlParams = new URLSearchParams(window.location.search);
     const referId = urlParams.get("id");
     if (referId) {
-      // Save or track stats here
+      // Optional: track referrer view/click stats
     }
   </script>
 </body>
