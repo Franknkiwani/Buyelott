@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>DLS AFFILIATE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     /* Reset */
     * {
@@ -114,6 +115,8 @@
       z-index: 1000;
       flex-direction: column;
       color: #fff;
+      padding: 20px;
+      text-align: center;
     }
 
     #loginModal h2 {
@@ -138,6 +141,9 @@
       box-shadow: 0 2px 6px rgba(66,133,244,0.6);
       transition: background-color 0.3s ease;
       user-select: none;
+      justify-content: center;
+      max-width: 300px;
+      margin: 0 auto;
     }
 
     #loginBtn:hover {
@@ -147,6 +153,19 @@
     #loginBtn img {
       height: 20px;
       width: 20px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+      .card-value {
+        font-size: 1.3rem;
+      }
+      .copy-btn, .affiliate-box {
+        width: 90%;
+      }
     }
   </style>
 </head>
@@ -188,13 +207,13 @@
     <button class="copy-btn" id="copyBtn">Copy Link</button>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+  <!-- Firebase SDK modular -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  <script>
-    // Your real Firebase config here
+    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
       authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -206,13 +225,13 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
 
     const loginModal = document.getElementById('loginModal');
-    const app = document.getElementById('app');
+    const appDiv = document.getElementById('app');
     const loginBtn = document.getElementById('loginBtn');
     const viewsCount = document.getElementById('viewsCount');
     const clicksCount = document.getElementById('clicksCount');
@@ -220,21 +239,17 @@
     const affiliateLink = document.getElementById('affiliateLink');
     const copyBtn = document.getElementById('copyBtn');
 
-    // Google Sign-In provider
-    const provider = new firebase.auth.GoogleAuthProvider();
-
     loginBtn.addEventListener('click', () => {
-      auth.signInWithPopup(provider).catch(err => {
-        alert("Login failed: " + err.message);
+      signInWithPopup(auth, provider).catch(err => {
+        alert('Login failed: ' + err.message);
       });
     });
 
-    // Function to create initial user data in db if not exists
     function initializeUserData(uid, displayName, email) {
-      const userRef = db.ref('users/' + uid);
-      userRef.once('value').then(snapshot => {
+      const userRef = ref(db, 'users/' + uid);
+      get(userRef).then(snapshot => {
         if (!snapshot.exists()) {
-          userRef.set({
+          set(userRef, {
             displayName: displayName || "Anonymous",
             email: email || "",
             stats: {
@@ -248,10 +263,9 @@
       });
     }
 
-    // Update UI with stats from database
     function updateStats(uid) {
-      const statsRef = db.ref('users/' + uid + '/stats');
-      statsRef.on('value', snapshot => {
+      const statsRef = ref(db, 'users/' + uid + '/stats');
+      onValue(statsRef, (snapshot) => {
         const stats = snapshot.val() || { views: 0, clicks: 0, earnings: 0 };
         viewsCount.textContent = stats.views || 0;
         clicksCount.textContent = stats.clicks || 0;
@@ -259,18 +273,15 @@
       });
     }
 
-    // Build referral link
     function buildReferralLink(uid) {
       return `${window.location.origin}/refer=${uid}`;
     }
 
-    // Update referral link UI
     function updateReferralLink(uid) {
       const link = buildReferralLink(uid);
       affiliateLink.textContent = link;
     }
 
-    // Copy referral link on button click
     copyBtn.addEventListener('click', () => {
       const text = affiliateLink.textContent;
       navigator.clipboard.writeText(text).then(() => {
@@ -284,27 +295,20 @@
       });
     });
 
-    // Listen to auth state changes
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, user => {
       if (user) {
-        // Hide login, show app
         loginModal.style.display = 'none';
-        app.style.display = 'flex';
+        appDiv.style.display = 'flex';
 
-        // Initialize user data in db
         initializeUserData(user.uid, user.displayName, user.email);
-
-        // Load and update stats
         updateStats(user.uid);
-
-        // Show referral link
         updateReferralLink(user.uid);
       } else {
-        // Show login modal, hide app
         loginModal.style.display = 'flex';
-        app.style.display = 'none';
+        appDiv.style.display = 'none';
       }
     });
   </script>
+
 </body>
 </html>
