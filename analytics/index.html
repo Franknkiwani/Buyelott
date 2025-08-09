@@ -3,117 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Site Analytics Dashboard</title>
+  <title>Surveoo Dashboard</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
   <style>
+    /* Your CSS here (same as previous dashboard + chart styles) */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #121212;
-      color: #eee;
       margin: 0;
-      padding: 20px;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #f2f2f7;
+      color: #1c1c1e;
+      padding: 1rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
     }
     h1 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
       text-align: center;
-      margin-bottom: 24px;
-      font-weight: 700;
-      color: #0af;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
+      color: #000;
     }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-    .stat {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 0 12px #0af44d44;
-    }
-    .stat h2 {
-      margin: 0;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #0af;
-    }
-    .stat p {
-      margin: 6px 0 0 0;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-    h2.countries-title {
-      margin-bottom: 12px;
-      color: #0af;
-      font-weight: 700;
-      border-bottom: 2px solid #0af;
-      padding-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    ul.country-list {
-      list-style: none;
-      padding: 0;
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #0af55;
-      border-radius: 8px;
-      background: #222;
-    }
-    ul.country-list li {
-      padding: 8px 12px;
-      border-bottom: 1px solid #0af44;
+    .dashboard {
       display: flex;
+      gap: 1rem;
       justify-content: space-between;
-      font-weight: 600;
-      color: #ccc;
+      max-width: 420px;
+      margin: 0 auto 2rem auto;
+      user-select: none;
+    }
+    .card {
+      flex: 1;
+      background: #fff;
+      border-radius: 20px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+      cursor: default;
+    }
+    .icon-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #e5e5ea;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+      box-shadow: inset 0 2px 5px rgba(255,255,255,0.8);
+    }
+    .icon-circle svg {
+      width: 26px;
+      height: 26px;
+      stroke: #007aff;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .stat-number {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #000;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.05em;
+    }
+    .stat-label {
+      font-weight: 500;
       font-size: 0.9rem;
+      color: #636366;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
-    ul.country-list li:last-child {
-      border-bottom: none;
+    @media (max-width: 360px) {
+      .dashboard {
+        flex-direction: column;
+        max-width: 100%;
+      }
+      .card {
+        margin-bottom: 1rem;
+      }
     }
-    .loading {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #0af;
-      margin-top: 100px;
+    .chart-container {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      padding: 1rem;
+      user-select: none;
     }
+    .toggle-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    .toggle-buttons button {
+      background: #007aff;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      padding: 0.4rem 1rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,122,255,0.4);
+      transition: background 0.3s ease;
+      user-select: none;
+      min-width: 80px;
+    }
+    .toggle-buttons button.active,
+    .toggle-buttons button:hover {
+      background: #005bb5;
+      box-shadow: 0 6px 12px rgba(0,91,181,0.6);
+    }
+    .chart-container {
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  padding: 1rem;
+  height: 260px; /* prevents tall stretching */
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important; /* forces it to fill container height */
+}
   </style>
 </head>
 <body>
-
-  <h1>Site Analytics</h1>
-
-  <div class="stats">
-    <div class="stat">
-      <h2 id="totalViews">-</h2>
-      <p>Total Views</p>
+  <h1>Surveoo Dashboard</h1>
+  <div class="dashboard">
+    <div class="card">
+      <div class="icon-circle" aria-label="Views icon">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </div>
+      <div class="stat-number" id="views-count">0</div>
+      <div class="stat-label">Views</div>
     </div>
-    <div class="stat">
-      <h2 id="totalClicks">-</h2>
-      <p>Total Clicks</p>
+    <div class="card">
+      <div class="icon-circle" aria-label="Clicks icon">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2l7 7-7-7zM2 22l12-12-4-4-8 8 4 4z" />
+        </svg>
+      </div>
+      <div class="stat-number" id="clicks-count">0</div>
+      <div class="stat-label">Clicks</div>
     </div>
-    <div class="stat">
-      <h2 id="uniqueUsers">-</h2>
-      <p>Unique Users</p>
+    <div class="card">
+      <div class="icon-circle" aria-label="Users icon">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M5.5 21a6.5 6.5 0 0113 0" />
+        </svg>
+      </div>
+      <div class="stat-number" id="users-count">0</div>
+      <div class="stat-label">Users</div>
     </div>
   </div>
 
-  <h2 class="countries-title">Visits by Country</h2>
-  <ul class="country-list" id="countryList">
-    <li>Loading countries...</li>
-  </ul>
+  <div class="chart-container">
+    <div class="toggle-buttons">
+      <button class="active" data-range="7">Last 7 Days</button>
+      <button data-range="30">Last 30 Days</button>
+      <button data-range="all">All Time</button>
+    </div>
+    <canvas id="statsChart" height="180"></canvas>
+  </div>
 
-  <!-- Firebase SDK v11 modular -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -126,82 +202,133 @@
       measurementId: "G-LLT6F9WRKH"
     };
 
-    // Init Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const totalViewsEl = document.getElementById('totalViews');
-    const totalClicksEl = document.getElementById('totalClicks');
-    const uniqueUsersEl = document.getElementById('uniqueUsers');
-    const countryListEl = document.getElementById('countryList');
+    // Dashboard stats refs
+    const viewsRef = ref(db, 'stats/views');
+    const clicksRef = ref(db, 'stats/clicks');
+    const usersRef = ref(db, 'stats/users');
+    const dailyRef = ref(db, 'stats/daily');
 
-    async function fetchVisitorData() {
-      try {
-        const visitorsRef = ref(db, 'visitors');
-        const snapshot = await get(visitorsRef);
+    // Update dashboard counts live
+    onValue(viewsRef, snapshot => {
+      document.getElementById('views-count').textContent = (snapshot.val() || 0).toLocaleString();
+    });
+    onValue(clicksRef, snapshot => {
+      document.getElementById('clicks-count').textContent = (snapshot.val() || 0).toLocaleString();
+    });
+    onValue(usersRef, snapshot => {
+      document.getElementById('users-count').textContent = (snapshot.val() || 0).toLocaleString();
+    });
 
-        if (!snapshot.exists()) {
-          totalViewsEl.textContent = '0';
-          totalClicksEl.textContent = '0';
-          uniqueUsersEl.textContent = '0';
-          countryListEl.innerHTML = '<li>No visitor data found.</li>';
-          return;
-        }
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    let currentRange = '7';
+    let statsChart;
 
-        const visitors = snapshot.val();
+    function parseDailyData(data, range) {
+      const dates = Object.keys(data || {}).sort();
+      const today = new Date();
+      let filteredDates;
 
-        let totalViews = 0;
-        let totalClicks = 0;
-        let uniqueUsers = 0;
-        const countryCounts = {};
+      if (range === '7') {
+        filteredDates = dates.filter(d => {
+          const date = new Date(d);
+          return (today - date) / (1000 * 60 * 60 * 24) < 7;
+        });
+      } else if (range === '30') {
+        filteredDates = dates.filter(d => {
+          const date = new Date(d);
+          return (today - date) / (1000 * 60 * 60 * 24) < 30;
+        });
+      } else {
+        filteredDates = dates;
+      }
 
-        for (const key in visitors) {
-          if (Object.hasOwnProperty.call(visitors, key)) {
-            const visitor = visitors[key];
-            totalViews += visitor.views || 0;
-            totalClicks += visitor.clicks || 0;
-            uniqueUsers++;
+      filteredDates.sort((a,b) => new Date(a) - new Date(b));
 
-            const country = visitor.country || 'Unknown';
-            countryCounts[country] = (countryCounts[country] || 0) + 1;
+      return {
+        labels: filteredDates.map(d => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })),
+        views: filteredDates.map(d => data[d]?.views || 0),
+        clicks: filteredDates.map(d => data[d]?.clicks || 0),
+        users: filteredDates.map(d => data[d]?.users || 0),
+      };
+    }
+
+    function renderChart(data) {
+      if(statsChart) {
+        statsChart.data.labels = data.labels;
+        statsChart.data.datasets[0].data = data.views;
+        statsChart.data.datasets[1].data = data.clicks;
+        statsChart.data.datasets[2].data = data.users;
+        statsChart.update();
+      } else {
+        statsChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Views',
+                data: data.views,
+                borderColor: '#007aff',
+                backgroundColor: 'rgba(0, 122, 255, 0.15)',
+                fill: true,
+                tension: 0.3,
+              },
+              {
+                label: 'Clicks',
+                data: data.clicks,
+                borderColor: '#dc2626',
+                backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                fill: true,
+                tension: 0.3,
+              },
+              {
+                label: 'Users',
+                data: data.users,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.15)',
+                fill: true,
+                tension: 0.3,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true },
+            },
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: {
+              legend: { position: 'top' },
+            }
           }
-        }
-
-        // Update totals on page
-        totalViewsEl.textContent = totalViews;
-        totalClicksEl.textContent = totalClicks;
-        uniqueUsersEl.textContent = uniqueUsers;
-
-        // Sort countries by visits descending
-        const sortedCountries = Object.entries(countryCounts)
-          .sort((a,b) => b[1] - a[1]);
-
-        // Render countries list
-        if (sortedCountries.length === 0) {
-          countryListEl.innerHTML = '<li>No country data.</li>';
-        } else {
-          countryListEl.innerHTML = '';
-          for (const [country, count] of sortedCountries) {
-            const li = document.createElement('li');
-            li.textContent = `${country}`;
-            const span = document.createElement('span');
-            span.textContent = count;
-            li.appendChild(span);
-            countryListEl.appendChild(li);
-          }
-        }
-
-      } catch (error) {
-        console.error('Error fetching visitor data:', error);
-        totalViewsEl.textContent = '-';
-        totalClicksEl.textContent = '-';
-        uniqueUsersEl.textContent = '-';
-        countryListEl.innerHTML = '<li>Error loading data</li>';
+        });
       }
     }
 
-    fetchVisitorData();
-  </script>
+    // Load & render daily data on startup
+    get(dailyRef).then(snapshot => {
+      const dailyData = snapshot.val() || {};
+      renderChart(parseDailyData(dailyData, currentRange));
+    }).catch(console.error);
 
+    // Toggle buttons
+    document.querySelectorAll('.toggle-buttons button').forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.dataset.range === currentRange) return;
+        currentRange = button.dataset.range;
+        document.querySelectorAll('.toggle-buttons button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        get(dailyRef).then(snapshot => {
+          const dailyData = snapshot.val() || {};
+          renderChart(parseDailyData(dailyData, currentRange));
+        }).catch(console.error);
+      });
+    });
+  </script>
 </body>
 </html>
