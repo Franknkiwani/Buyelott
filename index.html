@@ -608,9 +608,16 @@ svg.refer-badge text {
         loading="lazy"
       />
     </div>
-    <a href="https://mylead.global/offer/surveoo" class="cta-button" target="_blank" rel="noopener noreferrer" aria-label="Start earning now with Surveoo">
-      Start Earning Now
-    </a>
+  <a
+  href="https://mylead.global/offer/surveoo"
+  id="hero-cta-btn"
+  class="cta-button"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Start earning now with Surveoo"
+>
+  Start Earning Now
+</a>
   </section>
 
   <!-- How It Works -->
@@ -652,7 +659,7 @@ svg.refer-badge text {
   <section class="testimonials" role="region" aria-labelledby="testimonials-title">
     <h3 id="testimonials-title">What Users Say</h3>
     <blockquote class="testimonial" tabindex="0">
-      "Surveoo changed the game for me. Easy surveys and real payouts – legit as hell!" 
+      "Surveoo changed the game for me. Easy surveys and real payouts – legit as *****!" 
       <strong>- Jason M.</strong>
     </blockquote>
     <blockquote class="testimonial" tabindex="0">
@@ -741,12 +748,17 @@ svg.refer-badge text {
   Earnings vary based on effort and demographics. Many users find Surveoo a reliable way to earn extra cash.
 </p>
 </footer>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    serverTimestamp,
+    runTransaction,
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  // Your actual Firebase config from memory:
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -755,199 +767,7 @@ svg.refer-badge text {
     storageBucket: "itzhoyoo-f9f7e.filestorage.app",
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Contact form handler
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector(".contact-form");
-    const btn = form.querySelector("button");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      btn.disabled = true;
-      btn.textContent = "Sending...";
-
-      const name = form.name.value.trim();
-      const email = form.email.value.trim();
-      const message = form.message.value.trim();
-
-      if (!name || !email || !message) {
-        alert("Please fill all fields.");
-        btn.disabled = false;
-        btn.textContent = "Send Message";
-        return;
-      }
-
-      try {
-        await push(ref(db, "surveoocontacts"), {
-          name,
-          email,
-          message,
-          submittedAt: serverTimestamp()
-        });
-        alert("Thanks for reaching out! We will get back to you soon.");
-        form.reset();
-      } catch (error) {
-        console.error("Error sending contact message:", error);
-        alert("Oops! Something went wrong. Please try again.");
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Send Message";
-    });
-  });
-
-  // FAQ toggle logic
-  document.querySelectorAll('.faq-question').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const expanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', !expanded);
-      const answer = document.getElementById(btn.getAttribute('aria-controls'));
-      if (!expanded) {
-        answer.classList.add('open');
-      } else {
-        answer.classList.remove('open');
-      }
-    });
-  });
-  document.querySelector('.refer-badge').addEventListener('click', () => {
-  // Default stats
-  const moneyEarned = 0;
-  const friendsJoined = 0;
-  const referralLink = window.location.href;
-
-  // Disable background scrolling
-  const originalOverflow = document.body.style.overflow;
-  document.body.style.overflow = 'hidden';
-
-  // Create overlay modal container
-  const modal = document.createElement('div');
-  modal.classList.add('modal-overlay');
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.setAttribute('aria-label', 'Referral Program Details');
-
-  // Create modal content box
-  const content = document.createElement('div');
-  content.classList.add('modal-content');
-
-  content.innerHTML = `
-    <h2 style="margin-top:0; margin-bottom: 15px; font-weight: 700;">Refer & Earn $1</h2>
-    <p style="font-size: 16px; margin-bottom: 20px;">
-      Share your referral link and earn $1 for every successful signup!
-    </p>
-
-    <div style="font-size: 15px; margin-bottom: 15px;">
-      <strong>Money Earned:</strong> $${moneyEarned.toFixed(2)} &nbsp;&nbsp;
-      <strong>Friends Joined:</strong> ${friendsJoined}
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <input
-        type="text"
-        readonly
-        value="${referralLink}"
-        style="width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; user-select: all;"
-        aria-label="Referral link"
-      />
-      <button id="copyBtn" class="modal-button" style="width: 100%; margin-top: 10px;">Copy</button>
-      <button id="shareBtn" class="modal-button" style="
-        width: 100%;
-        margin-top: 10px;
-        background: linear-gradient(90deg, #06b6d4, #3b82f6);
-      ">Share</button>
-    </div>
-
-    <button id="closeBtn" class="modal-button close-btn" style="width: 100%;">Close</button>
-  `;
-
-  modal.appendChild(content);
-  document.body.appendChild(modal);
-
-  // Copy link functionality with fallback
-  document.getElementById('copyBtn').addEventListener('click', async () => {
-    const input = content.querySelector('input');
-    input.select();
-    input.setSelectionRange(0, 99999); // For mobile
-
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(input.value);
-        alert('Referral link copied to clipboard!');
-      } else {
-        const successful = document.execCommand('copy');
-        if (successful) {
-          alert('Referral link copied to clipboard!');
-        } else {
-          throw new Error('execCommand copy failed');
-        }
-      }
-    } catch (err) {
-      alert('Copy failed. Please copy manually.');
-    }
-  });
-
-  // Share button functionality (Web Share API)
-  document.getElementById('shareBtn').addEventListener('click', async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Join with my referral link',
-          text: 'Sign up through this referral and earn rewards!',
-          url: referralLink,
-        });
-      } catch (err) {
-        alert('Share cancelled or failed.');
-      }
-    } else {
-      alert('Sharing not supported on this device.');
-    }
-  });
-
-  // Close modal functionality
-  const closeModal = () => {
-    modal.remove();
-    // Restore scrolling
-    document.body.style.overflow = originalOverflow;
-  };
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-
-  // Close modal when clicking outside the content box
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
-
-  // Close modal on ESC key press
-  const escListener = (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      document.removeEventListener('keydown', escListener);
-    }
-  };
-  document.addEventListener('keydown', escListener);
-});
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
+    measurementId: "G-LLT6F9WRKH",
   };
 
   const app = initializeApp(firebaseConfig);
@@ -973,7 +793,6 @@ svg.refer-badge text {
     const today = getTodayDate();
     const dailyPath = `stats/daily/${today}`;
 
-    // Transaction for daily stats object
     const dailyRef = ref(db, dailyPath);
     try {
       await runTransaction(dailyRef, (currentData) => {
@@ -993,33 +812,207 @@ svg.refer-badge text {
         };
       });
     } catch (e) {
-      console.error('Failed to increment daily stats', e);
+      console.error("Failed to increment daily stats", e);
     }
 
-    // Increment total counters
-    if (views) await incrementRef('stats/views', views);
-    if (clicks) await incrementRef('stats/clicks', clicks);
-    if (users) await incrementRef('stats/users', users);
+    if (views) await incrementRef("stats/views", views);
+    if (clicks) await incrementRef("stats/clicks", clicks);
+    if (users) await incrementRef("stats/users", users);
   }
 
-  // Logic start here:
+  // DOM Ready
+  document.addEventListener("DOMContentLoaded", () => {
+    // Contact form handler
+    const form = document.querySelector(".contact-form");
+    if (form) {
+      const btn = form.querySelector("button");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.textContent = "Sending...";
 
-  // 1) Always increment views by 1 on page load
-  incrementDailyStats({ views: 1 });
+        const name = form.name.value.trim();
+        const email = form.email.value.trim();
+        const message = form.message.value.trim();
 
-  // 2) Increment users by 1 only once per device using localStorage
-  if (!localStorage.getItem('surveoo_user_counted')) {
-    incrementDailyStats({ users: 1 });
-    localStorage.setItem('surveoo_user_counted', 'true');
-  }
+        if (!name || !email || !message) {
+          alert("Please fill all fields.");
+          btn.disabled = false;
+          btn.textContent = "Send Message";
+          return;
+        }
 
-  // 3) Increment clicks, but only once per session to avoid spam
-  let clickCounted = false;
-  window.addEventListener('click', () => {
-    if (!clickCounted) {
-      incrementDailyStats({ clicks: 1 });
-      clickCounted = true;
+        try {
+          await push(ref(db, "surveoocontacts"), {
+            name,
+            email,
+            message,
+            submittedAt: serverTimestamp(),
+          });
+          alert("Thanks for reaching out! We will get back to you soon.");
+          form.reset();
+        } catch (error) {
+          console.error("Error sending contact message:", error);
+          alert("Oops! Something went wrong. Please try again.");
+        }
+
+        btn.disabled = false;
+        btn.textContent = "Send Message";
+      });
+    }
+
+    // FAQ toggle logic
+    document.querySelectorAll(".faq-question").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const expanded = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", !expanded);
+        const answer = document.getElementById(btn.getAttribute("aria-controls"));
+        if (!expanded) {
+          answer.classList.add("open");
+        } else {
+          answer.classList.remove("open");
+        }
+      });
+    });
+
+    // Referral badge modal
+    const referBadge = document.querySelector(".refer-badge");
+    if (referBadge) {
+      referBadge.addEventListener("click", () => {
+        const moneyEarned = 0;
+        const friendsJoined = 0;
+        const referralLink = window.location.href;
+
+        // Disable background scroll
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const modal = document.createElement("div");
+        modal.classList.add("modal-overlay");
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+        modal.setAttribute("aria-label", "Referral Program Details");
+
+        const content = document.createElement("div");
+        content.classList.add("modal-content");
+
+        content.innerHTML = `
+          <h2 style="margin-top:0; margin-bottom: 15px; font-weight: 700;">Refer & Earn $1</h2>
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            Share your referral link and earn $1 for every successful signup!
+          </p>
+
+          <div style="font-size: 15px; margin-bottom: 15px;">
+            <strong>Money Earned:</strong> $${moneyEarned.toFixed(2)} &nbsp;&nbsp;
+            <strong>Friends Joined:</strong> ${friendsJoined}
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <input
+              type="text"
+              readonly
+              value="${referralLink}"
+              style="width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; user-select: all;"
+              aria-label="Referral link"
+            />
+            <button id="copyBtn" class="modal-button" style="width: 100%; margin-top: 10px;">Copy</button>
+            <button id="shareBtn" class="modal-button" style="
+              width: 100%;
+              margin-top: 10px;
+              background: linear-gradient(90deg, #06b6d4, #3b82f6);
+            ">Share</button>
+          </div>
+
+          <button id="closeBtn" class="modal-button close-btn" style="width: 100%;">Close</button>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Copy link functionality
+        document.getElementById("copyBtn").addEventListener("click", async () => {
+          const input = content.querySelector("input");
+          input.select();
+          input.setSelectionRange(0, 99999);
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(input.value);
+              alert("Referral link copied to clipboard!");
+            } else {
+              const successful = document.execCommand("copy");
+              if (successful) {
+                alert("Referral link copied to clipboard!");
+              } else {
+                throw new Error("execCommand copy failed");
+              }
+            }
+          } catch (err) {
+            alert("Copy failed. Please copy manually.");
+          }
+        });
+
+        // Share button functionality (Web Share API)
+        document.getElementById("shareBtn").addEventListener("click", async () => {
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: "Join with my referral link",
+                text: "Sign up through this referral and earn rewards!",
+                url: referralLink,
+              });
+            } catch (err) {
+              alert("Share cancelled or failed.");
+            }
+          } else {
+            alert("Sharing not supported on this device.");
+          }
+        });
+
+        // Close modal functionality
+        const closeModal = () => {
+          modal.remove();
+          document.body.style.overflow = originalOverflow;
+        };
+
+        document.getElementById("closeBtn").addEventListener("click", closeModal);
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal();
+        });
+        const escListener = (e) => {
+          if (e.key === "Escape") {
+            closeModal();
+            document.removeEventListener("keydown", escListener);
+          }
+        };
+        document.addEventListener("keydown", escListener);
+      });
+    }
+
+    // --- Stats increment logic ---
+
+    // 1) Always increment views by 1 on page load
+    incrementDailyStats({ views: 1 });
+
+    // 2) Increment users by 1 only once per device using localStorage
+    if (!localStorage.getItem("surveoo_user_counted")) {
+      incrementDailyStats({ users: 1 });
+      localStorage.setItem("surveoo_user_counted", "true");
+    }
+
+    // 3) Increment clicks only once per session, and only on the hero CTA button
+    const ctaBtn = document.getElementById("hero-cta-btn");
+    if (ctaBtn) {
+      let clickCounted = false;
+      ctaBtn.addEventListener("click", () => {
+        if (!clickCounted) {
+          incrementDailyStats({ clicks: 1 });
+          clickCounted = true;
+        }
+      });
+    } else {
+      console.warn('Hero CTA button with id "hero-cta-btn" not found.');
     }
   });
 </script>
+
 </html>
