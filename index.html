@@ -934,4 +934,92 @@ svg.refer-badge text {
   document.addEventListener('keydown', escListener);
 });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Helper to get today's date string YYYY-MM-DD
+  function getTodayDate() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  // Firebase transaction increment helper
+  async function incrementRef(refPath, incrementBy = 1) {
+    const dbRef = ref(db, refPath);
+    try {
+      await runTransaction(dbRef, (current) => (current || 0) + incrementBy);
+    } catch (e) {
+      console.error(`Failed to increment ${refPath}`, e);
+    }
+  }
+
+  // Increment daily stats function
+  async function incrementDailyStats({ views = 0, clicks = 0, users = 0 } = {}) {
+    const today = getTodayDate();
+    const dailyPath = `stats/daily/${today}`;
+
+    // Transaction for daily stats object
+    const dailyRef = ref(db, dailyPath);
+    try {
+      await runTransaction(dailyRef, (currentData) => {
+        if (!currentData) {
+          return {
+            views,
+            clicks,
+            users,
+            updatedAt: Date.now(),
+          };
+        }
+        return {
+          views: (currentData.views || 0) + views,
+          clicks: (currentData.clicks || 0) + clicks,
+          users: (currentData.users || 0) + users,
+          updatedAt: Date.now(),
+        };
+      });
+    } catch (e) {
+      console.error('Failed to increment daily stats', e);
+    }
+
+    // Increment total counters
+    if (views) await incrementRef('stats/views', views);
+    if (clicks) await incrementRef('stats/clicks', clicks);
+    if (users) await incrementRef('stats/users', users);
+  }
+
+  // Logic start here:
+
+  // 1) Always increment views by 1 on page load
+  incrementDailyStats({ views: 1 });
+
+  // 2) Increment users by 1 only once per device using localStorage
+  if (!localStorage.getItem('surveoo_user_counted')) {
+    incrementDailyStats({ users: 1 });
+    localStorage.setItem('surveoo_user_counted', 'true');
+  }
+
+  // 3) Increment clicks, but only once per session to avoid spam
+  let clickCounted = false;
+  window.addEventListener('click', () => {
+    if (!clickCounted) {
+      incrementDailyStats({ clicks: 1 });
+      clickCounted = true;
+    }
+  });
+</script>
 </html>
