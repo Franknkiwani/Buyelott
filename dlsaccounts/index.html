@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Surveoo — Surveys That Pay 2025</title>
+  <style>
+    /* Base and Reset */
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #fff;
+      color: #222;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0.5rem;
+      overflow-x: hidden;
+      line-height: 1.4;
+    }
+    a {
+      color: #f97316;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    header {
+      background: white;
+      padding: 0.75rem 0.5rem;
+      border: 2px solid black;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      gap: 0.4rem;
+      white-space: nowrap;
+      margin-bottom: 0.5rem;
+    }
+    .left-group {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
+    svg.verified {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .title-container {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .title-container h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #28a745;
+      -webkit-text-stroke: 1px black;
+      text-stroke: 1px black;
+    }
+    .title-container small {
+      font-weight: 500;
+      font-size: 0.65rem;
+      color: black;
+      margin-top: 1px;
+    }
+    nav.right-group {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    svg.refer-badge {
+      cursor: pointer;
+      width: 100px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .tagline {
+      text-align: center;
+      margin: 0.6rem 0 1rem 0;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #555;
+      user-select: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 0.3rem;
+    }
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0 0.5rem;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      user-select: none;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .stat-item {
+      flex: 1 1 33%;
+      text-align: center;
+      min-width: 0;
+      padding: 0.5rem 0.25rem;
+      border-right: 1px solid #ddd;
+    }
+    .stat-item:last-child {
+      border-right: none;
+    }
+    .stat-value {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #28a745;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.15rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 1rem 1rem 1.5rem 1rem;
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      background: #f0fff4;
+      user-select: none;
+      margin-bottom: 1rem;
+    }
+    .hero h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #28a745;
+      margin: 0 0 0.6rem 0;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .hero p {
+      font-size: 0.9rem;
+      color: #333;
+      margin: 0 0 1rem 0;
+      line-height: 1.4;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-images {
+      display: flex;
+      justify-content: center;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .hero-images img {
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid #28a745;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(90deg, #f97316, #dc2626);
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 20px;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.5);
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+    .cta-button:hover {
+      background: linear-gradient(90deg, #dc2626, #f97316);
+    }
+
+    /* How It Works Section */
+    .how-it-works {
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      padding: 1rem 1rem 1.5rem 1rem;
+      margin-bottom: 1rem;
+      background: #f9fff9;
+      user-select: none;
+    }
+    .how-it-works h3 {
+      text-align: center;
+      color: #28a745;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .steps {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: nowrap;
+      gap: 0.7rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .step {
+      flex: 0 0 70px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #333;
+      user-select: none;
+    }
+    .step svg {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 0.3rem;
+      stroke: #28a745;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* Testimonials Section */
+    .testimonials {
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      background: #f0fff4;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .testimonials h3 {
+      text-align: center;
+      color: #28a745;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .testimonial {
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      color: #444;
+      user-select: none;
+    }
+    .testimonial strong {
+      display: block;
+      margin-top: 0.5rem;
+      color: #28a745;
+      font-weight: 700;
+    }
+
+    /* FAQ Section */
+    .faq {
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      padding: 1rem 1rem 1.5rem 1rem;
+      background: #f9fff9;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    .faq h3 {
+      color: #28a745;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+    .faq-item {
+      border-top: 1px solid #ddd;
+      padding: 0.5rem 0;
+    }
+    .faq-item:first-child {
+      border-top: none;
+    }
+    .faq-question {
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      position: relative;
+      padding-right: 20px;
+      user-select: none;
+    }
+    .faq-question::after {
+      content: "+";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 900;
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .faq-question.active::after {
+      content: "-";
+      transform: translateY(-50%);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 0.3rem;
+      transition: max-height 0.35s ease;
+      padding-left: 5px;
+    }
+    .faq-answer.open {
+      max-height: 500px; /* big enough for content */
+    }
+
+    /* Contact Section */
+    .contact {
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      background: #f0fff4;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    .contact h3 {
+      text-align: center;
+      color: #28a745;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .contact p {
+      font-size: 0.9rem;
+      color: #333;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .contact-form input,
+    .contact-form textarea {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border: 1.5px solid #28a745;
+      border-radius: 8px;
+      resize: vertical;
+    }
+    .contact-form button {
+      background: #28a745;
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 20px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+    .contact-form button:hover {
+      background: #1e7b2c;
+    }
+
+    /* Footer disclaimer */
+    footer {
+      font-size: 0.75rem;
+      color: #666;
+      text-align: center;
+      margin: 1rem 0 2rem 0;
+      user-select: none;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.2;
+    }
+    header {
+  position: sticky;
+  top: 0;
+  z-index: 9999; /* Keep it above everything */
+  background: white; /* Make sure background covers content behind */
+}
+svg.refer-badge {
+  width: 140px !important;       /* wider */
+  height: 38px !important;       /* taller */
+  cursor: pointer;
+}
+
+svg.refer-badge rect {
+  stroke-width: 3 !important;    /* thicker border */
+  rx: 20;
+  ry: 20;
+}
+
+svg.refer-badge text {
+  font-size: 14px !important;    /* smaller text */
+  font-weight: 800;
+  fill: white !important;
+  user-select: none;
+}
+.hero .cta-button {
+  background: linear-gradient(90deg, #a7f3d0, #06b6d4); /* Light cyan to cyan */
+  box-shadow: 0 0 0 2px #000 inset; /* Black outline */
+  color: black;
+  transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.hero .cta-button:hover {
+  background: linear-gradient(90deg, #06b6d4, #a7f3d0); /* Reverse gradient */
+  box-shadow: 0 0 0 2.5px #000 inset;
+  color: #111;
+}
+/* Disable text selection and tap highlight */
+* {
+  user-select: none;          /* Prevent text selection */
+  -webkit-user-select: none;  /* Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE10+ */
+  -webkit-tap-highlight-color: transparent; /* Remove blue highlight on mobile */
+}
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Modal content box */
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Buttons */
+.modal-button {
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  margin-top: 15px;
+  color: white;
+  background: linear-gradient(90deg, #f97316, #dc2626);
+}
+
+.modal-button.close-btn {
+  background: #eee;
+  color: #333;
+  margin-top: 20px;
+}
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="left-group">
+      <svg
+        class="verified"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="#28a745"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-label="Verified"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9 12.5l2 2 4-4" stroke="#28a745" />
+      </svg>
+      <div class="title-container">
+        <h1>SURVEYS</h1>
+        <small>that pay in 2025</small>
+      </div>
+    </div>
+   <nav class="right-group" role="navigation" aria-label="Referral">
+  <svg
+    class="refer-badge"
+    viewBox="0 0 130 34"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Refer and Earn one dollar"
+    style="cursor: pointer;"
+  >
+    <defs>
+      <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f97316" />
+        <stop offset="100%" stop-color="#dc2626" />
+      </linearGradient>
+      <style>
+        .text {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+            Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+            sans-serif;
+          font-weight: 600;
+          font-size: 12px;
+          fill: white;
+          user-select: none;
+          white-space: nowrap;
+        }
+      </style>
+    </defs>
+    <rect
+      x="1"
+      y="1"
+      width="128"
+      height="32"
+      rx="16"
+      ry="16"
+      fill="url(#grad2)"
+      stroke="black"
+      stroke-width="2"
+    />
+    <text x="65" y="22" text-anchor="middle" class="text">
+      Refer & Earn $1
+    </text>
+  </svg>
+</nav>
+  </header>
+
+  <div class="tagline" title="Surveys that pay in 2025 — Join the movement!">
+    Surveys that pay in 2025 — Join the movement!
+  </div>
+
+<section class="stats-bar" role="region" aria-label="Survey statistics">
+  <div class="stat-item" title="30,700,000+ Users">
+    <div class="stat-value">30.7M+</div>
+    <div class="stat-label">Users</div>
+  </div>
+  <div class="stat-item" title="$10,000,000+ Paid Out">
+    <div class="stat-value">$10M+</div>
+    <div class="stat-label">Paid Out</div>
+  </div>
+  <div class="stat-item" title="105,500,000+ Surveys Launched">
+    <div class="stat-value">105.5M+</div>
+    <div class="stat-label">Surveys</div>
+  </div>
+</section>
+  <!-- Hero Section -->
+  <section class="hero" role="region" aria-labelledby="hero-title">
+    <h2 id="hero-title">Surveoo</h2>
+    <p>
+      Surveoo is a legit survey site that pays real money for your opinions. Join thousands of users who
+      are earning easy cash by sharing their thoughts on exciting surveys. Start today and watch your earnings grow!
+    </p>
+    <div class="hero-images" aria-label="Surveoo screenshots or promotional images">
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnkSA5kPndncF4MYt8GyHgO7NsfTLZHWjvuqSpVRQOYHaqECPiKAimK8E&s=10"
+        alt="Surveoo screenshot 1"
+        loading="lazy"
+      />
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSP3StjNJw-T_Tlpcd6zr21oZ_NP5Vym1qyFeQstk04VrRDavpW3dpDR4A&s=10"
+        alt="Surveoo screenshot 2"
+        loading="lazy"
+      />
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyFbduPHs_d0kWQ9BUK4XGHWVWK0pmrb9mB_BTQ59EA089Yb3k6wUHo80&s=10"
+        alt="Surveoo screenshot 3"
+        loading="lazy"
+      />
+    </div>
+    <a href="https://mylead.global/offer/surveoo" class="cta-button" target="_blank" rel="noopener noreferrer" aria-label="Start earning now with Surveoo">
+      Start Earning Now
+    </a>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" role="region" aria-labelledby="how-it-works-title">
+    <h3 id="how-it-works-title">How It Works</h3>
+    <div class="steps">
+      <div class="step" aria-label="Step 1: Sign up free">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-8m-4 4h8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>Sign up free</div>
+      </div>
+      <div class="step" aria-label="Step 2: Complete surveys">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="4" y="3" width="16" height="18" rx="2" ry="2"/>
+          <path d="M8 10h8M8 14h4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>Complete surveys</div>
+      </div>
+      <div class="step" aria-label="Step 3: Earn rewards">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 12h8M12 8v8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>Earn rewards</div>
+      </div>
+      <div class="step" aria-label="Step 4: Withdraw cash">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2v20m-6-6h12"/>
+          <rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>
+        </svg>
+        <div>Withdraw cash</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials" role="region" aria-labelledby="testimonials-title">
+    <h3 id="testimonials-title">What Users Say</h3>
+    <blockquote class="testimonial" tabindex="0">
+      "Surveoo changed the game for me. Easy surveys and real payouts – legit as hell!" 
+      <strong>- Jason M.</strong>
+    </blockquote>
+    <blockquote class="testimonial" tabindex="0">
+      "I was skeptical at first, but Surveoo actually pays out on time. Highly recommend!"
+      <strong>- Amina K.</strong>
+    </blockquote>
+    <blockquote class="testimonial" tabindex="0">
+      "Love how simple and mobile-friendly it is. Earned my first $30 within a week."
+      <strong>- Thabo N.</strong>
+    </blockquote>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" role="region" aria-labelledby="faq-title">
+    <h3 id="faq-title">Frequently Asked Questions</h3>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false" aria-controls="faq1" id="faq1-btn">
+        Is Surveoo really free to join?
+      </button>
+      <div class="faq-answer" id="faq1" role="region" aria-labelledby="faq1-btn">
+        Yes! Signing up and participating in surveys on Surveoo is completely free with no hidden fees.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false" aria-controls="faq2" id="faq2-btn">
+        How do I get paid?
+      </button>
+      <div class="faq-answer" id="faq2" role="region" aria-labelledby="faq2-btn">
+        You can withdraw your earnings via PayPal or other popular payment methods once you reach the minimum payout threshold.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false" aria-controls="faq3" id="faq3-btn">
+        What if I don’t qualify for a survey?
+      </button>
+      <div class="faq-answer" id="faq3" role="region" aria-labelledby="faq3-btn">
+        Surveys are targeted based on your profile. If you don’t qualify, you can simply try another survey.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false" aria-controls="faq4" id="faq4-btn">
+        Can anyone worldwide join Surveoo?
+      </button>
+      <div class="faq-answer" id="faq4" role="region" aria-labelledby="faq4-btn">
+        Surveoo supports users from many countries, but availability may vary depending on your location.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false" aria-controls="faq5" id="faq5-btn">
+        How fast can I expect payouts?
+      </button>
+      <div class="faq-answer" id="faq5" role="region" aria-labelledby="faq5-btn">
+        Payouts are typically processed within 7-10 business days after your withdrawal request.
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" role="region" aria-labelledby="contact-title">
+    <h3 id="contact-title">Contact & Support</h3>
+    <p>Have questions? Reach out to us or visit Surveoo’s official support page.</p>
+    <form class="contact-form" onsubmit="event.preventDefault(); alert('Thanks for reaching out! We will get back to you soon.');">
+      <input type="text" name="name" placeholder="Your Name" required aria-label="Your Name" />
+      <input type="email" name="email" placeholder="Your Email" required aria-label="Your Email" />
+      <textarea name="message" rows="3" placeholder="Your Message" required aria-label="Your Message"></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Privacy & Terms -->
+ <footer style="text-align:center; padding: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; color: #555;">
+  <p>
+    <a href="https://www.surveoo.com/en/cgu" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">
+      Privacy Policy
+    </a> | 
+    <a href="https://www.surveoo.com/en/cgu" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">
+      Terms & Conditions
+    </a>
+  </p>
+<p style="font-style: italic; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+  Earnings vary based on effort and demographics. Many users find Surveoo a reliable way to earn extra cash.
+</p>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  // Your actual Firebase config from memory:
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Contact form handler
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector(".contact-form");
+    const btn = form.querySelector("button");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = "Sending...";
+
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+
+      if (!name || !email || !message) {
+        alert("Please fill all fields.");
+        btn.disabled = false;
+        btn.textContent = "Send Message";
+        return;
+      }
+
+      try {
+        await push(ref(db, "surveoocontacts"), {
+          name,
+          email,
+          message,
+          submittedAt: serverTimestamp()
+        });
+        alert("Thanks for reaching out! We will get back to you soon.");
+        form.reset();
+      } catch (error) {
+        console.error("Error sending contact message:", error);
+        alert("Oops! Something went wrong. Please try again.");
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Send Message";
+    });
+  });
+
+  // FAQ toggle logic
+  document.querySelectorAll('.faq-question').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !expanded);
+      const answer = document.getElementById(btn.getAttribute('aria-controls'));
+      if (!expanded) {
+        answer.classList.add('open');
+      } else {
+        answer.classList.remove('open');
+      }
+    });
+  });
+  document.querySelector('.refer-badge').addEventListener('click', () => {
+  // Default stats
+  const moneyEarned = 0;
+  const friendsJoined = 0;
+  const referralLink = window.location.href;
+
+  // Disable background scrolling
+  const originalOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+
+  // Create overlay modal container
+  const modal = document.createElement('div');
+  modal.classList.add('modal-overlay');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'Referral Program Details');
+
+  // Create modal content box
+  const content = document.createElement('div');
+  content.classList.add('modal-content');
+
+  content.innerHTML = `
+    <h2 style="margin-top:0; margin-bottom: 15px; font-weight: 700;">Refer & Earn $1</h2>
+    <p style="font-size: 16px; margin-bottom: 20px;">
+      Share your referral link and earn $1 for every successful signup!
+    </p>
+
+    <div style="font-size: 15px; margin-bottom: 15px;">
+      <strong>Money Earned:</strong> $${moneyEarned.toFixed(2)} &nbsp;&nbsp;
+      <strong>Friends Joined:</strong> ${friendsJoined}
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <input
+        type="text"
+        readonly
+        value="${referralLink}"
+        style="width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; user-select: all;"
+        aria-label="Referral link"
+      />
+      <button id="copyBtn" class="modal-button" style="width: 100%; margin-top: 10px;">Copy</button>
+      <button id="shareBtn" class="modal-button" style="
+        width: 100%;
+        margin-top: 10px;
+        background: linear-gradient(90deg, #06b6d4, #3b82f6);
+      ">Share</button>
+    </div>
+
+    <button id="closeBtn" class="modal-button close-btn" style="width: 100%;">Close</button>
+  `;
+
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+
+  // Copy link functionality with fallback
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const input = content.querySelector('input');
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(input.value);
+        alert('Referral link copied to clipboard!');
+      } else {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          alert('Referral link copied to clipboard!');
+        } else {
+          throw new Error('execCommand copy failed');
+        }
+      }
+    } catch (err) {
+      alert('Copy failed. Please copy manually.');
+    }
+  });
+
+  // Share button functionality (Web Share API)
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Join with my referral link',
+          text: 'Sign up through this referral and earn rewards!',
+          url: referralLink,
+        });
+      } catch (err) {
+        alert('Share cancelled or failed.');
+      }
+    } else {
+      alert('Sharing not supported on this device.');
+    }
+  });
+
+  // Close modal functionality
+  const closeModal = () => {
+    modal.remove();
+    // Restore scrolling
+    document.body.style.overflow = originalOverflow;
+  };
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+
+  // Close modal when clicking outside the content box
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close modal on ESC key press
+  const escListener = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escListener);
+    }
+  };
+  document.addEventListener('keydown', escListener);
+});
+</script>
+</html>
