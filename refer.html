@@ -3,145 +3,32 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Referral Dashboard | CyberChat</title>
+<title>Referral Tracking...</title>
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
     background: #121212;
     color: #eee;
-    max-width: 600px;
-    margin: 1rem auto;
-    padding: 1rem;
-  }
-  h1 {
+    margin: 0;
     text-align: center;
-    margin-bottom: 0.5rem;
-  }
-  button {
-    background: #0a84ff;
-    border: none;
-    padding: 0.6em 1.2em;
-    color: white;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 0.3em;
-    transition: background 0.3s;
-  }
-  button:disabled {
-    background: #555;
-    cursor: default;
-  }
-  #logged {
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    font-style: italic;
-    text-align: center;
-  }
-  input#shareLink {
-    width: 100%;
-    padding: 0.5em;
-    font-size: 0.9rem;
-    margin: 0.7em 0 1em 0;
-    border-radius: 6px;
-    border: none;
-    user-select: all;
-    background: #222;
-    color: #eee;
-  }
-  #stats {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 1rem;
-    font-weight: 600;
-  }
-  #hitsList {
-    max-height: 300px;
-    overflow-y: auto;
-    border-top: 1px solid #444;
-    padding-top: 0.8em;
-  }
-  .hit {
-    margin-bottom: 0.8em;
-    padding-bottom: 0.6em;
-    border-bottom: 1px solid #333;
-  }
-  .hit .time {
-    font-weight: 700;
-    font-size: 0.85rem;
-  }
-  .hit .details {
-    font-size: 0.75rem;
-    color: #bbb;
-  }
-  .muted {
-    text-align: center;
-    color: #666;
-    font-style: italic;
-  }
-  footer {
-    text-align: center;
-    margin-top: 2rem;
-    font-size: 0.75rem;
-    color: #444;
-  }
-  #perVisit {
-    color: #0f0;
   }
 </style>
 </head>
 <body>
-
-<h1>Referral Dashboard</h1>
-<div id="logged">Not signed in</div>
-
-<div style="text-align:center;">
-  <button id="anonSignin">Sign In Anonymously</button>
-  <button id="googleSignin">Sign In with Google</button>
-</div>
-
-<label for="shareLink" style="font-weight:600; display:block; margin-top:1.5em;">
-  Your unique referral link (share this):
-</label>
-<input type="text" id="shareLink" readonly aria-label="Referral link" />
-
-<div style="text-align:center; margin-bottom: 1rem;">
-  <button id="copyBtn" aria-label="Copy referral link">Copy</button>
-  <button id="openLink" aria-label="Open referral link in new tab">Open Link</button>
-</div>
-
-<div id="stats">
-  <div>Visits: <span id="visits">0</span></div>
-  <div>Earnings: <span id="earnings">$0.00</span></div>
-  <div>Per Visit: <span id="perVisit">$0.02</span></div>
-</div>
-
-<h2>Recent Hits</h2>
-<div id="hitsList"><div class="muted">No hits yet.</div></div>
-
-<footer>© 2025 CyberChat</footer>
+<div id="message">Processing your visit...</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import {
-    getAuth,
-    signInAnonymously,
-    signInWithPopup,
-    GoogleAuthProvider,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import {
     getDatabase,
     ref,
-    update,
-    onValue,
-    push,
     runTransaction,
-    query,
-    limitToLast,
-    get,
-    child
+    push
   } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -156,171 +43,47 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getDatabase(app);
 
-  const anonBtn = document.getElementById('anonSignin');
-  const googleBtn = document.getElementById('googleSignin');
-  const logged = document.getElementById('logged');
-  const shareLinkInput = document.getElementById('shareLink');
-  const copyBtn = document.getElementById('copyBtn');
-  const openLinkBtn = document.getElementById('openLink');
-  const visitsEl = document.getElementById('visits');
-  const earningsEl = document.getElementById('earnings');
-  const perVisitEl = document.getElementById('perVisit');
-  const hitsList = document.getElementById('hitsList');
+  const messageEl = document.getElementById('message');
 
-  const defaultPerVisit = 0.02;
-  perVisitEl.textContent = `$${defaultPerVisit.toFixed(2)}`;
+  // Extract uid param from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const uid = urlParams.get('uid');
 
-  let currentUid = null;
-
-  function buildShareUrl(uid) {
-    return `${location.protocol}//${location.host}/refer.html?refer=${uid}`;
-  }
-
-  // Sign-in handlers
-  anonBtn.addEventListener('click', async () => {
-    anonBtn.disabled = true;
-    anonBtn.textContent = 'Signing in...';
-    try {
-      await signInAnonymously(auth);
-    } catch (err) {
-      alert('Auth error: ' + err.message);
-      anonBtn.disabled = false;
-      anonBtn.textContent = 'Sign In Anonymously';
-    }
-  });
-
-  googleBtn.addEventListener('click', async () => {
-    googleBtn.disabled = true;
-    googleBtn.textContent = 'Signing in with Google...';
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      alert('Google Sign-In error: ' + err.message);
-      googleBtn.disabled = false;
-      googleBtn.textContent = 'Sign In with Google';
-    }
-  });
-
-  // Copy link button
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(shareLinkInput.value);
-      copyBtn.textContent = 'Copied';
-      setTimeout(() => copyBtn.textContent = 'Copy', 1200);
-    } catch {
-      alert('Copy failed. Try manually.');
-    }
-  });
-
-  // Open link button
-  openLinkBtn.addEventListener('click', () => {
-    window.open(shareLinkInput.value, '_blank');
-  });
-
-  // Auth state listener
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUid = user.uid;
-      logged.textContent = `Signed in — ${user.isAnonymous ? 'anonymous user' : (user.email || 'user')}`;
-      shareLinkInput.value = buildShareUrl(currentUid);
-
-      anonBtn.disabled = true;
-      anonBtn.textContent = 'Signed In';
-      googleBtn.disabled = true;
-      googleBtn.textContent = 'Signed In';
-
-      // Set createdAt only once
-      const createdAtRef = ref(db, `referrals/${currentUid}/meta/createdAt`);
-      const snap = await get(createdAtRef);
-      if (!snap.exists()) {
-        update(ref(db, `referrals/${currentUid}/meta`), { createdAt: Date.now() });
-      }
-
-      startStatsListener(currentUid);
-    } else {
-      currentUid = null;
-      logged.textContent = 'Not signed in';
-      shareLinkInput.value = `${location.protocol}//${location.host}/`;
-      anonBtn.disabled = false;
-      anonBtn.textContent = 'Sign In Anonymously';
-      googleBtn.disabled = false;
-      googleBtn.textContent = 'Sign In with Google';
-
-      visitsEl.textContent = '0';
-      earningsEl.textContent = '$0.00';
-      hitsList.innerHTML = '<div class="muted">No hits yet.</div>';
-    }
-  });
-
-  // Stats listener
-  function startStatsListener(uid) {
-    const visitsCountRef = ref(db, `referrals/${uid}/visitsCount`);
-    onValue(visitsCountRef, (snapshot) => {
-      const visits = snapshot.val() || 0;
-      visitsEl.textContent = visits;
-      earningsEl.textContent = '$' + (visits * defaultPerVisit).toFixed(2);
-    });
-
-    const hitsQuery = query(ref(db, `referrals/${uid}/hits`), limitToLast(20));
-    onValue(hitsQuery, (snapshot) => {
-      const val = snapshot.val();
-      hitsList.innerHTML = '';
-      if (!val) {
-        hitsList.innerHTML = '<div class="muted">No hits yet.</div>';
-        return;
-      }
-      const hitsArr = Object.values(val).sort((a, b) => b.t - a.t);
-      hitsArr.forEach(hit => {
-        const div = document.createElement('div');
-        div.className = 'hit';
-        const timeStr = new Date(hit.t).toLocaleString();
-        div.innerHTML = `
-          <div class="time">${timeStr}</div>
-          <div class="details">${hit.ua || 'unknown'} • referrer: ${hit.ref || '-'}</div>
-        `;
-        hitsList.appendChild(div);
+  if (!uid) {
+    messageEl.textContent = "No referral ID found in URL.";
+  } else {
+    recordVisit(uid)
+      .then(() => {
+        messageEl.textContent = "Thanks for visiting! Redirecting...";
+        // After a delay, redirect wherever you want, or just show a message
+        setTimeout(() => {
+          window.location.href = "/"; // or your homepage or anywhere
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error(err);
+        messageEl.textContent = "Oops, error recording visit.";
       });
-    });
   }
 
-  // Visitor referral hit recording
-  (function handleReferralHit() {
-    // Grab refer param from URL ?refer=UID
-    const urlParams = new URLSearchParams(location.search);
-    const referUid = urlParams.get('refer');
-    if (!referUid) return;
-
-    // Wait for auth to avoid counting owner's own visits
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.uid === referUid) {
-        console.log('Owner visited own link, skipping hit.');
-        return;
-      }
-      recordHit(referUid);
-    });
-
-  })();
-
-  // Record a hit
-  function recordHit(uid) {
-    if (!uid) return;
+  async function recordVisit(uid) {
     const visitsCountRef = ref(db, `referrals/${uid}/visitsCount`);
-    runTransaction(visitsCountRef, curr => (curr || 0) + 1).catch(console.error);
+    const hitsRef = ref(db, `referrals/${uid}/hits`);
 
-    const hitRef = ref(db, `referrals/${uid}/hits`);
+    // Atomically increment visitsCount
+    await runTransaction(visitsCountRef, (current) => (current || 0) + 1);
+
+    // Push hit details
     const hitData = {
       t: Date.now(),
       ua: navigator.userAgent.slice(0, 140),
-      ref: document.referrer ? (document.referrer.length > 120 ? document.referrer.slice(0, 120) : document.referrer) : ''
+      ref: document.referrer ? (document.referrer.length > 120 ? document.referrer.slice(0, 120) : document.referrer) : ""
     };
-    push(hitRef, hitData).catch(console.error);
+
+    await push(hitsRef, hitData);
   }
-
 </script>
-
 </body>
 </html>
