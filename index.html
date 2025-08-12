@@ -785,15 +785,12 @@ form#emailForm label {
     <button class="share-action" id="webShareBtn">📤 Share via Web API</button>
   </div>
 </div>
-
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
+<!-- Load Firebase v8 only -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-  // ===== Firebase Setup =====
+  // ==== Firebase Config & Init ====
   const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -804,29 +801,110 @@ form#emailForm label {
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
     measurementId: "G-LLT6F9WRKH"
   };
-
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // ===== Email Form Submit & Redirect =====
+  // ==== Unique User ID (one localStorage key) ====
+  const USER_CODE_KEY = 'analyticsUserCode';
+  let userCode = localStorage.getItem(USER_CODE_KEY);
+  if (!userCode) {
+    // Use crypto API if available, fallback otherwise
+    if (crypto && crypto.randomUUID) {
+      userCode = crypto.randomUUID();
+    } else {
+      // Simple fallback
+      userCode = 'user-' + Math.random().toString(36).substring(2, 15);
+    }
+    localStorage.setItem(USER_CODE_KEY, userCode);
+  }
+
+  // ==== Fetch user country once ====
+  async function getUserCountry() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error('Geo lookup failed');
+      const data = await res.json();
+      return (data.country_code || 'Unknown').toUpperCase();
+    } catch (err) {
+      console.warn('Geo lookup failed:', err);
+      return 'Unknown';
+    }
+  }
+
+  // ==== Track a visit (increment views and user visits) ====
+  async function trackVisit() {
+    const country = await getUserCountry();
+    const userRef = db.ref('analytics/users/' + userCode);
+
+    // Update or create user visit data atomically
+    userRef.transaction(user => {
+      if (user === null) {
+        return {
+          visits: 1,
+          clicks: 0,
+          country,
+          createdAt: Date.now(),
+          lastVisit: Date.now()
+        };
+      } else {
+        return {
+          visits: (user.visits || 0) + 1,
+          clicks: user.clicks || 0,
+          country: user.country || country,
+          createdAt: user.createdAt || Date.now(),
+          lastVisit: Date.now()
+        };
+      }
+    });
+
+    // Increment total views globally
+    const viewsRef = db.ref('analytics/views');
+    viewsRef.transaction(current => (current || 0) + 1);
+  }
+
+  // ==== Track a click (increment clicks globally and per user) ====
+  function trackClick() {
+    const userRef = db.ref('analytics/users/' + userCode);
+    userRef.transaction(user => {
+      if (user === null) {
+        return {
+          visits: 0,
+          clicks: 1,
+          country: 'Unknown',
+          lastVisit: Date.now()
+        };
+      } else {
+        return {
+          visits: user.visits || 0,
+          clicks: (user.clicks || 0) + 1,
+          country: user.country || 'Unknown',
+          lastVisit: user.lastVisit || Date.now()
+        };
+      }
+    });
+
+    const clicksRef = db.ref('analytics/clicks');
+    clicksRef.transaction(current => (current || 0) + 1);
+  }
+
+  // ==== Email form submission + save email + redirect ====
   const emailForm = document.getElementById('emailForm');
   const statusMessage = document.getElementById('statusMessage');
 
-  emailForm.addEventListener('submit', async (e) => {
+  emailForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const emailInput = document.getElementById('emailInput');
-    const email = emailInput.value.trim();
+    const email = emailInput?.value.trim();
 
-    // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Please enter a valid email.');
       return;
     }
 
     statusMessage.textContent = 'Saving... Redirecting...';
     statusMessage.classList.add('visible');
 
-    // Save to Firebase
     try {
       const newEntryRef = db.ref('emails').push();
       await newEntryRef.set({
@@ -834,7 +912,10 @@ form#emailForm label {
         submittedAt: Date.now()
       });
     } catch (err) {
-      console.error("Firebase save failed:", err);
+      console.error('Firebase save failed:', err);
+      alert('Failed to save email, try again.');
+      statusMessage.textContent = '';
+      return;
     }
 
     // Geo-based redirect
@@ -854,41 +935,36 @@ form#emailForm label {
     }
   });
 
-  // ===== Share Modal Logic =====
+  // ==== Share modal logic ====
   const modal = document.getElementById("shareModal");
   const closeModal = document.getElementById("closeModal");
   const copyLinkBtn = document.getElementById("copyLinkBtn");
   const webShareBtn = document.getElementById("webShareBtn");
   const shareBtn = document.getElementById("shareBtn");
 
-  // Open modal
-  shareBtn.addEventListener("click", () => {
-    // On mobile, open Web Share API directly
+  shareBtn?.addEventListener("click", () => {
     if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
       navigator.share({
         title: document.title,
         text: "Check out this page!",
         url: window.location.href
       }).catch(err => console.error("Error sharing:", err));
-    } else {
+    } else if (modal) {
       modal.style.display = "block";
     }
   });
 
-  // Close modal
-  closeModal.addEventListener("click", () => {
-    modal.style.display = "none";
+  closeModal?.addEventListener("click", () => {
+    if (modal) modal.style.display = "none";
   });
 
-  // Close if clicking outside content
   window.addEventListener("click", (e) => {
-    if (e.target === modal) {
+    if (modal && e.target === modal) {
       modal.style.display = "none";
     }
   });
 
-  // Copy link to clipboard
-  copyLinkBtn.addEventListener("click", () => {
+  copyLinkBtn?.addEventListener("click", () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
       alert("Link copied to clipboard!");
@@ -897,8 +973,7 @@ form#emailForm label {
     });
   });
 
-  // Share via Web Share API
-  webShareBtn.addEventListener("click", async () => {
+  webShareBtn?.addEventListener("click", async () => {
     if (navigator.share) {
       try {
         await navigator.share({
@@ -914,182 +989,11 @@ form#emailForm label {
     }
   });
 
-
-  // ===== Analytics Tracking =====
+  // ==== Initialize tracking ====
   (async () => {
-    const analyticsRef = db.ref('analytics');
+    await trackVisit();
 
-    // Unique user tracking via localStorage UUID
-    const USER_CODE_KEY = 'userTrackingCode';
-    let userCode = localStorage.getItem(USER_CODE_KEY);
-    if (!userCode) {
-      userCode = crypto.randomUUID();
-      localStorage.setItem(USER_CODE_KEY, userCode);
-    }
-
-    // Fetch user geo info once
-    let userCountry = 'Unknown';
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      if (response.ok) {
-        const data = await response.json();
-        userCountry = (data.country_code || 'Unknown').toUpperCase();
-      }
-    } catch (err) {
-      console.warn('Geo lookup failed', err);
-    }
-
-    // References for analytics
-    const globalViewsRef = analyticsRef.child('views');
-    const globalClicksRef = analyticsRef.child('clicks');
-    const usersRef = analyticsRef.child('users').child(userCode);
-
-    // Increment global views count
-    globalViewsRef.transaction(current => (current || 0) + 1);
-
-    // Create or update user data atomically (visits + lastVisit + country)
-    usersRef.transaction(currentData => {
-      if (currentData === null) {
-        return {
-          visits: 1,
-          clicks: 0,
-          country: userCountry,
-          createdAt: Date.now(),
-          lastVisit: Date.now()
-        };
-      } else {
-        return {
-          ...currentData,
-          visits: (currentData.visits || 0) + 1,
-          lastVisit: Date.now(),
-          country: currentData.country || userCountry,
-        };
-      }
-    });
-
-    // Track clicks on the "enter" button (assuming id="enterButton" or fallback)
-    const enterButton = document.getElementById('enterButton') || document.querySelector('button[type="submit"]');
-    if (enterButton) {
-      enterButton.addEventListener('click', () => {
-        // Increment global clicks
-        globalClicksRef.transaction(current => (current || 0) + 1);
-
-        // Increment user clicks count atomically
-        usersRef.child('clicks').transaction(current => (current || 0) + 1);
-      });
-    } else {
-      console.warn('Enter button not found for click tracking.');
-    }
-  })();
-</script>
-</body>
-
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-
-<script>
-  // Initialize Firebase (your config)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // Helper to generate random user code
-  function generateUserCode() {
-    return 'xxxxxxxxxxxx4xxxyxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = (Math.random() * 16) | 0,
-            v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-
-  // Get or create unique user id stored in localStorage
-  let userCode = localStorage.getItem('analyticsUserCode');
-  if (!userCode) {
-    userCode = generateUserCode();
-    localStorage.setItem('analyticsUserCode', userCode);
-  }
-
-  // Track a "visit" to your site
-  function trackVisit(country) {
-    const userRef = db.ref('analytics/users/' + userCode);
-
-    // Use a transaction for atomic increment to avoid race conditions
-    userRef.transaction(user => {
-      if (user === null) {
-        return {
-          visits: 1,
-          clicks: 0,
-          country: country || '-',
-          lastVisit: Date.now(),
-        };
-      } else {
-        return {
-          visits: (user.visits || 0) + 1,
-          clicks: user.clicks || 0,
-          country: country || user.country || '-',
-          lastVisit: Date.now(),
-        };
-      }
-    });
-
-    // Increment total views atomically
-    const viewsRef = db.ref('analytics/views');
-    viewsRef.transaction(current => (current || 0) + 1);
-  }
-
-  // Track a click event by user
-  function trackClick() {
-    const userRef = db.ref('analytics/users/' + userCode);
-    userRef.transaction(user => {
-      if (user === null) {
-        return {
-          visits: 0,
-          clicks: 1,
-          country: '-',
-          lastVisit: Date.now(),
-        };
-      } else {
-        return {
-          visits: user.visits || 0,
-          clicks: (user.clicks || 0) + 1,
-          country: user.country || '-',
-          lastVisit: user.lastVisit || Date.now(),
-        };
-      }
-    });
-
-    // Increment total clicks atomically
-    const clicksRef = db.ref('analytics/clicks');
-    clicksRef.transaction(current => (current || 0) + 1);
-  }
-
-  // Detect user country via free IP API
-  async function getUserCountry() {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (!res.ok) throw new Error('Failed to get IP data');
-      const data = await res.json();
-      return data.country_name || '-';
-    } catch {
-      return '-';
-    }
-  }
-
-  // Initialize tracking on page load
-  (async function initTracking() {
-    const country = await getUserCountry();
-    trackVisit(country);
-
-    // Attach click tracking to elements with class 'track-click'
+    // Track clicks on any element with class 'track-click'
     document.addEventListener('click', e => {
       if (e.target.closest('.track-click')) {
         trackClick();
@@ -1097,4 +1001,5 @@ form#emailForm label {
     });
   })();
 </script>
+
 </html>
