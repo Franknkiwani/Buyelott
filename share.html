@@ -415,8 +415,9 @@
   const defaultPerVisit = 0.02; // dollars per visit
   perVisitEl.textContent = `$${defaultPerVisit.toFixed(2)}`;
 
+  // Build share URL using query param ?uid=
   function buildShareUrl(uid) {
-    return `${location.protocol}//${location.host}/refer.html=${uid}`;
+    return `${location.protocol}//${location.host}/refer.html?uid=${uid}`;
   }
 
   // Anonymous sign-in
@@ -495,8 +496,6 @@
 
   // stats listener
   function startStatsListener(uid) {
-    const baseRef = ref(db, `referrals/${uid}`);
-
     onValue(ref(db, `referrals/${uid}/visitsCount`), (snapshot) => {
       const v = snapshot.val() || 0;
       visitsEl.textContent = v;
@@ -525,24 +524,11 @@
 
   // visitor side: detect and record referral hits
   (function handleIncomingReferral() {
-    let refer = null;
-
-    // Check URL pathname for /refer.html=UID
-    const path = location.pathname;
-    if (path.startsWith('/refer.html=')) {
-      refer = path.split('=')[1];
-    }
-
-    // fallback to query param ?refer=UID
-    if (!refer) {
-      const urlParams = new URLSearchParams(location.search);
-      refer = urlParams.get('refer');
-    }
-
+    const urlParams = new URLSearchParams(location.search);
+    const refer = urlParams.get('uid');
     if (!refer) return; // no referral uid
 
     onAuthStateChanged(auth, (user) => {
-      // ignore if owner visits own link
       if (user && user.uid === refer) {
         console.log('Owner visited own link, ignoring.');
         return;
@@ -552,13 +538,11 @@
 
     // Also attempt record immediately (even if not signed in yet)
     recordHit(refer);
-
   })();
 
   // record a hit in Firebase DB
   function recordHit(uid) {
     if (!uid) return;
-    const baseRef = ref(db, `referrals/${uid}`);
 
     runTransaction(ref(db, `referrals/${uid}/visitsCount`), (curr) => (curr || 0) + 1)
       .catch(err => console.error('Transaction error:', err));
