@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Share • CyberChat</title>
+<style>
+  :root {
+    --bg:#0b0f14;
+    --card:#0f1720;
+    --muted:#9aa6b2;
+    --accent:#5eead4;
+  }
+  * {
+    box-sizing: border-box;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* prevent horizontal scroll */
+    max-width: 100vw;
+    box-sizing: border-box;
+    font-size: 13px; /* smaller base font */
+    text-align: center; /* center all text globally */
+  }
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+    background: linear-gradient(180deg,#06080a, #07111a);
+    color: #e6eef6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 12px; /* reduced padding */
+  }
+  .wrap {
+    width: 100%;
+    max-width: 960px;
+    padding: 12px;
+    margin: 0 auto;
+  }
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.03);
+    backdrop-filter: blur(8px);
+    padding: 14px; /* smaller padding */
+    border-radius: 12px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* tighter gap */
+    margin-bottom: 12px; /* smaller margin */
+    justify-content: center; /* center horizontally */
+    text-align: center;
+  }
+  .logo {
+    width: 32px; /* smaller logo */
+    height: 32px;
+    border-radius: 6px;
+    background: linear-gradient(135deg,#0ea5a4,#7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    font-size: 18px; /* smaller font */
+    user-select: none;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 16px; /* smaller heading */
+    margin: 0 0 8px 0;
+  }
+  p.lead {
+    margin: 6px 0 12px;
+    color: var(--muted);
+    font-size: 12px; /* smaller lead text */
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 280px; /* narrower right panel */
+    gap: 12px; /* smaller gap */
+  }
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* left column */
+  .box {
+    background: rgba(255,255,255,0.02);
+    padding: 12px; /* smaller padding */
+    border-radius: 10px;
+  }
+  label {
+    display: block;
+    font-size: 12px; /* smaller label */
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-align: center; /* center labels */
+  }
+  .input, .btn, .stat {
+    width: 100%;
+    padding: 8px; /* smaller padding */
+    border-radius: 6px; /* tighter radius */
+    border: 1px solid rgba(255,255,255,0.04);
+    background: transparent;
+    color: inherit;
+    font-size: 12px; /* smaller font */
+    text-align: center;
+  }
+  .btn {
+    cursor: pointer;
+    background: linear-gradient(90deg,#0ea5a4,#7c3aed);
+    color: #021018;
+    border: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .btn:hover:not(:disabled) {
+    background: linear-gradient(90deg,#14b8a6,#8b5cf6);
+  }
+  .muted {
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  .copy-row {
+    display: flex;
+    flex-wrap: wrap; /* allow wrapping */
+    gap: 6px; /* smaller gap */
+    justify-content: center; /* center children */
+    align-items: center;
+  }
+  .copy-row input {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: 12px;
+    padding: 8px;
+    text-align: center;
+  }
+  .copy-row button {
+    flex-shrink: 0;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+  /* Responsive button layout for small screens */
+  @media (max-width: 480px) {
+    .copy-row button {
+      min-width: 48%;
+      margin-bottom: 6px;
+    }
+    .copy-row {
+      justify-content: space-between;
+    }
+  }
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px; /* smaller gap */
+  }
+  .small {
+    font-size: 11px; /* smaller text */
+    color: var(--muted);
+  }
+  .hits {
+    margin-top: 12px;
+    max-height: 140px; /* smaller height */
+    overflow: auto;
+  }
+  .hit {
+    padding: 6px; /* smaller padding */
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.02);
+    margin-bottom: 6px;
+    background: linear-gradient(180deg,rgba(255,255,255,0.01),transparent);
+    font-size: 12px;
+  }
+  /* right column */
+  .panel {
+    padding: 10px; /* smaller padding */
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.006));
+    border: 1px solid rgba(255,255,255,0.03);
+    text-align: center;
+  }
+  .big {
+    font-size: 20px; /* smaller big text */
+    font-weight: 700;
+  }
+  .mini {
+    font-size: 11px; /* smaller mini text */
+    color: var(--muted);
+  }
+  footer {
+    margin-top: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px; /* smaller footer */
+  }
+  /* Make copy buttons full width */
+.copy-row button {
+  width: 100% !important; /* force full width */
+  min-width: unset;        /* remove min-width restriction */
+  flex-shrink: 0;          /* keep button size stable */
+  white-space: nowrap;     /* keep text on one line */
+  box-sizing: border-box;
+}
+
+/* Responsive fix: on wider screens, keep buttons full width but limit max-width */
+@media (min-width: 481px) {
+  .copy-row button {
+    max-width: 280px; /* optional, keep buttons reasonable */
+  }
+}
+
+/* Style visits and earnings containers */
+.visits, .earnings {
+  width: 100%; /* full width */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* subtle white border */
+  border-radius: 10px;
+  padding: 12px; /* nice padding */
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+  color: #e6eef6;
+  margin-bottom: 12px; /* spacing below */
+  text-align: center;  /* center text */
+}
+/* Target the flex container wrapping the stats */
+.stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-direction: column; /* stack vertically */
+}
+
+/* Make each stat panel full width */
+.stats-container .stat.panel {
+  width: 100% !important;  /* force full width */
+  min-width: unset !important; /* remove min-width */
+  box-sizing: border-box;
+}
+
+/* Optional: add a max-width if you want limits on big screens */
+@media (min-width: 720px) {
+  .stats-container {
+    flex-direction: row;  /* switch to row on bigger screens */
+  }
+  .stats-container .stat.panel {
+    width: 48% !important;
+    min-width: 140px !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card">
+    <header>
+      <div class="logo">CC</div>
+      <div>
+        <h1>Share & Earn — CyberChat</h1>
+        <p class="lead">
+          Generate a unique refer link and earn for visits. Links look like: 
+          <code>https://cyberchat.online/refer.html=YOUR_UID</code>
+        </p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="box">
+          <label>Your account</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button id="anonSignin" class="btn" style="width:auto;flex-grow:1;min-width:140px;">Sign in anonymously</button>
+            <button id="googleSignin" class="btn" style="width:auto;flex-grow:1;min-width:140px;">Sign in with Google</button>
+            <div id="logged" style="margin-left:8px;color:var(--muted);min-width:160px;white-space:nowrap;">Not signed in</div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+          <label>Your share link</label>
+          <div class="copy-row">
+            <input id="shareLink" class="input" readonly value="https://cyberchat.online/">
+            <button id="copyBtn" class="btn" style="width:96px">Copy</button>
+          </div>
+          <div class="small" style="margin-top:8px">
+            You can paste this link anywhere. Visitors who open it will increment your visit count.
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+<label>Stats & earnings</label>
+<div class="stats-container" style="margin-bottom:8px;">
+  <div class="stat panel">
+    <div class="small">Visits</div>
+    <div id="visits" class="big">0</div>
+  </div>
+  <div class="stat panel">
+    <div class="small">Estimated earnings</div>
+    <div id="earnings" class="big">$0.00</div>
+  </div>
+</div>
+          <div class="small" style="margin-bottom:6px;">Per-visit rate: <strong id="perVisit">$0.02</strong></div>
+          <div class="small" style="font-weight:600; margin-bottom:12px; color:#0ee;">Minimum withdrawal: $5 via PayPal</div>
+
+          <div style="margin-top:12px">
+            <label>Last hits</label>
+            <div class="hits" id="hitsList"><div class="muted">No hits yet.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="mini">Your unique code</div>
+              <div id="uidBig" style="font-weight:700;font-size:18px">—</div>
+            </div>
+            <div style="text-align:right">
+              <div class="mini">Quick actions</div>
+              <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+                <button id="openLink" class="btn" style="padding:8px 12px;background:transparent;color:var(--accent);border:1px solid rgba(94,234,212,0.12)">Open link</button>
+              </div>
+            </div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+          <div class="small">How it works</div>
+          <ol style="padding-left:18px;margin-top:8px;color:var(--muted);font-size:13px">
+            <li>Sign in anonymously or with Google.</li>
+            <li>Share your link: <code>/refer.html=YOUR_UID</code>.</li>
+            <li>When someone visits your link, we record the hit and update your stats.</li>
+          </ol>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+          <div class="small">Notes</div>
+          <ul style="color:var(--muted);font-size:13px; margin-top:6px;">
+            <li>Clicks from the owner's own browser are ignored while signed in.</li>
+            <li>Data is securely stored in Firebase Realtime Database under <code>/referrals/{uid}</code>.</li>
+            <li>Minimum withdrawal amount is $5 via PayPal.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getAuth,
+    signInAnonymously,
+    signInWithPopup,
+    GoogleAuthProvider,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    update,
+    onValue,
+    push,
+    runTransaction,
+    query,
+    limitToLast
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  // ----- YOUR FIREBASE CONFIG -----
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  // Initialize Firebase app, auth, database
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  // Elements
+  const anonBtn = document.getElementById('anonSignin');
+  const googleBtn = document.getElementById('googleSignin');
+  const logged = document.getElementById('logged');
+  const shareLinkInput = document.getElementById('shareLink');
+  const copyBtn = document.getElementById('copyBtn');
+  const uidBig = document.getElementById('uidBig');
+  const visitsEl = document.getElementById('visits');
+  const earningsEl = document.getElementById('earnings');
+  const perVisitEl = document.getElementById('perVisit');
+  const hitsList = document.getElementById('hitsList');
+  const openLinkBtn = document.getElementById('openLink');
+
+  let currentUid = null;
+  const defaultPerVisit = 0.02; // dollars per visit
+  perVisitEl.textContent = `$${defaultPerVisit.toFixed(2)}`;
+
+  function buildShareUrl(uid) {
+    return `${location.protocol}//${location.host}/refer.html=${uid}`;
+  }
+
+  // Anonymous sign-in
+  anonBtn.addEventListener('click', async () => {
+    anonBtn.disabled = true;
+    anonBtn.textContent = 'Signing in...';
+    try {
+      await signInAnonymously(auth);
+      anonBtn.textContent = 'Signed in';
+    } catch (err) {
+      console.error(err);
+      anonBtn.disabled = false;
+      anonBtn.textContent = 'Sign in anonymously';
+      alert('Auth error: ' + err.message);
+    }
+  });
+
+  // Google sign-in
+  googleBtn.addEventListener('click', async () => {
+    googleBtn.disabled = true;
+    googleBtn.textContent = 'Signing in with Google...';
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      googleBtn.textContent = 'Signed in';
+    } catch (err) {
+      console.error(err);
+      googleBtn.disabled = false;
+      googleBtn.textContent = 'Sign in with Google';
+      alert('Google Sign-In error: ' + err.message);
+    }
+  });
+
+  // Copy link
+  copyBtn.addEventListener('click', async () => {
+    shareLinkInput.select();
+    shareLinkInput.setSelectionRange(0, 99999);
+    try {
+      await navigator.clipboard.writeText(shareLinkInput.value);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => copyBtn.textContent = 'Copy', 1200);
+    } catch {
+      alert('Copy failed');
+    }
+  });
+
+  // Open link button
+  openLinkBtn.addEventListener('click', () => {
+    const url = shareLinkInput.value;
+    window.open(url, '_blank');
+  });
+
+  // Listen auth state changes
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUid = user.uid;
+      logged.textContent = `Signed in — ${user.isAnonymous ? 'anonymous' : user.email || 'user'}`;
+      uidBig.textContent = currentUid;
+      shareLinkInput.value = buildShareUrl(currentUid);
+
+      // ensure meta exists
+      update(ref(db, `referrals/${currentUid}/meta`), { createdAt: Date.now() });
+
+      // start listening to stats
+      startStatsListener(currentUid);
+    } else {
+      currentUid = null;
+      logged.textContent = 'Not signed in';
+      uidBig.textContent = '—';
+      shareLinkInput.value = `${location.protocol}//${location.host}/`;
+      visitsEl.textContent = '0';
+      earningsEl.textContent = '$0.00';
+      hitsList.innerHTML = '<div class="muted">No hits yet.</div>';
+    }
+  });
+
+  // stats listener
+  function startStatsListener(uid) {
+    const baseRef = ref(db, `referrals/${uid}`);
+
+    onValue(ref(db, `referrals/${uid}/visitsCount`), (snapshot) => {
+      const v = snapshot.val() || 0;
+      visitsEl.textContent = v;
+      earningsEl.textContent = '$' + (v * defaultPerVisit).toFixed(2);
+    });
+
+    // last hits
+    const hitsQuery = query(ref(db, `referrals/${uid}/hits`), limitToLast(20));
+    onValue(hitsQuery, (snapshot) => {
+      const val = snapshot.val();
+      hitsList.innerHTML = '';
+      if (!val) {
+        hitsList.innerHTML = '<div class="muted">No hits yet.</div>';
+        return;
+      }
+      const arr = Object.values(val).sort((a, b) => b.t - a.t);
+      arr.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'hit';
+        const time = new Date(h.t).toLocaleString();
+        el.innerHTML = `<div style="font-weight:600">${time}</div><div class="small">${h.ua || 'unknown'} • referrer: ${h.ref || '-'}</div>`;
+        hitsList.appendChild(el);
+      });
+    });
+  }
+
+  // visitor side: detect and record referral hits
+  (function handleIncomingReferral() {
+    let refer = null;
+
+    // Check URL pathname for /refer.html=UID
+    const path = location.pathname;
+    if (path.startsWith('/refer.html=')) {
+      refer = path.split('=')[1];
+    }
+
+    // fallback to query param ?refer=UID
+    if (!refer) {
+      const urlParams = new URLSearchParams(location.search);
+      refer = urlParams.get('refer');
+    }
+
+    if (!refer) return; // no referral uid
+
+    onAuthStateChanged(auth, (user) => {
+      // ignore if owner visits own link
+      if (user && user.uid === refer) {
+        console.log('Owner visited own link, ignoring.');
+        return;
+      }
+      recordHit(refer);
+    });
+
+    // Also attempt record immediately (even if not signed in yet)
+    recordHit(refer);
+
+  })();
+
+  // record a hit in Firebase DB
+  function recordHit(uid) {
+    if (!uid) return;
+    const baseRef = ref(db, `referrals/${uid}`);
+
+    runTransaction(ref(db, `referrals/${uid}/visitsCount`), (curr) => (curr || 0) + 1)
+      .catch(err => console.error('Transaction error:', err));
+
+    const hit = {
+      t: Date.now(),
+      ua: navigator.userAgent.slice(0, 140),
+      ref: document.referrer ? (document.referrer.length > 120 ? document.referrer.slice(0, 120) : document.referrer) : ''
+    };
+
+    push(ref(db, `referrals/${uid}/hits`), hit)
+      .catch(err => console.error('Push hit error:', err));
+  }
+</script>
+
+</body>
+</html>
