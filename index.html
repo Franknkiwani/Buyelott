@@ -4,6 +4,88 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Join Qkkie</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  // ==== Firebase Config ====
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ==== Session Setup ====
+  const sessionId = Date.now() + "_" + Math.floor(Math.random() * 100000); // unique session
+  const sessionStart = Date.now();
+  let clickCount = 0;
+
+  // ==== Track Clicks ====
+  document.addEventListener('click', (e) => {
+    clickCount++;
+    db.ref('usavisitors/' + sessionId).update({ clicks: clickCount });
+  });
+
+  // ==== Track Session Duration ====
+  function updateSessionTime() {
+    const duration = Math.floor((Date.now() - sessionStart) / 1000); // seconds
+    db.ref('usavisitors/' + sessionId).update({ sessionTime: duration });
+  }
+  setInterval(updateSessionTime, 5000); // every 5 seconds
+
+  // ==== Track Visitor Info ====
+  async function trackVisitor() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+
+      const visitorInfo = {
+        country: data.country_name || 'Unknown',
+        countryCode: data.country || 'Unknown',
+        ip: data.ip || 'Unknown',
+        city: data.city || 'Unknown',
+        region: data.region || 'Unknown',
+        postal: data.postal || 'Unknown',
+        org: data.org || 'Unknown',
+        timezone: data.timezone || 'Unknown',
+        latitude: data.latitude || 0,
+        longitude: data.longitude || 0,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || 'Direct',
+        startedAt: Date.now(),
+        clicks: clickCount,
+        sessionTime: 0
+      };
+
+      // Save only US visitors, can expand later
+      if(visitorInfo.country === 'United States') {
+        db.ref('usavisitors/' + sessionId).set(visitorInfo);
+      } else {
+        console.log('Non-US visitor detected:', visitorInfo.country);
+        // Optional: redirect non-US
+        // window.location.href = 'ads.html';
+      }
+
+    } catch (err) {
+      console.error('Error fetching visitor info:', err);
+    }
+  }
+
+  trackVisitor();
+
+  // ==== End Session on Close ====
+  window.addEventListener('beforeunload', () => {
+    updateSessionTime();
+    db.ref('usavisitors/' + sessionId).update({ endedAt: Date.now() });
+  });
+</script>
   <style>
     /* iOS-style clean design with dark body */
     body {
