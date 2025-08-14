@@ -375,5 +375,81 @@
     }
     checkCountry();
   </script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  // ==== Firebase Config ====
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9h7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ==== Session Setup ====
+  const sessionId = Date.now() + "_" + Math.floor(Math.random()*1000); // unique session
+  let sessionStart = Date.now();
+  let clickCount = 0;
+
+  // ==== Track Clicks ====
+  document.addEventListener('click', () => {
+    clickCount++;
+    db.ref('usavisitors/' + sessionId).update({ clicks: clickCount });
+  });
+
+  // ==== Track Session Duration ====
+  function updateSessionTime() {
+    const duration = Math.floor((Date.now() - sessionStart)/1000); // seconds
+    db.ref('usavisitors/' + sessionId).update({ sessionTime: duration });
+  }
+  setInterval(updateSessionTime, 5000); // update every 5 seconds
+
+  // ==== Get Visitor Info ====
+  async function trackVisitor() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+
+      const visitorInfo = {
+        country: data.country_name || 'Unknown',
+        ip: data.ip,
+        city: data.city,
+        region: data.region,
+        org: data.org,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || 'Direct',
+        startedAt: Date.now(),
+        clicks: clickCount,
+        sessionTime: 0
+      };
+
+      if(visitorInfo.country === 'United States'){
+        db.ref('usavisitors/' + sessionId).set(visitorInfo);
+      } else {
+        console.log('Non-US visitor:', visitorInfo.country);
+        // Optional: redirect non-US visitors
+        // window.location.href = 'ads.html';
+      }
+
+    } catch(err) {
+      console.error('Could not fetch visitor info', err);
+    }
+  }
+
+  trackVisitor();
+
+  // ==== End Session on Page Close ====
+  window.addEventListener('beforeunload', () => {
+    updateSessionTime();
+    db.ref('usavisitors/' + sessionId).update({ endedAt: Date.now() });
+  });
+</script>
 </body>
 </html>
