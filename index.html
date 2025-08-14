@@ -161,5 +161,88 @@
     }
     checkCountry();
   </script>
+<script>
+  // ==== Firebase Config & Init ====
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ==== Unique User ID ====
+  const USER_CODE_KEY = 'analyticsUserCode';
+  let userCode = localStorage.getItem(USER_CODE_KEY);
+  if (!userCode) {
+    userCode = (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'user-' + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem(USER_CODE_KEY, userCode);
+  }
+
+  // ==== Fetch user country ====
+  async function getUserCountry() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (!res.ok) throw new Error('Geo lookup failed');
+      const data = await res.json();
+      return (data.country_code || 'Unknown').toUpperCase();
+    } catch (err) {
+      console.warn('Geo lookup failed:', err);
+      return 'Unknown';
+    }
+  }
+
+  // ==== Track visit ====
+  async function trackVisit() {
+    const country = await getUserCountry();
+    const userRef = db.ref('analytics/users/' + userCode);
+
+    userRef.transaction(user => {
+      if (!user) {
+        return { visits: 1, clicks: 0, country, createdAt: Date.now(), lastVisit: Date.now() };
+      } else {
+        return {
+          visits: (user.visits || 0) + 1,
+          clicks: user.clicks || 0,
+          country: user.country || country,
+          createdAt: user.createdAt || Date.now(),
+          lastVisit: Date.now()
+        };
+      }
+    });
+
+    const viewsRef = db.ref('analytics/views');
+    viewsRef.transaction(current => (current || 0) + 1);
+  }
+
+  // ==== Track click ====
+  function trackClick() {
+    const userRef = db.ref('analytics/users/' + userCode);
+    userRef.transaction(user => {
+      if (!user) return { visits: 0, clicks: 1, country: 'Unknown', lastVisit: Date.now() };
+      return {
+        visits: user.visits || 0,
+        clicks: (user.clicks || 0) + 1,
+        country: user.country || 'Unknown',
+        lastVisit: user.lastVisit || Date.now()
+      };
+    });
+
+    const clicksRef = db.ref('analytics/clicks');
+    clicksRef.transaction(current => (current || 0) + 1);
+  }
+
+  // ==== Initialize tracking ====
+  (async () => {
+    await trackVisit();
+    // Track clicks everywhere on the page
+    document.addEventListener('click', trackClick);
+  })();
+</script>
 </body>
 </html>
