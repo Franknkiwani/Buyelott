@@ -19,8 +19,14 @@
     font-size: 20px;
     font-weight: 600;
   }
-  .container {
-    padding: 10px;
+  .container { padding: 10px; }
+  .filters { margin-bottom: 10px; }
+  select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
   }
   .stats {
     background-color: #fff;
@@ -29,14 +35,10 @@
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     flex-wrap: wrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
   .stat-item { margin: 5px 0; font-size: 14px; color: #1c1c1e; }
-  #commandInput { 
-    width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc; 
-    margin-bottom: 10px; font-size: 14px;
-  }
   .visit-card {
     background-color: #fff;
     border-radius: 15px;
@@ -54,8 +56,17 @@
 
 <header>Visitor Dashboard</header>
 <div class="container">
-  <input type="text" id="commandInput" placeholder="Type command (e.g., 'last 7 days' or 'Aug 1 to Aug 10')">
-  
+  <div class="filters">
+    <select id="periodSelect">
+      <option value="today">Today</option>
+      <option value="yesterday">Yesterday</option>
+      <option value="last7">Last 7 Days</option>
+      <option value="thisMonth">This Month</option>
+      <option value="lastMonth">Last Month</option>
+      <option value="allTime">All Time</option>
+    </select>
+  </div>
+
   <div class="stats" id="statsPanel">
     <div class="stat-item">Total Views: <span id="totalViews">0</span></div>
     <div class="stat-item">Clicks: <span id="totalClicks">0</span></div>
@@ -91,14 +102,12 @@ const totalViewsEl = document.getElementById('totalViews');
 const totalClicksEl = document.getElementById('totalClicks');
 const totalSuccessEl = document.getElementById('totalSuccess');
 const totalFailedEl = document.getElementById('totalFailed');
-const commandInput = document.getElementById('commandInput');
+const periodSelect = document.getElementById('periodSelect');
 
 let allVisits = [];
 
-// Format timestamp
 function parseTimestamp(ts) { return ts ? new Date(ts) : new Date(); }
 
-// Update stats
 function updateStats(filteredVisits) {
   totalViewsEl.textContent = filteredVisits.length;
   totalClicksEl.textContent = filteredVisits.reduce((sum, v) => sum + (v.clicks || 0), 0);
@@ -106,7 +115,6 @@ function updateStats(filteredVisits) {
   totalFailedEl.textContent = filteredVisits.filter(v => v.status === 'failed').length;
 }
 
-// Render cards
 function renderVisits(filteredVisits) {
   container.innerHTML = '';
   filteredVisits.forEach(v => {
@@ -123,35 +131,44 @@ function renderVisits(filteredVisits) {
   });
 }
 
-// Parse AI-style command to get start & end dates
-function parseCommand(cmd) {
-  cmd = cmd.toLowerCase();
+function getPeriodRange(period) {
   const now = new Date();
-  let start = new Date(0);
-  let end = new Date();
-
-  if (cmd.includes('last')) {
-    const match = cmd.match(/last (\d+) day/);
-    if (match) {
-      start = new Date();
-      start.setDate(now.getDate() - parseInt(match[1]));
+  let start, end;
+  switch(period){
+    case 'today':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(start);
+      end.setHours(23,59,59,999);
+      break;
+    case 'yesterday':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() -1);
+      end = new Date(start);
+      end.setHours(23,59,59,999);
+      break;
+    case 'last7':
       end = now;
-    }
-  } else {
-    // Look for date ranges like "Aug 1 to Aug 10"
-    const dates = cmd.match(/(\w+ \d{1,2})/g);
-    if (dates && dates.length === 2) {
-      start = new Date(dates[0] + ' ' + now.getFullYear());
-      end = new Date(dates[1] + ' ' + now.getFullYear());
-      end.setHours(23,59,59);
-    }
+      start = new Date();
+      start.setDate(now.getDate() - 6);
+      start.setHours(0,0,0,0);
+      break;
+    case 'thisMonth':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = now;
+      break;
+    case 'lastMonth':
+      start = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0,23,59,59,999);
+      break;
+    case 'allTime':
+      start = new Date(0);
+      end = now;
+      break;
   }
-  return { start, end };
+  return {start, end};
 }
 
-// Filter visits by period
-function filterVisits(cmd = 'last 7 days') {
-  const { start, end } = parseCommand(cmd);
+function filterVisitsByPeriod(period) {
+  const { start, end } = getPeriodRange(period);
   const filtered = allVisits.filter(v => {
     const t = parseTimestamp(v.timestamp);
     return t >= start && t <= end;
@@ -160,24 +177,24 @@ function filterVisits(cmd = 'last 7 days') {
   renderVisits(filtered);
 }
 
-// Preload existing visits
+// Preload all visits and always show today’s data initially
 get(visitsRef).then(snapshot => {
-  if (snapshot.exists()) {
+  if(snapshot.exists()){
     allVisits = Object.values(snapshot.val());
-    filterVisits(); // default last 7 days
+    filterVisitsByPeriod('today'); // default to today
   }
-});
+}).catch(e => console.error('Firebase get error', e));
 
 // Real-time updates
 onChildAdded(visitsRef, snapshot => {
   const visit = snapshot.val();
   allVisits.push(visit);
-  filterVisits(commandInput.value || 'last 7 days');
+  filterVisitsByPeriod(periodSelect.value);
 });
 
-// Handle command input
-commandInput.addEventListener('change', () => {
-  filterVisits(commandInput.value || 'last 7 days');
+// Handle dropdown change
+periodSelect.addEventListener('change', () => {
+  filterVisitsByPeriod(periodSelect.value);
 });
 </script>
 
