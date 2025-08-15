@@ -23,32 +23,14 @@
     padding: 10px;
   }
   .filters {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 10px;
     margin-bottom: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  .filters label {
-    margin-right: 10px;
-    font-size: 14px;
-  }
-  input[type="date"], input[type="time"] {
-    padding: 5px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-right: 10px;
-  }
-  button {
-    padding: 8px 16px;
-    background-color: #1c1c1e;
-    color: #fff;
-    border: none;
+  select {
+    padding: 8px;
     border-radius: 10px;
-    cursor: pointer;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
   }
   .stats {
     background-color: #fff;
@@ -57,8 +39,8 @@
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    flex-wrap: wrap;
   }
   .stat-item { margin: 5px 0; font-size: 14px; color: #1c1c1e; }
   .visit-card {
@@ -79,19 +61,14 @@
 <header>Visitor Dashboard</header>
 <div class="container">
   <div class="filters">
-    <div>
-      <label>From:</label>
-      <input type="date" id="fromDate">
-      <input type="time" id="fromTime" value="00:00">
-    </div>
-    <div>
-      <label>To:</label>
-      <input type="date" id="toDate">
-      <input type="time" id="toTime" value="23:59">
-    </div>
-    <div>
-      <button id="applyFilter">Apply</button>
-    </div>
+    <select id="periodSelect">
+      <option value="today">Today</option>
+      <option value="yesterday">Yesterday</option>
+      <option value="last7">Last 7 Days</option>
+      <option value="thisMonth">This Month</option>
+      <option value="lastMonth">Last Month</option>
+      <option value="allTime">All Time</option>
+    </select>
   </div>
 
   <div class="stats" id="statsPanel">
@@ -129,81 +106,102 @@ const totalViewsEl = document.getElementById('totalViews');
 const totalClicksEl = document.getElementById('totalClicks');
 const totalSuccessEl = document.getElementById('totalSuccess');
 const totalFailedEl = document.getElementById('totalFailed');
-
-const fromDateEl = document.getElementById('fromDate');
-const fromTimeEl = document.getElementById('fromTime');
-const toDateEl = document.getElementById('toDate');
-const toTimeEl = document.getElementById('toTime');
+const periodSelect = document.getElementById('periodSelect');
 
 let allVisits = [];
 
-// Helper: parse timestamp
 function parseTimestamp(ts) { return ts ? new Date(ts) : new Date(); }
 
-// Update stats panel
-function updateStats(visits) {
-  totalViewsEl.textContent = visits.length;
-  totalClicksEl.textContent = visits.reduce((sum,v)=>sum+(v.clicks||0),0);
-  totalSuccessEl.textContent = visits.filter(v=>v.status==='success').length;
-  totalFailedEl.textContent = visits.filter(v=>v.status==='failed').length;
+function updateStats(filteredVisits) {
+  totalViewsEl.textContent = filteredVisits.length;
+  totalClicksEl.textContent = filteredVisits.reduce((sum, v) => sum + (v.clicks || 0), 0);
+  totalSuccessEl.textContent = filteredVisits.filter(v => v.status === 'success').length;
+  totalFailedEl.textContent = filteredVisits.filter(v => v.status === 'failed').length;
 }
 
-// Render visit cards
-function renderVisits(visits) {
-  container.innerHTML='';
-  visits.forEach(v=>{
+function renderVisits(filteredVisits) {
+  container.innerHTML = '';
+  filteredVisits.forEach(v => {
     const card = document.createElement('div');
-    card.className='visit-card';
-    card.innerHTML=`
-      <h3>${v.country||'Unknown'} - <span class="${v.status==='success'?'status-success':'status-failed'}">${v.status}</span></h3>
-      <p><strong>Time:</strong> ${v.timestamp||'-'}</p>
-      <p><strong>Referrer:</strong> ${v.referrer||'-'}</p>
-      <p><strong>Device:</strong> ${v.device||'-'}</p>
-      <p><strong>Clicks:</strong> ${v.clicks||0}</p>
+    card.className = 'visit-card';
+    card.innerHTML = `
+      <h3>${v.country || 'Unknown'} - <span class="${v.status === 'success' ? 'status-success' : 'status-failed'}">${v.status}</span></h3>
+      <p><strong>Time:</strong> ${v.timestamp || '-'}</p>
+      <p><strong>Referrer:</strong> ${v.referrer || '-'}</p>
+      <p><strong>Device:</strong> ${v.device || '-'}</p>
+      <p><strong>Clicks:</strong> ${v.clicks || 0}</p>
     `;
     container.prepend(card);
   });
 }
 
-// Filter visits by selected date/time
-function filterVisits() {
-  const fromDate = fromDateEl.value;
-  const fromTime = fromTimeEl.value || '00:00';
-  const toDate = toDateEl.value;
-  const toTime = toTimeEl.value || '23:59';
+// Get period start & end
+function getPeriodRange(period) {
+  const now = new Date();
+  let start, end;
+  switch(period){
+    case 'today':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(start);
+      end.setHours(23,59,59,999);
+      break;
+    case 'yesterday':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() -1);
+      end = new Date(start);
+      end.setHours(23,59,59,999);
+      break;
+    case 'last7':
+      end = now;
+      start = new Date();
+      start.setDate(now.getDate() - 6);
+      start.setHours(0,0,0,0);
+      break;
+    case 'thisMonth':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = now;
+      break;
+    case 'lastMonth':
+      start = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0,23,59,59,999);
+      break;
+    case 'allTime':
+      start = new Date(0);
+      end = now;
+      break;
+  }
+  return {start, end};
+}
 
-  const from = fromDate ? new Date(`${fromDate}T${fromTime}:00`) : null;
-  const to = toDate ? new Date(`${toDate}T${toTime}:00`) : null;
-
-  const filtered = allVisits.filter(v=>{
-    const t=parseTimestamp(v.timestamp);
-    if(from && t<from) return false;
-    if(to && t>to) return false;
-    return true;
+function filterVisitsByPeriod(period) {
+  const { start, end } = getPeriodRange(period);
+  const filtered = allVisits.filter(v => {
+    const t = parseTimestamp(v.timestamp);
+    return t >= start && t <= end;
   });
-
   updateStats(filtered);
   renderVisits(filtered);
 }
 
-// Preload existing visits
-get(visitsRef).then(snapshot=>{
+// Preload all visits
+get(visitsRef).then(snapshot => {
   if(snapshot.exists()){
     allVisits = Object.values(snapshot.val());
-    filterVisits();
+    filterVisitsByPeriod(periodSelect.value);
   }
 });
 
-// Listen for new visits
-onChildAdded(visitsRef, snapshot=>{
+// Real-time updates
+onChildAdded(visitsRef, snapshot => {
   const visit = snapshot.val();
   allVisits.push(visit);
-  filterVisits();
+  filterVisitsByPeriod(periodSelect.value);
 });
 
-// Apply button
-document.getElementById('applyFilter').onclick = filterVisits;
-
+// Handle dropdown change
+periodSelect.addEventListener('change', () => {
+  filterVisitsByPeriod(periodSelect.value);
+});
 </script>
+
 </body>
 </html>
