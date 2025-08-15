@@ -1,871 +1,209 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Analytics Dashboard</title>
-  <style>
-    /* --- iOS style & mobile first --- */
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Text:wght@400;600&display=swap');
-
-    :root {
-      --blue: #007aff;
-      --gray-light: #f2f2f7;
-      --gray-dark: #1c1c1e;
-      --gray-mid: #3a3a3c;
-      --gray-text: #6e6e73;
-      --white: #fff;
-      --radius: 16px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.1);
-      --font-sans: 'SF Pro Text', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    }
-
-    /* Reset & base */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: var(--font-sans);
-      background: var(--gray-light);
-      color: var(--gray-dark);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      max-width: 100vw;
-      overflow-x: hidden;
-      padding-bottom: 40px;
-    }
-    h1 {
-      font-weight: 600;
-      font-size: 1.75rem;
-      margin: 0;
-      padding: 20px;
-      background: var(--white);
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 0 0 var(--radius) var(--radius);
-    }
-    /* 3-dot menu */
-    .menu-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 28px;
-      color: var(--blue);
-      user-select: none;
-      line-height: 1;
-      padding: 5px;
-      border-radius: 50%;
-      transition: background-color 0.2s ease;
-    }
-    .menu-btn:hover, .menu-btn:focus {
-      background-color: var(--gray-light);
-      outline: none;
-    }
-
-    main {
-      padding: 15px 15px 80px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Card */
-    .card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-      user-select: none;
-    }
-    .card h2 {
-      margin: 0 0 15px 0;
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: var(--blue);
-    }
-
-    /* Stats Row */
-    .stats-row {
-      display: flex;
-      justify-content: space-around;
-      font-weight: 600;
-      font-size: 1.5rem;
-      color: var(--gray-dark);
-    }
-    .stat-item {
-      text-align: center;
-      flex: 1;
-      padding: 0 10px;
-      border-right: 1px solid var(--gray-light);
-      user-select: all;
-    }
-    .stat-item:last-child {
-      border-right: none;
-    }
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--gray-text);
-      font-weight: 400;
-      margin-top: 5px;
-    }
-
-    /* Tabs for time filter */
-    .tabs {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-      margin-bottom: 10px;
-    }
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 8px 6px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--gray-text);
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      user-select: none;
-      transition: color 0.2s ease, border-color 0.2s ease;
-    }
-    .tab.active {
-      color: var(--blue);
-      border-color: var(--blue);
-    }
-    .tab:not(:last-child) {
-      margin-right: 5px;
-    }
-
-    /* Chart container */
-    #chartContainer {
-      position: relative;
-      height: 250px;
-      width: 100%;
-    }
-
-    /* Hidden menu panel */
-    #advancedPanel {
-      position: fixed;
-      top: 60px;
-      right: 15px;
-      width: 320px;
-      max-width: 90vw;
-      background: var(--white);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius);
-      padding: 15px;
-      max-height: calc(100vh - 80px);
-      overflow-y: auto;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 999;
-      font-size: 0.9rem;
-      user-select: text;
-    }
-    #advancedPanel.open {
-      transform: translateX(0);
-    }
-    #advancedPanel h3 {
-      margin-top: 0;
-      color: var(--blue);
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    /* User list table */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      color: var(--gray-dark);
-    }
-    th, td {
-      text-align: left;
-      padding: 8px 6px;
-      border-bottom: 1px solid var(--gray-light);
-      word-break: break-word;
-    }
-    th {
-      background-color: var(--gray-light);
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    tbody tr:hover {
-      background-color: #e6f0ff;
-    }
-
-    /* Scrollbar for panel */
-    #advancedPanel::-webkit-scrollbar {
-      width: 8px;
-    }
-    #advancedPanel::-webkit-scrollbar-thumb {
-      background-color: var(--blue);
-      border-radius: 10px;
-    }
-
-    /* Responsive */
-    @media (max-width: 400px) {
-      .stat-item {
-        font-size: 1.2rem;
-      }
-      h1 {
-        font-size: 1.4rem;
-        padding: 15px 15px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitor Dashboard</title>
+<style>
+  body {
+    font-family: 'SF Pro Display', sans-serif;
+    background-color: #f2f2f7;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background-color: #1c1c1e;
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .container {
+    padding: 10px;
+  }
+  .filters {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .filters label {
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  input[type="date"], input[type="time"] {
+    padding: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+  }
+  button {
+    padding: 8px 16px;
+    background-color: #1c1c1e;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .stats {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .stat-item { margin: 5px 0; font-size: 14px; color: #1c1c1e; }
+  .visit-card {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .visit-card h3 { margin: 0 0 5px 0; font-size: 16px; color: #1c1c1e; }
+  .visit-card p { margin: 2px 0; font-size: 14px; color: #555; }
+  .status-success { color: #28a745; font-weight: bold; }
+  .status-failed { color: #ff3b30; font-weight: bold; }
+</style>
 </head>
 <body>
-  <h1>
-    Analytics Dashboard
-    <button aria-label="Toggle advanced menu" id="menuToggle" class="menu-btn" title="More options">⋯</button>
-  </h1>
 
-  <main>
-    <section class="card" aria-label="Summary statistics">
-      <div class="stats-row">
-        <div class="stat-item" aria-live="polite">
-          <div id="totalViews" class="stat-value">–</div>
-          <div class="stat-label">Views</div>
-        </div>
-        <div class="stat-item" aria-live="polite">
-          <div id="totalClicks" class="stat-value">–</div>
-          <div class="stat-label">Clicks</div>
-        </div>
-      </div>
-
-      <div class="tabs" role="tablist" aria-label="Select time range">
-        <div role="tab" tabindex="0" class="tab active" data-range="today">Today</div>
-        <div role="tab" tabindex="-1" class="tab" data-range="yesterday">Yesterday</div>
-        <div role="tab" tabindex="-1" class="tab" data-range="week">This Week</div>
-        <div role="tab" tabindex="-1" class="tab" data-range="month">This Month</div>
-        <div role="tab" tabindex="-1" class="tab" data-range="all">All Time</div>
-      </div>
-
-      <div id="chartContainer" aria-live="polite">
-        <canvas id="analyticsChart" aria-label="Analytics chart"></canvas>
-      </div>
-    </section>
-  </main>
-
-  <aside id="advancedPanel" aria-hidden="true" aria-label="Advanced analytics and user data">
-    <h3>Users</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Visits</th>
-          <th>Clicks</th>
-          <th>Country</th>
-          <th>Last Visit</th>
-        </tr>
-      </thead>
-      <tbody id="usersTableBody">
-        <tr><td colspan="5">Loading users...</td></tr>
-      </tbody>
-    </table>
-         </div>
-      </div>
-
-   </div>
-   <section class="email-container" aria-label="Recent Emails">
-    <div class="header">
-      <h2>Recent Emails</h2>
-      <div class="dots-menu" id="dotsMenu" aria-label="Admin menu" role="button" tabindex="0" aria-expanded="false" aria-haspopup="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+<header>Visitor Dashboard</header>
+<div class="container">
+  <div class="filters">
+    <div>
+      <label>From:</label>
+      <input type="date" id="fromDate">
+      <input type="time" id="fromTime" value="00:00">
     </div>
-
-    <div class="admin-tools" id="adminTools" role="region" aria-live="polite" aria-hidden="true">
-      <button id="deleteSelectedBtn" disabled>Delete Selected</button>
-      <button id="cancelAdminBtn">Cancel</button>
+    <div>
+      <label>To:</label>
+      <input type="date" id="toDate">
+      <input type="time" id="toTime" value="23:59">
     </div>
+    <div>
+      <button id="applyFilter">Apply</button>
+    </div>
+  </div>
 
-    <ul class="email-list" id="emailList" tabindex="0">
-      <li>Loading emails...</li>
-    </ul>
-    <button class="cta-button" id="emailNowBtn" type="button">Email Now</button>
-  </section>
-  </head>
-<body>
-  <style>
-    body {
-      margin: 0; padding: 15px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #f9f9f9;
-      color: #111;
-      max-width: 100vw;
-      overflow-x: hidden;
-    }
-    .email-container {
-      width: 100%;
-      border: 2px solid #007aff;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 2px 10px rgba(0,122,255,0.15);
-      padding: 20px;
-      box-sizing: border-box;
-      max-width: 600px;
-      margin: 0 auto 30px;
-      display: flex;
-      flex-direction: column;
-      height: 500px;
-      position: relative;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      user-select: none;
-    }
-    h2 {
-      margin: 0;
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #007aff;
-    }
-    .dots-menu {
-      position: relative;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      align-items: center;
-      padding: 5px 0;
-    }
-    .dots-menu span {
-      width: 5px;
-      height: 5px;
-      background: #007aff;
-      border-radius: 50%;
-      display: block;
-    }
-    .admin-tools {
-      position: absolute;
-      top: 50px;
-      right: 20px;
-      background: white;
-      border: 1px solid #007aff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,122,255,0.2);
-      padding: 10px 15px;
-      display: none;
-      z-index: 10;
-      width: 160px;
-      user-select: none;
-    }
-    .admin-tools button {
-      display: block;
-      width: 100%;
-      margin: 5px 0;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 8px 0;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #007aff;
-      color: white;
-      transition: background-color 0.25s ease;
-    }
-    .admin-tools button:disabled {
-      background: #a0c7ff;
-      cursor: not-allowed;
-    }
-    .admin-tools button:hover:not(:disabled) {
-      background: #005bb5;
-    }
-    ul.email-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 20px;
-      overflow-y: auto;
-      flex-grow: 1;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-    ul.email-list li {
-      padding: 12px 10px;
-      border-bottom: 1px solid #e5e5ea;
-      display: flex;
-      justify-content: space-between;
-      font-size: 1rem;
-      color: #333;
-      user-select: text;
-      cursor: default;
-      transition: background-color 0.2s ease;
-    }
-    ul.email-list li:last-child {
-      border-bottom: none;
-    }
-    ul.email-list li.admin-selectable {
-      cursor: pointer;
-    }
-    ul.email-list li.selected {
-      background: rgba(0,122,255,0.15);
-      font-weight: 600;
-      color: #004a99;
-    }
-    .email-text {
-      font-weight: 500;
-      word-break: break-all;
-      max-width: 70%;
-    }
-    .email-time {
-      font-size: 0.8rem;
-      color: #888;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-left: 10px;
-      user-select: none;
-    }
-    .cta-button {
-      background: #007aff;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 0;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.25s ease;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .cta-button:hover {
-      background: #005bb5;
-    }
-    /* Scrollbar for the list */
-    ul.email-list::-webkit-scrollbar {
-      width: 8px;
-    }
-    ul.email-list::-webkit-scrollbar-thumb {
-      background: rgba(0,122,255,0.3);
-      border-radius: 4px;
-    }
-  </style>
-  
-  
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <div class="stats" id="statsPanel">
+    <div class="stat-item">Total Views: <span id="totalViews">0</span></div>
+    <div class="stat-item">Clicks: <span id="totalClicks">0</span></div>
+    <div class="stat-item">Success: <span id="totalSuccess">0</span></div>
+    <div class="stat-item">Failed: <span id="totalFailed">0</span></div>
+  </div>
 
-  <!-- Chart.js for graphs -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // Firebase config and init
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  <div id="visitsContainer"></div>
+</div>
 
-    // DOM Elements
-    const totalViewsEl = document.getElementById('totalViews');
-    const totalClicksEl = document.getElementById('totalClicks');
-    const usersTableBody = document.getElementById('usersTableBody');
-    const advancedPanel = document.getElementById('advancedPanel');
-    const menuToggleBtn = document.getElementById('menuToggle');
-    const tabs = document.querySelectorAll('.tab');
-    const ctx = document.getElementById('analyticsChart').getContext('2d');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, onChildAdded } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    // State
-    let analyticsData = {
-      views: {},
-      clicks: {},
-      users: {}
-    };
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-    // Show / hide advanced panel
-    menuToggleBtn.addEventListener('click', () => {
-      const isOpen = advancedPanel.classList.toggle('open');
-      advancedPanel.setAttribute('aria-hidden', !isOpen);
-      menuToggleBtn.setAttribute('aria-expanded', isOpen);
-    });
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const visitsRef = ref(db, 'visits');
 
-    // Format timestamp
-    function formatDate(ts) {
-      if (!ts) return '-';
-      return new Date(ts).toLocaleString();
-    }
-    // Shorten userId for display
-    function shortId(id) {
-      return id.slice(0, 8) + '…';
-    }
+const container = document.getElementById('visitsContainer');
+const totalViewsEl = document.getElementById('totalViews');
+const totalClicksEl = document.getElementById('totalClicks');
+const totalSuccessEl = document.getElementById('totalSuccess');
+const totalFailedEl = document.getElementById('totalFailed');
 
-    // Utilities for date ranges
-    function getTodayRange() {
-      const now = new Date();
-      return [new Date(now.getFullYear(), now.getMonth(), now.getDate()), new Date(now.getFullYear(), now.getMonth(), now.getDate()+1)];
-    }
-    function getYesterdayRange() {
-      const now = new Date();
-      return [new Date(now.getFullYear(), now.getMonth(), now.getDate()-1), new Date(now.getFullYear(), now.getMonth(), now.getDate())];
-    }
-    function getWeekRange() {
-      const now = new Date();
-      const day = now.getDay(); // Sunday=0
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday start
-      const monday = new Date(now.setDate(diff));
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 7);
-      return [monday, sunday];
-    }
-    function getMonthRange() {
-      const now = new Date();
-      return [new Date(now.getFullYear(), now.getMonth(), 1), new Date(now.getFullYear(), now.getMonth() +1, 1)];
-    }
-    function getAllTimeRange() {
-      return [new Date(0), new Date()];
-    }
+const fromDateEl = document.getElementById('fromDate');
+const fromTimeEl = document.getElementById('fromTime');
+const toDateEl = document.getElementById('toDate');
+const toTimeEl = document.getElementById('toTime');
 
-    // Convert timestamp keyed data to count per day
-    // But your data is stored as counters only. So for demo:
-    // We'll just show total counts as horizontal bars per range
-    // So no time-series breakdown unless you store daily counts separately.
-    // We simulate with total views/clicks for each range by checking user lastVisit for filtering
+let allVisits = [];
 
-    // Chart.js instance
-    let chart = null;
+// Helper: parse timestamp
+function parseTimestamp(ts) { return ts ? new Date(ts) : new Date(); }
 
-    function updateSummaryStats() {
-      // Total views and clicks
-      db.ref('analytics/views').once('value').then(snap => {
-        totalViewsEl.textContent = snap.val()?.toLocaleString() || '0';
-      });
-      db.ref('analytics/clicks').once('value').then(snap => {
-        totalClicksEl.textContent = snap.val()?.toLocaleString() || '0';
-      });
-    }
+// Update stats panel
+function updateStats(visits) {
+  totalViewsEl.textContent = visits.length;
+  totalClicksEl.textContent = visits.reduce((sum,v)=>sum+(v.clicks||0),0);
+  totalSuccessEl.textContent = visits.filter(v=>v.status==='success').length;
+  totalFailedEl.textContent = visits.filter(v=>v.status==='failed').length;
+}
 
-    // Load users and render user table
-    function loadUsers() {
-      db.ref('analytics/users').once('value').then(snap => {
-        const users = snap.val() || {};
-        usersTableBody.innerHTML = '';
-
-        const sortedUsers = Object.entries(users).sort((a,b) => (b[1].visits || 0) - (a[1].visits || 0));
-        if (!sortedUsers.length) {
-          usersTableBody.innerHTML = '<tr><td colspan="5">No users tracked yet.</td></tr>';
-          return;
-        }
-
-        for (const [userId, data] of sortedUsers) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td title="${userId}">${shortId(userId)}</td>
-            <td>${data.visits || 0}</td>
-            <td>${data.clicks || 0}</td>
-            <td>${data.country || '-'}</td>
-            <td>${formatDate(data.lastVisit)}</td>
-          `;
-          usersTableBody.appendChild(tr);
-        }
-      });
-    }
-
-    // Since your current analytics data only stores totals, not per-day counts,
-    // we'll simulate "Today", "Yesterday", "Week", etc by filtering users' lastVisit timestamps
-    // and summing their visits and clicks. Global totals stay as is.
-
-    function filterUsersByDateRange(rangeStart, rangeEnd) {
-      return db.ref('analytics/users').once('value').then(snapshot => {
-        const users = snapshot.val() || {};
-        let visitsSum = 0;
-        let clicksSum = 0;
-
-        Object.values(users).forEach(user => {
-          const lastVisit = user.lastVisit || 0;
-          if (lastVisit >= rangeStart.getTime() && lastVisit < rangeEnd.getTime()) {
-            visitsSum += user.visits || 0;
-            clicksSum += user.clicks || 0;
-          }
-        });
-
-        return { visitsSum, clicksSum };
-      });
-    }
-
-    // Update chart for given range label and filter
-    async function updateChart(rangeKey) {
-      // Get date range for filtering users
-      let range;
-      switch(rangeKey) {
-        case 'today': range = getTodayRange(); break;
-        case 'yesterday': range = getYesterdayRange(); break;
-        case 'week': range = getWeekRange(); break;
-        case 'month': range = getMonthRange(); break;
-        case 'all': range = getAllTimeRange(); break;
-        default: range = getAllTimeRange();
-      }
-
-      // Fetch filtered sums
-      const { visitsSum, clicksSum } = await filterUsersByDateRange(range[0], range[1]);
-
-      // For demo: we show just two bars: visits and clicks for selected range
-      const labels = ['Visits', 'Clicks'];
-      const data = [visitsSum, clicksSum];
-
-      // If chart exists, update, else create new
-      if (chart) {
-        chart.data.datasets[0].data = data;
-        chart.update();
-      } else {
-        chart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{
-              label: `Activity (${rangeKey.charAt(0).toUpperCase() + rangeKey.slice(1)})`,
-              data,
-              backgroundColor: [ 'rgba(0, 122, 255, 0.8)', 'rgba(0, 122, 255, 0.5)'],
-              borderRadius: 6,
-              borderSkipped: false,
-              barPercentage: 0.6,
-            }]
-          },
-          options: {
-            responsive: true,
-            animation: { duration: 600 },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  stepSize: 1,
-                  precision: 0,
-                },
-                grid: { color: '#eee' }
-              },
-              x: {
-                grid: { display: false }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                enabled: true,
-                callbacks: {
-                  label: ctx => ctx.parsed.y.toLocaleString(),
-                }
-              }
-            }
-          }
-        });
-      }
-    }
-
-    // Update summary stats live
-    function updateSummaryLive() {
-      db.ref('analytics/views').on('value', snap => {
-        totalViewsEl.textContent = snap.val()?.toLocaleString() || '0';
-      });
-      db.ref('analytics/clicks').on('value', snap => {
-        totalClicksEl.textContent = snap.val()?.toLocaleString() || '0';
-      });
-    }
-
-    // Initialize UI tabs for time range filters
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('tabindex', '-1');
-          t.setAttribute('aria-selected', 'false');
-        });
-        tab.classList.add('active');
-        tab.setAttribute('tabindex', '0');
-        tab.setAttribute('aria-selected', 'true');
-        updateChart(tab.dataset.range);
-      });
-      tab.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          tab.click();
-        }
-      });
-    });
-
-    // Initial load
-    updateSummaryLive();
-    loadUsers();
-    updateChart('today');
-
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script>
-  // Initialize Firebase config & app
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // Grab DOM elements
-  const emailListEl = document.getElementById('emailList');
-  const emailNowBtn = document.getElementById('emailNowBtn');
-  const dotsMenu = document.getElementById('dotsMenu');
-  const adminTools = document.getElementById('adminTools');
-  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-  const cancelAdminBtn = document.getElementById('cancelAdminBtn');
-
-  let adminMode = false;
-  let selectedEmails = new Map();
-  let emailsData = new Map();
-
-  // Friendly relative time
-  function timeAgo(timestamp) {
-    const now = Date.now();
-    const seconds = Math.floor((now - timestamp) / 1000);
-    if (seconds < 60) return 'Just now';
-    const intervals = [
-      { label: 'year', seconds: 31536000 },
-      { label: 'month', seconds: 2592000 },
-      { label: 'week', seconds: 604800 },
-      { label: 'day', seconds: 86400 },
-      { label: 'hour', seconds: 3600 },
-      { label: 'minute', seconds: 60 },
-    ];
-    for (const interval of intervals) {
-      const count = Math.floor(seconds / interval.seconds);
-      if (count >= 1) {
-        return count + ' ' + interval.label + (count > 1 ? 's' : '') + ' ago';
-      }
-    }
-    return 'Just now';
-  }
-
-  // Render email list with admin selection logic
-  function renderEmails() {
-    emailListEl.innerHTML = '';
-    if (emailsData.size === 0) {
-      emailListEl.innerHTML = '<li>No emails found.</li>';
-      return;
-    }
-    emailsData.forEach(({email, submittedAt, key}) => {
-      const li = document.createElement('li');
-      li.dataset.key = key;
-      li.classList.toggle('admin-selectable', adminMode);
-      li.classList.toggle('selected', selectedEmails.has(key));
-      li.style.cursor = adminMode ? 'pointer' : 'default';
-
-      li.innerHTML = `
-        <span class="email-text">${email}</span>
-        <span class="email-time" title="${new Date(submittedAt).toLocaleString()}">${timeAgo(submittedAt)}</span>
-      `;
-
-      if (adminMode) {
-        li.onclick = () => {
-          if (selectedEmails.has(key)) {
-            selectedEmails.delete(key);
-            li.classList.remove('selected');
-          } else {
-            selectedEmails.set(key, true);
-            li.classList.add('selected');
-          }
-          deleteSelectedBtn.disabled = selectedEmails.size === 0;
-        };
-      } else {
-        li.onclick = null;
-      }
-      emailListEl.appendChild(li);
-    });
-  }
-
-  // Load 10 recent emails, descending order
-  function loadEmails() {
-    db.ref('emails').orderByChild('submittedAt').limitToLast(10).once('value').then(snapshot => {
-      const val = snapshot.val();
-      emailsData.clear();
-      selectedEmails.clear();
-      if (!val) {
-        emailListEl.innerHTML = '<li>No emails found.</li>';
-        return;
-      }
-      Object.entries(val).forEach(([key, emailObj]) => {
-        emailsData.set(key, {...emailObj, key});
-      });
-      emailsData = new Map([...emailsData.entries()].sort((a,b) => b[1].submittedAt - a[1].submittedAt));
-      renderEmails();
-    }).catch(err => {
-      console.error('Failed loading emails:', err);
-      emailListEl.innerHTML = '<li>Error loading emails.</li>';
-    });
-  }
-
-  // Toggle admin mode and controls
-  function toggleAdminTools(show) {
-    adminMode = show;
-    adminTools.style.display = show ? 'flex' : 'none';
-    dotsMenu.setAttribute('aria-expanded', show);
-    selectedEmails.clear();
-    deleteSelectedBtn.disabled = true;
-    renderEmails();
-  }
-
-  // Delete selected emails
-  function deleteSelectedEmails() {
-    if (selectedEmails.size === 0) return;
-    const promises = [];
-    selectedEmails.forEach((_, key) => {
-      promises.push(db.ref('emails/' + key).remove());
-    });
-    Promise.all(promises).then(() => {
-      selectedEmails.forEach((_, key) => emailsData.delete(key));
-      toggleAdminTools(false);
-      alert('Selected emails deleted.');
-      renderEmails();
-    }).catch(err => {
-      console.error('Delete failed:', err);
-      alert('Failed to delete emails. Check console for details.');
-    });
-  }
-
-  // Event listeners
-  dotsMenu.addEventListener('click', () => toggleAdminTools(!adminMode));
-  dotsMenu.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleAdminTools(!adminMode);
-    }
+// Render visit cards
+function renderVisits(visits) {
+  container.innerHTML='';
+  visits.forEach(v=>{
+    const card = document.createElement('div');
+    card.className='visit-card';
+    card.innerHTML=`
+      <h3>${v.country||'Unknown'} - <span class="${v.status==='success'?'status-success':'status-failed'}">${v.status}</span></h3>
+      <p><strong>Time:</strong> ${v.timestamp||'-'}</p>
+      <p><strong>Referrer:</strong> ${v.referrer||'-'}</p>
+      <p><strong>Device:</strong> ${v.device||'-'}</p>
+      <p><strong>Clicks:</strong> ${v.clicks||0}</p>
+    `;
+    container.prepend(card);
   });
-  deleteSelectedBtn.addEventListener('click', deleteSelectedEmails);
-  cancelAdminBtn.addEventListener('click', () => toggleAdminTools(false));
+}
 
-  emailNowBtn.addEventListener('click', () => {
-    alert('Email marketing system coming soon! Export your emails from Firebase console meanwhile.');
+// Filter visits by selected date/time
+function filterVisits() {
+  const fromDate = fromDateEl.value;
+  const fromTime = fromTimeEl.value || '00:00';
+  const toDate = toDateEl.value;
+  const toTime = toTimeEl.value || '23:59';
+
+  const from = fromDate ? new Date(`${fromDate}T${fromTime}:00`) : null;
+  const to = toDate ? new Date(`${toDate}T${toTime}:00`) : null;
+
+  const filtered = allVisits.filter(v=>{
+    const t=parseTimestamp(v.timestamp);
+    if(from && t<from) return false;
+    if(to && t>to) return false;
+    return true;
   });
 
-  // Kickoff: load emails immediately
-  loadEmails();
+  updateStats(filtered);
+  renderVisits(filtered);
+}
+
+// Preload existing visits
+get(visitsRef).then(snapshot=>{
+  if(snapshot.exists()){
+    allVisits = Object.values(snapshot.val());
+    filterVisits();
+  }
+});
+
+// Listen for new visits
+onChildAdded(visitsRef, snapshot=>{
+  const visit = snapshot.val();
+  allVisits.push(visit);
+  filterVisits();
+});
+
+// Apply button
+document.getElementById('applyFilter').onclick = filterVisits;
+
 </script>
 </body>
 </html>
