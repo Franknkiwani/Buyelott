@@ -19,18 +19,14 @@
     font-size: 20px;
     font-weight: 600;
   }
-  .container {
-    padding: 10px;
-  }
-  .filters {
-    margin-bottom: 10px;
-  }
+  .container { padding: 10px; }
+  .filters { margin-bottom: 10px; }
   select {
+    width: 100%;
     padding: 8px;
     border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 14px;
-    width: 100%;
   }
   .stats {
     background-color: #fff;
@@ -39,8 +35,8 @@
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     flex-wrap: wrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
   .stat-item { margin: 5px 0; font-size: 14px; color: #1c1c1e; }
   .visit-card {
@@ -135,7 +131,6 @@ function renderVisits(filteredVisits) {
   });
 }
 
-// Get period start & end
 function getPeriodRange(period) {
   const now = new Date();
   let start, end;
@@ -182,13 +177,13 @@ function filterVisitsByPeriod(period) {
   renderVisits(filtered);
 }
 
-// Preload all visits
+// Preload all visits and always show today’s data initially
 get(visitsRef).then(snapshot => {
   if(snapshot.exists()){
     allVisits = Object.values(snapshot.val());
-    filterVisitsByPeriod(periodSelect.value);
+    filterVisitsByPeriod('today'); // default to today
   }
-});
+}).catch(e => console.error('Firebase get error', e));
 
 // Real-time updates
 onChildAdded(visitsRef, snapshot => {
