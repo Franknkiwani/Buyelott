@@ -486,5 +486,74 @@ fetch('https://ipapi.co/json/')
 
 document.body.style.overflow = "hidden";
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ---- Helper: get country info ----
+async function getCountry() {
+  try {
+    const res = await fetch('https://ipapi.co/json');
+    const data = await res.json();
+    return {
+      country: data.country_name || 'Unknown',
+      countryCode: (data.country_code || 'US').toLowerCase(),
+      flag: `https://flagcdn.com/16x12/${(data.country_code || 'US').toLowerCase()}.png`
+    };
+  } catch(e) {
+    return { country: 'Unknown', countryCode: 'us', flag: 'https://flagcdn.com/16x12/us.png' };
+  }
+}
+
+// ---- Log visit ----
+async function logVisit() {
+  const { country, countryCode, flag } = await getCountry();
+  const timestamp = Date.now();
+
+  // LOGS - every visit
+  const logsRef = ref(db, 'analytics/logs');
+  push(logsRef, { timestamp, country, countryCode, flag, url: location.href }).catch(console.error);
+
+  // USERS - once per device
+  const userKey = 'uniqueUserLogged';
+  if (!localStorage.getItem(userKey)) {
+    localStorage.setItem(userKey, 'true');
+    const usersRef = ref(db, 'analytics/events');
+    push(usersRef, { timestamp, type: 'user' }).catch(console.error);
+  }
+
+  // VIEWS - every visit
+  const viewsRef = ref(db, 'analytics/events');
+  push(viewsRef, { timestamp, type: 'view' }).catch(console.error);
+}
+
+// ---- Track clicks ----
+function trackClicks() {
+  document.addEventListener('click', (e) => {
+    const timestamp = Date.now();
+    const clicksRef = ref(db, 'analytics/events');
+    push(clicksRef, { timestamp, type: 'click', target: e.target.tagName || 'unknown' }).catch(console.error);
+  });
+}
+
+// ---- Run tracking ----
+logVisit();
+trackClicks();
+</script>
 </body>
 </html>
