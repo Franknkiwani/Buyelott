@@ -1,337 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <head>
-  <title>Find Your Perfect Match - WomenwithSecrets</title>
-  <meta name="description" content="Join WomenwithSecrets and discover your perfect match! Create your free account, connect with singles in the USA, and start your journey today.">
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Favicon -->
-  <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKepGR2JIAU0pUqGYSgx7N6cHB7ZVIcKBkJPN2vkjhsoFzo1AyiE7_zGcS&s=10" type="image/png">
-
-  <!-- Open Graph / Social Preview -->
-  <meta property="og:title" content="Find Your Perfect Match - WomenwithSecrets">
-  <meta property="og:description" content="Join WomenwithSecrets and discover your perfect match! Create your free account, connect with singles in the USA, and start your journey today.">
-  <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsQQIEVt9bdHQFcNkDL0nUt1FU0e3bIhu_HvUXDoQ31NU_rTTch5bYFkM&s=10">
-  <meta property="og:type" content="website">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Find Your Perfect Match - WomenwithSecrets">
-  <meta name="twitter:description" content="Join WomenwithSecrets and discover your perfect match! Create your free account, connect with singles in the USA, and start your journey today.">
-  <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsQQIEVt9bdHQFcNkDL0nUt1FU0e3bIhu_HvUXDoQ31NU_rTTch5bYFkM&s=10">
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affiliate Offer Wall</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', sans-serif; }
-html, body { 
-    height: 100%; 
-}
-body { 
-    background-color: #1c1c1e; 
-    color: #fff; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    padding: 20px;
-}
+  body {
+    margin: 0;
+    background: #121212;
+    color: #fff;
+    font-family: 'SF Pro Display', sans-serif;
+    overflow-x: hidden;
+  }
 
-.container { 
-    width: 100%; 
-    max-width: 400px; 
-    text-align: center; 
-    background: #2c2c2e; 
-    border-radius: 20px; 
-    padding: 30px 20px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-}
-
-.carousel { 
-    width: 100%; 
-    height: 220px; 
-    margin-bottom: 20px; 
-    border-radius: 20px; 
-    overflow: hidden; 
-    position: relative; 
-}
-
-.carousel img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    position: absolute; 
-    opacity: 0; 
-    transition: opacity 1s ease-in-out; 
-    border-radius: 20px; 
-}
-
-.carousel img.active { 
-    opacity: 1; 
-}
-
-.logo { 
-    font-size: 2rem; 
-    font-weight: 700; 
-    margin: 15px 0; 
-    color: #ff2d55; 
-    letter-spacing: 1px; 
-}
-
-.subtext { 
-    font-size: 0.95rem; 
-    color: #b0b0b0; 
-    margin-bottom: 20px; 
-    line-height: 1.4; 
-}
-
-ul { 
-    list-style: none; 
-    text-align: left; 
-    margin-bottom: 30px; 
-    width: 100%; 
-    padding-left: 0; 
-}
-
-li { 
-    margin-bottom: 12px; 
-    display: flex; 
-    align-items: center; 
-    font-size: 0.95rem; 
-}
-
-li::before { 
-    content: '✔'; 
-    color: #34c759; 
-    margin-right: 10px; 
-}
-
-.cta-btn { 
-    background: linear-gradient(90deg, #ff2d55, #ff375f); 
-    padding: 15px 0; 
-    border-radius: 15px; 
-    font-size: 1.1rem; 
-    font-weight: 600; 
-    color: #fff; 
-    transition: transform 0.2s; 
-    display: block; 
-    margin: 0 auto; 
-    width: 80%;
+  /* Loading screen */
+  #loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18,18,18,0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
     text-align: center;
-}
+    padding: 2rem;
+  }
+  #loadingScreen p {
+    font-size: 1.5rem;
+    margin: 1rem 0 0 0;
+    line-height: 1.4;
+    color: #fff;
+  }
+  #loadingSpinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid rgba(255,255,255,0.2);
+    border-top-color: #007aff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
-.cta-btn:hover { 
-    transform: scale(1.05); 
-}
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .filter-btn, .share-btn {
+    padding: 0.6rem 1rem;
+    background: #007aff;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .filter-btn:hover, .share-btn:hover {
+    transform: translateY(-2px);
+  }
 
-.footer { 
-    font-size: 0.8rem; 
-    color: #8e8e93; 
-    margin-top: 25px; 
-}
-.carousel { 
-    width: 100%; 
-    margin-bottom: 20px; 
-    border-radius: 20px; 
-    overflow: hidden; 
-    position: relative; 
-}
-
-.carousel img { 
-    width: 100%;       /* full width of container */
-    height: auto;      /* keep aspect ratio */
-    display: none;     /* hide all except active */
-    border-radius: 20px; 
-}
-
-.carousel img.active { 
-    display: block;    /* show active image */
-}
-/* Disable text selection */
-body, .container, .logo, .subtext, ul, li, .cta-btn, .footer {
-    user-select: none;        /* Standard */
-    -webkit-user-select: none; /* Safari/Chrome */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE/Edge */
-}
+  .offer-card {
+    position: relative;
+    width: 90%;
+    max-width: 1000px;
+    margin: 3rem auto;
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .offer-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+  }
+  .offer-content {
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .offer-content h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .offer-content p {
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+  .cta-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem 0;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    transition: transform 0.2s ease;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    color: #fff;
+  }
+  .cta-btn:hover { transform: translateY(-3px); }
+  .availability {
+    display: block;
+    width: 100%;
+    padding: 0.8rem 0;
+    font-weight: 600;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+  }
+  .available { background-color: #28a745; color: #fff; }
+  .unavailable { background-color: #dc3545; color: #fff; }
 </style>
 </head>
 <body>
-  <div class="container">
 
-    <!-- Carousel -->
-    <div class="carousel">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq-lFvjUPlWUsiYZdnyuB__YxGXOjT-P0EdyzmkD79_gvLDxTHU20M60o&s=10" class="active" alt="Slide 1">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4TyKVK8CNtHtMleg8u5tISAcZPhn_JMLJA7ycYvipRefU0ldHhWGtQQc&s=10" alt="Slide 2">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1A6LLH8KabmXwj6e0tKzlQ1PqEFdZZeol9ORYGqQVavb74chpTNn3G3Q&s=10" alt="Slide 3">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1irrqoMa2OnBt6Cm1Rq87DpXoIScnxJ-8v1ERwk5BgnYTwYj94RqjvNi4&s=10" alt="Slide 4">
-    </div>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div id="loadingSpinner"></div>
+  <p id="loadingQuote">Loading... stay motivated!</p>
+</div>
 
-    <div class="logo">WomenwithSecrets</div>
-    <div class="subtext">Find your perfect match in the USA. Create your free account and confirm your email!</div>
-    
-    <ul>
-      <li>Free account creation</li>
-      <li>Secure & private</li>
-      <li>Instant access to singles</li>
-      <li>USA users only</li>
-    </ul>
-    
-    <a class="cta-btn" href="https://redrection.pro/a/prKoIQ9ltYVGl" target="_blank">Create My Free Account</a>
-    
-    <div class="footer">By signing up, you agree to the portal’s Terms of Service.</div>
-  </div>
+<!-- Top bar -->
+<div class="top-bar">
+  <button id="filterBtn" class="filter-btn">Show Only Available</button>
+  <button onclick="window.location.href='share.html'" class="share-btn">Share</button>
+</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<div id="offers"></div>
 
-  // ===== Your Firebase Config =====
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Track clicks
-  let clickCount = 0;
-  document.addEventListener('click', () => clickCount++);
-
-  // Detect country and device
-  fetch('https://ipapi.co/json/')
-    .then(res => res.json())
-    .then(data => {
-      const country = data.country_name || "Unknown";
-      const referrer = document.referrer || "Direct";
-      const timestamp = new Date().toISOString();
-      const device = /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop";
-
-      const isUSA = country === "United States";
-      const status = isUSA ? "success" : "failed";
-
-      // Capture visit in Firebase
-      push(ref(db, 'visits'), {
-        country,
-        referrer,
-        timestamp,
-        device,
-        clicks: clickCount,
-        status
-      });
-
-      // Show blocked screen if not USA
-      if (!isUSA) {
-        showLockedScreen();
-      }
-    })
-    .catch(err => console.error('Could not detect location:', err));
-
-  // Locked screen function (from earlier)
-  function showLockedScreen() {
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.95)';
-    overlay.style.color = '#fff';
-    overlay.style.display = 'flex';
-    overlay.style.flexDirection = 'column';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = 9999;
-    overlay.style.textAlign = 'center';
-    overlay.style.padding = '20px';
-
-    function createAdContainer() {
-      const adContainer = document.createElement('div');
-      adContainer.style.borderRadius = '15px';
-      adContainer.style.overflow = 'hidden';
-      adContainer.style.margin = '10px 0';
-      adContainer.style.width = '320px';
-      adContainer.style.height = '50px';
-
-      const adScript1 = document.createElement('script');
-      adScript1.type = 'text/javascript';
-      adScript1.innerHTML = `
-        atOptions = {
-          'key' : '2a9930a498db1f8096726619a2fe13ff',
-          'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
-          'params' : {}
-        };
-      `;
-      const adScript2 = document.createElement('script');
-      adScript2.type = 'text/javascript';
-      adScript2.src = "//www.highperformanceformat.com/2a9930a498db1f8096726619a2fe13ff/invoke.js";
-
-      adContainer.appendChild(adScript1);
-      adContainer.appendChild(adScript2);
-
-      return adContainer;
-    }
-
-    // Top ad
-    overlay.appendChild(createAdContainer());
-
-    // Message + CTA
-    const message = document.createElement('div');
-    message.innerHTML = `
-      <h1>Sorry, this site is only for USA users</h1>
-      <p>Here is how you can earn up to $100 per day by referring USA users to this site.</p>
-      <button id="ctaButton" style="
-        margin-top: 20px;
-        padding: 15px 30px;
-        font-size: 18px;
-        border: none;
-        border-radius: 10px;
-        background-color: #28a745;
-        color: white;
-        cursor: pointer;
-      ">Share & Earn</button>
-    `;
-    overlay.appendChild(message);
-
-    // Bottom ad
-    overlay.appendChild(createAdContainer());
-
-    document.body.appendChild(overlay);
-
-    document.getElementById('ctaButton').onclick = () => {
-      window.location.href = 'share.html';
-    };
-
-    // Trigger external script only when blocked screen shows
-    const externalScript = document.createElement('script');
-    externalScript.src = "https://fpyf8.com/88/tag.min.js";
-    externalScript.setAttribute('data-zone', '163332');
-    externalScript.async = true;
-    externalScript.setAttribute('data-cfasync', 'false');
-    document.body.appendChild(externalScript);
-  }
-</script>
 <script>
-    const slides = document.querySelectorAll('.carousel img');
-    let current = 0;
+const offers = [
+  {name: "WildAsianBabes", desc: "Connect with Asian singles. Sign up & confirm email to join.", url: "https://wait-page.eu/a/NQjKiV45Hj98v", thumbnail: "https://via.placeholder.com/1280x720/111/fff?text=WildAsianBabes", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "Grandhookup", desc: "Authentic casual dating connections made easy.", url: "https://wait-page.eu/a/7NzyFZx3tWvZr", thumbnail: "https://via.placeholder.com/1280x720/222/fff?text=Grandhookup", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "Dreamflirty", desc: "Find meaningful dating connections quickly.", url: "https://wait-page.eu/a/7NzyFEAGfWvRn", thumbnail: "https://via.placeholder.com/1280x720/333/fff?text=Dreamflirty", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "NSAFlirts", desc: "Casual dating and flirty encounters.", url: "https://wait-page.eu/a/ZqyGU766FKJ5k", thumbnail: "https://via.placeholder.com/1280x720/444/fff?text=NSAFlirts", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "FindMeanAsian", desc: "Meet Asian singles based on shared interests.", url: "https://wait-page.eu/a/ry5qTAvXf43xM", thumbnail: "https://via.placeholder.com/1280x720/555/fff?text=FindMeanAsian", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]}
+];
 
-    setInterval(() => {
-      slides[current].classList.remove('active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('active');
-    }, 3000); // change slide every 3 seconds
-  </script>
+let userCountry = "US"; // fallback
+let showOnlyAvailable = false;
+const quotes = [
+  "💪 Keep pushing, success is near!",
+  "💖 Love is everywhere, just sign up!",
+  "💰 Money loves action, take a step today!",
+  "🌟 Stay motivated, amazing things are coming!",
+  "❤️ Spread love, it comes back multiplied!",
+  "💸 Every click is an opportunity to earn!"
+];
+let quoteIndex = 0;
+
+// Render offers
+function renderOffers() {
+  const container = document.getElementById('offers');
+  container.innerHTML = "";
+  offers.forEach(offer => {
+    const isAvailable = offer.availableCountries.includes(userCountry);
+    if (showOnlyAvailable && !isAvailable) return;
+
+    const card = document.createElement('div');
+    card.className = "offer-card";
+    card.innerHTML = `
+      <img src="${offer.thumbnail}" alt="${offer.name}" class="offer-thumbnail">
+      <div class="offer-content">
+        <h2>${offer.name}</h2>
+        <p>${offer.desc}</p>
+        <a href="${offer.url}" target="_blank" class="cta-btn">Sign Up Now</a>
+        <span class="availability ${isAvailable ? 'available':'unavailable'}">
+          ${isAvailable ? 'Available in your country':'Not available in your country'}
+        </span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  // Hide loading screen
+  document.getElementById('loadingScreen').style.display = "none";
+  document.body.style.overflow = "auto";
+}
+
+// Rotate quotes while loading
+const quoteEl = document.getElementById('loadingQuote');
+const quoteInterval = setInterval(() => {
+  quoteEl.textContent = quotes[quoteIndex];
+  quoteIndex = (quoteIndex + 1) % quotes.length;
+}, 2500);
+
+// Filter button
+document.getElementById('filterBtn').addEventListener('click', () => {
+  showOnlyAvailable = !showOnlyAvailable;
+  document.getElementById('filterBtn').textContent = showOnlyAvailable ? "Show All Offers" : "Show Only Available";
+  renderOffers();
+});
+
+// Fetch user country from ipapi
+let networkTimeout = setTimeout(() => {
+  quoteEl.textContent = "⚠️ Network error. Please check your connection!";
+}, 10000);
+
+fetch('https://ipapi.co/json/')
+  .then(res => res.json())
+  .then(data => {
+    clearTimeout(networkTimeout);
+    userCountry = data.country;
+    renderOffers();
+  })
+  .catch(err => {
+    clearTimeout(networkTimeout);
+    quoteEl.textContent = "⚠️ Network error. Please check your connection!";
+    console.error("Could not fetch user country:", err);
+  });
+
+// Disable background scroll while loading
+document.body.style.overflow = "hidden";
+</script>
+
 </body>
 </html>
