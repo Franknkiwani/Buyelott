@@ -1,90 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Visitor Dashboard</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>iOS Analytics</title>
 <style>
-  body {
-    font-family: 'SF Pro Display', sans-serif;
-    background-color: #f2f2f7;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background-color: #1c1c1e;
-    color: #fff;
-    padding: 15px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-  }
-  .container { padding: 10px; }
-  .filters { margin-bottom: 10px; }
-  select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-  }
-  .stats {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  .stat-item { margin: 5px 0; font-size: 14px; color: #1c1c1e; }
-  .visit-card {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  .visit-card h3 { margin: 0 0 5px 0; font-size: 16px; color: #1c1c1e; }
-  .visit-card p { margin: 2px 0; font-size: 14px; color: #555; }
-  .status-success { color: #28a745; font-weight: bold; }
-  .status-failed { color: #ff3b30; font-weight: bold; }
+:root{
+  --bg: #0b0c0f;
+  --card:#0f1116cc;
+  --text:#eef0f4;
+  --muted:#aab0bd;
+  --accent:#3b82f6;
+  --radius:22px;
+  --red:#f44336;
+  --green:#4caf50;
+}
+
+/* Box sizing & global font */
+*{box-sizing:border-box;}
+html, body {
+  height: 100%;
+  margin: 0;
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 1200px at 10% -10%, #1b1f2b 0%, transparent 60%),
+    radial-gradient(1000px 900px at 110% 10%, #16223a 0%, transparent 55%),
+    linear-gradient(180deg, #0a0c12 0%, #0b0c0f 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 28px 28px 28px; /* top: 0, sides & bottom: 28px */
+  overflow-x: hidden; /* keep horizontal scroll disabled */
+}
+
+/* Wrapper for content */
+.wrap{width:min(1200px,96vw);}
+
+/* Title and period select */
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  margin: 0 0 18px 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title select {
+  width: 40%;
+  margin-left: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.title select option {
+  background: var(--card);
+  color: var(--text);
+}
+
+/* Main cards grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.card{
+  position:relative;
+  border-radius:var(--radius);
+  padding:18px 18px 16px;
+  background:var(--card);
+  backdrop-filter:blur(12px) saturate(120%);
+  -webkit-backdrop-filter:blur(12px) saturate(120%);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 10px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  overflow:hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 14px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:radial-gradient(200px 120px at 85% -20%, rgba(255,255,255,.08), transparent 60%);
+  pointer-events:none;
+}
+.label{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.value{
+  font-size:32px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.chip{
+  margin-top:10px;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  background: rgba(59,130,246,.12);
+  color:#bcd4ff;
+  border:1px solid rgba(59,130,246,.25);
+}
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--accent);
+  display:inline-block;
+}
+
+/* Smaller 2 cards under main */
+.small-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  margin-top:20px;
+}
+.small-card{
+  padding:12px;
+  border-radius:var(--radius);
+  text-align:center;
+  font-weight:700;
+  font-size:18px;
+  color:#fff;
+}
+.small-card.red{background:var(--red);}
+.small-card.green{background:var(--green);}
+
+/* Logs */
+.logs{
+  position:relative;
+  width:100%;
+  max-height:400px;
+  overflow-y:auto;
+  margin-top:24px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding:16px;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 10px 20px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.logs h2{
+  margin:0 0 12px 0;
+  font-size:18px;
+  font-weight:600;
+  color:var(--text);
+  text-align:center;
+}
+.log-table{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.log-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:10px;
+  background: rgba(255,255,255,.05);
+  font-size:14px;
+  color:var(--text);
+}
+.log-row img{
+  width:20px;
+  height:14px;
+  margin-right:8px;
+  border-radius:2px;
+}
+.log-info{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* Disable text selection globally */
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Specifically for logs only */
+.logs, .log-row, .log-info {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+#clearDataBtn {
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(45deg, #ff6ec4, #7873f5, #4ade80); 
+  background-size: 400% 400%;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s, background-position 2s;
+  animation: gradientShift 6s ease infinite;
+}
+
+#clearDataBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.title select {
+  flex: 1;
+  width: calc(100% - 50%);
+}
 </style>
+<style>
+/* Rainbow Button */
+.rainbow-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+  background-size: 400% 400%;
+  color: #fff;
+  animation: rainbow 3s ease infinite;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.rainbow-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+@keyframes rainbow {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: var(--card);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border-radius: var(--radius);
+  padding: 24px 32px;
+  width: 320px;
+  text-align: center;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+.modal-content input {
+  margin: 16px 0;
+  padding: 10px 12px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-size: 14px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.modal-btn {
+  flex: 1;
+  padding: 10px 0;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.modal-btn.cancel {
+  background: rgba(255,255,255,0.1);
+  color: #f44336;
+}
+.modal-btn.confirm {
+  background: var(--green);
+  color: #fff;
+}
+body.addEventListener('scroll', () => {
+  if (body.scrollLeft > 0) {
+    const overshoot = Math.min(body.scrollLeft, 50); // max 50px stretch
+    body.style.transform = `translateX(${-overshoot}px)`;
+    setTimeout(() => {
+      body.style.transition = 'transform 0.3s ease-out';
+      body.style.transform = 'translateX(0)';
+      setTimeout(() => body.style.transition = '', 300);
+    }, 50);
+  }
+});
+</style>
+<script>
+const body = document.body;
+const root = document.documentElement;
+
+body.addEventListener('scroll', () => {
+  // Horizontal scroll amount
+  const scrollX = body.scrollLeft;
+
+  if (scrollX > 0) {
+    // Map scroll amount to color intensity (max 50px)
+    const intensity = Math.min(scrollX / 50, 1);
+    // Change background slightly toward red/purple
+    root.style.background = `
+      radial-gradient(1200px 1200px at 10% -10%, rgba(255,100,100,${intensity}) 0%, transparent 60%),
+      radial-gradient(1000px 900px at 110% 10%, rgba(150,50,255,${intensity}) 0%, transparent 55%),
+      linear-gradient(180deg, #0a0c12 0%, #0b0c0f 100%)
+    `;
+  } else {
+    // Reset to normal when scroll = 0
+    root.style.background = `
+      radial-gradient(1200px 1200px at 10% -10%, #1b1f2b 0%, transparent 60%),
+      radial-gradient(1000px 900px at 110% 10%, #16223a 0%, transparent 55%),
+      linear-gradient(180deg, #0a0c12 0%, #0b0c0f 100%)
+    `;
+  }
+});
+</script>
 </head>
 <body>
-
-<header>Visitor Dashboard</header>
-<div class="container">
-  <div class="filters">
-    <select id="periodSelect">
-      <option value="today">Today</option>
-      <option value="yesterday">Yesterday</option>
-      <option value="last7">Last 7 Days</option>
-      <option value="thisMonth">This Month</option>
-      <option value="lastMonth">Last Month</option>
-      <option value="allTime">All Time</option>
-    </select>
-  </div>
-
-  <div class="stats" id="statsPanel">
-    <div class="stat-item">Total Views: <span id="totalViews">0</span></div>
-    <div class="stat-item">Clicks: <span id="totalClicks">0</span></div>
-    <div class="stat-item">Success: <span id="totalSuccess">0</span></div>
-    <div class="stat-item">Failed: <span id="totalFailed">0</span></div>
-  </div>
-
-  <div id="visitsContainer"></div>
+<!-- Rainbow Clear Button -->
+<div style="text-align:center; margin:20px 0;">
+  <button id="clearDataBtn" class="rainbow-btn">
+    Clear All Analytics & Logs
+  </button>
 </div>
+
+<!-- Modal Popup -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <h2>Confirm Action</h2>
+    <p>Enter your admin password to proceed:</p>
+    <input type="password" id="adminPassword" placeholder="••••••••" />
+    <div class="modal-actions">
+      <button id="cancelBtn" class="modal-btn cancel">Cancel</button>
+      <button id="confirmBtn" class="modal-btn confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, onChildAdded } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  authDomain: "itzhoyoo-firebaseapp.com",
   databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
   projectId: "itzhoyoo-f9f7e",
   storageBucket: "itzhoyoo-f9f7e.filestorage.app",
@@ -95,108 +406,360 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const visitsRef = ref(db, 'visits');
 
-const container = document.getElementById('visitsContainer');
-const totalViewsEl = document.getElementById('totalViews');
-const totalClicksEl = document.getElementById('totalClicks');
-const totalSuccessEl = document.getElementById('totalSuccess');
-const totalFailedEl = document.getElementById('totalFailed');
-const periodSelect = document.getElementById('periodSelect');
+const clearBtn = document.getElementById('clearDataBtn');
+const modal = document.getElementById('confirmModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const confirmBtn = document.getElementById('confirmBtn');
+const passwordInput = document.getElementById('adminPassword');
 
-let allVisits = [];
-
-function parseTimestamp(ts) { return ts ? new Date(ts) : new Date(); }
-
-function updateStats(filteredVisits) {
-  totalViewsEl.textContent = filteredVisits.length;
-  totalClicksEl.textContent = filteredVisits.reduce((sum, v) => sum + (v.clicks || 0), 0);
-  totalSuccessEl.textContent = filteredVisits.filter(v => v.status === 'success').length;
-  totalFailedEl.textContent = filteredVisits.filter(v => v.status === 'failed').length;
-}
-
-function renderVisits(filteredVisits) {
-  container.innerHTML = '';
-  filteredVisits.forEach(v => {
-    const card = document.createElement('div');
-    card.className = 'visit-card';
-    card.innerHTML = `
-      <h3>${v.country || 'Unknown'} - <span class="${v.status === 'success' ? 'status-success' : 'status-failed'}">${v.status}</span></h3>
-      <p><strong>Time:</strong> ${v.timestamp || '-'}</p>
-      <p><strong>Referrer:</strong> ${v.referrer || '-'}</p>
-      <p><strong>Device:</strong> ${v.device || '-'}</p>
-      <p><strong>Clicks:</strong> ${v.clicks || 0}</p>
-    `;
-    container.prepend(card);
-  });
-}
-
-function getPeriodRange(period) {
-  const now = new Date();
-  let start, end;
-  switch(period){
-    case 'today':
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      end = new Date(start);
-      end.setHours(23,59,59,999);
-      break;
-    case 'yesterday':
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() -1);
-      end = new Date(start);
-      end.setHours(23,59,59,999);
-      break;
-    case 'last7':
-      end = now;
-      start = new Date();
-      start.setDate(now.getDate() - 6);
-      start.setHours(0,0,0,0);
-      break;
-    case 'thisMonth':
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = now;
-      break;
-    case 'lastMonth':
-      start = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      end = new Date(now.getFullYear(), now.getMonth(), 0,23,59,59,999);
-      break;
-    case 'allTime':
-      start = new Date(0);
-      end = now;
-      break;
-  }
-  return {start, end};
-}
-
-function filterVisitsByPeriod(period) {
-  const { start, end } = getPeriodRange(period);
-  const filtered = allVisits.filter(v => {
-    const t = parseTimestamp(v.timestamp);
-    return t >= start && t <= end;
-  });
-  updateStats(filtered);
-  renderVisits(filtered);
-}
-
-// Preload all visits and always show today’s data initially
-get(visitsRef).then(snapshot => {
-  if(snapshot.exists()){
-    allVisits = Object.values(snapshot.val());
-    filterVisitsByPeriod('today'); // default to today
-  }
-}).catch(e => console.error('Firebase get error', e));
-
-// Real-time updates
-onChildAdded(visitsRef, snapshot => {
-  const visit = snapshot.val();
-  allVisits.push(visit);
-  filterVisitsByPeriod(periodSelect.value);
+// Show modal when button clicked
+clearBtn.addEventListener('click', () => {
+  passwordInput.value = '';
+  modal.style.display = 'flex';
+  passwordInput.focus();
 });
 
-// Handle dropdown change
-periodSelect.addEventListener('change', () => {
-  filterVisitsByPeriod(periodSelect.value);
+// Cancel button hides modal
+cancelBtn.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+// Confirm button checks password and clears data
+confirmBtn.addEventListener('click', async () => {
+  const pw = passwordInput.value;
+  if(pw !== 'frankNK123$'){
+    alert('Incorrect password!');
+    return;
+  }
+
+  try {
+    await remove(ref(db, 'analytics/events'));
+    await remove(ref(db, 'analytics/logs'));
+    modal.style.display = 'none';
+    alert('All analytics and logs cleared!');
+  } catch(err) {
+    console.error(err);
+    alert('Failed to clear data.');
+  }
+});
+
+// Close modal on outside click
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) modal.style.display = 'none';
 });
 </script>
+  <div class="wrap">
+        <h1 class="title">
+      Analytics
+      <select id="periodSelect">
+        <option value="hourly">Hourly</option>
+        <option value="today" selected>Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="thisWeek">This Week</option>
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="thisYear">This Year</option>
+        <option value="lifetime">Lifetime</option>
+      </select>
+    </h1>
 
+    <section class="grid">
+      <article class="card">
+        <div class="label">Users</div>
+        <div class="value" id="usersValue">0</div>
+        <div class="chip" id="usersPeriod">Period</div>
+      </article>
+      <article class="card">
+        <div class="label">Views</div>
+        <div class="value" id="viewsValue">0</div>
+        <div class="chip" id="viewsPeriod">Period</div>
+      </article>
+      <article class="card">
+        <div class="label">Clicks</div>
+        <div class="value" id="clicksValue">0</div>
+        <div class="chip" id="clicksPeriod">Period</div>
+      </article>
+      <article class="card">
+        <div class="label">Revenue</div>
+        <div class="value" id="revenueValue">$0</div>
+        <div class="chip" id="revenuePeriod">Period</div>
+      </article>
+    </section>
+
+    <section class="small-grid">
+      <div class="small-card red">
+        Errors: <span id="errorsValue">0</span>
+      </div>
+      <div class="small-card green">
+        Success: <span id="successValue">0</span>
+      </div>
+    </section>
+  </div>
+
+  <section class="logs">
+    <h2>Visitor Logs</h2>
+    <div class="log-table"></div>
+  </section>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const table = document.querySelector('.log-table');
+
+onValue(ref(db, 'logs'), snapshot => {
+  table.innerHTML = '';
+  const logs = snapshot.val();
+  if (!logs) return;
+  Object.values(logs).sort((a,b) => b.timestamp - a.timestamp).forEach(log => {
+    const row = document.createElement('div');
+    row.className = 'log-row';
+    row.innerHTML = `
+      <div class="log-info">
+        <img src="${log.flag}" alt="${log.country}">
+        <span>${log.country}</span>
+      </div>
+      <span>${timeAgo(log.timestamp)}</span>
+    `;
+    table.appendChild(row);
+  });
+});
+
+// Simple relative time
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  return `${day}d ago`;
+}
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const Analytics = {
+  set({ users, views, clicks, revenue, notes = {} } = {}) {
+    if (users !== undefined)  document.getElementById('usersValue').textContent   = users.toLocaleString?.() ?? users;
+    if (views !== undefined)  document.getElementById('viewsValue').textContent   = views.toLocaleString?.() ?? views;
+    if (clicks !== undefined) document.getElementById('clicksValue').textContent  = clicks.toLocaleString?.() ?? clicks;
+    if (revenue !== undefined)document.getElementById('revenueValue').textContent = typeof revenue==='number' ? `$${revenue.toLocaleString()}` : revenue;
+
+    document.getElementById('usersPeriod').textContent = notes.period || '';
+    document.getElementById('viewsPeriod').textContent = notes.period || '';
+    document.getElementById('clicksPeriod').textContent = notes.period || '';
+    document.getElementById('revenuePeriod').textContent = notes.period || '';
+  }
+};
+
+// Helper: compute period start/end
+function getPeriodRange(period){
+  const now = new Date();
+  const pad=(n)=>n.toString().padStart(2,'0');
+  let start,end;
+  switch(period){
+    case 'hourly':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),0,0);
+      end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),59,59);
+      break;
+    case 'today':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(),23,59,59);
+      break;
+    case 'yesterday':
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate()-1);
+      end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()-1,23,59,59);
+      break;
+    case 'thisWeek':
+      const day = now.getDay(); // 0-Sun,1-Mon...
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate()-day);
+      end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(),23,59,59);
+      break;
+    case 'thisMonth':
+      start = new Date(now.getFullYear(), now.getMonth(),1);
+      end   = new Date(now.getFullYear(), now.getMonth()+1,0,23,59,59);
+      break;
+    case 'lastMonth':
+      start = new Date(now.getFullYear(), now.getMonth()-1,1);
+      end   = new Date(now.getFullYear(), now.getMonth(),0,23,59,59);
+      break;
+    case 'thisYear':
+      start = new Date(now.getFullYear(),0,1);
+      end   = new Date(now.getFullYear(),11,31,23,59,59);
+      break;
+    case 'lifetime':
+      start = new Date(0); // Unix epoch
+      end   = now;
+      break;
+    default:
+      start = new Date(0);
+      end   = now;
+  }
+  return {start: start.getTime(), end: end.getTime()};
+}
+
+// Aggregate Firebase data by period
+async function loadAnalytics(period){
+  const {start,end} = getPeriodRange(period);
+  const analyticsRef = ref(db,'analytics/events'); // All individual events
+
+  let users=0, views=0, clicks=0, revenue=0, errors=0, success=0;
+
+  onValue(analyticsRef, (snapshot)=>{
+    const events = snapshot.val();
+    if(events){
+      Object.values(events).forEach(ev=>{
+        const t = ev.timestamp || 0;
+        if(t >= start && t <= end){
+          if(ev.type==='user') users +=1;
+          if(ev.type==='view') views +=1;
+          if(ev.type==='click') clicks +=1;
+          if(ev.type==='revenue') revenue += Number(ev.amount || 0);
+          if(ev.type==='error') errors +=1;
+          if(ev.type==='success') success +=1;
+        }
+      });
+    }
+    Analytics.set({
+      users, views, clicks, revenue,
+      notes:{period: period.replace(/([A-Z])/g,' $1').trim()} // e.g. thisWeek -> this Week
+    });
+    document.getElementById('errorsValue').textContent = errors.toLocaleString();
+    document.getElementById('successValue').textContent = success.toLocaleString();
+  });
+}
+
+// Event listener for dropdown
+document.getElementById('periodSelect').addEventListener('change', e=>{
+  loadAnalytics(e.target.value);
+});
+
+// Initial load
+loadAnalytics(document.getElementById('periodSelect').value);
+</script>
+<style>
+  .log-container {
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px;
+    width: 100%;
+    max-height: 300px; /* fixed height */
+    overflow-y: auto;  /* scrollable */
+    background: rgba(15,17,22,0.8);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+  .log-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+    color: #eef0f4;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-info { display: flex; align-items: center; gap: 6px; }
+  .log-info img { width: 16px; height: 12px; border-radius: 2px; }
+</style>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const logsContainer = document.querySelector('.log-table');
+
+// Utility to format relative time
+function timeAgo(timestamp){
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  if(seconds < 60) return `${seconds} sec ago`;
+  const minutes = Math.floor(seconds / 60);
+  if(minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if(hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+}
+
+// Load visitor logs
+function loadVisitorLogs() {
+  const logsRef = ref(db, 'analytics/logs'); // Your logs path
+  onValue(logsRef, (snapshot) => {
+    logsContainer.innerHTML = '';
+    const logs = snapshot.val();
+    if(!logs) return;
+
+    // Sort newest first
+    const sortedLogs = Object.values(logs).sort((a,b) => b.timestamp - a.timestamp);
+
+    sortedLogs.forEach(log => {
+      const relativeTime = timeAgo(log.timestamp);
+      const country = log.country || 'Unknown';
+      const flagCode = log.countryCode?.toLowerCase() || 'us';
+
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      row.innerHTML = `
+        <div class="log-info">
+          <img src="https://flagcdn.com/16x12/${flagCode}.png" alt="${country}" />
+          <span>${country}</span>
+        </div>
+        <div>${relativeTime}</div>
+      `;
+      logsContainer.appendChild(row);
+    });
+  });
+}
+
+// Start
+loadVisitorLogs();
+</script>
 </body>
+
 </html>
