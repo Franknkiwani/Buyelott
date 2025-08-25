@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Report Viewer</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.onload = async () => {
+    const dbRef = ref(db);
+    for (let phase of ['phase1','phase2','phase3']) {
+      try {
+        const snapshot = await get(child(dbRef, 'report/' + phase));
+        if(snapshot.exists()){
+          document.getElementById(phase).innerText = snapshot.val().text;
+        } else {
+          document.getElementById(phase).innerText = "[No content saved yet]";
+        }
+      } catch(error){
+        console.error(error);
+        document.getElementById(phase).innerText = "[Error loading content]";
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 0; display:flex; justify-content:center;}
+  main { width: 90%; max-width: 900px; margin: 2rem 0; background: #fff; padding: 1.5rem; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+  h2 { margin-top: 1.5rem; color:#333;}
+  .phase { white-space: pre-wrap; background:#f9f9f9; padding:1rem; border-radius:8px; border:1px solid #ccc; margin-top:0.5rem;}
+</style>
+</head>
+<body>
+<main>
+  <h2>Phase 1: Assessing Opportunities</h2>
+  <div class="phase" id="phase1">Loading...</div>
+
+  <h2>Phase 2: Creative Thinking & Problem Solving</h2>
+  <div class="phase" id="phase2">Loading...</div>
+
+  <h2>Phase 3: Business Reports & Presentation</h2>
+  <div class="phase" id="phase3">Loading...</div>
+</main>
+</body>
+</html>
