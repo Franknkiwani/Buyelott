@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Connect with Singles Near You</title>
+  
+  <!-- Meta Description for SEO -->
+  <meta name="description" content="Join the best dating platform to connect with singles near you. Start chatting, make real connections, and find love today!">
+  
+  <!-- Open Graph for Social Preview -->
+  <meta property="og:title" content="Connect with Singles Near You">
+  <meta property="og:description" content="Meet singles in your area and start building real connections today.">
+  <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPe8kR5mog4WmSZ8rxZb8g1LBb_XaxWkO9osW4u4RiYGS91DKtolbWmGrr&s=10">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourwebsite.com">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Connect with Singles Near You">
+  <meta name="twitter:description" content="Join the best dating platform to meet singles near you. Start chatting today!">
+  <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPe8kR5mog4WmSZ8rxZb8g1LBb_XaxWkO9osW4u4RiYGS91DKtolbWmGrr&s=10">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm5DcYHABRR_pM7K2RTyYGelcMZ8oR8CPUUelJ2x3yQEMCqGQPaI6USjhc&s=10">
+</head>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* RESET & MODERN BASE */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  -webkit-tap-highlight-color: transparent; /* remove blue highlight on mobile */
+  user-select: none; /* disable text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+body {
+  background: #121212;
+  color: #fff;
+  font-family: 'SF Pro Display', sans-serif;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Remove default focus outlines & selection */
+::selection {
+  background: transparent; 
+}
+a, button {
+  text-decoration: none;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* TOP BAR LEFT BUTTON GRADIENT CLEAN */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.left-btn {
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b); /* gradient button */
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.left-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,75,43,0.5);
+}
+
+/* OTHER BUTTONS */
+.filter-btn, .share-btn {
+  padding: 0.6rem 1rem;
+  background: #007aff;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.filter-btn:hover, .share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,122,255,0.5);
+}
+
+/* OFFER CARD CLEAN MODERN */
+.offer-card {
+  position: relative;
+  width: 90%;
+  max-width: 1000px;
+  margin: 3rem auto;
+  border-radius: 20px;
+  overflow: hidden;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+.offer-thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+.offer-content {
+  padding: 1.5rem;
+  text-align: center;
+}
+.offer-content h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.offer-content p {
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+.cta-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem 0;
+  border-radius: 12px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(90deg, #ff416c, #ff4b2b);
+  color: #fff;
+}
+.cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255,75,43,0.6);
+}
+.availability {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 0;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  transition: background 0.2s ease;
+}
+.available { background-color: #28a745; color: #fff; }
+.unavailable { background-color: #dc3545; color: #fff; }
+
+/* LOADING SCREEN (unchanged) */
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18,18,18,0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  text-align: center;
+  padding: 2rem;
+}
+#loadingScreen p {
+  font-size: 1.5rem;
+  margin: 1rem 0 0 0;
+  line-height: 1.4;
+  color: #fff;
+}
+#loadingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(255,255,255,0.2);
+  border-top-color: #007aff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+#filterBtn {
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#filterBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,75,43,0.5);
+}
+/* iOS-style badge purely with CSS */
+.availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  color: #fff;
+  position: relative;
+}
+
+/* green success */
+.availability.available {
+  background-color: rgba(52, 199, 89, 0.15); /* light green */
+  color: #34c759;
+}
+
+/* red error */
+.availability.unavailable {
+  background-color: rgba(255, 59, 48, 0.15); /* light red */
+  color: #ff3b30;
+}
+
+/* pseudo icon before text */
+.availability::before {
+  content: "⚠️"; /* can be ✅ for available or ❌ for unavailable */
+  display: inline-block;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* override icon per state */
+.availability.available::before { content: "✅"; }
+.availability.unavailable::before { content: "❌"; }
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  text-align: center;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Neon frosted spinner */
+#loadingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #ff416c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite, neonGlow 1.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 20px rgba(255,65,108,0.4);
+  margin-bottom: 1.2rem;
+}
+
+/* Spinner rotate */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Soft neon glow pulse */
+@keyframes neonGlow {
+  0% { box-shadow: 0 0 10px rgba(255,65,108,0.3); }
+  100% { box-shadow: 0 0 25px rgba(255,65,108,0.7); }
+}
+
+/* Quote text styling */
+#loadingQuote {
+  font-size: 1.3rem;
+  line-height: 1.4;
+  color: #fff;
+  max-width: 80%;
+  opacity: 0;
+  animation: quoteFade 2.5s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(255,255,255,0.2);
+}
+
+/* fade in/out quotes */
+@keyframes quoteFade {
+  0%, 20% { opacity: 0; transform: translateY(5px); }
+  30%, 70% { opacity: 1; transform: translateY(0); }
+  80%, 100% { opacity: 0; transform: translateY(-5px); }
+}
+
+/* smooth fade-in of entire screen */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* iOS-style header badge */
+.ios-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+  margin-left: 1rem;
+}
+.ios-badge.available { background-color: rgba(52,199,89,0.15); color:#34c759; }
+.ios-badge.unavailable { background-color: rgba(255,59,48,0.15); color:#ff3b30; }
+
+/* Loading screen */
+#loadingScreen {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(18,18,18,0.8); backdrop-filter: blur(12px);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  z-index:9999; text-align:center; padding:2rem; animation: fadeIn 0.5s ease forwards;
+}
+#loadingSpinner {
+  width:60px; height:60px; border:6px solid rgba(255,255,255,0.1);
+  border-top-color:#ff416c; border-radius:50%;
+  animation: spin 1s linear infinite, neonGlow 1.5s ease-in-out infinite alternate;
+  box-shadow:0 0 20px rgba(255,65,108,0.4); margin-bottom:1.2rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes neonGlow { 0% { box-shadow:0 0 10px rgba(255,65,108,0.3);} 100% { box-shadow:0 0 25px rgba(255,65,108,0.7);} }
+#loadingQuote { font-size:1.3rem; line-height:1.4; color:#fff; max-width:80%; opacity:0; animation: quoteFade 2.5s ease-in-out infinite; text-shadow:0 0 8px rgba(255,255,255,0.2);}
+@keyframes quoteFade { 0%,20%{opacity:0; transform:translateY(5px);} 30%,70%{opacity:1; transform:translateY(0);} 80%,100%{opacity:0; transform:translateY(-5px);} }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div id="loadingSpinner"></div>
+  <p id="loadingQuote">Loading... stay motivated!</p>
+</div>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <button id="filterBtn" class="filter-btn">Show Only Available</button>
+  <button onclick="window.location.href='share.html'" class="share-btn">Share</button>
+</div>
+
+<div id="offers"></div>
+<script>
+const thumbnails = [
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAbt7r17DjhltX74ELRRMD5_ZTEOg1jTXff0Ljy46CDqKQZgQUH555OFA&s=10",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPe8kR5mog4WmSZ8rxZb8g1LBb_XaxWkO9osW4u4RiYGS91DKtolbWmGrr&s=10",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvUTT2TlgwKFjcMtOfh471PFs5uBnu7dmUTJnxdbK7N1cBU75TVM3jpya6&s=10",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOBF4m6UNjJvmQzKSBOKywoj2hAUx14oKiOyTzyA3bo0ApcLIcO33I1bs&s=10",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnWiwpOguHlFs0OMtoqveJTz7WevWfNF8dcuEoicrt378qNf3FNWUDhzUF&s=10"
+];
+
+const offers = [
+  {name: "WildAsianBabes", desc: "Connect with Asian singles. Sign up & confirm email to join.", url: "https://wait-page.eu/a/NQjKiV45Hj98v", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "Grandhookup", desc: "Authentic casual dating connections made easy.", url: "https://wait-page.eu/a/7NzyFZx3tWvZr", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "Dreamflirty", desc: "Find meaningful dating connections quickly.", url: "https://wait-page.eu/a/7NzyFEAGfWvRn", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "NSAFlirts", desc: "Casual dating and flirty encounters.", url: "https://wait-page.eu/a/ZqyGU766FKJ5k", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]},
+  {name: "FindMeanAsian", desc: "Meet Asian singles based on shared interests.", url: "https://wait-page.eu/a/ry5qTAvXf43xM", availableCountries: ["US","UK","CA","AU","NZ","IE","ZA","PR"]}
+];
+
+let userCountry = "US"; // fallback
+let showOnlyAvailable = false;
+const quotes = [
+  "💪 Keep pushing, success is near!",
+  "💖 Love is everywhere, just sign up!",
+  "💰 Money loves action, take a step today!",
+  "🌟 Stay motivated, amazing things are coming!",
+  "❤️ Spread love, it comes back multiplied!",
+  "💸 Every click is an opportunity to earn!"
+];
+let quoteIndex = 0;
+
+// iOS-style header availability
+function updateHeaderAvailability() {
+  const anyAvailable = offers.some(offer => offer.availableCountries.includes(userCountry));
+  const headerEl = document.getElementById('headerAvailability');
+  headerEl.textContent = anyAvailable ? "Available in your country ✅" : "Not available ❌";
+  headerEl.className = 'ios-badge ' + (anyAvailable ? 'available' : 'unavailable');
+}
+
+function renderOffers() {
+  const container = document.getElementById('offers');
+  container.innerHTML = "";
+
+  const imagesToLoad = [];
+
+  offers.forEach((offer, i) => {
+    const isAvailable = offer.availableCountries.includes(userCountry);
+    if (showOnlyAvailable && !isAvailable) return;
+
+    const thumbnail = thumbnails[i] || thumbnails[thumbnails.length - 1];
+    const card = document.createElement('div');
+    card.className = "offer-card";
+    card.innerHTML = `
+      <div class="thumbnail-wrapper" style="position: relative;">
+        <img src="${thumbnail}" alt="${offer.name}" class="offer-thumbnail">
+        ${i === 0 ? `<div class="premium-label" style="position: absolute; top:10px; left:10px; background: linear-gradient(45deg,#f9d423,#ff4e50); color:white; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:12px; display:flex; align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="yellow" viewBox="0 0 24 24" width="16" height="16" style="margin-right:4px;">
+            <path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.782 1.4 8.17L12 18.896l-7.334 3.867 1.4-8.17-5.934-5.782 8.2-1.193z"/>
+          </svg>
+          Most Popular
+        </div>` : ""}
+      </div>
+      <div class="offer-content">
+        <h2>${offer.name}</h2>
+        <p>${offer.desc}</p>
+        <a href="${offer.url}" target="_blank" class="cta-btn">Sign Up Now</a>
+        <span class="availability ${isAvailable ? 'available' : 'unavailable'}">
+          ${isAvailable ? 'Available in your country' : 'Not available in your country'}
+        </span>
+      </div>
+    `;
+    container.appendChild(card);
+
+    const imgEl = card.querySelector('img');
+    imagesToLoad.push(new Promise(resolve => {
+      if (imgEl.complete) resolve();
+      else imgEl.onload = resolve;
+      imgEl.onerror = resolve;
+    }));
+  });
+
+  Promise.all(imagesToLoad).then(() => {
+    document.getElementById('loadingScreen').style.display = "none";
+    document.body.style.overflow = "auto";
+    updateHeaderAvailability();
+  });
+}
+
+// Rotating quotes
+const quoteEl = document.getElementById('loadingQuote');
+setInterval(() => {
+  quoteEl.textContent = quotes[quoteIndex];
+  quoteIndex = (quoteIndex + 1) % quotes.length;
+}, 2500);
+
+// Filter button
+document.getElementById('filterBtn').addEventListener('click', () => {
+  showOnlyAvailable = !showOnlyAvailable;
+  document.getElementById('filterBtn').textContent = showOnlyAvailable ? "Show All Offers" : "Show Only Available";
+  renderOffers();
+});
+
+// Fetch country
+let networkTimeout = setTimeout(() => {
+  quoteEl.textContent = "⚠️ Network error. Please check your connection!";
+}, 10000);
+
+fetch('https://ipapi.co/json/')
+  .then(res => res.json())
+  .then(data => {
+    clearTimeout(networkTimeout);
+    userCountry = data.country;
+    renderOffers();
+  })
+  .catch(err => {
+    clearTimeout(networkTimeout);
+    quoteEl.textContent = "⚠️ Network error. Please check your connection!";
+    console.error("Could not fetch user country:", err);
+  });
+
+document.body.style.overflow = "hidden";
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ---- Helper: get country info ----
+async function getCountry() {
+  try {
+    const res = await fetch('https://ipapi.co/json');
+    const data = await res.json();
+    return {
+      country: data.country_name || 'Unknown',
+      countryCode: (data.country_code || 'US').toLowerCase(),
+      flag: `https://flagcdn.com/16x12/${(data.country_code || 'US').toLowerCase()}.png`
+    };
+  } catch(e) {
+    return { country: 'Unknown', countryCode: 'us', flag: 'https://flagcdn.com/16x12/us.png' };
+  }
+}
+
+// ---- Log visit ----
+async function logVisit() {
+  const { country, countryCode, flag } = await getCountry();
+  const timestamp = Date.now();
+
+  // LOGS - every visit
+  const logsRef = ref(db, 'analytics/logs');
+  push(logsRef, { timestamp, country, countryCode, flag, url: location.href }).catch(console.error);
+
+  // USERS - once per device
+  const userKey = 'uniqueUserLogged';
+  if (!localStorage.getItem(userKey)) {
+    localStorage.setItem(userKey, 'true');
+    const usersRef = ref(db, 'analytics/events');
+    push(usersRef, { timestamp, type: 'user' }).catch(console.error);
+  }
+
+  // VIEWS - every visit
+  const viewsRef = ref(db, 'analytics/events');
+  push(viewsRef, { timestamp, type: 'view' }).catch(console.error);
+}
+
+// ---- Track clicks ----
+function trackClicks() {
+  document.addEventListener('click', (e) => {
+    const timestamp = Date.now();
+    const clicksRef = ref(db, 'analytics/events');
+    push(clicksRef, { timestamp, type: 'click', target: e.target.tagName || 'unknown' }).catch(console.error);
+  });
+}
+
+// ---- Run tracking ----
+logVisit();
+trackClicks();
+</script>
+</body>
+</html>
