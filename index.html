@@ -2043,6 +2043,56 @@ body.sidebar-open {
 }
 </style>
 <script src="https://fpyf8.com/88/tag.min.js" data-zone="126073" async data-cfasync="false"></script>
+<!-- Firebase & Tracking Script -->
+<script type="module">
+  // Import Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+  // Firebase Config (replace with your own values)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID",
+    measurementId: "MEASUREMENT_ID"
+  };
+
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  // === Tracking Functions ===
+
+  // Track page load
+  logEvent(analytics, "page_view", {
+    page_title: document.title,
+    page_location: window.location.href,
+    referrer: document.referrer
+  });
+
+  // Track offer clicks
+  document.querySelectorAll(".cta-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const offerId = btn.closest(".offer-card")?.querySelector("h2")?.innerText || "Unknown Offer";
+      logEvent(analytics, "offer_click", {
+        offer_name: offerId,
+        page_location: window.location.href
+      });
+    });
+  });
+
+  // Track user session info
+  const userData = {
+    language: navigator.language,
+    device: navigator.userAgent,
+    platform: navigator.platform
+  };
+  logEvent(analytics, "user_session", userData);
+
+</script>
 </head>
 <body>
 
