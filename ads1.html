@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mini YouTube Clone with Pre-Roll Ads</title>
+  <title>Mini YouTube Clone with Your Ads</title>
   <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet">
   <style>
     body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
@@ -15,64 +14,62 @@
   </style>
 </head>
 <body>
-  <header>MyTube</header>
-
-  <div class="container">
+  <header>MyTube</header>  <div class="container">
     <!-- Video 1 -->
     <div class="video-box">
       <div class="loading-ad" id="loading1">Loading ad...</div>
       <video id="video1" class="video-js vjs-default-skin" controls preload="auto">
         <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
       </video>
-    </div>
-  </div>
+    </div><!-- Video 2 -->
+<div class="video-box">
+  <div class="loading-ad" id="loading2">Loading ad...</div>
+  <video id="video2" class="video-js vjs-default-skin" controls preload="auto">
+    <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+  </video>
+</div>
 
-  <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
-  <script src="https://unpkg.com/videojs-contrib-ads/dist/videojs.ads.min.js"></script>
-  <script src="https://unpkg.com/videojs-ima/dist/videojs.ima.min.js"></script>
-  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+<!-- Video 3 -->
+<div class="video-box">
+  <div class="loading-ad" id="loading3">Loading ad...</div>
+  <video id="video3" class="video-js vjs-default-skin" controls preload="auto">
+    <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+  </video>
+</div>
 
-  <script>
-    var adTagUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=";
-
-    function setupPlayer(videoId, loadingId) {
+  </div>  <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>  <script>
+  function loadCustomAd(videoId, loadingId) {
       var loadingEl = document.getElementById(loadingId);
-      loadingEl.style.display = 'block'; // Show loading ad message
-
+      loadingEl.style.display = 'block';
       var player = videojs(videoId);
 
-      player.ima({
-        id: videoId,
-        adTagUrl: adTagUrl,
-        debug: true
-      });
-
       player.ready(function() {
-        // Request ads
-        player.ima.requestAds();
+          player.pause();
+          (function(ofmty){
+              var d = document,
+                  s = d.createElement('script'),
+                  l = d.scripts[d.scripts.length - 1];
+              s.settings = ofmty || {};
+              s.src = "//disfiguredcomment.com/bmXsVZs.diGFlQ0KYvW/cy/He-mB9ku_ZVUAlPkOPkThYd2-N/jdIoxLMoT/AgtGN/jpYn2ZM/juEQxcMxQB";
+              s.async = true;
+              s.referrerPolicy = 'no-referrer-when-downgrade';
+              s.onload = function(){
+                  console.log('Ad script loaded');
+                  loadingEl.style.display = 'none';
+                  player.play();
+              };
+              s.onerror = function(){
+                  console.log('Ad failed to load, skipping...');
+                  loadingEl.innerText = 'Ad failed. You can skip.';
+                  setTimeout(function(){ loadingEl.style.display = 'none'; player.play(); }, 2000);
+              };
+              l.parentNode.insertBefore(s, l);
+          })({});
       });
+  }
 
-      // Prevent video from playing until ad finishes or fails
-      player.on('adsready', function() {
-        loadingEl.style.display = 'none'; // Hide loading
-      });
-
-      player.on('adserror', function() {
-        console.log('Ad failed, allowing video to play');
-        loadingEl.innerText = 'Ad failed. You can skip.';
-        setTimeout(function() { loadingEl.style.display = 'none'; }, 2000); // auto hide
-      });
-
-      player.on('adstart', function() {
-        loadingEl.style.display = 'none';
-      });
-
-      player.on('adend', function() {
-        loadingEl.style.display = 'none';
-      });
-    }
-
-    setupPlayer('video1', 'loading1');
-  </script>
-</body>
+  loadCustomAd('video1', 'loading1');
+  loadCustomAd('video2', 'loading2');
+  loadCustomAd('video3', 'loading3');
+  </script></body>
 </html>
