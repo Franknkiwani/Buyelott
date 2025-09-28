@@ -3402,10 +3402,10 @@ function renderProduct(product, id) {
   const container = document.getElementById("productList");
   container.appendChild(card);
 
-  // Dynamically insert banner after product
+  // ✅ Inject your banner script after each product
   const bannerScript = document.createElement("script");
-  bannerScript.src = "//mildgive.com/bPXYV/snd.GhlW0EYZWbcw/GeJmq9_urZ/UklqkcPWTDYx2zN/j/IxxuNWT/QPtrNJjiYV2tMAjKER1/NOQT";
   bannerScript.async = true;
+  bannerScript.src = "//mildgive.com/bPXYV/snd.GhlW0EYZWbcw/GeJmq9_urZ/UklqkcPWTDYx2zN/j/IxxuNWT/QPtrNJjiYV2tMAjKER1/NOQT";
   bannerScript.referrerPolicy = "no-referrer-when-downgrade";
 
   const bannerWrapper = document.createElement("div");
@@ -3458,7 +3458,7 @@ function renderMixedFeed(filteredProducts) {
   }
 }
 
-// Apply search and filter
+// Search and filter
 function applySearchAndFilter() {
   const searchTerm = document.getElementById("searchInput")?.value.toLowerCase() || '';
   const filter = document.getElementById("filterSelect")?.value || 'default';
@@ -3469,31 +3469,20 @@ function applySearchAndFilter() {
     return title.includes(searchTerm) || desc.includes(searchTerm);
   });
 
-  if (filter === 'priceLow') {
-    filtered.sort((a, b) => parseFloat(a[1].price || 0) - parseFloat(b[1].price || 0));
-  } else if (filter === 'priceHigh') {
-    filtered.sort((a, b) => parseFloat(b[1].price || 0) - parseFloat(a[1].price || 0));
-  } else if (filter === 'newest') {
-    filtered.reverse();
-  } else if (filter === 'verified') {
-    filtered = filtered.filter(([_, p]) => p.seller?.verified === true);
-  }
+  if (filter === 'priceLow') filtered.sort((a,b)=>parseFloat(a[1].price||0)-parseFloat(b[1].price||0));
+  else if (filter === 'priceHigh') filtered.sort((a,b)=>parseFloat(b[1].price||0)-parseFloat(a[1].price||0));
+  else if (filter === 'newest') filtered.reverse();
+  else if (filter === 'verified') filtered = filtered.filter(([_,p])=>p.seller?.verified===true);
 
   renderMixedFeed(filtered);
 }
 
+// User actions
 function messageUser(productId) {
   if (!productId) return alert("Missing product ID.");
   window.location.href = `/messages?product=${encodeURIComponent(productId)}`;
 }
-
-async function loadAds() {
-  const adsSnapshot = await db.ref("/dlsaccountsads").once("value");
-  const adsData = adsSnapshot.val();
-  if (!adsData) return;
-  allAds = shuffleArray(Object.values(adsData));
-}
-
+function buyProduct(id) { window.location.href = `/product?id=${id}`; }
 function openModal(images) {
   const modal = document.getElementById("imageModal");
   modal.innerHTML = `<button class="close-modal" onclick="closeModal()">Close</button>`;
@@ -3508,25 +3497,24 @@ function openModal(images) {
   });
   modal.style.display = 'flex';
 }
+function closeModal() { document.getElementById("imageModal").style.display = 'none'; }
 
-function closeModal() {
-  document.getElementById("imageModal").style.display = 'none';
+// Load ads from Firebase
+async function loadAds() {
+  const adsSnapshot = await db.ref("/dlsaccountsads").once("value");
+  const adsData = adsSnapshot.val();
+  if (!adsData) return;
+  allAds = shuffleArray(Object.values(adsData));
 }
 
-function buyProduct(id) {
-  window.location.href = `/product?id=${id}`;
-}
-
-// Load products from Firebase
+// Load products
 async function loadMore() {
   if (loading) return;
   loading = true;
   showSkeletons();
 
   let ref = db.ref("/dlsaccounts").orderByKey().limitToFirst(LIMIT + 1);
-  if (lastKey) {
-    ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);
-  }
+  if (lastKey) ref = db.ref("/dlsaccounts").orderByKey().startAfter(lastKey).limitToFirst(LIMIT + 1);
 
   const snapshot = await ref.once("value");
   const data = snapshot.val();
@@ -3535,52 +3523,37 @@ async function loadMore() {
   const filterContainer = document.getElementById("searchFilterContainer");
   if (data && Object.keys(data).length > 0 && filterContainer) {
     filterContainer.style.display = "block";
-    requestAnimationFrame(() => {
-      filterContainer.classList.add("show");
-    });
+    requestAnimationFrame(()=>filterContainer.classList.add("show"));
   }
 
-  if (!data) {
-    window.removeEventListener('scroll', onScroll);
-    loading = false;
-    return;
-  }
+  if (!data) { window.removeEventListener('scroll', onScroll); loading=false; return; }
 
   let entries = Object.entries(data);
-  if (entries.length > LIMIT) {
-    lastKey = entries[LIMIT - 1][0];
-    entries.length = LIMIT;
-  } else {
-    window.removeEventListener('scroll', onScroll);
-  }
+  if (entries.length > LIMIT) { lastKey = entries[LIMIT - 1][0]; entries.length = LIMIT; }
+  else window.removeEventListener('scroll', onScroll);
 
   entries = shuffleArray(entries);
 
-  for (const [id, product] of entries) {
-    allProducts.push([id, product]);
-  }
+  for (const [id, product] of entries) allProducts.push([id, product]);
 
   applySearchAndFilter();
-  loading = false;
+  loading=false;
 }
 
 // Infinite scroll
 function onScroll() {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 && !loading) {
-    loadMore();
-  }
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300 && !loading) loadMore();
 }
 
-// Initialize
+// Init
 window.onload = async () => {
   await loadAds();
   loadMore();
   window.addEventListener('scroll', onScroll);
-
   const searchInput = document.getElementById("searchInput");
   const filterSelect = document.getElementById("filterSelect");
-  if (searchInput) searchInput.addEventListener("input", applySearchAndFilter);
-  if (filterSelect) filterSelect.addEventListener("change", applySearchAndFilter);
+  if(searchInput) searchInput.addEventListener("input", applySearchAndFilter);
+  if(filterSelect) filterSelect.addEventListener("change", applySearchAndFilter);
 };
 </script>
 <script>
