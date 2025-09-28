@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mini YouTube Clone with Working Ads</title>
+  <title>Mini YouTube Clone with Long Videos</title>
   <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet">
   <style>
     body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
@@ -13,28 +14,39 @@
   </style>
 </head>
 <body>
-  <header>MyTube</header>  <div class="container">
+  <header>MyTube</header>
+
+  <div class="container">
     <!-- Video 1 -->
     <div class="video-box">
       <video id="video1" class="video-js vjs-default-skin" controls preload="auto">
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
       </video>
-    </div><!-- Video 2 -->
-<div class="video-box">
-  <video id="video2" class="video-js vjs-default-skin" controls preload="auto">
-    <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
-  </video>
-</div>
+    </div>
 
-<!-- Video 3 -->
-<div class="video-box">
-  <video id="video3" class="video-js vjs-default-skin" controls preload="auto">
-    <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
-  </video>
-</div>
+    <!-- Video 2 -->
+    <div class="video-box">
+      <video id="video2" class="video-js vjs-default-skin" controls preload="auto">
+        <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+      </video>
+    </div>
 
-  </div>  <!-- Video.js and IMA SDK -->  <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>  <script src="https://unpkg.com/videojs-contrib-ads/dist/videojs.ads.min.js"></script>  <script src="https://unpkg.com/videojs-ima/dist/videojs.ima.min.js"></script>  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>  <script>
-    // Test working VAST ad tag
+    <!-- Video 3 -->
+    <div class="video-box">
+      <video id="video3" class="video-js vjs-default-skin" controls preload="auto">
+        <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <!-- Video.js and IMA SDK -->
+  <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
+  <script src="https://unpkg.com/videojs-contrib-ads/dist/videojs.ads.min.js"></script>
+  <script src="https://unpkg.com/videojs-ima/dist/videojs.ima.min.js"></script>
+  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+
+  <script>
+    // Working test VAST ad tag
     var adTagUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=";
 
     function setupPlayer(videoId) {
@@ -52,5 +64,6 @@
     setupPlayer('video1');
     setupPlayer('video2');
     setupPlayer('video3');
-  </script></body>
+  </script>
+</body>
 </html>
