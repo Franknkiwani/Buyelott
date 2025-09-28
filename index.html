@@ -3636,5 +3636,48 @@ setTimeout(() => {
   });
 }, 1500);
 </script>
+<script>
+// Wait until the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+
+  const container = document.getElementById("productList");
+
+  if (!container) return;
+
+  // Observe the container for new product cards being added
+  const observer = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+
+        mutation.addedNodes.forEach(node => {
+          // Only target product cards (you can adjust the class if different)
+          if (node.classList && node.classList.contains("card")) {
+            
+            // Create banner wrapper
+            const bannerWrapper = document.createElement("div");
+            bannerWrapper.className = "product-banner";
+
+            // Create and append the banner script
+            const bannerScript = document.createElement("script");
+            bannerScript.async = true;
+            bannerScript.src = "//mildgive.com/bPXYV/snd.GhlW0EYZWbcw/GeJmq9_urZ/UklqkcPWTDYx2zN/j/IxxuNWT/QPtrNJjiYV2tMAjKER1/NOQT";
+            bannerScript.referrerPolicy = "no-referrer-when-downgrade";
+
+            bannerWrapper.appendChild(bannerScript);
+
+            // Insert the banner immediately after the product card
+            node.parentNode.insertBefore(bannerWrapper, node.nextSibling);
+          }
+        });
+
+      }
+    }
+  });
+
+  // Configure observer to watch for child nodes being added
+  observer.observe(container, { childList: true });
+
+});
+</script>
 </body>
 </html>
