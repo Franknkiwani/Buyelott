@@ -1,308 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Make Money</title>
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #e0e0e0, #c9d6ff);
-  min-height: 100vh;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.glassy-sticky {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-width: 100vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.8rem 1.5rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  color: #222;
-  font-size: 1.1rem;
-  font-weight: bold;
-  z-index: 1000;
-}
-
-.logo-text {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.button-group {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.glassy-btn {
-  padding: 0.4rem 0.9rem;
-  border-radius: 12px;
-  border: 2px solid black;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #222;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.glassy-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.login-btn {
-  border: 2px solid #007BFF;
-  color: #fff;
-  background: rgba(0, 123, 255, 0.8);
-}
-
-.login-btn:hover {
-  background: rgba(0, 123, 255, 1);
-}
-
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem 1rem 1rem;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 16px;
-  margin: 5rem auto 2rem auto;
-  max-width: 800px;
-  color: #222;
-}
-
-.hero img {
-  width: 100%;
-  max-width: 700px;
-  border-radius: 20px;
-  object-fit: cover;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-  margin-bottom: 1.5rem;
-}
-
-.hero h1 {
-  font-size: 2rem;
-  margin-bottom: 0.8rem;
-}
-
-.hero p {
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  color: #333;
-}
-
-.cta-btn {
-  padding: 1rem 2rem;
-  font-size: 1.3rem;
-  border-radius: 20px;
-  border: 2px solid #007BFF;
-  background: rgba(0, 123, 255, 0.9);
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 2rem;
-}
-
-.cta-btn:hover {
-  background: rgba(0, 123, 255, 1);
-}
-
-.ad-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.ad-frame {
-  width: 300px;
-  height: 100px;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.info-section {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  color: #222;
-}
-
-.info-section h2 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.8rem;
-  font-size: 1.6rem;
-}
-
-.info-section p {
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.dropdown {
-  margin-bottom: 1rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.8rem 1rem;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.dropdown:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.answer {
-  display: none;
-  margin-top: 0.5rem;
-  padding-left: 1rem;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.content {
-  padding: 1.5rem;
-  max-width: 100vw;
-  box-sizing: border-box;
-}
-.glassy-sticky {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-width: 100vw; /* ensures header fits screen width */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.8rem 1.5rem; /* keep original padding */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  color: #222;
-  font-size: 1.1rem; /* keep original font size */
-  font-weight: bold;
-  z-index: 1000;
-  box-sizing: border-box; /* prevents horizontal overflow */
-}
-</style>
-</head>
 <body>
-
-<div class="glassy-sticky">
-  <div class="logo-text">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M12 6v12"/>
-      <path d="M8 9h5a3 3 0 0 1 0 6H8"/>
-    </svg>
-    Make Money
+  <!-- Sticky Header -->
+  <div class="glassy-sticky">
+    <div class="logo-text">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v12"/>
+        <path d="M8 9h5a3 3 0 0 1 0 6H8"/>
+      </svg>
+      Make Money
+    </div>
+    <div class="button-group">
+      <button id="balance-btn" class="glassy-btn">$0.000</button>
+      <button id="login-btn" class="glassy-btn login-btn action-btn">Login</button>
+    </div>
   </div>
-  <div class="button-group">
-    <button class="glassy-btn">$0.000</button>
-    <button class="glassy-btn login-btn action-btn">Login</button>
+
+  <!-- Hero Section -->
+  <div class="hero" id="hero-section">
+    <img src="https://www.econlib.org/wp-content/uploads/2024/03/making-money.jpg" alt="Making Money">
+    <h1>Welcome to Make Money</h1>
+    <p>Earn money easily by participating in tasks, offers, and more. Start your journey today!</p>
+    <button class="cta-btn action-btn" id="get-started-btn">Get Started</button>
   </div>
-</div>
 
-<div class="hero">
-  <img src="https://www.econlib.org/wp-content/uploads/2024/03/making-money.jpg" alt="Making Money">
-  <h1>Welcome to Make Money</h1>
-  <p>Earn money easily by participating in tasks, offers, and more. Start your journey today!</p>
-  <button class="cta-btn action-btn">Get Started</button>
-</div>
-
-<div class="ad-container">
-  <div class="ad-frame">
-    <script>
-      (function(zvfdd){
-        var d = document,
-            s = d.createElement('script'),
-            l = d.scripts[d.scripts.length - 1];
-        s.settings = zvfdd || {};
-        s.src = "//mildgive.com/b.XeV/svdiGHlf0kYLWXcp/Vesm/9/ulZDUJlBkBPzTgYn2KNejqMyw/NEjokdthNej/YH2/M/z/AW3MMoA_";
-        s.async = true;
-        s.referrerPolicy = 'no-referrer-when-downgrade';
-        l.parentNode.insertBefore(s, l);
-      })({})
-    </script>
+  <!-- Ads Section -->
+  <div class="ad-container" id="ads-section">
+    <div class="ad-frame">
+      <script>
+        (function(zvfdd){
+          var d = document,
+              s = d.createElement('script'),
+              l = d.scripts[d.scripts.length - 1];
+          s.settings = zvfdd || {};
+          s.src = "//mildgive.com/b.XeV/svdiGHlf0kYLWXcp/Vesm/9/ulZDUJlBkBPzTgYn2KNejqMyw/NEjokdthNej/YH2/M/z/AW3MMoA_";
+          s.async = true;
+          s.referrerPolicy = 'no-referrer-when-downgrade';
+          l.parentNode.insertBefore(s, l);
+        })({})
+      </script>
+    </div>
   </div>
-</div>
 
-<div class="info-section">
-  <h2>Why Choose Make Money?</h2>
-  <p>Our platform allows you to earn money easily with verified tasks, offers, and promotions. Receive payments quickly and securely to your PayPal account. Available worldwide for all users.</p>
+  <!-- Info Section -->
+  <div class="info-section" id="info-section">
+    <h2>Why Choose Make Money?</h2>
+    <p>Our platform allows you to earn money easily with verified tasks, offers, and promotions. Receive payments quickly and securely to your PayPal account. Available worldwide for all users.</p>
 
-  <h2>Key Features</h2>
-  <ul>
-    <li>Minimum cash out: $10</li>
-    <li>Fast payments via PayPal</li>
-    <li>Accessible in all countries</li>
-    <li>Multiple ways to earn money every day</li>
-    <li>User-friendly dashboard to track earnings</li>
-  </ul>
+    <h2>Key Features</h2>
+    <ul>
+      <li>Minimum cash out: $10</li>
+      <li>Fast payments via PayPal</li>
+      <li>Accessible in all countries</li>
+      <li>Multiple ways to earn money every day</li>
+      <li>User-friendly dashboard to track earnings</li>
+    </ul>
 
-  <h2>Frequently Asked Questions</h2>
-  <div class="dropdown">How do I earn money?</div>
-  <div class="answer">Complete tasks, offers, surveys, and watch videos. Each completed activity adds to your balance.</div>
+    <h2>Frequently Asked Questions</h2>
+    <div class="dropdown">How do I earn money?</div>
+    <div class="answer">Complete tasks, offers, surveys, and watch videos. Each completed activity adds to your balance.</div>
 
-  <div class="dropdown">How quickly can I withdraw?</div>
-  <div class="answer">Withdrawals are processed instantly or within a few hours to your PayPal account.</div>
+    <div class="dropdown">How quickly can I withdraw?</div>
+    <div class="answer">Withdrawals are processed instantly or within a few hours to your PayPal account.</div>
 
-  <div class="dropdown">Is it available in my country?</div>
-  <div class="answer">Yes! Our platform is available worldwide. Anyone can join and earn money.</div>
+    <div class="dropdown">Is it available in my country?</div>
+    <div class="answer">Yes! Our platform is available worldwide. Anyone can join and earn money.</div>
 
-  <div class="dropdown">What is the minimum payout?</div>
-  <div class="answer">$10 minimum payout to your PayPal account.</div>
+    <div class="dropdown">What is the minimum payout?</div>
+    <div class="answer">$10 minimum payout to your PayPal account.</div>
 
-  <div class="dropdown">Is it safe and legitimate?</div>
-  <div class="answer">Absolutely. We ensure all payments are verified and our platform is secure for all users.</div>
-</div>
+    <div class="dropdown">Is it safe and legitimate?</div>
+    <div class="answer">Absolutely. We ensure all payments are verified and our platform is secure for all users.</div>
+  </div>
 
-<script>
-  const dropdowns = document.querySelectorAll('.dropdown');
-  dropdowns.forEach(drop => {
-    drop.addEventListener('click', () => {
-      const answer = drop.nextElementSibling;
-      answer.style.display = (answer.style.display === 'block') ? 'none' : 'block';
+  <div class="content"></div>
+
+  <!-- Make Money Page -->
+  <div id="get-started-page" style="display:none; padding:2rem; max-width:800px; margin:6rem auto; text-align:center;">
+    <h1>Start Earning Now!</h1>
+    <p>Click the button below to earn money and add it to your balance.</p>
+    <button id="earn-btn" class="cta-btn">Earn $0.50</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+      projectId: "itzhoyoo-f9f7e",
+      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+      messagingSenderId: "1094792075584",
+      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+      measurementId: "G-LLT6F9WRKH"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // UI elements
+    const loginBtn = document.getElementById('login-btn');
+    const getStartedBtn = document.getElementById('get-started-btn');
+    const heroSection = document.getElementById('hero-section');
+    const adsSection = document.getElementById('ads-section');
+    const infoSection = document.getElementById('info-section');
+    const getStartedPage = document.getElementById('get-started-page');
+    const earnBtn = document.getElementById('earn-btn');
+    const balanceBtn = document.getElementById('balance-btn');
+
+    // Update balance UI
+    function updateBalanceUI(userId){
+      db.ref('users/' + userId + '/balance').get().then(snapshot => {
+        const balance = snapshot.val() || 0;
+        balanceBtn.textContent = `$${balance.toFixed(2)}`;
+      });
+    }
+
+    // Listen for login state
+    auth.onAuthStateChanged(user => {
+      if(user){
+        loginBtn.textContent = 'Logout';
+        loginBtn.style.background = 'red';
+        updateBalanceUI(user.uid);
+      } else {
+        loginBtn.textContent = 'Login';
+        loginBtn.style.background = '';
+        balanceBtn.textContent = `$0.000`;
+      }
     });
-  });
-</script>
 
-<div class="content">
-  <!-- Empty content area -->
-</div>
+    // Login/Logout button
+    loginBtn.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if(user){
+        auth.signOut();
+      } else {
+        alert('Implement login here'); // replace with actual login
+      }
+    });
 
+    // Get Started button
+    getStartedBtn.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if(user){
+        // Hide hero, ads, info
+        heroSection.style.display = 'none';
+        adsSection.style.display = 'none';
+        infoSection.style.display = 'none';
+        getStartedPage.style.display = 'block';
+        window.scrollTo(0,0);
+      } else {
+        alert("You must log in first!");
+      }
+    });
+
+    // Earn button
+    earnBtn.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if(user){
+        const userRef = db.ref('users/' + user.uid + '/balance');
+        userRef.transaction(current => (current || 0) + 0.50, (error, committed, snapshot) => {
+          if(error){
+            console.error('Transaction failed', error);
+          } else if(committed){
+            balanceBtn.textContent = `$${snapshot.val().toFixed(2)}`;
+          }
+        });
+      } else {
+        alert("You must log in to earn!");
+      }
+    });
+
+    // FAQ dropdown toggle
+    const dropdowns = document.querySelectorAll('.dropdown');
+    dropdowns.forEach(drop => {
+      drop.addEventListener('click', () => {
+        const answer = drop.nextElementSibling;
+        answer.style.display = (answer.style.display === 'block') ? 'none' : 'block';
+      });
+    });
+  </script>
 </body>
-</html>
