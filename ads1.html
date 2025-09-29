@@ -1,3 +1,141 @@
-<script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
- <ins class="eas6a97888e37" data-zoneid="5734832"></ins> 
- <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click & Earn</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:#f2f2f7; display:flex; flex-direction:column; align-items:center; padding:2rem; }
+  h1 { margin-bottom: 1rem; }
+  .balance { font-size:1.2rem; font-weight:bold; margin-bottom:2rem; }
+  .earn-btn { padding:1rem 2rem; margin:1rem 0; border:none; border-radius:15px; font-weight:600; cursor:pointer; background:#007BFF; color:#fff; transition: background 0.2s; }
+  .earn-btn:hover { background:#0056b3; }
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
+  .modal-content { background:#fff; border-radius:20px; padding:2rem; max-width:400px; width:90%; text-align:center; position:relative; }
+  .countdown { font-size:1.5rem; margin-top:1rem; font-weight:bold; }
+  .close-btn { position:absolute; top:10px; right:15px; font-size:1.2rem; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<h1>Click & Earn</h1>
+<div class="balance" id="balance">$0.00</div>
+
+<!-- First button: Click 10 times to redirect -->
+<button class="earn-btn" id="click-btn">Click me to earn $0.001</button>
+
+<!-- Second button: Watch Ad -->
+<button class="earn-btn" id="ad-btn">Watch Ad & Earn $0.015</button>
+
+<!-- Modal -->
+<div class="modal" id="ad-modal">
+  <div class="modal-content">
+    <span class="close-btn" id="close-modal">&times;</span>
+    <h2>Watch this Ad</h2>
+    <div id="ad-container"></div>
+    <div class="countdown" id="countdown">10</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const balanceEl = document.getElementById('balance');
+const clickBtn = document.getElementById('click-btn');
+const adBtn = document.getElementById('ad-btn');
+const adModal = document.getElementById('ad-modal');
+const adContainer = document.getElementById('ad-container');
+const countdownEl = document.getElementById('countdown');
+const closeModal = document.getElementById('close-modal');
+
+let clickCount = 0;
+
+// Update balance UI
+function updateBalanceUI(userId){
+  db.ref('users/' + userId + '/balance').get().then(snapshot => {
+    const balance = snapshot.val() || 0;
+    balanceEl.textContent = `$${balance.toFixed(3)}`;
+  });
+}
+
+// Check login
+auth.onAuthStateChanged(user => {
+  if(user){
+    updateBalanceUI(user.uid);
+  } else {
+    alert("You must log in first!");
+  }
+});
+
+// First button click
+clickBtn.addEventListener('click', () => {
+  const user = auth.currentUser;
+  if(!user){ alert("You must log in!"); return; }
+
+  clickCount++;
+  const userRef = db.ref('users/' + user.uid + '/balance');
+  userRef.transaction(current => (current || 0) + 0.001, (error, committed, snapshot) => {
+    if(error) console.error('Transaction failed', error);
+    else if(committed) balanceEl.textContent = `$${snapshot.val().toFixed(3)}`;
+  });
+
+  if(clickCount >= 10){
+    window.location.href = "https://unusualroof.com/nT6dWU";
+  }
+});
+
+// Second button click: show ad modal
+adBtn.addEventListener('click', () => {
+  const user = auth.currentUser;
+  if(!user){ alert("You must log in!"); return; }
+
+  // Inject ad script
+  adContainer.innerHTML = '';
+  const s = document.createElement('script');
+  s.src = "//mildgive.com/b/X.VTsTdxGBlm0/Y/Wscd/-ehmM9tupZeUaldk/P/TiYF2/NMj_ISxVNITDQ/tzNqj_Y/2wMjjGEJ1hNbQU";
+  s.async = true;
+  adContainer.appendChild(s);
+
+  adModal.style.display = 'flex';
+
+  let countdown = 10;
+  countdownEl.textContent = countdown;
+  const timer = setInterval(() => {
+    countdown--;
+    countdownEl.textContent = countdown;
+    if(countdown <= 0){
+      clearInterval(timer);
+      adModal.style.display = 'none';
+      // Give $0.015
+      const userRef = db.ref('users/' + user.uid + '/balance');
+      userRef.transaction(current => (current || 0) + 0.015, (error, committed, snapshot) => {
+        if(error) console.error('Transaction failed', error);
+        else if(committed) balanceEl.textContent = `$${snapshot.val().toFixed(3)}`;
+      });
+    }
+  }, 1000);
+});
+
+// Close modal manually (optional)
+closeModal.addEventListener('click', () => {
+  adModal.style.display = 'none';
+});
+</script>
+</body>
+</html>
