@@ -1,246 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CyberChat</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI', sans-serif; background:#121212; color:#fff; display:flex; flex-direction:column; align-items:center; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Make Money</title>
+  <style>
+    /* Reset & prevent overflow */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e0e0e0, #c9d6ff);
+      min-height: 100vh;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  /* Header */
-  header {
-    position: fixed; top:0; left:50%; transform: translateX(-50%);
-    width:100%; max-width:600px;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:1rem 1.5rem; background: rgba(0,0,0,0.9); z-index:1000;
-  }
-  .header-left { display:flex; align-items:center; gap:1rem; }
-  .header-left h1 { font-size:1.5rem; font-weight:bold; color:#fff; }
-  .hamburger { display:flex; flex-direction:column; gap:5px; cursor:pointer; }
-  .hamburger div { width:25px; height:3px; background:#fff; transition:0.3s; }
+    .glassy-sticky {
+      position: fixed; /* fully sticky */
+      top: 0;
+      left: 0;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.5rem; /* slightly smaller */
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      color: #222;
+      font-size: 1.1rem;
+      font-weight: bold;
+      z-index: 1000;
+    }
 
-  .header-right { display:flex; align-items:center; gap:0.5rem; }
-  .balance-btn { background:#fff; color:#000; border:none; padding:0.5rem 1rem; border-radius:0.5rem; font-weight:bold; cursor:pointer; }
-  .upload-btn { background:#0f0; border:none; padding:0.5rem 1rem; border-radius:0.5rem; font-weight:bold; cursor:pointer; color:#000; display:flex; align-items:center; gap:0.3rem; }
-  .upload-btn svg { fill: #000; }
+    .logo-text {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-  nav { position:fixed; top:0; left:-250px; width:250px; height:100%; background: rgba(0,0,0,0.95); padding:2rem 1rem; display:flex; flex-direction:column; gap:2rem; transition:0.3s; z-index:999; }
-  nav a { color:#0ff; text-decoration:none; font-weight:bold; font-size:1.2rem; }
-  nav a:hover { color:#fff; }
-  nav.open { left:0; }
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+    }
 
-  .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index:998; }
-  .overlay.active { display:block; }
+    .glassy-btn {
+      padding: 0.4rem 0.9rem; /* slightly smaller */
+      border-radius: 12px;
+      border: 2px solid black;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #222;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
 
-  /* Posts Section */
-  .posts-section { margin-top:100px; display:flex; flex-direction:column; gap:1rem; align-items:center; width:100%; max-width:600px; padding:0 1rem; }
-  .post-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:0.5rem; border:1px solid #0ff; display:flex; flex-direction:column; gap:0.5rem; width:100%; text-align:center; }
-  .post-card img { max-width:100%; border-radius:0.5rem; }
-  .post-card h3 { color:#0ff; margin-bottom:0.5rem; }
-  .post-card p { color:#ccc; font-size:0.95rem; }
+    .glassy-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
 
-  .load-more-btn { margin:1rem auto; padding:0.5rem 1rem; background:#0ff; color:#000; border:none; border-radius:0.5rem; cursor:pointer; font-weight:bold; display:block; }
+    .login-btn {
+      border: 2px solid #007BFF;
+      color: #fff;
+      background: rgba(0, 123, 255, 0.8);
+    }
 
-  /* Modal */
-  #authModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center; }
-  #authContent { background:#222; padding:2rem; border-radius:0.5rem; width:90%; max-width:400px; display:flex; flex-direction:column; gap:1rem; color:#fff; }
-  #authContent h2 { text-align:center; color:#0ff; }
-  #authContent input { padding:0.5rem; border-radius:0.3rem; border:none; width:100%; background:#333; color:#fff; }
-  #authContent button { padding:0.5rem; border-radius:0.3rem; border:none; cursor:pointer; font-weight:bold; width:100%; }
-  #loginBtn { background:#0f0; color:#000; }
-  #signupBtn { background:#4285F4; color:#fff; }
-  #googleBtn { background:#db4437; color:#fff; }
-  #forgotPassword { background:none; border:none; color:#0ff; text-align:right; cursor:pointer; font-size:0.9rem; }
-</style>
+    .login-btn:hover {
+      background: rgba(0, 123, 255, 1);
+    }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 1rem 1rem; /* smaller padding */
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      margin: 5rem auto 2rem auto; /* top margin accounts for fixed header */
+      max-width: 800px;
+      color: #222;
+    }
+
+    .hero img {
+      width: 100%;
+      max-width: 700px;
+      border-radius: 20px;
+      object-fit: cover;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      margin-bottom: 1.5rem; /* slightly smaller spacing */
+    }
+
+    .hero h1 {
+      font-size: 2rem; /* slightly smaller */
+      margin-bottom: 0.8rem;
+    }
+
+    .hero p {
+      font-size: 1rem; /* slightly smaller */
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .content {
+      padding: 1.5rem;
+      max-width: 100vw;
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
-
-<header>
-  <div class="header-left">
-    <div class="hamburger" id="hamburger"><div></div><div></div><div></div></div>
-    <h1>CyberChat</h1>
-  </div>
-  <div class="header-right">
-    <button id="uploadBtn" class="upload-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-        <path d="M5 20h14v-2H5v2zm7-18l-5 5h3v4h4v-4h3l-5-5z"/>
+  <div class="glassy-sticky">
+    <div class="logo-text">
+      <!-- Money-style SVG logo -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v12"/>
+        <path d="M8 9h5a3 3 0 0 1 0 6H8"/>
       </svg>
-      Upload
-    </button>
-    <button class="balance-btn">$0.000</button>
+      Make Money
+    </div>
+    <div class="button-group">
+      <button class="glassy-btn">$0.000</button>
+      <button class="glassy-btn login-btn">Login</button>
+    </div>
   </div>
-</header>
 
-<nav id="navMenu">
-  <a href="#">Home</a>
-  <a href="#">Features</a>
-  <a href="#">Contact</a>
-</nav>
-<div class="overlay" id="overlay"></div>
-
-<section class="posts-section" id="postsSection">
-  <h2 style="color:#0ff; margin-bottom:1rem;">Latest Posts</h2>
-</section>
-<button id="loadMoreBtn" class="load-more-btn">Load More</button>
-
-<!-- Auth Modal -->
-<div id="authModal">
-  <div id="authContent">
-    <h2>Login or Signup</h2>
-    <input type="text" id="signupUsername" placeholder="Username (for signup)">
-    <input type="email" id="authEmail" placeholder="Email">
-    <input type="password" id="authPassword" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <button id="signupBtn">Signup</button>
-    <button id="googleBtn">Login with Google</button>
-    <button id="forgotPassword">Forgot Password?</button>
+  <div class="hero">
+    <img src="https://www.econlib.org/wp-content/uploads/2024/03/making-money.jpg" alt="Making Money">
+    <h1>Welcome to Make Money</h1>
+    <p>Earn money easily by participating in tasks, offers, and more. Start your journey today!</p>
+    <button class="glassy-btn login-btn">Get Started</button>
   </div>
-</div>
 
-<script>
-// Hamburger menu
-const hamburger = document.getElementById('hamburger');
-const navMenu = document.getElementById('navMenu');
-const overlay = document.getElementById('overlay');
-hamburger.addEventListener('click', () => { navMenu.classList.toggle('open'); overlay.classList.toggle('active'); });
-overlay.addEventListener('click', () => { navMenu.classList.remove('open'); overlay.classList.remove('active'); });
-
-// Firebase setup
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
-const postsSection = document.getElementById('postsSection');
-const uploadButton = document.getElementById('uploadBtn');
-const authModal = document.getElementById('authModal');
-
-const signupUsername = document.getElementById('signupUsername');
-const authEmail = document.getElementById('authEmail');
-const authPassword = document.getElementById('authPassword');
-const loginBtn = document.getElementById('loginBtn');
-const signupBtn = document.getElementById('signupBtn');
-const googleBtn = document.getElementById('googleBtn');
-const forgotPassword = document.getElementById('forgotPassword');
-
-// Auth state check
-auth.onAuthStateChanged(user => {
-  if(user){
-    uploadButton.disabled = false;
-    authModal.style.display = 'none';
-  } else {
-    uploadButton.disabled = true;
-    authModal.style.display = 'flex';
-  }
-});
-
-// Email login
-loginBtn.addEventListener('click', () => {
-  auth.signInWithEmailAndPassword(authEmail.value, authPassword.value)
-  .catch(err => alert(err.message));
-});
-
-// Signup
-signupBtn.addEventListener('click', () => {
-  auth.createUserWithEmailAndPassword(authEmail.value, authPassword.value)
-  .then(userCredential => {
-    const userId = userCredential.user.uid;
-    db.ref('users/' + userId).set({ username: signupUsername.value });
-  })
-  .catch(err => alert(err.message));
-});
-
-// Google login
-googleBtn.addEventListener('click', () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => alert(err.message));
-});
-
-// Forgot password
-forgotPassword.addEventListener('click', () => {
-  const email = authEmail.value;
-  if(!email) return alert('Enter your email first');
-  auth.sendPasswordResetEmail(email).then(() => alert('Password reset email sent')).catch(err => alert(err.message));
-});
-
-// Lazy load posts on scroll
-let lastKey = null;
-const POSTS_PER_BATCH = 5;
-let loadingPosts = false;
-
-function loadPosts() {
-  if (loadingPosts) return;
-  loadingPosts = true;
-
-  let query = db.ref('posts').orderByKey().limitToFirst(POSTS_PER_BATCH);
-  if(lastKey) query = db.ref('posts').orderByKey().startAt(lastKey).limitToFirst(POSTS_PER_BATCH + 1);
-
-  query.once('value', snapshot => {
-    const posts = snapshot.val();
-    if(!posts) { loadingPosts = false; return; }
-
-    const keys = Object.keys(posts);
-    if(lastKey) keys.shift();
-
-    keys.forEach(key => {
-      const post = posts[key];
-
-      // Post card
-      const div = document.createElement('div');
-      div.className = 'post-card';
-      const imgHtml = post.image ? `<img src="${post.image}" alt="Post Image">` : '';
-      div.innerHTML = `${imgHtml}<h3>${post.title || 'No title'}</h3><p>${post.content || 'No content'}</p>`;
-
-      // If monitored, add sponsored ad inside the card
-      if(post.monitored){
-        const adDiv = document.createElement('div');
-        adDiv.className = 'post-ad';
-        adDiv.style.border = '1px solid #0ff';
-        adDiv.style.padding = '0.5rem';
-        adDiv.style.marginTop = '1rem';
-        adDiv.style.textAlign = 'center';
-        adDiv.style.borderRadius = '0.5rem';
-        adDiv.innerHTML = `<div style="font-size:0.8rem;color:#0ff;margin-bottom:0.3rem;">Sponsored</div>`;
-        
-        const adScript = document.createElement('script');
-        adScript.async = true;
-        adScript.referrerPolicy = 'no-referrer-when-downgrade';
-        adScript.src = "//mildgive.com/beXYV.s/doGslW0yYuWUck/Oe/m/9_uZZbU/l/kqPdT/Yr2vNDjNIi5XMZzuk/tqNnjfY/2/M/j/k/0nMvAt";
-        adDiv.appendChild(adScript);
-
-        div.appendChild(adDiv);
-      }
-
-      postsSection.appendChild(div);
-      lastKey = key;
-    });
-
-    loadingPosts = false;
-  });
-}
-
-// Trigger lazy load on scroll
-window.addEventListener('scroll', () => {
-  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200){
-    loadPosts();
-  }
-});
-
-// Initial load
-loadPosts();
-</script>
-
+  <div class="content">
+    <!-- Empty content area -->
+  </div>
 </body>
 </html>
