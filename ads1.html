@@ -3,111 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Make Money App</title>
+<title>Dark iOS App</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
-    background:#f0f2f5;
-    color:#111;
+  /* Reset */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  /* Sticky Glass Header */
-  header{
-    position:sticky;
-    top:0;
-    width:100%;
-    backdrop-filter:blur(12px);
-    background:rgba(255,255,255,0.5);
-    border-bottom:1px solid rgba(200,200,200,0.3);
-    padding:15px 20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    z-index:1000;
+  html, body {
+    height: 100%;
+    background: #111;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
-  /* SVG Logo */
-  .logo{
-    display:flex;
-    align-items:center;
-  }
-  .logo svg{
-    width:36px;
-    height:36px;
-    margin-right:10px;
-  }
-  .logo span{
-    font-weight:700;
-    font-size:1.5rem;
-    color:#007aff;
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 12px 20px;
+    backdrop-filter: blur(15px);
+    background: rgba(30, 30, 30, 0.5); /* glassy dark */
+    display: flex;
+    justify-content: space-between; /* left + right */
+    align-items: center;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  nav a{
-    margin-left:20px;
-    text-decoration:none;
-    color:#111;
-    font-weight:500;
-    transition:color 0.2s ease;
+  /* Left: name + SVG */
+  .app-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  nav a:hover{color:#007aff;}
 
-  main{padding:20px;}
-
-  .card{
-    background:rgba(255,255,255,0.6);
-    backdrop-filter:blur(10px);
-    border-radius:15px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.1);
-    transition:transform 0.2s ease;
+  .app-info svg {
+    width: 28px;
+    height: 28px;
+    fill: #0f0; /* green dollar sign */
   }
-  .card:hover{transform:translateY(-5px);}
-  h2{margin-bottom:10px;font-size:1.25rem;}
-  p{line-height:1.6;color:#333;}
 
-  footer{
-    text-align:center;
-    padding:20px;
-    color:#777;
-    font-size:0.9rem;
+  .app-info span {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    -webkit-text-stroke: 1px #000; /* black stroke for visibility */
+  }
+
+  /* Right: login button */
+  .login-btn {
+    background: #007bff;
+    color: #fff;
+    padding: 8px 16px;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .login-btn:hover {
+    background: #0056b3;
+  }
+
+  main {
+    padding: 20px;
+    color: #ddd;
+    min-height: 200vh; /* for scroll demo */
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">
-    <!-- SVG Dollar Logo -->
-    <svg xmlns="http://www.w3.org/2000/svg" fill="#007aff" viewBox="0 0 24 24"><path d="M12 1C6.48 1 2 5.48 2 11s4.48 10 10 10 10-4.48 10-10S17.52 1 12 1zm.5 15h-1v-1h-1v-2h2v2h1v1h-1v1zm1.03-6.45l-.91.91c-.56.56-.63 1.34-.19 1.79.44.44 1.22.37 1.79-.19l.91-.91c.56-.56.63-1.34.19-1.79-.44-.44-1.22-.37-1.79.19z"/></svg>
-    <span>CashFlow</span>
+  <!-- Left: dollar-sign SVG + app name -->
+  <div class="app-info">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 1c-.552 0-1 .448-1 1v1.072C7.136 3.736 4 6.763 4 11c0 2.542 1.684 4.307 4.6 4.857l-.6 1.643c-.065.18-.034.377.084.516.118.139.295.22.482.22h.019c.187 0 .364-.081.482-.22l.596-1.64c1.948-.273 3.36-1.395 3.36-3.296 0-2.176-1.6-2.624-3.2-3.072V6.048c2.024.404 4 1.907 4 4.952 0 2.52-1.684 4.285-4.6 4.835l.6 1.643c.065.18.034.377-.084.516-.118.139-.295.22-.482.22h-.019c-.187 0-.364-.081-.482-.22l-.596-1.64C6.136 16.264 4 13.237 4 9c0-2.542 1.684-4.307 4.6-4.857V3c0-.552.448-1 1-1h2z"/>
+    </svg>
+    <span>Make Money</span>
   </div>
-  <nav>
-    <a href="#">Dashboard</a>
-    <a href="#">Tasks</a>
-    <a href="#">Profile</a>
-  </nav>
+
+  <!-- Right: login button -->
+  <button class="login-btn">Login</button>
 </header>
 
 <main>
-  <div class="card">
-    <h2>Earn $10 Fast</h2>
-    <p>Complete this quick task and watch your wallet grow. Easy, fast, legit.</p>
-  </div>
-  <div class="card">
-    <h2>Watch & Earn</h2>
-    <p>Watch a 30-second ad and collect your reward instantly. Money doesn’t wait!</p>
-  </div>
-  <div class="card">
-    <h2>Invite Friends</h2>
-    <p>Share your referral code and earn bonuses for every friend that joins.</p>
-  </div>
+  <p>Scroll down to see the sticky glass header in action.</p>
 </main>
-
-<footer>
-  &copy; 2025 CashFlow App. All rights reserved.
-</footer>
 
 </body>
 </html>
