@@ -6,12 +6,13 @@
 <title>Make Money</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
+<!-- React CDN -->
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  * { margin:0; padding:0; box-sizing:border-box; user-select: none; }
   body, html {
     height:100%;
     font-family:'Poppins', sans-serif;
@@ -43,9 +44,9 @@
   }
 
   .app-name img {
-    width:36px;
+    width:36px;       /* slightly larger */
     height:36px;
-    border-radius:50%;
+    border-radius:50%; /* curved edges */
     margin-right:10px;
     object-fit: cover;
   }
@@ -53,186 +54,47 @@
   .btn {
     padding:8px 18px;
     border-radius:20px;
-    border:none;
+    border:2px solid #000;
     color:#fff;
     font-weight:600;
     cursor:pointer;
-    transition:0.2s;
-    user-select:none;
-    outline:none;
-    box-shadow:none;
+    transition: none;
+    user-select: none;
+    outline: none;
+    box-shadow: none;
     -webkit-tap-highlight-color: transparent;
   }
 
   .btn-login { background-color: #1E90FF; }
   .btn-logout { background-color: #FF3333; }
-
-  /* Modal Styles */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    overflow: hidden;
-  }
-
-  .modal {
-    background: #1f1f1f;
-    border-radius: 12px;
-    width: 350px;
-    max-width: 90%;
-    padding: 25px;
-    color: #fff;
-    position: relative;
-  }
-
-  .modal h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .tabs {
-    display: flex;
-    margin-bottom: 20px;
-    justify-content: space-around;
-  }
-
-  .tab {
-    cursor:pointer;
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: #333;
-    transition:0.2s;
-  }
-
-  .tab.active {
-    background: #1E90FF;
-  }
-
-  .modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .modal input {
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    outline:none;
-    font-size:14px;
-  }
-
-  .modal button.submit-btn {
-    padding:10px;
-    background:#1E90FF;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
-  }
-
-  .forgot {
-    text-align:right;
-    font-size:12px;
-    color:#aaa;
-    cursor:pointer;
-    margin-top:-8px;
-  }
-
-  .notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background:#333;
-    color:#fff;
-    padding:12px 20px;
-    border-radius:8px;
-    opacity:0.9;
-    z-index:1000;
-  }
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-function App() {
-  const [loggedIn, setLoggedIn] = React.useState(false);
-  const [showModal, setShowModal] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState('login');
-  const [notification, setNotification] = React.useState('');
+  function App() {
+    const [loggedIn, setLoggedIn] = React.useState(false);
 
-  const handleAuthButton = () => {
-    if (!loggedIn) {
-      setShowModal(true);
-      document.body.style.overflow = 'hidden'; // disable scroll
-    } else {
-      setLoggedIn(false);
-      showNotification("Logged out!");
+    const handleAuth = () => {
+      setLoggedIn(!loggedIn);
+      alert(loggedIn ? "Logged out!" : "Logged in!");
     }
-  }
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    document.body.style.overflow = 'auto';
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const action = activeTab === 'login' ? 'Logged in!' : 'Registered!';
-    setLoggedIn(true);
-    setShowModal(false);
-    document.body.style.overflow = 'auto';
-    showNotification(action);
-  }
-
-  const showNotification = (msg) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(''), 3000);
-  }
-
-  return (
-    <>
+    return (
       <header>
         <div className="app-name">
           <img src="https://previews.123rf.com/images/distrologo/distrologo1907/distrologo190700076/126643926-earn-money-vector-logo-icon-design-saving-money-symbol-design-with-hand-illustrations.jpg" alt="Logo" />
           Make Money
         </div>
-        <button className={loggedIn ? "btn btn-logout" : "btn btn-login"} onClick={handleAuthButton}>
+        <button className={loggedIn ? "btn btn-logout" : "btn btn-login"} onClick={handleAuth}>
           {loggedIn ? "Logout" : "Login"}
         </button>
       </header>
+    );
+  }
 
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="tabs">
-              <div className={`tab ${activeTab==='login' ? 'active' : ''}`} onClick={()=>setActiveTab('login')}>Login</div>
-              <div className={`tab ${activeTab==='register' ? 'active' : ''}`} onClick={()=>setActiveTab('register')}>Register</div>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <input type="email" placeholder="Email" required />
-              <input type="password" placeholder="Password" required />
-              {activeTab==='login' && <div className="forgot" onClick={()=>showNotification("Forgot password clicked")}>Forgot Password?</div>}
-              <button className="submit-btn">{activeTab==='login' ? 'Login' : 'Register'}</button>
-            </form>
-            <div style={{textAlign:'center', marginTop:'15px', cursor:'pointer', color:'#aaa'}} onClick={handleCloseModal}>Close</div>
-          </div>
-        </div>
-      )}
-
-      {notification && <div className="notification">{notification}</div>}
-    </>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
