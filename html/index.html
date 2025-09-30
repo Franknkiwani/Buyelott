@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Make Money</title>
+<title>Make Money Page</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -20,60 +20,78 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen;backg
 .task-button:hover{background:#155ab6;transform:translateY(-2px);}
 .task-button:disabled{background:#aaa;cursor:default;}
 #clickLimitModal,#adModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(8px);background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:999;}
-#clickLimitModal div,#adModal div{background:#fff;border-radius:20px;padding:30px;text-align:center;max-width:500px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.15);}
-#adCountdown,.countdown{font-weight:bold;color:#1a73e8;margin-top:15px;font-size:18px;}
+#clickLimitModal div,#adModal div{background:#fff;border-radius:20px;padding:30px;text-align:center;max-width:500px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;}
+#clickLimitAdContainer, #adContainer{position:relative;min-height:120px;width:100%;display:flex;justify-content:center;align-items:center;}
+#clickLimitCountdown, #adCountdown{font-weight:bold;color:#1a73e8;margin-top:15px;font-size:18px;}
+#clickLimitAdContainer::before, #adContainer::before{content:'Loading ad...';position:absolute;top:10px;left:50%;transform:translateX(-50%);font-weight:bold;color:#1a73e8;font-size:16px;z-index:10;}
+.hide-loading::before{content:'';}
+#clickLimitButton{background:#1a73e8;color:#fff;font-weight:600;padding:12px 25px;border-radius:12px;border:none;font-size:16px;cursor:pointer;transition:background 0.2s;}
+#clickLimitButton:hover{background:#155ab6;}
+/* Disable scrolling when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+/* Prevent scrolling */
+body.modal-open {
+  overflow: hidden;
+  height: 100%;
+  touch-action: none; /* prevent touch scrolling on mobile */
+}
 </style>
 </head>
 <body>
 <div class="task-container">
-  <!-- Click-to-Earn -->
-  <div class="task-card" id="clickTask">
-    <img class="task-image" src="https://static.keygames.com/4/113364/94215/1344x896/money-clicker.webp" alt="Money Clicker">
-    <div class="task-title">Click to Earn</div>
-    <div class="task-desc">Click the button to earn $0.001 instantly.</div>
-    <div class="task-reward">Reward: $0.001</div>
-    <button class="task-button" id="clickButton">Click & Earn</button>
-  </div>
 
-  <!-- Watch 10s Ad -->
-  <div class="task-card">
-    <img class="task-image" src="https://sketchub.in/storage/project_files/22085/1733655.png" alt="Watch Ad">
-    <div class="task-title">Watch a 10s Ad</div>
-    <div class="task-desc">Earn $0.010 by watching a short ad.</div>
-    <div class="task-reward">Reward: $0.010</div>
-    <button class="task-button" id="watchAdButton">Watch Ad & Earn</button>
-  </div>
+<!-- Click-to-Earn -->
+<div class="task-card" id="clickTask">
+  <img class="task-image" src="https://static.keygames.com/4/113364/94215/1344x896/money-clicker.webp" alt="Money Clicker">
+  <div class="task-title">Click to Earn</div>
+  <div class="task-desc">Click the button to earn $0.001 instantly.</div>
+  <div class="task-reward">Reward: $0.001</div>
+  <button class="task-button" id="clickButton">Click & Earn</button>
+</div>
 
-  <!-- Daily Check-in -->
-  <div class="task-card" id="dailyCheckin">
-    <img class="task-image" src="https://www.shutterstock.com/image-vector/closeup-businessman-hand-calendar-red-600nw-759266437.jpg" alt="Daily Check-in">
-    <div class="task-title">Daily Check-in</div>
-    <div class="task-desc">Claim your daily reward easily.</div>
-    <div class="task-reward">Reward: $0.100</div>
-    <button class="task-button" id="dailyButton">Check In Now</button>
-    <div class="countdown" id="dailyCountdown"></div>
-  </div>
+<!-- Watch 10s Ad -->
+<div class="task-card">
+  <img class="task-image" src="https://sketchub.in/storage/project_files/22085/1733655.png" alt="Watch Ad">
+  <div class="task-title">Watch a 10s Ad</div>
+  <div class="task-desc">Earn $0.010 by watching a short ad.</div>
+  <div class="task-reward">Reward: $0.010</div>
+  <button class="task-button" id="watchAdButton">Watch Ad & Earn</button>
+</div>
+
+<!-- Daily Check-in -->
+<div class="task-card" id="dailyCheckin">
+  <img class="task-image" src="https://www.shutterstock.com/image-vector/closeup-businessman-hand-calendar-red-600nw-759266437.jpg" alt="Daily Check-in">
+  <div class="task-title">Daily Check-in</div>
+  <div class="task-desc">Claim your daily reward easily.</div>
+  <div class="task-reward">Reward: $0.100</div>
+  <button class="task-button" id="dailyButton">Check In Now</button>
+  <div class="countdown" id="dailyCountdown"></div>
+</div>
 </div>
 
 <!-- Click Limit Modal -->
 <div id="clickLimitModal">
   <div>
     <h2 style="font-size:22px;margin-bottom:15px;color:#1a73e8;">Limit Reached!</h2>
-    <p style="font-size:16px;color:#555;margin-bottom:20px;">You've reached the 10-click limit. Unlock your next reward now!</p>
-    <button id="clickLimitButton" style="background:#1a73e8;color:#fff;font-weight:600;padding:12px 25px;border-radius:12px;border:none;font-size:16px;cursor:pointer;transition:background 0.2s;">Unlock Now</button>
-    <div id="clickLimitBanner" style="margin-top:20px; min-height:90px;"></div>
+    <p style="font-size:16px;color:#555;margin-bottom:20px;">You've reached the 10-click limit. Watch this ad to unlock your next reward!</p>
+    <button id="clickLimitButton">Watch Ad</button>
+    <div id="clickLimitAdContainer"></div>
+    <div id="clickLimitCountdown"></div>
   </div>
 </div>
 
-<!-- Ad Modal -->
+<!-- Watch Ad Modal -->
 <div id="adModal">
   <div>
-    <div id="adContainer">Loading ad...</div>
+    <div id="adContainer"></div>
     <div id="adCountdown"></div>
   </div>
 </div>
 
 <script>
+// ---------------- Firebase ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -88,112 +106,153 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 let currentUser;
-
 auth.signInAnonymously().then(res=>currentUser=res.user);
 
-// Global variables
-let clickCount = parseInt(localStorage.getItem('clickCount')||0);
-const clickButton = document.getElementById('clickButton');
-const clickLimitModal = document.getElementById('clickLimitModal');
-const clickLimitButton = document.getElementById('clickLimitButton');
-const clickLimitBanner = document.getElementById('clickLimitBanner');
-const clickURLs = ['https://unusualroof.com/nT6dWU','https://unusualroof.com/7hQMWv','https://nippyprice.com/mRIkp7'];
-
-// Reward function
+// ---------------- Reward ----------------
 function reward(amount){
-  if(!currentUser) return alert("Loading user...");
-  const userRef = db.ref('users/'+currentUser.uid+'/balance');
-  userRef.get().then(snapshot=>{
-    let bal=snapshot.val()||0;
+  if(!currentUser) return;
+  const userRef=db.ref('users/'+currentUser.uid+'/balance');
+  userRef.get().then(snap=>{
+    let bal=snap.val()||0;
     userRef.set(bal+amount);
     console.log(`Reward $${amount.toFixed(3)} | New balance: ${(bal+amount).toFixed(3)}`);
   });
 }
 
-// Ad modal
-const adModal = document.getElementById('adModal');
-const adContainer = document.getElementById('adContainer');
-const adCountdown = document.getElementById('adCountdown');
-const adScripts = [
-  "//mildgive.com/byX.VdsjdzG/lU0/YMWtc_/AeNmN9Mu_Z/U/lpkPPCToYh2CNDjjMowGNsjckttpNfj_YA2wMNzuAF3VM/AK",
-  "//mildgive.com/bEXYV.svdGGclU0/Y/W/cO/we/mO9xu_ZNUglSkLPXT/Yp2/NfjfItx/NST/QctjNHjnYu2IM/jbEf1/NcQR",
-  "//mildgive.com/bJXjV.sYdAGZll0HYPWfcs/jePmP9UuvZgUAlwkrPBTCYT2cN-jzIj5/MIz/k/tINjjYYt2wMkj/kG0_MMAR"
-];
-let adIndex=0;
+// ---------------- Click-to-Earn ----------------
+let clickCount=0;
+const maxClicks=10;
+const clickURLs=['https://unusualroof.com/nT6dWU','https://unusualroof.com/7hQMWv','https://nippyprice.com/mRIkp7'];
+const clickButton=document.getElementById('clickButton');
+const clickLimitModal=document.getElementById('clickLimitModal');
+const clickLimitButton=document.getElementById('clickLimitButton');
+const clickLimitAdContainer=document.getElementById('clickLimitAdContainer');
+const clickLimitCountdown=document.getElementById('clickLimitCountdown');
 
-async function showAdModal(callback){
-  adModal.style.display='flex';
-  adContainer.innerHTML='Loading ad...';
-  adCountdown.textContent='';
-
-  let adLoaded=false;
-  const script=document.createElement('script');
-  script.src=adScripts[adIndex];
-  script.async=true;
-  script.referrerPolicy='no-referrer-when-downgrade';
-  script.onload=()=>{adLoaded=true;};
-  script.onerror=()=>{adLoaded=false;};
-  document.body.appendChild(script);
-
-  adIndex=(adIndex+1)%adScripts.length;
-
-  let waited=0;
-  while(waited<10 && !adLoaded){await new Promise(r=>setTimeout(r,1000)); waited++;}
-
-  if(!adLoaded){adContainer.innerHTML="No ads available right now."; setTimeout(()=>adModal.style.display='none',1000); return;}
-
-  let countdown=10;
-  adCountdown.textContent=`Please wait: ${countdown}s`;
-  const interval=setInterval(()=>{
-    countdown--;
-    adCountdown.textContent=`Please wait: ${countdown}s`;
-    if(countdown<=0){clearInterval(interval); adModal.style.display='none'; callback();}
-  },1000);
-}
-
-// Click-to-Earn
 clickButton.addEventListener('click',()=>{
   clickCount++;
-  localStorage.setItem('clickCount',clickCount);
   reward(0.001);
-
-  if(clickCount>=10){
+  if(clickCount>=maxClicks){
     clickButton.disabled=true;
     clickLimitModal.style.display='flex';
-    // Banner ad
-    const banners=[
-      '<script src="//mildgive.com/byX.VdsjdzG/lU0/YMWtc_/AeNmN9Mu_Z/U/lpkPPCToYh2CNDjjMowGNsjckttpNfj_YA2wMNzuAF3VM/AK"><\/script>',
-      '<script src="//mildgive.com/bEXYV.svdGGclU0/Y/W/cO/we/mO9xu_ZNUglSkLPXT/Yp2/NfjfItx/NST/QctjNHjnYu2IM/jbEf1/NcQR"><\/script>'
-    ];
-    clickLimitBanner.innerHTML=banners[Math.floor(Math.random()*banners.length)];
-
-    clickLimitButton.onclick=()=>{clickLimitModal.style.display='none'; showAdModal(()=>{ window.location.href=clickURLs[Math.floor(Math.random()*clickURLs.length)]; });};
   }
 });
 
-// Daily Check-in
-const dailyButton=document.getElementById('dailyButton');
-const dailyCountdown=document.getElementById('dailyCountdown');
-function updateDailyCountdown(){
-  const nextTime=parseInt(localStorage.getItem('dailyNext')||0);
-  const now=Date.now();
-  let diff=nextTime-now;
-  if(diff>0){const hours=Math.floor(diff/3600000); const mins=Math.floor((diff%3600000)/60000); const secs=Math.floor((diff%60000)/1000); dailyCountdown.textContent=`${hours}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`; dailyButton.disabled=true;}
-  else{dailyCountdown.textContent=''; dailyButton.disabled=false;}
+// ---------------- Ad Loader ----------------
+function loadAd(container,scripts,countdownTarget,callback){
+  container.innerHTML='';
+  container.classList.remove('hide-loading');
+  countdownTarget.textContent='';
+  
+  const chosen=scripts[Math.random()<0.7?0:1];
+  const script=document.createElement('script');
+  script.src=chosen; script.async=true; script.referrerPolicy='no-referrer-when-downgrade';
+  
+  const wrapper=document.createElement('div');
+  wrapper.style.display='flex';
+  wrapper.style.justifyContent='center';
+  wrapper.style.alignItems='center';
+  wrapper.appendChild(script);
+  container.appendChild(wrapper);
+  
+  setTimeout(()=>container.classList.add('hide-loading'),500);
+  
+  let countdown=10;
+  countdownTarget.textContent=`Please wait: ${countdown}s`;
+  const interval=setInterval(()=>{
+    countdown--;
+    countdownTarget.textContent=`Please wait: ${countdown}s`;
+    if(countdown<=0){
+      clearInterval(interval);
+      if(callback) callback();
+    }
+  },1000);
 }
-setInterval(updateDailyCountdown,1000);
-dailyButton.addEventListener('click',()=>{
+
+// ---------------- Click Limit Modal ----------------
+clickLimitButton.addEventListener('click',()=>{
+  const adScripts=[
+    "//mildgive.com/b/X/Vbsed.Gqld0tYPW/cb/ueKmL9_uzZZUZlskFPbTCYM2WNgjvMg1ZMGD/kAt/NejSY/2TMrzsUexaM/Ap",
+    "//mildgive.com/bUXhV/s.duGHli0/Y/WicP/Vehmf9/uAZ-UjlNk_PETEY/2zNljFMA1IM/T/U/t/NQjNYn2aMUz/Uyx/N/gs"
+  ];
+  loadAd(clickLimitAdContainer,adScripts,clickLimitCountdown,()=>{
+    clickLimitModal.style.display='none';
+    // After ad finishes, redirect randomly
+    const randURL = clickURLs[Math.floor(Math.random() * clickURLs.length)];
+    window.location.href = randURL;
+  });
+});
+
+// ---------------- Watch Ad Modal ----------------
+const watchButton = document.getElementById('watchAdButton');
+const adModal = document.getElementById('adModal');
+const adContainer = document.getElementById('adContainer');
+const adCountdown = document.getElementById('adCountdown');
+const watchAdScripts = [
+  "//mildgive.com/b/X/Vbsed.Gqld0tYPW/cb/ueKmL9_uzZZUZlskFPbTCYM2WNgjvMg1ZMGD/kAt/NejSY/2TMrzsUexaM/Ap",
+  "//mildgive.com/bUXhV/s.duGHli0/Y/WicP/Vehmf9/uAZ-UjlNk_PETEY/2zNljFMA1IM/T/U/t/NQjNYn2aMUz/Uyx/N/gs"
+];
+
+watchButton.addEventListener('click', () => {
+  adModal.style.display = 'flex';
+  loadAd(adContainer, watchAdScripts, adCountdown, () => {
+    adModal.style.display = 'none';
+    reward(0.01);
+  });
+});
+
+// ---------------- Daily Check-in ----------------
+const dailyButton = document.getElementById('dailyButton');
+const dailyCountdown = document.getElementById('dailyCountdown');
+let dailyLast = 0;
+
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+  currentUser = user;
+  db.ref('users/' + currentUser.uid + '/dailyLast').get().then(snapshot => {
+    dailyLast = snapshot.val() || 0;
+    updateDailyCountdown();
+  });
+});
+
+function updateDailyCountdown() {
+  const now = Date.now();
+  const diff = 24*60*60*1000 - (now - dailyLast);
+  if(diff > 0){
+    const h = Math.floor(diff/(1000*60*60));
+    const m = Math.floor((diff%(1000*60*60))/(1000*60));
+    const s = Math.floor((diff%(1000*60))/1000);
+    dailyCountdown.textContent = `Next check-in in ${h}h ${m}m ${s}s`;
+    dailyButton.disabled = true;
+    setTimeout(updateDailyCountdown, 1000);
+  } else {
+    dailyCountdown.textContent = '';
+    dailyButton.disabled = false;
+  }
+}
+
+dailyButton.addEventListener('click', () => {
   reward(0.1);
-  const next24h=Date.now()+24*60*60*1000;
-  localStorage.setItem('dailyNext',next24h);
-  if(currentUser) db.ref('users/'+currentUser.uid+'/dailyNext').set(next24h);
+  dailyLast = Date.now();
+  db.ref('users/' + currentUser.uid + '/dailyLast').set(dailyLast);
   updateDailyCountdown();
 });
-updateDailyCountdown();
+function openModal(modal) {
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
 
-// Watch Ad Button
-const watchButton=document.getElementById('watchAdButton');
-watchButton.addEventListener('click',()=>showAdModal(()=>reward(0.01)));
+function closeModal(modal) {
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+}
+
+// Example usage for click-limit modal
+clickLimitButton.addEventListener('click', () => {
+  openModal(clickLimitModal);
+});
+
+const closeClickLimit = () => closeModal(clickLimitModal);
 </script>
 </body>
 </html>
