@@ -3,120 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💎 Expensive HTML Tester 3.0</title>
+<title>Modern HTML Tester</title>
 <style>
   body, html {
-    margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; display: flex; flex-direction: column;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    background: #1e1e1e;
+    color: #fff;
   }
   header {
-    background: linear-gradient(to right, #ff416c, #ff4b2b);
-    color: white; padding: 10px 20px; font-size: 1.5em; font-weight: bold;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background: #333;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.2em;
   }
-  #editor-container { display: flex; flex: 1; overflow: hidden; }
-  .panel {
-    flex: 1; display: flex; flex-direction: column; border-right: 2px solid #ff416c;
+  .editor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
   }
-  .panel:last-child { border-right: none; }
-  textarea {
-    flex: 1; padding: 10px; font-family: 'Courier New', monospace; font-size: 16px;
-    border: none; outline: none; resize: none; width: 100%;
+  .editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
   }
-  .panel-header {
-    background: #ff4b2b; color: white; padding: 5px 10px; text-align: center; font-weight: bold;
+  .editor label {
+    background: #444;
+    padding: 5px;
+    text-align: center;
   }
-  iframe { flex: 1; border-left: 3px solid #ff416c; width: 50%; }
-  button, select {
-    margin-left: 5px; background: white; color: #ff416c; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s;
+  .editor textarea {
+    flex: 1;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    resize: none;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
   }
-  button:hover, select:hover { background: #ff416c; color: white; }
+  .preview-container {
+    height: 40%;
+    margin: 5px;
+  }
+  .preview-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  button {
+    margin: 5px;
+    padding: 8px 12px;
+    background: #007acc;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover {
+    background: #005a99;
+  }
 </style>
 </head>
 <body>
-
-<header>
-  <span>💎 Expensive HTML Tester 3.0</span>
-  <div>
-    <select id="replace-type">
-      <option value="">-- Replace --</option>
-      <option value="html">HTML</option>
-      <option value="css">CSS</option>
-      <option value="js">JS</option>
-    </select>
-    <button onclick="runCode()">Run</button>
+<header>Modern HTML/CSS/JS Tester</header>
+<div class="editor-container">
+  <div class="editor">
+    <label for="html">HTML</label>
+    <textarea id="html"></textarea>
   </div>
-</header>
-
-<div id="editor-container">
-  <div class="panel">
-    <div class="panel-header">HTML</div>
-    <textarea id="html-editor"></textarea>
+  <div class="editor">
+    <label for="css">CSS</label>
+    <textarea id="css"></textarea>
   </div>
-  <div class="panel">
-    <div class="panel-header">CSS</div>
-    <textarea id="css-editor"></textarea>
+  <div class="editor">
+    <label for="js">JavaScript</label>
+    <textarea id="js"></textarea>
   </div>
-  <div class="panel">
-    <div class="panel-header">JS</div>
-    <textarea id="js-editor"></textarea>
-  </div>
+</div>
+<div style="text-align:center;">
+  <button id="run">Run</button>
+  <button id="fullscreen">Full Screen Preview</button>
+</div>
+<div class="preview-container">
   <iframe id="preview"></iframe>
 </div>
 
 <script>
-const htmlEditor = document.getElementById('html-editor');
-const cssEditor = document.getElementById('css-editor');
-const jsEditor = document.getElementById('js-editor');
-const preview = document.getElementById('preview');
-const replaceType = document.getElementById('replace-type');
+  const htmlEditor = document.getElementById('html');
+  const cssEditor = document.getElementById('css');
+  const jsEditor = document.getElementById('js');
+  const preview = document.getElementById('preview');
+  const runBtn = document.getElementById('run');
+  const fullscreenBtn = document.getElementById('fullscreen');
 
-// Load saved code or defaults
-const saved = JSON.parse(localStorage.getItem('expensive_html_tester_v3') || '{}');
-htmlEditor.value = saved.html || `<h1>Hello, Expensive Tester!</h1><p>Edit and run!</p>`;
-cssEditor.value = saved.css || `body { font-family: Arial; text-align: center; padding: 50px; } h1 { color: #ff416c; }`;
-jsEditor.value = saved.js || `console.log('Welcome!');`;
+  // Load saved code
+  htmlEditor.value = localStorage.getItem('html') || '';
+  cssEditor.value = localStorage.getItem('css') || '';
+  jsEditor.value = localStorage.getItem('js') || '';
 
-// Run preview
-function runCode() {
-  if (replaceType.value === "html") localStorage.setItem('html-temp', htmlEditor.value);
-  else if (replaceType.value === "css") localStorage.setItem('css-temp', cssEditor.value);
-  else if (replaceType.value === "js") localStorage.setItem('js-temp', jsEditor.value);
+  function updatePreview() {
+    const html = htmlEditor.value;
+    const css = `<style>${cssEditor.value}</style>`;
+    const js = `<script>${jsEditor.value}<\/script>`;
+    preview.srcdoc = html + css + js;
 
-  const combined = `
-    <!DOCTYPE html>
-    <html>
-      <head><style>${cssEditor.value}</style></head>
-      <body>${htmlEditor.value}<script>${jsEditor.value}<\/script></body>
-    </html>`;
-  
-  preview.srcdoc = combined;
+    // Save to localStorage
+    localStorage.setItem('html', htmlEditor.value);
+    localStorage.setItem('css', cssEditor.value);
+    localStorage.setItem('js', jsEditor.value);
+  }
 
-  // Save all editors
-  localStorage.setItem('expensive_html_tester_v3', JSON.stringify({
-    html: htmlEditor.value,
-    css: cssEditor.value,
-    js: jsEditor.value
-  }));
+  htmlEditor.addEventListener('input', updatePreview);
+  cssEditor.addEventListener('input', updatePreview);
+  jsEditor.addEventListener('input', updatePreview);
+  runBtn.addEventListener('click', updatePreview);
 
-  replaceType.value = '';
-}
+  // Fullscreen preview
+  fullscreenBtn.addEventListener('click', () => {
+    const iframeWindow = preview.contentWindow;
+    if (iframeWindow.document.documentElement.requestFullscreen) {
+      iframeWindow.document.documentElement.requestFullscreen();
+    }
+  });
 
-// Auto-save every 2 seconds
-setInterval(() => {
-  localStorage.setItem('expensive_html_tester_v3', JSON.stringify({
-    html: htmlEditor.value,
-    css: cssEditor.value,
-    js: jsEditor.value
-  }));
-}, 2000);
+  // Warn before leaving
+  window.addEventListener('beforeunload', (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+  });
 
-// Warn before leaving
-window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue=''; });
-
-// Initial run
-runCode();
+  // Initial render
+  updatePreview();
 </script>
-
 </body>
 </html>
