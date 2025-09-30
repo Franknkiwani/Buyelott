@@ -11,86 +11,94 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <style>
   * { margin:0; padding:0; box-sizing:border-box; user-select: none; }
-  body, html {
-    height:100%;
-    font-family:'Poppins', sans-serif;
-    background: linear-gradient(135deg, #4c669f, #3b5998, #192f6a);
-    overflow-x: hidden;
-  }
-
-  header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding: 10px 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-  }
-
-  .app-name {
-    display: flex;
-    align-items: center;
-    color: #fff;
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: 0.5px;
-  }
-
-  .app-name img {
-    width:36px;       /* slightly larger */
-    height:36px;
-    border-radius:50%; /* curved edges */
-    margin-right:10px;
-    object-fit: cover;
-  }
-
-  .btn {
-    padding:8px 18px;
-    border-radius:20px;
-    border:2px solid #000;
-    color:#fff;
-    font-weight:600;
-    cursor:pointer;
-    transition: none;
-    user-select: none;
-    outline: none;
-    box-shadow: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
+  body, html { height:100%; font-family:'Poppins', sans-serif; background: linear-gradient(135deg, #4c669f, #3b5998, #192f6a); overflow-x: hidden; }
+  header { position: sticky; top: 0; width: 100%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.2); padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+  .app-name { display: flex; align-items: center; color: #fff; font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
+  .app-name img { width:36px; height:36px; border-radius:50%; margin-right:10px; object-fit: cover; }
+  .btn { padding:8px 18px; border-radius:20px; border:2px solid #000; color:#fff; font-weight:600; cursor:pointer; transition: none; user-select: none; outline: none; box-shadow: none; -webkit-tap-highlight-color: transparent; }
   .btn-login { background-color: #1E90FF; }
   .btn-logout { background-color: #FF3333; }
+  /* Modal Styles */
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); justify-content:center; align-items:center; z-index:200; }
+  .modal-content { background:#fff; padding:30px; border-radius:12px; width:300px; display:flex; flex-direction:column; gap:12px; }
+  .modal input { padding:8px; border-radius:6px; border:1px solid #ccc; outline:none; }
+  .modal button { padding:8px; border-radius:20px; border:none; background:#1E90FF; color:#fff; cursor:pointer; font-weight:600; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-  function App() {
-    const [loggedIn, setLoggedIn] = React.useState(false);
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-    const handleAuth = () => {
-      setLoggedIn(!loggedIn);
-      alert(loggedIn ? "Logged out!" : "Logged in!");
+  function App() {
+    const [user, setUser] = React.useState(null);
+    const [modalOpen, setModalOpen] = React.useState(false);
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+
+    React.useEffect(() => {
+      auth.onAuthStateChanged(u => {
+        setUser(u);
+      });
+    }, []);
+
+    const handleLogin = async () => {
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        setModalOpen(false);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    const handleLogout = () => {
+      auth.signOut();
     }
 
     return (
-      <header>
-        <div className="app-name">
-          <img src="https://previews.123rf.com/images/distrologo/distrologo1907/distrologo190700076/126643926-earn-money-vector-logo-icon-design-saving-money-symbol-design-with-hand-illustrations.jpg" alt="Logo" />
-          Make Money
+      <>
+        <header>
+          <div className="app-name">
+            <img src="https://previews.123rf.com/images/distrologo/distrologo1907/distrologo190700076/126643926-earn-money-vector-logo-icon-design-saving-money-symbol-design-with-hand-illustrations.jpg" alt="Logo" />
+            Make Money
+          </div>
+          {user ? (
+            <button className="btn btn-logout" onClick={handleLogout}>Logout</button>
+          ) : (
+            <button className="btn btn-login" onClick={() => setModalOpen(true)}>Login</button>
+          )}
+        </header>
+
+        {/* Login Modal */}
+        <div className="modal" style={{display: modalOpen ? 'flex' : 'none'}}>
+          <div className="modal-content">
+            <h3>Login</h3>
+            <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+            <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} />
+            <button onClick={handleLogin}>Login</button>
+            <button onClick={()=>setModalOpen(false)} style={{background:'#FF3333'}}>Cancel</button>
+          </div>
         </div>
-        <button className={loggedIn ? "btn btn-logout" : "btn btn-login"} onClick={handleAuth}>
-          {loggedIn ? "Logout" : "Login"}
-        </button>
-      </header>
+      </>
     );
   }
 
