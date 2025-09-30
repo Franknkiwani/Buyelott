@@ -3,129 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expensive HTML Tester</title>
+<title>💎 Expensive HTML Tester 3.0</title>
 <style>
   body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    flex-direction: column;
+    margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; display: flex; flex-direction: column;
   }
   header {
     background: linear-gradient(to right, #ff416c, #ff4b2b);
-    color: white;
-    padding: 10px 20px;
-    font-size: 1.5em;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: white; padding: 10px 20px; font-size: 1.5em; font-weight: bold;
+    display: flex; justify-content: space-between; align-items: center;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  #editor-container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
+  #editor-container { display: flex; flex: 1; overflow: hidden; }
+  .panel {
+    flex: 1; display: flex; flex-direction: column; border-right: 2px solid #ff416c;
   }
+  .panel:last-child { border-right: none; }
   textarea {
-    flex: 1;
-    padding: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    resize: none;
+    flex: 1; padding: 10px; font-family: 'Courier New', monospace; font-size: 16px;
+    border: none; outline: none; resize: none; width: 100%;
   }
-  iframe {
-    flex: 1;
-    border-left: 3px solid #ff416c;
-    width: 50%;
+  .panel-header {
+    background: #ff4b2b; color: white; padding: 5px 10px; text-align: center; font-weight: bold;
   }
-  button {
-    background: white;
-    color: #ff416c;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-    margin-left: 5px;
+  iframe { flex: 1; border-left: 3px solid #ff416c; width: 50%; }
+  button, select {
+    margin-left: 5px; background: white; color: #ff416c; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s;
   }
-  button:hover {
-    background: #ff416c;
-    color: white;
-  }
+  button:hover, select:hover { background: #ff416c; color: white; }
 </style>
 </head>
 <body>
 
 <header>
-  <span>💎 Expensive HTML Tester</span>
+  <span>💎 Expensive HTML Tester 3.0</span>
   <div>
+    <select id="replace-type">
+      <option value="">-- Replace --</option>
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+      <option value="js">JS</option>
+    </select>
     <button onclick="runCode()">Run</button>
-    <button onclick="toggleFullscreen()">Fullscreen</button>
   </div>
 </header>
 
 <div id="editor-container">
-  <textarea id="code" placeholder="Write your HTML, CSS, JS here..."></textarea>
+  <div class="panel">
+    <div class="panel-header">HTML</div>
+    <textarea id="html-editor"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-header">CSS</div>
+    <textarea id="css-editor"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-header">JS</div>
+    <textarea id="js-editor"></textarea>
+  </div>
   <iframe id="preview"></iframe>
 </div>
 
 <script>
-  const codeArea = document.getElementById('code');
-  const preview = document.getElementById('preview');
+const htmlEditor = document.getElementById('html-editor');
+const cssEditor = document.getElementById('css-editor');
+const jsEditor = document.getElementById('js-editor');
+const preview = document.getElementById('preview');
+const replaceType = document.getElementById('replace-type');
 
-  // Load last saved version
-  codeArea.value = localStorage.getItem('expensive_html_tester') || `<!DOCTYPE html>
-<html>
-<head>
-<style>
-body { font-family: Arial; text-align: center; padding: 50px; }
-h1 { color: #ff416c; }
-</style>
-</head>
-<body>
-<h1>Hello, Expensive Tester!</h1>
-<p>Edit this and click "Run" to see the magic.</p>
-<script>
-console.log('Welcome!');
-</script>
-</body>
-</html>`;
+// Load saved code or defaults
+const saved = JSON.parse(localStorage.getItem('expensive_html_tester_v3') || '{}');
+htmlEditor.value = saved.html || `<h1>Hello, Expensive Tester!</h1><p>Edit and run!</p>`;
+cssEditor.value = saved.css || `body { font-family: Arial; text-align: center; padding: 50px; } h1 { color: #ff416c; }`;
+jsEditor.value = saved.js || `console.log('Welcome!');`;
 
-  // Run code
-  function runCode() {
-    const code = codeArea.value;
-    preview.srcdoc = code;
-    localStorage.setItem('expensive_html_tester', code);
-  }
+// Run preview
+function runCode() {
+  if (replaceType.value === "html") localStorage.setItem('html-temp', htmlEditor.value);
+  else if (replaceType.value === "css") localStorage.setItem('css-temp', cssEditor.value);
+  else if (replaceType.value === "js") localStorage.setItem('js-temp', jsEditor.value);
 
-  // Toggle fullscreen for preview
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      preview.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
-    } else {
-      document.exitFullscreen();
-    }
-  }
+  const combined = `
+    <!DOCTYPE html>
+    <html>
+      <head><style>${cssEditor.value}</style></head>
+      <body>${htmlEditor.value}<script>${jsEditor.value}<\/script></body>
+    </html>`;
+  
+  preview.srcdoc = combined;
 
-  // Auto-save every 2 seconds
-  setInterval(() => {
-    localStorage.setItem('expensive_html_tester', codeArea.value);
-  }, 2000);
+  // Save all editors
+  localStorage.setItem('expensive_html_tester_v3', JSON.stringify({
+    html: htmlEditor.value,
+    css: cssEditor.value,
+    js: jsEditor.value
+  }));
 
-  // Warn before leaving
-  window.addEventListener('beforeunload', (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  });
+  replaceType.value = '';
+}
 
-  // Initial run
-  runCode();
+// Auto-save every 2 seconds
+setInterval(() => {
+  localStorage.setItem('expensive_html_tester_v3', JSON.stringify({
+    html: htmlEditor.value,
+    css: cssEditor.value,
+    js: jsEditor.value
+  }));
+}, 2000);
+
+// Warn before leaving
+window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue=''; });
+
+// Initial run
+runCode();
 </script>
 
 </body>
