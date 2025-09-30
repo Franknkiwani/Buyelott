@@ -410,107 +410,6 @@ button {
   color: #ccc;
   padding-left: 1rem;
 }
-/* Task card */
-.task-card {
-  width: 100%;
-  max-width: 600px;
-  background: #fff; /* solid white background */
-  color: #000;      /* black text */
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.15);
-  padding: 1rem;    /* reduced padding */
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;      /* reduced gap */
-  align-items: center;
-  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
-}
-.task-title {
-  font-size: 1.2rem; /* smaller */
-  font-weight: 700;
-  color: #111; 
-  text-align: center;
-}
-.task-desc {
-  font-size: 0.95rem; /* smaller */
-  color: #333;
-  text-align: center;
-  margin-bottom: 0.4rem;
-}
-.task-btn {
-  margin-top: 0.4rem;
-  padding: 0.6rem 1.2rem; /* reduced size */
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 10px;
-  background: #4caf50;
-  color: #fff; 
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-}
-.task-btn:hover {
-  background: #43a047;
-  transform: scale(1.03);
-}
-/* Kill the big gap on new page */
-#get-started-page {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Remove gap on new page */
-#get-started-page {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Short, full-width hero */
-#get-started-page .hero {
-  width: 100%;
-  height: 150px; /* small height, adjust as needed */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: url("https://www.econlib.org/wp-content/uploads/2024/03/making-money.jpg") 
-              center/cover no-repeat;
-  text-align: center;
-  color: #fff;
-  margin: 0;            /* no gaps */
-  border-radius: 0;     /* squared edges */
-  padding: 1rem;
-}
-
-/* Hero content styling */
-#get-started-page .hero h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-#get-started-page .hero p {
-  font-size: 1rem;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* CTA button inside hero */
-#get-started-page .hero .cta-btn {
-  background: #4caf50;
-  color: #fff;
-  font-weight: 700;
-  padding: 0.5rem 1.2rem;
-  border: none;
-  border-radius: 0;     /* squared button edges */
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-}
-
-#get-started-page .hero .cta-btn:hover {
-  background: #43a047;
-  transform: scale(1.05);
-}
 </style>  
 </head>  
 <body>
@@ -588,12 +487,14 @@ button {
   </div>
 
   <div class="content"></div>
-<div id="get-started-page" style="display:none;">
-  <div class="hero">
-    <h1>Start Earning Now</h1>
-    <p>Complete tasks and watch your balance grow instantly.</p>
-    <button class="cta-btn">Earn Money</button>
-  </div>
+<!-- Make Money Page -->
+<div id="get-started-page" style="display:none; padding:2rem; max-width:800px; margin:6rem auto; text-align:center;">
+  <h1>Start Earning Now!</h1>
+  <p>Click the button below to earn money and add it to your balance.</p>
+  <button id="earn-btn" class="cta-btn">Earn $0.50</button>
+
+  <div class="balance" style="margin-top:2rem;">Balance: $0.000</div>
+
   <div class="tasks" style="margin-top:2rem;">
     <!-- Click to Earn -->
     <div class="task-card">
