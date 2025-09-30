@@ -374,49 +374,7 @@ body.modal-open {
   </div>
 
 </div>
-
-<!-- Click Limit Modal -->
-<div id="clickLimitModal">
-  <div class="modal-content">
-    <script>
-(function(erpyg){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = erpyg || {};
-s.src = "\/\/mildgive.com\/bYXXVls\/d.GdlD0MYTWNc-\/Xe\/m\/9\/uuZWU\/l\/k\/PwTPY\/2MNojMMwwqNBj\/k\/tnNYjIY\/2wM\/zbAB3eMmAV";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-  <div id="clickLimitCountdown"></div>
-    <p>You've reached the 10-click limit. Watch this ad to unlock your next reward!</p>
-    <button id="clickLimitButton" class="task-button">close Ad</button>
-    <div id="clickLimitAdContainer"></div>
-  
-  </div>
-</div>
-
-<!-- Watch Ad Modal -->
-<div id="adModal">
-  <div class="modal-content">
-    <script>
-(function(byyo){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = byyo || {};
-s.src = "\/\/mildgive.com\/b.X\/VzsLdtGwln0eY-W\/c_\/ce\/mg9auWZWUyl\/kOPNTYY\/2qNmjDMa1sM_Dbk\/t\/NhjeYK2UMYznUixaMuAN";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-    <div id="adContainer"></div>
-    <div id="adCountdown"></div>
-  </div>
-</div>
+<!-- Firebase JS SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -440,22 +398,8 @@ l.parentNode.insertBefore(s, l);
   // -------------------- UI Elements --------------------
   const loginBtn = document.getElementById('login-btn');
   const balanceBtn = document.getElementById('balance-btn');
-  const clickButton = document.getElementById('clickButton');
-  const clickLimitModal = document.getElementById('clickLimitModal');
-  const clickLimitButton = document.getElementById('clickLimitButton');
-  const clickLimitAdContainer = document.getElementById('clickLimitAdContainer');
-  const clickLimitCountdown = document.getElementById('clickLimitCountdown');
-  const watchButton = document.getElementById('watchAdButton');
-  const adModal = document.getElementById('adModal');
-  const adContainer = document.getElementById('adContainer');
-  const adCountdown = document.getElementById('adCountdown');
-  const dailyButton = document.getElementById('dailyButton');
-  const dailyCountdown = document.getElementById('dailyCountdown');
 
   let currentUser = null;
-  let clickCount = 0;
-  const maxClicks = 10;
-  const clickURLs = ['https://unusualroof.com/nT6dWU','https://unusualroof.com/7hQMWv','https://nippyprice.com/mRIkp7'];
 
   // -------------------- Auth --------------------
   auth.signInAnonymously();
@@ -464,9 +408,10 @@ l.parentNode.insertBefore(s, l);
       currentUser = user;
       loginBtn.textContent = 'Logout';
       loginBtn.style.background = 'red';
-      setupBalanceListener();
-      loadUserClickCount();
-      loadDailyCheckin();
+      // Setup balance listener when user logs in
+      db.ref('users/' + currentUser.uid + '/balance').on('value', snapshot => {
+        balanceBtn.textContent = `$${(snapshot.val()||0).toFixed(3)}`;
+      });
     } else {
       currentUser = null;
       loginBtn.textContent = 'Login';
@@ -475,6 +420,7 @@ l.parentNode.insertBefore(s, l);
     }
   });
 
+  // -------------------- Login/Logout --------------------
   loginBtn.addEventListener('click', () => {
     if(currentUser){
       auth.signOut();
@@ -482,142 +428,6 @@ l.parentNode.insertBefore(s, l);
       alert('Implement login here');
     }
   });
-
-  function setupBalanceListener(){
-    db.ref('users/' + currentUser.uid + '/balance').on('value', snapshot => {
-      balanceBtn.textContent = `$${(snapshot.val()||0).toFixed(3)}`;
-    });
-  }
-
-  function reward(amount){
-    if(!currentUser) return;
-    const ref = db.ref('users/' + currentUser.uid + '/balance');
-    ref.transaction(current => (current||0)+amount);
-  }
-
-  // -------------------- Click-to-Earn --------------------
-  clickButton.addEventListener('click', () => {
-    clickCount++;
-    reward(0.001);
-    db.ref('users/' + currentUser.uid + '/clickCount').set(clickCount);
-
-    if(clickCount >= maxClicks){
-      clickButton.disabled = true;
-      openModal(clickLimitModal);
-    }
-  });
-
-  function loadUserClickCount(){
-    db.ref('users/' + currentUser.uid + '/clickCount').get().then(snap=>{
-      clickCount = snap.val()||0;
-      clickButton.disabled = clickCount >= maxClicks;
-    });
-  }
-
-  // -------------------- Click Limit Modal --------------------
-  clickLimitButton.addEventListener('click', ()=>{
-    const adScripts = [
-      "//mildgive.com/b/X/Vbsed.Gqld0tYPW/cb/ueKmL9_uzZZUZlskFPbTCYM2WNgjvMg1ZMGD/kAt/NejSY/2TMrzsUexaM/Ap",
-      "//mildgive.com/bUXhV/s.duGHli0/Y/WicP/Vehmf9/uAZ-UjlNk_PETEY/2zNljFMA1IM/T/U/t/NQjNYn2aMUz/Uyx/N/gs"
-    ];
-    loadAd(clickLimitAdContainer, adScripts, clickLimitCountdown, ()=>{
-      clickLimitModal.style.display='none';
-      clickCount = 0;
-      db.ref('users/' + currentUser.uid + '/clickCount').set(0);
-      clickButton.disabled = false;
-      const randURL = clickURLs[Math.floor(Math.random()*clickURLs.length)];
-      window.location.href = randURL;
-    });
-  });
-
-  // -------------------- Watch Ad --------------------
-  const watchAdScripts = [
-    "//mildgive.com/b/X/Vbsed.Gqld0tYPW/cb/ueKmL9_uzZZUZlskFPbTCYM2WNgjvMg1ZMGD/kAt/NejSY/2TMrzsUexaM/Ap",
-    "//mildgive.com/bUXhV/s.duGHli0/Y/WicP/Vehmf9/uAZ-UjlNk_PETEY/2zNljFMA1IM/T/U/t/NQjNYn2aMUz/Uyx/N/gs"
-  ];
-  watchButton.addEventListener('click', ()=>{
-    openModal(adModal);
-    loadAd(adContainer, watchAdScripts, adCountdown, ()=>{
-      closeModal(adModal);
-      reward(0.01);
-    });
-  });
-
-  // -------------------- Daily Check-in --------------------
-  let dailyLast = 0;
-  function loadDailyCheckin(){
-    db.ref('users/' + currentUser.uid + '/dailyLast').get().then(snap=>{
-      dailyLast = snap.val()||0;
-      updateDailyCountdown();
-    });
-  }
-
-  function updateDailyCountdown(){
-    const now = Date.now();
-    const diff = 24*60*60*1000 - (now - dailyLast);
-    if(diff>0){
-      const h = Math.floor(diff/(1000*60*60));
-      const m = Math.floor((diff%(1000*60*60))/(1000*60));
-      const s = Math.floor((diff%(1000*60))/1000);
-      dailyCountdown.textContent = `Next check-in in ${h}h ${m}m ${s}s`;
-      dailyButton.disabled = true;
-      setTimeout(updateDailyCountdown,1000);
-    } else {
-      dailyCountdown.textContent = '';
-      dailyButton.disabled = false;
-    }
-  }
-
-  dailyButton.addEventListener('click', ()=>{
-    reward(0.1);
-    dailyLast = Date.now();
-    db.ref('users/' + currentUser.uid + '/dailyLast').set(dailyLast);
-    updateDailyCountdown();
-  });
-
-  // -------------------- Modal Helpers --------------------
-  function openModal(modal){
-    modal.style.display='flex';
-    document.body.classList.add('modal-open');
-  }
-  function closeModal(modal){
-    modal.style.display='none';
-    document.body.classList.remove('modal-open');
-  }
-
-  // -------------------- Ad Loader --------------------
-  function loadAd(container,scripts,countdownTarget,callback){
-    container.innerHTML='';
-    container.classList.remove('hide-loading');
-    countdownTarget.textContent='';
-
-    const chosen = scripts[Math.floor(Math.random()*scripts.length)];
-    const script = document.createElement('script');
-    script.src = chosen;
-    script.async = true;
-    script.referrerPolicy='no-referrer-when-downgrade';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.display='flex';
-    wrapper.style.justifyContent='center';
-    wrapper.style.alignItems='center';
-    wrapper.appendChild(script);
-    container.appendChild(wrapper);
-
-    setTimeout(()=>container.classList.add('hide-loading'),500);
-
-    let countdown=10;
-    countdownTarget.textContent=`Please wait: ${countdown}s`;
-    const interval = setInterval(()=>{
-      countdown--;
-      countdownTarget.textContent=`Please wait: ${countdown}s`;
-      if(countdown<=0){
-        clearInterval(interval);
-        if(callback) callback();
-      }
-    },1000);
-  }
-
 </script>
 </body>
 </html>
