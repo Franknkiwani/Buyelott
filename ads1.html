@@ -3,717 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dark iOS App</title>
-
+<title>Hoyoo Tasks</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-
-  body{
-    background:#111;
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow-x:hidden;
-  }
-
-  /* Header */
-  header{
-    position: fixed;
-    top:0;
-    width:100%;
-    padding:12px 20px;
-    backdrop-filter: blur(15px);
-    background: rgba(30,30,30,0.5);
-    display:flex;
-    justify-content: space-between;
-    align-items:center;
-    z-index:1000;
-    border-bottom:1px solid rgba(255,255,255,0.1);
-  }
-
-  .app-info{
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-
-  .app-info img{
-    width:28px;
-    height:28px;
-  }
-
-  .app-info span{
-    color:#fff;
-    font-weight:700;
-    font-size:1.2rem;
-    -webkit-text-stroke:1px #000;
-  }
-
-  .login-btn{
-    background:#007bff;
-    color:#fff;
-    padding:8px 16px;
-    border:2px solid #fff;
-    border-radius:10px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.2s;
-  }
-
-  .login-btn.logout{
-    background:#ff3b3b;
-  }
-
-  main{
-    padding:100px 20px 20px;
-    color:#ddd;
-    min-height:200vh;
-  }
-
-  /* Modal overlay */
-  .modal-overlay{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(10px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    visibility:hidden;
-    opacity:0;
-    transition:0.3s;
-    z-index:9999;
-  }
-
-  .modal-overlay.active{
-    visibility: visible;
-    opacity:1;
-  }
-
-  /* Modal content */
-  .modal{
-    background: rgba(40,40,40,0.9);
-    border-radius:20px;
-    width:90%;
-    max-width:400px;
-    padding:30px;
-    backdrop-filter: blur(15px);
-    color:#fff;
-  }
-
-  .tabs{
-    display:flex;
-    margin-bottom:20px;
-  }
-
-  .tab{
-    flex:1;
-    text-align:center;
-    padding:10px 0;
-    cursor:pointer;
-    border-bottom:2px solid transparent;
-    font-weight:600;
-  }
-
-  .tab.active{
-    border-bottom:2px solid #00ff00;
-  }
-
-  .form-section{
-    display:none;
-    flex-direction:column;
-    gap:15px;
-  }
-
-  .form-section.active{
-    display:flex;
-  }
-
-  input{
-    padding:10px;
-    border-radius:10px;
-    border:none;
-    outline:none;
-    font-size:1rem;
-  }
-
-  button.submit-btn{
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    background:#00bc6e;
-    color:#fff;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.2s;
-  }
-
-  button.submit-btn:hover{
-    background:#009f5f;
-  }
-
-  .forgot-password{
-    text-align:right;
-    font-size:0.9rem;
-    cursor:pointer;
-    color:#00bc6e;
-  }
-/* Disable text selection everywhere */
-* {
-  user-select: none;       /* Standard */
-  -webkit-user-select: none; /* Safari/Chrome */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* IE/Edge */
-}
-
-/* Remove blue outline/highlight on buttons and inputs */
-button, input, textarea {
-  outline: none;
-  -webkit-tap-highlight-color: transparent; /* Mobile */
-}
-main {
-  padding-top: 80px; /* adjust slightly more than header height */
-}
-/* Wallet card white border */
-.wallet-card {
-  border: 1px solid #fff;
-  box-shadow: 0 6px 20px rgba(255,255,255,0.1), 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Modal white border */
-.modal {
-  border: 1px solid #fff;
-  box-shadow: 0 6px 20px rgba(255,255,255,0.15), 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Breakdown boxes white edges */
-.breakdown {
-  border: 1px solid rgba(255,255,255,0.4);
-}
-
-/* Input and select fields white edges */
-.field input, .field select {
-  border: 1px solid #fff;
-}
-
-/* Cashout button full-width and visible edges */
-.actions .btn-primary {
-  border: 1px solid #fff;
-}
-
-/* Optional hover glow for cards and modal */
-.wallet-card:hover, .modal:hover {
-  border-color: #fff;
-  box-shadow: 0 0 15px rgba(255,255,255,0.3), 0 10px 30px rgba(0,0,0,0.5);
-}
-
-</style>
-<style>
-/* Root variables for wallet & modal */
-:root {
-  --card-bg: linear-gradient(180deg,#111827,#0b1220);
-  --accent: #7c5cff;
-  --muted: #9aa4b2;
-  --white-border: rgba(255,255,255,0.3);
-  --modal-border: rgba(255,255,255,0.4);
-  --hover-border: rgba(255,255,255,0.5);
-  --hover-shadow: 0 0 15px rgba(255,255,255,0.15), 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Wallet card */
-main .wallet-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--card-bg);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  border: 1px solid var(--white-border);
-  transition: border 0.2s, box-shadow 0.2s;
-}
-
-main .wallet-card:hover {
-  border-color: var(--hover-border);
-  box-shadow: var(--hover-shadow);
-}
-
-/* Wallet top section */
-main .wallet-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-main .wallet-title {
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.5px;
-}
-
-main .balance-amount {
-  font-size: 32px;
-  font-weight: 700;
-}
-
-main .balance-sub {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* Actions buttons */
-main .actions {
-  margin-top: 20px;
-}
-
-main .btn,
-main .btn-primary {
-  width: 100%;
-  padding: 14px 0;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
-}
-
-main .btn-primary {
-  background: linear-gradient(90deg,var(--accent),#5ab0ff);
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(124,92,255,0.2);
-}
-
-main .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(124,92,255,0.25);
-}
-
-/* Breakdown boxes */
-main .breakdown {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 18px;
-  background: #111827;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-main .break-item .label {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-main .break-item .value {
-  font-weight: 700;
-}
-
-/* Modal */
-main .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 50;
-}
-
-main .modal {
-  width: 100%;
-  max-width: 400px;
-  background: #111827;
-  border-radius: 14px;
-  padding: 24px;
-  color: #fff;
-  border: 1px solid var(--modal-border);
-  transition: border 0.2s, box-shadow 0.2s;
-}
-
-main .modal:hover {
-  border-color: var(--hover-border);
-  box-shadow: var(--hover-shadow);
-}
-
-/* Modal fields */
-main .field input,
-main .field select {
-  background: #1f2937;
-  border: 1px solid var(--white-border);
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-}
-
-/* Responsive */
-@media (max-width: 420px) {
-  main .wallet-card,
-  main .modal {
-    padding: 16px;
-  }
-}
-/* Cashout modal specific fields */
-main .modal h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-main .modal .field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 14px;
-}
-
-main .modal .field label {
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: var(--muted);
-}
-
-main .modal .field input,
-main .modal .field select {
-  background: #1f2937;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-}
-
-main .modal .note {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-main .modal-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-main .modal-footer .hint {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-main .modal-footer button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  border: none;
-}
-
-main .modal-footer button#cancelModal {
-  background: #374151;
-  color: #fff;
-}
-
-main .modal-footer button#confirmCash {
-  background: var(--accent);
-  color: #fff;
-}
-
-main .modal-footer button:hover {
-  opacity: 0.9;
-}
-#modalBackdrop {
-  display: none; /* hidden by default */
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-  z-index: 2000; /* above header */
-}
-/* Modal backdrop */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 50;
-  transition: opacity 0.3s ease;
-}
-
-/* Modal container */
-.modal {
-  width: 100%;
-  max-width: 400px;
-  background: linear-gradient(180deg, #111827, #0b1220);
-  border-radius: 14px;
-  padding: 24px;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-/* Modal header */
-.modal h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-/* Form fields */
-.field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 14px;
-}
-
-.field input, .field select {
-  background: #1f2937;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-}
-
-/* Notes and hints */
-.note, .hint {
-  font-size: 12px;
-  color: #9aa4b2; /* muted text */
-}
-
-/* Modal footer buttons */
-.modal-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-.modal-footer .btn {
-  width: auto;
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Hover glow for modal */
-.modal:hover {
-  border-color: rgba(255,255,255,0.5);
-  box-shadow: 0 0 15px rgba(255,255,255,0.15), 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Responsive adjustments */
-@media (max-width:420px){
-  .modal { padding: 16px; }
-}
+  body {background:#111;color:#fff;font-family:-apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px;}
+  h1 {text-align:center;margin-bottom:20px;}
+  .task-card {background:#1f1f1f;padding:20px;margin:15px auto;border-radius:12px;max-width:400px;text-align:center;border:1px solid #fff;}
+  .task-card button {padding:12px 20px;border:none;border-radius:10px;background:#00bc6e;color:#fff;font-weight:600;cursor:pointer;margin-top:10px;}
+  .task-card button:disabled {background:#555;cursor:not-allowed;}
+  #balance {text-align:center;font-size:24px;margin-bottom:20px;}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="app-info">
-    <img src="https://www.reshot.com/preview-assets/icons/CVF7N6YZ9S/sack-of-money-dollar-CVF7N6YZ9S.svg" alt="Sack of Money Logo">
-    <span>Make Money</span>
-  </div>
-  <button id="loginBtn" class="login-btn">Login</button>
-</header>
-<main>
-  <div class="wallet-card full-width">
-    <div class="wallet-top">
-      <div>
-        <div class="wallet-title">Wallet</div>
-        <div class="balance-row">
-          <div class="balance-amount" id="balanceAmount">$0.00</div>
-          <div class="balance-sub">Available balance</div>
-        </div>
-      </div>
-      <button class="btn-primary" id="refreshBtn" style="width:auto;padding:6px 12px;font-size:14px;">⟳</button>
-    </div>
+<h1>Earn Money</h1>
+<div id="balance">Balance: $0.00</div>
 
-    <div class="actions">
-      <button class="btn btn-primary" id="cashoutBtn">Cash out</button>
-    </div>
-
-    <div class="breakdown">
-      <div class="break-item">
-        <div class="label">Pending</div>
-        <div class="value" id="pendingVal">$0.00</div>
-      </div>
-      <div class="break-item">
-        <div class="label">Withdrawn</div>
-        <div class="value" id="withdrawnVal">$0.00</div>
-      </div>
-      <div class="break-item">
-        <div class="label">Next payout</div>
-        <div class="value" id="nextPayout">-</div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal">
-    <h3>Cash out funds</h3>
-    <p>Enter payout info. Minimum cashout: <strong>$10</strong>.</p>
-    <div class="field">
-      <label>Amount (USD)</label>
-      <input type="number" id="cashAmount" min="10" step="0.01" placeholder="10.00">
-    </div>
-    <div class="field">
-      <label>Method</label>
-      <select id="payMethod">
-        <option value="paypal">PayPal</option>
-        <option value="bank">Bank transfer</option>
-        <option value="crypto">Crypto</option>
-      </select>
-    </div>
-    <div class="field" id="payoutDetailsField">
-      <label id="payoutLabel">PayPal Email</label>
-      <input type="text" id="payoutDetails" placeholder="Enter your PayPal email">
-    </div>
-    <div class="note">Estimated fee: <span id="feeVal">$0.50</span></div>
-    <div class="modal-footer">
-      <div class="hint">Available: <strong id="availableHint">$0.00</strong></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" id="cancelModal" style="background:#374151;color:#fff;">Cancel</button>
-        <button class="btn btn-primary" id="confirmCash">Confirm</button>
-      </div>
-    </div>
-  </div>
+<div class="task-card">
+  <h2>Click to Earn</h2>
+  <p>Click the button to earn <strong>$0.001</strong></p>
+  <button id="clickEarnBtn">Click & Earn</button>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" id="authModal">
-  <div class="modal">
-    <div class="tabs">
-      <div class="tab active" id="loginTab">Login</div>
-      <div class="tab" id="registerTab">Register</div>
-    </div>
+<div class="task-card">
+  <h2>Watch & Earn</h2>
+  <p>Watch a short ad to earn <strong>$0.010</strong></p>
+  <button id="watchEarnBtn">Watch & Earn</button>
+</div>
 
-    <!-- Login -->
-    <div class="form-section active" id="loginForm">
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Password">
-      <div class="forgot-password" id="forgotPassword">Forgot Password?</div>
-      <button class="submit-btn" id="loginSubmit">Login</button>
-    </div>
-
-    <!-- Register -->
-    <div class="form-section" id="registerForm">
-      <input type="email" id="registerEmail" placeholder="Email">
-      <input type="password" id="registerPassword" placeholder="Password">
-      <button class="submit-btn" id="registerSubmit">Register</button>
-    </div>
-  </div>
+<div class="task-card">
+  <h2>Daily Check-in</h2>
+  <p>Check in once every 24 hours to earn <strong>$0.100</strong></p>
+  <button id="dailyCheckBtn">Daily Check-in</button>
+  <p id="dailyHint" style="font-size:12px;margin-top:6px;"></p>
 </div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
-  const loginBtn = document.getElementById('loginBtn');
-  const authModal = document.getElementById('authModal');
-
-  const loginTab = document.getElementById('loginTab');
-  const registerTab = document.getElementById('registerTab');
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-
-  // Tabs
-  loginTab.addEventListener('click', ()=>{
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
-    loginForm.classList.add('active');
-    registerForm.classList.remove('active');
-  });
-  registerTab.addEventListener('click', ()=>{
-    registerTab.classList.add('active');
-    loginTab.classList.remove('active');
-    registerForm.classList.add('active');
-    loginForm.classList.remove('active');
-  });
-
-  // Show modal
-  loginBtn.addEventListener('click', ()=>{
-    const user = auth.currentUser;
-    if(user){
-      auth.signOut();
-    } else {
-      authModal.classList.add('active');
-      document.body.style.overflow='hidden'; // prevent background scroll
-    }
-  });
-
-  // Close modal on overlay click (optional)
-  authModal.addEventListener('click', e=>{
-    if(e.target === authModal){
-      authModal.classList.remove('active');
-      document.body.style.overflow='auto';
-    }
-  });
-
-  // Register
-  document.getElementById('registerSubmit').addEventListener('click', ()=>{
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(()=>{authModal.classList.remove('active'); document.body.style.overflow='auto';})
-      .catch(err=>alert(err.message));
-  });
-
-  // Login
-  document.getElementById('loginSubmit').addEventListener('click', ()=>{
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    auth.signInWithEmailAndPassword(email,password)
-      .then(()=>{authModal.classList.remove('active'); document.body.style.overflow='auto';})
-      .catch(err=>alert(err.message));
-  });
-
-  // Forgot password
-  document.getElementById('forgotPassword').addEventListener('click', ()=>{
-    const email = document.getElementById('loginEmail').value;
-    if(!email){alert('Enter your email first'); return;}
-    auth.sendPasswordResetEmail(email)
-      .then(()=>alert('Password reset email sent'))
-      .catch(err=>alert(err.message));
-  });
-
-  // Update login button based on auth state
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      loginBtn.textContent='Logout';
-      loginBtn.classList.add('logout');
-} else {
-      loginBtn.textContent='Login';
-      loginBtn.classList.remove('logout');
-    }
-  });
-</script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -724,105 +53,85 @@ const firebaseConfig = {
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
   measurementId: "G-LLT6F9WRKH"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getDatabase();
 
-const balanceEl = document.getElementById('balanceAmount');
-const availableHint = document.getElementById('availableHint');
-const pendingVal = document.getElementById('pendingVal');
-const withdrawnVal = document.getElementById('withdrawnVal');
-const nextPayoutEl = document.getElementById('nextPayout');
-const cashAmount = document.getElementById('cashAmount');
-const payMethod = document.getElementById('payMethod');
-const payoutDetails = document.getElementById('payoutDetails');
-const payoutLabel = document.getElementById('payoutLabel');
-const feeVal = document.getElementById('feeVal');
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-let userState = { balance:0, pending:0, withdrawn:0, nextPayout:"-" };
+let user = null;
+let balance = 0;
 
-function formatUSD(v){ return '$'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+// Utility
+function formatUSD(v){ return '$'+Number(v).toFixed(3); }
+function refreshBalance(){ document.getElementById('balance').textContent = 'Balance: '+formatUSD(balance); }
 
-function refreshUI(){
-  balanceEl.textContent = formatUSD(userState.balance);
-  availableHint.textContent = formatUSD(userState.balance);
-  pendingVal.textContent = formatUSD(userState.pending);
-  withdrawnVal.textContent = formatUSD(userState.withdrawn);
-  nextPayoutEl.textContent = userState.nextPayout;
-}
-
-function loadEarnings(uid){
-  const userRef = ref(db,'myearnings/'+uid);
-  get(userRef).then(snapshot=>{
+// Load user's current balance
+function loadBalance(uid){
+  db.ref('myearnings/'+uid).get().then(snapshot=>{
     if(snapshot.exists()){
       const data = snapshot.val();
-      userState.balance = data.balance || 0;
-      userState.pending = data.pending || 0;
-      userState.withdrawn = data.withdrawn || 0;
-      userState.nextPayout = data.nextPayout || '-';
-      refreshUI();
+      balance = data.balance || 0;
+      refreshBalance();
+    } else {
+      db.ref('myearnings/'+uid).set({balance:0, pending:0, withdrawn:0, nextPayout:'-'});
+      balance = 0;
+      refreshBalance();
     }
-  }).catch(console.error);
+  });
 }
 
-function estimateFee(amount){
-  if(!amount||amount<=0) return 0;
-  return Math.round((0.5 + amount*0.005)*100)/100;
-}
-function updateFee(){
-  const amt = Number(cashAmount.value||0);
-  feeVal.textContent = formatUSD(estimateFee(amt));
-}
-cashAmount.addEventListener('input',updateFee);
-
-payMethod.addEventListener('change', ()=>{
-  const val = payMethod.value;
-  if(val==='paypal') payoutLabel.textContent='PayPal Email', payoutDetails.placeholder='Enter PayPal email';
-  if(val==='bank') payoutLabel.textContent='Bank Account', payoutDetails.placeholder='Enter bank account info';
-  if(val==='crypto') payoutLabel.textContent='Crypto Address', payoutDetails.placeholder='Enter crypto wallet address';
+// Auth check
+auth.onAuthStateChanged(u=>{
+  if(u){
+    user = u;
+    loadBalance(user.uid);
+  } else {
+    alert('You must be logged in to earn money!');
+  }
 });
 
-document.getElementById('cashoutBtn').addEventListener('click', ()=>{
-  document.getElementById('modalBackdrop').style.display='flex';
-  document.body.style.overflow='hidden';
+// Click to earn
+document.getElementById('clickEarnBtn').addEventListener('click', ()=>{
+  if(!user) return alert('Login first');
+  balance += 0.001;
+  refreshBalance();
+  db.ref('myearnings/'+user.uid).update({balance:balance});
 });
 
-document.getElementById('cancelModal').addEventListener('click', ()=>{
-  document.getElementById('modalBackdrop').style.display='none';
-  document.body.style.overflow='';
+// Watch & Earn
+document.getElementById('watchEarnBtn').addEventListener('click', ()=>{
+  if(!user) return alert('Login first');
+  // Simulate ad watch delay
+  const btn = document.getElementById('watchEarnBtn');
+  btn.disabled = true;
+  btn.textContent = 'Watching ad...';
+  setTimeout(()=>{
+    balance += 0.01;
+    refreshBalance();
+    db.ref('myearnings/'+user.uid).update({balance:balance});
+    btn.disabled = false;
+    btn.textContent = 'Watch & Earn';
+  }, 5000); // 5s ad
 });
 
-document.getElementById('confirmCash').addEventListener('click', ()=>{
-  const amt = Number(cashAmount.value||0);
-  if(isNaN(amt)||amt<10){ alert('Minimum $10'); return; }
-  if(amt>userState.balance){ alert('Not enough balance'); return; }
-  if(!payoutDetails.value.trim()){ alert('Enter payout details'); return; }
-
-  const fee = estimateFee(amt);
-  const userRef = ref(db,'myearnings/'+auth.currentUser.uid);
-  const updates = {
-    balance: Math.round((userState.balance-amt)*100)/100,
-    pending: Math.round((userState.pending+amt)*100)/100
-  };
-  update(userRef, updates).then(()=>{
-    userState.balance=updates.balance;
-    userState.pending=updates.pending;
-    refreshUI();
-    document.getElementById('modalBackdrop').style.display='none';
-    cashAmount.value='';
-    payoutDetails.value='';
-    alert('Cashout requested. Funds moved to pending.');
-  }).catch(err=>alert('Error: '+err.message));
-});
-
-document.getElementById('refreshBtn').addEventListener('click', ()=>{
-  loadEarnings(auth.currentUser.uid);
-});
-
-onAuthStateChanged(auth, user=>{
-  if(user) loadEarnings(user.uid);
-  else alert('Please log in to access your wallet.');
+// Daily check-in
+document.getElementById('dailyCheckBtn').addEventListener('click', ()=>{
+  if(!user) return alert('Login first');
+  const today = new Date().getTime();
+  db.ref('tasks/'+user.uid+'/dailyCheck').get().then(snap=>{
+    let lastCheck = snap.val() || 0;
+    if(today - lastCheck >= 24*60*60*1000){
+      balance += 0.1;
+      refreshBalance();
+      db.ref('myearnings/'+user.uid).update({balance:balance});
+      db.ref('tasks/'+user.uid+'/dailyCheck').set(today);
+      document.getElementById('dailyHint').textContent = 'Daily check-in successful!';
+    } else {
+      document.getElementById('dailyHint').textContent = 'Already checked in within 24 hours.';
+    }
+  });
 });
 </script>
+
 </body>
 </html>
