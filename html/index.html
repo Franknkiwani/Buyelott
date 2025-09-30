@@ -52,6 +52,7 @@
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
+    margin-left: 5px;
   }
   button:hover {
     background: #ff416c;
@@ -63,7 +64,10 @@
 
 <header>
   <span>💎 Expensive HTML Tester</span>
-  <button onclick="runCode()">Run</button>
+  <div>
+    <button onclick="runCode()">Run</button>
+    <button onclick="toggleFullscreen()">Fullscreen</button>
+  </div>
 </header>
 
 <div id="editor-container">
@@ -98,6 +102,15 @@ console.log('Welcome!');
     const code = codeArea.value;
     preview.srcdoc = code;
     localStorage.setItem('expensive_html_tester', code);
+  }
+
+  // Toggle fullscreen for preview
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      preview.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+    } else {
+      document.exitFullscreen();
+    }
   }
 
   // Auto-save every 2 seconds
