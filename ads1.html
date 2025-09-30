@@ -3,139 +3,236 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Click & Earn</title>
+<title>Make Money</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:#f2f2f7; display:flex; flex-direction:column; align-items:center; padding:2rem; }
-  h1 { margin-bottom: 1rem; }
-  .balance { font-size:1.2rem; font-weight:bold; margin-bottom:2rem; }
-  .earn-btn { padding:1rem 2rem; margin:1rem 0; border:none; border-radius:15px; font-weight:600; cursor:pointer; background:#007BFF; color:#fff; transition: background 0.2s; }
-  .earn-btn:hover { background:#0056b3; }
-  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
-  .modal-content { background:#fff; border-radius:20px; padding:2rem; max-width:400px; width:90%; text-align:center; position:relative; }
-  .countdown { font-size:1.5rem; margin-top:1rem; font-weight:bold; }
-  .close-btn { position:absolute; top:10px; right:15px; font-size:1.2rem; cursor:pointer; }
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  body, html {
+    height:100%;
+    font-family:'Poppins', sans-serif;
+    background: linear-gradient(135deg, #4c669f, #3b5998, #192f6a);
+    overflow-x: hidden;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 10px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .app-name {
+    display: flex;
+    align-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .app-name img {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    margin-right:10px;
+    object-fit: cover;
+  }
+
+  .btn {
+    padding:8px 18px;
+    border-radius:20px;
+    border:none;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
+    user-select:none;
+    outline:none;
+    box-shadow:none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-login { background-color: #1E90FF; }
+  .btn-logout { background-color: #FF3333; }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .modal {
+    background: #1f1f1f;
+    border-radius: 12px;
+    width: 350px;
+    max-width: 90%;
+    padding: 25px;
+    color: #fff;
+    position: relative;
+  }
+
+  .modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .tabs {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: space-around;
+  }
+
+  .tab {
+    cursor:pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #333;
+    transition:0.2s;
+  }
+
+  .tab.active {
+    background: #1E90FF;
+  }
+
+  .modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal input {
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+    font-size:14px;
+  }
+
+  .modal button.submit-btn {
+    padding:10px;
+    background:#1E90FF;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  .forgot {
+    text-align:right;
+    font-size:12px;
+    color:#aaa;
+    cursor:pointer;
+    margin-top:-8px;
+  }
+
+  .notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background:#333;
+    color:#fff;
+    padding:12px 20px;
+    border-radius:8px;
+    opacity:0.9;
+    z-index:1000;
+  }
 </style>
 </head>
 <body>
+<div id="root"></div>
 
-<h1>Click & Earn</h1>
-<div class="balance" id="balance">$0.00</div>
+<script type="text/babel">
+function App() {
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('login');
+  const [notification, setNotification] = React.useState('');
 
-<!-- First button: Click 10 times to redirect -->
-<button class="earn-btn" id="click-btn">Click me to earn $0.001</button>
+  const handleAuthButton = () => {
+    if (!loggedIn) {
+      setShowModal(true);
+      document.body.style.overflow = 'hidden'; // disable scroll
+    } else {
+      setLoggedIn(false);
+      showNotification("Logged out!");
+    }
+  }
 
-<!-- Second button: Watch Ad -->
-<button class="earn-btn" id="ad-btn">Watch Ad & Earn $0.015</button>
+  const handleCloseModal = () => {
+    setShowModal(false);
+    document.body.style.overflow = 'auto';
+  }
 
-<!-- Modal -->
-<div class="modal" id="ad-modal">
-  <div class="modal-content">
-    <span class="close-btn" id="close-modal">&times;</span>
-    <h2>Watch this Ad</h2>
-    <div id="ad-container"></div>
-    <div class="countdown" id="countdown">10</div>
-  </div>
-</div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const action = activeTab === 'login' ? 'Logged in!' : 'Registered!';
+    setLoggedIn(true);
+    setShowModal(false);
+    document.body.style.overflow = 'auto';
+    showNotification(action);
+  }
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  const showNotification = (msg) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(''), 3000);
+  }
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+  return (
+    <>
+      <header>
+        <div className="app-name">
+          <img src="https://previews.123rf.com/images/distrologo/distrologo1907/distrologo190700076/126643926-earn-money-vector-logo-icon-design-saving-money-symbol-design-with-hand-illustrations.jpg" alt="Logo" />
+          Make Money
+        </div>
+        <button className={loggedIn ? "btn btn-logout" : "btn btn-login"} onClick={handleAuthButton}>
+          {loggedIn ? "Logout" : "Login"}
+        </button>
+      </header>
 
-const balanceEl = document.getElementById('balance');
-const clickBtn = document.getElementById('click-btn');
-const adBtn = document.getElementById('ad-btn');
-const adModal = document.getElementById('ad-modal');
-const adContainer = document.getElementById('ad-container');
-const countdownEl = document.getElementById('countdown');
-const closeModal = document.getElementById('close-modal');
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="tabs">
+              <div className={`tab ${activeTab==='login' ? 'active' : ''}`} onClick={()=>setActiveTab('login')}>Login</div>
+              <div className={`tab ${activeTab==='register' ? 'active' : ''}`} onClick={()=>setActiveTab('register')}>Register</div>
+            </div>
 
-let clickCount = 0;
+            <form onSubmit={handleSubmit}>
+              <input type="email" placeholder="Email" required />
+              <input type="password" placeholder="Password" required />
+              {activeTab==='login' && <div className="forgot" onClick={()=>showNotification("Forgot password clicked")}>Forgot Password?</div>}
+              <button className="submit-btn">{activeTab==='login' ? 'Login' : 'Register'}</button>
+            </form>
+            <div style={{textAlign:'center', marginTop:'15px', cursor:'pointer', color:'#aaa'}} onClick={handleCloseModal}>Close</div>
+          </div>
+        </div>
+      )}
 
-// Update balance UI
-function updateBalanceUI(userId){
-  db.ref('users/' + userId + '/balance').get().then(snapshot => {
-    const balance = snapshot.val() || 0;
-    balanceEl.textContent = `$${balance.toFixed(3)}`;
-  });
+      {notification && <div className="notification">{notification}</div>}
+    </>
+  );
 }
 
-// Check login
-auth.onAuthStateChanged(user => {
-  if(user){
-    updateBalanceUI(user.uid);
-  } else {
-    alert("You must log in first!");
-  }
-});
-
-// First button click
-clickBtn.addEventListener('click', () => {
-  const user = auth.currentUser;
-  if(!user){ alert("You must log in!"); return; }
-
-  clickCount++;
-  const userRef = db.ref('users/' + user.uid + '/balance');
-  userRef.transaction(current => (current || 0) + 0.001, (error, committed, snapshot) => {
-    if(error) console.error('Transaction failed', error);
-    else if(committed) balanceEl.textContent = `$${snapshot.val().toFixed(3)}`;
-  });
-
-  if(clickCount >= 10){
-    window.location.href = "https://unusualroof.com/nT6dWU";
-  }
-});
-
-// Second button click: show ad modal
-adBtn.addEventListener('click', () => {
-  const user = auth.currentUser;
-  if(!user){ alert("You must log in!"); return; }
-
-  // Inject ad script
-  adContainer.innerHTML = '';
-  const s = document.createElement('script');
-  s.src = "//mildgive.com/b/X.VTsTdxGBlm0/Y/Wscd/-ehmM9tupZeUaldk/P/TiYF2/NMj_ISxVNITDQ/tzNqj_Y/2wMjjGEJ1hNbQU";
-  s.async = true;
-  adContainer.appendChild(s);
-
-  adModal.style.display = 'flex';
-
-  let countdown = 10;
-  countdownEl.textContent = countdown;
-  const timer = setInterval(() => {
-    countdown--;
-    countdownEl.textContent = countdown;
-    if(countdown <= 0){
-      clearInterval(timer);
-      adModal.style.display = 'none';
-      // Give $0.015
-      const userRef = db.ref('users/' + user.uid + '/balance');
-      userRef.transaction(current => (current || 0) + 0.015, (error, committed, snapshot) => {
-        if(error) console.error('Transaction failed', error);
-        else if(committed) balanceEl.textContent = `$${snapshot.val().toFixed(3)}`;
-      });
-    }
-  }, 1000);
-});
-
-// Close modal manually (optional)
-closeModal.addEventListener('click', () => {
-  adModal.style.display = 'none';
-});
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
