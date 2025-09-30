@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expensive HTML Tester</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  #editor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  textarea {
+    flex: 1;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+  }
+  iframe {
+    flex: 1;
+    border-left: 3px solid #ff416c;
+    width: 50%;
+  }
+  button {
+    background: white;
+    color: #ff416c;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover {
+    background: #ff416c;
+    color: white;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span>💎 Expensive HTML Tester</span>
+  <button onclick="runCode()">Run</button>
+</header>
+
+<div id="editor-container">
+  <textarea id="code" placeholder="Write your HTML, CSS, JS here..."></textarea>
+  <iframe id="preview"></iframe>
+</div>
+
+<script>
+  const codeArea = document.getElementById('code');
+  const preview = document.getElementById('preview');
+
+  // Load last saved version
+  codeArea.value = localStorage.getItem('expensive_html_tester') || `<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: Arial; text-align: center; padding: 50px; }
+h1 { color: #ff416c; }
+</style>
+</head>
+<body>
+<h1>Hello, Expensive Tester!</h1>
+<p>Edit this and click "Run" to see the magic.</p>
+<script>
+console.log('Welcome!');
+</script>
+</body>
+</html>`;
+
+  // Run code
+  function runCode() {
+    const code = codeArea.value;
+    preview.srcdoc = code;
+    localStorage.setItem('expensive_html_tester', code);
+  }
+
+  // Auto-save every 2 seconds
+  setInterval(() => {
+    localStorage.setItem('expensive_html_tester', codeArea.value);
+  }, 2000);
+
+  // Warn before leaving
+  window.addEventListener('beforeunload', (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  // Initial run
+  runCode();
+</script>
+
+</body>
+</html>
