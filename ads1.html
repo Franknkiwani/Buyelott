@@ -5,95 +5,311 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dark iOS App</title>
 <style>
-  /* Reset */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  *{margin:0;padding:0;box-sizing:border-box;}
 
-  html, body {
-    height: 100%;
-    background: #111;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  body{
+    background:#111;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x:hidden;
   }
 
   /* Header */
-  header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    padding: 12px 20px;
+  header{
+    position: fixed;
+    top:0;
+    width:100%;
+    padding:12px 20px;
     backdrop-filter: blur(15px);
-    background: rgba(30, 30, 30, 0.5); /* glassy dark */
-    display: flex;
-    justify-content: space-between; /* left + right */
-    align-items: center;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,30,30,0.5);
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    z-index:1000;
+    border-bottom:1px solid rgba(255,255,255,0.1);
   }
 
-  /* Left: name + SVG */
-  .app-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .app-info{
+    display:flex;
+    align-items:center;
+    gap:8px;
   }
 
-  .app-info svg {
-    width: 28px;
-    height: 28px;
-    fill: #0f0; /* green dollar sign */
+  .app-info img{
+    width:28px;
+    height:28px;
   }
 
-  .app-info span {
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.2rem;
-    -webkit-text-stroke: 1px #000; /* black stroke for visibility */
+  .app-info span{
+    color:#fff;
+    font-weight:700;
+    font-size:1.2rem;
+    -webkit-text-stroke:1px #000;
   }
 
-  /* Right: login button */
-  .login-btn {
-    background: #007bff;
-    color: #fff;
-    padding: 8px 16px;
-    border: 2px solid #fff;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
+  .login-btn{
+    background:#007bff;
+    color:#fff;
+    padding:8px 16px;
+    border:2px solid #fff;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
   }
 
-  .login-btn:hover {
-    background: #0056b3;
+  .login-btn.logout{
+    background:#ff3b3b;
   }
 
-  main {
-    padding: 20px;
-    color: #ddd;
-    min-height: 200vh; /* for scroll demo */
+  main{
+    padding:100px 20px 20px;
+    color:#ddd;
+    min-height:200vh;
   }
+
+  /* Modal overlay */
+  .modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    visibility:hidden;
+    opacity:0;
+    transition:0.3s;
+    z-index:9999;
+  }
+
+  .modal-overlay.active{
+    visibility: visible;
+    opacity:1;
+  }
+
+  /* Modal content */
+  .modal{
+    background: rgba(40,40,40,0.9);
+    border-radius:20px;
+    width:90%;
+    max-width:400px;
+    padding:30px;
+    backdrop-filter: blur(15px);
+    color:#fff;
+  }
+
+  .tabs{
+    display:flex;
+    margin-bottom:20px;
+  }
+
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    font-weight:600;
+  }
+
+  .tab.active{
+    border-bottom:2px solid #00ff00;
+  }
+
+  .form-section{
+    display:none;
+    flex-direction:column;
+    gap:15px;
+  }
+
+  .form-section.active{
+    display:flex;
+  }
+
+  input{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:1rem;
+  }
+
+  button.submit-btn{
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#00bc6e;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
+  }
+
+  button.submit-btn:hover{
+    background:#009f5f;
+  }
+
+  .forgot-password{
+    text-align:right;
+    font-size:0.9rem;
+    cursor:pointer;
+    color:#00bc6e;
+  }
+/* Disable text selection everywhere */
+* {
+  user-select: none;       /* Standard */
+  -webkit-user-select: none; /* Safari/Chrome */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
+}
+
+/* Remove blue outline/highlight on buttons and inputs */
+button, input, textarea {
+  outline: none;
+  -webkit-tap-highlight-color: transparent; /* Mobile */
+}
 </style>
 </head>
 <body>
 
 <header>
-  <!-- Left: dollar-sign SVG + app name -->
   <div class="app-info">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M12 1c-.552 0-1 .448-1 1v1.072C7.136 3.736 4 6.763 4 11c0 2.542 1.684 4.307 4.6 4.857l-.6 1.643c-.065.18-.034.377.084.516.118.139.295.22.482.22h.019c.187 0 .364-.081.482-.22l.596-1.64c1.948-.273 3.36-1.395 3.36-3.296 0-2.176-1.6-2.624-3.2-3.072V6.048c2.024.404 4 1.907 4 4.952 0 2.52-1.684 4.285-4.6 4.835l.6 1.643c.065.18.034.377-.084.516-.118.139-.295.22-.482.22h-.019c-.187 0-.364-.081-.482-.22l-.596-1.64C6.136 16.264 4 13.237 4 9c0-2.542 1.684-4.307 4.6-4.857V3c0-.552.448-1 1-1h2z"/>
-    </svg>
+    <img src="https://www.reshot.com/preview-assets/icons/CVF7N6YZ9S/sack-of-money-dollar-CVF7N6YZ9S.svg" alt="Sack of Money Logo">
     <span>Make Money</span>
   </div>
-
-  <!-- Right: login button -->
-  <button class="login-btn">Login</button>
+  <button id="loginBtn" class="login-btn">Login</button>
 </header>
 
 <main>
-  <p>Scroll down to see the sticky glass header in action.</p>
+
 </main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="tabs">
+      <div class="tab active" id="loginTab">Login</div>
+      <div class="tab" id="registerTab">Register</div>
+    </div>
+
+    <!-- Login -->
+    <div class="form-section active" id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <div class="forgot-password" id="forgotPassword">Forgot Password?</div>
+      <button class="submit-btn" id="loginSubmit">Login</button>
+    </div>
+
+    <!-- Register -->
+    <div class="form-section" id="registerForm">
+      <input type="email" id="registerEmail" placeholder="Email">
+      <input type="password" id="registerPassword" placeholder="Password">
+      <button class="submit-btn" id="registerSubmit">Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const loginBtn = document.getElementById('loginBtn');
+  const authModal = document.getElementById('authModal');
+
+  const loginTab = document.getElementById('loginTab');
+  const registerTab = document.getElementById('registerTab');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+
+  // Tabs
+  loginTab.addEventListener('click', ()=>{
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    loginForm.classList.add('active');
+    registerForm.classList.remove('active');
+  });
+  registerTab.addEventListener('click', ()=>{
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    registerForm.classList.add('active');
+    loginForm.classList.remove('active');
+  });
+
+  // Show modal
+  loginBtn.addEventListener('click', ()=>{
+    const user = auth.currentUser;
+    if(user){
+      auth.signOut();
+    } else {
+      authModal.classList.add('active');
+      document.body.style.overflow='hidden'; // prevent background scroll
+    }
+  });
+
+  // Close modal on overlay click (optional)
+  authModal.addEventListener('click', e=>{
+    if(e.target === authModal){
+      authModal.classList.remove('active');
+      document.body.style.overflow='auto';
+    }
+  });
+
+  // Register
+  document.getElementById('registerSubmit').addEventListener('click', ()=>{
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(()=>{authModal.classList.remove('active'); document.body.style.overflow='auto';})
+      .catch(err=>alert(err.message));
+  });
+
+  // Login
+  document.getElementById('loginSubmit').addEventListener('click', ()=>{
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    auth.signInWithEmailAndPassword(email,password)
+      .then(()=>{authModal.classList.remove('active'); document.body.style.overflow='auto';})
+      .catch(err=>alert(err.message));
+  });
+
+  // Forgot password
+  document.getElementById('forgotPassword').addEventListener('click', ()=>{
+    const email = document.getElementById('loginEmail').value;
+    if(!email){alert('Enter your email first'); return;}
+    auth.sendPasswordResetEmail(email)
+      .then(()=>alert('Password reset email sent'))
+      .catch(err=>alert(err.message));
+  });
+
+  // Update login button based on auth state
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      loginBtn.textContent='Logout';
+      loginBtn.classList.add('logout');
+} else {
+      loginBtn.textContent='Login';
+      loginBtn.classList.remove('logout');
+    }
+  });
+</script>
 
 </body>
 </html>
