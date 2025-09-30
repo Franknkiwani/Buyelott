@@ -3,143 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modern HTML Tester</title>
+<title>Make Money</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    background: #1e1e1e;
-    color: #fff;
-  }
-  header {
-    background: #333;
-    padding: 10px;
-    text-align: center;
-    font-size: 1.2em;
-  }
-  .editor-container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-  .editor {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    margin: 5px;
-  }
-  .editor label {
-    background: #444;
-    padding: 5px;
-    text-align: center;
-  }
-  .editor textarea {
-    flex: 1;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    border: none;
-    resize: none;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 14px;
-  }
-  .preview-container {
-    height: 40%;
-    margin: 5px;
-  }
-  .preview-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-  button {
-    margin: 5px;
-    padding: 8px 12px;
-    background: #007acc;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  button:hover {
-    background: #005a99;
-  }
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen;background:#f2f2f7;display:flex;justify-content:center;padding:20px 0;}
+.task-container{width:95%;max-width:500px;display:flex;flex-direction:column;align-items:center;}
+.task-card{background:#fff;margin-bottom:20px;padding:15px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,0.06);text-align:center;width:100%;}
+.task-image{width:100%;max-width:400px;border-radius:15px;margin-bottom:15px;}
+.task-title{font-size:18px;font-weight:600;margin-bottom:8px;}
+.task-desc{font-size:14px;color:#555;margin-bottom:12px;}
+.task-reward{font-size:16px;font-weight:bold;color:#1a73e8;margin-bottom:12px;}
+.task-button{background:#1a73e8;color:#fff;font-weight:600;padding:10px 20px;border-radius:12px;border:none;cursor:pointer;transition:background 0.2s, transform 0.2s;}
+.task-button:hover{background:#155ab6;transform:translateY(-2px);}
+.task-button:disabled{background:#aaa;cursor:default;}
+#clickLimitModal,#adModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(8px);background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:999;}
+#clickLimitModal div,#adModal div{background:#fff;border-radius:20px;padding:30px;text-align:center;max-width:500px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.15);}
+#adCountdown,.countdown{font-weight:bold;color:#1a73e8;margin-top:15px;font-size:18px;}
 </style>
 </head>
 <body>
-<header>Modern HTML/CSS/JS Tester</header>
-<div class="editor-container">
-  <div class="editor">
-    <label for="html">HTML</label>
-    <textarea id="html"></textarea>
+<div class="task-container">
+  <!-- Click-to-Earn -->
+  <div class="task-card" id="clickTask">
+    <img class="task-image" src="https://static.keygames.com/4/113364/94215/1344x896/money-clicker.webp" alt="Money Clicker">
+    <div class="task-title">Click to Earn</div>
+    <div class="task-desc">Click the button to earn $0.001 instantly.</div>
+    <div class="task-reward">Reward: $0.001</div>
+    <button class="task-button" id="clickButton">Click & Earn</button>
   </div>
-  <div class="editor">
-    <label for="css">CSS</label>
-    <textarea id="css"></textarea>
+
+  <!-- Watch 10s Ad -->
+  <div class="task-card">
+    <img class="task-image" src="https://sketchub.in/storage/project_files/22085/1733655.png" alt="Watch Ad">
+    <div class="task-title">Watch a 10s Ad</div>
+    <div class="task-desc">Earn $0.010 by watching a short ad.</div>
+    <div class="task-reward">Reward: $0.010</div>
+    <button class="task-button" id="watchAdButton">Watch Ad & Earn</button>
   </div>
-  <div class="editor">
-    <label for="js">JavaScript</label>
-    <textarea id="js"></textarea>
+
+  <!-- Daily Check-in -->
+  <div class="task-card" id="dailyCheckin">
+    <img class="task-image" src="https://www.shutterstock.com/image-vector/closeup-businessman-hand-calendar-red-600nw-759266437.jpg" alt="Daily Check-in">
+    <div class="task-title">Daily Check-in</div>
+    <div class="task-desc">Claim your daily reward easily.</div>
+    <div class="task-reward">Reward: $0.100</div>
+    <button class="task-button" id="dailyButton">Check In Now</button>
+    <div class="countdown" id="dailyCountdown"></div>
   </div>
 </div>
-<div style="text-align:center;">
-  <button id="run">Run</button>
-  <button id="fullscreen">Full Screen Preview</button>
+
+<!-- Click Limit Modal -->
+<div id="clickLimitModal">
+  <div>
+    <h2 style="font-size:22px;margin-bottom:15px;color:#1a73e8;">Limit Reached!</h2>
+    <p style="font-size:16px;color:#555;margin-bottom:20px;">You've reached the 10-click limit. Unlock your next reward now!</p>
+    <button id="clickLimitButton" style="background:#1a73e8;color:#fff;font-weight:600;padding:12px 25px;border-radius:12px;border:none;font-size:16px;cursor:pointer;transition:background 0.2s;">Unlock Now</button>
+    <div id="clickLimitBanner" style="margin-top:20px; min-height:90px;"></div>
+  </div>
 </div>
-<div class="preview-container">
-  <iframe id="preview"></iframe>
+
+<!-- Ad Modal -->
+<div id="adModal">
+  <div>
+    <div id="adContainer">Loading ad...</div>
+    <div id="adCountdown"></div>
+  </div>
 </div>
 
 <script>
-  const htmlEditor = document.getElementById('html');
-  const cssEditor = document.getElementById('css');
-  const jsEditor = document.getElementById('js');
-  const preview = document.getElementById('preview');
-  const runBtn = document.getElementById('run');
-  const fullscreenBtn = document.getElementById('fullscreen');
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+let currentUser;
 
-  // Load saved code
-  htmlEditor.value = localStorage.getItem('html') || '';
-  cssEditor.value = localStorage.getItem('css') || '';
-  jsEditor.value = localStorage.getItem('js') || '';
+auth.signInAnonymously().then(res=>currentUser=res.user);
 
-  function updatePreview() {
-    const html = htmlEditor.value;
-    const css = `<style>${cssEditor.value}</style>`;
-    const js = `<script>${jsEditor.value}<\/script>`;
-    preview.srcdoc = html + css + js;
+// Global variables
+let clickCount = parseInt(localStorage.getItem('clickCount')||0);
+const clickButton = document.getElementById('clickButton');
+const clickLimitModal = document.getElementById('clickLimitModal');
+const clickLimitButton = document.getElementById('clickLimitButton');
+const clickLimitBanner = document.getElementById('clickLimitBanner');
+const clickURLs = ['https://unusualroof.com/nT6dWU','https://unusualroof.com/7hQMWv','https://nippyprice.com/mRIkp7'];
 
-    // Save to localStorage
-    localStorage.setItem('html', htmlEditor.value);
-    localStorage.setItem('css', cssEditor.value);
-    localStorage.setItem('js', jsEditor.value);
+// Reward function
+function reward(amount){
+  if(!currentUser) return alert("Loading user...");
+  const userRef = db.ref('users/'+currentUser.uid+'/balance');
+  userRef.get().then(snapshot=>{
+    let bal=snapshot.val()||0;
+    userRef.set(bal+amount);
+    console.log(`Reward $${amount.toFixed(3)} | New balance: ${(bal+amount).toFixed(3)}`);
+  });
+}
+
+// Ad modal
+const adModal = document.getElementById('adModal');
+const adContainer = document.getElementById('adContainer');
+const adCountdown = document.getElementById('adCountdown');
+const adScripts = [
+  "//mildgive.com/byX.VdsjdzG/lU0/YMWtc_/AeNmN9Mu_Z/U/lpkPPCToYh2CNDjjMowGNsjckttpNfj_YA2wMNzuAF3VM/AK",
+  "//mildgive.com/bEXYV.svdGGclU0/Y/W/cO/we/mO9xu_ZNUglSkLPXT/Yp2/NfjfItx/NST/QctjNHjnYu2IM/jbEf1/NcQR",
+  "//mildgive.com/bJXjV.sYdAGZll0HYPWfcs/jePmP9UuvZgUAlwkrPBTCYT2cN-jzIj5/MIz/k/tINjjYYt2wMkj/kG0_MMAR"
+];
+let adIndex=0;
+
+async function showAdModal(callback){
+  adModal.style.display='flex';
+  adContainer.innerHTML='Loading ad...';
+  adCountdown.textContent='';
+
+  let adLoaded=false;
+  const script=document.createElement('script');
+  script.src=adScripts[adIndex];
+  script.async=true;
+  script.referrerPolicy='no-referrer-when-downgrade';
+  script.onload=()=>{adLoaded=true;};
+  script.onerror=()=>{adLoaded=false;};
+  document.body.appendChild(script);
+
+  adIndex=(adIndex+1)%adScripts.length;
+
+  let waited=0;
+  while(waited<10 && !adLoaded){await new Promise(r=>setTimeout(r,1000)); waited++;}
+
+  if(!adLoaded){adContainer.innerHTML="No ads available right now."; setTimeout(()=>adModal.style.display='none',1000); return;}
+
+  let countdown=10;
+  adCountdown.textContent=`Please wait: ${countdown}s`;
+  const interval=setInterval(()=>{
+    countdown--;
+    adCountdown.textContent=`Please wait: ${countdown}s`;
+    if(countdown<=0){clearInterval(interval); adModal.style.display='none'; callback();}
+  },1000);
+}
+
+// Click-to-Earn
+clickButton.addEventListener('click',()=>{
+  clickCount++;
+  localStorage.setItem('clickCount',clickCount);
+  reward(0.001);
+
+  if(clickCount>=10){
+    clickButton.disabled=true;
+    clickLimitModal.style.display='flex';
+    // Banner ad
+    const banners=[
+      '<script src="//mildgive.com/byX.VdsjdzG/lU0/YMWtc_/AeNmN9Mu_Z/U/lpkPPCToYh2CNDjjMowGNsjckttpNfj_YA2wMNzuAF3VM/AK"><\/script>',
+      '<script src="//mildgive.com/bEXYV.svdGGclU0/Y/W/cO/we/mO9xu_ZNUglSkLPXT/Yp2/NfjfItx/NST/QctjNHjnYu2IM/jbEf1/NcQR"><\/script>'
+    ];
+    clickLimitBanner.innerHTML=banners[Math.floor(Math.random()*banners.length)];
+
+    clickLimitButton.onclick=()=>{clickLimitModal.style.display='none'; showAdModal(()=>{ window.location.href=clickURLs[Math.floor(Math.random()*clickURLs.length)]; });};
   }
+});
 
-  htmlEditor.addEventListener('input', updatePreview);
-  cssEditor.addEventListener('input', updatePreview);
-  jsEditor.addEventListener('input', updatePreview);
-  runBtn.addEventListener('click', updatePreview);
+// Daily Check-in
+const dailyButton=document.getElementById('dailyButton');
+const dailyCountdown=document.getElementById('dailyCountdown');
+function updateDailyCountdown(){
+  const nextTime=parseInt(localStorage.getItem('dailyNext')||0);
+  const now=Date.now();
+  let diff=nextTime-now;
+  if(diff>0){const hours=Math.floor(diff/3600000); const mins=Math.floor((diff%3600000)/60000); const secs=Math.floor((diff%60000)/1000); dailyCountdown.textContent=`${hours}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`; dailyButton.disabled=true;}
+  else{dailyCountdown.textContent=''; dailyButton.disabled=false;}
+}
+setInterval(updateDailyCountdown,1000);
+dailyButton.addEventListener('click',()=>{
+  reward(0.1);
+  const next24h=Date.now()+24*60*60*1000;
+  localStorage.setItem('dailyNext',next24h);
+  if(currentUser) db.ref('users/'+currentUser.uid+'/dailyNext').set(next24h);
+  updateDailyCountdown();
+});
+updateDailyCountdown();
 
-  // Fullscreen preview
-  fullscreenBtn.addEventListener('click', () => {
-    const iframeWindow = preview.contentWindow;
-    if (iframeWindow.document.documentElement.requestFullscreen) {
-      iframeWindow.document.documentElement.requestFullscreen();
-    }
-  });
-
-  // Warn before leaving
-  window.addEventListener('beforeunload', (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  });
-
-  // Initial render
-  updatePreview();
+// Watch Ad Button
+const watchButton=document.getElementById('watchAdButton');
+watchButton.addEventListener('click',()=>showAdModal(()=>reward(0.01)));
 </script>
 </body>
 </html>
