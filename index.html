@@ -1388,6 +1388,82 @@ watchBtn?.addEventListener('click',async ()=>{
 /* ---------- Initial UI ---------- */
 if(!auth.currentUser) showNotLoggedUI();
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
+// ====== FIREBASE CONFIG ======
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+// ====== INITIALIZE FIREBASE ======
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ====== HELPER: GET USER COUNTRY ======
+async function getCountry() {
+  try {
+    const res = await fetch('https://ipapi.co/json');
+    const data = await res.json();
+    return {
+      country: data.country_name || 'Unknown',
+      countryCode: (data.country_code || 'US').toLowerCase(),
+      flag: `https://flagcdn.com/16x12/${(data.country_code || 'US').toLowerCase()}.png`
+    };
+  } catch(e) {
+    return { country: 'Unknown', countryCode: 'us', flag: 'https://flagcdn.com/16x12/us.png' };
+  }
+}
+
+// ====== LOG VISITS ======
+async function logVisit() {
+  const { country, countryCode, flag } = await getCountry();
+  const timestamp = Date.now();
+
+  // Logs every visit
+  const logsRef = ref(db, 'analytics/logs');
+  push(logsRef, { timestamp, country, countryCode, flag, url: location.href }).catch(console.error);
+
+  // Track unique users (per device)
+  const userKey = 'uniqueUserLogged';
+  if (!localStorage.getItem(userKey)) {
+    localStorage.setItem(userKey, 'true');
+    const usersRef = ref(db, 'analytics/events');
+    push(usersRef, { timestamp, type: 'user' }).catch(console.error);
+  }
+
+  // Track page views
+  const viewsRef = ref(db, 'analytics/events');
+  push(viewsRef, { timestamp, type: 'view' }).catch(console.error);
+}
+
+// ====== TRACK CLICKS ======
+function trackClicks() {
+  document.addEventListener('click', (e) => {
+    const timestamp = Date.now();
+    const clicksRef = ref(db, 'analytics/events');
+    push(clicksRef, { timestamp, type: 'click', target: e.target.tagName || 'unknown' }).catch(console.error);
+  });
+}
+
+// ====== TRACK CUSTOM EVENTS ======
+export async function trackEvent(type, meta = {}) {
+  const timestamp = Date.now();
+  const eventsRef = ref(db, 'analytics/events');
+  push(eventsRef, { timestamp, type, ...meta }).catch(console.error);
+}
+
+// ====== INIT TRACKING ======
+logVisit();
+trackClicks();
+</script>
 </body>
 </html>
