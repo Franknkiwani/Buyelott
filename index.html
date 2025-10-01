@@ -1093,6 +1093,43 @@ background: rgba(30,30,30,0.7); backdrop-filter: blur(15px); text-align:center; 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // Always fade out loading screen after checking auth
+  onAuthStateChanged(auth, (user) => {
+    const loader = document.getElementById('loadingScreen');
+    const text = document.getElementById('loadingText');
+
+    if(user){
+      text.innerText = "Welcome back!";
+    } else {
+      text.innerText = "Ready to login";
+    }
+
+    // Smooth fade out
+    setTimeout(()=>{
+      loader.style.opacity='0';
+      setTimeout(()=>{ loader.style.display='none'; },800);
+    },800);
+  });
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
   onAuthStateChanged(auth, (user) => {
     const loader = document.getElementById('loadingScreen');
     const text = document.getElementById('loadingText');
