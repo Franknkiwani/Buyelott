@@ -5,37 +5,262 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoyoo Tasks</title>
 <style>
-  body {background:#111;color:#fff;font-family:-apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px;}
-  h1 {text-align:center;margin-bottom:20px;}
-  .task-card {background:#1f1f1f;padding:20px;margin:15px auto;border-radius:12px;max-width:400px;text-align:center;border:1px solid #fff;}
-  .task-card button {padding:12px 20px;border:none;border-radius:10px;background:#00bc6e;color:#fff;font-weight:600;cursor:pointer;margin-top:10px;}
-  .task-card button:disabled {background:#555;cursor:not-allowed;}
-  #balance {text-align:center;font-size:24px;margin-bottom:20px;}
+/* Wrapper for everything */
+#hoyooApp * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+#hoyooApp button,
+#hoyooApp input,
+#hoyooApp textarea {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#hoyooApp {
+  background: #111;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+#hoyooApp h1 {
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+#hoyooApp #balance {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+  width: 90%;
+  max-width: 400px;
+}
+
+#hoyooApp .task-card {
+  background: rgba(30,30,30,0.6);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 12px 0;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#hoyooApp .task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+}
+
+#hoyooApp .task-card h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+#hoyooApp .task-card p {
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+#hoyooApp .task-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+}
+
+#hoyooApp .task-card button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(90deg,#00bc6e,#00ff90);
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#hoyooApp .task-card button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,188,110,0.4);
+}
+
+#hoyooApp .task-card button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#hoyooApp #dailyHint {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #7c5cff;
+}
+
+/* Modals */
+#hoyooApp .modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#hoyooApp .modal {
+  background: #222;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 300px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 </style>
 </head>
 <body>
-
-<h1>Earn Money</h1>
-<div id="balance">Balance: $0.00</div>
-
-<div class="task-card">
-  <h2>Click to Earn</h2>
-  <p>Click the button to earn <strong>$0.001</strong></p>
-  <button id="clickEarnBtn">Click & Earn</button>
+<div id="hoyooApp">
+  <h1>Hoyoo Tasks</h1>  
+  <div id="balance">Balance: $0.000</div>  
+  
+  <div class="task-card">  
+    <img src="https://img.icons8.com/ios-filled/100/click.png" alt="Click to Earn">  
+    <h2>Click to Earn</h2>  
+    <p>Click the button to earn <strong>$0.001</strong></p>  
+    <button id="clickEarnBtn">Click & Earn</button>  
+  </div>  
+  
+  <div class="task-card">  
+    <img src="https://img.icons8.com/ios-filled/100/video-play.png" alt="Watch & Earn">  
+    <h2>Watch & Earn</h2>  
+    <p>Watch a short ad to earn <strong>$0.010</strong></p>  
+    <button id="watchBtn">Watch & Earn</button>  
+  </div>  
+  
+  <div class="task-card">  
+    <img src="https://img.icons8.com/ios-filled/100/calendar.png" alt="Daily Check-in">  
+    <h2>Daily Check-in</h2>  
+    <p>Check in once every 24 hours to earn <strong>$0.100</strong></p>  
+    <button id="dailyCheckBtn">Daily Check-in</button>  
+    <p id="dailyHint"></p>  
+  </div>  
+  
+  <!-- Modal for alerts -->  
+  <div class="modal-overlay" id="modalOverlay">  
+    <div class="modal">  
+      <p id="modalText">Message</p>  
+      <button onclick="closeModal()">OK</button>  
+    </div>  
+  </div>  
+  
+  <!-- Watch & Earn Modal -->  
+  <div class="modal-overlay" id="watchModal">  
+    <div class="modal" style="position:relative; max-width:360px; margin:auto; padding:20px; background:#1a1a1a; border-radius:16px; text-align:center;">  
+          
+      <!-- Skip button -->  
+      <button id="skipBtn" style="  
+        position:absolute;  
+        top:10px; right:10px;  
+        background:#00bc6e;  
+        color:#fff;  
+        font-size:1.2rem;  
+        padding:10px 20px;  
+        border:none;  
+        border-radius:12px;  
+        cursor:not-allowed;  
+        opacity:0.5;  
+      ">Skip in 10</button>  
+          
+      <!-- Ad section -->  
+      <div style="margin-top:40px;">  
+        <h2 style="color:#fff; margin-bottom:10px;">Watching Ad...</h2>  
+          
+        <script>  
+          (function(opa){  
+            var d = document,  
+                s = d.createElement('script'),  
+                l = d.scripts[d.scripts.length - 1];  
+            s.settings = opa || {};  
+            s.src = "//mildgive.com/bCXiVcskd.GKlP0xYGWOca/Se-mr9ouzZhUDl/kBP/TtY/2NNVjkMP1/MJD_kKtYNgjQYm2/MCzXUIxJMpAH";  
+            s.async = true;  
+            s.referrerPolicy = 'no-referrer-when-downgrade';  
+            l.parentNode.insertBefore(s, l);  
+          })({})  
+        </script>  
+          
+        <p style="color:#bbb; margin:10px 0;">Earn $0.010 when you skip or finish</p>  
+          
+        <!-- Ad box -->  
+        <div style="  
+          width:300px;   
+          height:250px;   
+          background:#333;   
+          border-radius:16px;   
+          margin:16px auto 0;   
+          display:flex;   
+          justify-content:center;   
+          align-items:center;   
+          color:#fff;  
+          overflow:hidden;  
+        ">  
+          <script>  
+            (function(cwxj){  
+              var d = document,  
+                  s = d.createElement('script'),  
+                  l = d.scripts[d.scripts.length - 1];  
+              s.settings = cwxj || {};  
+              s.src = "//mildgive.com/b.XtVlsHdmGclF0BYHW/cg/YeqmH9ruoZgU_lhk/PKT/Yt2/N/jtMw1/MwTBUOteNvjmY/2/M/zMU-xwN/gY";  
+              s.async = true;  
+              s.referrerPolicy = 'no-referrer-when-downgrade';  
+              l.parentNode.insertBefore(s, l);  
+            })({})  
+          </script>  
+        </div>  
+      </div>  
+    </div>  
+  </div>  
 </div>
 
-<div class="task-card">
-  <h2>Watch & Earn</h2>
-  <p>Watch a short ad to earn <strong>$0.010</strong></p>
-  <button id="watchEarnBtn">Watch & Earn</button>
-</div>
-
-<div class="task-card">
-  <h2>Daily Check-in</h2>
-  <p>Check in once every 24 hours to earn <strong>$0.100</strong></p>
-  <button id="dailyCheckBtn">Daily Check-in</button>
-  <p id="dailyHint" style="font-size:12px;margin-top:6px;"></p>
-</div>
+<!-- Scoped CSS -->
+<style>
+  #hoyooApp * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select:none; }
+  #hoyooApp button, #hoyooApp input, #hoyooApp textarea { outline:none; -webkit-tap-highlight-color:transparent; }
+  #hoyooApp { background:#111; color:#fff; padding:20px; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+  #hoyooApp h1 { margin-bottom:20px; font-weight:700; font-size:1.8rem; }
+  #hoyooApp #balance { font-size:1.5rem; margin-bottom:20px; text-align:center; background: rgba(255,255,255,0.05); padding:12px 20px; border-radius:16px; box-shadow:0 4px 15px rgba(255,255,255,0.1); width:90%; max-width:400px; }
+  #hoyooApp .task-card { background: rgba(30,30,30,0.6); backdrop-filter: blur(15px); border-radius:20px; padding:24px; margin:12px 0; max-width:400px; width:90%; text-align:center; border:1px solid rgba(255,255,255,0.2); box-shadow:0 10px 30px rgba(0,0,0,0.5); transition: transform 0.2s, box-shadow 0.2s; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #hoyooApp .task-card:hover { transform: translateY(-2px); box-shadow:0 15px 40px rgba(0,0,0,0.6); }
+  #hoyooApp .task-card h2 { font-size:1.2rem; font-weight:600; }
+  #hoyooApp .task-card p { color:#aaa; font-size:0.95rem; }
+  #hoyooApp .task-card img { width:80px; height:80px; border-radius:16px; }
+  #hoyooApp .task-card button { padding:12px 20px; border:none; border-radius:14px; background: linear-gradient(90deg,#00bc6e,#00ff90); color:#111; font-weight:700; cursor:pointer; transition:0.2s; }
+  #hoyooApp .task-card button:hover { transform: translateY(-1px); box-shadow:0 6px 20px rgba(0,188,110,0.4); }
+  #hoyooApp .task-card button:disabled { background:#555; cursor:not-allowed; box-shadow:none; }
+  #hoyooApp #dailyHint { margin-top:6px; font-size:0.85rem; color:#7c5cff; }
+  #hoyooApp .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:999; }
+  #hoyooApp .modal { background:#222; border-radius:16px; padding:24px; max-width:300px; width:90%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+</style>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -53,7 +278,6 @@ const firebaseConfig = {
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
   measurementId: "G-LLT6F9WRKH"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
@@ -61,11 +285,26 @@ const db = firebase.database();
 let user = null;
 let balance = 0;
 
-// Utility
-function formatUSD(v){ return '$'+Number(v).toFixed(3); }
+// Helper functions
+function formatUSD(v){ return '$'+v.toFixed(3); } // 3 decimals
 function refreshBalance(){ document.getElementById('balance').textContent = 'Balance: '+formatUSD(balance); }
+function showModal(msg){ document.getElementById('modalText').textContent = msg; document.getElementById('modalOverlay').style.display='flex'; }
+function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
 
-// Load user's current balance
+// Update daily button state
+function updateDailyButton(lastCheck){
+  const btn = document.getElementById('dailyCheckBtn');
+  const now = new Date().getTime();
+  if(now - lastCheck < 24*60*60*1000){
+    btn.disabled = true;
+    document.getElementById('dailyHint').textContent = 'Already checked in within 24 hours.';
+  } else {
+    btn.disabled = false;
+    document.getElementById('dailyHint').textContent = '';
+  }
+}
+
+// Load balance and daily state
 function loadBalance(uid){
   db.ref('myearnings/'+uid).get().then(snapshot=>{
     if(snapshot.exists()){
@@ -78,58 +317,80 @@ function loadBalance(uid){
       refreshBalance();
     }
   });
+  db.ref('tasks/'+uid+'/dailyCheck').get().then(snap=>{
+    const lastCheck = snap.val() || 0;
+    updateDailyButton(lastCheck);
+  });
 }
 
-// Auth check
+// Auth state
 auth.onAuthStateChanged(u=>{
-  if(u){
-    user = u;
-    loadBalance(user.uid);
-  } else {
-    alert('You must be logged in to earn money!');
-  }
+  if(u){ user = u; loadBalance(user.uid); } 
+  else { showModal('Login required to earn money!'); }
 });
 
 // Click to earn
 document.getElementById('clickEarnBtn').addEventListener('click', ()=>{
-  if(!user) return alert('Login first');
+  if(!user) return showModal('Login first');
   balance += 0.001;
   refreshBalance();
   db.ref('myearnings/'+user.uid).update({balance:balance});
 });
 
-// Watch & Earn
-document.getElementById('watchEarnBtn').addEventListener('click', ()=>{
-  if(!user) return alert('Login first');
-  // Simulate ad watch delay
-  const btn = document.getElementById('watchEarnBtn');
-  btn.disabled = true;
-  btn.textContent = 'Watching ad...';
-  setTimeout(()=>{
-    balance += 0.01;
-    refreshBalance();
-    db.ref('myearnings/'+user.uid).update({balance:balance});
-    btn.disabled = false;
-    btn.textContent = 'Watch & Earn';
-  }, 5000); // 5s ad
-});
-
 // Daily check-in
 document.getElementById('dailyCheckBtn').addEventListener('click', ()=>{
-  if(!user) return alert('Login first');
+  if(!user) return showModal('Login first');
   const today = new Date().getTime();
   db.ref('tasks/'+user.uid+'/dailyCheck').get().then(snap=>{
-    let lastCheck = snap.val() || 0;
+    const lastCheck = snap.val() || 0;
     if(today - lastCheck >= 24*60*60*1000){
-      balance += 0.1;
+      balance += 0.100;
       refreshBalance();
       db.ref('myearnings/'+user.uid).update({balance:balance});
       db.ref('tasks/'+user.uid+'/dailyCheck').set(today);
       document.getElementById('dailyHint').textContent = 'Daily check-in successful!';
+      document.getElementById('dailyCheckBtn').disabled = true;
     } else {
-      document.getElementById('dailyHint').textContent = 'Already checked in within 24 hours.';
+      updateDailyButton(lastCheck);
     }
   });
+});
+
+// Watch & Earn
+document.getElementById('watchBtn').addEventListener('click', ()=>{
+  if(!user) return showModal('Login first');
+
+  const modal = document.getElementById('watchModal');
+  const skipBtn = document.getElementById('skipBtn');
+  modal.style.display = 'flex';
+
+  let countdown = 10;
+  skipBtn.textContent = `Skip in ${countdown}`;
+  skipBtn.disabled = true;
+  skipBtn.style.cursor = 'not-allowed';
+  skipBtn.style.opacity = 0.5;
+
+  const interval = setInterval(()=>{
+    countdown--;
+    if(countdown > 0){
+      skipBtn.textContent = `Skip in ${countdown}`;
+    } else {
+      skipBtn.textContent = 'Skip Now';
+      skipBtn.disabled = false;
+      skipBtn.style.cursor = 'pointer';
+      skipBtn.style.opacity = 1;
+      clearInterval(interval);
+    }
+  },1000);
+
+  skipBtn.onclick = ()=>{
+    if(skipBtn.disabled) return;
+    balance += 0.010;
+    refreshBalance();
+    db.ref('myearnings/'+user.uid).update({balance:balance});
+    modal.style.display = 'none';
+    location.reload();
+  }
 });
 </script>
 
