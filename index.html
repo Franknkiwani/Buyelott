@@ -3,292 +3,209 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dating Hub — Meet Singles Near You</title>
+<title>Dating Hub</title>
 
-<!-- Meta tags -->
-<meta name="description" content="Dating Hub — Find love, chat, and connect with singles near you. Quick sign-up and real matches.">
-<meta property="og:title" content="Dating Hub — Meet Singles Near You">
-<meta property="og:description" content="Join thousands of singles looking for love. Sign up now and start chatting!">
-<meta property="og:image" content="https://hd.wallpaperswide.com/thumbs/girls_194-t2.jpg">
+<meta name="description" content="Discover interesting singles and connect safely. Join Dating Hub today!">
+<meta property="og:title" content="Dating Hub">
+<meta property="og:description" content="Discover interesting singles and connect safely.">
+<meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://savebig.pro/a/DprZcO42sAjpK">
+<meta name="twitter:card" content="summary_large_image">
 
-<!-- Favicon -->
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/833/833472.png" type="image/png">
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* Disable text selection and highlight */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 body {
-  min-height: 100vh;
-  background: #ffffff;
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-  -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', sans-serif;
+    background-color: #121212;
+    color: #f4f6f8;
+    padding: 20px;
 }
-header {
-  width: 100%;
-  padding: 15px 30px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+header { text-align: center; margin-bottom: 30px; }
+header h1 { font-size: 2rem; color: #f4f6f8; }
+header p { margin-top: 5px; color: #cbd5e1; }
+
+#motivational-message {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #f4f6f8;
+    margin: 20px auto;
+    padding: 16px 24px;
+    max-width: 650px;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-header svg {
-  width: 32px;
-  height: 32px;
-  fill: #ff4d6d;
+#motivational-message:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
-header .app-name {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
+.city {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffe600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-header .cta-btn {
-  padding: 10px 20px;
-  background: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
+.city svg {
+    width: 20px;
+    height: 20px;
+    fill: #ff4757;
 }
-header .cta-btn:hover {
-  background: #218838;
+.message {
+    font-size: 1.2rem;
+    color: #f4f6f8;
 }
-.main-container {
-  width: 80%;
-  max-width: 900px;
-  margin: 80px auto 20px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  background: url('https://hd.wallpaperswide.com/thumbs/girls_194-t2.jpg') center/cover no-repeat;
-  padding-top: 56.25%;
-  position: relative;
+
+.offer-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; margin-top: 20px;}
+.offer-card {
+    background-color: #1f1f1f;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #fff; 
 }
-.full-cta {
-  display: block;
-  width: 80%;
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 15px;
-  text-align: center;
-  background: #28a745;
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s;
-  text-decoration: none;
-}
-.full-cta:hover {
-  background: #218838;
-}
-section {
-  width: 80%;
-  max-width: 900px;
-  margin: 30px auto;
-  text-align: center;
-}
-section h2 {
-  font-size: 1.8rem;
-  color: #ff4d6d;
-  margin-bottom: 10px;
-}
-section p {
-  font-size: 1rem;
-  color: #444;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-select {
-  width: 80%;
-  max-width: 300px;
-  margin: 10px auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  display: block;
-}
-.profile-preview {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-.profile {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  background: #fff;
-}
-.profile img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-.profile p {
-  padding: 10px;
-  font-weight: bold;
-  color: #333;
-}
+.offer-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+.offer-image { width: 100%; height: 150px; border-radius: 12px; margin-bottom: 15px; background-size: cover; background-position: center; }
+.offer-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #f4f6f8; text-align: center; }
+.offer-desc { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 10px; text-align: center; }
+.offer-countries { margin-bottom: 15px; font-size: 1.2rem; text-align: center; }
+.offer-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background-color: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: background 0.2s; }
+.offer-link svg { width: 16px; height: 16px; fill: #fff; }
+.offer-link:hover { background-color: #4338ca; }
+footer { text-align: center; margin-top: 50px; font-size: 0.9rem; color: #9ca3af; }
 </style>
 </head>
 <body>
 
 <header>
-  <div style="display:flex; align-items:center; gap:10px;">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42   
-      4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3   
-      19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-    </svg>
-    <div class="app-name">DATING HUB</div>
-  </div>
-  <button class="cta-btn" id="mainBtn">Register</button>
+    <h1>Dating Hub</h1>
+    <p>Discover interesting singles and connect safely</p>
 </header>
 
-<div class="main-container"></div>
+<div id="motivational-message"></div>
+<div class="offer-container" id="offers"></div>
 
-<a href="#" id="bottomBtn" class="full-cta">Find Your Match</a>
-
-<section>
-  <h2>Find Love Near You ❤️</h2>
-  <p>Join thousands of real singles looking to meet new people today. Quick signup, fun chat, and real connections — start now!</p>
-
-  <select>
-    <option selected disabled>Your Age Range</option>
-    <option>18 - 24</option>
-    <option>25 - 34</option>
-    <option>35 - 44</option>
-    <option>45+</option>
-  </select>
-
-  <select>
-    <option selected disabled>Looking For</option>
-    <option>Women</option>
-    <option>Men</option>
-    <option>Both</option>
-  </select>
-
-  <select>
-    <option selected disabled>Choose Location</option>
-    <option>United States</option>
-    <option>South Africa</option>
-    <option>United Kingdom</option>
-    <option>Canada</option>
-    <option>Australia</option>
-    <option>Ireland</option>
-  </select>
-
-  <a href="#" id="startBtn" class="full-cta">Start Chatting</a>
-
-  <h2 style="margin-top:40px;">Popular Members Near You 💬</h2>
-  <div class="profile-preview">
-    <div class="profile">
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
-      <p>Sophie, 23</p>
-    </div>
-    <div class="profile">
-      <img src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
-      <p>Ella, 27</p>
-    </div>
-    <div class="profile">
-      <img src="https://randomuser.me/api/portraits/men/21.jpg" alt="">
-      <p>Chris, 55</p>
-    </div>
-    <div class="profile">
-      <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="">
-      <p>Mia, 30</p>
-    </div>
-  </div>
-</section>
-
-<a href="#" id="joinBtn" class="full-cta">Join Free Now</a>
+<footer>
+    Dating Hub – Safe & Fun Connections
+</footer>
 
 <script>
-// --------------------- Firebase Config ---------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const offers = [
+    {
+        title:"Grandhookup",
+        desc:"Meet exciting singles near you. Chat, connect, and see where it goes.",
+        link:"https://wait-page.eu/a/7NzyFZx3tWvZr",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿"]
+    },
+    {
+        title:"NSAFlirts",
+        desc:"Casual encounters and flirty chats waiting for you today.",
+        link:"https://wait-page.eu/a/ZqyGU766FKJ5k",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyLdglVjobYW1yDcLJqgMs9LpfE6xIPVcNfNIGT5JRbcCyP_hIjn3USH2G&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇵🇷"]
+    },
+    {
+        title:"Dreamflirty",
+        desc:"Find your dream match and start chatting instantly.",
+        link:"https://wait-page.eu/a/7NzyFEAGfWvRn",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScM3GscwWGzU3Je25-raEc9l0lW1W0kqzkxkyelJ495g&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿"]
+    },
+    {
+        title:"Hotasianflirts",
+        desc:"Connect with singles from Asia and start new adventures.",
+        link:"https://savebig.pro/a/3BvrIpl6nf2yXL",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb189ixjXWq6bbXMFrhU_dlUgH0nklLD6mn-a5abBFRA&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿"]
+    },
+    {
+        title:"Hornyanonymous",
+        desc:"Anonymous chats with fun singles near you.",
+        link:"https://savebig.pro/a/yQ5AiyRYsQ0E3",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStO7a0mPNjDwJkk6bNn-8r_Xvyz3rpZ6_Q3DSHujrTag&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇵🇷"]
+    },
+    {
+        title:"DesperateBBWs",
+        desc:"Meet plus-size singles and start meaningful chats.",
+        link:"https://savebig.pro/a/R2nKuv1j9UP7ZD",
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10",
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿"]
+    }
+];
 
-// --------------------- Allowed Countries ---------------------
-const allowedCountries = ["United States","United Kingdom","Canada","Australia","South Africa","Ireland"];
-let visitorCountry = "Unknown";
-let visitType = "unsuccessful";
-
-// --------------------- Detect Country ---------------------
-fetch('https://ipapi.co/json/')
-  .then(res => res.json())
-  .then(data => {
-    visitorCountry = data.country_name || "Unknown";
-    if(allowedCountries.includes(visitorCountry)) visitType = "success";
-    logVisit(visitType);
-  })
-  .catch(err => logVisit("unsuccessful"));
-
-// --------------------- Log Visit ---------------------
-function logVisit(type){
-  const visitRef = db.ref('datingstats/visits');
-  visitRef.push({country: visitorCountry, type: type, timestamp: Date.now()});
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
 }
+shuffle(offers);
 
-// --------------------- Button Clicks ---------------------
-function logClick(buttonName){
-  const clickRef = db.ref('datingstats/clicks');
-  clickRef.push({button: buttonName, country: visitorCountry, timestamp: Date.now()});
+const container = document.getElementById('offers');
+offers.forEach(offer => {
+    const card = document.createElement('div');
+    card.className = 'offer-card';
+    card.innerHTML = `
+        <div class="offer-image" style="background-image: url('${offer.img}');"></div>
+        <div class="offer-title">${offer.title}</div>
+        <div class="offer-desc">${offer.desc}</div>
+        <div class="offer-countries">${offer.countries.join(' ')}</div>
+        <a href="${offer.link}" target="_blank" class="offer-link">
+            <span>Connect Now</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+    `;
+    container.appendChild(card);
+});
+
+// Motivational Message
+const emojis = ['😘','🥰','😊','😋','😍','🤭','🤗'];
+function getRandomEmoji(){ return emojis[Math.floor(Math.random()*emojis.length)]; }
+
+function displayMotivationalMessage(){
+    fetch('https://ipapi.co/json/')
+        .then(res=>res.json())
+        .then(data=>{
+            const countryCode = data.country_code;
+            const city = data.city || '';
+            const country = data.country_name || '';
+            const emoji = getRandomEmoji();
+            let flag = '';
+            if(countryCode){
+                flag = String.fromCodePoint(...[...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+            }
+            document.getElementById('motivational-message').innerHTML = `
+                <span class="city">${flag} ${city ? city : country} ${flag}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </span>
+                <span class="message">Singles are waiting for you! ${emoji}</span>
+            `;
+        })
+        .catch(err=>{
+            document.getElementById('motivational-message').innerHTML = `
+                <span class="city">Singles near you</span>
+                <span class="message"> are waiting! 😘</span>
+            `;
+        });
 }
-
-// --------------------- Attach Buttons ---------------------
-document.getElementById("mainBtn").addEventListener("click", ()=>{
-  logClick("header_register");
-  window.location.href = "https://savebig.pro/a/DprZcO42sAjpK";
-});
-document.getElementById("bottomBtn").addEventListener("click", ()=>{
-  logClick("bottom_match");
-  window.location.href = "https://savebig.pro/a/DprZcO42sAjpK";
-});
-document.getElementById("startBtn").addEventListener("click", ()=>{
-  logClick("start_chatting");
-  window.location.href = "https://savebig.pro/a/DprZcO42sAjpK";
-});
-document.getElementById("joinBtn").addEventListener("click", ()=>{
-  logClick("join_free");
-  window.location.href = "https://savebig.pro/a/DprZcO42sAjpK";
-});
+window.onload = displayMotivationalMessage;
 </script>
 
 </body>
