@@ -1,0 +1,185 @@
+<!-- Dashboard Styles -->
+<style>
+  /* Basic resets & dark theme */
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+    line-height: 1.5;
+  }
+  ::selection { background: none; }
+
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  h1 { margin-bottom: 20px; font-weight: 600; }
+
+  /* Dropdown */
+  select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+  }
+  th, td {
+    padding: 12px 8px;
+    text-align: left;
+  }
+  th {
+    background: #1f1f1f;
+    font-weight: 500;
+  }
+  tr:nth-child(even) { background: #1a1a1a; }
+  tr:hover { background: #2a2a2a; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    th, td { padding: 8px 4px; font-size: 14px; }
+  }
+</style>
+
+<div class="container">
+  <h1>Betway Stats Dashboard</h1>
+  <select id="filter">
+    <option value="today">Today</option>
+    <option value="yesterday">Yesterday</option>
+    <option value="last7">Last 7 Days</option>
+    <option value="month">This Month</option>
+    <option value="lastMonth">Last Month</option>
+    <option value="year">This Year</option>
+    <option value="all">All Time</option>
+  </select>
+
+  <h2>Visits</h2>
+  <table id="visitsTable">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>IP</th>
+        <th>Country</th>
+        <th>City</th>
+        <th>Platform</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Clicks</h2>
+  <table id="clicksTable">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>IP</th>
+        <th>Country</th>
+        <th>Element</th>
+        <th>ID</th>
+        <th>Classes</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Firebase + Dashboard Script -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const visitsTable = document.querySelector("#visitsTable tbody");
+  const clicksTable = document.querySelector("#clicksTable tbody");
+  const filterSelect = document.getElementById("filter");
+
+  function filterByTime(timestamp, filter) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    switch(filter) {
+      case "today": return date >= startOfToday;
+      case "yesterday": return date >= startOfYesterday && date < startOfToday;
+      case "last7": return date >= new Date(now.getTime() - 7*24*60*60*1000);
+      case "month": return date >= startOfMonth;
+      case "lastMonth":
+        return date >= startOfLastMonth && date < startOfMonth;
+      case "year": return date >= startOfYear;
+      case "all": return true;
+      default: return true;
+    }
+  }
+
+  function populateTable(data, table, isClick=false) {
+    table.innerHTML = "";
+    Object.values(data || {}).sort((a,b)=>b.timestamp - a.timestamp)
+      .forEach(entry => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = isClick
+          ? `<td>${new Date(entry.timestamp).toLocaleString()}</td>
+             <td>${entry.ip}</td>
+             <td>${entry.country}</td>
+             <td>${entry.element || '-'}</td>
+             <td>${entry.id || '-'}</td>
+             <td>${entry.classes || '-'}</td>`
+          : `<td>${new Date(entry.timestamp).toLocaleString()}</td>
+             <td>${entry.ip}</td>
+             <td>${entry.country}</td>
+             <td>${entry.city || '-'}</td>
+             <td>${entry.platform}</td>
+             <td>${entry.url}</td>`;
+        table.appendChild(tr);
+      });
+  }
+
+  function updateTables() {
+    const filter = filterSelect.value;
+    db.ref("betwaystats/visits").once("value").then(snapshot => {
+      const visits = snapshot.val();
+      const filteredVisits = Object.fromEntries(
+        Object.entries(visits || {}).filter(([k,v])=>filterByTime(v.timestamp, filter))
+      );
+      populateTable(filteredVisits, visitsTable);
+    });
+    db.ref("betwaystats/clicks").once("value").then(snapshot => {
+      const clicks = snapshot.val();
+      const filteredClicks = Object.fromEntries(
+        Object.entries(clicks || {}).filter(([k,v])=>filterByTime(v.timestamp, filter))
+      );
+      populateTable(filteredClicks, clicksTable, true);
+    });
+  }
+
+  filterSelect.addEventListener("change", updateTables);
+  updateTables();
+</script>
