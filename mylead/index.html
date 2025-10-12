@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyLead Dashboard</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f1f1f1;
+  }
+  header {
+    padding: 20px;
+    text-align: center;
+    background: #1f1f1f;
+    font-size: 1.5em;
+    font-weight: bold;
+    border-bottom: 1px solid #333;
+  }
+  main {
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    font-size: 1em;
+    border-radius: 5px;
+    border: none;
+  }
+  input {
+    background: #222;
+    color: #f1f1f1;
+  }
+  button {
+    background: #4caf50;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #45a049;
+  }
+  .card {
+    background: #1f1f1f;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+  }
+  h2 {
+    margin-top: 0;
+    color: #4caf50;
+  }
+</style>
+</head>
+<body>
+
+<header>MyLead Dashboard</header>
+<main>
+
+<div class="card" id="loginCard">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="MyLead Username">
+  <input type="password" id="password" placeholder="MyLead Password">
+  <button onclick="login()">Login</button>
+  <p id="loginMsg"></p>
+</div>
+
+<div class="card" id="statsCard" style="display:none;">
+  <h2>Account Stats</h2>
+  <p><strong>Available to Pay:</strong> <span id="toPay">0</span> USD</p>
+  <p><strong>Accepted:</strong> <span id="accepted">0</span> USD</p>
+  <p><strong>Waiting:</strong> <span id="waiting">0</span> USD</p>
+  <p><strong>Total Leads:</strong> <span id="leads">0</span></p>
+  <button onclick="refreshStats()">Refresh Stats</button>
+</div>
+
+</main>
+
+<script>
+let accessToken = "";
+
+// Login function
+async function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("loginMsg");
+
+  if(!username || !password){
+    msg.textContent = "Enter username and password!";
+    return;
+  }
+
+  msg.textContent = "Logging in...";
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    const res = await fetch("https://api.mylead.eu/api/external/v1/auth/login", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+
+    if(data.status === "success"){
+      accessToken = data.data.access_token;
+      msg.textContent = "Login successful!";
+      document.getElementById("loginCard").style.display = "none";
+      document.getElementById("statsCard").style.display = "block";
+      fetchStats();
+    } else {
+      msg.textContent = data.errors.message || "Login failed";
+    }
+
+  } catch(err){
+    msg.textContent = "Error: " + err.message;
+  }
+}
+
+// Fetch stats
+async function fetchStats(){
+  if(!accessToken) return;
+  try {
+    const res = await fetch("https://api.mylead.eu/api/external/v1/statistic/balance", {
+      headers: {
+        "Authorization": "Bearer " + accessToken
+      }
+    });
+    const data = await res.json();
+
+    if(data.status === "success"){
+      const balance = data.data.balance[0];
+      document.getElementById("toPay").textContent = balance.to_pay.toFixed(2);
+      document.getElementById("accepted").textContent = balance.accepted.toFixed(2);
+      document.getElementById("waiting").textContent = balance.waiting.toFixed(2);
+    } else {
+      console.error(data);
+    }
+
+    // Optional: fetch summary (leads etc.)
+    const sumRes = await fetch("https://api.mylead.eu/api/external/v1/statistic/summary", {
+      headers: {"Authorization": "Bearer " + accessToken}
+    });
+    const sumData = await sumRes.json();
+    if(sumData.status === "success"){
+      const summary = sumData.data.summary[0];
+      document.getElementById("leads").textContent = summary.leads_accepted;
+    }
+
+  } catch(err){
+    console.error(err);
+  }
+}
+
+// Refresh button
+function refreshStats(){
+  fetchStats();
+}
+</script>
+
+</body>
+</html>
