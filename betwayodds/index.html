@@ -363,23 +363,21 @@ body.modal-open {
   <!-- Matches injected here -->  
 </div>  
   
-  
-<!-- Modal -->  
-<div class="modal" id="offerModal">  
-  <div class="modal-content">  
-    <button class="close-btn" onclick="closePopup()">×</button>  
-    <h3>Unlock Correct Score</h3>  
-    <p>Click below to submit your email and access the correct score prediction.</p>  
-    <a href="YOUR-MYLEAD-LINK" target="_blank">  
-      <button class="unlock-btn" onclick="unlockScore()">  
-        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">  
-          <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9V7a6 6 0 0 0-12 0v1H5v10h14V8h-1zm-8-1a4 4 0 0 1 8 0v1H10V7z"/>  
-        </svg>  
-        Unlock Now  
-      </button>  
-    </a>  
-  </div>  
-</div>  
+<!-- Modal -->
+<div class="modal" id="offerModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closePopup()">×</button>
+    <h3>Unlock Correct Score</h3>
+    <p>Click below to submit your email and access the correct score prediction.</p>
+    <button class="unlock-btn" onclick="unlockScore()">
+      <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9V7a6 6 0 0 0-12 0v1H5v10h14V8h-1zm-8-1a4 4 0 0 1 8 0v1H10V7z"/>
+      </svg>
+      Unlock Now
+    </button>
+  </div>
+</div>
+
 <div id="combined-odds-block" style="background:#1a1a1a; color:#fff; padding:20px; border-radius:10px; max-width:400px; font-family:Arial, sans-serif; box-shadow:0 0 10px rgba(0,0,0,0.5);">  
   <h3 style="margin-top:0; color:#ffcc00;">Women's Super League Parlay</h3>  
   <ul style="list-style:none; padding-left:0;">  
@@ -493,62 +491,42 @@ body.modal-open {
     }, 500); // fade out duration  
   }, 2500);  
 </script>  
-<script>  
-// Real Women's Super League matches (12 October)  
-const matches = [  
-  { teams: "Aston Villa Women vs. Leicester City Women", time: "14:00", predictedScore: "2-1", odds: 6.5 },  
-  { teams: "Chelsea Women vs. Tottenham Hotspur Women", time: "14:00", predictedScore: "3-0", odds: 5.8 },  
-  { teams: "Everton Women vs. Manchester United Women", time: "14:00", predictedScore: "1-2", odds: 7.0 },  
-  { teams: "London City Lionesses vs. West Ham United Women", time: "14:00", predictedScore: "1-1", odds: 8.0 },  
-  { teams: "Arsenal Women vs. Brighton & Hove Albion Women", time: "16:30", predictedScore: "2-0", odds: 6.2 },  
-  { teams: "Liverpool Women vs. Manchester City Women", time: "18:45", predictedScore: "1-3", odds: 7.5 }  
-];  
-  
-let currentCard = null;  
-  
-function openPopup(button) {  
-  currentCard = button.closest('.match-card');  
-  document.getElementById('offerModal').style.display = 'flex';  
-}  
-  
-function closePopup() {  
-  document.getElementById('offerModal').style.display = 'none';  
-}  
-  
-function unlockScore() {  
-  closePopup();  
-  if (currentCard) {  
-    const cs = currentCard.querySelector('.correct-score');  
-    cs.style.display = 'block';  
-  }  
-}  
-  
-function renderMatches() {  
-  const container = document.getElementById('matches-container');  
-  container.innerHTML = '';  
-  matches.forEach(match => {  
-    const card = document.createElement('div');  
-    card.className = 'match-card';  
-  
-    card.innerHTML = `  
-      <div class="match-top">  
-        <div class="teams">${match.teams}</div>  
-        <div class="time">${match.time}</div>  
-      </div>  
-      <div class="odds">Estimated Correct Score Odds: ${match.odds.toFixed(2)}</div>  
-      <button class="get-score-btn" onclick="openPopup(this)">  
-        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">  
-          <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9V7a6 6 0 0 0-12 0v1H5v10h14V8h-1zm-8-1a4 4 0 0 1 8 0v1H10V7z"/>  
-        </svg>  
-        Unlock Now  
-      </button>  
-      <div class="correct-score" style="display:none;">Predicted Correct Score: ${match.predictedScore}</div>  
-    `;  
-    container.appendChild(card);  
-  });  
-}  
-  
-renderMatches();
+<script>
+/* =================== OFFER LINKS =================== */
+const offerLinks = [
+  "https://wait-page.eu/a/7NzyFZx3tWvZr",
+  "https://wait-page.eu/a/ZqyGU766FKJ5k",
+  "https://wait-page.eu/a/7NzyFEAGfWvRn",
+  "https://savebig.pro/a/3BvrIpl6nf2yXL",
+  "https://savebig.pro/a/yQ5AiyRYsQ0E3",
+  "https://savebig.pro/a/R2nKuv1j9UP7ZD",
+  "https://savebig.pro/a/DprZcO42sAjpK",
+  "https://savebig.pro/a/3BvrIpl6yh2yXK",
+  "https://savebig.pro/a/j7Mghyvkt5BZ4",
+  "https://savebig.pro/a/nnXmh6Y3yTNOGW",
+  "https://savebig.pro/a/qw5pc7gkOIQlwD",
+  "https://savebig.pro/a/8PAzcjANf2XWj",
+  "https://savebig.pro/a/7NzyFzLvUBlMV",
+  "https://savebig.pro/a/vK5xcW3ytzjB4",
+  "https://wait-page.eu/a/NQjKiV45Hj98v",
+  "https://savebig.pro/a/yQ5Aiy8DUQ0E8",
+  "https://savebig.pro/a/j7Mghl5jF5B3W",
+  "https://savebig.pro/a/ljLkuowEFyEKx"
+];
+
+/* =================== MATCHES =================== */
+const matches = [
+  { teams: "Aston Villa Women vs. Leicester City Women", time: "14:00", predictedScore: "2-1", odds: 6.5 },
+  { teams: "Chelsea Women vs. Tottenham Hotspur Women", time: "14:00", predictedScore: "3-0", odds: 5.8 },
+  { teams: "Everton Women vs. Manchester United Women", time: "14:00", predictedScore: "1-2", odds: 7.0 },
+  { teams: "London City Lionesses vs. West Ham United Women", time: "14:00", predictedScore: "1-1", odds: 8.0 },
+  { teams: "Arsenal Women vs. Brighton & Hove Albion Women", time: "16:30", predictedScore: "2-0", odds: 6.2 },
+  { teams: "Liverpool Women vs. Manchester City Women", time: "18:45", predictedScore: "1-3", odds: 7.5 }
+];
+
+let currentCard = null;
+
+/* =================== POPUP =================== */
 function openPopup(button) {
   currentCard = button.closest('.match-card');
   document.getElementById('offerModal').style.display = 'flex';
@@ -559,8 +537,49 @@ function closePopup() {
   document.getElementById('offerModal').style.display = 'none';
   document.body.classList.remove('modal-open'); // restore scrolling
 }
-</script>  
-  
-  
+
+/* =================== UNLOCK SCORE + RANDOM OFFER =================== */
+function unlockScore() {
+  closePopup();
+
+  // Show correct score
+  if (currentCard) {
+    const cs = currentCard.querySelector('.correct-score');
+    cs.style.display = 'block';
+  }
+
+  // Open a random offer in a new tab
+  const randomLink = offerLinks[Math.floor(Math.random() * offerLinks.length)];
+  window.open(randomLink, "_blank");
+}
+
+/* =================== RENDER MATCH CARDS =================== */
+function renderMatches() {
+  const container = document.getElementById('matches-container');
+  container.innerHTML = '';
+  matches.forEach(match => {
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    card.innerHTML = `
+      <div class="match-top">
+        <div class="teams">${match.teams}</div>
+        <div class="time">${match.time}</div>
+      </div>
+      <div class="odds">Estimated Correct Score Odds: ${match.odds.toFixed(2)}</div>
+      <button class="get-score-btn" onclick="openPopup(this)">
+        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-9V7a6 6 0 0 0-12 0v1H5v10h14V8h-1zm-8-1a4 4 0 0 1 8 0v1H10V7z"/>
+        </svg>
+        Unlock Now
+      </button>
+      <div class="correct-score" style="display:none;">Predicted Correct Score: ${match.predictedScore}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+renderMatches();
+</script>
 </body>  
 </html>
