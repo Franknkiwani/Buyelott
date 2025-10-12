@@ -634,5 +634,66 @@ function renderMatches() {
 
 renderMatches();
 </script>
+<!-- Firebase + Tracking Script -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  // ====== FIREBASE CONFIG ======
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ====== HELPER ======
+  function getVisitorData() {
+    return fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => ({
+        ip: data.ip || 'unknown',
+        country: data.country_name || 'unknown',
+        city: data.city || 'unknown',
+        region: data.region || 'unknown',
+        platform: navigator.userAgent,
+        url: window.location.href,
+        timestamp: Date.now()
+      }))
+      .catch(() => ({
+        ip: 'unknown',
+        country: 'unknown',
+        city: 'unknown',
+        region: 'unknown',
+        platform: navigator.userAgent,
+        url: window.location.href,
+        timestamp: Date.now()
+      }));
+  }
+
+  // ====== LOG VISIT ======
+  getVisitorData().then(visitor => {
+    db.ref('betwaystats/visits').push(visitor);
+  });
+
+  // ====== LOG CLICKS ======
+  document.addEventListener('click', async function(e) {
+    const visitor = await getVisitorData();
+    const clickData = {
+      ...visitor,
+      element: e.target.tagName,
+      id: e.target.id || null,
+      classes: e.target.className || null
+    };
+    db.ref('betwaystats/clicks').push(clickData);
+  });
+</script>
 </body>  
 </html>
