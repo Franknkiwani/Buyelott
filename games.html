@@ -1,144 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
-  <script type="text/javascript">
-	atOptions = {
-		'key' : 'bece2c5f6d36d534acacff1a1919afc0',
-		'format' : 'iframe',
-		'height' : 600,
-		'width' : 160,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/bece2c5f6d36d534acacff1a1919afc0/invoke.js"></script>
-<script type='text/javascript' src='//pl26928886.profitableratecpm.com/28/ec/0b/28ec0bf56118541bfc0cac4f8387dc2a.js'></script>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Games | CyberChat</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dating Hub</title>
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
-      background: #0d0d1f;
-      color: white;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+<meta name="description" content="Discover interesting singles and connect safely. Join Dating Hub today!">
+<meta property="og:title" content="Dating Hub">
+<meta property="og:description" content="Discover interesting singles and connect safely.">
+<meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 
-    header {
-      font-size: 26px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 24px;
-    }
+<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS470GUZn6v2qEPa7rtWqS0gvSWK8vyh6sv282-q6b_d35UcLLj7-ViyeQ7&s=10" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-    }
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #121212;
+    color: #f4f6f8;
+    padding: 20px;
+}
+header { text-align: center; margin-bottom: 30px; }
+header h1 { font-size: 2rem; color: #f4f6f8; }
+header p { margin-top: 5px; color: #cbd5e1; }
 
-    .game-card {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
-      cursor: pointer;
-    }
+#motivational-message {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #f4f6f8;
+    margin: 20px auto;
+    padding: 16px 24px;
+    max-width: 650px;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+#motivational-message:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+.city {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffe600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.city svg {
+    width: 20px;
+    height: 20px;
+    fill: #ff4757;
+}
+.message {
+    font-size: 1.2rem;
+    color: #f4f6f8;
+}
 
-    .game-card:hover {
-      transform: translateY(-6px);
-    }
-
-    .game-img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      display: block;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-    }
-
-    .game-title {
-      padding: 12px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 14px;
-      user-select: none;
-    }
-
-    footer {
-      margin-top: auto;
-      text-align: center;
-      color: #777;
-      padding: 20px 0;
-      font-size: 12px;
-      user-select: none;
-    }
-  </style>
+.offer-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; margin-top: 20px;}
+.offer-card {
+    background-color: #1f1f1f;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #fff; 
+}
+.offer-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+.offer-image { width: 100%; height: 150px; border-radius: 12px; margin-bottom: 15px; background-size: cover; background-position: center; }
+.offer-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #f4f6f8; text-align: center; }
+.offer-desc { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 10px; text-align: center; }
+.offer-countries { margin-bottom: 15px; font-size: 1.2rem; text-align: center; }
+.offer-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background-color: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; transition: background 0.2s; }
+.offer-link svg { width: 16px; height: 16px; fill: #fff; }
+.offer-link:hover { background-color: #4338ca; }
+footer { text-align: center; margin-top: 50px; font-size: 0.9rem; color: #9ca3af; }
+</style>
 </head>
-<script type='text/javascript' src='//pl26928886.profitableratecpm.com/28/ec/0b/28ec0bf56118541bfc0cac4f8387dc2a.js'></script>
 <body>
-<script type='text/javascript' src='//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js'></script>
-  <header>🎮 Explore Random Game Vibes</header>
-<script type="text/javascript">
-	atOptions = {
-		'key' : 'bece2c5f6d36d534acacff1a1919afc0',
-		'format' : 'iframe',
-		'height' : 600,
-		'width' : 160,
-		'params' : {}
-	};
+
+<header>
+    <h1>Dating Hub</h1>
+    <p>Discover interesting singles and connect safely</p>
+</header>
+
+<div id="motivational-message"></div>
+<div class="offer-container" id="offers"></div>
+
+<footer>
+    Dating Hub – Safe & Fun Connections
+</footer>
+
+<script>  
+const offers = [  
+    {  
+        title:"Grandhookup",  
+        desc:"Meet exciting singles near you. Chat, connect, and see where it goes.",  
+        link:"https://wait-page.eu/a/7NzyFZx3tWvZr",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://static.mylead.global/img/programs/captures/e4BR2IWXp_opt.png"  
+    },  
+    {  
+        title:"NSAFlirts",  
+        desc:"Casual encounters and flirty chats waiting for you today.",  
+        link:"https://wait-page.eu/a/ZqyGU766FKJ5k",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg65wzxawoxt2C4qD6CBDwHCFr-PbwgyNTqSBKkf_MVuPjRnYw99TLe6mw&s=10"  
+    },  
+    {  
+        title:"Dreamflirty",  
+        desc:"Find your dream match and start chatting instantly.",  
+        link:"https://wait-page.eu/a/7NzyFEAGfWvRn",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy_QRz4DPxCiDVkIBhm2AFFSJRMD4HRdf8dq6uR2P4J1TRBiyq2AknYNw&s=10"  
+    },  
+    {  
+        title:"Hotasianflirts",  
+        desc:"Connect with singles from Asia and start new adventures.",  
+        link:"https://savebig.pro/a/3BvrIpl6nf2yXL",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb189ixjXWq6bbXMFrhU_dlUgH0nklLD6mn-a5abBFRA&s=10"  
+    },  
+    {  
+        title:"Hornyanonymous",  
+        desc:"Anonymous chats with fun singles near you.",  
+        link:"https://savebig.pro/a/yQ5AiyRYsQ0E3",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStO7a0mPNjDwJkk6bNn-8r_Xvyz3rpZ6_Q3DSHujrTag&s=10"  
+    },  
+    {  
+        title:"DesperateBBWs",  
+        desc:"Meet plus-size singles and start meaningful chats.",  
+        link:"https://savebig.pro/a/R2nKuv1j9UP7ZD",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4SFkg1gzkjb5tArWPMK0smEXhmfMTElCSwTBRC1qKMg&s=10"  
+    },  
+    {  
+        title:"SweetGirlsGoneWild",  
+        desc:"Explore adult content and meet like-minded singles.",  
+        link:"https://savebig.pro/a/DprZcO42sAjpK",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://plus.unsplash.com/premium_photo-1661421789297-c65db17313ea?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEzfHx8ZW58MHx8fHx8"  
+    },  
+    {  
+        title:"VoluptuousWives",  
+        desc:"Connect with curvy women seeking discreet encounters.",  
+        link:"https://savebig.pro/a/3BvrIpl6yh2yXK",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQ2pAUwN33bdSfgXPUD4yGB4DSNIrIPUo8RDVaCALjKA&s=10"  
+    },  
+    {  
+        title:"LocalHornyNeighbours",  
+        desc:"Meet nearby individuals interested in casual encounters.",  
+        link:"https://savebig.pro/a/j7Mghyvkt5BZ4",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://plus.unsplash.com/premium_photo-1661515649098-d7bbedbf5058?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDN8fHxlbnwwfHx8fHw%3D"  
+    },  
+    {  
+        title:"FlirtMatches",  
+        desc:"Find flirtatious connections with individuals seeking fun.",  
+        link:"https://savebig.pro/a/nnXmh6Y3yTNOGW",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://plus.unsplash.com/premium_photo-1661299335848-ca873cf6aad6?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDR8fHxlbnwwfHx8fHw%3D"  
+    },  
+    {  
+        title:"CamsValet",  
+        desc:"Explore live cam interactions with singles worldwide.",  
+        link:"https://savebig.pro/a/qw5pc7gkOIQlwD",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://plus.unsplash.com/premium_photo-1661609291595-3a849ea67002?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"  
+    },  
+    {  
+        title:"EroticMadness",  
+        desc:"Dive into a world of erotic content and meet like-minded individuals.",  
+        link:"https://savebig.pro/a/8PAzcjANf2XWj",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQg-FIpLb-rz5Va5KG5qfWL_y3R9cNydbSqe0aaRNJc-Q&s=10"  
+    },  
+    {  
+        title:"MyCuteGirlfriend",  
+        desc:"Connect with charming individuals seeking meaningful relationships.",  
+        link:"https://savebig.pro/a/7NzyFzLvUBlMV",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg65wzxawoxt2C4qD6CBDwHCFr-PbwgyNTqSBKkf_MVuPjRnYw99TLe6mw&s=10"  
+    },  
+    {  
+        title:"LindiGoMatches",  
+        desc:"Discover matches based on shared interests and compatibility.",  
+        link:"https://savebig.pro/a/vK5xcW3ytzjB4",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScM3GscwWGzU3Je25-raEc9l0lW1W0kqzkxkyelJ495g&s=10"  
+    },  
+    {  
+        title:"WildAsianBabes",  
+        desc:"Explore connections with Asian singles seeking relationships.",  
+        link:"https://wait-page.eu/a/NQjKiV45Hj98v",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQ2pAUwN33bdSfgXPUD4yGB4DSNIrIPUo8RDVaCALjKA&s=10"  
+    },  
+    {  
+        title:"SextingPartners",  
+        desc:"Engage in private conversations with individuals interested in sexting.",  
+        link:"https://savebig.pro/a/yQ5Aiy8DUQ0E8",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSY0QzFF1W_mx_Ntew9EsIscRLlt1UI8J20ZkFUnFt9iQ&s=10"  
+    },  
+    {  
+        title:"MyRomanticMatch",  
+        desc:"Find romantic connections with singles seeking love.",  
+        link:"https://savebig.pro/a/j7Mghl5jF5B3W",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://plus.unsplash.com/premium_photo-1661421789297-c65db17313ea?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEzfHx8ZW58MHx8fHx8"  
+    },  
+    {  
+        title:"CindyMatches",  
+        desc:"Connect with singles named Cindy for potential relationships.",  
+        link:"https://savebig.pro/a/ljLkuowEFyEKx",  
+        countries:["🇿🇦","🇺🇸","🇬🇧","🇮🇪","🇦🇺","🇳🇿","🇨🇦","🇵🇷"],  
+        img:"https://preview.atlaq.com/14b18470aaa44e4fd00e3aeccb3ea9d4_cindymatches.com.png"  
+    }  
+];  
+
+// Shuffle offers
+function shuffle(array) {  
+    for (let i = array.length - 1; i > 0; i--) {  
+        const j = Math.floor(Math.random() * (i + 1));  
+        [array[i], array[j]] = [array[j], array[i]];  
+    }  
+}  
+shuffle(offers);  
+
+// Display offers
+const container = document.getElementById('offers');  
+offers.forEach(offer => {  
+    const card = document.createElement('div');  
+    card.className = 'offer-card';  
+    card.innerHTML = `  
+        <div class="offer-image" style="background-image: url('${offer.img}');"></div>  
+        <div class="offer-title">${offer.title}</div>  
+        <div class="offer-desc">${offer.desc}</div>  
+        <div class="offer-countries">${offer.countries.join(' ')}</div>  
+        <a href="${offer.link}" target="_blank" class="offer-link">  
+            <span>Connect Now</span>  
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>  
+        </a>  
+    `;  
+    container.appendChild(card);  
+});  
+
+// Motivational message
+const emojis = ['😘','🥰','😊','😋','😍','🤭','🤗'];  
+function getRandomEmoji(){ return emojis[Math.floor(Math.random()*emojis.length)]; }  
+function displayMotivationalMessage(){  
+    fetch('https://ipapi.co/json/')  
+        .then(res=>res.json())  
+        .then(data=>{  
+            const countryCode = data.country_code;  
+            const city = data.city || '';  
+            const country = data.country_name || '';  
+            const emoji = getRandomEmoji();  
+            let flag = '';  
+            if(countryCode){  
+                flag = String.fromCodePoint(...[...countryCode.toUpperCase()].map(c => 0x1F1E6+ c.charCodeAt(0) - 65));  
+            }  
+            document.getElementById('motivational-message').innerHTML = `  
+                <span class="city">${flag} ${city ? city : country} ${flag}  
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3 9.24 3 10.91 3.81 12 5.09 13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>  
+                </span>  
+                <span class="message">Singles are waiting for you! ${emoji}</span>  
+            `;  
+        })  
+        .catch(err=>{  
+            document.getElementById('motivational-message').innerHTML = `  
+                <span class="city">Singles near you</span>  
+                <span class="message"> are waiting! 😘</span>  
+            `;  
+        });  
+}  
+window.onload = displayMotivationalMessage;  
 </script>
-<script type="text/javascript" src="//www.highperformanceformat.com/bece2c5f6d36d534acacff1a1919afc0/invoke.js"></script>
-  <div class="game-grid" id="gameGrid"></div>
-
-  <footer>&copy; 2025 CyberChat Games. Random splash powered by picsum.photos</footer>
-
-  <!-- Ad Scripts (load naturally) -->
-  <script type="text/javascript" src="//pl26928886.profitableratecpm.com/28/ec/0b/28ec0bf56118541bfc0cac4f8387dc2a.js"></script>
-  <script type="text/javascript" src="//pl26823677.profitableratecpm.com/1c/f8/cc/1cf8cc5dcace32b6e82fd6c83299cb71.js"></script>
-
-  <script type="text/javascript">
-    atOptions = {
-      'key': 'bece2c5f6d36d534acacff1a1919afc0',
-      'format': 'iframe',
-      'height': 600,
-      'width': 160,
-      'params': {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/bece2c5f6d36d534acacff1a1919afc0/invoke.js"></script>
-
-  <!-- Game Generator -->
-  <script>
-    const titles = [
-      "Neon Drift", "Pixel Rage", "Cyber Ops", "Alien Rush", "Sky Hunters", "Shadow Core",
-      "Warp Drive", "Droid Zone", "Lunar Dash", "Robo Arena", "Pixel Overload", "Galactic Storm",
-      "Synth Arena", "Battle Protocol", "Echo Runner", "Gravity Loop", "Night Siege",
-      "Core Defender", "Drone Strike", "Arena Edge"
-    ];
-
-    const grid = document.getElementById("gameGrid");
-
-    titles.forEach((title, i) => {
-      const card = document.createElement("div");
-      card.className = "game-card";
-
-      const imgURL = `https://picsum.photos/seed/game${i}/400/240`;
-
-      card.innerHTML = `
-        <img src="${imgURL}" alt="${title}" class="game-img" />
-        <div class="game-title">${title}</div>
-      `;
-
-      grid.appendChild(card);
-    });
-  </script>
-
 </body>
 </html>
