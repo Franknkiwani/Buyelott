@@ -206,6 +206,31 @@
     .auth-pill button{padding:8px 10px;font-size:0.84rem}
     .popup{margin-top:8px;border-radius:8px}
   }
+/* Center all text globally */
+body, 
+body * {
+  text-align: center !important;
+}
+
+/* Keep inputs, forms, and some layouts left-aligned if needed */
+input, textarea, select, .topbar-right, .small-row, .auth-pill, .dropdown details > p {
+  text-align: left !important;
+}
+
+/* Optional: center the titles and descriptions inside cards */
+.card .title,
+.card .desc,
+.card .cta,
+.popup .inner > div,
+.notifications .note {
+  text-align: center !important;
+}
+
+/* Optional: center SVG + text combos inside your stats cards */
+div[style*="display: flex;"] {
+  justify-content: center !important;
+  text-align: center !important;
+}
 </style>
 </head>
 <body>
