@@ -1094,5 +1094,65 @@ document.addEventListener('DOMContentLoaded', function(){
   tabRegister.addEventListener('click', activateRegister);
   tabLogin.addEventListener('click', activateLogin);
 </script>
+<script>
+  // Elements
+  const overlay = document.getElementById('overlay');
+  const popup = document.getElementById('popup');
+  const openLoginBtn = document.getElementById('open-login');
+  const openRegisterBtn = document.getElementById('open-register');
+  const closePopupBtn = document.getElementById('closePopup');
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const panelLogin = document.getElementById('panel-login');
+  const panelRegister = document.getElementById('panel-register');
+
+  // Open login popup
+  openLoginBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    panelLogin.style.display = 'block';
+    panelRegister.style.display = 'none';
+    document.body.classList.add('no-select');
+  });
+
+  // Open register popup
+  openRegisterBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    panelRegister.style.display = 'block';
+    panelLogin.style.display = 'none';
+    document.body.classList.add('no-select');
+  });
+
+  // Close popup
+  closePopupBtn.addEventListener('click', () => {
+    overlay.classList.remove('active');
+    document.body.classList.remove('no-select');
+  });
+
+  // Switch tabs
+  tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    panelLogin.style.display = 'block';
+    panelRegister.style.display = 'none';
+  });
+
+  tabRegister.addEventListener('click', () => {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    panelRegister.style.display = 'block';
+    panelLogin.style.display = 'none';
+  });
+
+  // Optional: close popup if backdrop clicked
+  const backdrop = document.getElementById('backdrop');
+  backdrop.addEventListener('click', () => {
+    overlay.classList.remove('active');
+    document.body.classList.remove('no-select');
+  });
+</script>
 </body>
 </html>
