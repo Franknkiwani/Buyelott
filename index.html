@@ -1,1194 +1,1098 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Surveify — Earn with Surveoo</title>
-
-<!-- Favicon -->
-<link rel="icon" href="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" type="image/png">
-
-<!-- Meta Tags -->
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Surveify — Earn money from surveys worldwide! Top paying survey site Surveoo helps you earn in USD, Naira, and Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">
-<meta name="keywords" content="Surveify, Surveoo, online surveys, earn money online, USD, Naira, Rand, USA, South Africa, Nigeria, India, worldwide surveys">
-<meta name="author" content="Surveify">
-
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Surveify — Earn with Surveoo">
-<meta property="og:description" content="Earn money from surveys worldwide! Surveoo pays in USD, Naira, Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">
-<meta property="og:image" content="https://th.bing.com/th/id/OIG3.tzd9v2yiOyplKn2V4t13?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3">
-<meta property="og:url" content="https://yourwebsite.com">
-<meta property="og:site_name" content="Surveify">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Surveify — Earn with Surveoo">
-<meta name="twitter:description" content="Earn money from surveys worldwide! Surveoo pays in USD, Naira, Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">
-<meta name="twitter:image" content="https://th.bing.com/th/id/OIG3.tzd9v2yiOyplKn2V4t13?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3">
-<style>
-  /* Loader Styles */
-  html, body {
-    overflow: hidden; /* Block scroll while loader is active */
-  }
-
-  .loader {
-    position: fixed;
-    inset: 0;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 9999;
-    animation: fadeOut 1s ease 2.8s forwards;
-  }
-
-  .loader img {
-    width: 160px;
-    margin-bottom: 25px;
-    animation: pulse 1.5s infinite alternate;
-  }
-
-  .progress-bar {
-    width: 200px;
-    height: 6px;
-    background-color: #e0e0e0;
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    width: 0%;
-    height: 100%;
-    background-color: #000;
-    border-radius: 6px;
-    animation: load 3s ease-in-out forwards;
-  }
-
-  @keyframes load {
-    from { width: 0%; }
-    to { width: 100%; }
-  }
-
-  @keyframes pulse {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(1.05); opacity: 0.9; }
-  }
-
-  @keyframes fadeOut {
-    to {
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(0.95);
-    }
-  }
-</style>
-<style>
-  :root{
-    --bg:#0b0b0b;
-    --glass:rgba(22,22,22,0.62);
-    --border:rgba(255,255,255,0.06);
-    --muted:#9b9b9b;
-    --text:#e7e7e7;
-    --blue:#1f6fe6;
-    --pink:#e1529b;
-    --cta-bg:#ffffff;
-    --cta-border:#000000;
-    --success:#2ecc71;
-    --error:#e74c3c;
-  }
-
-  /* Reset & basics */
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:Inter, 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    user-select:none; /* default locked; inputs will override */
-    overflow-y:scroll;
-  }
-
-  /* Topbar (sticky) */
-  .topbar{
-    position:sticky;
-    top:0;
-    z-index:1200;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 18px;
-    backdrop-filter:blur(12px);
-    background:rgba(10,10,10,0.55);
-    border-bottom:1px solid var(--border);
-    box-shadow:0 3px 18px rgba(0,0,0,0.5);
-  }
-
-  .logo{
-    font-weight:700;
-    font-size:1.05rem;
-    color:#fff;
-    letter-spacing:0.6px;
-  }
-
-  .topbar-right{
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-
-  /* split pill */
-  .auth-pill{
-    display:inline-flex;
-    border-radius:999px;
-    overflow:hidden;
-    border:1px solid var(--border);
-    background:rgba(255,255,255,0.02);
-  }
-  .auth-pill button{
-    padding:8px 12px;
-    border:0;
-    outline:0;
-    cursor:pointer;
-    font-weight:600;
-    font-size:0.86rem;
-    min-width:84px;
-  }
-  .auth-pill button.register{
-    background:linear-gradient(180deg,var(--blue), #0f5fd6);
-    color:#fff;
-  }
-  .auth-pill button.login{
-    background:linear-gradient(180deg,var(--pink), #c93b88);
-    color:#fff;
-  }
-  .auth-pill button:active{transform:translateY(1px)}
-
-  .profile {
-    width:36px;height:36px;border-radius:999px;overflow:hidden;border:1.5px solid rgba(255,255,255,0.08);
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  }
-  .profile img{width:100%;height:100%;object-fit:cover;display:block}
-
-  /* Main container */
-  main{
-    max-width:720px;
-    margin:34px auto;
-    padding:0 18px;
-  }
-
-  .card{
-    background:var(--glass);
-    border-radius:16px;
-    padding:20px;
-    border:1px solid var(--border);
-    backdrop-filter:blur(14px);
-    box-shadow:0 10px 40px rgba(0,0,0,0.5);
-  }
-
-  img.hero{width:100%;border-radius:12px;margin-bottom:14px;opacity:0.95;display:block}
-
-  .title{font-size:1.18rem;font-weight:700;color:#fff;margin-bottom:8px}
-  .desc{color:var(--muted);font-size:0.95rem;margin-bottom:16px}
-
-  /* CTA: full width, white with black border */
-  .cta{
-    display:block;width:100%;text-align:center;padding:12px 14px;border-radius:11px;
-    background:var(--cta-bg);color:#000;font-weight:700;border:1.6px solid var(--cta-border);
-    text-decoration:none;font-size:0.95rem;
-    transition:transform .14s ease,box-shadow .14s ease;
-    box-shadow:0 0 0 rgba(0,0,0,0);
-  }
-  .cta:active{transform:translateY(1px)}
-  .cta:hover{transform:scale(1.01)}
-
-  /* dropdowns (details/summary) */
-  .dropdown{margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.02)}
-  details{border-bottom:1px solid var(--border)}
-  details:last-child{border-bottom:none}
-  summary{
-    list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:12px;color:#cfcfcf;font-weight:600;font-size:0.95rem;
-  }
-  summary svg{width:18px;height:18px;flex-shrink:0;fill:var(--blue)}
-  details p{padding:10px 14px 16px;color:var(--muted);font-size:0.9rem;line-height:1.45}
-
-  /* Floating popup overlay */
-  .overlay{
-    position:fixed;inset:0;z-index:2000;display:grid;place-items:start;pointer-events:none;
-  }
-  .overlay.active{pointer-events:auto}
-
-  .backdrop{
-    position:fixed;inset:0;background:rgba(5,5,5,0.55);backdrop-filter:blur(8px);transition:opacity .28s ease;opacity:0;
-  }
-  .overlay.active .backdrop{opacity:1}
-
-  .popup{
-    width:100%;max-width:680px;margin:18px auto 0;border-radius:12px;overflow:hidden;
-    background:linear-gradient(180deg, rgba(18,18,18,0.96), rgba(12,12,12,0.98));
-    border:1px solid var(--border);
-    transform:translateY(-120%); /* slide from top */
-    transition:transform .42s cubic-bezier(.2,.95,.2,1),opacity .28s ease;
-    box-shadow:0 40px 80px rgba(0,0,0,0.6);
-    pointer-events:auto;
-  }
-  .overlay.active .popup{transform:translateY(0)}
-
-  .popup .inner{padding:18px}
-  .popup .tabs{display:flex;border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.02);border:1px solid var(--border);margin-bottom:14px}
-  .tabs button{flex:1;padding:10px 12px;border:0;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
-  .tabs button.active{color:var(--text);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-
-  form{display:grid;gap:10px}
-  label{font-size:0.78rem;color:var(--muted);display:block}
-  input[type="text"],input[type="email"],input[type="password"]{
-    padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
-    background:rgba(255,255,255,0.02);color:var(--text);font-size:0.95rem;
-    outline:none;
-  }
-  input::placeholder{color:rgba(255,255,255,0.28)}
-  .small-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:2px}
-  .link-like{font-size:0.9rem;color:var(--muted);text-decoration:underline;cursor:pointer}
-  .submit{
-    margin-top:6px;padding:10px;border-radius:10px;border:0;background:var(--blue);color:#fff;font-weight:800;cursor:pointer;
-  }
-
-  /* notifications area below popup */
-  .notifications{
-    position:fixed;left:50%;transform:translateX(-50%);top:calc(100px + 12px);z-index:2600;display:flex;flex-direction:column;gap:10px;pointer-events:none;
-    width:calc(100% - 40px);max-width:680px;padding:0 10px;align-items:center;
-  }
-  .note{
-    pointer-events:auto;
-    min-width:120px;
-    max-width:100%;
-    padding:10px 14px;border-radius:10px;font-weight:600;color:#fff;
-    box-shadow:0 6px 26px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);
-  }
-  .note.success{background:linear-gradient(180deg,var(--success),#1f9d5a)}
-  .note.error{background:linear-gradient(180deg,var(--error),#c33b32)}
-
-  /* disable select when popup open: class on body will override (we set body.no-select when active) */
-  body.no-select{user-select:none;touch-action:none;overflow:hidden}
-
-  /* inputs must allow selection still */
-  input,textarea,select{user-select:text;-webkit-user-select:text}
-
-  /* small responsive */
-  @media(min-width:880px){main{margin-top:48px}}
-  @media(max-width:420px){
-    .topbar{padding:10px}
-    .logo{font-size:1rem}
-    .auth-pill button{padding:8px 10px;font-size:0.84rem}
-    .popup{margin-top:8px;border-radius:8px}
-  }
-/* Center all text globally */
-body, 
-body * {
-  text-align: center !important;
-}
-
-/* Keep inputs, forms, and some layouts left-aligned if needed */
-input, textarea, select, .topbar-right, .small-row, .auth-pill, .dropdown details > p {
-  text-align: left !important;
-}
-
-/* Optional: center the titles and descriptions inside cards */
-.card .title,
-.card .desc,
-.card .cta,
-.popup .inner > div,
-.notifications .note {
-  text-align: center !important;
-}
-
-/* Optional: center SVG + text combos inside your stats cards */
-div[style*="display: flex;"] {
-  justify-content: center !important;
-  text-align: center !important;
-}
-</style>
-</head>
-<body>
-
-<!-- TOPBAR -->
-<div class="topbar">
-<div class="logo">
-  <svg class="money-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" style="vertical-align:middle; margin-right:6px;">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-    <text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" font-family="Arial, sans-serif">$</text>
-  </svg>
-  Surveify
-</div>
-
-<style>
-  .money-icon {
-    animation: coinColors 1s infinite;
-  }
-
-  @keyframes coinColors {
-    0% { color: gold; }
-    25% { color: limegreen; }
-    50% { color: deepskyblue; }
-    75% { color: orange; }
-    100% { color: gold; }
-  }
-/* Center all text in the app */
-body {
-  text-align: center;
-  font-family: sans-serif; /* optional, makes it look nicer */
-  color: #fff;             /* optional, for dark theme */
-  background-color: #121212; /* optional */
-}
-/* Horizontal centering only */
-.cta-btn {
-  display: block;
-  margin: 0 auto; /* centers horizontally */
-}
-
-/* Optional: vertical centering in parent container */
-.parent-container {
-  display: flex;
-  justify-content: center; /* horizontal */
-  align-items: center;     /* vertical */
-  height: 100%;            /* or any height you need */
-}
-.card .hero {
-  width: 100%;       /* keeps it full width of the card */
-  max-width: 300px;  /* maximum width so it doesn’t stretch too much */
-  height: auto;      /* maintains aspect ratio */
-  border-radius: 12px;
-  display: block;
-  margin: 0 auto 15px auto; /* center horizontally with bottom margin */
-}
-</style>
-
-  <div class="topbar-right" id="header-right">
-    <div class="auth-pill" id="header-left" role="tablist" aria-label="auth">
-      <button class="register" id="open-register">Register</button>
-      <button class="login" id="open-login">Login</button>
-    </div>
-
-    <div class="profile" id="profileDiv" title="Profile">
-      <img src="https://thumbs.dreamstime.com/b/hand-holding-lightbulb-money-stack-young-plant-nature-idea-saving-energy-accounting-finance-concept-170450270.jpg" alt="profile">
-    </div>
-  </div>
-</div>
-
-<!-- MAIN -->
-<main>
- <section class="card" aria-labelledby="main-title" style="background: rgba(30,30,30,0.85); border: 2px solid #444; border-radius: 12px; padding: 20px; max-width: 500px; margin: 20px auto; text-align: center;">
-  <img class="hero" src="https://th.bing.com/th/id/OIG3.EG_57hxzk__uBjgSOMTY?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3" alt="Surveoo preview" style="width:100%; border-radius:12px; margin-bottom:15px;">
-  <div class="title" id="main-title" style="font-size:24px; color:#ffcc00; font-weight:bold; margin-bottom:10px;">Surveoo</div>
-  <div class="desc" style="font-size:16px; color:#ccc; line-height:1.5;">
-    Turn spare minutes into cash from anywhere in the world! 💵 Earn in 
-    <strong style="color:#00ff00;">USD, Naira, Rand</strong> with trusted surveys. Available in 
-    <strong style="color:#00aaff;">USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳</strong>, and many more countries 🌎. Fast payouts, verified surveys, and real earnings!
-  </div>
-</section>
-
-    <a class="cta" href="#" id="main-cta">Join Surveoo Now</a>
-
-    <div class="dropdown" aria-hidden="false">
-      <details>
-        <summary>
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Zm0-16a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm-.25 3.75a.75.75 0 0 1 .75.75v2.25l1.75 1.75a.75.75 0 0 1-1.06 1.06l-2-2a.75.75 0 0 1-.22-.53V9.5a.75.75 0 0 1 .78-.75Z"/></svg>
-          How to Make Money with Surveys
-        </summary>
-        <p>Register, complete your profile, and check surveys daily. Being consistent and honest increases invite frequency and payout size.</p>
-      </details>
-
-      <details>
-        <summary>
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a10 10 0 1 1-7.07 2.93A10 10 0 0 1 12 2Zm0 2a8 8 0 1 0 5.66 2.34A8 8 0 0 0 12 4Zm.75 4.75a.75.75 0 0 1 .75.75v3.44l2.22 1.27a.75.75 0 0 1-.74 1.3l-2.73-1.56a.75.75 0 0 1-.38-.65V9.5a.75.75 0 0 1 .75-.75Z"/></svg>
-          Tips to Earn More
-        </summary>
-        <p>Fully complete profile surveys, use a reliable email, stay active nightly, and combine panels to smooth earnings.</p>
-      </details>
-
-      <details>
-        <summary>
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a8 8 0 0 1 8 8c0 3.5-2.25 6.47-5.33 7.58l.62 2.42a1 1 0 0 1-1.94.5l-.6-2.33h-1.5l-.6 2.33a1 1 0 0 1-1.94-.5l.62-2.42A8 8 0 0 1 4 12a8 8 0 0 1 8-8Zm0 2a6 6 0 0 0-6 6c0 2.57 1.62 4.75 3.92 5.6a1 1 0 0 1 .63.76l.25 1h2.4l.25-1a1 1 0 0 1 .63-.76A6 6 0 0 0 18 12a6 6 0 0 0-6-6Z"/></svg>
-          Why Choose Surveoo
-        </summary>
-        <p>Direct research partners, quicker verification, real cash payouts — fewer points, more actual money.</p>
-      </details>
-    </div>
-  </section>
-</main>
-<!-- Overlay popup & backdrop -->
-<div class="overlay" id="overlay" aria-hidden="true">
-  <div class="backdrop" id="backdrop"></div>
-
-  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="authTitle" id="popup">
-    <div class="inner">
-      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;position:relative">
-        <div id="authTitle" style="font-weight:800;color:#fff;font-size:1.4rem">Welcome</div>
-        <div id="authSubtitle" style="font-size:0.88rem;color:var(--muted)">Start by creating an account or log in</div>
-        <!-- iOS-style red close button -->
-        <button id="closePopup" aria-label="Close">✕</button>
-      </div>
-
-      <div class="tabs" role="tablist">
-        <button id="tab-register" class="active" role="tab" aria-selected="true">Register</button>
-        <button id="tab-login" role="tab" aria-selected="false">Login</button>
-      </div>
-
-      <!-- Register form -->
-      <div id="panel-register" role="tabpanel">
-        <form id="registerForm" autocomplete="on">
-          <label for="reg-username">Username</label>
-          <input id="reg-username" name="username" type="text" placeholder="Your username" required>
-
-          <label for="reg-email">Email</label>
-          <input id="reg-email" name="email" type="email" placeholder="you@example.com" required>
-
-          <label for="reg-pass">Password</label>
-          <input id="reg-pass" name="password" type="password" placeholder="Choose a strong password" minlength="6" required>
-
-          <button type="submit" class="submit">Create account</button>
-        </form>
-      </div>
-
-      <!-- Login form -->
-      <div id="panel-login" role="tabpanel" style="display:none">
-        <form id="loginForm" autocomplete="on">
-          <label for="log-email">Email</label>
-          <input id="log-email" name="email" type="email" placeholder="you@example.com" required>
-
-          <label for="log-pass">Password</label>
-          <input id="log-pass" name="password" type="password" placeholder="Your password" required>
-
-          <div class="small-row" style="margin-top:4px">
-            <div style="font-size:0.85rem;color:var(--muted)">
-              <input id="remember" type="checkbox" style="margin-right:6px">Remember
-            </div>
-            <div id="forgot" class="link-like">Forgot password?</div>
-          </div>
-
-          <button type="submit" class="submit">Sign in</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  /* iOS-style red close button */
-  #closePopup {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
-    background-color: #ff3b30;
-    border: none;
-    border-radius: 16px;
-    color: #fff;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  #closePopup:hover {
-    background-color: #ff605c;
-    transform: scale(1.1);
-  }
-</style>
-
-<script>
-  // Close popup functionality
-  document.getElementById('closePopup').addEventListener('click', () => {
-    document.getElementById('overlay').style.display = 'none';
-  });
-</script>
-
-<!-- Notifications container -->
-<div class="notifications" id="notifications" aria-live="polite"></div>
-<!-- Modern Dark Surveoo Card -->
-<div style="
-    max-width: 500px; 
-    margin: 20px auto; 
-    background-color: #121212; 
-    border: 2px solid #000; 
-    border-radius: 16px; 
-    overflow: hidden; 
-    color: #fff; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-">
-
-    <!-- Header -->
-    <div style="padding: 20px; border-bottom: 1px solid #333;">
-        <h2 style="margin:0; font-size: 1.5rem;">Surveoo Stats</h2>
-    </div>
-
-    <!-- Stats Grid -->
-    <div style="display: flex; flex-direction: column; gap: 15px; padding: 20px;">
-        
-        <!-- Registered Users -->
-        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-            <!-- User SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8.964 8.964 0 0112 15a8.964 8.964 0 016.879 2.804M12 12a5 5 0 100-10 5 5 0 000 10z"/>
-            </svg>
-            <div>
-                <div style="font-size: 0.9rem; color: #aaa;">Registered Users</div>
-                <div style="font-size: 1.2rem; font-weight: bold;">32,713,365</div>
-            </div>
-        </div>
-
-        <!-- Countries Covered -->
-        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-            <!-- Globe SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 0v20M2 12h20"/>
-            </svg>
-            <div>
-                <div style="font-size: 0.9rem; color: #aaa;">Countries Covered</div>
-                <div style="font-size: 1.2rem; font-weight: bold;">197</div>
-            </div>
-        </div>
-
-        <!-- Surveys Launched -->
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <!-- Clipboard SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 2h6a2 2 0 012 2v2H7V4a2 2 0 012-2zm0 4h6M7 8h10v12H7V8z"/>
-            </svg>
-            <div>
-                <div style="font-size: 0.9rem; color: #aaa;">Surveys Launched</div>
-                <div style="font-size: 1.2rem; font-weight: bold;">116,031,457</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div style="padding: 20px; border-top: 1px solid #333; text-align: center;">
-        <button style="
-            background: linear-gradient(135deg, #1e1e1e, #333);
-            color: #fff;
-            font-weight: bold;
-            font-size: 1rem;
-            padding: 12px 30px;
-            border-radius: 12px;
-            border: 1px solid #555;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        " 
-        onmouseover="this.style.background='linear-gradient(135deg,#333,#111)'" 
-        onmouseout="this.style.background='linear-gradient(135deg,#1e1e1e,#333)'">
-            Register & Start Earning
-        </button>
-    </div>
-</div>
-<!-- Surveoo Earn Section -->
-<section style="backdrop-filter: blur(12px); background: rgba(22,22,22,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:25px; padding:40px 30px; margin:40px auto; max-width:850px; text-align:center; color:#fff;">
-    <h1><a href="https://www.surveoo.com/" target="_blank" style="color:#1e90ff; text-decoration:none;">Surveoo — No.1 Paid Survey</a></h1>
-    <h2>Earn up to <strong>$10 per Survey</strong></h2>
-    <p>Join the <strong>Surveoo</strong> community and earn money by completing paid surveys. Get rewarded via:</p>
-    <ul style="list-style:none; padding:0; margin-top:20px; display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
-        <li style="display:flex; align-items:center; gap:10px;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="PayPal" style="width:50px; height:auto;">
-            PayPal
-        </li>
-        <li style="display:flex; align-items:center; gap:10px;">
-            <img src="https://media.sodagift.com/img/image/2047108500617718-600x600.jpeg" alt="Amazon" style="width:50px; height:auto;">
-            Amazon
-        </li>
-        <li style="display:flex; align-items:center; gap:10px;">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkAOa9tK6YR7Tki6ErdJw1yl2vuNlGUH1ugUuIN-vPGx0ZWQ82csxhqXEX&s=10" alt="Bank" style="width:50px; height:auto;">
-            Bank Transfer
-        </li>
-    </ul>
-    <a href="https://www.surveoo.com/" class="btn" style="display:inline-block; padding:12px 30px; background:#1e90ff; color:#fff; border-radius:15px; font-weight:600; margin-top:20px; text-decoration:none;">Register for Free</a>
-
-    <!-- How it Works -->
-    <div style="margin-top:40px; text-align:left;">
-        <h2 style="text-align:center;">How It Works?</h2>
-        <ul style="list-style:none; padding:0; margin-top:20px;">
-            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-                <img src="https://cdn-app.surveoo.com/assets/site/img/home_01.png" alt="Register Free" style="width:40px; height:auto;">
-                <span>Register for free: Join the community in seconds.</span>
-            </li>
-            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-                <img src="https://cdn-app.surveoo.com/assets/site/img/home_02.png" alt="Respond Survey & Study" style="width:40px; height:auto;">
-                <span>Respond daily: Answer surveys and studies.</span>
-            </li>
-            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-                <img src="https://cdn-app.surveoo.com/assets/site/img/home_03.png" alt="Protect Money" style="width:40px; height:auto;">
-                <span>Pocket your money: Request withdrawals and treat yourself.</span>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats" style="display:flex; justify-content:space-around; flex-wrap:wrap; margin-top:30px; gap:20px;">
-        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">
-            <h3 style="color:#1e90ff;">32,713,365</h3>
-            <p style="color:#ccc;">Registered Users</p>
-        </div>
-        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">
-            <h3 style="color:#1e90ff;">197</h3>
-            <p style="color:#ccc;">Countries Covered</p>
-        </div>
-        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">
-            <h3 style="color:#1e90ff;">116,031,457</h3>
-            <p style="color:#ccc;">Surveys Launched</p>
-        </div>
-    </div>
-
-    <!-- Dropdown Extra Info -->
-    <details style="background: rgba(255,255,255,0.05); border-radius:12px; padding:15px 20px; margin-top:30px; width:100%;">
-        <summary style="font-weight:600; font-size:16px; cursor:pointer;">Data Protection & Quality</summary>
-        <p style="margin-top:10px; font-size:14px; color:#ccc;">Your data is fully protected and never shared with third parties. Only the best surveys from prestigious brands.</p>
-    </details>
-
-    <details style="background: rgba(255,255,255,0.05); border-radius:12px; padding:15px 20px; margin-top:15px; width:100%;">
-        <summary style="font-weight:600; font-size:16px; cursor:pointer;">Controlled Partners</summary>
-        <p style="margin-top:10px; font-size:14px; color:#ccc;">We work with top global brands — no nasty surprises. Our partners are trusted worldwide.</p>
-    </details>
-</section>
-<button class="cta-btn">
-  <span class="text-slide">Join Surveoo</span>
-  <span class="text-slide">Earn on Surveoo</span>
-</button>
-
-<style>
-.cta-btn {
-  position: relative;
-  overflow: hidden;
-  padding: 10px 30px;
-  font-size: 16px;
-  font-weight: bold;
-  color: black;
-  background-color: #00ffff; /* cyan */
-  border: none;
-  border-radius: 20px; /* smooth curved edges */
-  cursor: pointer;
-  width: 180px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.text-slide {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  animation: slideText 3s infinite;
-}
-
-.text-slide:nth-child(2) {
-  animation-delay: 1.5s;
-}
-
-@keyframes slideText {
-  0%, 45% { transform: translateY(0); opacity: 1; }
-  50%, 95% { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-.cta-btn:hover {
-  transform: scale(1.05);
-  transition: transform 0.3s;
-}
-</style>
-<!-- Surveify Banner -->
-<div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-  <div style="display:flex; align-items:center; background:rgba(30,30,30,0.85); border:2px solid #444; border-radius:12px; padding:20px; gap:20px; width:80%; margin:20px auto;">
-    <!-- Logo -->
-    <div style="background:#fff; padding:10px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-      <img src="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" alt="Surveify Logo" style="height:120px;">
-    </div>
-    <!-- Text -->
-    <div style="max-width:600px;">
-      <h1 style="margin:0; font-size:28px; color:#ffcc00;">Welcome to Surveify!</h1>
-      <p style="margin:8px 0 0 0; font-size:16px; line-height:1.5;">
-        Here we show the <span style="color:#00ff99; font-weight:bold;">top paying survey sites</span>. Our top recommendation is <span style="color:#00ff99; font-weight:bold;">Surveoo</span>, the most legit survey site. Earn up to <span style="color:#00ff99; font-weight:bold;">$10 per survey</span>!
-      </p>
-    </div>
-  </div>
-
-  <!-- Reviews -->
-  <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; width:80%; margin:auto;">
-    <!-- Review 1 -->
-    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">
-      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
-        <div style="width:40px; height:40px; background:#ff595e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">YM</div>
-        <div style="font-weight:bold; color:#ffcc00;">Yoka M</div>
-      </div>
-      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>
-      <div style="font-size:14px; line-height:1.4; color:#ccc;">"Surveoo is amazing! I earned $10 in just one survey."</div>
-    </div>
-
-    <!-- Review 2 -->
-    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">
-      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
-        <div style="width:40px; height:40px; background:#1982c4; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">TT</div>
-        <div style="font-weight:bold; color:#ffcc00;">Tammy T</div>
-      </div>
-      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>
-      <div style="font-size:14px; line-height:1.4; color:#ccc;">"Fast payouts and legit surveys. Highly recommend Surveoo!"</div>
-    </div>
-
-    <!-- Review 3 -->
-    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">
-      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
-        <div style="width:40px; height:40px; background:#6a4c93; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">FN</div>
-        <div style="font-weight:bold; color:#ffcc00;">Frank N</div>
-      </div>
-      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>
-      <div style="font-size:14px; line-height:1.4; color:#ccc;">"I never thought online surveys could be this rewarding!"</div>
-    </div>
-  </div>
-</div>
-<!-- START: Surveoo Promo Footer -->
-<footer class="sv-footer" role="contentinfo">
-  <div class="sv-footer-inner">
-    <div class="sv-brand">
-      <!-- Replace with your logo img if you want -->
-      <div class="sv-logo" aria-hidden="true">Surveify</div>
-      <p class="sv-tag">Join. Answer. Earn.</p>
-    </div>
-
-    <nav class="sv-links" aria-label="Footer links">
-      <a href="#" class="sv-link">Home</a>
-      <a href="#" class="sv-link">How it works</a>
-      <a href="#" class="sv-link">FAQ</a>
-      <a href="#" class="sv-link">Privacy</a>
-      <a href="#" class="sv-link">Terms</a>
-    </nav>
-
-    <div class="sv-contact">
-      <p class="sv-cta">Questions or partnership? Contact your manager:</p>
-      <p class="sv-manager">
-        <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>
-      </p>
-    </div>
-  </div>
-
-  <div class="sv-disclaimer">
-    <strong>Disclaimer:</strong>
-    <span>
-      Surveoo and any other survey sites promoted here are <em>not</em> owned, operated, or controlled by us.
-      We only promote these platforms for marketing/affiliate purposes. For account issues, payouts, or
-      platform-specific support, please contact your personal manager at
-      <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>.
-    </span>
-  </div>
-
-  <div class="sv-bottom">
-    <small>&copy; <span id="sv-year"></span> Surveoo Promotions. All rights reserved.</small>
-  </div>
-</footer>
-
-<style>
-/* --- Surveoo Promo Footer - drop-in CSS --- */
-.sv-footer {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: #060606;
-  color: #dfefff;
-  padding: 22px;
-  border-top: 1px solid rgba(0,255,255,0.06);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-  --accent: #00ffff; /* cyan accent */
-  --muted: rgba(223,239,255,0.55);
-  font-size: 14px;
-}
-
-.sv-footer-inner {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  margin: 0 auto 14px;
-  padding-bottom: 8px;
-}
-
-.sv-brand {
-  min-width: 180px;
-}
-.sv-logo {
-  font-weight: 800;
-  color: var(--accent);
-  font-size: 20px;
-  letter-spacing: 0.6px;
-  border-radius: 8px;
-  padding: 6px 10px;
-  display: inline-block;
-}
-.sv-tag {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.sv-links {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.sv-link {
-  color: var(--muted);
-  text-decoration: none;
-  padding: 6px 8px;
-  border-radius: 8px;
-}
-.sv-link:hover { color: #ffffff; background: rgba(0,255,255,0.03); }
-
-.sv-contact {
-  min-width: 200px;
-  text-align: right;
-}
-.sv-cta { margin: 0 0 6px; color: var(--muted); }
-.sv-manager a {
-  color: #000;
-  background: var(--accent);
-  padding: 6px 10px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-block;
-}
-.sv-manager a:hover { opacity: 0.95; transform: translateY(-1px); transition: .15s ease; }
-
-.sv-disclaimer {
-  max-width: 1200px;
-  margin: 6px auto 12px;
-  color: #aebedb;
-  background: rgba(255,255,255,0.02);
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  line-height: 1.45;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.sv-disclaimer strong { color: #fff; margin-right: 6px; }
-
-.sv-bottom {
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-  color: #7f9bb1;
-  padding-top: 6px;
-  font-size: 13px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 720px) {
-  .sv-footer-inner { gap: 12px; }
-  .sv-contact { text-align: left; width: 100%; }
-  .sv-links { width: 100%; justify-content: flex-start; }
-  .sv-brand { width: 100%; }
-  .sv-disclaimer { font-size: 13px; }
-}
-</style>
-<!-- Surveify Loader Start -->
-
-
-<div class="loader">
-  <img src="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" alt="Surveify Logo">
-  <div class="progress-bar">
-    <div class="progress-fill"></div>
-  </div>
-</div>
-
-<script>
-  // Hide loader after 3 seconds and unlock scroll
-  setTimeout(() => {
-    const loader = document.querySelector('.loader');
-    loader.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Re-enable scroll
-  }, 3000);
-</script>
-<!-- Surveify Loader End -->
-<script>
-/* small helper: set year automatically */
-document.addEventListener('DOMContentLoaded', function(){
-  const y = new Date().getFullYear();
-  const el = document.getElementById('sv-year');
-  if (el) el.textContent = y;
-});
-</script>
-<!-- END: Surveoo Promo Footer -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-<script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
-  // Elements
-  const overlay = document.getElementById('overlay');
-  const popup = document.getElementById('popup');
-  const backdrop = document.getElementById('backdrop');
-  const closePopup = document.getElementById('closePopup');
-  const tabRegister = document.getElementById('tab-register');
-  const tabLogin = document.getElementById('tab-login');
-  const panelRegister = document.getElementById('panel-register');
-  const panelLogin = document.getElementById('panel-login');
-  const notifications = document.getElementById('notifications');
-  const body = document.body;
-  const mainCta = document.getElementById('main-cta');
-  const topbarRight = document.querySelector('.topbar-right');
-
-  // Notification
-  function showNotification(type, text, timeout=3500){
-    const note = document.createElement('div');
-    note.className = 'note ' + (type==='ok' ? 'success' : 'error');
-    note.textContent = text;
-    notifications.appendChild(note);
-    setTimeout(()=> {
-      note.style.opacity = '0';
-      note.style.transform = 'translateY(-6px)';
-      setTimeout(()=> note.remove(), 260);
-    }, timeout);
-  }
-
-  // Open/close popup
-  function openPopup(tab='register'){
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden','false');
-    body.classList.add('no-select');
-    tab === 'login' ? activateLogin() : activateRegister();
-    setTimeout(()=>{
-      const first = tab==='login' ? document.getElementById('log-email') : document.getElementById('reg-username');
-      first && first.focus();
-    }, 380);
-  }
-  function closeAll(){
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden','true');
-    body.classList.remove('no-select');
-  }
-
-  // Tabs
-  function activateRegister(){
-    tabRegister.classList.add('active'); tabRegister.setAttribute('aria-selected','true');
-    tabLogin.classList.remove('active'); tabLogin.setAttribute('aria-selected','false');
-    panelRegister.style.display = 'block';
-    panelLogin.style.display = 'none';
-    document.getElementById('authTitle').textContent = "Create Your Account 🔥";
-    document.getElementById('authSubtitle').textContent = "Join Surveify and start earning smarter";
-  }
-  function activateLogin(){
-    tabLogin.classList.add('active'); tabLogin.setAttribute('aria-selected','true');
-    tabRegister.classList.remove('active'); tabRegister.setAttribute('aria-selected','false');
-    panelLogin.style.display = 'block';
-    panelRegister.style.display = 'none';
-    document.getElementById('authTitle').textContent = "Welcome Back 👋";
-    document.getElementById('authSubtitle').textContent = "Reignite your hustle — log in below";
-  }
-
-  // Attach topbar buttons
-  function attachAuthButtons(){
-    topbarRight.innerHTML = `
-      <div class="auth-pill" role="tablist" aria-label="auth">
-        <button class="register" id="open-register">Register</button>
-        <button class="login" id="open-login">Login</button>
-      </div>
-      <div class="profile" id="profileDiv" title="Profile">
-        <img src="https://thumbs.dreamstime.com/b/hand-holding-lightbulb-money-stack-young-plant-nature-idea-saving-energy-accounting-finance-concept-170450270.jpg" alt="profile">
-      </div>
-    `;
-    document.getElementById('open-register').addEventListener('click', ()=> openPopup('register'));
-    document.getElementById('open-login').addEventListener('click', ()=> openPopup('login'));
-  }
-
-  // Update topbar for logged in user
-  function updateHeader(username){
-    topbarRight.innerHTML = '';
-    const span = document.createElement('span');
-    span.style.color = '#fff';
-    span.textContent = `@${username}`;
-
-    const logoutBtn = document.createElement('button');
-    logoutBtn.id = 'logoutBtn';
-    logoutBtn.style.cssText = 'margin-left:10px;color:red;background:transparent;border:1px solid red;padding:4px 8px;border-radius:6px;cursor:pointer';
-    logoutBtn.textContent = 'Logout';
-    logoutBtn.addEventListener('click', async ()=>{
-      await auth.signOut();
-      showNotification('ok','Logged out successfully.');
-      attachAuthButtons();
-    });
-
-    topbarRight.appendChild(span);
-    topbarRight.appendChild(logoutBtn);
-  }
-
-  // Firebase auth forms
-  document.getElementById('registerForm').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const username = document.getElementById('reg-username').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const pass = document.getElementById('reg-pass').value;
-    if(!username || !email || pass.length < 6){ showNotification('err','Fill valid details (password min 6 chars).'); return; }
-    try{
-      const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-      await userCredential.user.updateProfile({ displayName: username });
-      showNotification('ok', `Account created — welcome @${username}!`);
-      updateHeader(username);
-      closeAll();
-      this.reset();
-    }catch(err){ showNotification('err', err.message); }
-  });
-
-  document.getElementById('loginForm').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const email = document.getElementById('log-email').value.trim();
-    const pass = document.getElementById('log-pass').value;
-    if(!email || !pass){ showNotification('err','Enter email and password.'); return; }
-    try{
-      const userCredential = await auth.signInWithEmailAndPassword(email, pass);
-      const username = userCredential.user.displayName || email.split('@')[0];
-      showNotification('ok', `Signed in successfully as @${username}`);
-      updateHeader(username);
-      closeAll();
-      this.reset();
-    }catch(err){ showNotification('err', err.message); }
-  });
-
-  // Keep user logged in
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      const username = user.displayName || user.email.split('@')[0];
-      updateHeader(username);
-    } else {
-      attachAuthButtons();
-    }
-  });
-
-  // Forgot password
-  document.getElementById('forgot').addEventListener('click', function(){
-    const email = document.getElementById('log-email').value.trim();
-    if(!email){ showNotification('err','Enter your email first'); return; }
-    auth.sendPasswordResetEmail(email)
-        .then(()=> showNotification('ok','Password reset email sent.'))
-        .catch(err=> showNotification('err', err.message));
-  });
-
-  // Close popup on ESC
-  document.addEventListener('keydown', (e)=> {
-    if(e.key === 'Escape' && overlay.classList.contains('active')) closeAll();
-  });
-
-  // Popup focus trap
-  let lastFocused = null;
-  function trapFocusOnOpen(){
-    if(overlay.classList.contains('active')){
-      lastFocused = document.activeElement;
-      const focusable = popup.querySelectorAll('input,button,select,[tabindex]:not([tabindex="-1"])');
-      if(focusable.length) focusable[0].focus();
-      document.addEventListener('focus', enforce, true);
-    } else {
-      document.removeEventListener('focus', enforce, true);
-      lastFocused && lastFocused.focus();
-    }
-    function enforce(ev){
-      if(!popup.contains(ev.target)) ev.stopPropagation(), ev.preventDefault(), popup.querySelector('input,button').focus();
-    }
-  }
-  const obs = new MutationObserver(trapFocusOnOpen);
-  obs.observe(overlay, { attributes: true, attributeFilter: ['class'] });
-
-  // Initial attachment
-  attachAuthButtons();
-  openRegister.addEventListener('click', ()=> openPopup('register'));
-  openLogin.addEventListener('click', ()=> openPopup('login'));
-  mainCta.addEventListener('click', (e)=> { e.preventDefault(); openPopup('register'); });
-  closePopup.addEventListener('click', closeAll);
-  backdrop.addEventListener('click', closeAll);
-  tabRegister.addEventListener('click', activateRegister);
-  tabLogin.addEventListener('click', activateLogin);
-</script>
-<script>
-  // Elements
-  const overlay = document.getElementById('overlay');
-  const popup = document.getElementById('popup');
-  const openLoginBtn = document.getElementById('open-login');
-  const openRegisterBtn = document.getElementById('open-register');
-  const closePopupBtn = document.getElementById('closePopup');
-  const tabLogin = document.getElementById('tab-login');
-  const tabRegister = document.getElementById('tab-register');
-  const panelLogin = document.getElementById('panel-login');
-  const panelRegister = document.getElementById('panel-register');
-
-  // Open login popup
-  openLoginBtn.addEventListener('click', () => {
-    overlay.classList.add('active');
-    tabLogin.classList.add('active');
-    tabRegister.classList.remove('active');
-    panelLogin.style.display = 'block';
-    panelRegister.style.display = 'none';
-    document.body.classList.add('no-select');
-  });
-
-  // Open register popup
-  openRegisterBtn.addEventListener('click', () => {
-    overlay.classList.add('active');
-    tabRegister.classList.add('active');
-    tabLogin.classList.remove('active');
-    panelRegister.style.display = 'block';
-    panelLogin.style.display = 'none';
-    document.body.classList.add('no-select');
-  });
-
-  // Close popup
-  closePopupBtn.addEventListener('click', () => {
-    overlay.classList.remove('active');
-    document.body.classList.remove('no-select');
-  });
-
-  // Switch tabs
-  tabLogin.addEventListener('click', () => {
-    tabLogin.classList.add('active');
-    tabRegister.classList.remove('active');
-    panelLogin.style.display = 'block';
-    panelRegister.style.display = 'none';
-  });
-
-  tabRegister.addEventListener('click', () => {
-    tabRegister.classList.add('active');
-    tabLogin.classList.remove('active');
-    panelRegister.style.display = 'block';
-    panelLogin.style.display = 'none';
-  });
-
-  // Optional: close popup if backdrop clicked
-  const backdrop = document.getElementById('backdrop');
-  backdrop.addEventListener('click', () => {
-    overlay.classList.remove('active');
-    document.body.classList.remove('no-select');
-  });
-</script>
-</body>
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="utf-8" />  
+<meta name="viewport" content="width=device-width,initial-scale=1" />  
+<title>Surveify — Earn with Surveoo</title>  
+  
+<!-- Favicon -->  
+<link rel="icon" href="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" type="image/png">  
+  
+<!-- Meta Tags -->  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<meta name="description" content="Surveify — Earn money from surveys worldwide! Top paying survey site Surveoo helps you earn in USD, Naira, and Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">  
+<meta name="keywords" content="Surveify, Surveoo, online surveys, earn money online, USD, Naira, Rand, USA, South Africa, Nigeria, India, worldwide surveys">  
+<meta name="author" content="Surveify">  
+  
+<!-- Open Graph / Facebook -->  
+<meta property="og:type" content="website">  
+<meta property="og:title" content="Surveify — Earn with Surveoo">  
+<meta property="og:description" content="Earn money from surveys worldwide! Surveoo pays in USD, Naira, Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">  
+<meta property="og:image" content="https://th.bing.com/th/id/OIG3.tzd9v2yiOyplKn2V4t13?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3">  
+<meta property="og:url" content="https://yourwebsite.com">  
+<meta property="og:site_name" content="Surveify">  
+  
+<!-- Twitter -->  
+<meta name="twitter:card" content="summary_large_image">  
+<meta name="twitter:title" content="Surveify — Earn with Surveoo">  
+<meta name="twitter:description" content="Earn money from surveys worldwide! Surveoo pays in USD, Naira, Rand. Available in USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳, and more. Make money online with legit surveys.">  
+<meta name="twitter:image" content="https://th.bing.com/th/id/OIG3.tzd9v2yiOyplKn2V4t13?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3">  
+<style>  
+  /* Loader Styles */  
+  html, body {  
+    overflow: hidden; /* Block scroll while loader is active */  
+  }  
+  
+  .loader {  
+    position: fixed;  
+    inset: 0;  
+    background-color: #ffffff;  
+    display: flex;  
+    justify-content: center;  
+    align-items: center;  
+    flex-direction: column;  
+    z-index: 9999;  
+    animation: fadeOut 1s ease 2.8s forwards;  
+  }  
+  
+  .loader img {  
+    width: 160px;  
+    margin-bottom: 25px;  
+    animation: pulse 1.5s infinite alternate;  
+  }  
+  
+  .progress-bar {  
+    width: 200px;  
+    height: 6px;  
+    background-color: #e0e0e0;  
+    border-radius: 6px;  
+    overflow: hidden;  
+  }  
+  
+  .progress-fill {  
+    width: 0%;  
+    height: 100%;  
+    background-color: #000;  
+    border-radius: 6px;  
+    animation: load 3s ease-in-out forwards;  
+  }  
+  
+  @keyframes load {  
+    from { width: 0%; }  
+    to { width: 100%; }  
+  }  
+  
+  @keyframes pulse {  
+    from { transform: scale(1); opacity: 1; }  
+    to { transform: scale(1.05); opacity: 0.9; }  
+  }  
+  
+  @keyframes fadeOut {  
+    to {  
+      opacity: 0;  
+      visibility: hidden;  
+      transform: scale(0.95);  
+    }  
+  }  
+</style>  
+<style>  
+  :root{  
+    --bg:#0b0b0b;  
+    --glass:rgba(22,22,22,0.62);  
+    --border:rgba(255,255,255,0.06);  
+    --muted:#9b9b9b;  
+    --text:#e7e7e7;  
+    --blue:#1f6fe6;  
+    --pink:#e1529b;  
+    --cta-bg:#ffffff;  
+    --cta-border:#000000;  
+    --success:#2ecc71;  
+    --error:#e74c3c;  
+  }  
+  
+  /* Reset & basics */  
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}  
+  html,body{height:100%}  
+  body{  
+    background:var(--bg);  
+    color:var(--text);  
+    font-family:Inter, 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;  
+    -webkit-font-smoothing:antialiased;  
+    -moz-osx-font-smoothing:grayscale;  
+    user-select:none; /* default locked; inputs will override */  
+    overflow-y:scroll;  
+  }  
+  
+  /* Topbar (sticky) */  
+  .topbar{  
+    position:sticky;  
+    top:0;  
+    z-index:1200;  
+    display:flex;  
+    align-items:center;  
+    justify-content:space-between;  
+    gap:12px;  
+    padding:12px 18px;  
+    backdrop-filter:blur(12px);  
+    background:rgba(10,10,10,0.55);  
+    border-bottom:1px solid var(--border);  
+    box-shadow:0 3px 18px rgba(0,0,0,0.5);  
+  }  
+  
+  .logo{  
+    font-weight:700;  
+    font-size:1.05rem;  
+    color:#fff;  
+    letter-spacing:0.6px;  
+  }  
+  
+  .topbar-right{  
+    display:flex;  
+    align-items:center;  
+    gap:12px;  
+  }  
+  
+  /* split pill */  
+  .auth-pill{  
+    display:inline-flex;  
+    border-radius:999px;  
+    overflow:hidden;  
+    border:1px solid var(--border);  
+    background:rgba(255,255,255,0.02);  
+  }  
+  .auth-pill button{  
+    padding:8px 12px;  
+    border:0;  
+    outline:0;  
+    cursor:pointer;  
+    font-weight:600;  
+    font-size:0.86rem;  
+    min-width:84px;  
+  }  
+  .auth-pill button.register{  
+    background:linear-gradient(180deg,var(--blue), #0f5fd6);  
+    color:#fff;  
+  }  
+  .auth-pill button.login{  
+    background:linear-gradient(180deg,var(--pink), #c93b88);  
+    color:#fff;  
+  }  
+  .auth-pill button:active{transform:translateY(1px)}  
+  
+  .profile {  
+    width:36px;height:36px;border-radius:999px;overflow:hidden;border:1.5px solid rgba(255,255,255,0.08);  
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));  
+  }  
+  .profile img{width:100%;height:100%;object-fit:cover;display:block}  
+  
+  /* Main container */  
+  main{  
+    max-width:720px;  
+    margin:34px auto;  
+    padding:0 18px;  
+  }  
+  
+  .card{  
+    background:var(--glass);  
+    border-radius:16px;  
+    padding:20px;  
+    border:1px solid var(--border);  
+    backdrop-filter:blur(14px);  
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);  
+  }  
+  
+  img.hero{width:100%;border-radius:12px;margin-bottom:14px;opacity:0.95;display:block}  
+  
+  .title{font-size:1.18rem;font-weight:700;color:#fff;margin-bottom:8px}  
+  .desc{color:var(--muted);font-size:0.95rem;margin-bottom:16px}  
+  
+  /* CTA: full width, white with black border */  
+  .cta{  
+    display:block;width:100%;text-align:center;padding:12px 14px;border-radius:11px;  
+    background:var(--cta-bg);color:#000;font-weight:700;border:1.6px solid var(--cta-border);  
+    text-decoration:none;font-size:0.95rem;  
+    transition:transform .14s ease,box-shadow .14s ease;  
+    box-shadow:0 0 0 rgba(0,0,0,0);  
+  }  
+  .cta:active{transform:translateY(1px)}  
+  .cta:hover{transform:scale(1.01)}  
+  
+  /* dropdowns (details/summary) */  
+  .dropdown{margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.02)}  
+  details{border-bottom:1px solid var(--border)}  
+  details:last-child{border-bottom:none}  
+  summary{  
+    list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:12px;color:#cfcfcf;font-weight:600;font-size:0.95rem;  
+  }  
+  summary svg{width:18px;height:18px;flex-shrink:0;fill:var(--blue)}  
+  details p{padding:10px 14px 16px;color:var(--muted);font-size:0.9rem;line-height:1.45}  
+  
+  /* Floating popup overlay */  
+  .overlay{  
+    position:fixed;inset:0;z-index:2000;display:grid;place-items:start;pointer-events:none;  
+  }  
+  .overlay.active{pointer-events:auto}  
+  
+  .backdrop{  
+    position:fixed;inset:0;background:rgba(5,5,5,0.55);backdrop-filter:blur(8px);transition:opacity .28s ease;opacity:0;  
+  }  
+  .overlay.active .backdrop{opacity:1}  
+  
+  .popup{  
+    width:100%;max-width:680px;margin:18px auto 0;border-radius:12px;overflow:hidden;  
+    background:linear-gradient(180deg, rgba(18,18,18,0.96), rgba(12,12,12,0.98));  
+    border:1px solid var(--border);  
+    transform:translateY(-120%); /* slide from top */  
+    transition:transform .42s cubic-bezier(.2,.95,.2,1),opacity .28s ease;  
+    box-shadow:0 40px 80px rgba(0,0,0,0.6);  
+    pointer-events:auto;  
+  }  
+  .overlay.active .popup{transform:translateY(0)}  
+  
+  .popup .inner{padding:18px}  
+  .popup .tabs{display:flex;border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.02);border:1px solid var(--border);margin-bottom:14px}  
+  .tabs button{flex:1;padding:10px 12px;border:0;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}  
+  .tabs button.active{color:var(--text);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}  
+  
+  form{display:grid;gap:10px}  
+  label{font-size:0.78rem;color:var(--muted);display:block}  
+  input[type="text"],input[type="email"],input[type="password"]{  
+    padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);  
+    background:rgba(255,255,255,0.02);color:var(--text);font-size:0.95rem;  
+    outline:none;  
+  }  
+  input::placeholder{color:rgba(255,255,255,0.28)}  
+  .small-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:2px}  
+  .link-like{font-size:0.9rem;color:var(--muted);text-decoration:underline;cursor:pointer}  
+  .submit{  
+    margin-top:6px;padding:10px;border-radius:10px;border:0;background:var(--blue);color:#fff;font-weight:800;cursor:pointer;  
+  }  
+  
+  /* notifications area below popup */  
+  .notifications{  
+    position:fixed;left:50%;transform:translateX(-50%);top:calc(100px + 12px);z-index:2600;display:flex;flex-direction:column;gap:10px;pointer-events:none;  
+    width:calc(100% - 40px);max-width:680px;padding:0 10px;align-items:center;  
+  }  
+  .note{  
+    pointer-events:auto;  
+    min-width:120px;  
+    max-width:100%;  
+    padding:10px 14px;border-radius:10px;font-weight:600;color:#fff;  
+    box-shadow:0 6px 26px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);  
+  }  
+  .note.success{background:linear-gradient(180deg,var(--success),#1f9d5a)}  
+  .note.error{background:linear-gradient(180deg,var(--error),#c33b32)}  
+  
+  /* disable select when popup open: class on body will override (we set body.no-select when active) */  
+  body.no-select{user-select:none;touch-action:none;overflow:hidden}  
+  
+  /* inputs must allow selection still */  
+  input,textarea,select{user-select:text;-webkit-user-select:text}  
+  
+  /* small responsive */  
+  @media(min-width:880px){main{margin-top:48px}}  
+  @media(max-width:420px){  
+    .topbar{padding:10px}  
+    .logo{font-size:1rem}  
+    .auth-pill button{padding:8px 10px;font-size:0.84rem}  
+    .popup{margin-top:8px;border-radius:8px}  
+  }  
+/* Center all text globally */  
+body,   
+body * {  
+  text-align: center !important;  
+}  
+  
+/* Keep inputs, forms, and some layouts left-aligned if needed */  
+input, textarea, select, .topbar-right, .small-row, .auth-pill, .dropdown details > p {  
+  text-align: left !important;  
+}  
+  
+/* Optional: center the titles and descriptions inside cards */  
+.card .title,  
+.card .desc,  
+.card .cta,  
+.popup .inner > div,  
+.notifications .note {  
+  text-align: center !important;  
+}  
+  
+/* Optional: center SVG + text combos inside your stats cards */  
+div[style*="display: flex;"] {  
+  justify-content: center !important;  
+  text-align: center !important;  
+}  
+</style>  
+</head>  
+<body>  
+  
+<!-- TOPBAR -->  
+<div class="topbar">  
+<div class="logo">  
+  <svg class="money-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" style="vertical-align:middle; margin-right:6px;">  
+    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>  
+    <text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" font-family="Arial, sans-serif">$</text>  
+  </svg>  
+  Surveify  
+</div>  
+  
+<style>  
+  .money-icon {  
+    animation: coinColors 1s infinite;  
+  }  
+  
+  @keyframes coinColors {  
+    0% { color: gold; }  
+    25% { color: limegreen; }  
+    50% { color: deepskyblue; }  
+    75% { color: orange; }  
+    100% { color: gold; }  
+  }  
+/* Center all text in the app */  
+body {  
+  text-align: center;  
+  font-family: sans-serif; /* optional, makes it look nicer */  
+  color: #fff;             /* optional, for dark theme */  
+  background-color: #121212; /* optional */  
+}  
+/* Horizontal centering only */  
+.cta-btn {  
+  display: block;  
+  margin: 0 auto; /* centers horizontally */  
+}  
+  
+/* Optional: vertical centering in parent container */  
+.parent-container {  
+  display: flex;  
+  justify-content: center; /* horizontal */  
+  align-items: center;     /* vertical */  
+  height: 100%;            /* or any height you need */  
+}  
+.card .hero {  
+  width: 100%;       /* keeps it full width of the card */  
+  max-width: 300px;  /* maximum width so it doesn’t stretch too much */  
+  height: auto;      /* maintains aspect ratio */  
+  border-radius: 12px;  
+  display: block;  
+  margin: 0 auto 15px auto; /* center horizontally with bottom margin */  
+}  
+</style>  
+  
+  <div class="topbar-right" id="header-right">  
+    <div class="auth-pill" id="header-left" role="tablist" aria-label="auth">  
+      <button class="register" id="open-register">Register</button>  
+      <button class="login" id="open-login">Login</button>  
+    </div>  
+  
+    <div class="profile" id="profileDiv" title="Profile">  
+      <img src="https://thumbs.dreamstime.com/b/hand-holding-lightbulb-money-stack-young-plant-nature-idea-saving-energy-accounting-finance-concept-170450270.jpg" alt="profile">  
+    </div>  
+  </div>  
+</div>  
+  
+<!-- MAIN -->  
+<main>  
+ <section class="card" aria-labelledby="main-title" style="background: rgba(30,30,30,0.85); border: 2px solid #444; border-radius: 12px; padding: 20px; max-width: 500px; margin: 20px auto; text-align: center;">  
+  <img class="hero" src="https://th.bing.com/th/id/OIG3.EG_57hxzk__uBjgSOMTY?cb=12&dpr=1,8&pid=ImgDetMain&o=7&rm=3" alt="Surveoo preview" style="width:100%; border-radius:12px; margin-bottom:15px;">  
+  <div class="title" id="main-title" style="font-size:24px; color:#ffcc00; font-weight:bold; margin-bottom:10px;">Surveoo</div>  
+  <div class="desc" style="font-size:16px; color:#ccc; line-height:1.5;">  
+    Turn spare minutes into cash from anywhere in the world! 💵 Earn in   
+    <strong style="color:#00ff00;">USD, Naira, Rand</strong> with trusted surveys. Available in   
+    <strong style="color:#00aaff;">USA 🇺🇸, South Africa 🇿🇦, Nigeria 🇳🇬, India 🇮🇳</strong>, and many more countries 🌎. Fast payouts, verified surveys, and real earnings!  
+  </div>  
+</section>  
+  
+    <a class="cta" href="#" id="main-cta">Join Surveoo Now</a>  
+  
+    <div class="dropdown" aria-hidden="false">  
+      <details>  
+        <summary>  
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Zm0-16a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm-.25 3.75a.75.75 0 0 1 .75.75v2.25l1.75 1.75a.75.75 0 0 1-1.06 1.06l-2-2a.75.75 0 0 1-.22-.53V9.5a.75.75 0 0 1 .78-.75Z"/></svg>  
+          How to Make Money with Surveys  
+        </summary>  
+        <p>Register, complete your profile, and check surveys daily. Being consistent and honest increases invite frequency and payout size.</p>  
+      </details>  
+  
+      <details>  
+        <summary>  
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a10 10 0 1 1-7.07 2.93A10 10 0 0 1 12 2Zm0 2a8 8 0 1 0 5.66 2.34A8 8 0 0 0 12 4Zm.75 4.75a.75.75 0 0 1 .75.75v3.44l2.22 1.27a.75.75 0 0 1-.74 1.3l-2.73-1.56a.75.75 0 0 1-.38-.65V9.5a.75.75 0 0 1 .75-.75Z"/></svg>  
+          Tips to Earn More  
+        </summary>  
+        <p>Fully complete profile surveys, use a reliable email, stay active nightly, and combine panels to smooth earnings.</p>  
+      </details>  
+  
+      <details>  
+        <summary>  
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a8 8 0 0 1 8 8c0 3.5-2.25 6.47-5.33 7.58l.62 2.42a1 1 0 0 1-1.94.5l-.6-2.33h-1.5l-.6 2.33a1 1 0 0 1-1.94-.5l.62-2.42A8 8 0 0 1 4 12a8 8 0 0 1 8-8Zm0 2a6 6 0 0 0-6 6c0 2.57 1.62 4.75 3.92 5.6a1 1 0 0 1 .63.76l.25 1h2.4l.25-1a1 1 0 0 1 .63-.76A6 6 0 0 0 18 12a6 6 0 0 0-6-6Z"/></svg>  
+          Why Choose Surveoo  
+        </summary>  
+        <p>Direct research partners, quicker verification, real cash payouts — fewer points, more actual money.</p>  
+      </details>  
+    </div>  
+  </section>  
+</main>  
+  
+<!-- Overlay popup & backdrop -->  
+<div class="overlay" id="overlay" aria-hidden="true">  
+  <div class="backdrop" id="backdrop"></div>  
+  
+  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="authTitle" id="popup">  
+    <div class="inner">  
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">  
+        <div id="authTitle" style="font-weight:800;color:#fff;font-size:1.4rem">Welcome</div>  
+        <div id="authSubtitle" style="font-size:0.88rem;color:var(--muted)">Start by creating an account or log in</div>  
+        <button id="closePopup" aria-label="Close" style="position:absolute;top:14px;right:14px;background:transparent;border:0;color:var(--muted);cursor:pointer;font-weight:700">✕</button>  
+      </div>  
+  
+      <div class="tabs" role="tablist">  
+        <button id="tab-register" class="active" role="tab" aria-selected="true">Register</button>  
+        <button id="tab-login" role="tab" aria-selected="false">Login</button>  
+      </div>  
+  
+      <!-- Register form -->  
+      <div id="panel-register" role="tabpanel">  
+        <form id="registerForm" autocomplete="on">  
+          <label for="reg-username">Username</label>  
+          <input id="reg-username" name="username" type="text" placeholder="Your username" required>  
+  
+          <label for="reg-email">Email</label>  
+          <input id="reg-email" name="email" type="email" placeholder="you@example.com" required>  
+  
+          <label for="reg-pass">Password</label>  
+          <input id="reg-pass" name="password" type="password" placeholder="Choose a strong password" minlength="6" required>  
+  
+          <button type="submit" class="submit">Create account</button>  
+        </form>  
+      </div>  
+  
+      <!-- Login form -->  
+      <div id="panel-login" role="tabpanel" style="display:none">  
+        <form id="loginForm" autocomplete="on">  
+          <label for="log-email">Email</label>  
+          <input id="log-email" name="email" type="email" placeholder="you@example.com" required>  
+  
+          <label for="log-pass">Password</label>  
+          <input id="log-pass" name="password" type="password" placeholder="Your password" required>  
+  
+          <div class="small-row" style="margin-top:4px">  
+            <div style="font-size:0.85rem;color:var(--muted)"><input id="remember" type="checkbox" style="margin-right:6px">Remember</div>  
+            <div id="forgot" class="link-like">Forgot password?</div>  
+          </div>  
+  
+          <button type="submit" class="submit">Sign in</button>  
+        </form>  
+      </div>  
+    </div>  
+  </div>  
+</div>  
+  
+<!-- Notifications container -->  
+<div class="notifications" id="notifications" aria-live="polite"></div>  
+<!-- Modern Dark Surveoo Card -->  
+<div style="  
+    max-width: 500px;   
+    margin: 20px auto;   
+    background-color: #121212;   
+    border: 2px solid #000;   
+    border-radius: 16px;   
+    overflow: hidden;   
+    color: #fff;   
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;  
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);  
+">  
+  
+    <!-- Header -->  
+    <div style="padding: 20px; border-bottom: 1px solid #333;">  
+        <h2 style="margin:0; font-size: 1.5rem;">Surveoo Stats</h2>  
+    </div>  
+  
+    <!-- Stats Grid -->  
+    <div style="display: flex; flex-direction: column; gap: 15px; padding: 20px;">  
+          
+        <!-- Registered Users -->  
+        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; padding-bottom: 10px;">  
+            <!-- User SVG -->  
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">  
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8.964 8.964 0 0112 15a8.964 8.964 0 016.879 2.804M12 12a5 5 0 100-10 5 5 0 000 10z"/>  
+            </svg>  
+            <div>  
+                <div style="font-size: 0.9rem; color: #aaa;">Registered Users</div>  
+                <div style="font-size: 1.2rem; font-weight: bold;">32,713,365</div>  
+            </div>  
+        </div>  
+  
+        <!-- Countries Covered -->  
+        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; padding-bottom: 10px;">  
+            <!-- Globe SVG -->  
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">  
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 0v20M2 12h20"/>  
+            </svg>  
+            <div>  
+                <div style="font-size: 0.9rem; color: #aaa;">Countries Covered</div>  
+                <div style="font-size: 1.2rem; font-weight: bold;">197</div>  
+            </div>  
+        </div>  
+  
+        <!-- Surveys Launched -->  
+        <div style="display: flex; align-items: center; gap: 12px;">  
+            <!-- Clipboard SVG -->  
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24">  
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 2h6a2 2 0 012 2v2H7V4a2 2 0 012-2zm0 4h6M7 8h10v12H7V8z"/>  
+            </svg>  
+            <div>  
+                <div style="font-size: 0.9rem; color: #aaa;">Surveys Launched</div>  
+                <div style="font-size: 1.2rem; font-weight: bold;">116,031,457</div>  
+            </div>  
+        </div>  
+    </div>  
+  
+    <!-- Call to Action -->  
+    <div style="padding: 20px; border-top: 1px solid #333; text-align: center;">  
+        <button style="  
+            background: linear-gradient(135deg, #1e1e1e, #333);  
+            color: #fff;  
+            font-weight: bold;  
+            font-size: 1rem;  
+            padding: 12px 30px;  
+            border-radius: 12px;  
+            border: 1px solid #555;  
+            cursor: pointer;  
+            transition: all 0.2s ease;  
+        "   
+        onmouseover="this.style.background='linear-gradient(135deg,#333,#111)'"   
+        onmouseout="this.style.background='linear-gradient(135deg,#1e1e1e,#333)'">  
+            Register & Start Earning  
+        </button>  
+    </div>  
+</div>  
+<!-- Surveoo Earn Section -->  
+<section style="backdrop-filter: blur(12px); background: rgba(22,22,22,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:25px; padding:40px 30px; margin:40px auto; max-width:850px; text-align:center; color:#fff;">  
+    <h1><a href="https://www.surveoo.com/" target="_blank" style="color:#1e90ff; text-decoration:none;">Surveoo — No.1 Paid Survey</a></h1>  
+    <h2>Earn up to <strong>$10 per Survey</strong></h2>  
+    <p>Join the <strong>Surveoo</strong> community and earn money by completing paid surveys. Get rewarded via:</p>  
+    <ul style="list-style:none; padding:0; margin-top:20px; display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">  
+        <li style="display:flex; align-items:center; gap:10px;">  
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" alt="PayPal" style="width:50px; height:auto;">  
+            PayPal  
+        </li>  
+        <li style="display:flex; align-items:center; gap:10px;">  
+            <img src="https://media.sodagift.com/img/image/2047108500617718-600x600.jpeg" alt="Amazon" style="width:50px; height:auto;">  
+            Amazon  
+        </li>  
+        <li style="display:flex; align-items:center; gap:10px;">  
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkAOa9tK6YR7Tki6ErdJw1yl2vuNlGUH1ugUuIN-vPGx0ZWQ82csxhqXEX&s=10" alt="Bank" style="width:50px; height:auto;">  
+            Bank Transfer  
+        </li>  
+    </ul>  
+    <a href="https://www.surveoo.com/" class="btn" style="display:inline-block; padding:12px 30px; background:#1e90ff; color:#fff; border-radius:15px; font-weight:600; margin-top:20px; text-decoration:none;">Register for Free</a>  
+  
+    <!-- How it Works -->  
+    <div style="margin-top:40px; text-align:left;">  
+        <h2 style="text-align:center;">How It Works?</h2>  
+        <ul style="list-style:none; padding:0; margin-top:20px;">  
+            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">  
+                <img src="https://cdn-app.surveoo.com/assets/site/img/home_01.png" alt="Register Free" style="width:40px; height:auto;">  
+                <span>Register for free: Join the community in seconds.</span>  
+            </li>  
+            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">  
+                <img src="https://cdn-app.surveoo.com/assets/site/img/home_02.png" alt="Respond Survey & Study" style="width:40px; height:auto;">  
+                <span>Respond daily: Answer surveys and studies.</span>  
+            </li>  
+            <li style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">  
+                <img src="https://cdn-app.surveoo.com/assets/site/img/home_03.png" alt="Protect Money" style="width:40px; height:auto;">  
+                <span>Pocket your money: Request withdrawals and treat yourself.</span>  
+            </li>  
+        </ul>  
+    </div>  
+  
+    <!-- Stats -->  
+    <div class="stats" style="display:flex; justify-content:space-around; flex-wrap:wrap; margin-top:30px; gap:20px;">  
+        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">  
+            <h3 style="color:#1e90ff;">32,713,365</h3>  
+            <p style="color:#ccc;">Registered Users</p>  
+        </div>  
+        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">  
+            <h3 style="color:#1e90ff;">197</h3>  
+            <p style="color:#ccc;">Countries Covered</p>  
+        </div>  
+        <div class="stat" style="flex:1; background: rgba(255,255,255,0.05); padding:25px; border-radius:20px; text-align:center;">  
+            <h3 style="color:#1e90ff;">116,031,457</h3>  
+            <p style="color:#ccc;">Surveys Launched</p>  
+        </div>  
+    </div>  
+  
+    <!-- Dropdown Extra Info -->  
+    <details style="background: rgba(255,255,255,0.05); border-radius:12px; padding:15px 20px; margin-top:30px; width:100%;">  
+        <summary style="font-weight:600; font-size:16px; cursor:pointer;">Data Protection & Quality</summary>  
+        <p style="margin-top:10px; font-size:14px; color:#ccc;">Your data is fully protected and never shared with third parties. Only the best surveys from prestigious brands.</p>  
+    </details>  
+  
+    <details style="background: rgba(255,255,255,0.05); border-radius:12px; padding:15px 20px; margin-top:15px; width:100%;">  
+        <summary style="font-weight:600; font-size:16px; cursor:pointer;">Controlled Partners</summary>  
+        <p style="margin-top:10px; font-size:14px; color:#ccc;">We work with top global brands — no nasty surprises. Our partners are trusted worldwide.</p>  
+    </details>  
+</section>  
+<button class="cta-btn">  
+  <span class="text-slide">Join Surveoo</span>  
+  <span class="text-slide">Earn on Surveoo</span>  
+</button>  
+  
+<style>  
+.cta-btn {  
+  position: relative;  
+  overflow: hidden;  
+  padding: 10px 30px;  
+  font-size: 16px;  
+  font-weight: bold;  
+  color: black;  
+  background-color: #00ffff; /* cyan */  
+  border: none;  
+  border-radius: 20px; /* smooth curved edges */  
+  cursor: pointer;  
+  width: 180px;  
+  height: 45px;  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+  text-align: center;  
+}  
+  
+.text-slide {  
+  position: absolute;  
+  width: 100%;  
+  text-align: center;  
+  animation: slideText 3s infinite;  
+}  
+  
+.text-slide:nth-child(2) {  
+  animation-delay: 1.5s;  
+}  
+  
+@keyframes slideText {  
+  0%, 45% { transform: translateY(0); opacity: 1; }  
+  50%, 95% { transform: translateY(100%); opacity: 0; }  
+  100% { transform: translateY(0); opacity: 1; }  
+}  
+  
+.cta-btn:hover {  
+  transform: scale(1.05);  
+  transition: transform 0.3s;  
+}  
+</style>  
+<!-- Surveify Banner -->  
+<div style="display:flex; flex-direction:column; align-items:center; width:100%;">  
+  <div style="display:flex; align-items:center; background:rgba(30,30,30,0.85); border:2px solid #444; border-radius:12px; padding:20px; gap:20px; width:80%; margin:20px auto;">  
+    <!-- Logo -->  
+    <div style="background:#fff; padding:10px; border-radius:12px; display:flex; align-items:center; justify-content:center;">  
+      <img src="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" alt="Surveify Logo" style="height:120px;">  
+    </div>  
+    <!-- Text -->  
+    <div style="max-width:600px;">  
+      <h1 style="margin:0; font-size:28px; color:#ffcc00;">Welcome to Surveify!</h1>  
+      <p style="margin:8px 0 0 0; font-size:16px; line-height:1.5;">  
+        Here we show the <span style="color:#00ff99; font-weight:bold;">top paying survey sites</span>. Our top recommendation is <span style="color:#00ff99; font-weight:bold;">Surveoo</span>, the most legit survey site. Earn up to <span style="color:#00ff99; font-weight:bold;">$10 per survey</span>!  
+      </p>  
+    </div>  
+  </div>  
+  
+  <!-- Reviews -->  
+  <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; width:80%; margin:auto;">  
+    <!-- Review 1 -->  
+    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">  
+      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">  
+        <div style="width:40px; height:40px; background:#ff595e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">YM</div>  
+        <div style="font-weight:bold; color:#ffcc00;">Yoka M</div>  
+      </div>  
+      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>  
+      <div style="font-size:14px; line-height:1.4; color:#ccc;">"Surveoo is amazing! I earned $10 in just one survey."</div>  
+    </div>  
+  
+    <!-- Review 2 -->  
+    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">  
+      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">  
+        <div style="width:40px; height:40px; background:#1982c4; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">TT</div>  
+        <div style="font-weight:bold; color:#ffcc00;">Tammy T</div>  
+      </div>  
+      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>  
+      <div style="font-size:14px; line-height:1.4; color:#ccc;">"Fast payouts and legit surveys. Highly recommend Surveoo!"</div>  
+    </div>  
+  
+    <!-- Review 3 -->  
+    <div style="background:rgba(40,40,40,0.9); border:1px solid #555; border-radius:12px; padding:15px; width:250px; text-align:center; transition:transform 0.3s;">  
+      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">  
+        <div style="width:40px; height:40px; background:#6a4c93; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; margin-right:10px;">FN</div>  
+        <div style="font-weight:bold; color:#ffcc00;">Frank N</div>  
+      </div>  
+      <div style="color:#ffd700; font-size:18px; margin-bottom:8px;">★★★★★</div>  
+      <div style="font-size:14px; line-height:1.4; color:#ccc;">"I never thought online surveys could be this rewarding!"</div>  
+    </div>  
+  </div>  
+</div>  
+<!-- START: Surveoo Promo Footer -->  
+<footer class="sv-footer" role="contentinfo">  
+  <div class="sv-footer-inner">  
+    <div class="sv-brand">  
+      <!-- Replace with your logo img if you want -->  
+      <div class="sv-logo" aria-hidden="true">Surveify</div>  
+      <p class="sv-tag">Join. Answer. Earn.</p>  
+    </div>  
+  
+    <nav class="sv-links" aria-label="Footer links">  
+      <a href="#" class="sv-link">Home</a>  
+      <a href="#" class="sv-link">How it works</a>  
+      <a href="#" class="sv-link">FAQ</a>  
+      <a href="#" class="sv-link">Privacy</a>  
+      <a href="#" class="sv-link">Terms</a>  
+    </nav>  
+  
+    <div class="sv-contact">  
+      <p class="sv-cta">Questions or partnership? Contact your manager:</p>  
+      <p class="sv-manager">  
+        <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>  
+      </p>  
+    </div>  
+  </div>  
+  
+  <div class="sv-disclaimer">  
+    <strong>Disclaimer:</strong>  
+    <span>  
+      Surveoo and any other survey sites promoted here are <em>not</em> owned, operated, or controlled by us.  
+      We only promote these platforms for marketing/affiliate purposes. For account issues, payouts, or  
+      platform-specific support, please contact your personal manager at  
+      <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>.  
+    </span>  
+  </div>  
+  
+  <div class="sv-bottom">  
+    <small>&copy; <span id="sv-year"></span> Surveoo Promotions. All rights reserved.</small>  
+  </div>  
+</footer>  
+  
+<style>  
+/* --- Surveoo Promo Footer - drop-in CSS --- */  
+.sv-footer {  
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;  
+  background: #060606;  
+  color: #dfefff;  
+  padding: 22px;  
+  border-top: 1px solid rgba(0,255,255,0.06);  
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);  
+  --accent: #00ffff; /* cyan accent */  
+  --muted: rgba(223,239,255,0.55);  
+  font-size: 14px;  
+}  
+  
+.sv-footer-inner {  
+  display: flex;  
+  gap: 24px;  
+  align-items: flex-start;  
+  justify-content: space-between;  
+  flex-wrap: wrap;  
+  max-width: 1200px;  
+  margin: 0 auto 14px;  
+  padding-bottom: 8px;  
+}  
+  
+.sv-brand {  
+  min-width: 180px;  
+}  
+.sv-logo {  
+  font-weight: 800;  
+  color: var(--accent);  
+  font-size: 20px;  
+  letter-spacing: 0.6px;  
+  border-radius: 8px;  
+  padding: 6px 10px;  
+  display: inline-block;  
+}  
+.sv-tag {  
+  margin: 6px 0 0;  
+  color: var(--muted);  
+  font-size: 13px;  
+}  
+  
+.sv-links {  
+  display: flex;  
+  gap: 12px;  
+  align-items: center;  
+  flex-wrap: wrap;  
+}  
+.sv-link {  
+  color: var(--muted);  
+  text-decoration: none;  
+  padding: 6px 8px;  
+  border-radius: 8px;  
+}  
+.sv-link:hover { color: #ffffff; background: rgba(0,255,255,0.03); }  
+  
+.sv-contact {  
+  min-width: 200px;  
+  text-align: right;  
+}  
+.sv-cta { margin: 0 0 6px; color: var(--muted); }  
+.sv-manager a {  
+  color: #000;  
+  background: var(--accent);  
+  padding: 6px 10px;  
+  border-radius: 999px;  
+  text-decoration: none;  
+  font-weight: 600;  
+  display: inline-block;  
+}  
+.sv-manager a:hover { opacity: 0.95; transform: translateY(-1px); transition: .15s ease; }  
+  
+.sv-disclaimer {  
+  max-width: 1200px;  
+  margin: 6px auto 12px;  
+  color: #aebedb;  
+  background: rgba(255,255,255,0.02);  
+  padding: 12px 14px;  
+  border-radius: 10px;  
+  font-size: 13px;  
+  line-height: 1.45;  
+  display: flex;  
+  gap: 10px;  
+  align-items: center;  
+}  
+.sv-disclaimer strong { color: #fff; margin-right: 6px; }  
+  
+.sv-bottom {  
+  max-width: 1200px;  
+  margin: 0 auto;  
+  text-align: center;  
+  color: #7f9bb1;  
+  padding-top: 6px;  
+  font-size: 13px;  
+}  
+  
+/* Responsive tweaks */  
+@media (max-width: 720px) {  
+  .sv-footer-inner { gap: 12px; }  
+  .sv-contact { text-align: left; width: 100%; }  
+  .sv-links { width: 100%; justify-content: flex-start; }  
+  .sv-brand { width: 100%; }  
+  .sv-disclaimer { font-size: 13px; }  
+}  
+</style>  
+<!-- Surveify Loader Start -->  
+  
+  
+<div class="loader">  
+  <img src="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" alt="Surveify Logo">  
+  <div class="progress-bar">  
+    <div class="progress-fill"></div>  
+  </div>  
+</div>  
+  
+<script>  
+  // Hide loader after 3 seconds and unlock scroll  
+  setTimeout(() => {  
+    const loader = document.querySelector('.loader');  
+    loader.style.display = 'none';  
+    document.body.style.overflow = 'auto'; // Re-enable scroll  
+  }, 3000);  
+</script>  
+<!-- Surveify Loader End -->  
+<script>  
+/* small helper: set year automatically */  
+document.addEventListener('DOMContentLoaded', function(){  
+  const y = new Date().getFullYear();  
+  const el = document.getElementById('sv-year');  
+  if (el) el.textContent = y;  
+});  
+</script>  
+<!-- END: Surveoo Promo Footer -->  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>  
+  
+<script>  
+  // Firebase config  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+    projectId: "itzhoyoo-f9f7e",  
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+    messagingSenderId: "1094792075584",  
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",  
+    measurementId: "G-LLT6F9WRKH"  
+  };  
+  firebase.initializeApp(firebaseConfig);  
+  const auth = firebase.auth();  
+  
+  // Elements  
+  const overlay = document.getElementById('overlay');  
+  const popup = document.getElementById('popup');  
+  const backdrop = document.getElementById('backdrop');  
+  const closePopup = document.getElementById('closePopup');  
+  const tabRegister = document.getElementById('tab-register');  
+  const tabLogin = document.getElementById('tab-login');  
+  const panelRegister = document.getElementById('panel-register');  
+  const panelLogin = document.getElementById('panel-login');  
+  const notifications = document.getElementById('notifications');  
+  const body = document.body;  
+  const mainCta = document.getElementById('main-cta');  
+  const topbarRight = document.querySelector('.topbar-right');  
+  
+  // Notification  
+  function showNotification(type, text, timeout=3500){  
+    const note = document.createElement('div');  
+    note.className = 'note ' + (type==='ok' ? 'success' : 'error');  
+    note.textContent = text;  
+    notifications.appendChild(note);  
+    setTimeout(()=> {  
+      note.style.opacity = '0';  
+      note.style.transform = 'translateY(-6px)';  
+      setTimeout(()=> note.remove(), 260);  
+    }, timeout);  
+  }  
+  
+  // Open/close popup  
+  function openPopup(tab='register'){  
+    overlay.classList.add('active');  
+    overlay.setAttribute('aria-hidden','false');  
+    body.classList.add('no-select');  
+    tab === 'login' ? activateLogin() : activateRegister();  
+    setTimeout(()=>{  
+      const first = tab==='login' ? document.getElementById('log-email') : document.getElementById('reg-username');  
+      first && first.focus();  
+    }, 380);  
+  }  
+  function closeAll(){  
+    overlay.classList.remove('active');  
+    overlay.setAttribute('aria-hidden','true');  
+    body.classList.remove('no-select');  
+  }  
+  
+  // Tabs  
+  function activateRegister(){  
+    tabRegister.classList.add('active'); tabRegister.setAttribute('aria-selected','true');  
+    tabLogin.classList.remove('active'); tabLogin.setAttribute('aria-selected','false');  
+    panelRegister.style.display = 'block';  
+    panelLogin.style.display = 'none';  
+    document.getElementById('authTitle').textContent = "Create Your Account 🔥";  
+    document.getElementById('authSubtitle').textContent = "Join Surveify and start earning smarter";  
+  }  
+  function activateLogin(){  
+    tabLogin.classList.add('active'); tabLogin.setAttribute('aria-selected','true');  
+    tabRegister.classList.remove('active'); tabRegister.setAttribute('aria-selected','false');  
+    panelLogin.style.display = 'block';  
+    panelRegister.style.display = 'none';  
+    document.getElementById('authTitle').textContent = "Welcome Back 👋";  
+    document.getElementById('authSubtitle').textContent = "Reignite your hustle — log in below";  
+  }  
+  
+  // Attach topbar buttons  
+  function attachAuthButtons(){  
+    topbarRight.innerHTML = `  
+      <div class="auth-pill" role="tablist" aria-label="auth">  
+        <button class="register" id="open-register">Register</button>  
+        <button class="login" id="open-login">Login</button>  
+      </div>  
+      <div class="profile" id="profileDiv" title="Profile">  
+        <img src="https://thumbs.dreamstime.com/b/hand-holding-lightbulb-money-stack-young-plant-nature-idea-saving-energy-accounting-finance-concept-170450270.jpg" alt="profile">  
+      </div>  
+    `;  
+    document.getElementById('open-register').addEventListener('click', ()=> openPopup('register'));  
+    document.getElementById('open-login').addEventListener('click', ()=> openPopup('login'));  
+  }  
+  
+  // Update topbar for logged in user  
+  function updateHeader(username){  
+    topbarRight.innerHTML = '';  
+    const span = document.createElement('span');  
+    span.style.color = '#fff';  
+    span.textContent = `@${username}`;  
+  
+    const logoutBtn = document.createElement('button');  
+    logoutBtn.id = 'logoutBtn';  
+    logoutBtn.style.cssText = 'margin-left:10px;color:red;background:transparent;border:1px solid red;padding:4px 8px;border-radius:6px;cursor:pointer';  
+    logoutBtn.textContent = 'Logout';  
+    logoutBtn.addEventListener('click', async ()=>{  
+      await auth.signOut();  
+      showNotification('ok','Logged out successfully.');  
+      attachAuthButtons();  
+    });  
+  
+    topbarRight.appendChild(span);  
+    topbarRight.appendChild(logoutBtn);  
+  }  
+  
+  // Firebase auth forms  
+  document.getElementById('registerForm').addEventListener('submit', async function(e){  
+    e.preventDefault();  
+    const username = document.getElementById('reg-username').value.trim();  
+    const email = document.getElementById('reg-email').value.trim();  
+    const pass = document.getElementById('reg-pass').value;  
+    if(!username || !email || pass.length < 6){ showNotification('err','Fill valid details (password min 6 chars).'); return; }  
+    try{  
+      const userCredential = await auth.createUserWithEmailAndPassword(email, pass);  
+      await userCredential.user.updateProfile({ displayName: username });  
+      showNotification('ok', `Account created — welcome @${username}!`);  
+      updateHeader(username);  
+      closeAll();  
+      this.reset();  
+    }catch(err){ showNotification('err', err.message); }  
+  });  
+  
+  document.getElementById('loginForm').addEventListener('submit', async function(e){  
+    e.preventDefault();  
+    const email = document.getElementById('log-email').value.trim();  
+    const pass = document.getElementById('log-pass').value;  
+    if(!email || !pass){ showNotification('err','Enter email and password.'); return; }  
+    try{  
+      const userCredential = await auth.signInWithEmailAndPassword(email, pass);  
+      const username = userCredential.user.displayName || email.split('@')[0];  
+      showNotification('ok', `Signed in successfully as @${username}`);  
+      updateHeader(username);  
+      closeAll();  
+      this.reset();  
+    }catch(err){ showNotification('err', err.message); }  
+  });  
+  
+  // Keep user logged in  
+  auth.onAuthStateChanged(user=>{  
+    if(user){  
+      const username = user.displayName || user.email.split('@')[0];  
+      updateHeader(username);  
+    } else {  
+      attachAuthButtons();  
+    }  
+  });  
+  
+  // Forgot password  
+  document.getElementById('forgot').addEventListener('click', function(){  
+    const email = document.getElementById('log-email').value.trim();  
+    if(!email){ showNotification('err','Enter your email first'); return; }  
+    auth.sendPasswordResetEmail(email)  
+        .then(()=> showNotification('ok','Password reset email sent.'))  
+        .catch(err=> showNotification('err', err.message));  
+  });  
+  
+  // Close popup on ESC  
+  document.addEventListener('keydown', (e)=> {  
+    if(e.key === 'Escape' && overlay.classList.contains('active')) closeAll();  
+  });  
+  
+  // Popup focus trap  
+  let lastFocused = null;  
+  function trapFocusOnOpen(){  
+    if(overlay.classList.contains('active')){  
+      lastFocused = document.activeElement;  
+      const focusable = popup.querySelectorAll('input,button,select,[tabindex]:not([tabindex="-1"])');  
+      if(focusable.length) focusable[0].focus();  
+      document.addEventListener('focus', enforce, true);  
+    } else {  
+      document.removeEventListener('focus', enforce, true);  
+      lastFocused && lastFocused.focus();  
+    }  
+    function enforce(ev){  
+      if(!popup.contains(ev.target)) ev.stopPropagation(), ev.preventDefault(), popup.querySelector('input,button').focus();  
+    }  
+  }  
+  const obs = new MutationObserver(trapFocusOnOpen);  
+  obs.observe(overlay, { attributes: true, attributeFilter: ['class'] });  
+  
+  // Initial attachment  
+  attachAuthButtons();  
+  openRegister.addEventListener('click', ()=> openPopup('register'));  
+  openLogin.addEventListener('click', ()=> openPopup('login'));  
+  mainCta.addEventListener('click', (e)=> { e.preventDefault(); openPopup('register'); });  
+  closePopup.addEventListener('click', closeAll);  
+  backdrop.addEventListener('click', closeAll);  
+  tabRegister.addEventListener('click', activateRegister);  
+  tabLogin.addEventListener('click', activateLogin);  
+</script>  
+</body>  
 </html>
