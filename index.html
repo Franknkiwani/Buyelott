@@ -422,17 +422,17 @@ body {
     </div>
   </section>
 </main>
-
 <!-- Overlay popup & backdrop -->
 <div class="overlay" id="overlay" aria-hidden="true">
   <div class="backdrop" id="backdrop"></div>
 
   <div class="popup" role="dialog" aria-modal="true" aria-labelledby="authTitle" id="popup">
     <div class="inner">
-      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;position:relative">
         <div id="authTitle" style="font-weight:800;color:#fff;font-size:1.4rem">Welcome</div>
         <div id="authSubtitle" style="font-size:0.88rem;color:var(--muted)">Start by creating an account or log in</div>
-        <button id="closePopup" aria-label="Close" style="position:absolute;top:14px;right:14px;background:transparent;border:0;color:var(--muted);cursor:pointer;font-weight:700">✕</button>
+        <!-- iOS-style red close button -->
+        <button id="closePopup" aria-label="Close">✕</button>
       </div>
 
       <div class="tabs" role="tablist">
@@ -466,7 +466,9 @@ body {
           <input id="log-pass" name="password" type="password" placeholder="Your password" required>
 
           <div class="small-row" style="margin-top:4px">
-            <div style="font-size:0.85rem;color:var(--muted)"><input id="remember" type="checkbox" style="margin-right:6px">Remember</div>
+            <div style="font-size:0.85rem;color:var(--muted)">
+              <input id="remember" type="checkbox" style="margin-right:6px">Remember
+            </div>
             <div id="forgot" class="link-like">Forgot password?</div>
           </div>
 
@@ -476,6 +478,40 @@ body {
     </div>
   </div>
 </div>
+
+<style>
+  /* iOS-style red close button */
+  #closePopup {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background-color: #ff3b30;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  #closePopup:hover {
+    background-color: #ff605c;
+    transform: scale(1.1);
+  }
+</style>
+
+<script>
+  // Close popup functionality
+  document.getElementById('closePopup').addEventListener('click', () => {
+    document.getElementById('overlay').style.display = 'none';
+  });
+</script>
 
 <!-- Notifications container -->
 <div class="notifications" id="notifications" aria-live="polite"></div>
