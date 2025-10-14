@@ -515,6 +515,63 @@ body {
         <p style="margin-top:10px; font-size:14px; color:#ccc;">We work with top global brands — no nasty surprises. Our partners are trusted worldwide.</p>
     </details>
 </section>
+<div class="cta-container">
+  <button class="cta-btn">
+    <span class="text-slide">Join Surveoo</span>
+    <span class="text-slide">Earn on Surveoo</span>
+  </button>
+</div>
+
+<style>
+.cta-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* centers vertically in full page */
+  background-color: #000; /* optional, just for contrast */
+}
+
+.cta-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 15px 50px;
+  font-size: 18px;
+  font-weight: bold;
+  color: black;
+  background-color: #00ffff; /* cyan */
+  border: none;
+  border-radius: 25px; /* smooth curved edges */
+  cursor: pointer;
+  width: 220px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.text-slide {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  animation: slideText 4s infinite;
+}
+
+.text-slide:nth-child(2) {
+  animation-delay: 2s;
+}
+
+@keyframes slideText {
+  0%, 45% { transform: translateY(0); opacity: 1; }
+  50%, 95% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.cta-btn:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s;
+}
+</style>
 <!-- Surveify Banner -->
 <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
   <div style="display:flex; align-items:center; background:rgba(30,30,30,0.85); border:2px solid #444; border-radius:12px; padding:20px; gap:20px; width:80%; margin:20px auto;">
