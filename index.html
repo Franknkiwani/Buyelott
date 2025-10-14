@@ -808,64 +808,7 @@ body {
 }
 </style>
 <!-- Surveify Loader Start -->
-<style>
-  /* Loader Styles */
-  html, body {
-    overflow: hidden; /* Block scroll while loader is active */
-  }
 
-  .loader {
-    position: fixed;
-    inset: 0;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 9999;
-    animation: fadeOut 1s ease 2.8s forwards;
-  }
-
-  .loader img {
-    width: 160px;
-    margin-bottom: 25px;
-    animation: pulse 1.5s infinite alternate;
-  }
-
-  .progress-bar {
-    width: 200px;
-    height: 6px;
-    background-color: #e0e0e0;
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    width: 0%;
-    height: 100%;
-    background-color: #000;
-    border-radius: 6px;
-    animation: load 3s ease-in-out forwards;
-  }
-
-  @keyframes load {
-    from { width: 0%; }
-    to { width: 100%; }
-  }
-
-  @keyframes pulse {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(1.05); opacity: 0.9; }
-  }
-
-  @keyframes fadeOut {
-    to {
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(0.95);
-    }
-  }
-</style>
 
 <div class="loader">
   <img src="https://i.ibb.co/7JcM0Ks0/IMG-20251014-WA0007-removebg-preview.png" alt="Surveify Logo">
