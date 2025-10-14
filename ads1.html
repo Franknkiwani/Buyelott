@@ -624,6 +624,162 @@ body {
     </div>
   </div>
 </div>
+<!-- START: Surveoo Promo Footer -->
+<footer class="sv-footer" role="contentinfo">
+  <div class="sv-footer-inner">
+    <div class="sv-brand">
+      <!-- Replace with your logo img if you want -->
+      <div class="sv-logo" aria-hidden="true">Surveoo</div>
+      <p class="sv-tag">Join. Answer. Earn.</p>
+    </div>
+
+    <nav class="sv-links" aria-label="Footer links">
+      <a href="#" class="sv-link">Home</a>
+      <a href="#" class="sv-link">How it works</a>
+      <a href="#" class="sv-link">FAQ</a>
+      <a href="#" class="sv-link">Privacy</a>
+      <a href="#" class="sv-link">Terms</a>
+    </nav>
+
+    <div class="sv-contact">
+      <p class="sv-cta">Questions or partnership? Contact your manager:</p>
+      <p class="sv-manager">
+        <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="sv-disclaimer">
+    <strong>Disclaimer:</strong>
+    <span>
+      Surveoo and any other survey sites promoted here are <em>not</em> owned, operated, or controlled by us.
+      We only promote these platforms for marketing/affiliate purposes. For account issues, payouts, or
+      platform-specific support, please contact your personal manager at
+      <a href="mailto:cashmarco2000@gmail.com">cashmarco2000@gmail.com</a>.
+    </span>
+  </div>
+
+  <div class="sv-bottom">
+    <small>&copy; <span id="sv-year"></span> Surveoo Promotions. All rights reserved.</small>
+  </div>
+</footer>
+
+<style>
+/* --- Surveoo Promo Footer - drop-in CSS --- */
+.sv-footer {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #060606;
+  color: #dfefff;
+  padding: 22px;
+  border-top: 1px solid rgba(0,255,255,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  --accent: #00ffff; /* cyan accent */
+  --muted: rgba(223,239,255,0.55);
+  font-size: 14px;
+}
+
+.sv-footer-inner {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto 14px;
+  padding-bottom: 8px;
+}
+
+.sv-brand {
+  min-width: 180px;
+}
+.sv-logo {
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 20px;
+  letter-spacing: 0.6px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+.sv-tag {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sv-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sv-link {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+.sv-link:hover { color: #ffffff; background: rgba(0,255,255,0.03); }
+
+.sv-contact {
+  min-width: 200px;
+  text-align: right;
+}
+.sv-cta { margin: 0 0 6px; color: var(--muted); }
+.sv-manager a {
+  color: #000;
+  background: var(--accent);
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+}
+.sv-manager a:hover { opacity: 0.95; transform: translateY(-1px); transition: .15s ease; }
+
+.sv-disclaimer {
+  max-width: 1200px;
+  margin: 6px auto 12px;
+  color: #aebedb;
+  background: rgba(255,255,255,0.02);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.sv-disclaimer strong { color: #fff; margin-right: 6px; }
+
+.sv-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  color: #7f9bb1;
+  padding-top: 6px;
+  font-size: 13px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .sv-footer-inner { gap: 12px; }
+  .sv-contact { text-align: left; width: 100%; }
+  .sv-links { width: 100%; justify-content: flex-start; }
+  .sv-brand { width: 100%; }
+  .sv-disclaimer { font-size: 13px; }
+}
+</style>
+
+<script>
+/* small helper: set year automatically */
+document.addEventListener('DOMContentLoaded', function(){
+  const y = new Date().getFullYear();
+  const el = document.getElementById('sv-year');
+  if (el) el.textContent = y;
+});
+</script>
+<!-- END: Surveoo Promo Footer -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
