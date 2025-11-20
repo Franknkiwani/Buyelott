@@ -161,6 +161,87 @@ body, header, .card, .container, select, button {
 button:focus, select:focus {
   outline: none; /* remove default focus outline */
 }
+.voucher-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* voucher left, amount right */
+}
+
+.voucher-box {
+  flex: 1; /* takes all remaining space */
+  background: #1c1c1e;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  border: 1px solid #333;
+  text-align: left; /* code on the left */
+  overflow: hidden;
+}
+
+.amount-box {
+  margin-left: 10px; /* space between code and amount */
+  font-size: 16px;
+  color: #00ff7f;
+  font-weight: 600;
+  flex-shrink: 0; /* prevent shrinking */
+}
+.unlock-btn {
+  display: block;               /* make it block so it can be centered */
+  margin: 20px auto 0 auto;     /* top margin + center horizontally */
+  background: #2c2c2e;          /* dark base color */
+  color: #fff;                   /* text color */
+  padding: 12px 25px;            /* size */
+  border-radius: 14px;           /* smooth rounded edges */
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid #00ff7f;    /* green outline highlight */
+  box-shadow: 0 4px 12px rgba(0, 255, 127, 0.4); /* subtle glow */
+  transition: all 0.25s ease-in-out; /* smooth hover effect */
+}
+
+.unlock-btn:hover {
+  background: #00ff7f;           /* highlight background on hover */
+  color: #000;                   /* contrast text */
+  box-shadow: 0 6px 18px rgba(0, 255, 127, 0.6); /* stronger glow */
+  border-color: #00ff7f;         /* matching border */
+}
+
+.unlock-btn:active {
+  transform: scale(0.98);        /* small press effect */
+  box-shadow: 0 3px 8px rgba(0, 255, 127, 0.5);
+}
+.hidden {
+  display: none !important; /* forcefully hide element */
+}
+.loader-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;          /* dark background, like iOS launch screen */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.2); /* light gray track */
+  border-top-color: #fff;                         /* spinning color */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -168,18 +249,27 @@ button:focus, select:focus {
 <header>BETTING VOUCHER</header>
 
 <div class="container">
-  <div id="card" class="card">
-    <div class="title">Choose Your Voucher Type</div>
-    <select id="voucherType">
+  <div id="card" class="card" style="padding: 20px; max-width: 400px; margin: auto; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #fff;">
+    <!-- Top images with OR -->
+    <div class="voucher-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRH4zQ67FEwAOu6DDKgcGbYfbomDHIf-2Dw98DVYZhynQ&s=10" alt="Voucher 1" style="width:60px; height:60px; border-radius:12px; object-fit: cover; border: 2px solid #ccc;">
+      <strong style="font-size: 18px; color: #333;">OR</strong>
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJaN34HLXnLQXNbRqmOcy3TauEL-3kQN8-UgtrjE_OMA&s=10" alt="Voucher 2" style="width:60px; height:60px; border-radius:12px; object-fit: cover; border: 2px solid #ccc;">
+    </div>
+
+    <!-- Title and select -->
+<div class="title" style="color: #000; font-weight: bold; margin-bottom: 10px;">Choose Your Voucher Type</div>
+    <select id="voucherType" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
       <option value="1voucher">1 Voucher</option>
       <option value="ott">OTT Voucher</option>
     </select>
-
+  </div>
     <button class="primary-btn" onclick="showVoucher()">Show Voucher</button>
 
-    <div id="voucher" class="voucher-box">••••••••••</div>
-    <div id="amount" class="amount-box hidden">R0</div>
-
+<div class="voucher-container" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
+  <div id="voucher" class="voucher-box">••••••••••</div>
+  <div id="amount" class="amount-box hidden">R0</div>
+</div>
     <div id="unlockBtn" class="unlock-btn hidden" onclick="unlockCode()">Unlock Code</div>
   </div>
 </div>
@@ -246,7 +336,10 @@ button:focus, select:focus {
     font-weight: 600;
   }
 </style>
-
+<!-- iOS-style Loading Screen -->
+<div id="loader" class="loader-overlay">
+  <div class="spinner"></div>
+</div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getDatabase, ref, get, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -308,6 +401,14 @@ button:focus, select:focus {
     setTimeout(() => updateVisits(1), 60000); // +1 after 1 min
     trackOnline();
   });
+  window.addEventListener("load", () => {
+  setTimeout(() => {
+    const loader = document.getElementById("loader");
+    loader.style.opacity = '0';
+    loader.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => loader.style.display = 'none', 400);
+  }, 2000); // 2 seconds
+});
 </script>
 <!-- END: Visits & Online Users Panel -->
 <script>
