@@ -3,92 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Random Message Generator</title>
+<title>Image BW Converter + Imgur Upload</title>
 
 <style>
   body {
     margin: 0;
+    padding: 20px;
     background: #0f0f0f;
     color: #fff;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro", Roboto, sans-serif;
+  }
+  h1 { text-align: center; margin-bottom: 20px; }
+
+  .box {
+    background: rgba(255,255,255,0.06);
     padding: 20px;
-  }
-  h1 {
-    text-align: center;
+    border-radius: 14px;
     margin-bottom: 20px;
   }
-  #messages {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  .msg {
-    background: rgba(255,255,255,0.07);
+
+  input[type="file"] {
+    width: 100%;
     padding: 15px;
+    background: #ffffff10;
+    border: 1px solid #ffffff30;
     border-radius: 12px;
-    font-size: 1.1rem;
+    color: #ccc;
   }
+
   button {
     width: 100%;
     padding: 15px;
+    border: none;
+    border-radius: 12px;
+    margin-top: 15px;
     background: #ffffff15;
-    border: 1px solid #ffffff30;
-    border-radius: 12px;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
-  .ad-box {
-    margin: 25px 0;
-    padding: 15px;
-    text-align: center;
+
+  img {
+    width: 100%;
     border-radius: 12px;
-    background: rgba(255,255,255,0.06);
-    color: #aaa;
+    margin-top: 15px;
+  }
+
+  .link-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #ffffff15;
+    border-radius: 10px;
+    word-break: break-all;
+    font-size: 0.9rem;
   }
 </style>
 </head>
 <body>
 
-<h1>🔥 Random Messages</h1>
+<h1>🖼 Image BW Converter + Imgur Upload</h1>
 
-<div id="messages"></div>
+<div class="box">
+  <input type="file" id="upload" accept="image/*">
+  <button onclick="uploadToImgur()">Upload to Imgur</button>
+  <div id="imgurLink" class="link-box"></div>
+</div>
 
-<button onclick="addMessage()">Generate Message</button>
-
-<div class="ad-box">
-  AdSense Slot
-  <!-- Your AdSense code goes here -->
+<div class="box">
+  <button onclick="convertBW()">Convert to Black & White</button>
+  <canvas id="canvas" style="width:100%; display:none;"></canvas>
+  <img id="preview">
+  <a id="downloadBtn" style="display:none;" download="BW-Image.png">
+    <button>Download BW Image</button>
+  </a>
 </div>
 
 <script>
-  const texts = [
-    "Stay hungry, stay humble",
-    "You’re built different",
-    "Trust the grind",
-    "Keep moving forward",
-    "Energy never lies",
-    "Your future self is watching",
-    "Chase purpose, not people",
-    "Small steps = big wins",
-    "Good vibes only",
-    "Nothing changes if nothing changes"
-  ];
+// Load image into preview
+let originalImage = null;
 
-  const emojis = ["🔥", "💫", "⚡", "🚀", "😮‍💨", "🌟", "🦁", "🥇", "📈", "💥", "✨", "😎", "💯", "🧠"];
+document.getElementById("upload").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  function addMessage() {
-    const box = document.getElementById("messages");
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    originalImage = event.target.result;
+    document.getElementById("preview").src = originalImage;
+  };
+  reader.readAsDataURL(file);
+});
 
-    const randomText = texts[Math.floor(Math.random() * texts.length)];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-    const div = document.createElement("div");
-    div.className = "msg";
-    div.textContent = randomEmoji + " " + randomText;
+// Upload to Imgur
+async function uploadToImgur() {
+  const fileInput = document.getElementById("upload").files[0];
+  if (!fileInput) return alert("Select an image first.");
 
-    box.appendChild(div);
+  const form = new FormData();
+  form.append("image", fileInput);
+
+  const res = await fetch("https://api.imgur.com/3/image", {
+    method: "POST",
+    headers: { Authorization: "Client-ID 891e5bb4aa94282" },
+    body: form
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("imgurLink").textContent = "Imgur Link: " + data.data.link;
+  } else {
+    document.getElementById("imgurLink").textContent = "Upload failed.";
   }
+}
+
+
+// Convert to black & white
+function convertBW() {
+  if (!originalImage) return alert("Upload an image first.");
+
+  const img = new Image();
+  img.src = originalImage;
+
+  img.onload = function() {
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+
+    // Convert to grayscale
+    for (let i = 0; i < pixels.length; i += 4) {
+      let avg = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+      pixels[i] = avg;
+      pixels[i+1] = avg;
+      pixels[i+2] = avg;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    // Show BW image
+    const bwURL = canvas.toDataURL("image/png");
+    document.getElementById("preview").src = bwURL;
+
+    // Activate download
+    const download = document.getElementById("downloadBtn");
+    download.href = bwURL;
+    download.style.display = "block";
+  };
+}
 </script>
 
 </body>
