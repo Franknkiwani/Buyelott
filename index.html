@@ -3,496 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FREE BETTING VOUCHER</title>
-
-<!-- Description -->
-<meta name="description" content="Get your FREE R50 1Voucher or OTT Voucher today! Check your voucher stats, see online users, and claim your codes instantly.">
-
-<!-- Favicon -->
-<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9B1GRnCMomvVCmNe7jeWia1o2E-K1lrT1lOQI9LgrCg&s=10" type="image/png">
-
-<!-- Open Graph / Facebook / WhatsApp Preview -->
-<meta property="og:title" content=" FREE BETTING VOUCHER">
-<meta property="og:description" content="Get your FREE R50 1Voucher or OTT Voucher today! Check your voucher stats, see online users, and claim your codes instantly.">
-<meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwUkFNXbZVdOmsWy7yeqUjVWW4XNVAwX_vKbfqAzLXOhwUZhbSYX2PxCN2&s=10">
-<meta property="og:type" content="website">
-<meta property="og:url" content="YOUR_PAGE_URL_HERE">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content=" FREE BETTING VOUCHER">
-<meta name="twitter:description" content="Get your FREE R50 1Voucher or OTT Voucher today! Check your voucher stats, see online users, and claim your codes instantly.">
-<meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwUkFNXbZVdOmsWy7yeqUjVWW4XNVAwX_vKbfqAzLXOhwUZhbSYX2PxCN2&s=10">
-
-<!-- Mobile / Safari -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#000000">
-<link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9B1GRnCMomvVCmNe7jeWia1o2E-K1lrT1lOQI9LgrCg&s=10">
-
-</head>
+<title>Random Message Generator</title>
 
 <style>
-body {
-  margin: 0;
-  background: #000;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  color: #fff;
-  transition: filter 0.3s;
-  overflow-x: hidden;
-}
-header {
-  text-align: center;
-  padding: 18px;
-  font-size: 22px;
-  font-weight: 700;
-  background: #0d0d0d;
-  border-bottom: 1px solid #222;
-  letter-spacing: 1px;
-}
-.container { padding: 20px; }
-.card {
-  background: #111;
-  border-radius: 20px;
-  padding: 25px;
-  margin-top: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  text-align: center;
-  border: 1px solid #222;
-  transition: filter 0.3s;
-}
-.title { font-size: 20px; font-weight: 600; margin-bottom: 10px; color: #e0e0e0; }
-select {
-  width: 100%;
-  padding: 14px;
-  margin-top: 10px;
-  border-radius: 12px;
-  border: 1px solid #333;
-  font-size: 16px;
-  background: #1c1c1e;
-  color: #fff;
-  outline: none;
-}
-.voucher-box {
-  background: #1c1c1e;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  margin-top: 20px;
-  border: 1px solid #333;
-}
-.amount-box { margin-top: 12px; font-size: 16px; color: #00ff7f; font-weight: 600; }
-.primary-btn {
-  width: 100%;
-  padding: 15px;
-  margin-top: 20px;
-  background: #007aff;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.primary-btn:active { background: #0065d6; }
-.unlock-btn {
-  margin-top: 15px;
-  background: #2c2c2e;
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  display: inline-block;
-  cursor: pointer;
-  border: 1px solid #3a3a3c;
-}
-.unlock-btn:active { background: #3a3a3c; }
-.hidden { display: none; }
-.popup-overlay {
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.popup {
-  background: #1c1c1e;
-  border-radius: 20px;
-  padding: 25px;
-  width: 80%;
-  max-width: 350px;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.8);
-  border: 1px solid #333;
-}
-.popup p { font-size: 16px; color: #fff; margin-bottom: 15px; }
-.popup button {
-  background: #007aff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  color: #fff;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-}
-.popup button:active { background: #0065d6; }
-/* Sticky header */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000; /* stay on top of other content */
-}
-
-/* Disable text selection and blue highlight */
-body, header, .card, .container, select, button {
-  user-select: none;       /* prevents text selection */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-tap-highlight-color: transparent; /* remove blue highlight on tap/click */
-}
-
-/* Optional: for buttons and selects specifically */
-button:focus, select:focus {
-  outline: none; /* remove default focus outline */
-}
-.voucher-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* voucher left, amount right */
-}
-
-.voucher-box {
-  flex: 1; /* takes all remaining space */
-  background: #1c1c1e;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  border: 1px solid #333;
-  text-align: left; /* code on the left */
-  overflow: hidden;
-}
-
-.amount-box {
-  margin-left: 10px; /* space between code and amount */
-  font-size: 16px;
-  color: #00ff7f;
-  font-weight: 600;
-  flex-shrink: 0; /* prevent shrinking */
-}
-.unlock-btn {
-  display: block;               /* make it block so it can be centered */
-  margin: 20px auto 0 auto;     /* top margin + center horizontally */
-  background: #2c2c2e;          /* dark base color */
-  color: #fff;                   /* text color */
-  padding: 12px 25px;            /* size */
-  border-radius: 14px;           /* smooth rounded edges */
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-  border: 2px solid #00ff7f;    /* green outline highlight */
-  box-shadow: 0 4px 12px rgba(0, 255, 127, 0.4); /* subtle glow */
-  transition: all 0.25s ease-in-out; /* smooth hover effect */
-}
-
-.unlock-btn:hover {
-  background: #00ff7f;           /* highlight background on hover */
-  color: #000;                   /* contrast text */
-  box-shadow: 0 6px 18px rgba(0, 255, 127, 0.6); /* stronger glow */
-  border-color: #00ff7f;         /* matching border */
-}
-
-.unlock-btn:active {
-  transform: scale(0.98);        /* small press effect */
-  box-shadow: 0 3px 8px rgba(0, 255, 127, 0.5);
-}
-.hidden {
-  display: none !important; /* forcefully hide element */
-}
-.loader-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;          /* dark background, like iOS launch screen */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.2); /* light gray track */
-  border-top-color: #fff;                         /* spinning color */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  body {
+    margin: 0;
+    background: #0f0f0f;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro", Roboto, sans-serif;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  #messages {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .msg {
+    background: rgba(255,255,255,0.07);
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+  }
+  button {
+    width: 100%;
+    padding: 15px;
+    background: #ffffff15;
+    border: 1px solid #ffffff30;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1.1rem;
+  }
+  .ad-box {
+    margin: 25px 0;
+    padding: 15px;
+    text-align: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    color: #aaa;
+  }
 </style>
 </head>
 <body>
 
-<header>BETTING VOUCHER</header>
+<h1>🔥 Random Messages</h1>
 
-<div class="container">
-  <div id="card" class="card" style="padding: 20px; max-width: 400px; margin: auto; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #fff;">
-    <!-- Top images with OR -->
-    <div class="voucher-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRH4zQ67FEwAOu6DDKgcGbYfbomDHIf-2Dw98DVYZhynQ&s=10" alt="Voucher 1" style="width:60px; height:60px; border-radius:12px; object-fit: cover; border: 2px solid #ccc;">
-      <strong style="font-size: 18px; color: #333;">OR</strong>
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJaN34HLXnLQXNbRqmOcy3TauEL-3kQN8-UgtrjE_OMA&s=10" alt="Voucher 2" style="width:60px; height:60px; border-radius:12px; object-fit: cover; border: 2px solid #ccc;">
-    </div>
+<div id="messages"></div>
 
-    <!-- Title and select -->
-<div class="title" style="color: #000; font-weight: bold; margin-bottom: 10px;">Choose Your Voucher Type</div>
-    <select id="voucherType" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
-      <option value="1voucher">1 Voucher</option>
-      <option value="ott">OTT Voucher</option>
-    </select>
-  </div>
-    <button class="primary-btn" onclick="showVoucher()">Show Voucher</button>
+<button onclick="addMessage()">Generate Message</button>
 
-<div class="voucher-container" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
-  <div id="voucher" class="voucher-box">••••••••••</div>
-  <div id="amount" class="amount-box hidden">R0</div>
-</div>
-    <div id="unlockBtn" class="unlock-btn hidden" onclick="unlockCode()">Unlock Code</div>
-  </div>
+<div class="ad-box">
+  AdSense Slot
+  <!-- Your AdSense code goes here -->
 </div>
 
-<div id="popupOverlay" class="popup-overlay">
-  <div class="popup">
-    <p>Enter your email on the next website and your voucher will be sent.</p>
-    <button onclick="redirect()">Continue</button>
-  </div>
-</div>
-<div class="card" style="margin-top:30px; border:1px solid #000; background:rgba(28,28,30,0.95); backdrop-filter:blur(6px);">
-  <div class="title">Today's Voucher Stats</div>
-  <div style="text-align:right; font-size:13px; color:#aaa; margin-bottom:6px;">
-    Next refresh in <span id="timer">60</span>s
-  </div>
-  <table style="width:100%; border-collapse: collapse; text-align:left; font-size:14px;">
-    <thead>
-      <tr style="border-bottom:1px solid #222;">
-        <th style="padding:8px;">User</th>
-        <th style="padding:8px;">Voucher Type</th>
-        <th style="padding:8px;">Amount</th>
-      </tr>
-    </thead>
-    <tbody id="mockStats"></tbody>
-  </table>
-</div>
-<!-- START: Visits & Online Users Panel -->
-<div id="stats-panel">
-  <div class="stat-item">
-    👤 Today Visits: <span id="visits-count">...</span>
-  </div>
-  <div class="stat-item">
-    🟢 Online Users: <span id="online-count">...</span>
-  </div>
-</div>
-
-<style>
-  /* Stats Panel Styles */
-  #stats-panel {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #1c1c1e;
-    color: #fff;
-    font-size: 0.95rem;
-    padding: 12px 18px;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 130px;
-    z-index: 9999;
-  }
-
-  #stats-panel .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  #stats-panel .stat-item span {
-    font-weight: 600;
-  }
-</style>
-<!-- iOS-style Loading Screen -->
-<div id="loader" class="loader-overlay">
-  <div class="spinner"></div>
-</div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, get, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const today = new Date().toISOString().split('T')[0];
-  const visitsRef = ref(db, `visits/${today}`);
-  const onlineRef = ref(db, `onlineUsers/${today}`);
-
-  // Increment visits
-  async function updateVisits(amount = 1) {
-    await runTransaction(visitsRef, current => (current || 0) + amount);
-    fetchVisits();
-  }
-
-  // Fetch today's visits
-  async function fetchVisits() {
-    const snapshot = await get(visitsRef);
-    const count = snapshot.exists() ? snapshot.val() : 0;
-    document.getElementById("visits-count").innerText = count;
-  }
-
-  // Track online users
-  function trackOnline() {
-    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    const userRef = ref(db, `onlineUsers/${today}/${userId}`);
-
-    runTransaction(userRef, () => 1); // add user
-
-    // Remove user on disconnect
-    window.addEventListener("beforeunload", () => {
-      userRef.remove();
-    });
-
-    // Listen to total online users
-    const dayRef = ref(db, `onlineUsers/${today}`);
-    onValue(dayRef, snapshot => {
-      const users = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById("online-count").innerText = users;
-    });
-  }
-
-  window.addEventListener("load", () => {
-    updateVisits(1); // +1 on visit
-    setTimeout(() => updateVisits(1), 60000); // +1 after 1 min
-    trackOnline();
-  });
-  window.addEventListener("load", () => {
-  setTimeout(() => {
-    const loader = document.getElementById("loader");
-    loader.style.opacity = '0';
-    loader.style.transition = 'opacity 0.4s ease';
-    setTimeout(() => loader.style.display = 'none', 400);
-  }, 2000); // 2 seconds
-});
-</script>
-<!-- END: Visits & Online Users Panel -->
 <script>
-const users = ["User123","Anon567","Guest89","Player42","User007","Anon900","Guest22","Player88","User999","Anon101"];
-const voucherTypes = ["1 Voucher","OTT Voucher"];
-const amounts = [5,10,15,20,25,30,35,40,45,50];
-
-function generateMockStats(){
-  const statsBody = document.getElementById("mockStats");
-  statsBody.innerHTML = "";
-  for(let i=0;i<10;i++){
-    const user = users[Math.floor(Math.random()*users.length)];
-    const type = voucherTypes[Math.floor(Math.random()*voucherTypes.length)];
-    const amount = amounts[Math.floor(Math.random()*amounts.length)];
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td style="padding:6px;">${user}</td><td style="padding:6px;">${type}</td><td style="padding:6px;">R${amount}</td>`;
-    statsBody.appendChild(tr);
-  }
-}
-
-// Timer logic
-let timeLeft = 60;
-function startTimer(){
-  const timerEl = document.getElementById("timer");
-  setInterval(()=>{
-    timeLeft--;
-    timerEl.innerText = timeLeft;
-    if(timeLeft<=0){
-      generateMockStats();
-      timeLeft=60;
-    }
-  },1000);
-}
-
-// Initial load
-generateMockStats();
-startTimer();
-</script>
-<script>
-function getRandomNumber(length) {
-  let result = '';
-  const digits = '0123456789';
-  for(let i=0;i<length;i++){
-    result += digits.charAt(Math.floor(Math.random()*digits.length));
-  }
-  return result;
-}
-
-function showVoucher() {
-  const type = document.getElementById("voucherType").value;
-  
-  // Set exact length
-  const length = type === '1voucher' ? 16 : 12;
-  const visibleLength = length - 4; // last 4 digits locked
-  
-  const visible = getRandomNumber(visibleLength);
-  const locked = "<span style='color:red'>××××</span>";
-  
-  document.getElementById("voucher").innerHTML = visible + locked;
-
-  // Show unlock button
-  document.getElementById("unlockBtn").classList.remove("hidden");
-
-  // Random amount multiples of 5
-  const amounts = [5,10,15,20,25,30,35,40,45,50];
-  const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
-  const amountBox = document.getElementById("amount");
-  amountBox.innerHTML = `R${randomAmount}`;
-  amountBox.classList.remove("hidden");
-}
-
-function unlockCode() {
-  document.getElementById("card").style.filter = "blur(4px)";
-  document.getElementById("popupOverlay").style.display = "flex";
-}
-
-function redirect() {
-  const links = [
-    "https://savebig.pro/a/yQ5AiyRYsQ0E3",
-    "https://savebig.pro/a/j7Mghyvkt5BZ4"
+  const texts = [
+    "Stay hungry, stay humble",
+    "You’re built different",
+    "Trust the grind",
+    "Keep moving forward",
+    "Energy never lies",
+    "Your future self is watching",
+    "Chase purpose, not people",
+    "Small steps = big wins",
+    "Good vibes only",
+    "Nothing changes if nothing changes"
   ];
-  const url = links[Math.floor(Math.random() * links.length)];
-  window.location.href = url;
-}
+
+  const emojis = ["🔥", "💫", "⚡", "🚀", "😮‍💨", "🌟", "🦁", "🥇", "📈", "💥", "✨", "😎", "💯", "🧠"];
+
+  function addMessage() {
+    const box = document.getElementById("messages");
+
+    const randomText = texts[Math.floor(Math.random() * texts.length)];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.textContent = randomEmoji + " " + randomText;
+
+    box.appendChild(div);
+  }
 </script>
 
 </body>
