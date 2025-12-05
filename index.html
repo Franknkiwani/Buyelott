@@ -76,419 +76,335 @@
   </div>
 
   <!-- Firebase + App scripts -->
-  <script type="module">
-    // ----------------------------
-    //  CONFIG - using values you provided
-    // ----------------------------
-    const IMGUR_CLIENT_ID = "891e5bb4aa94282"; // your Imgur client id (anonymous upload)
-    // Firebase config (from user)
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
-    };
+<script type="module">
+  // ----------------------------
+  //  CONFIG
+  // ----------------------------
+  const IMGUR_CLIENT_ID = "891e5bb4aa94282"; 
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-    // ----------------------------
-    //  Initialize Firebase (modular)
-    // ----------------------------
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signInAnonymously,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      set,
-      update,
-      onValue,
-      query,
-      orderByChild,
-      equalTo,
-      get,
-      child,
-      runTransaction,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  // ----------------------------
+  // Firebase Imports
+  // ----------------------------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInAnonymously,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    set,
+    update,
+    onValue,
+    query,
+    orderByChild,
+    equalTo,
+    get,
+    child,
+    runTransaction
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-    // ----------------------------
-    //  UI references
-    // ----------------------------
-    const fileInput = document.getElementById('file');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const preview = document.getElementById('preview');
-    const uploadStatus = document.getElementById('uploadStatus');
-    const captionEl = document.getElementById('caption');
-    const privacyEl = document.getElementById('privacy');
-    const gallery = document.getElementById('gallery');
-    const authArea = document.getElementById('authArea');
+  // ----------------------------
+  // UI References
+  // ----------------------------
+  const fileInput = document.getElementById('file');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const preview = document.getElementById('preview');
+  const uploadStatus = document.getElementById('uploadStatus');
+  const captionEl = document.getElementById('caption');
+  const privacyEl = document.getElementById('privacy');
+  const gallery = document.getElementById('gallery');
+  const authArea = document.getElementById('authArea');
 
-    let currentUser = null;
-    let currentUserProfile = null; // cached profile
+  let currentUser = null;
 
-    // ----------------------------
-    //  Auth: Sign-in UI & handling
-    // ----------------------------
-    function renderAuth(user) {
-      authArea.innerHTML = '';
-      if (!user) {
-        const signInBtn = document.createElement('button');
-        signInBtn.className = 'primary small';
-        signInBtn.textContent = 'Sign in with Google';
-        signInBtn.onclick = async () => {
-          try {
-            await signInWithPopup(auth, new GoogleAuthProvider());
-          } catch (e) {
-            // fallback to anonymous if popup blocked
-            console.warn('Popup sign-in failed, using anonymous', e);
-            await signInAnonymously(auth);
-          }
-        };
+  // ----------------------------
+  // AUTH
+  // ----------------------------
+  function renderAuth(user) {
+    authArea.innerHTML = '';
+    if (!user) {
+      const g = document.createElement('button');
+      g.textContent = 'Sign in with Google';
+      g.className = 'primary small';
+      g.onclick = async () => {
+        try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+        catch { await signInAnonymously(auth); }
+      };
 
-        const anonBtn = document.createElement('button');
-        anonBtn.className = 'ghost small';
-        anonBtn.textContent = 'Continue anonymously';
-        anonBtn.onclick = async () => { await signInAnonymously(auth); };
+      const anon = document.createElement('button');
+      anon.textContent = 'Continue anonymously';
+      anon.className = 'ghost small';
+      anon.onclick = () => signInAnonymously(auth);
 
-        authArea.appendChild(signInBtn);
-        authArea.appendChild(anonBtn);
-      } else {
-        const box = document.createElement('div');
-        box.className = 'userbox';
-        const avatar = document.createElement('div'); avatar.className = 'avatar';
-        const img = document.createElement('img');
-        img.src = user.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.uid}`;
-        avatar.appendChild(img);
-        const name = document.createElement('div');
-        name.innerHTML = `<div style="font-weight:700">${user.displayName || 'Anonymous'}</div><div class="muted">${user.uid.slice(0,8)}</div>`;
+      authArea.appendChild(g);
+      authArea.appendChild(anon);
+    } else {
+      const box = document.createElement('div');
+      box.className = 'userbox';
 
-        const outBtn = document.createElement('button');
-        outBtn.className = 'ghost small';
-        outBtn.textContent = 'Sign out';
-        outBtn.onclick = async () => { await signOut(auth); };
-
-        box.appendChild(avatar);
-        box.appendChild(name);
-        box.appendChild(outBtn);
-        authArea.appendChild(box);
-      }
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      renderAuth(user);
-      if (user) {
-        // ensure user profile exists in DB
-        const uRef = ref(db, `users/${user.uid}`);
-        await set(uRef, {
-          displayName: user.displayName || 'Anonymous',
-          photoURL: user.photoURL || null,
-          lastSeen: Date.now()
-        }, { /* no options */ }).catch(()=>{/* ignore */});
-        // cache
-        currentUserProfile = { uid: user.uid, displayName: user.displayName || 'Anonymous', photoURL: user.photoURL || null };
-      } else {
-        currentUserProfile = null;
-      }
-    });
-
-    // ----------------------------
-    //  Preview selected file
-    // ----------------------------
-    fileInput.addEventListener('change', (ev) => {
-      preview.innerHTML = '';
-      const f = fileInput.files && fileInput.files[0];
-      if (!f) return;
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(f);
-      img.style.maxHeight = '120px';
-      img.style.borderRadius = '8px';
-      preview.appendChild(img);
-    });
+      img.src = user.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.uid}`;
+      avatar.appendChild(img);
 
-    // ----------------------------
-    //  Upload flow: Imgur -> Save metadata to Firebase
-    // ----------------------------
-    uploadBtn.addEventListener('click', async () => {
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Select an image first.');
+      const name = document.createElement('div');
+      name.innerHTML = `<strong>${user.displayName || 'Anonymous'}</strong><br><span class="muted">${user.uid.slice(0,6)}</span>`;
+
+      const outBtn = document.createElement('button');
+      outBtn.textContent = 'Sign out';
+      outBtn.className = 'ghost small';
+      outBtn.onclick = () => signOut(auth);
+
+      box.appendChild(avatar);
+      box.appendChild(name);
+      box.appendChild(outBtn);
+
+      authArea.appendChild(box);
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    renderAuth(user);
+    if (user) {
+      await set(ref(db, `users/${user.uid}`), {
+        displayName: user.displayName || 'Anonymous',
+        photoURL: user.photoURL || null,
+        lastSeen: Date.now()
+      }).catch(()=>{});
+    }
+    loadPublicGallery();
+  });
+
+  // ----------------------------
+  // Preview selected file
+  // ----------------------------
+  fileInput.addEventListener('change', () => {
+    preview.innerHTML = '';
+    if (!fileInput.files.length) return;
+
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(fileInput.files[0]);
+    img.style.maxHeight = '120px';
+    img.style.borderRadius = '8px';
+    preview.appendChild(img);
+  });
+
+  // ----------------------------
+  // Upload → Imgur → Firebase save
+  // ----------------------------
+  uploadBtn.addEventListener('click', async () => {
+    if (!fileInput.files.length) return alert('Choose an image');
+
+    if (!currentUser) await signInAnonymously(auth);
+
+    const file = fileInput.files[0];
+    const caption = captionEl.value || '';
+    const privacy = privacyEl.value || 'public';
+
+    uploadStatus.textContent = 'Uploading to Imgur...';
+    uploadBtn.disabled = true;
+
+    try {
+      const base64 = await fileToBase64(file);
+
+      const payload = new URLSearchParams();
+      payload.append('image', base64.replace(/^data:image\/\w+;base64,/, ''));
+      payload.append('type', 'base64');
+
+      const res = await fetch("https://api.imgur.com/3/image", {
+        method: "POST",
+        headers: { Authorization: "Client-ID " + IMGUR_CLIENT_ID },
+        body: payload
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error("Imgur upload failed");
+
+      const link = data.data.link;
+      const delHash = data.data.deletehash;
+
+      const newImg = push(ref(db, "images"));
+      await set(newImg, {
+        ownerUid: currentUser.uid,
+        ownerName: currentUser.displayName || "Anonymous",
+        ownerPhoto: currentUser.photoURL || null,
+        caption,
+        privacy,
+        imgurLink: link,
+        imgurDeleteHash: delHash,
+        createdAt: Date.now(),
+        likesCount: 0
+      });
+
+      uploadStatus.innerHTML = `Uploaded. <a href="${link}" target="_blank">View</a>`;
+
+      fileInput.value = "";
+      captionEl.value = "";
+      preview.innerHTML = "";
+
+      loadPublicGallery();
+    } catch (e) {
+      uploadStatus.textContent = "Upload failed: " + e.message;
+    }
+    uploadBtn.disabled = false;
+  });
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  // ----------------------------
+  // FIXED PUBLIC GALLERY LOADER
+  // ----------------------------
+  async function loadPublicGallery() {
+    gallery.innerHTML = '<div class="muted center">Loading public images…</div>';
+
+    try {
+      const snap = await get(ref(db, 'images'));
+
+      gallery.innerHTML = '';
+
+      if (!snap.exists()) {
+        gallery.innerHTML = '<div class="muted center">No public images yet.</div>';
         return;
       }
-      if (!currentUser) {
-        const ok = confirm('You must sign in (Google or anonymous) to upload. Sign in now?');
-        if (ok) {
-          try { await signInAnonymously(auth); } catch (e) { console.error(e); }
-        } else return;
+
+      const all = snap.val();
+
+      const entries = Object.entries(all)
+        .filter(([id, meta]) => meta && meta.privacy === "public")
+        .sort((a, b) => b[1].createdAt - a[1].createdAt);
+
+      if (!entries.length) {
+        gallery.innerHTML = '<div class="muted center">No public images yet.</div>';
+        return;
       }
 
-      const file = fileInput.files[0];
-      const caption = captionEl.value || '';
-      const privacy = privacyEl.value || 'public';
-
-      uploadStatus.textContent = 'Uploading to Imgur...';
-      uploadBtn.disabled = true;
-
-      try {
-        // Convert file -> base64
-        const base64 = await fileToBase64(file);
-        // Imgur expects base64 without data: prefix
-        const payload = new URLSearchParams();
-        payload.append('image', base64.replace(/^data:image\/\w+;base64,/, ''));
-        payload.append('type', 'base64');
-        payload.append('name', file.name);
-        payload.append('title', caption);
-
-        const res = await fetch('https://api.imgur.com/3/image', {
-          method: 'POST',
-          headers: {
-            Authorization: 'Client-ID ' + IMGUR_CLIENT_ID,
-            Accept: 'application/json'
-          },
-          body: payload
-        });
-
-        const data = await res.json();
-        if (!data || !data.success) throw new Error(data?.data?.error || 'Imgur upload failed');
-
-        const imgLink = data.data.link;
-        const imgDeleteHash = data.data.deletehash || null;
-        uploadStatus.textContent = 'Saved to Imgur. Saving metadata to Firebase...';
-
-        // Save metadata to Realtime DB under /images
-        const imagesRef = ref(db, 'images');
-        const newImageRef = push(imagesRef);
-        const now = Date.now();
-        await set(newImageRef, {
-          ownerUid: currentUser.uid,
-          ownerName: currentUser.displayName || 'Anonymous',
-          ownerPhoto: currentUser.photoURL || null,
-          caption,
-          privacy,
-          imgurLink: imgLink,
-          imgurDeleteHash: imgDeleteHash,
-          createdAt: now,
-          likesCount: 0
-        });
-
-        uploadStatus.innerHTML = `Upload complete. <a href="${imgLink}" target="_blank" rel="noopener">View on Imgur</a>`;
-        // reset input
-        fileInput.value = '';
-        captionEl.value = '';
-        preview.innerHTML = '';
-        // refresh gallery (private images won't show unless public)
-        loadPublicGallery();
-      } catch (err) {
-        console.error(err);
-        uploadStatus.textContent = 'Upload failed: ' + (err.message || err);
-      } finally {
-        uploadBtn.disabled = false;
-      }
-    });
-
-    function fileToBase64(file) {
-      return new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result);
-        reader.onerror = (e) => rej(e);
-        reader.readAsDataURL(file);
+      entries.forEach(([id, meta]) => {
+        gallery.appendChild(makeImageCard(id, meta));
       });
+
+    } catch (e) {
+      console.error(e);
+      gallery.innerHTML = '<div class="muted center">Failed to load gallery.</div>';
     }
+  }
 
-    // ----------------------------
-    //  Load public gallery from Firebase
-    // ----------------------------
-    async function loadPublicGallery() {
-      gallery.innerHTML = '<div class="muted center">Loading public images…</div>';
-      try {
-        const imagesQ = query(ref(db, 'images'), orderByChild('privacy'), equalTo('public'));
-        const snap = await get(imagesQ);
-        gallery.innerHTML = '';
-        if (!snap.exists()) {
-          gallery.innerHTML = '<div class="muted center">No public images yet.</div>';
-          return;
-        }
-        const images = snap.val();
-        // images is object keyed by push keys
-        const entries = Object.entries(images).sort((a,b) => b[1].createdAt - a[1].createdAt);
-        for (const [id, meta] of entries) {
-          gallery.appendChild(makeImageCard(id, meta));
-        }
-      } catch (e) {
-        console.error(e);
-        gallery.innerHTML = '<div class="muted center">Failed to load gallery.</div>';
-      }
-    }
+  // ----------------------------
+  // Image Card (likes + follow)
+  // ----------------------------
+  function makeImageCard(id, meta) {
+    const card = document.createElement("div");
+    card.className = "card thumb";
 
-    // ----------------------------
-    //  Create an image card element (like, follow)
-    // ----------------------------
-    function makeImageCard(id, meta) {
-      const wrap = document.createElement('div');
-      wrap.className = 'card thumb';
-      wrap.style.padding = '8px';
+    const img = document.createElement("img");
+    img.src = meta.imgurLink;
+    img.style.width = "100%";
+    img.style.borderRadius = "6px";
+    card.appendChild(img);
 
-      const img = document.createElement('img');
-      img.src = meta.imgurLink;
-      img.alt = meta.caption || '';
-      wrap.appendChild(img);
+    const metaDiv = document.createElement("div");
+    metaDiv.className = "meta";
 
-      const metaRow = document.createElement('div');
-      metaRow.className = 'meta';
+    const owner = document.createElement("div");
+    owner.innerHTML = `<strong>${meta.ownerName}</strong><br><span class="muted">${new Date(meta.createdAt).toLocaleString()}</span>`;
+    metaDiv.appendChild(owner);
 
-      // left: owner + caption
-      const left = document.createElement('div');
-      left.style.display = 'flex';
-      left.style.flexDirection = 'column';
+    const actions = document.createElement("div");
+    actions.style.marginTop = "6px";
 
-      const ownerLine = document.createElement('div');
-      ownerLine.style.display = 'flex';
-      ownerLine.style.alignItems = 'center';
-      ownerLine.style.gap = '8px';
+    const likeBtn = document.createElement("button");
+    likeBtn.textContent = `❤ ${meta.likesCount || 0}`;
+    likeBtn.className = "small";
+    likeBtn.onclick = () => handleLike(id, meta, likeBtn);
 
-      const avatar = document.createElement('div'); avatar.className='avatar';
-      const avatImg = document.createElement('img');
-      avatImg.src = meta.ownerPhoto || `https://api.dicebear.com/7.x/identicon/svg?seed=${meta.ownerUid}`;
-      avatar.appendChild(avatImg);
-      ownerLine.appendChild(avatar);
+    const viewBtn = document.createElement("a");
+    viewBtn.textContent = "View";
+    viewBtn.href = meta.imgurLink;
+    viewBtn.target = "_blank";
+    viewBtn.className = "small";
 
-      const ownerName = document.createElement('div');
-      ownerName.innerHTML = `<div style="font-weight:700">${escapeHtml(meta.ownerName||'Anonymous')}</div><div class="muted" style="font-size:12px">${new Date(meta.createdAt).toLocaleString()}</div>`;
-      ownerLine.appendChild(ownerName);
+    actions.appendChild(likeBtn);
+    actions.appendChild(viewBtn);
 
-      left.appendChild(ownerLine);
+    // follow system
+    if (currentUser && currentUser.uid !== meta.ownerUid) {
+      const followBtn = document.createElement("button");
+      followBtn.className = "small";
+      followBtn.textContent = "Follow";
 
-      if (meta.caption) {
-        const caption = document.createElement('div');
-        caption.className = 'muted';
-        caption.style.marginTop = '6px';
-        caption.textContent = meta.caption;
-        left.appendChild(caption);
-      }
+      const fRef = ref(db, `users/${meta.ownerUid}/followers/${currentUser.uid}`);
+      get(fRef).then(s => {
+        if (s.exists()) followBtn.textContent = "Unfollow";
+      });
 
-      metaRow.appendChild(left);
-
-      // right: actions
-      const actions = document.createElement('div');
-      actions.style.display = 'flex';
-      actions.style.alignItems = 'center';
-      actions.style.gap = '8px';
-
-      const likeBtn = document.createElement('button');
-      likeBtn.className = 'small';
-      likeBtn.textContent = `❤ ${meta.likesCount || 0}`;
-      likeBtn.onclick = () => handleLike(id, meta, likeBtn);
-
-      const viewLink = document.createElement('a');
-      viewLink.className = 'small';
-      viewLink.href = meta.imgurLink;
-      viewLink.target = '_blank';
-      viewLink.rel = 'noopener';
-      viewLink.textContent = 'View';
-
-      actions.appendChild(likeBtn);
-      actions.appendChild(viewLink);
-
-      // follow button (if viewer not the owner)
-      if (currentUser && currentUser.uid !== meta.ownerUid) {
-        const followBtn = document.createElement('button');
-        followBtn.className = 'small';
-        followBtn.textContent = 'Follow';
-        // fetch if current user follows owner
-        get(ref(db, `users/${meta.ownerUid}/followers/${currentUser.uid}`)).then(s => {
-          if (s.exists()) followBtn.textContent = 'Unfollow';
-        }).catch(()=>{});
-        followBtn.onclick = async () => {
-          if (!currentUser) { alert('Sign in to follow'); return; }
-          const fRef = ref(db, `users/${meta.ownerUid}/followers/${currentUser.uid}`);
-          const cur = await get(fRef);
-          if (cur.exists()) {
-            // unfollow
-            await set(fRef, null);
-            followBtn.textContent = 'Follow';
-          } else {
-            await set(fRef, true);
-            followBtn.textContent = 'Unfollow';
-          }
-        };
-        actions.appendChild(followBtn);
-      } else {
-        // if owner viewing their own image, show delete link placeholder (not implemented)
-        if (currentUser && currentUser.uid === meta.ownerUid) {
-          const you = document.createElement('div');
-          you.className = 'muted';
-          you.textContent = 'Your upload';
-          actions.appendChild(you);
-        }
-      }
-
-      metaRow.appendChild(actions);
-      wrap.appendChild(metaRow);
-
-      return wrap;
-    }
-
-    // ----------------------------
-    //  Handle like with transaction & per-user prevention
-    // ----------------------------
-    async function handleLike(imageId, meta, likeBtn) {
-      if (!currentUser) { alert('Sign in to like images'); return; }
-      const likedByRef = ref(db, `images/${imageId}/likedBy/${currentUser.uid}`);
-      const likesCountRef = ref(db, `images/${imageId}/likesCount`);
-      try {
-        const snap = await get(likedByRef);
-        if (snap.exists()) {
-          // already liked -> unlike
-          await set(likedByRef, null);
-          // decrement count transactionally
-          await runTransaction(likesCountRef, (current) => (current || 0) > 0 ? (current - 1) : 0);
-          // update btn text quickly (reload gallery shortly)
-          const newCountSnap = await get(likesCountRef);
-          likeBtn.textContent = `❤ ${newCountSnap.exists() ? newCountSnap.val() : 0}`;
+      followBtn.onclick = async () => {
+        const s = await get(fRef);
+        if (s.exists()) {
+          await set(fRef, null);
+          followBtn.textContent = "Follow";
         } else {
-          // like
-          await set(likedByRef, true);
-          await runTransaction(likesCountRef, (current) => (current || 0) + 1);
-          const newCountSnap = await get(likesCountRef);
-          likeBtn.textContent = `❤ ${newCountSnap.exists() ? newCountSnap.val() : 0}`;
+          await set(fRef, true);
+          followBtn.textContent = "Unfollow";
         }
-      } catch (e) {
-        console.error('Like failed', e);
-        alert('Like action failed. Try again.');
-      }
+      };
+      actions.appendChild(followBtn);
     }
 
-    // ----------------------------
-    //  Small util: escape html
-    // ----------------------------
-    function escapeHtml(s) {
-      if (!s) return '';
-      return s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    metaDiv.appendChild(actions);
+    card.appendChild(metaDiv);
+
+    return card;
+  }
+
+  // ----------------------------
+  // LIKE HANDLER
+  // ----------------------------
+  async function handleLike(id, meta, likeBtn) {
+    if (!currentUser) return alert("Sign in");
+
+    const likedRef = ref(db, `images/${id}/likedBy/${currentUser.uid}`);
+    const countRef = ref(db, `images/${id}/likesCount`);
+
+    const snap = await get(likedRef);
+    if (snap.exists()) {
+      await set(likedRef, null);
+      await runTransaction(countRef, c => (c || 0) - 1);
+    } else {
+      await set(likedRef, true);
+      await runTransaction(countRef, c => (c || 0) + 1);
     }
 
-    // ----------------------------
-    //  Auto-load gallery and set up listener for public images (optional)
-    // ----------------------------
-    loadPublicGallery();
-
-    // Optional: listen to changes in public images live (uncomment to enable live updates)
-    // const publicQuery = query(ref(db,'images'), orderByChild('privacy'), equalTo('public'));
-    // onValue(publicQuery, () => loadPublicGallery());
-
-    // END
-  </script>
+    const newCount = await get(countRef);
+    likeBtn.textContent = `❤ ${newCount.exists() ? newCount.val() : 0}`;
+  }
+</script>
 </body>
 </html>
