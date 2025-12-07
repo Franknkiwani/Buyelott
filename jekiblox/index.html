@@ -506,7 +506,105 @@ body, main {
   </div>
 </div>
   </section>
+<div class="jeblox-subscribe-wrapper">
+  <div class="jeblox-subscribe-card">
 
+    <iframe 
+        src="https://livecounts.io/embed/youtube-live-subscriber-counter/UCluF1YrBr4yIe9_RrQ4acnA" 
+        frameborder="0" 
+        class="jeblox-subscriber-iframe">
+    </iframe>
+
+    <p class="jeblox-subscribe-text">
+      Subscribe for 10 years of Goodluck! 🍀
+    </p>
+
+    <a href="https://www.youtube.com/@cedlyh?sub_confirmation=1" target="_blank" 
+       class="jeblox-subscribe-btn">
+      SUBSCRIBE NOW
+    </a>
+
+  </div>
+</div>
+
+<style>
+/* Wrapper to center horizontally only */
+.jeblox-subscribe-wrapper {
+  display: flex;
+  justify-content: center; /* horizontal centering */
+  width: 100%;
+}
+
+/* Card styles */
+.jeblox-subscribe-card {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 10px;
+  overflow: hidden;
+}
+
+.jeblox-subscriber-iframe {
+  border:0;
+  width:100%;
+  height:80px;
+  border-radius:8px;
+}
+
+.jeblox-subscribe-text {
+  margin-top:8px;
+  font-family: Arial, sans-serif;
+  font-size:14px;
+  font-weight:bold;
+  color:#000;
+  text-align:center;
+}
+
+.jeblox-subscribe-btn {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff0000; /* Red button */
+  padding: 10px 20px;
+  border: 3px solid #ff0000;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.jeblox-subscribe-btn::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(45deg, #ff0000, #ff9900, #ff0000, #ff3300, #ff0000);
+  z-index: -1;
+  filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 10px;
+  animation: jeblox-rainbow 3s linear infinite;
+}
+
+.jeblox-subscribe-btn:hover::before {
+  opacity: 1;
+}
+
+@keyframes jeblox-rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+</style>
 </main>
 
 <script>
