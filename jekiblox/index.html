@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark App with Animated Hamburger</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: black;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      min-height: 200vh;
+      overflow-x: hidden;
+    }
+
+    /* Smaller Sticky Glassy Header */
+    header {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(40, 40, 40, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+    }
+
+    /* Left side: logo + name + subscribe */
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    header img {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    header span {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .subscribe-btn {
+      background-color: #e84118;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .subscribe-btn:hover {
+      background-color: #c23616;
+    }
+
+    /* Unique Hamburger menu */
+    .hamburger {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .hamburger div {
+      height: 4px;
+      background-color: #ffffff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* Initial line sizes: biggest on top */
+    .hamburger div:nth-child(1) { width: 24px; } /* biggest */
+    .hamburger div:nth-child(2) { width: 18px; } /* bigger */
+    .hamburger div:nth-child(3) { width: 12px; } /* small */
+
+    /* Animate lines when menu is active */
+    .hamburger.active div:nth-child(1) { width: 12px; transform: translateX(12px); }
+    .hamburger.active div:nth-child(2) { width: 18px; transform: translateX(0); }
+    .hamburger.active div:nth-child(3) { width: 24px; transform: translateX(-12px); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -250px;
+      width: 250px;
+      height: 100%;
+      background: rgba(50,50,50,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-left: 1px solid rgba(255,255,255,0.1);
+      transition: right 0.4s ease;
+      padding: 2rem 1rem;
+      z-index: 999;
+    }
+
+    .sidebar.show {
+      right: 0;
+    }
+
+    main {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      header img { height: 35px; width: 35px; }
+      header span { font-size: 0.9rem; }
+      .subscribe-btn { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+      .hamburger div:nth-child(1) { width: 20px; }
+      .hamburger div:nth-child(2) { width: 15px; }
+      .hamburger div:nth-child(3) { width: 10px; }
+    }
+    /* Disable text selection and blue highlight */
+* {
+  user-select: none;       /* standard */
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
+}
+
+body {
+  -webkit-tap-highlight-color: transparent; /* remove blue highlight on mobile */
+}
+
+/* Sidebar overlay everything */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -100%;         /* start offscreen */
+  width: 100%;          /* cover entire viewport width */
+  height: 100%;         /* full height */
+  background: rgba(30,30,30,0.97); /* dark overlay */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: right 0.4s ease;
+  padding: 2rem;
+  z-index: 2000;        /* above header */
+}
+
+/* Show sidebar fully */
+.sidebar.show {
+  right: 0;
+}
+/* Main container */
+main {
+  max-width: 72rem; /* max-w-6xl */
+  margin: 0 auto;
+  padding: 2rem 1rem; /* py-8 px-4 */
+  color: #e5e7eb; /* light gray text */
+}
+
+/* Background for sections */
+body, main {
+  background-color: #1f2937; /* dark gray background */
+}
+
+/* Hero section */
+#home {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  #home {
+    grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+  }
+}
+#home h1 {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 800;   /* font-extrabold */
+}
+#home h1 .text-pink-500 {
+  color: #f472b6; /* brighter pink for dark theme */
+}
+#home p {
+  margin-top: 0.75rem; /* mt-3 */
+  color: #d1d5db; /* lighter gray */
+}
+#home .flex.gap-3 {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+#home a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+#home a.bg-pink-500 {
+  background-color: #f472b6;
+  color: #1f2937; /* dark text for contrast */
+}
+#home a.border {
+  border: 1px solid #374151; /* darker border */
+  color: #e5e7eb;
+}
+#home ul {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  list-style: none;
+  padding-left: 0;
+}
+#home ul li {
+  margin-bottom: 0.25rem;
+}
+
+/* Featured Short */
+#home iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0.375rem;
+}
+.bg-white {
+  background-color: #111827; /* dark card background */
+}
+.border {
+  border: 1px solid #374151; /* darker border */
+}
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+.p-3 {
+  padding: 0.75rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+}
+.text-gray-500 {
+  color: #9ca3af; /* light gray */
+}
+.mt-3 { margin-top: 0.75rem; }
+.font-semibold { font-weight: 600; }
+.text-sm { font-size: 0.875rem; }
+
+/* Archive */
+#archive {
+  margin-top: 3rem;
+}
+#archive .flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#archive select {
+  margin-left: 0.5rem;
+  border: 1px solid #374151;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+#shortsGrid {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 640px) { #shortsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px) { #shortsGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) { #shortsGrid { grid-template-columns: repeat(4, 1fr); } }
+
+.grid-card {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.grid-card:hover {
+  transform: translateY(-0.375rem);
+  box-shadow: 0 0.625rem 1.875rem rgba(0,0,0,0.5); /* darker shadow for dark theme */
+}
+.short-thumb {
+  width: 100%;
+  height: 20rem;
+  object-fit: cover;
+  aspect-ratio: 9 / 16;
+  border-radius: 0.375rem;
+}
+  </style>
+
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <img src="https://i.imgur.com/h7pSdsp.jpeg" alt="Logo" />
+    <a href="https://youtube.com/@cedlyh?si=5Pi1Hkr4ugdj4ivA" target="_blank" style="text-decoration:none; color:inherit;">
+      <span>@JEKIBLOX</span>
+    </a>
+    <button class="subscribe-btn" onclick="window.open('https://youtube.com/@cedlyh?si=5Pi1Hkr4ugdj4ivA', '_blank')">
+      Subscribe
+    </button>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <!-- Close button -->
+  <button id="closeSidebar" style="padding:6px 12px; color:black; background:#e0e0e0; border:none; border-radius:8px; cursor:pointer;">
+    Close
+  </button>
+
+  <div style="padding:16px; overflow-y:auto; max-height:90vh; font-family:sans-serif;">
+    <h2 style="font-size:1.5rem; font-weight:bold; margin-bottom:8px;">About Jekiblox</h2>
+    <p>Welcome to <strong>Jekiblox</strong>! This channel posts fun, random, and sometimes chaotic Roblox content, from hilarious brainrot clips to trending game moments.</p>
+
+    <h3 style="margin-top:16px; font-weight:bold;">Channel Stats</h3>
+    <ul style="margin-left:16px; list-style-type:disc;">
+      <li>Views: Millions monthly</li>
+      <li>Subscribers: Growing fast with engaged audience</li>
+      <li>Video Type: Short clips, long gameplay, funny edits</li>
+      <li>Content Style: Memes, chaotic Roblox moments, Brainrot humor</li>
+    </ul>
+
+    <h3 style="margin-top:16px; font-weight:bold;">Audience</h3>
+    <p>The primary audience is <strong>young gamers and Roblox enthusiasts</strong>. They are highly engaged, love interactive content, and are eager to try new brands and products.</p>
+
+    <h3 style="margin-top:16px; font-weight:bold;">Why Sponsor?</h3>
+    <ul style="margin-left:16px; list-style-type:disc;">
+      <li>High engagement with targeted gaming & meme audience</li>
+      <li>Frequent content drops keep your brand in viewers’ minds</li>
+      <li>Potential for cross-promotion in videos, shorts, and sidebar mentions</li>
+      <li>Professional and transparent sponsorship process</li>
+    </ul>
+
+    <h3 style="margin-top:16px; font-weight:bold;">Past Highlights</h3>
+    <ul style="margin-left:16px; list-style-type:disc;">
+      <li>Collaborations with popular Roblox creators</li>
+      <li>Viral Brainrot clips reaching thousands of shares</li>
+      <li>Interactive polls and fan-driven content</li>
+    </ul>
+
+    <h3 style="margin-top:16px; font-weight:bold;">Contact</h3>
+    <p>If you’re interested in working with Jekiblox, click the sponsorship request button below or email <a href="mailto:jekiblox@gmail.com" style="color:#d6336c;">CLICK HERE</a>.</p>
+
+   <button 
+  onclick="window.location.href='mailto:jekiblox@gmail.com?subject=Sponsorship%20Request&body=Hi%20Jekiblox,%0A%0AI%20would%20like%20to%20discuss%20a%20sponsorship%20deal.%0A%0AThanks,'"
+  style="margin-top:12px; padding:10px 16px; border-radius:10px; background:#d6336c; color:white; border:none; cursor:pointer; width:100%;">
+  Request a Sponsorship Deal
+</button>
+  </div>
+</div>
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const sidebar = document.getElementById('sidebar');
+  const closeBtn = document.getElementById('closeSidebar');
+
+  // Toggle sidebar with hamburger
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    sidebar.classList.toggle('show');
+  });
+
+  // Close sidebar with close button
+  closeBtn.addEventListener('click', () => {
+    sidebar.classList.remove('show');
+    hamburger.classList.remove('active');
+  });
+</script>
+
+<style>
+  /* Close button */
+  .close-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: red;
+    color: white;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .close-btn:hover {
+    background: darkred;
+  }
+
+  /* Hamburger button */
+  .hamburger-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 200;
+    background: #111;
+    color: white;
+    border: none;
+    font-size: 28px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+
+  .hamburger-btn.active {
+    background: #222;
+  }
+</style>
+<main class="max-w-6xl mx-auto px-4 py-8">
+  <!-- HERO -->
+  <section id="home" class="grid md:grid-cols-2 gap-8 items-center">
+    <div>
+<h1 class="text-center font-extrabold">
+  <div class="text-4xl uppercase">BRAINROT</div>
+  <div class="text-3xl mt-2">
+    <span class="text-pink-500 uppercase">SHORTS</span> & 
+    <span style="color:#00ffff;" class="uppercase">VIDEOS</span>
+  </div>
+</h1>
+ <p class="mt-3 text-gray-600">
+  Explore the world of BRAINROT! Watch Shorts and full Videos, discover fun Roblox chaos, and learn about other creators and exclusive content from jekiblox.
+</p>
+    <div class="mt-6 flex gap-3">
+  <a href="https://m.youtube.com/@cedlyh/shorts" target="_blank"
+     style="flex:1; text-align:center; padding:10px 0; border:2px solid black; border-radius:10px; background:#ff69b4; color:black; font-weight:600;">
+    Browse Shorts
+  </a>
+  <a href="https://youtube.com/@cedlyh?si=5Pi1Hkr4ugdj4ivA" target="_blank"
+     style="flex:1; text-align:center; padding:10px 0; border:2px solid black; border-radius:10px; background:#00ffff; color:black; font-weight:600;">
+    Browse Videos
+  </a>
+</div>
+
+      <ul class="mt-6 text-sm text-gray-500 space-y-1">
+<li class="animated-line">• Brand partnerships & sponsorships •</li>
+
+<style>
+.animated-line {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 4px;
+  text-align: center;
+}
+
+.animated-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: #ff69b4; /* starting pink */
+  animation: colorCycle 2s infinite alternate;
+}
+
+@keyframes colorCycle {
+  0% { background: #ff69b4; } /* pink */
+  50% { background: #00ffff; } /* cyan */
+  100% { background: #ff69b4; } /* pink again */
+}
+</style>
+      </ul>
+    </div>
+
+<!-- Featured Short -->
+<div>
+  <div class="bg-white border rounded-lg p-3">
+    <div class="text-xs text-gray-500 mb-2">Featured Short</div>
+    <div class="aspect-w-9 aspect-h-16" style="position:relative;padding-bottom:177.78%">
+      <iframe 
+        src="https://www.youtube.com/embed/Hr-m0EWDyxc?rel=0&modestbranding=1&playsinline=1" 
+        title="jekiblox featured short" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen 
+        style="position:absolute;left:0;top:0;width:100%;height:100%;border:0;border-radius:6px">
+      </iframe>
+    </div>
+    <h3 class="mt-3 font-semibold">OUR MOST WATCHED SHORT</h3>
+    <p class="text-sm text-gray-500">Check out the short that fans love the most!</p>
+  </div>
+</div>
+  </section>
+
+</main>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  function sendContact(){
+    alert('Thanks! Your message was sent (demo). Replace this function with your backend POST to receive real inquiries.');
+  }
+</script>
+</body>
+</html>
