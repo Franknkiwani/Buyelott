@@ -325,6 +325,17 @@ body, main {
   aspect-ratio: 9 / 16;
   border-radius: 0.375rem;
 }
+/* Add top and bottom spacing for subscribe card only */
+.jeblox-subscribe-wrapper {
+  margin-top: 24px;    /* space above */
+  margin-bottom: 24px; /* space below */
+}
+
+/* Keep bottom spacing for dropdowns */
+div[style*="margin-bottom:16px"] {
+  margin-bottom: 24px; /* space below */
+  margin-top: 0;       /* no extra space above */
+}
   </style>
 
 </head>
@@ -546,7 +557,80 @@ body, main {
 
   </div>
 </div>
+<!-- Collapsible Sections Inline with Sponsor Email Under Dropdown -->
+<div style="margin-bottom:16px;border:1px solid #444;border-radius:12px;overflow:hidden;background:#222;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+  <button style="width:100%;background:#111;color:#fff;padding:12px 16px;text-align:left;font-size:1rem;font-weight:bold;border:none;cursor:pointer;outline:none;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s;"
+          onclick="toggleDropdown(this)">
+    About My Channel
+    <span style="transition:transform 0.3s;">&#9660;</span>
+  </button>
+  <div style="max-height:0;overflow:hidden;background:#1a1a1a;padding:0 16px;transition:max-height 0.3s ease,padding 0.3s ease;">
+    <p style="margin:12px 0;color:#ddd;font-size:0.9rem;line-height:1.4;">
+      I make fast, chaotic, funny Roblox content with a mix of dark humor, randomness,
+      and pure Gen Z energy. Every video is unpredictable — that’s why my viewers stick around.
+    </p>
+    <p style="margin-bottom:12px;color:#ffcc00;font-weight:bold;font-size:0.9rem;">
+      Email us at <a href="mailto:jekiblox@gmail.com?subject=Sponsorship%20Request&body=Hi%20Jekiblox,%0A%0AI%20would%20like%20to%20discuss%20a%20sponsorship%20deal.%0A%0AThanks," style="color:#00ffff;text-decoration:underline;">jekiblox@gmail.com</a>
+    </p>
+  </div>
+</div>
 
+<div style="margin-bottom:16px;border:1px solid #444;border-radius:12px;overflow:hidden;background:#222;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+  <button style="width:100%;background:#111;color:#fff;padding:12px 16px;text-align:left;font-size:1rem;font-weight:bold;border:none;cursor:pointer;outline:none;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s;"
+          onclick="toggleDropdown(this)">
+    Sponsor Packages
+    <span style="transition:transform 0.3s;">&#9660;</span>
+  </button>
+  <div style="max-height:0;overflow:hidden;background:#1a1a1a;padding:0 16px;transition:max-height 0.3s ease,padding 0.3s ease;">
+    <ul style="margin:12px 0;padding-left:20px;color:#ddd;font-size:0.9rem;line-height:1.4;">
+      <li><strong>Shoutout Package:</strong> Quick mention inside a video.</li>
+      <li><strong>Dedicated Short:</strong> A full short built around your product.</li>
+      <li><strong>Pinned Comment Promo:</strong> Your link pinned for 48 hours.</li>
+      <li><strong>Community Post:</strong> Clean, simple promotion to active followers.</li>
+      <li><strong>Avatar Integration:</strong> Your brand added into my Roblox character for fun placement.</li>
+    </ul>
+    <p style="margin-bottom:12px;color:#ffcc00;font-weight:bold;font-size:0.9rem;">
+      Email us at <a href="mailto:jekiblox@gmail.com?subject=Sponsorship%20Request&body=Hi%20Jekiblox,%0A%0AI%20would%20like%20to%20discuss%20a%20sponsorship%20deal.%0A%0AThanks," style="color:#00ffff;text-decoration:underline;">jekiblox@gmail.com</a>
+    </p>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;border:1px solid #444;border-radius:12px;overflow:hidden;background:#222;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+  <button style="width:100%;background:#111;color:#fff;padding:12px 16px;text-align:left;font-size:1rem;font-weight:bold;border:none;cursor:pointer;outline:none;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s;"
+          onclick="toggleDropdown(this)">
+    Audience Demographics
+    <span style="transition:transform 0.3s;">&#9660;</span>
+  </button>
+  <div style="max-height:0;overflow:hidden;background:#1a1a1a;padding:0 16px;transition:max-height 0.3s ease,padding 0.3s ease;">
+    <ul style="margin:12px 0;padding-left:20px;color:#ddd;font-size:0.9rem;line-height:1.4;">
+      <li><strong>Age Range:</strong> Mostly 8–25</li>
+      <li><strong>Audience Type:</strong> Roblox players & meme lovers</li>
+      <li><strong>Regions:</strong> Global — strongest in US, UK & EU</li>
+      <li><strong>Watch Style:</strong> High engagement on short-form videos</li>
+    </ul>
+    <p style="margin-bottom:12px;color:#ffcc00;font-weight:bold;font-size:0.9rem;">
+      Email us at <a href="mailto:jekiblox@gmail.com?subject=Sponsorship%20Request&body=Hi%20Jekiblox,%0A%0AI%20would%20like%20to%20discuss%20a%20sponsorship%20deal.%0A%0AThanks," style="color:#00ffff;text-decoration:underline;">jekiblox@gmail.com</a>
+    </p>
+  </div>
+</div>
+
+<script>
+function toggleDropdown(btn){
+  const content = btn.nextElementSibling;
+  const arrow = btn.querySelector('span');
+  if(content.style.maxHeight && content.style.maxHeight !== '0px'){
+    content.style.maxHeight = '0';
+    content.style.paddingTop = '0';
+    content.style.paddingBottom = '0';
+    arrow.style.transform = 'rotate(0deg)';
+  } else {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    content.style.paddingTop = '12px';
+    content.style.paddingBottom = '12px';
+    arrow.style.transform = 'rotate(180deg)';
+  }
+}
+</script>
 <style>
 /* Wrapper to center horizontally only */
 .jeblox-subscribe-wrapper {
