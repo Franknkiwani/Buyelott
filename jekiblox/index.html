@@ -771,7 +771,49 @@ body.partnerUI-popup-open {
   padding:8px; font-size:14px; text-align:center; font-weight:600; color:#fff;
 }
 </style>
+<!-- ADMIN PANEL BUTTON -->
+<div id="adminPanelWrapper">
+  <button id="adminPanelBtn">ADMIN PANEL ➡</button>
+</div>
 
+<style>
+  /* Unique CSS for this button only */
+  #adminPanelWrapper {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+  }
+
+  #adminPanelBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(to right, #ff6ec7 50%, #00d2ff 50%);
+    color: #000; /* Black text */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  /* Hover effect */
+  #adminPanelBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  }
+</style>
+
+<script>
+  document.getElementById('adminPanelBtn').addEventListener('click', () => {
+    // Redirect without showing index.html
+    window.location.href = 'jekibloxadmin/';
+  });
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, set, push, get, child, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
