@@ -1,0 +1,31 @@
+<input type="file" id="videoInput" accept="video/mp4,video/webm" />
+<button id="uploadBtn">Upload Video</button>
+<video id="preview" width="300" controls style="display:none;"></video>
+
+<script>
+document.getElementById('uploadBtn').addEventListener('click', async () => {
+    const file = document.getElementById('videoInput').files[0];
+    if (!file) return alert('Select a video first');
+
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('userhash', ''); // optional
+    formData.append('fileToUpload', file);
+
+    try {
+        const res = await fetch('https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
+        });
+        const mp4Link = await res.text();
+        console.log('Uploaded video link:', mp4Link);
+
+        // Show preview
+        const videoEl = document.getElementById('preview');
+        videoEl.src = mp4Link;
+        videoEl.style.display = 'block';
+    } catch(err) {
+        console.error('Upload failed:', err);
+    }
+});
+</script>
