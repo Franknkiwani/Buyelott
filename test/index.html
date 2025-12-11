@@ -3,207 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flex Your Brainrot</title>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const videoInput = document.getElementById('videoInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const progressBar = document.getElementById('progressBar');
-    const preview = document.getElementById('preview');
-    const titleInput = document.getElementById('titleInput');
-    const descInput = document.getElementById('descInput');
-    const feedContainer = document.getElementById('videoFeed');
-
-    // Upload function
-    uploadBtn.addEventListener('click', () => {
-      const file = videoInput.files[0];
-      if (!file) return alert('Select a video first!');
-      const title = titleInput.value || "Untitled";
-      const description = descInput.value || "";
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://upload.gofile.io/uploadFile');
-
-      xhr.upload.addEventListener('progress', e => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + '%';
-          progressBar.textContent = percent + '%';
-        }
-      });
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const res = JSON.parse(xhr.responseText);
-          if(res.status === "ok") {
-            const directLink = res.data.directLink; // ✅ actual video file
-            preview.src = directLink;
-            preview.style.display = 'block';
-
-            // Save to Firebase
-            push(ref(db, 'videos'), {
-              title,
-              description,
-              videoUrl: directLink,
-              timestamp: Date.now()
-            }).then(() => {
-              alert('Video uploaded and saved!');
-              progressBar.style.width = '0%';
-              progressBar.textContent = '';
-              videoInput.value = '';
-              titleInput.value = '';
-              descInput.value = '';
-            });
-
-          } else {
-            alert('Upload failed: ' + JSON.stringify(res));
-          }
-        } else {
-          alert('Upload failed, network error.');
-        }
-      };
-
-      xhr.onerror = () => alert('Upload failed, network error.');
-      xhr.send(formData);
-    });
-
-    // Load videos from Firebase
-    const videosRef = ref(db, 'videos');
-    onValue(videosRef, (snapshot) => {
-      feedContainer.innerHTML = '';
-      const data = snapshot.val();
-      if (!data) {
-        feedContainer.innerHTML = '<p style="color:#aaa;">No brainrot uploaded yet</p>';
-        return;
-      }
-
-      const videos = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
-
-      videos.forEach(video => {
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.innerHTML = `
-          <video src="${video.videoUrl}" controls></video>
-          <h3>${video.title}</h3>
-          <p>${video.description || ''}</p>
-        `;
-        feedContainer.appendChild(card);
-      });
-    });
-  });
-</script>
-
+<title>@JEKIBLOX</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #0e0e0e;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-  }
-  h1 { margin-bottom: 1rem; text-align:center; font-family: monospace; color:#0ff; }
-  .upload-container, #videoFeed {
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .upload-container {
-    background: rgba(255,255,255,0.05);
-    padding: 2rem;
-    border-radius: 16px;
-    margin-bottom: 2rem;
-  }
-  input, textarea, button {
-    width: 100%;
-    padding: 0.8rem;
-    border-radius: 12px;
-    border: none;
-    font-size: 1rem;
-    background: rgba(255,255,255,0.1);
-    color:#fff;
-  }
-  input::placeholder, textarea::placeholder { color:#aaa; }
-  input[type="file"] { padding: 0.4rem; background: rgba(255,255,255,0.05); }
-  button {
-    background: #00ffcc;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  button:hover { background: #00d4aa; }
-  .progress-wrapper {
-    width: 100%;
-    background: rgba(255,255,255,0.1);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    width: 0;
-    height: 1.5rem;
-    background: #00ffcc;
-    text-align: center;
-    color: #000;
-    line-height: 1.5rem;
-    font-weight: bold;
-  }
-  .video-card {
-    background: rgba(255,255,255,0.05);
-    padding: 1rem;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  video {
-    width: 100%;
-    border-radius: 12px;
-  }
-  h3 { margin: 0.3rem 0 0; color:#0ff; }
-  p { margin: 0; color: #aaa; font-size: 0.9rem; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;}
+body{height:100vh;width:100%;background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center center/cover;display:flex;flex-direction:column;align-items:center;}
+header{width:100%;padding:0.5rem 1rem;background:rgba(0,0,0,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
+header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
+header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
+.sub-btn{margin-left:auto;padding:6px 14px;background:rgba(255,0,0,0.85);border:1px solid rgba(255,0,0,0.9);border-radius:12px;font-size:0.9rem;color:white;font-weight:600;cursor:pointer;transition:0.2s;}
+.sub-btn:active{transform:scale(0.95);background:rgba(255,0,0,0.95);}
+.upload-btn{position:fixed;top:70px;right:1rem;display:flex;align-items:center;gap:6px;padding:10px 16px;background:rgba(255,255,255,0.25);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.5);border-radius:14px;font-size:0.95rem;font-weight:600;color:black;cursor:pointer;transition:0.25s ease;-webkit-text-stroke:0.5px black;}
+.upload-btn svg{width:20px;height:20px;fill:black;}
+.upload-btn:hover{box-shadow:0 0 8px rgba(0,0,0,0.7);background:rgba(255,255,255,0.3);}
+.upload-btn:active{transform:scale(0.95);background:rgba(255,255,255,0.35);}
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);display:none;justify-content:center;align-items:center;z-index:999;}
+.popup{background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border-radius:20px;padding:2rem;width:90%;max-width:400px;display:flex;flex-direction:column;gap:1rem;color:black;position:relative;}
+.popup img{max-width:100%;border-radius:12px;object-fit:cover;margin-bottom:10px;}
+.popup input,.popup textarea,.popup select{width:100%;padding:0.6rem 0.8rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
+.popup button{padding:0.7rem;border:none;border-radius:12px;background:rgba(0,0,0,0.7);color:white;font-weight:600;cursor:pointer;transition:0.2s;}
+.popup button:active{transform:scale(0.95);}
+.popup .close-btn{background:rgba(255,0,0,0.8);margin-top:5px;}
+.progress-bar-container{width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:8px;overflow:hidden;display:none;margin-top:5px;position:relative;}
+.progress-bar{width:0%;height:100%;background:limegreen;transition:width 0.3s ease;}
+.progress-text{position:absolute;top:-22px;right:0;color:white;font-size:0.8rem;font-weight:600;}
+.notification{position:fixed;top:20px;right:20px;background:rgba(0,0,0,0.8);color:white;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
+.notification.show{opacity:1;transform:translateY(0);}
+#postsSection{width:100%;display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:120px;padding-bottom:50px;}
+.post-card{background:rgba(255,255,255,0.15);backdrop-filter:blur(12px);border-radius:18px;max-width:600px;width:95%;display:flex;flex-direction:column;gap:0.5rem;color:black;border:1px solid rgba(0,0,0,0.3);box-shadow:0 0 10px rgba(0,0,0,0.2);position:relative;}
+.post-card img{width:100%;height:300px;object-fit:cover;border-radius:12px;}
+.post-card .card-footer{display:flex;justify-content:space-between;align-items:center;padding:0 0.5rem 0.5rem 0.5rem;}
+.invisible-ad{border:1px solid transparent;margin-top:5px;display:flex;justify-content:center;align-items:center;}
+.invisible-ad img{max-width:100%;height:auto;display:block;}
 </style>
 </head>
 <body>
 
-<h1>Flex Your Brainrot</h1>
+<header>
+  <img src="https://i.imgur.com/96svPpA.jpeg" alt="logo">
+  <span>@JEKIBLOX</span>
+  <button class="sub-btn">Login with Google</button>
+</header>
 
-<div class="upload-container">
-  <input type="text" id="titleInput" placeholder="Video Title" required>
-  <textarea id="descInput" placeholder="Description (optional)"></textarea>
-  <input type="file" id="videoInput" accept="video/mp4,video/webm">
-  <button id="uploadBtn">Upload Brainrot</button>
-  <div class="progress-wrapper">
-    <div id="progressBar" class="progress-bar"></div>
+<button class="upload-btn" id="uploadBtn">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4a7.5 7.5 0 0 0-7.35 6.04A5.99 5.99 0 0 0 6 22h12a6 6 0 0 0 1.35-11.96zM13 13v4h-2v-4H8l4-4 4 4h-3z"/>
+  </svg>
+  UPLOAD BRAINROT
+</button>
+
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup">
+    <h3>Upload Brainrot</h3>
+    <img id="preview" src="" alt="Preview" style="display:none;">
+    <input type="file" id="fileInput" accept="image/*">
+    <input type="text" id="title" placeholder="Title">
+    <textarea id="description" placeholder="Description" rows="3"></textarea>
+    <select id="monetizeStatus">
+      <option value="notMonetized">Not Monetized</option>
+      <option value="monetized">Monetized</option>
+    </select>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-text" id="progressText">0%</div>
+    </div>
+    <button id="submitBtn">Submit</button>
+    <button id="closeBtn" class="close-btn">Close</button>
   </div>
-  <video id="preview" controls style="display:none;"></video>
 </div>
 
-<div id="videoFeed"></div>
+<section id="postsSection"></section>
+<div id="notification" class="notification"></div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+let currentUser = null;
+
+// Elements
+const uploadBtn = document.getElementById('uploadBtn');
+const popupOverlay = document.getElementById('popupOverlay');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const monetizeStatus = document.getElementById('monetizeStatus');
+const closeBtn = document.getElementById('closeBtn');
+const submitBtn = document.getElementById('submitBtn');
+const progressBarContainer = document.querySelector('.progress-bar-container');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const notification = document.getElementById('notification');
+const postsSection = document.getElementById('postsSection');
+const subBtn = document.querySelector('.sub-btn');
+
+function showNotification(msg){
+  notification.textContent = msg;
+  notification.classList.add('show');
+  setTimeout(()=>notification.classList.remove('show'),3000);
+}
+
+// Google Auth
+subBtn.addEventListener('click', async ()=>{
+  if(currentUser){
+    await auth.signOut();
+    currentUser = null;
+    subBtn.textContent = "Login with Google";
+    showNotification("Logged out");
+  }else{
+    try{
+      const result = await signInWithPopup(auth, provider);
+      currentUser = result.user;
+      showNotification("Logged in as "+currentUser.displayName);
+      subBtn.textContent = "Logout";
+    }catch(e){ showNotification("Login failed: "+e.message); }
+  }
+});
+
+onAuthStateChanged(auth,user=>{
+  currentUser = user;
+  subBtn.textContent = user ? "Logout" : "Login with Google";
+});
+
+// Popup handlers
+uploadBtn.addEventListener('click',()=> popupOverlay.style.display='flex');
+closeBtn.addEventListener('click',()=>{ popupOverlay.style.display='none'; resetForm(); });
+
+function resetForm(){
+  fileInput.value=''; preview.src=''; preview.style.display='none';
+  document.getElementById('title').value='';
+  document.getElementById('description').value='';
+  monetizeStatus.value='notMonetized';
+  progressBar.style.width='0%'; progressText.textContent='0%';
+  progressBarContainer.style.display='none';
+}
+
+// Image preview
+fileInput.addEventListener('change',()=>{
+  const file=fileInput.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      preview.src=e.target.result; preview.style.display='block';
+    }
+    reader.readAsDataURL(file);
+  }else{ preview.src=''; preview.style.display='none'; }
+});
+
+// Submit handler
+submitBtn.addEventListener('click', async ()=>{
+  if(!currentUser) return showNotification("Login required to upload!");
+  const file=fileInput.files[0];
+  const title=document.getElementById('title').value.trim();
+  const description=document.getElementById('description').value.trim();
+
+  if(!file) return showNotification("Image is required!");
+  if(!title) return showNotification("Title is required!");
+
+  submitBtn.disabled=true; fileInput.disabled=true; monetizeStatus.disabled=true;
+  progressBarContainer.style.display='block'; progressBar.style.width='0%'; progressText.textContent='0%';
+
+  try{
+    // Upload to Imgur
+    progressBar.style.width='10%'; progressText.textContent='10%';
+    const formData=new FormData(); formData.append('image',file);
+    const res=await fetch('https://api.imgur.com/3/image',{
+      method:'POST',
+      headers:{Authorization:'Client-ID 891e5bb4aa94282'},
+      body:formData
+    });
+    const imgurData=await res.json();
+    if(!imgurData.success) throw new Error("Imgur upload failed");
+    const imageUrl=imgurData.data.link;
+
+    progressBar.style.width='60%'; progressText.textContent='60%';
+
+    const newPostRef = push(ref(db,'jekiblox/post'));
+    await set(newPostRef,{
+      image: imageUrl,
+      title: title,
+      description: description,
+      monetized: monetizeStatus.value==='monetized',
+      userId: currentUser.uid,
+      timestamp:Date.now()
+    });
+
+    progressBar.style.width='100%'; progressText.textContent='100%';
+    showNotification("Upload successful!");
+    resetForm();
+    popupOverlay.style.display='none';
+  }catch(e){
+    showNotification("Upload failed: "+e.message);
+    progressBarContainer.style.display='none';
+  }finally{
+    submitBtn.disabled=false; fileInput.disabled=false; monetizeStatus.disabled=false;
+  }
+});
+
+// Load posts
+onValue(ref(db,'jekiblox/post'), async snapshot=>{
+  postsSection.innerHTML='';
+  const data=snapshot.val(); if(!data) return;
+  const postsArray = Object.entries(data).sort((a,b)=>b[1].timestamp - a[1].timestamp);
+
+  for(const [id, post] of postsArray){
+    const card = document.createElement('div'); card.classList.add('post-card');
+
+    const img = document.createElement('img'); img.src=post.image; card.appendChild(img);
+
+    const titleDiv = document.createElement('div'); titleDiv.textContent=post.title;
+    titleDiv.style.fontWeight='600'; titleDiv.style.fontSize='1.1rem'; titleDiv.style.padding='0 0.5rem';
+    card.appendChild(titleDiv);
+
+    if(post.description){
+      const descDiv = document.createElement('div'); descDiv.textContent=post.description;
+      descDiv.style.fontSize='0.9rem'; descDiv.style.color='rgba(0,0,0,0.75)'; descDiv.style.padding='0 0.5rem';
+      card.appendChild(descDiv);
+    }
+
+    const footer = document.createElement('div'); footer.classList.add('card-footer');
+
+    const statusDiv = document.createElement('div');
+    statusDiv.textContent = post.monetized ? "Monetized ✅" : "Not Monetized ❌";
+    footer.appendChild(statusDiv);
+
+    card.appendChild(footer);
+
+    // Invisible ad container if monetized
+    if(post.monetized){
+      const adContainer = document.createElement('div'); adContainer.classList.add('invisible-ad');
+      // Fetch random ad
+      const adsSnap = await get(ref(db,'jekibloxads'));
+      const adsData = adsSnap.val();
+      if(adsData){
+        const adsArray = Object.entries(adsData);
+        const [_, ad] = adsArray[Math.floor(Math.random()*adsArray.length)];
+        // Set ad dimensions
+        adContainer.style.width = ad.width+'px';
+        adContainer.style.height = ad.height+'px';
+        // Insert ad base code
+        adContainer.innerHTML = ad.code;
+      }
+      card.appendChild(adContainer);
+    }
+
+    postsSection.appendChild(card);
+  }
+});
+</script>
 </body>
 </html>
