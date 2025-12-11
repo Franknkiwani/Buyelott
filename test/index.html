@@ -77,7 +77,184 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
     </div>
   </div>
 </header>
+<div style="width:100%;min-height:100vh;padding:20px;
+    background:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAh4-rDFGeLXXrOWHH5FekaOy6hBDYb6e4g863TlVl6akOJFBZWj4p11E&s=10') center/cover no-repeat;">
 
+  <div id="giveawayBox" style="width:80%;margin:20px auto;padding:14px;
+      border-radius:18px;background:rgba(255,255,255,0.15);
+      backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;">
+
+    <img id="giveImg" src="" style="width:90px;height:90px;border-radius:14px;object-fit:cover;display:none;">
+
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+
+      <h3 id="giveTitle" style="font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;">
+        Loading...
+      </h3>
+
+      <span id="countdown" style="font-size:13px;color:#fff;opacity:0.8;margin-bottom:8px;">--</span>
+      <span id="enteredCount" style="font-size:13px;color:#fff;opacity:0.8;margin-bottom:12px;">0 entered</span>
+
+      <button id="enterBtn" style="
+          padding:10px 16px;
+          font-size:14px;
+          font-weight:600;
+          background:rgba(255,255,255,0.15);
+          backdrop-filter:blur(14px);
+          color:#fff;
+          border:2px solid rgba(255,255,255,0.9);
+          border-radius:12px;
+          cursor:pointer;
+          transition:0.2s;">
+        Enter Giveaway
+      </button>
+
+    </div>
+
+  </div>
+
+  <div id="noGiveaway" style="text-align:center;color:#fff;font-size:16px;display:none;margin-top:40px;">
+    No giveaways right now.
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const enterBtn = document.getElementById("enterBtn");
+const giveTitle = document.getElementById("giveTitle");
+const giveImg = document.getElementById("giveImg");
+const countdownEl = document.getElementById("countdown");
+const enteredCountEl = document.getElementById("enteredCount");
+const giveBox = document.getElementById("giveawayBox");
+const noGive = document.getElementById("noGiveaway");
+
+let currentGive = null;
+let user = null;
+
+// disable button initially
+enterBtn.disabled = true;
+enterBtn.style.opacity = "0.5";
+enterBtn.style.filter = "blur(1px)";
+
+// listen auth
+onAuthStateChanged(auth, u => {
+  user = u;
+  updateEnterAvailability();
+});
+
+// load giveaway
+onValue(ref(db, "jekibloxgiveaway/current"), snap => {
+  if (!snap.exists()) {
+    // no giveaway
+    giveBox.style.display = "none";
+    noGive.style.display = "block";
+    return;
+  }
+
+  currentGive = snap.val();
+  giveTitle.textContent = currentGive.title;
+  giveImg.src = currentGive.image;
+  giveImg.style.display = "block";
+  giveBox.style.display = "flex";
+  noGive.style.display = "none";
+
+  startCountdown(currentGive.endsAt);
+  watchEntryCount();
+  updateEnterAvailability();
+});
+
+function startCountdown(endTime) {
+  function tick() {
+    const now = Date.now();
+    const diff = endTime - now;
+
+    if (diff <= 0) {
+      countdownEl.textContent = "Giveaway Ended";
+      disableEnter();
+      return;
+    }
+
+    const h = Math.floor(diff / (1000*60*60));
+    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const s = Math.floor((diff % (1000*60)) / 1000);
+
+    countdownEl.textContent = `${h}h ${m}m ${s}s left`;
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function watchEntryCount() {
+  const entriesRef = ref(db, "giveawayEntries");
+  onValue(entriesRef, snap => {
+    const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+    enteredCountEl.textContent = `${count} entered`;
+  });
+}
+
+function disableEnter() {
+  enterBtn.disabled = true;
+  enterBtn.style.opacity = "0.5";
+  enterBtn.style.filter = "blur(1px)";
+}
+
+function updateEnterAvailability() {
+  if (!currentGive) {
+    disableEnter();
+    return;
+  }
+  if (!user) {
+    disableEnter();
+    enterBtn.onclick = () => alert("Log in first to enter.");
+    return;
+  }
+  // check if user already entered
+  get(child(ref(db), `giveawayEntries/${user.uid}`)).then(snap => {
+    if (snap.exists()) {
+      enterBtn.disabled = true;
+      enterBtn.innerText = "Already Entered ✔";
+      enterBtn.style.opacity = "0.5";
+      enterBtn.style.filter = "blur(1px)";
+    } else {
+      // still valid to enter
+      enterBtn.disabled = false;
+      enterBtn.style.opacity = "1";
+      enterBtn.style.filter = "none";
+      enterBtn.innerText = "Enter Giveaway";
+
+      enterBtn.onclick = () => {
+        set(ref(db, "giveawayEntries/" + user.uid), {
+          enteredAt: Date.now(),
+          uid: user.uid
+        });
+        enterBtn.innerText = "Entered ✔";
+        enterBtn.style.background = "rgba(0,255,140,0.25)";
+        disableEnter();
+      };
+    }
+  });
+}
+</script>
 <!-- Auth Popup -->
 <div class="popup-overlay" id="authOverlay">
   <div class="popup">
