@@ -116,7 +116,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebas
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo.firebaseapp.com",
@@ -131,7 +130,6 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Elements
 const authBtn = document.getElementById('authBtn');
 const authOverlay = document.getElementById('authOverlay');
 const closeAuthBtn = document.getElementById('closeAuthBtn');
@@ -166,7 +164,7 @@ function showNotification(msg,type='success'){
   setTimeout(()=>notification.className='notification',3000);
 }
 
-// Open/close auth popup
+// Open/close popup
 authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
 closeAuthBtn.addEventListener('click',()=>{
   authOverlay.style.display='none';
@@ -174,7 +172,7 @@ closeAuthBtn.addEventListener('click',()=>{
   document.getElementById('authFormContainer').style.display='flex';
 });
 
-// Switch mode (under main action)
+// Switch mode
 switchModeBtn.addEventListener('click',()=>{
   isRegisterMode=!isRegisterMode;
   if(isRegisterMode){
@@ -202,17 +200,14 @@ profilePicInput.addEventListener('change',()=>{
     const reader = new FileReader();
     reader.onload = e=>profilePreview.src=e.target.result;
     reader.readAsDataURL(file);
-  } else {
-    profilePreview.src='';
-    profilePicFile=null;
-  }
+  } else { profilePreview.src=''; profilePicFile=null; }
 });
 
 // Submit register/login
-authSubmitBtn.addEventListener('click',async()=>{
-  const email=emailInput.value.trim();
-  const password=passwordInput.value.trim();
-  const username=usernameInput.value.trim();
+authSubmitBtn.addEventListener('click', async()=>{
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const username = usernameInput.value.trim();
 
   if(!email || !password) return showNotification("Email & password required!",'error');
   if(isRegisterMode && !username) return showNotification("@username required!",'error');
@@ -222,12 +217,11 @@ authSubmitBtn.addEventListener('click',async()=>{
     if(isRegisterMode){
       const cred = await createUserWithEmailAndPassword(auth,email,password);
       user = cred.user;
-      // Upload profile pic to Imgur
       let profileUrl="";
       if(profilePicFile){
         const formData=new FormData();
         formData.append('image',profilePicFile);
-        const res = await fetch('https://api.imgur.com/3/image',{
+        const res=await fetch('https://api.imgur.com/3/image',{
           method:'POST',
           headers:{Authorization:'Client-ID 891e5bb4aa94282'},
           body:formData
@@ -246,9 +240,20 @@ authSubmitBtn.addEventListener('click',async()=>{
       user = cred.user;
       showNotification("Login successful!","success");
     }
+
+    // Fetch user data immediately after register/login
+    const snapshot = await new Promise(res=>onValue(ref(db,'jekiblox/users/'+user.uid),snap=>res(snap),{onlyOnce:true}));
+    const userData = snapshot.val();
+    if(userData){
+      authBtn.style.display='none';
+      userProfile.style.display='flex';
+      userPic.src=userData.profilePic||'https://i.imgur.com/96svPpA.jpeg';
+      userName.textContent=userData.username||user.email.split('@')[0];
+    }
+
     authOverlay.style.display='none';
-    document.getElementById('authFormContainer').style.display='flex';
     forgotPassContainer.style.display='none';
+    document.getElementById('authFormContainer').style.display='flex';
     profilePicInput.value=''; profilePreview.src='';
     emailInput.value=''; passwordInput.value=''; usernameInput.value='';
   }catch(e){ showNotification(e.message,'error'); }
@@ -260,8 +265,7 @@ forgotPass.addEventListener('click',()=>{
   forgotPassContainer.style.display='flex';
   forgotEmailInput.value='';
 });
-
-forgotSubmitBtn.addEventListener('click',async ()=>{
+forgotSubmitBtn.addEventListener('click',async()=>{
   const email = forgotEmailInput.value.trim();
   if(!email) return showNotification("Email required!",'error');
   try{
@@ -272,30 +276,32 @@ forgotSubmitBtn.addEventListener('click',async ()=>{
   }catch(e){ showNotification(e.message,'error'); }
 });
 
-// Update header only after checking user data exists
-onAuthStateChanged(auth, async user=>{
-  authBtn.style.display='block';
-  userProfile.style.display='none';
-  if(user){
-    const dbRef = ref(db,'jekiblox/users/'+user.uid);
-    const snapshot = await new Promise(res=>onValue(dbRef,snap=>res(snap),{onlyOnce:true}));
-    const userData = snapshot.val();
-    if(userData){ // only show profile if data exists
-      authBtn.style.display='none';
-      userProfile.style.display='flex';
-      userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
-      userName.textContent = userData?.username || user.email.split('@')[0];
-    }
-  }
-});
-
-// Logout popup
+// Logout
 userProfile.addEventListener('click',()=>logoutOverlay.style.display='flex');
 cancelLogout.addEventListener('click',()=>logoutOverlay.style.display='none');
 confirmLogout.addEventListener('click',async()=>{
   await auth.signOut();
   logoutOverlay.style.display='none';
+  authBtn.style.display='block';
+  userProfile.style.display='none';
   showNotification("Logged out","success");
+});
+
+// Also update header on auth state change (optional)
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    const snapshot = await new Promise(res=>onValue(ref(db,'jekiblox/users/'+user.uid),snap=>res(snap),{onlyOnce:true}));
+    const userData = snapshot.val();
+    if(userData){
+      authBtn.style.display='none';
+      userProfile.style.display='flex';
+      userPic.src=userData.profilePic||'https://i.imgur.com/96svPpA.jpeg';
+      userName.textContent=userData.username||user.email.split('@')[0];
+    }
+  }else{
+    authBtn.style.display='block';
+    userProfile.style.display='none';
+  }
 });
 
 </script>
