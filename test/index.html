@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jekiblox Video Hub</title>
+<title>Flex Your Brainrot</title>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -32,7 +32,7 @@
     const descInput = document.getElementById('descInput');
     const feedContainer = document.getElementById('videoFeed');
 
-    // Upload handler
+    // Upload function
     uploadBtn.addEventListener('click', () => {
       const file = videoInput.files[0];
       if (!file) return alert('Select a video first!');
@@ -57,15 +57,15 @@
         if (xhr.status === 200) {
           const res = JSON.parse(xhr.responseText);
           if(res.status === "ok") {
-            const videoUrl = res.data.directLink; // Use direct MP4 link
-            preview.src = videoUrl;
+            const directLink = res.data.directLink; // ✅ actual video file
+            preview.src = directLink;
             preview.style.display = 'block';
 
             // Save to Firebase
             push(ref(db, 'videos'), {
               title,
               description,
-              videoUrl,
+              videoUrl: directLink,
               timestamp: Date.now()
             }).then(() => {
               alert('Video uploaded and saved!');
@@ -91,10 +91,10 @@
     // Load videos from Firebase
     const videosRef = ref(db, 'videos');
     onValue(videosRef, (snapshot) => {
-      feedContainer.innerHTML = ''; // clear feed
+      feedContainer.innerHTML = '';
       const data = snapshot.val();
       if (!data) {
-        feedContainer.innerHTML = '<p style="color:#aaa;">No videos yet</p>';
+        feedContainer.innerHTML = '<p style="color:#aaa;">No brainrot uploaded yet</p>';
         return;
       }
 
@@ -124,7 +124,7 @@
     align-items: center;
     padding: 1rem;
   }
-  h1 { margin-bottom: 1rem; }
+  h1 { margin-bottom: 1rem; text-align:center; font-family: monospace; color:#0ff; }
   .upload-container, #videoFeed {
     width: 100%;
     max-width: 600px;
@@ -144,8 +144,11 @@
     border-radius: 12px;
     border: none;
     font-size: 1rem;
+    background: rgba(255,255,255,0.1);
+    color:#fff;
   }
-  input[type="file"] { padding: 0.4rem; }
+  input::placeholder, textarea::placeholder { color:#aaa; }
+  input[type="file"] { padding: 0.4rem; background: rgba(255,255,255,0.05); }
   button {
     background: #00ffcc;
     color: #000;
@@ -181,19 +184,19 @@
     width: 100%;
     border-radius: 12px;
   }
-  h3 { margin: 0.3rem 0 0; }
+  h3 { margin: 0.3rem 0 0; color:#0ff; }
   p { margin: 0; color: #aaa; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 
-<h1>Jekiblox Video Hub</h1>
+<h1>Flex Your Brainrot</h1>
 
 <div class="upload-container">
   <input type="text" id="titleInput" placeholder="Video Title" required>
   <textarea id="descInput" placeholder="Description (optional)"></textarea>
   <input type="file" id="videoInput" accept="video/mp4,video/webm">
-  <button id="uploadBtn">Upload Video</button>
+  <button id="uploadBtn">Upload Brainrot</button>
   <div class="progress-wrapper">
     <div id="progressBar" class="progress-bar"></div>
   </div>
