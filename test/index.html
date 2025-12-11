@@ -10,20 +10,45 @@ body{background:url('https://static.vecteezy.com/system/resources/previews/002/1
 header{width:100%;padding:0.5rem 1rem;background:rgba(0,0,0,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
 header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
 header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
-.auth-btn{margin-left:auto;padding:6px 14px;background:rgba(255,0,0,0.85);border:1px solid rgba(255,0,0,0.9);border-radius:12px;font-size:0.9rem;color:white;font-weight:600;cursor:pointer;transition:0.2s;}
-.auth-btn:active{transform:scale(0.95);background:rgba(255,0,0,0.95);}
+.auth-btn {
+  margin-left:auto;
+  padding:6px 14px;
+  background:rgba(255,255,255,0.15);
+  border:1px solid black;
+  backdrop-filter:blur(12px);
+  border-radius:12px;
+  font-size:0.9rem;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+}
+.auth-btn:hover { background:rgba(255,255,255,0.25); }
+
 #userProfile{display:none;align-items:center;gap:6px;cursor:pointer;margin-left:auto;}
 #userProfile img{width:32px;height:32px;border-radius:50%;object-fit:cover;}
 #userProfile span{color:white;font-weight:600;}
+
 .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:none;justify-content:center;align-items:flex-start;padding-top:50px;overflow-y:auto;z-index:999;}
 .popup{background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border-radius:20px;padding:2rem;width:90%;max-width:400px;display:flex;flex-direction:column;gap:1rem;color:black;position:relative;}
 .popup h3{text-align:center;color:white;}
-.popup .close-btn{position:absolute;top:10px;left:10px;background:rgba(255,0,0,0.8);border:none;color:white;padding:5px 10px;border-radius:12px;cursor:pointer;}
+.popup .close-btn{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);border:none;color:white;padding:5px 10px;border-radius:12px;cursor:pointer;}
 .popup input{width:100%;padding:0.6rem 0.8rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
 .popup button{padding:0.7rem;border:none;border-radius:12px;background:rgba(0,0,0,0.7);color:white;font-weight:600;cursor:pointer;transition:0.2s;}
 .popup button:active{transform:scale(0.95);}
 #profilePreview{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:auto;}
 .forgot-pass{color:white;text-decoration:underline;font-size:0.85rem;cursor:pointer;text-align:right;}
+#switchModeBtn {
+  background: rgba(255,255,255,0.6);
+  color:black;
+  border:1px solid rgba(0,0,0,0.4);
+  border-radius:12px;
+  padding:0.6rem;
+  margin-top:5px;
+  cursor:pointer;
+}
+#switchModeBtn:hover { background: rgba(255,255,255,0.8); }
+
 .notification{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
 .notification.show{opacity:1;transform:translateY(0);}
 .notification.success{background:rgba(0,128,0,0.85);color:white;}
@@ -55,8 +80,8 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
     <span class="forgot-pass" id="forgotPass">Forgot Password?</span>
-    <button id="switchModeBtn">Switch to Login</button>
     <button id="authSubmitBtn">Register</button>
+    <button id="switchModeBtn">Switch to Login</button>
   </div>
 </div>
 
@@ -85,7 +110,7 @@ const firebaseConfig = {
   authDomain: "itzhoyoo.firebaseapp.com",
   databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
   projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  storageBucket: "itzhoyoo-filestorage.app",
   messagingSenderId: "1094792075584",
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
   measurementId: "G-LLT6F9WRKH"
@@ -128,7 +153,7 @@ function showNotification(msg,type='success'){
 authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
 closeAuthBtn.addEventListener('click',()=> authOverlay.style.display='none');
 
-// Switch mode
+// Switch mode (placed under main button)
 switchModeBtn.addEventListener('click',()=>{
   isRegisterMode=!isRegisterMode;
   if(isRegisterMode){
@@ -216,20 +241,20 @@ forgotPass.addEventListener('click',async()=>{
   }catch(e){ showNotification(e.message,'error'); }
 });
 
-// Update header on auth state change
+// Update header only after checking user data exists
 onAuthStateChanged(auth, async user=>{
+  authBtn.style.display='block';
+  userProfile.style.display='none';
   if(user){
-    authBtn.style.display='none';
-    userProfile.style.display='flex';
-    // load user data
     const dbRef = ref(db,'jekiblox/users/'+user.uid);
     const snapshot = await new Promise(res=>onValue(dbRef,snap=>res(snap),{onlyOnce:true}));
     const userData = snapshot.val();
-    userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
-    userName.textContent = userData?.username || user.email.split('@')[0];
-  } else {
-    authBtn.style.display='block';
-    userProfile.style.display='none';
+    if(userData){ // only show profile if data exists
+      authBtn.style.display='none';
+      userProfile.style.display='flex';
+      userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
+      userName.textContent = userData?.username || user.email.split('@')[0];
+    }
   }
 });
 
