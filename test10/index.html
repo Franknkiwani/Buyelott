@@ -1,146 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flex Your Brainrot - Video Upload</title>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<input type="file" id="fileInput" />
+<button id="uploadBtn">Upload</button>
+<p id="result"></p>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+<script>
+document.getElementById('uploadBtn').onclick = async () => {
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) return alert("Select a file first!");
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('videoInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const progressBar = document.getElementById('progressBar');
-    const preview = document.getElementById('preview');
-    const titleInput = document.getElementById('titleInput');
-    const descInput = document.getElementById('descInput');
-    const feedContainer = document.getElementById('videoFeed');
-
-    const GOFILE_TOKEN = "9lKKPI3KOO9rtUWlxpeAKhOG762s3BtW"; // your account token
-
-    uploadBtn.addEventListener('click', () => {
-      const file = fileInput.files[0];
-      if(!file) return alert('Select a video first!');
-      const title = titleInput.value || "Untitled";
-      const description = descInput.value || "";
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('token', GOFILE_TOKEN);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://api.gofile.io/uploadFile');
-
-      xhr.upload.addEventListener('progress', e => {
-        if(e.lengthComputable){
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + '%';
-          progressBar.textContent = percent + '%';
-        }
-      });
-
-      xhr.onload = () => {
-        if(xhr.status === 200){
-          const res = JSON.parse(xhr.responseText);
-          if(res.status === "ok"){
-            const videoUrl = res.data.directLink; // this is playable MP4
-            preview.src = videoUrl;
-            preview.style.display = 'block';
-
-            // Save to Firebase
-            push(ref(db, 'videos'), { title, description, videoUrl, timestamp: Date.now() })
-              .then(() => {
-                alert('Video uploaded and saved!');
-                progressBar.style.width = '0%';
-                progressBar.textContent = '';
-                fileInput.value = '';
-                titleInput.value = '';
-                descInput.value = '';
-              });
-          } else {
-            alert('Upload failed: ' + JSON.stringify(res));
-          }
-        } else {
-          alert('Network error during upload');
-        }
-      };
-
-      xhr.onerror = () => alert('Upload failed, network error');
-      xhr.send(formData);
+  try {
+    const res = await fetch("https://file.io", {
+      method: "POST",
+      body: formData
     });
-
-    // Load video feed
-    const videosRef = ref(db, 'videos');
-    onValue(videosRef, snapshot => {
-      feedContainer.innerHTML = '';
-      const data = snapshot.val();
-      if(!data){
-        feedContainer.innerHTML = '<p style="color:#aaa;">No brainrot videos yet</p>';
-        return;
-      }
-      const videos = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
-      videos.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.innerHTML = `
-          <video src="${v.videoUrl}" controls></video>
-          <h3>${v.title}</h3>
-          <p>${v.description || ''}</p>
-        `;
-        feedContainer.appendChild(card);
-      });
-    });
-  });
+    const data = await res.json();
+    document.getElementById('result').innerHTML = `Link: <a href="${data.link}" target="_blank">${data.link}</a>`;
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+};
 </script>
-
-<style>
-body { font-family: Arial,sans-serif; background:#0e0e0e; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
-h1 { text-align:center; color:#0ff; margin-bottom:1rem; font-family:monospace; }
-.upload-container, #videoFeed { width:100%; max-width:600px; display:flex; flex-direction:column; gap:1rem; }
-.upload-container { background: rgba(255,255,255,0.05); padding:2rem; border-radius:16px; margin-bottom:2rem; }
-input, textarea, button { width:100%; padding:0.8rem; border-radius:12px; border:none; font-size:1rem; background: rgba(255,255,255,0.1); color:#fff; }
-input::placeholder, textarea::placeholder { color:#aaa; }
-button { background:#00ffcc; color:#000; font-weight:bold; cursor:pointer; transition:0.3s; }
-button:hover { background:#00d4aa; }
-.progress-wrapper { width:100%; background: rgba(255,255,255,0.1); border-radius:12px; overflow:hidden; }
-.progress-bar { width:0; height:1.5rem; background:#00ffcc; text-align:center; color:#000; line-height:1.5rem; font-weight:bold; }
-.video-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:16px; display:flex; flex-direction:column; gap:0.5rem; }
-.video-card video { width:100%; border-radius:12px; }
-h3 { margin:0.3rem 0 0; color:#0ff; }
-p { margin:0; color:#aaa; font-size:0.9rem; }
-</style>
-</head>
-<body>
-
-<h1>Flex Your Brainrot</h1>
-
-<div class="upload-container">
-  <input type="text" id="titleInput" placeholder="Video Title" required>
-  <textarea id="descInput" placeholder="Description (optional)"></textarea>
-  <input type="file" id="videoInput" accept="video/mp4,video/webm">
-  <button id="uploadBtn">Upload Video</button>
-  <div class="progress-wrapper">
-    <div id="progressBar" class="progress-bar"></div>
-  </div>
-  <video id="preview" controls style="display:none; margin-top:1rem; border-radius:12px;"></video>
-</div>
-
-<div id="videoFeed"></div>
-
-</body>
-</html>
