@@ -3,28 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>@JEKIBLOX</title>
+<title>@JEKIBLOX Chat</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;}
-body{background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center/cover;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
+body{background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center/cover;display:flex;flex-direction:column;height:100vh;}
 header{width:100%;padding:0.5rem 1rem;background:rgba(0,0,0,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
 header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
 header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
-.auth-btn {
-  margin-left:auto;
-  padding:6px 14px;
-  background:rgba(255,255,255,0.15);
-  border:1px solid black;
-  backdrop-filter:blur(12px);
-  border-radius:12px;
-  font-size:0.9rem;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-  transition:0.2s;
-}
-.auth-btn:hover { background:rgba(255,255,255,0.25); }
-
+.auth-btn{margin-left:auto;padding:6px 14px;background:rgba(255,255,255,0.15);border:1px solid black;backdrop-filter:blur(12px);border-radius:12px;color:white;font-weight:600;cursor:pointer;}
+.auth-btn:hover{background:rgba(255,255,255,0.25);}
 #userProfile{display:none;align-items:center;gap:6px;cursor:pointer;margin-left:auto;}
 #userProfile img{width:32px;height:32px;border-radius:50%;object-fit:cover;}
 #userProfile span{color:white;font-weight:600;}
@@ -38,29 +25,31 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
 .popup button:active{transform:scale(0.95);}
 #profilePreview{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:auto;}
 .forgot-pass{color:white;text-decoration:underline;font-size:0.85rem;cursor:pointer;text-align:right;}
-#switchModeBtn {
-  background: rgba(255,255,255,0.6);
-  color:black;
-  border:1px solid rgba(0,0,0,0.4);
-  border-radius:12px;
-  padding:0.6rem;
-  margin-top:5px;
-  cursor:pointer;
-}
+#switchModeBtn{background: rgba(255,255,255,0.6); color:black; border:1px solid rgba(0,0,0,0.4); border-radius:12px; padding:0.6rem; margin-top:5px; cursor:pointer;}
 #switchModeBtn:hover { background: rgba(255,255,255,0.8); }
 
 .notification{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
 .notification.show{opacity:1;transform:translateY(0);}
 .notification.success{background:rgba(0,128,0,0.85);color:white;}
 .notification.error{background:rgba(255,0,0,0.85);color:white;}
+
+#chatContainer{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;gap:10px;overflow-y:auto;background:rgba(0,0,0,0.1);}
+.message{display:flex;gap:10px;align-items:flex-start;max-width:70%;padding:5px 10px;border-radius:12px;background:rgba(255,255,255,0.2);}
+.message img{width:40px;height:40px;border-radius:50%;object-fit:cover;}
+.messageContent{display:flex;flex-direction:column;gap:2px;}
+.messageContent .sender{font-weight:600;color:white;font-size:0.9rem;}
+.messageContent .text{color:white;font-size:0.9rem;}
+#chatInputContainer{display:flex;gap:5px;padding:5px;background:rgba(0,0,0,0.2);backdrop-filter:blur(5px);}
+#chatInputContainer input{flex:1;padding:0.6rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
+#chatInputContainer button{padding:0.6rem 1rem;border-radius:12px;border:none;background:rgba(255,255,255,0.15);color:white;font-weight:600;cursor:pointer;}
 </style>
 </head>
 <body>
 
 <header>
   <img src="https://i.imgur.com/96svPpA.jpeg" alt="logo">
-  <span>@JEKIBLOX</span>
-  <div id="authContainer" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+  <span>@JEKIBLOX Chat</span>
+  <div id="authContainer" style="display:flex;align-items:center;gap:8px;">
     <button class="auth-btn" id="authBtn">REGISTER / LOGIN</button>
     <div id="userProfile">
       <img id="userPic" src="" alt="Profile">
@@ -79,32 +68,32 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
     <input type="text" id="usernameInput" placeholder="@username">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
+    <div id="forgotPassContainer" style="display:none;flex-direction:column;gap:5px;">
+      <input type="email" id="forgotEmailInput" placeholder="Enter your email">
+      <button id="forgotSubmitBtn">Reset Password</button>
+    </div>
     <span class="forgot-pass" id="forgotPass">Forgot Password?</span>
     <button id="authSubmitBtn">Register</button>
     <button id="switchModeBtn">Switch to Login</button>
   </div>
 </div>
 
-<!-- Logout confirmation popup -->
-<div class="popup-overlay" id="logoutOverlay">
-  <div class="popup" style="max-width:300px;text-align:center;">
-    <h3>Log Out?</h3>
-    <p>Do you really want to log out?</p>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
-      <button id="cancelLogout" style="background:rgba(0,0,0,0.5);">Cancel</button>
-      <button id="confirmLogout" style="background:rgba(255,0,0,0.85);">Yes</button>
-    </div>
-  </div>
+<!-- Chat Container -->
+<div id="chatContainer"></div>
+
+<div id="chatInputContainer" style="display:none;">
+  <input type="text" id="chatMessage" placeholder="Type a message...">
+  <input type="file" id="chatImage" accept="image/*">
+  <button id="sendBtn">Send</button>
 </div>
 
 <div id="notification" class="notification"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo.firebaseapp.com",
@@ -132,12 +121,19 @@ const usernameInput = document.getElementById('usernameInput');
 const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const forgotPass = document.getElementById('forgotPass');
+const forgotPassContainer = document.getElementById('forgotPassContainer');
+const forgotEmailInput = document.getElementById('forgotEmailInput');
+const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
+
 const userProfile = document.getElementById('userProfile');
 const userPic = document.getElementById('userPic');
 const userName = document.getElementById('userName');
-const logoutOverlay = document.getElementById('logoutOverlay');
-const cancelLogout = document.getElementById('cancelLogout');
-const confirmLogout = document.getElementById('confirmLogout');
+
+const chatContainer = document.getElementById('chatContainer');
+const chatInputContainer = document.getElementById('chatInputContainer');
+const chatMessage = document.getElementById('chatMessage');
+const chatImage = document.getElementById('chatImage');
+const sendBtn = document.getElementById('sendBtn');
 
 let isRegisterMode = true;
 let profilePicFile = null;
@@ -153,7 +149,7 @@ function showNotification(msg,type='success'){
 authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
 closeAuthBtn.addEventListener('click',()=> authOverlay.style.display='none');
 
-// Switch mode (placed under main button)
+// Switch mode
 switchModeBtn.addEventListener('click',()=>{
   isRegisterMode=!isRegisterMode;
   if(isRegisterMode){
@@ -187,21 +183,18 @@ profilePicInput.addEventListener('change',()=>{
   }
 });
 
-// Submit register/login
-authSubmitBtn.addEventListener('click',async()=>{
+// Submit auth
+authSubmitBtn.addEventListener('click', async ()=>{
   const email=emailInput.value.trim();
   const password=passwordInput.value.trim();
   const username=usernameInput.value.trim();
-
-  if(!email || !password) return showNotification("Email & password required!",'error');
+  if(!email||!password) return showNotification("Email & password required!",'error');
   if(isRegisterMode && !username) return showNotification("@username required!",'error');
-
   try{
     let user;
     if(isRegisterMode){
       const cred = await createUserWithEmailAndPassword(auth,email,password);
       user = cred.user;
-      // Upload profile pic to Imgur
       let profileUrl="";
       if(profilePicFile){
         const formData=new FormData();
@@ -232,39 +225,98 @@ authSubmitBtn.addEventListener('click',async()=>{
 });
 
 // Forgot password
-forgotPass.addEventListener('click',async()=>{
-  const email = prompt("Enter your email for password reset:");
-  if(!email) return;
+forgotPass.addEventListener('click',()=>{
+  forgotPassContainer.style.display='flex';
+});
+forgotSubmitBtn.addEventListener('click', async ()=>{
+  const email = forgotEmailInput.value.trim();
+  if(!email) return showNotification("Email required",'error');
   try{
     await sendPasswordResetEmail(auth,email);
     showNotification("Password reset email sent!","success");
+    forgotPassContainer.style.display='none';
   }catch(e){ showNotification(e.message,'error'); }
 });
 
-// Update header only after checking user data exists
+// Update header after login
 onAuthStateChanged(auth, async user=>{
   authBtn.style.display='block';
   userProfile.style.display='none';
+  chatInputContainer.style.display='none';
   if(user){
-    const dbRef = ref(db,'jekiblox/users/'+user.uid);
-    const snapshot = await new Promise(res=>onValue(dbRef,snap=>res(snap),{onlyOnce:true}));
-    const userData = snapshot.val();
-    if(userData){ // only show profile if data exists
+    const userRef = ref(db,'jekiblox/users/'+user.uid);
+    const snapshot = await new Promise(res=>onChildAdded(userRef, ()=>res()));
+    const snap = await fetch('https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com/jekiblox/users/'+user.uid+'.json');
+    const userData = await snap.json();
+    if(userData){
       authBtn.style.display='none';
       userProfile.style.display='flex';
-      userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
-      userName.textContent = userData?.username || user.email.split('@')[0];
+      userPic.src = userData.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
+      userName.textContent = userData.username || user.email.split('@')[0];
+      chatInputContainer.style.display='flex';
     }
   }
 });
 
-// Logout popup
-userProfile.addEventListener('click',()=>logoutOverlay.style.display='flex');
-cancelLogout.addEventListener('click',()=>logoutOverlay.style.display='none');
-confirmLogout.addEventListener('click',async()=>{
-  await auth.signOut();
-  logoutOverlay.style.display='none';
-  showNotification("Logged out","success");
+// Logout
+userProfile.addEventListener('click', async ()=>{
+  if(confirm("Log out?")){ await signOut(auth); showNotification("Logged out","success"); }
+});
+
+// Chat functionality
+onAuthStateChanged(auth, user=>{
+  if(!user) return;
+  const chatRef = ref(db,'jekiblox/chat');
+  onChildAdded(chatRef, snapshot=>{
+    const msg = snapshot.val();
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message');
+    const imgEl = document.createElement('img');
+    imgEl.src = msg.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
+    const contentDiv = document.createElement('div');
+    contentDiv.classList.add('messageContent');
+    const sender = document.createElement('span');
+    sender.classList.add('sender'); sender.textContent = msg.username;
+    const text = document.createElement('span');
+    text.classList.add('text'); text.textContent = msg.text || '';
+    contentDiv.appendChild(sender);
+    contentDiv.appendChild(text);
+    if(msg.image){
+      const imgMsg = document.createElement('img');
+      imgMsg.src=msg.image;
+      imgMsg.style.maxWidth='200px'; imgMsg.style.borderRadius='12px';
+      contentDiv.appendChild(imgMsg);
+    }
+    msgDiv.appendChild(imgEl);
+    msgDiv.appendChild(contentDiv);
+    chatContainer.appendChild(msgDiv);
+    chatContainer.scrollTop=chatContainer.scrollHeight;
+  });
+});
+
+// Send message
+sendBtn.addEventListener('click', async ()=>{
+  const user = auth.currentUser;
+  if(!user) return;
+  const username = userName.textContent;
+  const profilePic = userPic.src;
+  const text = chatMessage.value.trim();
+  const file = chatImage.files[0];
+  let imageUrl="";
+  if(file){
+    const formData = new FormData();
+    formData.append('image',file);
+    const res = await fetch('https://api.imgur.com/3/image',{
+      method:'POST',
+      headers:{Authorization:'Client-ID 891e5bb4aa94282'},
+      body:formData
+    });
+    const data = await res.json();
+    if(data.success) imageUrl=data.data.link;
+  }
+  if(!text && !imageUrl) return;
+  await push(ref(db,'jekiblox/chat'),{username, profilePic, text, image:imageUrl, timestamp:Date.now()});
+  chatMessage.value=''; chatImage.value='';
 });
 </script>
 </body>
