@@ -4,110 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jekiblox Video Upload</title>
-<style>
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #111;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-}
-
-.upload-card {
-    width: 100%;
-    max-width: 600px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.upload-card input[type="file"] {
-    display: none;
-}
-
-.upload-btn {
-    background: #fff;
-    color: #000;
-    padding: 0.8rem 1.2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.upload-btn:hover {
-    background: #f0f0f0;
-}
-
-video {
-    width: 100%;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
-
-.progress-container {
-    width: 100%;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    display: none;
-}
-
-.progress-bar {
-    height: 10px;
-    width: 0%;
-    background: #4ade80;
-    transition: width 0.2s;
-    border-radius: 8px;
-}
-
-/* Mobile adjustments */
-@media (max-width: 480px) {
-    body {
-        padding: 1rem;
-    }
-    .upload-card {
-        padding: 1rem;
-    }
-    .upload-btn {
-        padding: 0.6rem 1rem;
-    }
-}
-</style>
-</head>
-<body>
-
-<div class="upload-card">
-    <label for="videoInput" class="upload-btn">Select Video</label>
-    <input type="file" id="videoInput" accept="video/mp4,video/webm">
-    <input type="text" id="videoTitle" placeholder="Video Title" style="padding:0.6rem;border-radius:12px;border:none;width:100%;">
-    <button id="uploadBtn" class="upload-btn">Upload Video</button>
-
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
-
-    <video id="preview" controls style="display:none;"></video>
-</div>
-
-<h2 style="margin-top:2rem;">Community Feed</h2>
-<div id="videoFeed" style="display:flex; flex-direction:column; gap:1rem; width:100%; max-width:600px;"></div>
-
-<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+  // Firebase v11 modular imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
     authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
     databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
@@ -116,108 +18,151 @@ const firebaseConfig = {
     messagingSenderId: "1094792075584",
     appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
     measurementId: "G-LLT6F9WRKH"
-};
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const videoRef = ref(db, 'videos');
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-// Load existing videos
-function loadVideos() {
-    onValue(videoRef, (snapshot) => {
-        const container = document.getElementById('videoFeed');
-        container.innerHTML = '';
-        const data = snapshot.val();
-        if (!data) return;
-        Object.values(data).forEach(video => {
-            const wrapper = document.createElement('div');
-            wrapper.style.display='flex';
-            wrapper.style.flexDirection='column';
-            wrapper.style.gap='0.5rem';
-
-            const title = document.createElement('strong');
-            title.textContent = video.title;
-
-            const videoEl = document.createElement('video');
-            videoEl.src = video.url;
-            videoEl.controls = true;
-
-            wrapper.appendChild(title);
-            wrapper.appendChild(videoEl);
-            container.appendChild(wrapper);
-        });
-    });
-}
-
-loadVideos();
-
-// Upload
-document.getElementById('uploadBtn').addEventListener('click', async () => {
-    const file = document.getElementById('videoInput').files[0];
-    const title = document.getElementById('videoTitle').value.trim();
-    if (!file) return alert('Select a video first');
-    if (!title) return alert('Add a video title');
-
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('userhash', '');
-    formData.append('fileToUpload', file);
-
-    const progressContainer = document.querySelector('.progress-container');
+  // DOM Elements
+  window.addEventListener('DOMContentLoaded', () => {
+    const videoInput = document.getElementById('videoInput');
+    const uploadBtn = document.getElementById('uploadBtn');
     const progressBar = document.getElementById('progressBar');
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
+    const preview = document.getElementById('preview');
+    const titleInput = document.getElementById('titleInput');
+    const descInput = document.getElementById('descInput');
 
-    try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://catbox.moe/user/api.php');
+    uploadBtn.addEventListener('click', () => {
+      const file = videoInput.files[0];
+      if (!file) return alert('Select a video first!');
+      const title = titleInput.value || "Untitled";
+      const description = descInput.value || "";
 
-        xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-                const percent = (e.loaded / e.total) * 100;
-                progressBar.style.width = percent + '%';
-            }
-        });
+      const formData = new FormData();
+      formData.append('file', file);
 
-        xhr.onload = async () => {
-            if (xhr.status === 200) {
-                const mp4Link = xhr.responseText;
-                console.log('Uploaded video link:', mp4Link);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://upload.gofile.io/uploadFile');
 
-                // Show preview
-                const videoEl = document.getElementById('preview');
-                videoEl.src = mp4Link;
-                videoEl.style.display = 'block';
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + '%';
+          progressBar.textContent = percent + '%';
+        }
+      });
 
-                // Save to Firebase
-                await push(videoRef, {
-                    title: title,
-                    url: mp4Link,
-                    timestamp: Date.now()
-                });
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          if(res.status === "ok") {
+            const videoUrl = res.data.downloadPage;
+            preview.src = videoUrl;
+            preview.style.display = 'block';
 
-                alert('Upload successful!');
-                progressBar.style.width = '0%';
-                progressContainer.style.display = 'none';
-                document.getElementById('videoInput').value = '';
-                document.getElementById('videoTitle').value = '';
-            } else {
-                alert('Upload failed: ' + xhr.statusText);
-            }
-        };
+            // Save to Firebase
+            push(ref(db, 'videos'), {
+              title,
+              description,
+              videoUrl,
+              timestamp: Date.now()
+            }).then(() => {
+              alert('Video uploaded and saved!');
+              progressBar.style.width = '0%';
+              progressBar.textContent = '';
+              videoInput.value = '';
+              titleInput.value = '';
+              descInput.value = '';
+            });
 
-        xhr.onerror = () => {
-            alert('Upload failed due to network error.');
-        };
+          } else {
+            alert('Upload failed: ' + JSON.stringify(res));
+          }
+        } else {
+          alert('Upload failed, network error.');
+        }
+      };
 
-        xhr.send(formData);
-
-    } catch(err) {
-        console.error(err);
-        alert('Upload error: ' + err.message);
-    }
-});
+      xhr.onerror = () => alert('Upload failed, network error.');
+      xhr.send(formData);
+    });
+  });
 </script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0e0e0e;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+  .upload-container {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255,255,255,0.05);
+    padding: 2rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  input, textarea, button {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+  }
+  input[type="file"] {
+    padding: 0.4rem;
+  }
+  button {
+    background: #00ffcc;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #00d4aa;
+  }
+  .progress-wrapper {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    width: 0;
+    height: 1.5rem;
+    background: #00ffcc;
+    text-align: center;
+    color: #000;
+    line-height: 1.5rem;
+    font-weight: bold;
+  }
+  video {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="upload-container">
+  <input type="text" id="titleInput" placeholder="Video Title" required>
+  <textarea id="descInput" placeholder="Description (optional)"></textarea>
+  <input type="file" id="videoInput" accept="video/mp4,video/webm">
+  <button id="uploadBtn">Upload Video</button>
+  <div class="progress-wrapper">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+  <video id="preview" controls style="display:none;"></video>
+</div>
 
 </body>
 </html>
