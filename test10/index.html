@@ -1,25 +1,51 @@
-<input type="file" id="fileInput" />
-<button id="uploadBtn">Upload</button>
-<p id="result"></p>
-
-<script>
-document.getElementById('uploadBtn').onclick = async () => {
-  const fileInput = document.getElementById('fileInput');
-  if (!fileInput.files.length) return alert("Select a file first!");
-
-  const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
-
-  try {
-    const res = await fetch("https://file.io", {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-    document.getElementById('result').innerHTML = `Link: <a href="${data.link}" target="_blank">${data.link}</a>`;
-  } catch (err) {
-    console.error(err);
-    alert("Upload failed");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticky Dark Glassy Header</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
   }
-};
-</script>
+
+  body {
+    min-height: 200vh; /* so you can scroll and see sticky effect */
+    background: url('https://i.pinimg.com/736x/79/fd/d1/79fdd17253b569a417e980a99aecd978.jpg') center/cover no-repeat;
+    background-size: cover;
+    color: white;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    z-index: 100;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: background 0.3s ease;
+  }
+
+  header:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+</style>
+</head>
+<body>
+  <header>Dark Glassy Header</header>
+  <main style="padding: 50px; text-align:center;">
+    <p>Scroll down to see the sticky effect with rounded bottom edges.</p>
+  </main>
+</body>
+</html>
