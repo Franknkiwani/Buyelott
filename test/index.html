@@ -6,34 +6,23 @@
 <title>@JEKIBLOX</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;}
-body{height:100vh;width:100%;background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center center/cover;display:flex;flex-direction:column;align-items:center;}
+body{background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center/cover;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
 header{width:100%;padding:0.5rem 1rem;background:rgba(0,0,0,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
 header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
 header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
-.sub-btn{margin-left:auto;padding:6px 14px;background:rgba(255,0,0,0.85);border:1px solid rgba(255,0,0,0.9);border-radius:12px;font-size:0.9rem;color:white;font-weight:600;cursor:pointer;transition:0.2s;}
-.sub-btn:active{transform:scale(0.95);background:rgba(255,0,0,0.95);}
-.upload-btn{position:fixed;top:70px;right:1rem;display:flex;align-items:center;gap:6px;padding:10px 16px;background:rgba(255,255,255,0.25);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.5);border-radius:14px;font-size:0.95rem;font-weight:600;color:black;cursor:pointer;transition:0.25s ease;-webkit-text-stroke:0.5px black;}
-.upload-btn svg{width:20px;height:20px;fill:black;}
-.upload-btn:hover{box-shadow:0 0 8px rgba(0,0,0,0.7);background:rgba(255,255,255,0.3);}
-.upload-btn:active{transform:scale(0.95);background:rgba(255,255,255,0.35);}
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);display:none;justify-content:center;align-items:center;z-index:999;}
+.auth-btn{margin-left:auto;padding:6px 14px;background:rgba(255,0,0,0.85);border:1px solid rgba(255,0,0,0.9);border-radius:12px;font-size:0.9rem;color:white;font-weight:600;cursor:pointer;transition:0.2s;}
+.auth-btn:active{transform:scale(0.95);background:rgba(255,0,0,0.95);}
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:none;justify-content:center;align-items:flex-start;padding-top:50px;overflow-y:auto;z-index:999;}
 .popup{background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border-radius:20px;padding:2rem;width:90%;max-width:400px;display:flex;flex-direction:column;gap:1rem;color:black;position:relative;}
-.popup img{max-width:100%;border-radius:12px;object-fit:cover;margin-bottom:10px;}
-.popup input,.popup textarea,.popup select{width:100%;padding:0.6rem 0.8rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
+.popup h3{text-align:center;color:white;}
+.popup .close-btn{position:absolute;top:10px;left:10px;background:rgba(255,0,0,0.8);border:none;color:white;padding:5px 10px;border-radius:12px;cursor:pointer;}
+.popup input{width:100%;padding:0.6rem 0.8rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
 .popup button{padding:0.7rem;border:none;border-radius:12px;background:rgba(0,0,0,0.7);color:white;font-weight:600;cursor:pointer;transition:0.2s;}
 .popup button:active{transform:scale(0.95);}
-.popup .close-btn{background:rgba(255,0,0,0.8);margin-top:5px;}
-.progress-bar-container{width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:8px;overflow:hidden;display:none;margin-top:5px;position:relative;}
-.progress-bar{width:0%;height:100%;background:limegreen;transition:width 0.3s ease;}
-.progress-text{position:absolute;top:-22px;right:0;color:white;font-size:0.8rem;font-weight:600;}
+#profilePreview{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:auto;}
+.forgot-pass{color:white;text-decoration:underline;font-size:0.85rem;cursor:pointer;text-align:right;}
 .notification{position:fixed;top:20px;right:20px;background:rgba(0,0,0,0.8);color:white;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
 .notification.show{opacity:1;transform:translateY(0);}
-#postsSection{width:100%;display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:120px;padding-bottom:50px;}
-.post-card{background:rgba(255,255,255,0.15);backdrop-filter:blur(12px);border-radius:18px;max-width:600px;width:95%;display:flex;flex-direction:column;gap:0.5rem;color:black;border:1px solid rgba(0,0,0,0.3);box-shadow:0 0 10px rgba(0,0,0,0.2);position:relative;}
-.post-card img{width:100%;height:300px;object-fit:cover;border-radius:12px;}
-.post-card .card-footer{display:flex;justify-content:space-between;align-items:center;padding:0 0.5rem 0.5rem 0.5rem;}
-.invisible-ad{border:1px solid transparent;margin-top:5px;display:flex;justify-content:center;align-items:center;}
-.invisible-ad img{max-width:100%;height:auto;display:block;}
 </style>
 </head>
 <body>
@@ -41,43 +30,31 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
 <header>
   <img src="https://i.imgur.com/96svPpA.jpeg" alt="logo">
   <span>@JEKIBLOX</span>
-  <button class="sub-btn">Login with Google</button>
+  <button class="auth-btn" id="authBtn">REGISTER / LOGIN</button>
 </header>
 
-<button class="upload-btn" id="uploadBtn">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4a7.5 7.5 0 0 0-7.35 6.04A5.99 5.99 0 0 0 6 22h12a6 6 0 0 0 1.35-11.96zM13 13v4h-2v-4H8l4-4 4 4h-3z"/>
-  </svg>
-  UPLOAD BRAINROT
-</button>
-
-<div class="popup-overlay" id="popupOverlay">
+<!-- Auth Popup -->
+<div class="popup-overlay" id="authOverlay">
   <div class="popup">
-    <h3>Upload Brainrot</h3>
-    <img id="preview" src="" alt="Preview" style="display:none;">
-    <input type="file" id="fileInput" accept="image/*">
-    <input type="text" id="title" placeholder="Title">
-    <textarea id="description" placeholder="Description" rows="3"></textarea>
-    <select id="monetizeStatus">
-      <option value="notMonetized">Not Monetized</option>
-      <option value="monetized">Monetized</option>
-    </select>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="progressBar"></div>
-      <div class="progress-text" id="progressText">0%</div>
-    </div>
-    <button id="submitBtn">Submit</button>
-    <button id="closeBtn" class="close-btn">Close</button>
+    <button class="close-btn" id="closeAuthBtn">X</button>
+    <h3 id="popupTitle">Register</h3>
+    <img id="profilePreview" src="" alt="Profile Preview">
+    <input type="file" id="profilePicInput" accept="image/*">
+    <input type="text" id="usernameInput" placeholder="@username">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
+    <span class="forgot-pass" id="forgotPass">Forgot Password?</span>
+    <button id="switchModeBtn">Switch to Login</button>
+    <button id="authSubmitBtn">Register</button>
   </div>
 </div>
 
-<section id="postsSection"></section>
 <div id="notification" class="notification"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -93,176 +70,124 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-let currentUser = null;
 
 // Elements
-const uploadBtn = document.getElementById('uploadBtn');
-const popupOverlay = document.getElementById('popupOverlay');
-const fileInput = document.getElementById('fileInput');
-const preview = document.getElementById('preview');
-const monetizeStatus = document.getElementById('monetizeStatus');
-const closeBtn = document.getElementById('closeBtn');
-const submitBtn = document.getElementById('submitBtn');
-const progressBarContainer = document.querySelector('.progress-bar-container');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
-const notification = document.getElementById('notification');
-const postsSection = document.getElementById('postsSection');
-const subBtn = document.querySelector('.sub-btn');
+const authBtn = document.getElementById('authBtn');
+const authOverlay = document.getElementById('authOverlay');
+const closeAuthBtn = document.getElementById('closeAuthBtn');
+const popupTitle = document.getElementById('popupTitle');
+const switchModeBtn = document.getElementById('switchModeBtn');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+const profilePicInput = document.getElementById('profilePicInput');
+const profilePreview = document.getElementById('profilePreview');
+const usernameInput = document.getElementById('usernameInput');
+const emailInput = document.getElementById('emailInput');
+const passwordInput = document.getElementById('passwordInput');
+const forgotPass = document.getElementById('forgotPass');
+
+let isRegisterMode = true;
+let profilePicFile = null;
 
 function showNotification(msg){
+  const notification = document.getElementById('notification');
   notification.textContent = msg;
   notification.classList.add('show');
   setTimeout(()=>notification.classList.remove('show'),3000);
 }
 
-// Google Auth
-subBtn.addEventListener('click', async ()=>{
-  if(currentUser){
-    await auth.signOut();
-    currentUser = null;
-    subBtn.textContent = "Login with Google";
-    showNotification("Logged out");
-  }else{
-    try{
-      const result = await signInWithPopup(auth, provider);
-      currentUser = result.user;
-      showNotification("Logged in as "+currentUser.displayName);
-      subBtn.textContent = "Logout";
-    }catch(e){ showNotification("Login failed: "+e.message); }
+// Open/close popup
+authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
+closeAuthBtn.addEventListener('click',()=> authOverlay.style.display='none');
+
+// Switch modes
+switchModeBtn.addEventListener('click',()=>{
+  isRegisterMode = !isRegisterMode;
+  if(isRegisterMode){
+    popupTitle.textContent="Register";
+    authSubmitBtn.textContent="Register";
+    switchModeBtn.textContent="Switch to Login";
+    usernameInput.style.display="block";
+  } else {
+    popupTitle.textContent="Login";
+    authSubmitBtn.textContent="Login";
+    switchModeBtn.textContent="Switch to Register";
+    usernameInput.style.display="none";
   }
 });
 
-onAuthStateChanged(auth,user=>{
-  currentUser = user;
-  subBtn.textContent = user ? "Logout" : "Login with Google";
-});
-
-// Popup handlers
-uploadBtn.addEventListener('click',()=> popupOverlay.style.display='flex');
-closeBtn.addEventListener('click',()=>{ popupOverlay.style.display='none'; resetForm(); });
-
-function resetForm(){
-  fileInput.value=''; preview.src=''; preview.style.display='none';
-  document.getElementById('title').value='';
-  document.getElementById('description').value='';
-  monetizeStatus.value='notMonetized';
-  progressBar.style.width='0%'; progressText.textContent='0%';
-  progressBarContainer.style.display='none';
-}
-
-// Image preview
-fileInput.addEventListener('change',()=>{
-  const file=fileInput.files[0];
+// Profile pic preview
+profilePicInput.addEventListener('change',()=>{
+  const file = profilePicInput.files[0];
   if(file){
-    const reader=new FileReader();
-    reader.onload=e=>{
-      preview.src=e.target.result; preview.style.display='block';
-    }
+    profilePicFile = file;
+    const reader = new FileReader();
+    reader.onload = e=>profilePreview.src=e.target.result;
     reader.readAsDataURL(file);
-  }else{ preview.src=''; preview.style.display='none'; }
+  } else {
+    profilePreview.src='';
+    profilePicFile=null;
+  }
 });
 
-// Submit handler
-submitBtn.addEventListener('click', async ()=>{
-  if(!currentUser) return showNotification("Login required to upload!");
-  const file=fileInput.files[0];
-  const title=document.getElementById('title').value.trim();
-  const description=document.getElementById('description').value.trim();
+// Submit
+authSubmitBtn.addEventListener('click', async ()=>{
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const username = usernameInput.value.trim();
 
-  if(!file) return showNotification("Image is required!");
-  if(!title) return showNotification("Title is required!");
-
-  submitBtn.disabled=true; fileInput.disabled=true; monetizeStatus.disabled=true;
-  progressBarContainer.style.display='block'; progressBar.style.width='0%'; progressText.textContent='0%';
+  if(!email || !password) return showNotification("Email & password required!");
+  if(isRegisterMode && !username) return showNotification("@username required!");
 
   try{
-    // Upload to Imgur
-    progressBar.style.width='10%'; progressText.textContent='10%';
-    const formData=new FormData(); formData.append('image',file);
-    const res=await fetch('https://api.imgur.com/3/image',{
-      method:'POST',
-      headers:{Authorization:'Client-ID 891e5bb4aa94282'},
-      body:formData
-    });
-    const imgurData=await res.json();
-    if(!imgurData.success) throw new Error("Imgur upload failed");
-    const imageUrl=imgurData.data.link;
+    let user;
+    if(isRegisterMode){
+      const cred = await createUserWithEmailAndPassword(auth,email,password);
+      user = cred.user;
+    } else {
+      const cred = await signInWithEmailAndPassword(auth,email,password);
+      user = cred.user;
+    }
 
-    progressBar.style.width='60%'; progressText.textContent='60%';
+    // Upload profile pic to Imgur if registering
+    let profileUrl = "";
+    if(isRegisterMode && profilePicFile){
+      const formData = new FormData();
+      formData.append('image',profilePicFile);
+      const res = await fetch('https://api.imgur.com/3/image',{
+        method:'POST',
+        headers:{Authorization:'Client-ID 891e5bb4aa94282'},
+        body:formData
+      });
+      const data = await res.json();
+      if(data.success) profileUrl = data.data.link;
+    }
 
-    const newPostRef = push(ref(db,'jekiblox/post'));
-    await set(newPostRef,{
-      image: imageUrl,
-      title: title,
-      description: description,
-      monetized: monetizeStatus.value==='monetized',
-      userId: currentUser.uid,
-      timestamp:Date.now()
-    });
+    if(isRegisterMode){
+      // Save user info to Firebase DB
+      await set(ref(db,'jekiblox/users/'+user.uid),{
+        username: username,
+        email: email,
+        profilePic: profileUrl
+      });
+      showNotification("Registration successful!");
+    } else {
+      showNotification("Login successful!");
+    }
 
-    progressBar.style.width='100%'; progressText.textContent='100%';
-    showNotification("Upload successful!");
-    resetForm();
-    popupOverlay.style.display='none';
-  }catch(e){
-    showNotification("Upload failed: "+e.message);
-    progressBarContainer.style.display='none';
-  }finally{
-    submitBtn.disabled=false; fileInput.disabled=false; monetizeStatus.disabled=false;
-  }
+    authOverlay.style.display='none';
+    profilePicInput.value=''; profilePreview.src=''; emailInput.value=''; passwordInput.value=''; usernameInput.value='';
+
+  }catch(e){ showNotification("Error: "+e.message); }
 });
 
-// Load posts
-onValue(ref(db,'jekiblox/post'), async snapshot=>{
-  postsSection.innerHTML='';
-  const data=snapshot.val(); if(!data) return;
-  const postsArray = Object.entries(data).sort((a,b)=>b[1].timestamp - a[1].timestamp);
-
-  for(const [id, post] of postsArray){
-    const card = document.createElement('div'); card.classList.add('post-card');
-
-    const img = document.createElement('img'); img.src=post.image; card.appendChild(img);
-
-    const titleDiv = document.createElement('div'); titleDiv.textContent=post.title;
-    titleDiv.style.fontWeight='600'; titleDiv.style.fontSize='1.1rem'; titleDiv.style.padding='0 0.5rem';
-    card.appendChild(titleDiv);
-
-    if(post.description){
-      const descDiv = document.createElement('div'); descDiv.textContent=post.description;
-      descDiv.style.fontSize='0.9rem'; descDiv.style.color='rgba(0,0,0,0.75)'; descDiv.style.padding='0 0.5rem';
-      card.appendChild(descDiv);
-    }
-
-    const footer = document.createElement('div'); footer.classList.add('card-footer');
-
-    const statusDiv = document.createElement('div');
-    statusDiv.textContent = post.monetized ? "Monetized ✅" : "Not Monetized ❌";
-    footer.appendChild(statusDiv);
-
-    card.appendChild(footer);
-
-    // Invisible ad container if monetized
-    if(post.monetized){
-      const adContainer = document.createElement('div'); adContainer.classList.add('invisible-ad');
-      // Fetch random ad
-      const adsSnap = await get(ref(db,'jekibloxads'));
-      const adsData = adsSnap.val();
-      if(adsData){
-        const adsArray = Object.entries(adsData);
-        const [_, ad] = adsArray[Math.floor(Math.random()*adsArray.length)];
-        // Set ad dimensions
-        adContainer.style.width = ad.width+'px';
-        adContainer.style.height = ad.height+'px';
-        // Insert ad base code
-        adContainer.innerHTML = ad.code;
-      }
-      card.appendChild(adContainer);
-    }
-
-    postsSection.appendChild(card);
-  }
+// Forgot password
+forgotPass.addEventListener('click', async ()=>{
+  const email = prompt("Enter your email for password reset:");
+  if(!email) return;
+  try{
+    await sendPasswordResetEmail(auth,email);
+    showNotification("Password reset email sent!");
+  }catch(e){ showNotification("Error: "+e.message); }
 });
 </script>
 </body>
