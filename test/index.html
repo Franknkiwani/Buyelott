@@ -12,6 +12,9 @@ header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
 header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
 .auth-btn{margin-left:auto;padding:6px 14px;background:rgba(255,0,0,0.85);border:1px solid rgba(255,0,0,0.9);border-radius:12px;font-size:0.9rem;color:white;font-weight:600;cursor:pointer;transition:0.2s;}
 .auth-btn:active{transform:scale(0.95);background:rgba(255,0,0,0.95);}
+#userProfile{display:none;align-items:center;gap:6px;cursor:pointer;margin-left:auto;}
+#userProfile img{width:32px;height:32px;border-radius:50%;object-fit:cover;}
+#userProfile span{color:white;font-weight:600;}
 .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:none;justify-content:center;align-items:flex-start;padding-top:50px;overflow-y:auto;z-index:999;}
 .popup{background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border-radius:20px;padding:2rem;width:90%;max-width:400px;display:flex;flex-direction:column;gap:1rem;color:black;position:relative;}
 .popup h3{text-align:center;color:white;}
@@ -21,8 +24,10 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
 .popup button:active{transform:scale(0.95);}
 #profilePreview{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:auto;}
 .forgot-pass{color:white;text-decoration:underline;font-size:0.85rem;cursor:pointer;text-align:right;}
-.notification{position:fixed;top:20px;right:20px;background:rgba(0,0,0,0.8);color:white;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
+.notification{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
 .notification.show{opacity:1;transform:translateY(0);}
+.notification.success{background:rgba(0,128,0,0.85);color:white;}
+.notification.error{background:rgba(255,0,0,0.85);color:white;}
 </style>
 </head>
 <body>
@@ -30,7 +35,13 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
 <header>
   <img src="https://i.imgur.com/96svPpA.jpeg" alt="logo">
   <span>@JEKIBLOX</span>
-  <button class="auth-btn" id="authBtn">REGISTER / LOGIN</button>
+  <div id="authContainer" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+    <button class="auth-btn" id="authBtn">REGISTER / LOGIN</button>
+    <div id="userProfile">
+      <img id="userPic" src="" alt="Profile">
+      <span id="userName"></span>
+    </div>
+  </div>
 </header>
 
 <!-- Auth Popup -->
@@ -49,11 +60,23 @@ header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
   </div>
 </div>
 
+<!-- Logout confirmation popup -->
+<div class="popup-overlay" id="logoutOverlay">
+  <div class="popup" style="max-width:300px;text-align:center;">
+    <h3>Log Out?</h3>
+    <p>Do you really want to log out?</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
+      <button id="cancelLogout" style="background:rgba(0,0,0,0.5);">Cancel</button>
+      <button id="confirmLogout" style="background:rgba(255,0,0,0.85);">Yes</button>
+    </div>
+  </div>
+</div>
+
 <div id="notification" class="notification"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Firebase config
@@ -84,34 +107,44 @@ const usernameInput = document.getElementById('usernameInput');
 const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const forgotPass = document.getElementById('forgotPass');
+const userProfile = document.getElementById('userProfile');
+const userPic = document.getElementById('userPic');
+const userName = document.getElementById('userName');
+const logoutOverlay = document.getElementById('logoutOverlay');
+const cancelLogout = document.getElementById('cancelLogout');
+const confirmLogout = document.getElementById('confirmLogout');
 
 let isRegisterMode = true;
 let profilePicFile = null;
 
-function showNotification(msg){
+function showNotification(msg,type='success'){
   const notification = document.getElementById('notification');
   notification.textContent = msg;
-  notification.classList.add('show');
-  setTimeout(()=>notification.classList.remove('show'),3000);
+  notification.className='notification show '+(type==='success'?'success':'error');
+  setTimeout(()=>notification.className='notification',3000);
 }
 
-// Open/close popup
+// Open/close auth popup
 authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
 closeAuthBtn.addEventListener('click',()=> authOverlay.style.display='none');
 
-// Switch modes
+// Switch mode
 switchModeBtn.addEventListener('click',()=>{
-  isRegisterMode = !isRegisterMode;
+  isRegisterMode=!isRegisterMode;
   if(isRegisterMode){
     popupTitle.textContent="Register";
     authSubmitBtn.textContent="Register";
     switchModeBtn.textContent="Switch to Login";
     usernameInput.style.display="block";
+    profilePicInput.style.display="block";
+    profilePreview.style.display="block";
   } else {
     popupTitle.textContent="Login";
     authSubmitBtn.textContent="Login";
     switchModeBtn.textContent="Switch to Register";
     usernameInput.style.display="none";
+    profilePicInput.style.display="none";
+    profilePreview.style.display="none";
   }
 });
 
@@ -129,65 +162,84 @@ profilePicInput.addEventListener('change',()=>{
   }
 });
 
-// Submit
-authSubmitBtn.addEventListener('click', async ()=>{
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-  const username = usernameInput.value.trim();
+// Submit register/login
+authSubmitBtn.addEventListener('click',async()=>{
+  const email=emailInput.value.trim();
+  const password=passwordInput.value.trim();
+  const username=usernameInput.value.trim();
 
-  if(!email || !password) return showNotification("Email & password required!");
-  if(isRegisterMode && !username) return showNotification("@username required!");
+  if(!email || !password) return showNotification("Email & password required!",'error');
+  if(isRegisterMode && !username) return showNotification("@username required!",'error');
 
   try{
     let user;
     if(isRegisterMode){
       const cred = await createUserWithEmailAndPassword(auth,email,password);
       user = cred.user;
+      // Upload profile pic to Imgur
+      let profileUrl="";
+      if(profilePicFile){
+        const formData=new FormData();
+        formData.append('image',profilePicFile);
+        const res = await fetch('https://api.imgur.com/3/image',{
+          method:'POST',
+          headers:{Authorization:'Client-ID 891e5bb4aa94282'},
+          body:formData
+        });
+        const data = await res.json();
+        if(data.success) profileUrl=data.data.link;
+      }
+      await set(ref(db,'jekiblox/users/'+user.uid),{
+        username:username,
+        email:email,
+        profilePic:profileUrl
+      });
+      showNotification("Registration successful!","success");
     } else {
       const cred = await signInWithEmailAndPassword(auth,email,password);
       user = cred.user;
+      showNotification("Login successful!","success");
     }
-
-    // Upload profile pic to Imgur if registering
-    let profileUrl = "";
-    if(isRegisterMode && profilePicFile){
-      const formData = new FormData();
-      formData.append('image',profilePicFile);
-      const res = await fetch('https://api.imgur.com/3/image',{
-        method:'POST',
-        headers:{Authorization:'Client-ID 891e5bb4aa94282'},
-        body:formData
-      });
-      const data = await res.json();
-      if(data.success) profileUrl = data.data.link;
-    }
-
-    if(isRegisterMode){
-      // Save user info to Firebase DB
-      await set(ref(db,'jekiblox/users/'+user.uid),{
-        username: username,
-        email: email,
-        profilePic: profileUrl
-      });
-      showNotification("Registration successful!");
-    } else {
-      showNotification("Login successful!");
-    }
-
     authOverlay.style.display='none';
-    profilePicInput.value=''; profilePreview.src=''; emailInput.value=''; passwordInput.value=''; usernameInput.value='';
-
-  }catch(e){ showNotification("Error: "+e.message); }
+    profilePicInput.value=''; profilePreview.src='';
+    emailInput.value=''; passwordInput.value=''; usernameInput.value='';
+  }catch(e){ showNotification(e.message,'error'); }
 });
 
 // Forgot password
-forgotPass.addEventListener('click', async ()=>{
+forgotPass.addEventListener('click',async()=>{
   const email = prompt("Enter your email for password reset:");
   if(!email) return;
   try{
     await sendPasswordResetEmail(auth,email);
-    showNotification("Password reset email sent!");
-  }catch(e){ showNotification("Error: "+e.message); }
+    showNotification("Password reset email sent!","success");
+  }catch(e){ showNotification(e.message,'error'); }
+});
+
+// Update header on auth state change
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    authBtn.style.display='none';
+    userProfile.style.display='flex';
+    // load user data
+    const dbRef = ref(db,'jekiblox/users/'+user.uid);
+    const snapshot = await new Promise(res=>onValue(dbRef,snap=>res(snap),{onlyOnce:true}));
+    const userData = snapshot.val();
+    userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
+    userName.textContent = userData?.username || user.email.split('@')[0];
+  } else {
+    authBtn.style.display='block';
+    userProfile.style.display='none';
+  }
+});
+
+// Logout popup
+userProfile.addEventListener('click',()=>logoutOverlay.style.display='flex');
+cancelLogout.addEventListener('click',()=>logoutOverlay.style.display='none');
+confirmLogout.addEventListener('click',async()=>{
+  await auth.signOut();
+  logoutOverlay.style.display='none';
+  showNotification("Logged out","success");
 });
 </script>
 </body>
