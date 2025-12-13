@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Goal Tracker with Firebase</title>
+<title>Motivation Dashboard</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
-  body{background:#0b0b0d;color:#fff;min-height:100vh;padding:20px;}
-  header{height:56px;display:flex;align-items:center;padding:0 16px;background:rgba(15,15,18,0.9);border-bottom:1px solid rgba(255,255,255,0.04);}
+  body{background:#0b0b0d;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px;}
+  header{height:56px;display:flex;align-items:center;padding:0 16px;background:rgba(15,15,18,0.9);border-bottom:1px solid rgba(255,255,255,0.04);width:100%;}
   header .brand{font-size:28px;font-weight:700;}
-  .goal-box{margin-top:20px;max-width:600px;width:100%;text-align:center;}
-  .progress-bar{background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;height:20px;}
+
+  .goal-box{width:100%;max-width:800px;text-align:center;background:rgba(255,255,255,0.05);padding:20px;border-radius:12px;}
+  .progress-bar{background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;height:20px;margin-top:10px;}
   .progress-fill{width:0;height:100%;background:#4caf50;border-radius:10px;transition:0.4s;}
-  input{width:100%;padding:8px;margin:10px 0;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#fff;font-size:16px;text-align:center;}
-  .fx-info{margin-top:10px;opacity:0.85;font-size:14px;}
+  input{width:80%;padding:10px;margin:10px 0;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#fff;font-size:16px;text-align:center;}
+
+  .countdown, .quote{margin-top:10px;opacity:0.85;font-size:16px;}
+  
+  .dream-card{width:100%;max-width:800px;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;margin-top:20px;}
+  .dream-card img{width:100%;display:block;}
+  .dream-card p{padding:10px;font-size:16px;text-align:center;}
 </style>
 </head>
 <body>
@@ -24,72 +30,91 @@
   <h2>Goal: $500,000 by Jan 1, 2030</h2>
   <input type="number" id="currentAmount" placeholder="Enter how much you have ($)" />
   <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-  <div class="fx-info" id="countdown">Time left: calculating…</div>
+  <div class="countdown" id="countdown">Time left: calculating…</div>
+  <div class="quote" id="quote">Stay focused, stay hungry!</div>
 </div>
 
-<!-- Firebase SDK -->
+<div class="dream-card">
+  <img src="https://www.vacations.capetown/wp-content/uploads/2024/01/Hollywood-Mansion-Camps-Bay-201920-675x756.jpg" alt="Dream House">
+  <p>Dream House</p>
+</div>
+<div class="dream-card">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi4s5dDPhhAbaNf7lbf2o7L35jO1iB5ehqoSTl-Fh1MgsY4gsmXwZucDqE&s=10" alt="Dream Girl">
+  <p>Dream Girl</p>
+</div>
+<div class="dream-card">
+  <img src="https://images.prismic.io/carwow/d3f8a25d-6199-4132-8f92-61be951b3019_LHD+Lamborghini+Aventador+Ultimae+Exterior+11.jpg?auto=format&cs=tinysrgb&fit=max&q=60" alt="Dream Car">
+  <p>Dream Car</p>
+</div>
+
 <script type="module">
-  // Import Firebase modules
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-    projectId: "itzhoyoo-f9f7e",
-    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-    messagingSenderId: "1094792075584",
-    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-    measurementId: "G-LLT6F9WRKH"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const amountInput = document.getElementById('currentAmount');
-  const progressFill = document.getElementById('progressFill');
-  const goal = 500000;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const amountInput = document.getElementById('currentAmount');
+const progressFill = document.getElementById('progressFill');
+const goal = 500000;
+const amountRef = ref(db,'personalGoal/currentAmount');
+const quoteEl = document.getElementById('quote');
 
-  // Load saved amount on page load
-  const amountRef = ref(db, 'personalGoal/currentAmount');
-  get(amountRef).then(snapshot => {
-    if(snapshot.exists()){
-      amountInput.value = snapshot.val();
-      updateProgress();
-    }
-  });
+const quotes = [
+  "Dream big. Work bigger.",
+  "Every dollar counts, stay focused.",
+  "Hustle now, shine later.",
+  "4 years to $500k, let's go!",
+  "Keep adding, keep growing."
+];
 
-  // Update Firebase and progress bar when input changes
-  amountInput.addEventListener('input', () => {
-    const value = parseFloat(amountInput.value) || 0;
-    set(amountRef, value);
-    updateProgress();
-  });
+// Load saved amount
+get(amountRef).then(snap => { if(snap.exists()){ amountInput.value = snap.val(); updateProgress(); } });
 
-  function updateProgress(){
-    const val = parseFloat(amountInput.value) || 0;
-    let percent = Math.min((val/goal)*100,100);
-    progressFill.style.width = percent + '%';
-  }
+amountInput.addEventListener('input', () => {
+  const val = parseFloat(amountInput.value) || 0;
+  set(amountRef,val);
+  updateProgress();
+});
 
-  // Countdown to Jan 1, 2030
-  const countdownEl = document.getElementById('countdown');
-  function updateCountdown() {
-    const target = new Date('2030-01-01T00:00:00');
-    const now = new Date();
-    const diff = target - now;
-    if(diff <= 0){
-      countdownEl.textContent = "🎉 It’s 2030!";
-      return;
-    }
-    const days = Math.floor(diff / (1000*60*60*24));
-    const hrs = Math.floor((diff / (1000*60*60)) % 24);
-    const mins = Math.floor((diff / (1000*60)) % 60);
-    const secs = Math.floor((diff / 1000) % 60);
-    countdownEl.textContent = `Time left: ${days}d ${hrs}h ${mins}m ${secs}s`;
-  }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+function updateProgress(){
+  const val = parseFloat(amountInput.value) || 0;
+  let percent = Math.min((val/goal)*100,100);
+  progressFill.style.width = percent + '%';
+}
+
+// Countdown
+const countdownEl = document.getElementById('countdown');
+function updateCountdown() {
+  const target = new Date('2030-01-01T00:00:00');
+  const now = new Date();
+  const diff = target - now;
+  if(diff <= 0){ countdownEl.textContent = "🎉 It’s 2030!"; return; }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hrs = Math.floor((diff / (1000*60*60)) % 24);
+  const mins = Math.floor((diff / (1000*60)) % 60);
+  const secs = Math.floor((diff / 1000) % 60);
+  countdownEl.textContent = `Time left: ${days}d ${hrs}h ${mins}m ${secs}s`;
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+// Rotate quotes
+let qIndex = 0;
+setInterval(()=>{
+  quoteEl.textContent = quotes[qIndex];
+  qIndex = (qIndex+1)%quotes.length;
+}, 7000);
 </script>
 
 </body>
