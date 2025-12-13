@@ -3,502 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>@JEKIBLOX</title>
+<title>Goal + FX Tracker</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;}
-body{background:url('https://static.vecteezy.com/system/resources/previews/002/142/935/large_2x/beautiful-tropical-beach-background-free-photo.jpg') no-repeat center/cover;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;transition:background 0.5s ease;}
-header{width:100%;padding:0.5rem 1rem;background:rgba(0,0,0,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
-header img{height:34px;width:34px;border-radius:8px;object-fit:cover;}
-header span{color:white;font-size:1.15rem;font-weight:600;letter-spacing:0.4px;}
-.auth-btn{
-  margin-left:auto;
-  padding:6px 14px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid black;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  backdrop-filter: blur(8px);
-}
-.auth-btn:active{transform: scale(0.95);background: rgba(0,0,0,0.35);}
-#userProfile{display:none;align-items:center;gap:6px;cursor:pointer;margin-left:auto;}
-#userProfile img{width:32px;height:32px;border-radius:50%;object-fit:cover;}
-#userProfile span{color:white;font-weight:600;}
-
-/* Popup styles */
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:none;justify-content:center;align-items:flex-start;padding-top:50px;overflow-y:auto;z-index:999;}
-.popup{background:rgba(255,255,255,0.1);backdrop-filter:blur(15px);border:1px solid black;border-radius:20px;padding:2rem;width:90%;max-width:400px;display:flex;flex-direction:column;gap:1rem;color:white;position:relative;}
-.popup h3{text-align:center;color:white;}
-.popup .close-btn{position:absolute;top:10px;left:10px;background:rgba(255,0,0,0.8);border:none;color:white;padding:5px 10px;border-radius:12px;cursor:pointer;}
-.popup input{width:100%;padding:0.6rem 0.8rem;border-radius:12px;border:none;outline:none;font-size:0.95rem;}
-.popup button{padding:0.7rem;border:none;border-radius:12px;background:rgba(0,0,0,0.7);color:white;font-weight:600;cursor:pointer;transition:0.2s;}
-.popup button:active{transform:scale(0.95);}
-#profilePreview{width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:auto;}
-.forgot-pass{color:white;text-decoration:underline;font-size:0.85rem;cursor:pointer;text-align:right;}
-#switchModeBtn{background:white;color:black;font-weight:600;border:none;border-radius:12px;padding:0.7rem;cursor:pointer;transition:0.2s;}
-#switchModeBtn:active{transform:scale(0.95);background:rgba(230,230,230,1);}
-.notification{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.4s, transform 0.4s;z-index:1000;}
-.notification.show{opacity:1;transform:translateY(0);}
-.notification.success{background:rgba(0,128,0,0.85);color:white;}
-.notification.error{background:rgba(255,0,0,0.85);color:white;}
-
-/* Change Background button */
-#changeBgBtn{
-  position:fixed;
-  bottom:20px;
-  left:20px;
-  padding:0.6rem 1rem;
-  border-radius:12px;
-  border:none;
-  background:rgba(0,0,0,0.25);
-  color:white;
-  font-weight:600;
-  backdrop-filter:blur(8px);
-  cursor:pointer;
-  z-index:1000;
-  transition:0.2s;
-}
-#changeBgBtn:active{transform:scale(0.95);}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+  body{background:#0b0b0d;color:#fff;min-height:100vh;padding:20px;}
+  header{height:56px;display:flex;align-items:center;padding:0 16px;background:rgba(15,15,18,0.9);border-bottom:1px solid rgba(255,255,255,0.04);}
+  header .brand{font-size:28px;font-weight:700;}
+  .goal-box{margin-top:20px;max-width:600px;width:100%;text-align:center;}
+  .progress-bar{background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;height:20px;}
+  .progress-fill{width:0;height:100%;background:#4caf50;border-radius:10px;transition:0.4s;}
+  input{width:100%;padding:8px;margin:10px 0;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#fff;font-size:16px;text-align:center;}
+  .fx-info{margin-top:10px;opacity:0.85;font-size:14px;}
 </style>
 </head>
 <body>
 
-<header>
-  <img src="https://i.imgur.com/96svPpA.jpeg" alt="logo">
-  <span>@JEKIBLOX</span>
-  <div id="authContainer" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-    <button class="auth-btn" id="authBtn">REGISTER / LOGIN</button>
-    <div id="userProfile">
-      <img id="userPic" src="" alt="Profile">
-      <span id="userName"></span>
-    </div>
-  </div>
-</header>
-<div style="width:100%;min-height:100vh;padding:20px;
-    background:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAh4-rDFGeLXXrOWHH5FekaOy6hBDYb6e4g863TlVl6akOJFBZWj4p11E&s=10') center/cover no-repeat;">
+<header><div class="brand">frank nkiwani</div></header>
 
-  <div id="giveawayBox" style="width:80%;margin:20px auto;padding:14px;
-      border-radius:18px;background:rgba(255,255,255,0.15);
-      backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;">
+<div class="goal-box">
+  <h2>Goal: $500,000 by Jan 1, 2030</h2>
 
-    <img id="giveImg" src="" style="width:90px;height:90px;border-radius:14px;object-fit:cover;display:none;">
+  <input type="number" id="currentAmount" placeholder="Enter how much you have ($)" />
 
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+  <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
 
-      <h3 id="giveTitle" style="font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;">
-        Loading...
-      </h3>
+  <div class="fx-info" id="fxRate">Loading USD → ZAR rate...</div>
+  <div class="fx-info" id="convertedZAR"></div>
 
-      <span id="countdown" style="font-size:13px;color:#fff;opacity:0.8;margin-bottom:8px;">--</span>
-      <span id="enteredCount" style="font-size:13px;color:#fff;opacity:0.8;margin-bottom:12px;">0 entered</span>
-
-      <button id="enterBtn" style="
-          padding:10px 16px;
-          font-size:14px;
-          font-weight:600;
-          background:rgba(255,255,255,0.15);
-          backdrop-filter:blur(14px);
-          color:#fff;
-          border:2px solid rgba(255,255,255,0.9);
-          border-radius:12px;
-          cursor:pointer;
-          transition:0.2s;">
-        Enter Giveaway
-      </button>
-
-    </div>
-
-  </div>
-
-  <div id="noGiveaway" style="text-align:center;color:#fff;font-size:16px;display:none;margin-top:40px;">
-    No giveaways right now.
-  </div>
-
+  <div class="fx-info" id="countdown">Time left: calculating…</div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+<script>
+  const goal = 500000;
+  const progressFill = document.getElementById('progressFill');
+  const currentAmountEl = document.getElementById('currentAmount');
+  const fxRateEl = document.getElementById('fxRate');
+  const convertedZAREl = document.getElementById('convertedZAR');
+  const countdownEl = document.getElementById('countdown');
+  let currentRate = null;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
+  currentAmountEl.addEventListener('input', updateProgress);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const enterBtn = document.getElementById("enterBtn");
-const giveTitle = document.getElementById("giveTitle");
-const giveImg = document.getElementById("giveImg");
-const countdownEl = document.getElementById("countdown");
-const enteredCountEl = document.getElementById("enteredCount");
-const giveBox = document.getElementById("giveawayBox");
-const noGive = document.getElementById("noGiveaway");
-
-let currentGive = null;
-let user = null;
-
-// disable button initially
-enterBtn.disabled = true;
-enterBtn.style.opacity = "0.5";
-enterBtn.style.filter = "blur(1px)";
-
-// listen auth
-onAuthStateChanged(auth, u => {
-  user = u;
-  updateEnterAvailability();
-});
-
-// load giveaway
-onValue(ref(db, "jekibloxgiveaway/current"), snap => {
-  if (!snap.exists()) {
-    // no giveaway
-    giveBox.style.display = "none";
-    noGive.style.display = "block";
-    return;
+  async function fetchLiveRate() {
+    try {
+      const res = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=ZAR');
+      const data = await res.json();
+      currentRate = data.rates.ZAR;
+      fxRateEl.textContent = `USD → ZAR: 1 USD ≈ R ${currentRate.toFixed(2)}`;
+      updateProgress();
+    } catch (err) {
+      fxRateEl.textContent = "Failed to load FX rate.";
+      console.error(err);
+    }
   }
 
-  currentGive = snap.val();
-  giveTitle.textContent = currentGive.title;
-  giveImg.src = currentGive.image;
-  giveImg.style.display = "block";
-  giveBox.style.display = "flex";
-  noGive.style.display = "none";
+  function updateProgress() {
+    const val = parseFloat(currentAmountEl.value) || 0;
+    let percent = Math.min((val / goal) * 100, 100);
+    progressFill.style.width = percent + '%';
+    if (currentRate !== null) {
+      convertedZAREl.textContent = `≈ R ${(val * currentRate).toLocaleString('en-ZA', {maximumFractionDigits:2})}`;
+    }
+  }
 
-  startCountdown(currentGive.endsAt);
-  watchEntryCount();
-  updateEnterAvailability();
-});
-
-function startCountdown(endTime) {
-  function tick() {
-    const now = Date.now();
-    const diff = endTime - now;
-
+  function updateCountdown() {
+    const target = new Date('2030-01-01T00:00:00');
+    const now = new Date();
+    const diff = target - now;
     if (diff <= 0) {
-      countdownEl.textContent = "Giveaway Ended";
-      disableEnter();
+      countdownEl.textContent = "🎉 It’s 2030!";
       return;
     }
-
-    const h = Math.floor(diff / (1000*60*60));
-    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
-    const s = Math.floor((diff % (1000*60)) / 1000);
-
-    countdownEl.textContent = `${h}h ${m}m ${s}s left`;
-
-    requestAnimationFrame(tick);
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hrs = Math.floor((diff / (1000*60*60)) % 24);
+    const mins = Math.floor((diff / (1000*60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+    countdownEl.textContent = `Time left: ${days}d ${hrs}h ${mins}m ${secs}s`;
   }
-  tick();
-}
 
-function watchEntryCount() {
-  const entriesRef = ref(db, "giveawayEntries");
-  onValue(entriesRef, snap => {
-    const count = snap.exists() ? Object.keys(snap.val()).length : 0;
-    enteredCountEl.textContent = `${count} entered`;
-  });
-}
-
-function disableEnter() {
-  enterBtn.disabled = true;
-  enterBtn.style.opacity = "0.5";
-  enterBtn.style.filter = "blur(1px)";
-}
-
-function updateEnterAvailability() {
-  if (!currentGive) {
-    disableEnter();
-    return;
-  }
-  if (!user) {
-    disableEnter();
-    enterBtn.onclick = () => alert("Log in first to enter.");
-    return;
-  }
-  // check if user already entered
-  get(child(ref(db), `giveawayEntries/${user.uid}`)).then(snap => {
-    if (snap.exists()) {
-      enterBtn.disabled = true;
-      enterBtn.innerText = "Already Entered ✔";
-      enterBtn.style.opacity = "0.5";
-      enterBtn.style.filter = "blur(1px)";
-    } else {
-      // still valid to enter
-      enterBtn.disabled = false;
-      enterBtn.style.opacity = "1";
-      enterBtn.style.filter = "none";
-      enterBtn.innerText = "Enter Giveaway";
-
-      enterBtn.onclick = () => {
-        set(ref(db, "giveawayEntries/" + user.uid), {
-          enteredAt: Date.now(),
-          uid: user.uid
-        });
-        enterBtn.innerText = "Entered ✔";
-        enterBtn.style.background = "rgba(0,255,140,0.25)";
-        disableEnter();
-      };
-    }
-  });
-}
+  fetchLiveRate();
+  setInterval(fetchLiveRate, 60*1000); // refresh every minute
+  setInterval(updateCountdown, 1000);
 </script>
-<!-- Auth Popup -->
-<div class="popup-overlay" id="authOverlay">
-  <div class="popup">
-    <button class="close-btn" id="closeAuthBtn">X</button>
-    <h3 id="popupTitle">Register</h3>
-    <img id="profilePreview" src="" alt="Profile Preview">
-    <input type="file" id="profilePicInput" accept="image/*">
-    <input type="text" id="usernameInput" placeholder="@username">
-    <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passwordInput" placeholder="Password">
-    <span class="forgot-pass" id="forgotPass">Forgot Password?</span>
-    <button id="authSubmitBtn">Register</button>
-    <button id="switchModeBtn">Switch to Login</button>
-  </div>
-</div>
 
-<!-- Forgot Password Popup -->
-<div class="popup-overlay" id="forgotOverlay">
-  <div class="popup">
-    <button class="close-btn" id="closeForgotBtn">X</button>
-    <h3>Reset Password</h3>
-    <input type="email" id="forgotEmailInput" placeholder="Enter your email">
-    <button id="forgotSubmitBtn">Send Reset Email</button>
-  </div>
-</div>
-
-<!-- Logout confirmation popup -->
-<div class="popup-overlay" id="logoutOverlay">
-  <div class="popup" style="max-width:300px;text-align:center;">
-    <h3>Log Out?</h3>
-    <p>Do you really want to log out?</p>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
-      <button id="cancelLogout" style="background:rgba(0,0,0,0.5);">Cancel</button>
-      <button id="confirmLogout" style="background:rgba(255,0,0,0.85);">Yes</button>
-    </div>
-  </div>
-</div>
-
-<!-- Change Background Button -->
-<button id="changeBgBtn">Change Background</button>
-
-<div id="notification" class="notification"></div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-// Elements
-const authBtn = document.getElementById('authBtn');
-const authOverlay = document.getElementById('authOverlay');
-const closeAuthBtn = document.getElementById('closeAuthBtn');
-const popupTitle = document.getElementById('popupTitle');
-const switchModeBtn = document.getElementById('switchModeBtn');
-const authSubmitBtn = document.getElementById('authSubmitBtn');
-const profilePicInput = document.getElementById('profilePicInput');
-const profilePreview = document.getElementById('profilePreview');
-const usernameInput = document.getElementById('usernameInput');
-const emailInput = document.getElementById('emailInput');
-const passwordInput = document.getElementById('passwordInput');
-const forgotPass = document.getElementById('forgotPass');
-const userProfile = document.getElementById('userProfile');
-const userPic = document.getElementById('userPic');
-const userName = document.getElementById('userName');
-const logoutOverlay = document.getElementById('logoutOverlay');
-const cancelLogout = document.getElementById('cancelLogout');
-const confirmLogout = document.getElementById('confirmLogout');
-
-const forgotOverlay = document.getElementById('forgotOverlay');
-const closeForgotBtn = document.getElementById('closeForgotBtn');
-const forgotEmailInput = document.getElementById('forgotEmailInput');
-const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
-
-const changeBgBtn = document.getElementById('changeBgBtn');
-const bgImages = [
-  'https://i.pinimg.com/736x/4d/81/11/4d8111618f39b9af62f3ca2b3947bd07.jpg',
-  'https://images.stockcake.com/public/3/2/a/32aa032b-8576-4991-9dfd-5105356ca0c3_large/tropical-purple-sunset-stockcake.jpg',
-  'https://images.stockcake.com/public/9/a/9/9a9f3eea-c1fb-4b50-8891-3b15a1b1073a_large/sunset-tropical-beach-stockcake.jpg',
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAh4-rDFGeLXXrOWHH5FekaOy6hBDYb6e4g863TlVl6akOJFBZWj4p11E&s=10',
-  'https://i.pinimg.com/736x/4a/26/09/4a2609f06bee1872d9502473ef84e669.jpg'
-];
-
-// Preload backgrounds
-const preloadedBGs = [];
-bgImages.forEach(url=>{
-  const img=new Image();
-  img.src=url;
-  preloadedBGs.push(img);
-});
-
-// Apply saved bg or default
-const savedBg = localStorage.getItem('jekiblox-bg');
-if(savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
-
-// Change background handler
-changeBgBtn.addEventListener('click',()=>{
-  const randomBg = bgImages[Math.floor(Math.random()*bgImages.length)];
-  document.body.style.backgroundImage=`url(${randomBg})`;
-  localStorage.setItem('jekiblox-bg',randomBg);
-});
-
-// Notification helper
-function showNotification(msg,type='success'){
-  const notification = document.getElementById('notification');
-  notification.textContent=msg;
-  notification.className='notification show '+(type==='success'?'success':'error');
-  setTimeout(()=>notification.className='notification',3000);
-}
-
-// Auth popup
-authBtn.addEventListener('click',()=> authOverlay.style.display='flex');
-closeAuthBtn.addEventListener('click',()=> authOverlay.style.display='none');
-
-let isRegisterMode=true;
-let profilePicFile=null;
-
-// Switch mode
-switchModeBtn.addEventListener('click',()=>{
-  isRegisterMode=!isRegisterMode;
-  if(isRegisterMode){
-    popupTitle.textContent="Register";
-    authSubmitBtn.textContent="Register";
-    switchModeBtn.textContent="Switch to Login";
-    usernameInput.style.display="block";
-    profilePicInput.style.display="block";
-    profilePreview.style.display="block";
-  } else {
-    popupTitle.textContent="Login";
-    authSubmitBtn.textContent="Login";
-    switchModeBtn.textContent="Switch to Register";
-    usernameInput.style.display="none";
-    profilePicInput.style.display="none";
-    profilePreview.style.display="none";
-  }
-});
-
-// Profile pic preview
-profilePicInput.addEventListener('change',()=>{
-  const file = profilePicInput.files[0];
-  if(file){
-    profilePicFile = file;
-    const reader = new FileReader();
-    reader.onload = e=>profilePreview.src=e.target.result;
-    reader.readAsDataURL(file);
-  } else { profilePreview.src=''; profilePicFile=null; }
-});
-
-// Update header profile
-async function updateProfileArea(user){
-  if(!user) return;
-  userProfile.style.display='flex';
-  authBtn.style.display='none';
-  const dbRef = ref(db,'jekiblox/users/'+user.uid);
-  const snapshot = await new Promise(res=>onValue(dbRef,snap=>res(snap),{onlyOnce:true}));
-  const userData = snapshot.val();
-  userPic.src = userData?.profilePic || 'https://i.imgur.com/96svPpA.jpeg';
-  userName.textContent = userData?.username || user.email.split('@')[0];
-}
-
-// Register/Login
-authSubmitBtn.addEventListener('click',async()=>{
-  const email=emailInput.value.trim();
-  const password=passwordInput.value.trim();
-  const username=usernameInput.value.trim();
-  if(!email || !password) return showNotification("Email & password required!",'error');
-  if(isRegisterMode && !username) return showNotification("@username required!",'error');
-
-  try{
-    let user;
-    if(isRegisterMode){
-      const cred = await createUserWithEmailAndPassword(auth,email,password);
-      user = cred.user;
-      // Upload profile pic to Imgur
-      let profileUrl="";
-      if(profilePicFile){
-        const formData=new FormData();
-        formData.append('image',profilePicFile);
-        const res = await fetch('https://api.imgur.com/3/image',{
-          method:'POST',
-          headers:{Authorization:'Client-ID 891e5bb4aa94282'},
-          body:formData
-        });
-        const data = await res.json();
-        if(data.success) profileUrl=data.data.link;
-      }
-      await set(ref(db,'jekiblox/users/'+user.uid),{
-        username:username,
-        email:email,
-        profilePic:profileUrl
-      });
-      showNotification("Registration successful!","success");
-    } else {
-      const cred = await signInWithEmailAndPassword(auth,email,password);
-      user = cred.user;
-      showNotification("Login successful!","success");
-    }
-    updateProfileArea(user);
-    authOverlay.style.display='none';
-    profilePicInput.value=''; profilePreview.src='';
-    emailInput.value=''; passwordInput.value=''; usernameInput.value='';
-  }catch(e){ showNotification(e.message,'error'); }
-});
-
-// Forgot password
-forgotPass.addEventListener('click',()=>{ forgotOverlay.style.display='flex'; forgotEmailInput.value=''; });
-closeForgotBtn.addEventListener('click',()=>forgotOverlay.style.display='none');
-forgotSubmitBtn.addEventListener('click',async ()=>{
-  const email = forgotEmailInput.value.trim();
-  if(!email) return showNotification("Email required!","error");
-  try{
-    await sendPasswordResetEmail(auth,email);
-    showNotification("Password reset email sent!","success");
-    forgotOverlay.style.display='none';
-  }catch(e){ showNotification(e.message,'error'); }
-});
-
-// Auth state change
-onAuthStateChanged(auth,user=>{
-  if(user) updateProfileArea(user);
-  else { authBtn.style.display='block'; userProfile.style.display='none'; }
-});
-
-// Logout
-userProfile.addEventListener('click',()=>logoutOverlay.style.display='flex');
-cancelLogout.addEventListener('click',()=>logoutOverlay.style.display='none');
-confirmLogout.addEventListener('click',async()=>{
-  await auth.signOut();
-  logoutOverlay.style.display='none';
-  showNotification("Logged out","success");
-});
-</script>
 </body>
 </html>
