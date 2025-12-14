@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <!-- Page Title -->
   <title>WATCH-4-RBX | Earn Free Robux by Watching Shorts</title>
 
@@ -15,17 +18,633 @@
   <meta property="og:description" content="Earn free Robux instantly by watching short Roblox videos. Easy, fun, and 100% safe. Start collecting Robux now!">
   <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFMu2e9gaNAB2lo_naNy92h34lZAhSYhtsht3CMpD98toPCizKavTeORE&s=10">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourdomain.com">
+  <meta property="og:url" content="https://watch4rbx.com">
 
   <!-- Twitter Card Preview -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="WATCH-4-RBX | Earn Free Robux by Watching Shorts">
   <meta name="twitter:description" content="Earn free Robux instantly by watching short Roblox videos. Easy, fun, and 100% safe. Start collecting Robux now!">
   <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFMu2e9gaNAB2lo_naNy92h34lZAhSYhtsht3CMpD98toPCizKavTeORE&s=10">
+<style>
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  margin: 0;
+  background: #121212;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  position: sticky;       /* Makes it stick */
+  top: 0;                 /* Stick to top of viewport */
+  z-index: 9999;          /* Stay above other content */
+  background: rgba(26,26,26,0.95);  /* Slightly transparent dark bg */
+  backdrop-filter: blur(12px);      /* Glassy iOS effect */
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5); /* subtle depth */
+}
+
+.logo-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header img { width: 40px; }
+
+/* BUTTONS */
+button {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.login-btn { background: cyan; color: #121212; }
+.signup-btn { background: hotpink; color: #121212; }
+
+/* BALANCE */
+#balanceBtn {
+  display: none;
+  background: white;
+  color: #121212;
+  border-radius: 999px;
+  padding: 6px 10px 6px 14px;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+#getRobuxBtn {
+  background: #00c853;
+  color: white;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* MENU */
+.menu-wrapper { position: relative; }
+.dots { font-size: 20px; cursor: pointer; padding: 0 6px; }
+
+.menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 28px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.menu div {
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.menu div:hover { background: #2a2a2a; }
+
+/* MODALS */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes glow {
+  0% { background-position: 0% }
+  100% { background-position: 100% }
+}
+
+.modal-box {
+  width: 80%;
+  max-width: 420px;
+  padding: 3px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, cyan, hotpink, violet);
+  background-size: 300%;
+  animation: glow 1s linear infinite;
+}
+
+.modal-content {
+  background: #121212;
+  border-radius: 22px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content input {
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+}
+
+.close-btn {
+  text-align: right;
+  cursor: pointer;
+}
+
+/* NOTICES */
+.notice {
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+.notice.error { background: #3a0000; color: #ff6b6b; }
+.notice.success { background: #003a1a; color: #3dff9c; }
+/* STOP TEXT SELECTION & COPYING */
+* {
+  user-select: none;           /* Standard */
+  -webkit-user-select: none;   /* Chrome/Safari */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE/Edge */
+}
+
+body {
+  -webkit-touch-callout: none; /* Disable long-press menu on iOS */
+}
+
+input, textarea {
+  user-select: text; /* Keep inputs editable */
+}
+/* REMOVE BLUE TAP/FOCUS HIGHLIGHT */
+* {
+  outline: none;                 /* Remove default focus outline */
+  -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+}
+#videoContainer {
+  position: relative;
+  width: 80%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+#player {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  display: block;
+}
+
+#playPauseBtn {
+  position: absolute;
+  bottom: 12px;       /* distance from bottom inside video */
+  left: 50%;          /* center horizontally */
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  color: #00ffd5;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: all 0.2s ease;
+}
+
+#playPauseBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #00fff0;
+  transform: translateX(-50%) scale(1.05);
+}
+
+
+/* Get Robux popup/modal */
+#withdrawModal {
+  z-index: 10000; /* higher than menu so it stays on top */
+}
+/* General Section Styling */
+#howItWorks, #statsSection {
+  padding: 40px 20px;
+  background: #121212;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+/* Section Titles */
+#howItWorks h2 {
+  color: #00ffd5;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* Steps Container */
+.steps-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Individual Step */
+.step {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  font-size: 18px;
+  color: #00ffd5;
+}
+
+.step-content {
+  display: none;
+  font-size: 14px;
+  color: #ccc;
+}
+
+/* Stats Section */
+#statsSection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.stat-card {
+  flex: 1 1 0;
+  min-width: 250px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 35px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 42px rgba(0,0,0,0.6);
+}
+
+.stat-number {
+  font-size: 42px;
+  font-weight: 700;
+  color: #00ffd5; /* can change per card with IDs */
+}
+
+#totalUsers .stat-number {
+  color: #ff6b6b;
+}
+
+#activeSessions .stat-number {
+  color: #ffdd00;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: #ccc;
+}
+/* Logo bounce animation */
+@keyframes bounce {
+  0%,100%{ transform:translateY(0);}
+  50%{ transform:translateY(-15px);}
+}
+
+/* Robux coin for later animation */
+.robuxCoin {
+  position:absolute;
+  width:24px;
+  height:24px;
+  background:url('https://img.icons8.com/clouds/100/robux.png') no-repeat center/contain;
+  pointer-events:none;
+  animation:fall 2s linear forwards;
+}
+
+@keyframes fall {
+  0% {transform: translateY(0) rotate(0deg);}
+  100% {transform: translateY(600px) rotate(360deg); opacity:0;}
+}
+
+/* Optional: customize progress bar animation when script adds width */
+#loadingBar {
+  transition: width 0.2s ease-in-out;
+}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+</style>
 </head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WATCH-4-RBX</title>
+<body>
+
+<header>
+  <div class="logo-name">
+    <img src="https://img.icons8.com/clouds/100/robux.png" alt="WATCH-4-RBX Logo">
+    <span>WATCH-4-RBX</span>
+  </div>
+
+  <div id="authButtons">
+    <button class="login-btn" onclick="openLoginModal()">LOGIN</button>
+    <button class="signup-btn" onclick="openSignupModal()">SIGNUP</button>
+  </div>
+
+  <div id="balanceBtn">
+    <span id="rbxText">RBX: 0</span>
+    <button id="getRobuxBtn">GET</button>
+
+    <div class="menu-wrapper">
+      <span class="dots" onclick="toggleMenu()">⋮</span>
+      <div id="menu" class="menu">
+        <div onclick="logoutUser()" style="color:#ff4d4d; font-weight:bold; cursor:pointer;">Log out</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Top Section -->
+<div style="display:flex; flex-direction:column; align-items:center; margin-top:20px; gap:16px;">
+
+  <!-- Top Glassy Text -->
+  <div id="topText" style="
+    width: 80%;
+    max-width: 640px;
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    color: #00ffd5;
+    font-size: 18px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  ">
+    You earn 1 Robux per short watched
+  </div>
+
+  <!-- Video Player Container -->
+  <div id="videoContainer" style="
+    width: 80%;
+    max-width: 640px;
+    text-align: center;
+    position: relative;
+  ">
+    <!-- Glassy Loader -->
+    <div id="loader" style="
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #00ffd5;
+      font-weight: bold;
+      font-size: 16px;
+      z-index: 10;
+    ">
+      <div style="
+        border: 4px solid rgba(255,255,255,0.2);
+        border-top: 4px solid #00ffd5;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 10px;
+      "></div>
+      Loading your short...
+    </div>
+
+    <!-- Video -->
+    <video id="player" style="
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    ">
+      <source src="" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Play/Pause Button -->
+    <div style="text-align:center; margin-top:10px;">
+      <button id="playPauseBtn" style="
+        padding:10px 20px;
+        border-radius:12px;
+        border:none;
+        background:#00ffd5;
+        color:#000;
+        font-weight:bold;
+        cursor:pointer;
+      ">⏸️ Play</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- HOW IT WORKS - iOS Dark Style -->
+<section id="howItWorks">
+  <h2>How It Works</h2>
+
+  <div class="steps-container">
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-title">
+        1️⃣ Sign Up / Login
+        <span class="arrow">▼</span>
+      </div>
+      <div class="step-content">
+        Create your account or login to start earning Robux by watching shorts. All data is securely stored.
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-title">
+        2️⃣ Watch Shorts
+        <span class="arrow">▼</span>
+      </div>
+      <div class="step-content">
+        Watch short videos. Each completed video rewards you with 1 Robux. Do not skip ahead!
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-title">
+        3️⃣ Collect Robux
+        <span class="arrow">▼</span>
+      </div>
+      <div class="step-content">
+        Robux appear automatically in your balance at the top of the page.
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-title">
+        4️⃣ Withdraw
+        <span class="arrow">▼</span>
+      </div>
+      <div class="step-content">
+        Once you reach 100 Robux, click "GET" to request a withdrawal to your Roblox account.
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-title">
+        5️⃣ Support & FAQ
+        <span class="arrow">▼</span>
+      </div>
+      <div class="step-content">
+        Contact support or check the FAQ if you have questions. Withdrawals and balance update live.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section id="statsSection">
+  <div class="stat-card" id="totalRobux">
+    <div class="stat-number">150,000+</div>
+    <div class="stat-label">Total Robux Earned</div>
+  </div>
+
+  <div class="stat-card" id="totalUsers">
+    <div class="stat-number">25,000+</div>
+    <div class="stat-label">Total Users</div>
+  </div>
+
+  <div class="stat-card" id="activeSessions">
+    <div class="stat-number">2k+</div>
+    <div class="stat-label">Daily Concurrent</div>
+  </div>
+</section>
+
+</div>
+
+<!-- iOS-style Popup -->
+<div id="popup" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: #f2f2f7;
+  color: #000;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%; max-width: 300px;
+  text-align: center;
+  font-size: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+">
+  <div>Congrats! You earned 1 Robux!</div>
+  <button id="okButton" style="
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    background-color: #007aff;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  ">OK</button>
+</div>
+<!-- LOGIN -->
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeLoginModal()">✕</div>
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <div id="loginNotice" class="notice"></div>
+      <button class="login-btn" onclick="loginUser()">Login</button>
+      <small onclick="forgotPassword()" style="cursor:pointer">Forgot password?</small>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeSignupModal()">✕</div>
+      <input id="signupEmail" placeholder="Email">
+      <input id="signupPassword" type="password">
+      <div id="signupNotice" class="notice"></div>
+      <button class="signup-btn" onclick="signupUser()">Create Account</button>
+    </div>
+  </div>
+</div>
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" style="position:fixed; inset:0; background:#121212; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999;">
+  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:80px; animation:bounce 1.5s infinite;">
+  <div style="color:white; margin:15px 0; font-size:18px;">Loading Robux Magic...</div>
+  <div style="width:300px; max-width:80vw; height:12px; border-radius:12px; background: rgba(255,255,255,0.1); overflow:hidden;">
+    <div id="loadingBar" style="width:0%; height:100%; background: linear-gradient(90deg, #ff4c4c, #ff1aff); border-radius:12px;"></div>
+  </div>
+</div>
+<!-- WITHDRAW POPUP -->
+<div id="withdrawModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content" style="text-align:center;">
+      <div class="close-btn" onclick="closeWithdrawModal()">✕</div>
+      
+      <!-- Big User RBX Display -->
+      <div style="font-size:48px; font-weight:bold; margin:10px 0;" id="withdrawRBX">0 RBX</div>
+      <div style="font-size:14px; color:#aaa;">This is your available Robux</div>
+      
+      <!-- Username -->
+      <input type="text" id="withdrawUsername" placeholder="@Roblox Username">
+      <div id="usernameNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Email -->
+      <input type="email" id="withdrawEmail" placeholder="Email">
+      <div id="emailNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Error / Success message -->
+      <div id="withdrawNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Confirm Button -->
+      <button id="confirmWithdrawBtn">CONFIRM NOW</button>
+      
+      <!-- Pending RBX bar -->
+      <div id="pendingRBXBar" style="margin-top:15px; background:#333; border-radius:12px; padding:6px; color:#ff0; font-size:14px;">
+        Pending Robux: 0
+      </div>
+    </div>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
 import {
@@ -404,559 +1023,6 @@ player.addEventListener('playing', () => {
   clearTimeout(bufferingTimeout);
   loader.style.display = 'none';
 });
-</script>
-<style>
-* {
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-body {
-  margin: 0;
-  background: #121212;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-header {
-  position: sticky;       /* Makes it stick */
-  top: 0;                 /* Stick to top of viewport */
-  z-index: 9999;          /* Stay above other content */
-  background: rgba(26,26,26,0.95);  /* Slightly transparent dark bg */
-  backdrop-filter: blur(12px);      /* Glassy iOS effect */
-  padding: 8px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5); /* subtle depth */
-}
-
-.logo-name {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-header img { width: 40px; }
-
-/* BUTTONS */
-button {
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-}
-
-.login-btn { background: cyan; color: #121212; }
-.signup-btn { background: hotpink; color: #121212; }
-
-/* BALANCE */
-#balanceBtn {
-  display: none;
-  background: white;
-  color: #121212;
-  border-radius: 999px;
-  padding: 6px 10px 6px 14px;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-}
-
-#getRobuxBtn {
-  background: #00c853;
-  color: white;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 13px;
-}
-
-/* MENU */
-.menu-wrapper { position: relative; }
-.dots { font-size: 20px; cursor: pointer; padding: 0 6px; }
-
-.menu {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 28px;
-  background: #1a1a1a;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-}
-.menu div {
-  padding: 10px 14px;
-  cursor: pointer;
-}
-.menu div:hover { background: #2a2a2a; }
-
-/* MODALS */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
-
-@keyframes glow {
-  0% { background-position: 0% }
-  100% { background-position: 100% }
-}
-
-.modal-box {
-  width: 80%;
-  max-width: 420px;
-  padding: 3px;
-  border-radius: 24px;
-  background: linear-gradient(90deg, cyan, hotpink, violet);
-  background-size: 300%;
-  animation: glow 1s linear infinite;
-}
-
-.modal-content {
-  background: #121212;
-  border-radius: 22px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.modal-content input {
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-}
-
-.close-btn {
-  text-align: right;
-  cursor: pointer;
-}
-
-/* NOTICES */
-.notice {
-  padding: 8px;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-.notice.error { background: #3a0000; color: #ff6b6b; }
-.notice.success { background: #003a1a; color: #3dff9c; }
-/* STOP TEXT SELECTION & COPYING */
-* {
-  user-select: none;           /* Standard */
-  -webkit-user-select: none;   /* Chrome/Safari */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* IE/Edge */
-}
-
-body {
-  -webkit-touch-callout: none; /* Disable long-press menu on iOS */
-}
-
-input, textarea {
-  user-select: text; /* Keep inputs editable */
-}
-/* REMOVE BLUE TAP/FOCUS HIGHLIGHT */
-* {
-  outline: none;                 /* Remove default focus outline */
-  -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
-}
-#videoContainer {
-  position: relative;
-  width: 80%;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-#player {
-  width: 100%;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  display: block;
-}
-
-#playPauseBtn {
-  position: absolute;
-  bottom: 12px;       /* distance from bottom inside video */
-  left: 50%;          /* center horizontally */
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  color: #00ffd5;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  transition: all 0.2s ease;
-}
-
-#playPauseBtn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #00fff0;
-  transform: translateX(-50%) scale(1.05);
-}
-
-
-/* Get Robux popup/modal */
-#withdrawModal {
-  z-index: 10000; /* higher than menu so it stays on top */
-}
-</style>
-
-</head>
-<body>
-
-<header>
-  <div class="logo-name">
-    <img src="https://img.icons8.com/clouds/100/robux.png">
-    <span>WATCH-4-RBX</span>
-  </div>
-
-  <div id="authButtons">
-    <button class="login-btn" onclick="openLoginModal()">LOGIN</button>
-    <button class="signup-btn" onclick="openSignupModal()">SIGNUP</button>
-  </div>
-
-<div id="balanceBtn">
-  <span id="rbxText">RBX: 0</span>
-  <button id="getRobuxBtn">GET</button>
- 
-  <div class="menu-wrapper">
-    <span class="dots" onclick="toggleMenu()">⋮</span>
-    <div id="menu" class="menu">
-      <div onclick="logoutUser()" style="color:#ff4d4d; font-weight:bold; cursor:pointer;">Log out</div>
-    </div>
-  </div>
-</div>
-    </div>
-  </div>
-</header>
-<!-- Top Section -->
-<div style="display:flex; flex-direction:column; align-items:center; margin-top:20px; gap:16px;">
-
-  <!-- Top Glassy Text -->
-  <div id="topText" style="
-    width: 80%;
-    max-width: 640px;
-    text-align: center;
-    padding: 12px 20px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(12px);
-    color: #00ffd5;
-    font-size: 18px;
-    font-weight: 500;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  ">
-    You earn 1 Robux per short watched
-  </div>
-
-  <!-- Video Player Container -->
-  <div id="videoContainer" style="
-    width: 80%;
-    max-width: 640px;
-    text-align: center;
-    position: relative;
-  ">
-    <!-- Glassy Loader -->
-    <div id="loader" style="
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(12px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #00ffd5;
-      font-weight: bold;
-      font-size: 16px;
-      z-index: 10;
-    ">
-      <div style="
-        border: 4px solid rgba(255,255,255,0.2);
-        border-top: 4px solid #00ffd5;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin-bottom: 10px;
-      "></div>
-      Loading your short...
-    </div>
-
-    <!-- Video -->
-    <video id="player" style="
-      width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    ">
-      <source src="" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-
-    <!-- Play/Pause Button -->
-    <div style="text-align:center; margin-top:10px;">
-      <button id="playPauseBtn" style="
-        padding:10px 20px;
-        border-radius:12px;
-        border:none;
-        background:#00ffd5;
-        color:#000;
-        font-weight:bold;
-        cursor:pointer;
-      ">⏸️ Play</button>
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- HOW IT WORKS - iOS Dark Style -->
-<section id="howItWorks" style="
-  padding: 40px 20px;
-  background: #121212;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-">
-
-  <h2 style="
-    color: #00ffd5;
-    font-size: 26px;
-    font-weight: 600;
-    text-align: center;
-  ">How It Works</h2>
-
-  <div style="
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  ">
-
-    <!-- Step 1 -->
-    <div style="
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 18px 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    " class="step">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        font-size: 18px;
-        color: #00ffd5;
-      " class="step-title">
-        1️⃣ Sign Up / Login
-        <span class="arrow">▼</span>
-      </div>
-      <div style="display:none; font-size:14px; color:#ccc;" class="step-content">
-        Create your account or login to start earning Robux by watching shorts. All data is securely stored.
-      </div>
-    </div>
-
-    <!-- Step 2 -->
-    <div style="
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 18px 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    " class="step">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        font-size: 18px;
-        color: #00ffd5;
-      " class="step-title">
-        2️⃣ Watch Shorts
-        <span class="arrow">▼</span>
-      </div>
-      <div style="display:none; font-size:14px; color:#ccc;" class="step-content">
-        Watch short videos. Each completed video rewards you with 1 Robux. Do not skip ahead!
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div style="
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 18px 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    " class="step">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        font-size: 18px;
-        color: #00ffd5;
-      " class="step-title">
-        3️⃣ Collect Robux
-        <span class="arrow">▼</span>
-      </div>
-      <div style="display:none; font-size:14px; color:#ccc;" class="step-content">
-        Robux appear automatically in your balance at the top of the page.
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div style="
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 18px 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    " class="step">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        font-size: 18px;
-        color: #00ffd5;
-      " class="step-title">
-        4️⃣ Withdraw
-        <span class="arrow">▼</span>
-      </div>
-      <div style="display:none; font-size:14px; color:#ccc;" class="step-content">
-        Once you reach 100 Robux, click "GET" to request a withdrawal to your Roblox account.
-      </div>
-    </div>
-
-    <!-- Step 5 -->
-    <div style="
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 18px 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    " class="step">
-      <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-        font-size: 18px;
-        color: #00ffd5;
-      " class="step-title">
-        5️⃣ Support & FAQ
-        <span class="arrow">▼</span>
-      </div>
-      <div style="display:none; font-size:14px; color:#ccc;" class="step-content">
-        Contact support or check the FAQ if you have questions. Withdrawals and balance update live.
-      </div>
-    </div>
-
-  </div>
-<!-- STATS SECTION -->
-<section id="statsSection" style="
-  padding: 40px 20px;
-  background: #121212;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  text-align: center;
-">
-  <!-- Total Robux -->
-  <div style="
-    flex: 1 1 0;
-    min-width: 250px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 35px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 18px 42px rgba(0,0,0,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'">
-    <div style="font-size: 42px; font-weight: 700; color: #00ffd5;" id="totalRobux">150,000+</div>
-    <div style="font-size: 16px; color: #ccc;">Total Robux Earned</div>
-  </div>
-
-  <!-- Total Users -->
-  <div style="
-    flex: 1 1 0;
-    min-width: 250px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 35px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 18px 42px rgba(0,0,0,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'">
-    <div style="font-size: 42px; font-weight: 700; color: #ff6b6b;" id="totalUsers">25,000+</div>
-    <div style="font-size: 16px; color: #ccc;">Total Users</div>
-  </div>
-
-  <!-- Daily Active -->
-  <div style="
-    flex: 1 1 0;
-    min-width: 250px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    padding: 35px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 18px 42px rgba(0,0,0,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 12px 36px rgba(0,0,0,0.5)'">
-    <div style="font-size: 42px; font-weight: 700; color: #ffdd00;" id="activeSessions">2k+</div>
-    <div style="font-size: 16px; color: #ccc;">Daily Concurrent</div>
-  </div>
-</section>
-
-<script>
 // Dropdown toggle
 document.querySelectorAll('#howItWorks .step').forEach(step => {
   step.addEventListener('click', () => {
@@ -973,135 +1039,5 @@ document.querySelectorAll('#howItWorks .step').forEach(step => {
 });
 </script>
 
-</div>
-
-<!-- iOS-style Popup -->
-<div id="popup" style="
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  background: #f2f2f7;
-  color: #000;
-  padding: 20px;
-  border-radius: 15px;
-  width: 80%; max-width: 300px;
-  text-align: center;
-  font-size: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  display: none;
-  flex-direction: column;
-">
-  <div>Congrats! You earned 1 Robux!</div>
-  <button id="okButton" style="
-    margin-top: 15px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: none;
-    background-color: #007aff;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-  ">OK</button>
-</div>
-
-<!-- Spinner Animation -->
-<style>
-  @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-  }
-</style>
-<!-- LOGIN -->
-<div id="loginModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-content">
-      <div class="close-btn" onclick="closeLoginModal()">✕</div>
-      <input id="loginEmail" placeholder="Email">
-      <input id="loginPassword" type="password" placeholder="Password">
-      <div id="loginNotice" class="notice"></div>
-      <button class="login-btn" onclick="loginUser()">Login</button>
-      <small onclick="forgotPassword()" style="cursor:pointer">Forgot password?</small>
-    </div>
-  </div>
-</div>
-
-<!-- SIGNUP -->
-<div id="signupModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-content">
-      <div class="close-btn" onclick="closeSignupModal()">✕</div>
-      <input id="signupEmail" placeholder="Email">
-      <input id="signupPassword" type="password">
-      <div id="signupNotice" class="notice"></div>
-      <button class="signup-btn" onclick="signupUser()">Create Account</button>
-    </div>
-  </div>
-</div>
-<!-- LOADING SCREEN -->
-<div id="loadingScreen" style="position:fixed; inset:0; background:#121212; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999;">
-  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:80px; animation:bounce 1.5s infinite;">
-  <div style="color:white; margin:15px 0; font-size:18px;">Loading Robux Magic...</div>
-  <div style="width:300px; max-width:80vw; height:12px; border-radius:12px; background: rgba(255,255,255,0.1); overflow:hidden;">
-    <div id="loadingBar" style="width:0%; height:100%; background: linear-gradient(90deg, #ff4c4c, #ff1aff); border-radius:12px;"></div>
-  </div>
-</div>
-<!-- WITHDRAW POPUP -->
-<div id="withdrawModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-content" style="text-align:center;">
-      <div class="close-btn" onclick="closeWithdrawModal()">✕</div>
-      
-      <!-- Big User RBX Display -->
-      <div style="font-size:48px; font-weight:bold; margin:10px 0;" id="withdrawRBX">0 RBX</div>
-      <div style="font-size:14px; color:#aaa;">This is your available Robux</div>
-      
-      <!-- Username -->
-      <input type="text" id="withdrawUsername" placeholder="@Roblox Username">
-      <div id="usernameNotice" class="notice" style="display:none;"></div>
-      
-      <!-- Email -->
-      <input type="email" id="withdrawEmail" placeholder="Email">
-      <div id="emailNotice" class="notice" style="display:none;"></div>
-      
-      <!-- Error / Success message -->
-      <div id="withdrawNotice" class="notice" style="display:none;"></div>
-      
-      <!-- Confirm Button -->
-      <button id="confirmWithdrawBtn">CONFIRM NOW</button>
-      
-      <!-- Pending RBX bar -->
-      <div id="pendingRBXBar" style="margin-top:15px; background:#333; border-radius:12px; padding:6px; color:#ff0; font-size:14px;">
-        Pending Robux: 0
-      </div>
-    </div>
-  </div>
-</div>
-<style>
-/* Logo bounce animation */
-@keyframes bounce {
-  0%,100%{ transform:translateY(0);}
-  50%{ transform:translateY(-15px);}
-}
-
-/* Robux coin for later animation */
-.robuxCoin {
-  position:absolute;
-  width:24px;
-  height:24px;
-  background:url('https://img.icons8.com/clouds/100/robux.png') no-repeat center/contain;
-  pointer-events:none;
-  animation:fall 2s linear forwards;
-}
-
-@keyframes fall {
-  0% {transform: translateY(0) rotate(0deg);}
-  100% {transform: translateY(600px) rotate(360deg); opacity:0;}
-}
-
-/* Optional: customize progress bar animation when script adds width */
-#loadingBar {
-  transition: width 0.2s ease-in-out;
-}
-</style>
 </body>
 </html>
