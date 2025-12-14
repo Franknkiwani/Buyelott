@@ -239,6 +239,97 @@ onAuthStateChanged(auth, async user => {
   clearInterval(progressInterval);
   hideLoader();
 });
+/* --- WATCH & EARN SHORTS --- */
+const originalVideos = [
+  "https://files.catbox.moe/61ny1y.mp4",
+  "https://files.catbox.moe/jfapxh.mp4",
+  "https://files.catbox.moe/vqvviq.mp4",
+  "https://files.catbox.moe/69l5y3.mp4",
+  "https://files.catbox.moe/bjwdo9.mp4",
+  "https://files.catbox.moe/sjpa2p.mp4",
+  "https://files.catbox.moe/j9rxi4.mp4",
+  "https://files.catbox.moe/8xiynj.mp4",
+  "https://files.catbox.moe/vmhugn.mp4",
+  "https://files.catbox.moe/ce1rr5.mp4",
+  "https://files.catbox.moe/j5f490.mp4",
+  "https://files.catbox.moe/aec00g.mp4",
+  "https://files.catbox.moe/s0covk.mp4",
+  "https://files.catbox.moe/gii9kh.mp4",
+  "https://files.catbox.moe/cfg3ny.mp4"
+];
+
+let shuffledVideos = [...originalVideos].sort(() => Math.random() - 0.5);
+let currentIndex = 0;
+
+const playerContainer = document.getElementById('videoContainer');
+const player = document.getElementById('player');
+const source = player.querySelector('source');
+const loader = document.getElementById('loader');
+const popup = document.getElementById('popup');
+const okButton = document.getElementById('okButton');
+const topText = document.getElementById('topText');
+
+// Update topText to glassy and use “short”
+topText.style.cssText = `
+  width: 80%;
+  max-width: 640px;
+  text-align: center;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  color: #00ffd5;
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+`;
+topText.textContent = "You earn 1 Robux per short watched";
+
+// Function to load a video
+function loadVideo(index){
+  loader.style.display = 'flex';
+  source.src = shuffledVideos[index];
+  player.load();
+}
+
+// Hide loader when video is ready
+player.addEventListener('canplay', () => {
+  loader.style.display = 'none';
+});
+
+// Show popup after short ends
+player.addEventListener('ended', () => {
+  popup.style.display = 'flex';
+});
+
+// OK button handler → reward RBX & load next short
+okButton.addEventListener('click', async () => {
+  popup.style.display = 'none';
+  const user = auth.currentUser;
+  if(user){
+    try {
+      const rbxRef = ref(db, `users/${user.uid}/robux`);
+      const snapshot = await get(rbxRef);
+      const currentRBX = snapshot.exists() ? snapshot.val() : 0;
+      await set(rbxRef, currentRBX + 1);
+      rbxText.textContent = `RBX: ${currentRBX + 1}`;
+    } catch(err){
+      console.error("Failed to reward RBX:", err);
+    }
+  }
+
+  // Move to next short
+  currentIndex++;
+  if(currentIndex >= shuffledVideos.length){
+    shuffledVideos = [...originalVideos].sort(() => Math.random() - 0.5);
+    currentIndex = 0;
+  }
+  loadVideo(currentIndex);
+});
+
+// Load first short
+loadVideo(currentIndex);
 </script>
 <style>
 * {
@@ -427,7 +518,109 @@ input, textarea {
     </div>
   </div>
 </header>
+<!-- Top Glassy Text -->
+<div id="topText" style="
+  width: 80%;
+  max-width: 640px;
+  text-align: center;
+  padding: 12px 20px;
+  margin: 20px auto;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  color: #00ffd5;
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+">
+  You earn 1 Robux per short watched
+</div>
 
+<!-- Video Player Container -->
+<div id="videoContainer" style="
+  width: 80%;
+  max-width: 640px;
+  margin: 0 auto 20px auto;
+  text-align: center;
+  position: relative;
+">
+
+  <!-- Glassy Loader -->
+  <div id="loader" style="
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #00ffd5;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 10;
+  ">
+    <div style="
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top: 4px solid #00ffd5;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    "></div>
+    Loading your short...
+  </div>
+
+  <!-- Video -->
+  <video id="player" controls style="
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  ">
+    <source src="" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<!-- iOS-style Popup -->
+<div id="popup" style="
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: #f2f2f7;
+  color: #000;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%; max-width: 300px;
+  text-align: center;
+  font-size: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+">
+  <div>Congrats! You earned 1 Robux!</div>
+  <button id="okButton" style="
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    background-color: #007aff;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  ">OK</button>
+</div>
+
+<!-- Spinner Animation -->
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+</style>
 <!-- LOGIN -->
 <div id="loginModal" class="modal">
   <div class="modal-box">
