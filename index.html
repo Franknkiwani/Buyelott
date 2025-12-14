@@ -569,6 +569,98 @@ input, textarea {
 </section>
 
 </div>
+<!-- CHAT BUBBLE -->
+<div id="chatBubble" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #00ffd5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 9999;
+  transition: transform 0.2s;
+">💬</div>
+
+<!-- CHAT POPUP -->
+<div id="chatPopup" style="
+  display: none;
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: #1e1e1e;
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+">
+  <div style="
+    padding: 12px 20px;
+    background: rgba(255,0,0,0.2);
+    backdrop-filter: blur(10px);
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    border-radius:20px 20px 0 0;
+  ">
+    Group Chat
+    <span id="closeChatBtn" style="
+      cursor:pointer;
+      background: rgba(255,0,0,0.5);
+      padding:4px 8px;
+      border-radius:12px;
+      font-size:14px;
+      font-weight:bold;
+      color:#fff;
+      backdrop-filter:blur(5px);
+    ">Close</span>
+  </div>
+
+  <div id="chatMessages" style="
+    flex: 1;
+    padding: 12px 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #fff;
+  "></div>
+
+  <div id="chatError" style="color:red; font-size:12px; padding:4px 20px; display:none;"></div>
+
+  <form id="chatForm" style="
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  ">
+    <input type="text" id="chatInput" placeholder="Type a message..." style="
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      background: #2c2c2c;
+      color: #fff;
+      font-size: 14px;
+    " required>
+    <button type="submit" style="
+      padding: 10px 16px;
+      background: #00ffd5;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    ">Send</button>
+  </form>
+</div>
 
 <!-- iOS-style Popup -->
 <div id="popup" style="
@@ -624,6 +716,17 @@ input, textarea {
     </div>
   </div>
 </div>
+<style>
+  #loginModal {
+    z-index: 9999;
+    position: fixed; /* make sure z-index works */
+  }
+
+  #signupModal {
+    z-index: 10000;
+    position: fixed;
+  }
+</style>
 <!-- LOADING SCREEN -->
 <div id="loadingScreen" style="position:fixed; inset:0; background:#121212; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999;">
   <img src="https://img.icons8.com/clouds/100/robux.png" style="width:80px; animation:bounce 1.5s infinite;">
@@ -1295,6 +1398,152 @@ popupModal.addEventListener('click', e => {
     closePopup();
   }
 });
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const chatBubble = document.getElementById('chatBubble');
+const chatPopup = document.getElementById('chatPopup');
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+const chatError = document.getElementById('chatError');
+const closeBtn = document.getElementById('closeChatBtn');
+
+let currentUser = null;
+let isAdmin = false;
+let bannedUsers = {};
+
+// Login anonymously
+signInAnonymously(auth).catch(console.error);
+onAuthStateChanged(auth,user=>{ currentUser=user; });
+
+chatBubble.addEventListener('click',()=>{ chatPopup.style.display= chatPopup.style.display==='flex'?'none':'flex'; });
+closeBtn.addEventListener('click',()=>{ chatPopup.style.display='none'; });
+
+const blockedWords=["fake","not legit","scam","fuck","shit","instagram","facebook","twitter","snapchat","tiktok"];
+const ADMIN_CODE="08042006fnk";
+
+chatForm.addEventListener('submit',async e=>{
+  e.preventDefault();
+  chatError.style.display='none';
+  const msg = chatInput.value.trim();
+  if(!msg) return;
+
+  if(msg===ADMIN_CODE){
+    isAdmin=true;
+    chatInput.value='';
+    const adminMsg = {message:"Admin joined the chat!",email:"Admin",admin:true,timestamp:Date.now()};
+    push(ref(db,'groupChatMessages'),adminMsg);
+    return;
+  }
+
+  if(!currentUser){
+    chatError.innerText="You must be logged in!";
+    chatError.style.display='block';
+    return;
+  }
+
+  if(blockedWords.some(word=>msg.toLowerCase().includes(word))){
+    chatError.innerText="Your message contains blocked words!";
+    chatError.style.display='block';
+    return;
+  }
+
+  if(bannedUsers[currentUser.uid] && Date.now()<bannedUsers[currentUser.uid]){
+    chatError.innerText="You are temporarily banned!";
+    chatError.style.display='block';
+    return;
+  }
+
+  const username = currentUser.email?.split('@')[0] || "User";
+  push(ref(db,'groupChatMessages'),{
+    message: msg,
+    email:isAdmin?"Admin":username,
+    admin:isAdmin,
+    timestamp:Date.now()
+  });
+
+  chatInput.value='';
+});
+
+// Listen messages
+onChildAdded(ref(db,'groupChatMessages'),snapshot=>{
+  const data=snapshot.val();
+  const msgDiv=document.createElement('div');
+  msgDiv.style.padding='6px 0';
+  msgDiv.style.borderBottom='1px solid rgba(255,255,255,0.1)';
+  msgDiv.style.cursor = isAdmin ? "pointer" : "default";
+  const displayName = data.email==="Admin"?"Admin":data.email.split('@')[0];
+  msgDiv.innerHTML = `
+    <div style="font-size:12px; color:${data.admin?'#ff0':'#00ffd5'};">
+      ${displayName}${data.admin?' ✅':''} • ${new Date(data.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+    </div>
+    <div style="font-size:14px; color:#fff;">${data.message}</div>
+  `;
+
+  // Admin actions inline
+  if(isAdmin){
+    msgDiv.addEventListener('click',async ()=>{
+      const actionsDiv = document.createElement('div');
+      actionsDiv.style.background='rgba(0,0,0,0.5)';
+      actionsDiv.style.backdropFilter='blur(5px)';
+      actionsDiv.style.padding='4px';
+      actionsDiv.style.margin='4px 0';
+      actionsDiv.style.borderRadius='8px';
+      actionsDiv.innerHTML = `
+        <button style="margin-right:4px;" onclick="deleteMsg(this)">Delete</button>
+        <button style="margin-right:4px;" onclick="banMsg('${data.email}', this)">Ban 1h</button>
+        <button onclick="mentionUser('${data.email}', this)">Mention</button>
+      `;
+      msgDiv.appendChild(actionsDiv);
+    });
+  }
+
+  chatMessages.appendChild(msgDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+window.deleteMsg=function(btn){
+  const msgDiv=btn.closest('div');
+  if(msgDiv && msgDiv.parentNode){ msgDiv.remove(); }
+}
+window.banMsg=async function(email,btn){
+  const q = query(ref(db,'groupChatMessages'), orderByChild('email'), equalTo(email));
+  const snap = await get(q);
+  snap.forEach(child=>{
+    bannedUsers[child.key]=Date.now()+3600*1000;
+  });
+  btn.innerText='Banned 1h';
+}
+window.mentionUser=function(email,btn){
+  const name = email.split('@')[0];
+  push(ref(db,'groupChatMessages'),{
+    message:`@${name} `,
+    email:'Admin',
+    admin:true,
+    timestamp:Date.now()
+  });
+  btn.disabled=true;
+}
 </script>
 </body>
 </html>
