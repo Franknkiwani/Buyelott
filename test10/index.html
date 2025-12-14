@@ -1,41 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Force Interstitial Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<button id="forceAdBtn" style="
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  z-index:999999;
-  padding:12px 18px;
-  background:#111;
-  color:#fff;
-  border-radius:10px;
-  border:none;
-  font-weight:600;
-">
-  Show Ad
-</button>
-<script>
-  const monetagZones = [
-    '9106964',
-    '9118658',
-    '10325686',
-    '10324576',
-    '10324575',
-    '10324573'
-  ];
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  let monetagIndex = 0;
+    #forceAdBtn {
+      padding: 16px 22px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      z-index: 999999;
+    }
 
-  document.getElementById('forceAdBtn').addEventListener('click', () => {
-    const zone = monetagZones[monetagIndex];
-    monetagIndex = (monetagIndex + 1) % monetagZones.length;
+    #adLoader {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      z-index: 999998;
+    }
+  </style>
+</head>
+<body>
 
-    console.log('Loading Monetag zone:', zone);
+  <button id="forceAdBtn">Show Ad</button>
 
-    const s = document.createElement('script');
-    s.dataset.zone = zone;
-    s.src = 'https://groleegni.net/vignette.min.js';
-    s.async = true;
+  <div id="adLoader">Loading ad…</div>
 
-    document.body.appendChild(s);
-  });
-</script>
+  <script>
+    const MONETAG_ZONE = '10325686'; // 👈 YOUR ONE ZONE ID
+    let adLoaded = false;
+
+    const btn = document.getElementById('forceAdBtn');
+    const loader = document.getElementById('adLoader');
+
+    function giveUserReward() {
+      // hook your reward logic here
+      console.log('Reward granted');
+    }
+
+    btn.addEventListener('click', () => {
+      if (adLoaded) return;
+      adLoaded = true;
+
+      console.log('Forcing Monetag interstitial');
+      loader.style.display = 'flex';
+
+      const s = document.createElement('script');
+      s.dataset.zone = MONETAG_ZONE;
+      s.src = 'https://groleegni.net/vignette.min.js';
+      s.async = true;
+
+      s.onload = () => {
+        console.log('Monetag script loaded');
+        loader.style.display = 'none';
+        giveUserReward();
+        btn.style.display = 'none';
+      };
+
+      s.onerror = () => {
+        console.warn('Ad failed to load');
+        loader.style.display = 'none';
+        adLoaded = false;
+      };
+
+      document.body.appendChild(s);
+    });
+  </script>
+
+</body>
+</html>
