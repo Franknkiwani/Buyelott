@@ -1,51 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sticky Dark Glassy Header</title>
+<section id="earnSection" style="display:none; padding:20px; text-align:center;">
+  <h2>🎬 Watch & Earn Robux</h2>
+  
+  <div id="videoContainer" style="margin:20px auto; max-width:480px;">
+    <video id="earnVideo" width="100%" controls>
+      <source id="videoSource" src="" type="video/mp4">
+      Your browser does not support HTML5 video.
+    </video>
+  </div>
+  
+  <div style="margin-top:15px;">
+    <button id="prevVideoBtn" style="padding:8px 14px; border-radius:12px; background:#555; color:white; border:none; cursor:pointer;">◀ Previous</button>
+    <button id="nextVideoBtn" style="padding:8px 14px; border-radius:12px; background:#555; color:white; border:none; cursor:pointer;">Next ▶</button>
+  </div>
+  
+  <button id="claimRBXBtn" style="margin-top:15px; display:none; padding:10px 20px; border-radius:12px; font-weight:bold; background:#00c853; color:white; border:none; cursor:pointer;">
+    Claim 10 RBX
+  </button>
+  
+  <div id="earnNotice" class="notice" style="margin-top:10px; display:none;"></div>
+  <div style="margin-top:10px; font-size:14px; color:#aaa;">Video <span id="currentVideoNum">1</span> of <span id="totalVideos">15</span></div>
+</section>
+
+<script>
+const earnSection = document.getElementById('earnSection');
+const earnVideo = document.getElementById('earnVideo');
+const videoSource = document.getElementById('videoSource');
+const claimRBXBtn = document.getElementById('claimRBXBtn');
+const earnNotice = document.getElementById('earnNotice');
+const currentVideoNum = document.getElementById('currentVideoNum');
+const totalVideosSpan = document.getElementById('totalVideos');
+const prevVideoBtn = document.getElementById('prevVideoBtn');
+const nextVideoBtn = document.getElementById('nextVideoBtn');
+
+// Original mp4 links
+const originalVideos = [
+  "https://files.catbox.moe/61ny1y.mp4",
+  "https://files.catbox.moe/jfapxh.mp4",
+  "https://files.catbox.moe/vqvviq.mp4",
+  "https://files.catbox.moe/69l5y3.mp4",
+  "https://files.catbox.moe/bjwdo9.mp4",
+  "https://files.catbox.moe/sjpa2p.mp4",
+  "https://files.catbox.moe/j9rxi4.mp4",
+  "https://files.catbox.moe/8xiynj.mp4",
+  "https://files.catbox.moe/vmhugn.mp4",
+  "https://files.catbox.moe/ce1rr5.mp4",
+  "https://files.catbox.moe/j5f490.mp4",
+  "https://files.catbox.moe/aec00g.mp4",
+  "https://files.catbox.moe/s0covk.mp4",
+  "https://files.catbox.moe/gii9kh.mp4",
+  "https://files.catbox.moe/cfg3ny.mp4"
+];
+
+let unwatchedVideos = [...originalVideos];
+let currentIndex = 0;
+let claimedVideos = new Set();
+
+totalVideosSpan.textContent = originalVideos.length;
+
+// Shuffle helper
+function shuffleArray(array) {
+  for(let i=array.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// Spawn falling Robux coins
+function spawnCoins(amount){
+  for(let i=0;i<amount;i++){
+    const coin = document.createElement('div');
+    coin.className='robuxCoin';
+    coin.style.left = Math.random()*90+'vw';
+    coin.style.top = '-50px';
+    coin.style.animationDuration = (1.5 + Math.random()*1) + 's';
+    document.body.appendChild(coin);
+    setTimeout(()=>coin.remove(), 2500);
+  }
+}
+
+// Load random video
+function loadRandomVideo(){
+  if(unwatchedVideos.length === 0){
+    unwatchedVideos = [...originalVideos];
+    shuffleArray(unwatchedVideos);
+    claimedVideos.clear();
+  }
+
+  const randomIndex = Math.floor(Math.random() * unwatchedVideos.length);
+  const videoUrl = unwatchedVideos[randomIndex];
+  currentIndex = originalVideos.indexOf(videoUrl);
+
+  videoSource.src = videoUrl;
+  earnVideo.load();
+  claimRBXBtn.style.display = claimedVideos.has(currentIndex) ? 'none' : 'inline-block';
+  earnNotice.style.display = 'none';
+  currentVideoNum.textContent = currentIndex + 1;
+}
+
+// Prev/Next buttons
+prevVideoBtn.onclick = loadRandomVideo;
+nextVideoBtn.onclick = loadRandomVideo;
+
+// Video ended
+earnVideo.addEventListener('ended', () => {
+  if(!claimedVideos.has(currentIndex)){
+    claimRBXBtn.style.display = 'inline-block';
+  }
+});
+
+// Claim RBX
+claimRBXBtn.addEventListener('click', async () => {
+  const user = auth.currentUser;
+  if(!user) return alert("Login first!");
+  if(claimedVideos.has(currentIndex)) return;
+
+  try {
+    const rbxRef = ref(db, `users/${user.uid}/robux`);
+    const snapshot = await get(rbxRef);
+    const currentRBX = snapshot.exists() ? snapshot.val() : 0;
+    const newRBX = currentRBX + 10;
+
+    await set(rbxRef, newRBX);
+    rbxText.textContent = `RBX: ${newRBX}`;
+    
+    earnNotice.textContent = "+10 Robux added!";
+    earnNotice.className = 'notice success';
+    earnNotice.style.display = 'block';
+
+    claimedVideos.add(currentIndex);
+    claimRBXBtn.style.display = 'none';
+    spawnCoins(15);
+
+    // Remove from unwatchedVideos
+    unwatchedVideos = unwatchedVideos.filter(v => v !== originalVideos[currentIndex]);
+  } catch(err) {
+    console.error(err);
+    earnNotice.textContent = "Error claiming Robux";
+    earnNotice.className = 'notice error';
+    earnNotice.style.display = 'block';
+  }
+});
+
+// Show section only if logged in
+onAuthStateChanged(auth, user => {
+  if(user){
+    earnSection.style.display = 'block';
+    loadRandomVideo();
+  } else {
+    earnSection.style.display = 'none';
+  }
+});
+</script>
+
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
-  }
+.robuxCoin {
+  position:absolute;
+  width:24px;
+  height:24px;
+  background:url('https://img.icons8.com/clouds/100/robux.png') no-repeat center/contain;
+  pointer-events:none;
+  z-index:9999;
+  animation:fall 2s linear forwards;
+}
 
-  body {
-    min-height: 200vh; /* so you can scroll and see sticky effect */
-    background: url('https://i.pinimg.com/564x/f7/19/9b/f7199b6f6946919c164828e678b14378.jpg') center/cover no-repeat;
-    background-size: cover;
-    color: white;
-  }
-
-  header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    padding: 15px 30px;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(15px);
-    border-bottom-left-radius: 25px;
-    border-bottom-right-radius: 25px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-    font-size: 24px;
-    font-weight: 600;
-    z-index: 100;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: background 0.3s ease;
-  }
-
-  header:hover {
-    background: rgba(0, 0, 0, 0.6);
-  }
+@keyframes fall {
+  0% {transform: translateY(0) rotate(0deg);}
+  100% {transform: translateY(600px) rotate(360deg); opacity:0;}
+}
 </style>
-</head>
-<body>
-  <header>Your Glassy Header</header>
-  <main style="padding: 50px; text-align:center;">
-    <p>Scroll to see that sticky action.</p>
-  </main>
-</body>
-</html>
