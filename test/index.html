@@ -3,141 +3,522 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Milestone Dashboard</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
-  body{background:#0b0b0d;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px;}
-  header{height:56px;display:flex;align-items:center;padding:0 16px;background:rgba(15,15,18,0.9);border-bottom:1px solid rgba(255,255,255,0.04);width:100%;}
-  header .brand{font-size:28px;font-weight:700;}
-
-  .goal-box{width:100%;max-width:800px;text-align:center;background:rgba(255,255,255,0.05);padding:20px;border-radius:12px;}
-  .progress-bar{background:rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;height:20px;margin-top:10px;}
-  .progress-fill{width:0;height:100%;background:#4caf50;border-radius:10px;transition:0.4s;}
-  input{width:80%;padding:10px;margin:10px 0;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#fff;font-size:16px;text-align:center;}
-
-  .countdown, .quote{margin-top:10px;opacity:0.85;font-size:16px;}
-  
-  .dream-card{width:100%;max-width:800px;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;margin-top:20px;position:relative;}
-  .dream-card img{width:100%;display:block;}
-  .dream-card p{padding:10px;font-size:16px;text-align:center;}
-  .tick{position:absolute;top:10px;right:10px;font-size:28px;color:#4caf50;}
-</style>
-</head>
-<body>
-
-<header><div class="brand">frank nkiwani</div></header>
-
-<div class="goal-box">
-  <h2>Total Goal: $500,000 by Jan 1, 2030</h2>
-  <input type="number" id="currentAmount" placeholder="Enter how much you have ($)" />
-  <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-  <div class="countdown" id="countdown">Time left: calculating…</div>
-  <div class="quote" id="quote">Stay focused, stay hungry!</div>
-</div>
-
-<div class="dream-card" id="houseCard">
-  <img src="https://www.vacations.capetown/wp-content/uploads/2024/01/Hollywood-Mansion-Camps-Bay-201920-675x756.jpg" alt="Dream House">
-  <p>Dream House ($300k)</p>
-  <div class="tick" id="houseTick"></div>
-</div>
-<div class="dream-card" id="girlCard">
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi4s5dDPhhAbaNf7lbf2o7L35jO1iB5ehqoSTl-Fh1MgsY4gsmXwZucDqE&s=10" alt="Dream Girl">
-  <p>Dream Girl ($100k)</p>
-  <div class="tick" id="girlTick"></div>
-</div>
-<div class="dream-card" id="carCard">
-  <img src="https://images.prismic.io/carwow/d3f8a25d-6199-4132-8f92-61be951b3019_LHD+Lamborghini+Aventador+Ultimae+Exterior+11.jpg?auto=format&cs=tinysrgb&fit=max&q=60" alt="Dream Car">
-  <p>Dream Car ($100k)</p>
-  <div class="tick" id="carTick"></div>
-</div>
-
+<title>WATCH-4-RBX</title>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
 
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
   databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
   projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
   messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const amountInput = document.getElementById('currentAmount');
-const progressFill = document.getElementById('progressFill');
-const goal = 500000;
-const amountRef = ref(db,'personalGoal/currentAmount');
+const auth = getAuth(app);
+const db = getDatabase();
 
-const houseTick = document.getElementById('houseTick');
-const girlTick = document.getElementById('girlTick');
-const carTick = document.getElementById('carTick');
+/* --- MODALS --- */
+window.openLoginModal = () => loginModal.style.display = 'flex';
+window.closeLoginModal = () => loginModal.style.display = 'none';
+window.openSignupModal = () => signupModal.style.display = 'flex';
+window.closeSignupModal = () => signupModal.style.display = 'none';
 
-const milestones = {
-  house: 300000,
-  girl: 100000,
-  car: 100000
+/* --- NOTIFY --- */
+function notify(el, msg, ok=false) {
+  el.textContent = msg;
+  el.className = 'notice ' + (ok ? 'success' : 'error');
+}
+
+/* --- LOGIN --- */
+window.loginUser = async () => {
+  try {
+    await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+    notify(loginNotice, "Login successful", true);
+  } catch (e) {
+    notify(loginNotice, e.code.replace('auth/',''));
+  }
 };
 
-const quotes = [
-  "Dream big. Work bigger.",
-  "Every dollar counts, stay focused.",
-  "Hustle now, shine later.",
-  "4 years to $500k, let's go!",
-  "Keep adding, keep growing."
-];
+/* --- SIGNUP --- */
+window.signupUser = async () => {
+  try {
+    await createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value);
+    set(ref(db, `users/${auth.currentUser.uid}/robux`), 0);
+    notify(signupNotice, "Account created", true);
+  } catch (e) {
+    notify(signupNotice, e.code.replace('auth/',''));
+  }
+};
 
-function updateMilestones(val){
-  houseTick.textContent = val >= milestones.house ? "✅" : "";
-  girlTick.textContent = val >= (milestones.house + milestones.girl) ? "✅" : "";
-  carTick.textContent = val >= (milestones.house + milestones.girl + milestones.car) ? "✅" : "";
-}
+/* --- RESET PASSWORD --- */
+window.forgotPassword = async () => {
+  if (!loginEmail.value) return notify(loginNotice, "Enter email first");
+  try {
+    await sendPasswordResetEmail(auth, loginEmail.value);
+    notify(loginNotice, "Reset email sent", true);
+  } catch (e) {
+    notify(loginNotice, e.code.replace('auth/',''));
+  }
+};
 
-function updateProgress(){
-  const val = parseFloat(amountInput.value) || 0;
-  let percent = Math.min((val/goal)*100,100);
-  progressFill.style.width = percent + '%';
-  updateMilestones(val);
-}
+/* --- MENU --- */
+window.toggleMenu = () => {
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+};
+window.logoutUser = async () => {
+  await signOut(auth);
+  menu.style.display = 'none';
+};
 
-// Load saved amount
-get(amountRef).then(snap => { if(snap.exists()){ amountInput.value = snap.val(); updateProgress(); } });
+/* --- GET ROBUX BUTTON opens Withdraw Modal --- */
+getRobuxBtn.onclick = () => {
+  openWithdrawModal();
+};
 
-amountInput.addEventListener('input', () => {
-  const val = parseFloat(amountInput.value) || 0;
-  set(amountRef,val);
-  updateProgress();
+/* --- WITHDRAW MODAL LOGIC --- */
+window.openWithdrawModal = () => {
+  withdrawModal.style.display = 'flex';
+  const currentRBX = parseInt(rbxText.textContent.split(': ')[1]) || 0;
+  withdrawRBX.textContent = `${currentRBX} RBX`;
+};
+window.closeWithdrawModal = () => withdrawModal.style.display = 'none';
+
+confirmWithdrawBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) return alert("Please login first!");
+
+  const username = withdrawUsername.value.trim();
+  const email = withdrawEmail.value.trim();
+  const rbxAmount = parseInt(rbxText.textContent.split(': ')[1]) || 0;
+
+  // Reset notices
+  usernameNotice.style.display = emailNotice.style.display = withdrawNotice.style.display = 'none';
+
+  let valid = true;
+  if(username.length < 3) {
+    usernameNotice.textContent = "Enter a valid Roblox username";
+    usernameNotice.style.display='block';
+    usernameNotice.className='notice error';
+    valid = false;
+  }
+  if(!email.includes("@")) {
+    emailNotice.textContent = "Enter a valid email";
+    emailNotice.style.display='block';
+    emailNotice.className='notice error';
+    valid = false;
+  }
+  if(rbxAmount < 100) {
+    withdrawNotice.textContent = "Minimum 100 Robux required";
+    withdrawNotice.style.display='block';
+    withdrawNotice.className='notice error';
+    valid = false;
+  }
+  if(!valid) return;
+
+  try {
+    // Deduct RBX
+    const remaining = rbxAmount - 100;
+    await set(ref(db, `users/${user.uid}/robux`), remaining);
+    rbxText.textContent = `RBX: ${remaining}`;
+
+    // Create pending withdraw
+    await set(ref(db, `withdraws/${user.uid}`), {
+      amount: 100,
+      username: username,
+      email: email,
+      status: 'pending',
+      adminMessage: '',
+      timestamp: Date.now()
+    });
+
+    // Show pending RBX inline
+    pendingRBXBar.textContent = `Pending Robux: 100`;
+    pendingRBXBar.style.color = 'yellow';
+
+    withdrawNotice.textContent = "Withdrawal request sent!";
+    withdrawNotice.style.display='block';
+    withdrawNotice.className='notice success';
+
+    withdrawUsername.value='';
+    withdrawEmail.value='';
+    closeWithdrawModal();
+
+  } catch(err) {
+    console.error(err);
+    withdrawNotice.textContent="Error submitting request";
+    withdrawNotice.style.display='block';
+    withdrawNotice.className='notice error';
+  }
+};
+
+// Listen for admin updates
+onAuthStateChanged(auth, user => {
+  if(user){
+    const pendingRef = ref(db, `withdraws/${user.uid}`);
+    onValue(pendingRef, snapshot => {
+      if(!snapshot.exists()) return;
+      const data = snapshot.val();
+      if(data.status==='paid'){
+        pendingRBXBar.textContent = `Paid: ${data.adminMessage || ''}`;
+        pendingRBXBar.style.color='green';
+      } else if(data.status==='rejected'){
+        pendingRBXBar.textContent = `Rejected: ${data.adminMessage || ''}`;
+        pendingRBXBar.style.color='red';
+      } else {
+        pendingRBXBar.textContent = `Pending Robux: ${data.amount}`;
+        pendingRBXBar.style.color='yellow';
+      }
+    });
+  }
 });
 
-// Countdown
-const countdownEl = document.getElementById('countdown');
-function updateCountdown() {
-  const target = new Date('2030-01-01T00:00:00');
-  const now = new Date();
-  const diff = target - now;
-  if(diff <= 0){ countdownEl.textContent = "🎉 It’s 2030!"; return; }
-  const days = Math.floor(diff / (1000*60*60*24));
-  const hrs = Math.floor((diff / (1000*60*60)) % 24);
-  const mins = Math.floor((diff / (1000*60)) % 60);
-  const secs = Math.floor((diff / 1000) % 60);
-  countdownEl.textContent = `Time left: ${days}d ${hrs}h ${mins}m ${secs}s`;
+/* --- LOADING SCREEN LOGIC --- */
+const loadingScreen = document.getElementById('loadingScreen');
+const loadingBar = document.getElementById('loadingBar');
+
+function spawnCoins(amount){
+  for(let i=0;i<amount;i++){
+    const coin = document.createElement('div');
+    coin.className='robuxCoin';
+    coin.style.left = Math.random()*90+'vw';
+    coin.style.top = '-50px';
+    coin.style.animationDuration = (1.5 + Math.random()*1) + 's';
+    loadingScreen.appendChild(coin);
+    setTimeout(()=>coin.remove(), 2500);
+  }
 }
-setInterval(updateCountdown,1000);
-updateCountdown();
 
-// Rotate quotes
-let qIndex = 0;
-const quoteEl = document.getElementById('quote');
-setInterval(()=>{
-  quoteEl.textContent = quotes[qIndex];
-  qIndex = (qIndex+1)%quotes.length;
-},7000);
+let progress = 0;
+const progressInterval = setInterval(()=>{
+  progress += Math.random()*5; 
+  if(progress > 95) progress = 95;
+  loadingBar.style.width = progress + '%';
+}, 100);
 
+function hideLoader() {
+  loadingBar.style.width = '100%';
+  spawnCoins(25);
+  setTimeout(()=>{ loadingScreen.style.display='none'; }, 2000);
+}
+
+onAuthStateChanged(auth, async user => {
+  if(user){
+    authButtons.style.display = 'none';
+    balanceBtn.style.display = 'flex';
+    closeLoginModal();
+    closeSignupModal();
+
+    try {
+      const rbxRef = ref(db, `users/${user.uid}/robux`);
+      const snapshot = await get(rbxRef);
+      const rbxValue = snapshot.exists() ? snapshot.val() : 0;
+      rbxText.textContent = `RBX: ${rbxValue}`;
+    } catch (err) {
+      console.error("Failed to fetch RBX:", err);
+      rbxText.textContent = 'RBX: 0';
+    }
+  } else {
+    authButtons.style.display = 'flex';
+    balanceBtn.style.display = 'none';
+  }
+
+  clearInterval(progressInterval);
+  hideLoader();
+});
 </script>
+<style>
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
 
+body {
+  margin: 0;
+  background: #121212;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  background: #1a1a1a;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header img { width: 40px; }
+
+/* BUTTONS */
+button {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.login-btn { background: cyan; color: #121212; }
+.signup-btn { background: hotpink; color: #121212; }
+
+/* BALANCE */
+#balanceBtn {
+  display: none;
+  background: white;
+  color: #121212;
+  border-radius: 999px;
+  padding: 6px 10px 6px 14px;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+#getRobuxBtn {
+  background: #00c853;
+  color: white;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* MENU */
+.menu-wrapper { position: relative; }
+.dots { font-size: 20px; cursor: pointer; padding: 0 6px; }
+
+.menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 28px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.menu div {
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.menu div:hover { background: #2a2a2a; }
+
+/* MODALS */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes glow {
+  0% { background-position: 0% }
+  100% { background-position: 100% }
+}
+
+.modal-box {
+  width: 80%;
+  max-width: 420px;
+  padding: 3px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, cyan, hotpink, violet);
+  background-size: 300%;
+  animation: glow 1s linear infinite;
+}
+
+.modal-content {
+  background: #121212;
+  border-radius: 22px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content input {
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+}
+
+.close-btn {
+  text-align: right;
+  cursor: pointer;
+}
+
+/* NOTICES */
+.notice {
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+.notice.error { background: #3a0000; color: #ff6b6b; }
+.notice.success { background: #003a1a; color: #3dff9c; }
+/* STOP TEXT SELECTION & COPYING */
+* {
+  user-select: none;           /* Standard */
+  -webkit-user-select: none;   /* Chrome/Safari */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* IE/Edge */
+}
+
+body {
+  -webkit-touch-callout: none; /* Disable long-press menu on iOS */
+}
+
+input, textarea {
+  user-select: text; /* Keep inputs editable */
+}
+/* REMOVE BLUE TAP/FOCUS HIGHLIGHT */
+* {
+  outline: none;                 /* Remove default focus outline */
+  -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo-name">
+    <img src="https://img.icons8.com/clouds/100/robux.png">
+    <span>WATCH-4-RBX</span>
+  </div>
+
+  <div id="authButtons">
+    <button class="login-btn" onclick="openLoginModal()">LOGIN</button>
+    <button class="signup-btn" onclick="openSignupModal()">SIGNUP</button>
+  </div>
+
+<div id="balanceBtn">
+  <span id="rbxText">RBX: 0</span>
+  <button id="getRobuxBtn">GET</button>
+ 
+  <div class="menu-wrapper">
+    <span class="dots" onclick="toggleMenu()">⋮</span>
+    <div id="menu" class="menu">
+      <div onclick="logoutUser()" style="color:#ff4d4d; font-weight:bold; cursor:pointer;">Log out</div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeLoginModal()">✕</div>
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <div id="loginNotice" class="notice"></div>
+      <button class="login-btn" onclick="loginUser()">Login</button>
+      <small onclick="forgotPassword()" style="cursor:pointer">Forgot password?</small>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content">
+      <div class="close-btn" onclick="closeSignupModal()">✕</div>
+      <input id="signupEmail" placeholder="Email">
+      <input id="signupPassword" type="password">
+      <div id="signupNotice" class="notice"></div>
+      <button class="signup-btn" onclick="signupUser()">Create Account</button>
+    </div>
+  </div>
+</div>
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" style="position:fixed; inset:0; background:#121212; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999;">
+  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:80px; animation:bounce 1.5s infinite;">
+  <div style="color:white; margin:15px 0; font-size:18px;">Loading Robux Magic...</div>
+  <div style="width:300px; max-width:80vw; height:12px; border-radius:12px; background: rgba(255,255,255,0.1); overflow:hidden;">
+    <div id="loadingBar" style="width:0%; height:100%; background: linear-gradient(90deg, #ff4c4c, #ff1aff); border-radius:12px;"></div>
+  </div>
+</div>
+<!-- WITHDRAW POPUP -->
+<div id="withdrawModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-content" style="text-align:center;">
+      <div class="close-btn" onclick="closeWithdrawModal()">✕</div>
+      
+      <!-- Big User RBX Display -->
+      <div style="font-size:48px; font-weight:bold; margin:10px 0;" id="withdrawRBX">0 RBX</div>
+      <div style="font-size:14px; color:#aaa;">This is your available Robux</div>
+      
+      <!-- Username -->
+      <input type="text" id="withdrawUsername" placeholder="@Roblox Username">
+      <div id="usernameNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Email -->
+      <input type="email" id="withdrawEmail" placeholder="Email">
+      <div id="emailNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Error / Success message -->
+      <div id="withdrawNotice" class="notice" style="display:none;"></div>
+      
+      <!-- Confirm Button -->
+      <button id="confirmWithdrawBtn">CONFIRM NOW</button>
+      
+      <!-- Pending RBX bar -->
+      <div id="pendingRBXBar" style="margin-top:15px; background:#333; border-radius:12px; padding:6px; color:#ff0; font-size:14px;">
+        Pending Robux: 0
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+/* Logo bounce animation */
+@keyframes bounce {
+  0%,100%{ transform:translateY(0);}
+  50%{ transform:translateY(-15px);}
+}
+
+/* Robux coin for later animation */
+.robuxCoin {
+  position:absolute;
+  width:24px;
+  height:24px;
+  background:url('https://img.icons8.com/clouds/100/robux.png') no-repeat center/contain;
+  pointer-events:none;
+  animation:fall 2s linear forwards;
+}
+
+@keyframes fall {
+  0% {transform: translateY(0) rotate(0deg);}
+  100% {transform: translateY(600px) rotate(360deg); opacity:0;}
+}
+
+/* Optional: customize progress bar animation when script adds width */
+#loadingBar {
+  transition: width 0.2s ease-in-out;
+}
+</style>
 </body>
 </html>
