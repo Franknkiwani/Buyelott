@@ -85,9 +85,7 @@ window.logoutUser = async () => {
 };
 
 /* --- GET ROBUX BUTTON opens Withdraw Modal --- */
-getRobuxBtn.onclick = () => {
-  openWithdrawModal();
-};
+getRobuxBtn.onclick = () => openWithdrawModal();
 
 /* --- WITHDRAW MODAL LOGIC --- */
 window.openWithdrawModal = () => {
@@ -105,7 +103,6 @@ confirmWithdrawBtn.onclick = async () => {
   const email = withdrawEmail.value.trim();
   const rbxAmount = parseInt(rbxText.textContent.split(': ')[1]) || 0;
 
-  // Reset notices
   usernameNotice.style.display = emailNotice.style.display = withdrawNotice.style.display = 'none';
 
   let valid = true;
@@ -130,12 +127,10 @@ confirmWithdrawBtn.onclick = async () => {
   if(!valid) return;
 
   try {
-    // Deduct RBX
     const remaining = rbxAmount - 100;
     await set(ref(db, `users/${user.uid}/robux`), remaining);
     rbxText.textContent = `RBX: ${remaining}`;
 
-    // Create pending withdraw
     await set(ref(db, `withdraws/${user.uid}`), {
       amount: 100,
       username: username,
@@ -145,7 +140,6 @@ confirmWithdrawBtn.onclick = async () => {
       timestamp: Date.now()
     });
 
-    // Show pending RBX inline
     pendingRBXBar.textContent = `Pending Robux: 100`;
     pendingRBXBar.style.color = 'yellow';
 
@@ -239,7 +233,8 @@ onAuthStateChanged(auth, async user => {
   clearInterval(progressInterval);
   hideLoader();
 });
-/* --- WATCH & EARN SHORTS --- */
+
+/* --- WATCH & EARN SHORTS + PLAYER CONTROLS --- */
 const originalVideos = [
   "https://files.catbox.moe/61ny1y.mp4",
   "https://files.catbox.moe/jfapxh.mp4",
@@ -268,8 +263,40 @@ const loader = document.getElementById('loader');
 const popup = document.getElementById('popup');
 const okButton = document.getElementById('okButton');
 const topText = document.getElementById('topText');
+const playPauseBtn = document.getElementById('playPauseBtn');
 
-// Update topText to glassy and use “short”
+// Reset button to "Play"
+function resetPlayButton() {
+  playPauseBtn.textContent = "▶️ Play";
+}
+
+// Track last safe time to prevent seeking
+player.lastTime = 0;
+
+// Play/Pause toggle
+playPauseBtn.addEventListener('click', () => {
+  if(player.paused){
+    player.play();
+    playPauseBtn.textContent = "⏸️ Pause";
+  } else {
+    player.pause();
+    playPauseBtn.textContent = "▶️ Play";
+  }
+});
+
+// Prevent seeking ahead
+player.addEventListener('seeking', () => {
+  if(player.currentTime > player.lastTime){
+    player.currentTime = player.lastTime;
+  }
+});
+
+// Update last safe time
+player.addEventListener('timeupdate', () => {
+  player.lastTime = player.currentTime;
+});
+
+// Top text style
 topText.style.cssText = `
   width: 80%;
   max-width: 640px;
@@ -286,24 +313,25 @@ topText.style.cssText = `
 `;
 topText.textContent = "You earn 1 Robux per short watched";
 
-// Function to load a video
+// Load video by index
 function loadVideo(index){
   loader.style.display = 'flex';
   source.src = shuffledVideos[index];
   player.load();
+  resetPlayButton();
 }
 
-// Hide loader when video is ready
+// Hide loader when video can play
 player.addEventListener('canplay', () => {
   loader.style.display = 'none';
 });
 
-// Show popup after short ends
+// Show popup after video ends
 player.addEventListener('ended', () => {
   popup.style.display = 'flex';
 });
 
-// OK button handler → reward RBX & load next short
+// OK button → reward + next video
 okButton.addEventListener('click', async () => {
   popup.style.display = 'none';
   const user = auth.currentUser;
@@ -319,7 +347,7 @@ okButton.addEventListener('click', async () => {
     }
   }
 
-  // Move to next short
+  // Next video shuffle
   currentIndex++;
   if(currentIndex >= shuffledVideos.length){
     shuffledVideos = [...originalVideos].sort(() => Math.random() - 0.5);
@@ -328,8 +356,32 @@ okButton.addEventListener('click', async () => {
   loadVideo(currentIndex);
 });
 
-// Load first short
+// Load first video
 loadVideo(currentIndex);
+// Show loader when video is buffering
+player.addEventListener('waiting', () => {
+  loader.style.display = 'flex';
+});
+
+// Hide loader when video resumes playing
+player.addEventListener('playing', () => {
+  loader.style.display = 'none';
+});
+
+// Optional: fallback for slow network
+let bufferingTimeout;
+player.addEventListener('waiting', () => {
+  clearTimeout(bufferingTimeout);
+  bufferingTimeout = setTimeout(() => {
+    console.warn("Video is taking too long to load. You might be on slow Wi-Fi.");
+    loader.style.display = 'flex';
+  }, 5000); // 5 seconds threshold
+});
+
+player.addEventListener('playing', () => {
+  clearTimeout(bufferingTimeout);
+  loader.style.display = 'none';
+});
 </script>
 <style>
 * {
@@ -488,6 +540,49 @@ input, textarea {
   outline: none;                 /* Remove default focus outline */
   -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
 }
+#videoContainer {
+  position: relative;
+  width: 80%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+#player {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  display: block;
+}
+
+#playPauseBtn {
+  position: absolute;
+  bottom: 12px;       /* distance from bottom inside video */
+  left: 50%;          /* center horizontally */
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  color: #00ffd5;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: all 0.2s ease;
+}
+
+#playPauseBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #00fff0;
+  transform: translateX(-50%) scale(1.05);
+}
+
+
+/* Get Robux popup/modal */
+#withdrawModal {
+  z-index: 10000; /* higher than menu so it stays on top */
+}
 </style>
 </head>
 
@@ -518,71 +613,90 @@ input, textarea {
     </div>
   </div>
 </header>
-<!-- Top Glassy Text -->
-<div id="topText" style="
-  width: 80%;
-  max-width: 640px;
-  text-align: center;
-  padding: 12px 20px;
-  margin: 20px auto;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(12px);
-  color: #00ffd5;
-  font-size: 18px;
-  font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-">
-  You earn 1 Robux per short watched
-</div>
+<!-- Top Section -->
+<div style="display:flex; flex-direction:column; align-items:center; margin-top:20px; gap:16px;">
 
-<!-- Video Player Container -->
-<div id="videoContainer" style="
-  width: 80%;
-  max-width: 640px;
-  margin: 0 auto 20px auto;
-  text-align: center;
-  position: relative;
-">
-
-  <!-- Glassy Loader -->
-  <div id="loader" style="
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+  <!-- Top Glassy Text -->
+  <div id="topText" style="
+    width: 80%;
+    max-width: 640px;
+    text-align: center;
+    padding: 12px 20px;
     border-radius: 20px;
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(12px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     color: #00ffd5;
-    font-weight: bold;
-    font-size: 16px;
-    z-index: 10;
+    font-size: 18px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   ">
-    <div style="
-      border: 4px solid rgba(255,255,255,0.2);
-      border-top: 4px solid #00ffd5;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 10px;
-    "></div>
-    Loading your short...
+    You earn 1 Robux per short watched
   </div>
 
-  <!-- Video -->
-  <video id="player" controls style="
-    width: 100%;
-    border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  <!-- Video Player Container -->
+  <div id="videoContainer" style="
+    width: 80%;
+    max-width: 640px;
+    text-align: center;
+    position: relative;
   ">
-    <source src="" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+    <!-- Glassy Loader -->
+    <div id="loader" style="
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #00ffd5;
+      font-weight: bold;
+      font-size: 16px;
+      z-index: 10;
+    ">
+      <div style="
+        border: 4px solid rgba(255,255,255,0.2);
+        border-top: 4px solid #00ffd5;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 10px;
+      "></div>
+      Loading your short...
+    </div>
+
+    <!-- Video -->
+    <video id="player" style="
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    ">
+      <source src="" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Play/Pause Button -->
+    <div style="text-align:center; margin-top:10px;">
+      <button id="playPauseBtn" style="
+        padding:10px 20px;
+        border-radius:12px;
+        border:none;
+        background:#00ffd5;
+        color:#000;
+        font-weight:bold;
+        cursor:pointer;
+      ">⏸️ Play</button>
+    </div>
+
+  </div>
+
+</div>
+
+
 </div>
 
 <!-- iOS-style Popup -->
