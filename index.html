@@ -377,6 +377,21 @@ input, textarea {
   0%   { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
 }
+/* Chat Popup Hidden by Default */
+#chatPopup {
+  display: none;       /* Hide initially */
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: #1e1e1e;
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+  overflow: hidden;
+  flex-direction: column;
+  z-index: 9999;
+}
 </style>
 </head>
 <body>
@@ -1335,7 +1350,8 @@ document.querySelectorAll('#howItWorks .step').forEach(step => {
 <!-- SCRIPTS -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -1351,8 +1367,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
-// POPUP LOGIC
+/* ------------------ POPUP LOGIC ------------------ */
 const popupModal = document.getElementById('popupModal');
 const popupInnerContent = document.getElementById('popupInnerContent');
 
@@ -1363,7 +1380,6 @@ document.querySelectorAll('.footer-btn').forEach(btn => {
     popupInnerContent.innerHTML = template.innerHTML;
     popupModal.style.display = 'flex';
 
-    // Contact form submission
     const contactForm = document.getElementById('contactForm');
     if(contactForm){
       const submitBtn = contactForm.querySelector('button');
@@ -1392,34 +1408,13 @@ function closePopup(){
   popupInnerContent.innerHTML='';
 }
 
-// Close when clicking outside content
 popupModal.addEventListener('click', e => {
   if(e.target === popupModal){
     closePopup();
   }
 });
-</script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
+/* ------------------ CHAT LOGIC ------------------ */
 const chatBubble = document.getElementById('chatBubble');
 const chatPopup = document.getElementById('chatPopup');
 const chatForm = document.getElementById('chatForm');
@@ -1432,27 +1427,44 @@ let currentUser = null;
 let isAdmin = false;
 let bannedUsers = {};
 
-// Login anonymously
-signInAnonymously(auth).catch(console.error);
-onAuthStateChanged(auth,user=>{ currentUser=user; });
+// Hide chat popup by default
+chatPopup.style.display = 'none';
 
-chatBubble.addEventListener('click',()=>{ chatPopup.style.display= chatPopup.style.display==='flex'?'none':'flex'; });
-closeBtn.addEventListener('click',()=>{ chatPopup.style.display='none'; });
+// Show/hide chat on bubble click
+chatBubble.addEventListener('click', () => {
+  chatPopup.style.display = chatPopup.style.display === 'flex' ? 'none' : 'flex';
+});
 
-const blockedWords=["fake","not legit","scam","fuck","shit","instagram","facebook","twitter","snapchat","tiktok"];
-const ADMIN_CODE="08042006fnk";
+// Close button
+closeBtn.addEventListener('click', () => chatPopup.style.display='none');
 
-chatForm.addEventListener('submit',async e=>{
+// Monitor auth
+onAuthStateChanged(auth, user => {
+  if(!user){
+    chatError.innerText = "Login to view chat!";
+    chatError.style.display='block';
+    currentUser = null;
+    return;
+  }
+  currentUser = user;
+  chatError.style.display='none';
+});
+
+// Chat restrictions
+const blockedWords = ["fake","not legit","scam","fuck","shit","instagram","facebook","twitter","snapchat","tiktok"];
+const ADMIN_CODE = "08042006fnk";
+
+chatForm.addEventListener('submit', async e => {
   e.preventDefault();
   chatError.style.display='none';
   const msg = chatInput.value.trim();
   if(!msg) return;
 
-  if(msg===ADMIN_CODE){
-    isAdmin=true;
+  if(msg === ADMIN_CODE){
+    isAdmin = true;
     chatInput.value='';
     const adminMsg = {message:"Admin joined the chat!",email:"Admin",admin:true,timestamp:Date.now()};
-    push(ref(db,'groupChatMessages'),adminMsg);
+    push(ref(db,'groupChatMessages'), adminMsg);
     return;
   }
 
@@ -1462,13 +1474,13 @@ chatForm.addEventListener('submit',async e=>{
     return;
   }
 
-  if(blockedWords.some(word=>msg.toLowerCase().includes(word))){
+  if(blockedWords.some(word => msg.toLowerCase().includes(word))){
     chatError.innerText="Your message contains blocked words!";
     chatError.style.display='block';
     return;
   }
 
-  if(bannedUsers[currentUser.uid] && Date.now()<bannedUsers[currentUser.uid]){
+  if(bannedUsers[currentUser.uid] && Date.now() < bannedUsers[currentUser.uid]){
     chatError.innerText="You are temporarily banned!";
     chatError.style.display='block';
     return;
@@ -1477,22 +1489,22 @@ chatForm.addEventListener('submit',async e=>{
   const username = currentUser.email?.split('@')[0] || "User";
   push(ref(db,'groupChatMessages'),{
     message: msg,
-    email:isAdmin?"Admin":username,
-    admin:isAdmin,
-    timestamp:Date.now()
+    email: isAdmin ? "Admin" : username,
+    admin: isAdmin,
+    timestamp: Date.now()
   });
 
   chatInput.value='';
 });
 
 // Listen messages
-onChildAdded(ref(db,'groupChatMessages'),snapshot=>{
-  const data=snapshot.val();
-  const msgDiv=document.createElement('div');
+onChildAdded(ref(db,'groupChatMessages'), snapshot => {
+  const data = snapshot.val();
+  const msgDiv = document.createElement('div');
   msgDiv.style.padding='6px 0';
   msgDiv.style.borderBottom='1px solid rgba(255,255,255,0.1)';
   msgDiv.style.cursor = isAdmin ? "pointer" : "default";
-  const displayName = data.email==="Admin"?"Admin":data.email.split('@')[0];
+  const displayName = data.email==="Admin" ? "Admin" : data.email.split('@')[0];
   msgDiv.innerHTML = `
     <div style="font-size:12px; color:${data.admin?'#ff0':'#00ffd5'};">
       ${displayName}${data.admin?' ✅':''} • ${new Date(data.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
@@ -1500,10 +1512,11 @@ onChildAdded(ref(db,'groupChatMessages'),snapshot=>{
     <div style="font-size:14px; color:#fff;">${data.message}</div>
   `;
 
-  // Admin actions inline
   if(isAdmin){
-    msgDiv.addEventListener('click',async ()=>{
+    msgDiv.addEventListener('click', async () => {
+      if(msgDiv.querySelector('.admin-actions')) return;
       const actionsDiv = document.createElement('div');
+      actionsDiv.className='admin-actions';
       actionsDiv.style.background='rgba(0,0,0,0.5)';
       actionsDiv.style.backdropFilter='blur(5px)';
       actionsDiv.style.padding='4px';
@@ -1522,19 +1535,22 @@ onChildAdded(ref(db,'groupChatMessages'),snapshot=>{
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-window.deleteMsg=function(btn){
-  const msgDiv=btn.closest('div');
+// Admin helpers
+window.deleteMsg = function(btn){
+  const msgDiv = btn.closest('div');
   if(msgDiv && msgDiv.parentNode){ msgDiv.remove(); }
 }
-window.banMsg=async function(email,btn){
+
+window.banMsg = async function(email, btn){
   const q = query(ref(db,'groupChatMessages'), orderByChild('email'), equalTo(email));
   const snap = await get(q);
-  snap.forEach(child=>{
-    bannedUsers[child.key]=Date.now()+3600*1000;
+  snap.forEach(child => {
+    bannedUsers[child.key] = Date.now() + 3600*1000;
   });
   btn.innerText='Banned 1h';
 }
-window.mentionUser=function(email,btn){
+
+window.mentionUser = function(email, btn){
   const name = email.split('@')[0];
   push(ref(db,'groupChatMessages'),{
     message:`@${name} `,
