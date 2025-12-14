@@ -359,6 +359,24 @@ input, textarea {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+ .footer {
+  background-color: #121212;
+  animation: footerColorChange 5s infinite alternate, rainbowFooter 10s linear infinite;
+}
+
+@keyframes footerColorChange {
+  0%   { background-color: #121212; }
+  20%  { background-color: #1a1a2e; }
+  40%  { background-color: #2e1a3a; }
+  60%  { background-color: #1a2e2e; }
+  80%  { background-color: #2e2e1a; }
+  100% { background-color: #121212; }
+}
+
+@keyframes rainbowFooter {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -645,6 +663,179 @@ input, textarea {
     </div>
   </div>
 </div>
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Logo & Description -->
+    <div class="footer-logo">
+      <img src="https://img.icons8.com/clouds/100/robux.png" alt="WATCH-4-RBX Logo">
+      <p>Earn free Robux instantly by watching shorts. Safe, easy, and fun!</p>
+    </div>
+
+    <!-- Links -->
+    <div class="footer-links">
+      <h4>Links</h4>
+      <ul>
+        <li><button class="footer-btn" data-popup="howItWorksPopup">How It Works</button></li>
+        <li><button class="footer-btn" data-popup="statsPopup">Stats</button></li>
+        <li><button class="footer-btn" data-popup="faqPopup">FAQ</button></li>
+        <li><button class="footer-btn" data-popup="termsPopup">Terms of Service</button></li>
+        <li><button class="footer-btn" data-popup="privacyPopup">Privacy Policy</button></li>
+        <li><button class="footer-btn" data-popup="contactPopup">Contact</button></li>
+      </ul>
+    </div>
+
+    <!-- Support -->
+    <div class="footer-support">
+      <h4>Support</h4>
+      <ul>
+        <li><button class="footer-btn" data-popup="contactPopup">Email Support</button></li>
+      </ul>
+    </div>
+
+    <!-- Social -->
+    <div class="footer-social">
+      <h4>Follow Us</h4>
+      <div class="social-icons">
+        <a href="https://www.youtube.com/" target="_blank">
+          <img src="https://img.icons8.com/ios-glyphs/30/00ffd5/youtube-play.png" alt="YouTube"/>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="footer-bottom">
+    &copy; 2025 WATCH-4-RBX. All rights reserved.
+  </div>
+</footer>
+
+<!-- POPUP MODAL -->
+<div id="popupModal" class="popup-modal">
+  <div class="popup-content">
+  <span class="popup-close" onclick="closePopup()" style="
+  position: absolute; 
+  top: 10px; 
+  right: 15px; 
+  font-size: 14px; 
+  color: #ff4d4d; 
+  cursor: pointer;
+  font-weight: 500;
+">
+ <small style='font-size:12px; color:#ff6666; display:block; margin-top:2px;'>click outside to close</small>
+</span>
+    <div id="popupInnerContent"></div>
+  </div>
+</div>
+
+<!-- POPUP CONTENT TEMPLATES -->
+<template id="contactPopup">
+  <h2>Contact Us</h2>
+  <form id="contactForm">
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+  <p id="contactStatus"></p>
+</template>
+
+<template id="faqPopup">
+  <h2>FAQ</h2>
+  <div class="faq-item">
+    <strong>Q: Is this site safe?</strong>
+    <p>A: Absolutely! WATCH-4-RBX never asks for your Roblox password. Your data is securely stored.</p>
+  </div>
+  <div class="faq-item">
+    <strong>Q: How do I earn Robux?</strong>
+    <p>A: Watch short Roblox videos in full. Each completed video adds 1 Robux to your balance.</p>
+  </div>
+  <div class="faq-item">
+    <strong>Q: How long does it take to withdraw?</strong>
+    <p>A: Once you reach 100 Robux, click "GET" and withdrawals are processed instantly.</p>
+  </div>
+  <div class="faq-item">
+    <strong>Q: Can I earn more Robux by watching faster?</strong>
+    <p>A: No, skipping or fast-forwarding may invalidate the video. Watch fully to earn.</p>
+  </div>
+  <div class="faq-item">
+    <strong>Q: Do I need a Roblox account?</strong>
+    <p>A: Yes, your Robux are sent directly to your Roblox account.</p>
+  </div>
+</template>
+
+<template id="termsPopup">
+  <h2>Terms of Service</h2>
+  <p>Welcome to WATCH-4-RBX. By using our service, you agree to the following terms:</p>
+  <ul>
+    <li>You must be at least 13 years old to use this site.</li>
+    <li>All Robux earnings are credited after watching videos fully and correctly.</li>
+    <li>Skipping, spamming, or using automation may result in account suspension.</li>
+    <li>WATCH-4-RBX is not affiliated with Roblox Corp.</li>
+    <li>We reserve the right to modify the terms at any time. Continued use constitutes acceptance.</li>
+  </ul>
+</template>
+
+<template id="privacyPopup">
+  <h2>Privacy Policy</h2>
+  <ul>
+    <li>We only store your email and messages submitted via contact forms.</li>
+    <li>We do not store Roblox passwords or payment info.</li>
+    <li>Your data is never shared with third parties.</li>
+    <li>We use Firebase Realtime Database for secure storage and retrieval.</li>
+    <li>You can request data deletion at any time by contacting <strong>watch4rbx@gmail.com</strong>.</li>
+  </ul>
+</template>
+
+<template id="howItWorksPopup">
+  <h2>How It Works</h2>
+  <ol>
+    <li><strong>Sign Up / Login:</strong> Create your free account to start earning Robux.</li>
+    <li><strong>Watch Shorts:</strong> Watch short Roblox videos fully. Each completed video adds 1 Robux.</li>
+    <li><strong>Collect Robux:</strong> Your balance updates automatically at the top of the page.</li>
+    <li><strong>Withdraw:</strong> Reach 100 Robux and click "GET" to receive your Robux instantly.</li>
+    <li><strong>Support & FAQ:</strong> Contact us anytime or check the FAQ for assistance.</li>
+  </ol>
+</template>
+
+<template id="statsPopup">
+  <h2>Stats</h2>
+  <ul>
+    <li><strong>Total Robux Earned:</strong> 150,000+</li>
+    <li><strong>Total Users:</strong> 25,000+</li>
+    <li><strong>Daily Active Users:</strong> 2,000+</li>
+    <li><strong>Videos Watched:</strong> 1,200,000+</li>
+    <li><strong>Withdrawals Processed:</strong> 3,500+</li>
+  </ul>
+</template>
+
+<!-- STYLES -->
+<style>
+.footer { background: #121212; color: #fff; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; padding:40px 20px 20px;}
+.footer-container { display:flex; flex-wrap:wrap; gap:40px; justify-content:space-between; max-width:1200px; margin:0 auto;}
+.footer-logo img {width:80px;margin-bottom:12px;}
+.footer-logo p {font-size:14px;color:#ccc; max-width:250px;}
+.footer-links, .footer-support {min-width:150px;}
+.footer-links h4, .footer-support h4, .footer-social h4 {color:#00ffd5; font-size:16px; margin-bottom:12px;}
+.footer-links ul, .footer-support ul {list-style:none; padding:0; margin:0;}
+.footer-links ul li, .footer-support ul li {margin-bottom:8px;}
+.footer-links ul li button, .footer-support ul li button {background:none;border:none;color:#ccc;cursor:pointer;font-size:14px; transition:color 0.2s;}
+.footer-links ul li button:hover, .footer-support ul li button:hover {color:#00ffd5;}
+.footer-social .social-icons a {display:inline-block; transition: transform 0.2s;}
+.footer-social .social-icons a:hover {transform:translateY(-3px);}
+.footer-bottom {text-align:center;font-size:12px;color:#666; margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;}
+
+/* POPUP MODAL */
+.popup-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999;}
+.popup-content { background:#1e1e1e; padding:30px; border-radius:20px; max-width:500px; width:90%; position:relative; color:#fff;}
+.popup-close { position:absolute; top:15px; right:20px; font-size:24px; cursor:pointer; }
+.popup-content form { display:flex; flex-direction:column; gap:12px; }
+.popup-content form input, .popup-content form textarea { padding:10px; border-radius:12px; border:none; outline:none; width:100%; font-size:14px; background:#2c2c2c; color:#fff; }
+.popup-content form button { padding:12px; border-radius:12px; border:none; background:#00ffd5; font-weight:bold; cursor:pointer; color:#000; font-size:16px; }
+.popup-content form button:hover {background:#00e0c0;}
+#contactStatus {font-size:14px; color:#0f0; margin-top:8px;}
+</style>
+
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
 import {
@@ -1038,6 +1229,72 @@ document.querySelectorAll('#howItWorks .step').forEach(step => {
   });
 });
 </script>
+<!-- SCRIPTS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// POPUP LOGIC
+const popupModal = document.getElementById('popupModal');
+const popupInnerContent = document.getElementById('popupInnerContent');
+
+document.querySelectorAll('.footer-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const templateId = btn.dataset.popup;
+    const template = document.getElementById(templateId);
+    popupInnerContent.innerHTML = template.innerHTML;
+    popupModal.style.display = 'flex';
+
+    // Contact form submission
+    const contactForm = document.getElementById('contactForm');
+    if(contactForm){
+      const submitBtn = contactForm.querySelector('button');
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        const email = contactForm.email.value;
+        const message = contactForm.message.value;
+        try {
+          await push(ref(db, 'contactMessages'), {email, message, timestamp: Date.now()});
+          document.getElementById('contactStatus').innerText = "Message sent successfully!";
+          contactForm.reset();
+        } catch(err) {
+          document.getElementById('contactStatus').innerText = "Error sending message.";
+          console.error(err);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    }
+  });
+});
+
+function closePopup(){
+  popupModal.style.display='none';
+  popupInnerContent.innerHTML='';
+}
+
+// Close when clicking outside content
+popupModal.addEventListener('click', e => {
+  if(e.target === popupModal){
+    closePopup();
+  }
+});
+</script>
 </body>
 </html>
