@@ -6,15 +6,12 @@
 <title>WATCH-4-RBX</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
-body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;}
+body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 header{
-  position:sticky;top:0;
-  padding:12px 20px;
+  position:sticky;top:0;padding:12px 20px;
   display:flex;justify-content:space-between;align-items:center;
-  backdrop-filter:blur(20px);
-  background:rgba(255,255,255,0.05);
-  border-bottom:1px solid rgba(255,255,255,0.1);
-  z-index:100;
+  backdrop-filter:blur(20px);background:rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.1);z-index:100;
 }
 .left{display:flex;align-items:center;gap:10px;}
 .left img{width:26px;height:26px;}
@@ -22,122 +19,76 @@ header{
 
 /* Buttons */
 .loading,.rbx,.register-btn{
-  padding:8px 16px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.3);
+  padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.3);
+  cursor:pointer;font-weight:700;transition:0.3s ease;
 }
+.rbx {
+  background: linear-gradient(135deg,#00ff99,#00cc77);
+  color:#000;box-shadow:0 0 15px rgba(0,255,150,0.4);
+}
+.rbx:hover {transform:scale(1.05); box-shadow:0 0 25px rgba(0,255,150,0.7);}
 .register-btn{
-  background:linear-gradient(135deg, #ff4d4d, #ff6666);
-  color:#fff;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 0 12px rgba(255,77,77,.5);
-  transition:0.3s ease;
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.4);
+  color:#fff;backdrop-filter: blur(8px);
+  box-shadow:0 0 15px rgba(255,255,255,0.2);
 }
-.register-btn:hover{
-  background:linear-gradient(135deg, #ff6666, #ff4d4d);
-  box-shadow:0 0 20px rgba(255,77,77,.8);
-}
+.register-btn:hover {box-shadow:0 0 25px rgba(255,255,255,0.5); transform:scale(1.05);}
+.register-btn:active {transform:scale(0.95);}
 
-.user-actions{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  position:relative;
-}
-.rbx{cursor:pointer;box-shadow:0 0 15px rgba(0,255,150,0.3);}
-.logout-icon{
-  width:22px;height:22px;cursor:pointer;fill:#ff4d4d;
-  transition:transform 0.2s ease;
-}
-.logout-icon:hover{transform:rotate(20deg);}
+/* User actions */
+.user-actions{display:flex;align-items:center;gap:10px;position:relative;}
+.logout-icon{width:24px;height:24px;cursor:pointer;transition:0.2s;}
+.logout-icon:hover{transform: rotate(15deg) scale(1.1);}
 .logout-menu{
-  display:none;
-  position:absolute;
-  right:0;
-  top:120%;
-  background:#120000;
-  border:1px solid rgba(255,77,77,.6);
-  border-radius:12px;
-  padding:6px;
-  box-shadow:0 0 15px rgba(255,77,77,.4);
+  display:none;position:absolute;right:0;top:120%;
+  background:#120000;border:1px solid rgba(255,77,77,.6);
+  border-radius:12px;padding:6px;box-shadow:0 0 15px rgba(255,77,77,.4);
 }
+.logout-menu.show{display:block;opacity:1;pointer-events:auto;transition:0.2s ease;}
 .logout-menu button{
-  background:none;
-  border:none;
-  color:#ff4d4d;
-  font-weight:700;
-  padding:8px 16px;
-  border-radius:10px;
-  cursor:pointer;
+  background:none;border:none;color:#ff4d4d;font-weight:700;
+  padding:8px 16px;border-radius:10px;cursor:pointer;
 }
 .logout-menu button:hover{background:rgba(255,77,77,.15);}
 
 /* Modal */
 .modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  backdrop-filter:blur(15px);
-  z-index:200;
-  justify-content:center;
-  align-items:center;
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(15px);
+  z-index:200;justify-content:center;align-items:center;
 }
 .modal-box{
-  position:relative;
-  width:90%;
-  max-width:420px;
-  background:#0f0f0f;
-  border-radius:18px;
-  padding:20px;
+  position:relative;width:90%;max-width:420px;
+  background:#0f0f0f;border-radius:18px;padding:20px;
   box-shadow:0 0 30px rgba(0,255,150,.2);
 }
 
-/* Close button top left */
+/* Close button SVG top-left */
 .modal-close{
-  position:absolute;
-  top:10px;
-  left:10px;
-  background:#ff4d4d;
-  border:none;
-  color:white;
-  font-weight:600;
-  padding:6px 12px;
-  border-radius:50px;
-  cursor:pointer;
-  font-size:.8rem;
-  transition:0.2s ease;
+  position:absolute;top:10px;left:10px;
+  background:none;border:none;padding:0;cursor:pointer;
 }
-.modal-close:hover{
-  background:#ff6666;
-  transform:scale(1.05);
-}
+.modal-close svg{width:28px;height:28px;transition:0.2s ease;}
+.modal-close svg:hover{transform:scale(1.1);}
 
 /* Modal content */
-.balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;}
+.balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;animation:pulse 1.2s ease infinite alternate;}
+@keyframes pulse{0%{transform:scale(1);}100%{transform:scale(1.05);}}
 .sub{text-align:center;opacity:.7;margin-bottom:10px;}
 .notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
 input,textarea{
-  width:100%;
-  background:#000;
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:10px;
-  padding:10px;
-  color:#fff;
-  margin-bottom:10px;
+  width:100%;background: rgba(0,0,0,0.3);
+  border:1px solid rgba(0,255,150,0.3);border-radius:10px;padding:10px;
+  color:#fff;margin-bottom:10px;box-shadow:0 0 8px rgba(0,255,150,0.1);
 }
+input:focus,textarea:focus{border-color:#00ff99;box-shadow:0 0 12px rgba(0,255,150,0.3);outline:none;}
 textarea{resize:none;height:70px;}
 .confirm{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  font-weight:700;
-  cursor:pointer;
-  background:#fff;
-  color:#000;
+  width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;
+  cursor:pointer;background:#00ff99;color:#000;transition:0.2s;
 }
+.confirm:hover{transform:scale(1.03);box-shadow:0 0 15px rgba(0,255,150,.5);}
 .msg{text-align:center;margin-top:10px;font-weight:600;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
@@ -157,12 +108,14 @@ textarea{resize:none;height:70px;}
 <!-- WITHDRAW MODAL -->
 <div class="modal" id="withdrawModal">
   <div class="modal-box">
-    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">Close</button>
+    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <path fill="#fb7369" d="m68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"></path>
+      </svg>
+    </button>
     <div class="balance-big" id="bigBal">0 RBX</div>
     <div class="sub">Available balance</div>
-    <div class="notice">
-      Once you reach <b>150 RBX</b>, you can redeem for real Robux
-    </div>
+    <div class="notice">Once you reach <b>150 RBX</b>, you can redeem for real Robux</div>
     <input id="robloxUser" placeholder="@roblox username">
     <textarea id="extraInfo" placeholder="More info (optional)"></textarea>
     <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>
@@ -174,7 +127,7 @@ textarea{resize:none;height:70px;}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -199,7 +152,7 @@ window.openModal=()=>document.getElementById("withdrawModal").style.display="fle
 // Toggle logout/settings menu
 window.toggleLogout=()=>{
   const menu=document.getElementById("logoutMenu");
-  menu.style.display = menu.style.display==="block"?"none":"block";
+  menu.classList.toggle('show');
 };
 
 // Logout
@@ -215,16 +168,18 @@ onAuthStateChanged(auth,async user=>{
     return;
   }
   currentUser=user;
-  const balSnap=await get(ref(db,`users/${user.uid}/rbxbalance`));
-  balance=balSnap.exists()?balSnap.val():0;
-  document.getElementById("bigBal").innerText=balance+" RBX";
+  const balRef = ref(db,`users/${user.uid}/rbxbalance`);
+  onValue(balRef,snap=>{
+    balance = snap.exists()?snap.val():0;
+    document.getElementById("bigBal").innerText=balance+" RBX";
+    const rbxBtn = document.querySelector(".rbx");
+    if(rbxBtn) rbxBtn.innerText = balance+" RBX / GET";
+  });
 
   headerRight.innerHTML=`
     <div class="user-actions">
       <div class="rbx" onclick="openModal()">${balance} RBX / GET</div>
-      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24" fill="#ff4d4d">
-        <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm8.94 4a6.978 6.978 0 00-.34-1.71l2.03-1.57-2-3.46-2.4 1a6.992 6.992 0 00-1.48-.86l-.36-2.53H9.63l-.36 2.53a6.992 6.992 0 00-1.48.86l-2.4-1-2 3.46 2.03 1.57c-.07.55-.07 1.11 0 1.66L2.92 14.3l2 3.46 2.4-1c.44.34.92.62 1.48.86l.36 2.53h4.74l.36-2.53c.56-.24 1.04-.52 1.48-.86l2.4 1 2-3.46-2.03-1.57c.07-.55.07-1.11 0-1.66z"/>
-      </svg>
+      <img class="logout-icon" src="https://i.imgur.com/Lvfvc4a.png" onclick="toggleLogout()">
       <div class="logout-menu" id="logoutMenu">
         <button onclick="doLogout()">Logout</button>
       </div>
@@ -240,6 +195,11 @@ window.confirmWithdraw=async()=>{
     msg.classList.add("error");
     return;
   }
+  if(!robloxUser.value){
+    msg.textContent="Please enter your Roblox username";
+    msg.classList.add("error");
+    return;
+  }
   await push(ref(db,`confirmedrbx/${currentUser.uid}`),{
     amount:150,
     roblox:robloxUser.value,
@@ -249,8 +209,7 @@ window.confirmWithdraw=async()=>{
   });
   msg.textContent="Withdrawal submitted";
   msg.classList.add("success");
-  robloxUser.value="";
-  extraInfo.value="";
+  robloxUser.value=""; extraInfo.value="";
 };
 
 // Close modal / menu when clicking outside
@@ -258,7 +217,7 @@ window.onclick = (e) => {
   const menu = document.getElementById("logoutMenu");
   const modal = document.getElementById("withdrawModal");
   if(e.target === modal) modal.style.display="none";
-  if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.style.display="none";
+  if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.classList.remove('show');
 };
 
 // Close modal with ESC
