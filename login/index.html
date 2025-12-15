@@ -1,11 +1,13 @@
 <div class="page-container">
   <div class="auth-box">
     <h2>Login</h2>
-    <input type="email" placeholder="Email" />
-    <input type="password" placeholder="Password" />
-    <button class="login-btn">Login</button>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <div id="loginNotice" style="color:red;font-size:0.85rem;min-height:20px;"></div>
+    <button id="loginBtn">Login</button>
     <p style="margin-top:10px;font-size:0.85rem;color:rgba(255,255,255,.6);">
-      Don't have an account? <span style="color:#ff4fd8;cursor:pointer;" onclick="loadPage('/signup/index.html')">Sign Up</span>
+      Don't have an account? 
+      <span style="color:#ff4fd8;cursor:pointer;" onclick="loadPage('/signup/index.html')">Sign Up</span>
     </p>
   </div>
 </div>
@@ -42,3 +44,57 @@
   box-shadow:0 0 10px #00ffff;
 }
 </style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e",
+  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId:"1094792075584",
+  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const loginBtn = document.getElementById("loginBtn");
+const notice = document.getElementById("loginNotice");
+const emailInput = document.getElementById("loginEmail");
+const passInput = document.getElementById("loginPassword");
+
+// LOGIN FUNCTION
+loginBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passInput.value.trim();
+  notice.style.color = "red";
+
+  if (!email || !password) {
+    notice.textContent = "Please enter email and password";
+    return;
+  }
+
+  notice.textContent = "Logging in…";
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    notice.style.color = "green";
+    notice.textContent = "Login successful!";
+    
+    // Reload main page to update header
+    window.location.reload();
+  } catch (err) {
+    notice.style.color = "red";
+    notice.textContent = err.message;
+  }
+});
+
+// Optional: auto redirect if already logged in
+onAuthStateChanged(auth, user => {
+  if(user) window.location.reload();
+});
+</script>
