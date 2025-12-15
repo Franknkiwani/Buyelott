@@ -1,0 +1,44 @@
+<div class="page-container">
+  <div class="auth-box">
+    <h2>Login</h2>
+    <input type="email" placeholder="Email" />
+    <input type="password" placeholder="Password" />
+    <button class="login-btn">Login</button>
+    <p style="margin-top:10px;font-size:0.85rem;color:rgba(255,255,255,.6);">
+      Don't have an account? <span style="color:#ff4fd8;cursor:pointer;" onclick="loadPage('/signup/index.html')">Sign Up</span>
+    </p>
+  </div>
+</div>
+
+<style>
+.page-container{display:flex;justify-content:center;align-items:center;height:60vh;}
+.auth-box{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(15px);
+  padding:30px;
+  border-radius:18px;
+  width:300px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.auth-box h2{text-align:center;color:#0ff;font-weight:700;}
+.auth-box input{
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.3);
+  background:rgba(0,0,0,.2);
+  color:#fff;
+}
+.auth-box input::placeholder{color:rgba(255,255,255,.5);}
+.auth-box button{
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#00ffff,#00b3ff);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 0 10px #00ffff;
+}
+</style>
