@@ -106,7 +106,7 @@ textarea{resize:none;height:70px;}
     <h1>WATCH-4-RBX</h1>
   </div>
   <div id="headerRight">
-    <button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>
+    <button class="register-btn" onclick="location.href='register/'">REGISTER</button>
   </div>
 </header>
 
@@ -162,7 +162,7 @@ window.doLogout=async()=>{await signOut(auth);location.reload();};
 
 onAuthStateChanged(auth,async user=>{
   if(!user){
-    headerRight.innerHTML=`<button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>`;
+    headerRight.innerHTML = `<button class="register-btn" onclick="location.href='register/'">REGISTER</button>`;
     return;
   }
   currentUser=user;
