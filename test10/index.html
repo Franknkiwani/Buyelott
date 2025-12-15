@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WATCH-4-RBX</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
+/* Global reset and font */
+*{
+  margin:0;padding:0;box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
+  user-select:none; /* disable text selection */
+  -webkit-tap-highlight-color:transparent; /* remove mobile highlight */
+}
 body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 header{
   position:sticky;top:0;padding:12px 20px;
@@ -22,11 +28,18 @@ header{
   padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.3);
   cursor:pointer;font-weight:700;transition:0.3s ease;
 }
+/* Dark glassy RBX buttons */
 .rbx {
-  background: linear-gradient(135deg,#00ff99,#00cc77);
-  color:#000;box-shadow:0 0 15px rgba(0,255,150,0.4);
+  background: rgba(255,255,255,0.05); 
+  border: 1px solid rgba(255,255,255,0.4); 
+  color: #fff;
+  box-shadow:0 0 12px rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
 }
-.rbx:hover {transform:scale(1.05); box-shadow:0 0 25px rgba(0,255,150,0.7);}
+.rbx:hover {transform:scale(1.05); box-shadow:0 0 25px rgba(255,255,255,0.4);}
+.rbx:active {transform:scale(0.95); box-shadow:0 0 15px rgba(255,255,255,0.25);}
+
+/* REGISTER button */
 .register-btn{
   background: rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.4);
@@ -61,7 +74,7 @@ header{
 .modal-box{
   position:relative;width:90%;max-width:420px;
   background:#0f0f0f;border-radius:18px;padding:20px;
-  box-shadow:0 0 30px rgba(0,255,150,.2);
+  box-shadow:0 0 30px rgba(255,255,255,.15);
 }
 
 /* Close button SVG top-left */
@@ -79,16 +92,16 @@ header{
 .notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
 input,textarea{
   width:100%;background: rgba(0,0,0,0.3);
-  border:1px solid rgba(0,255,150,0.3);border-radius:10px;padding:10px;
-  color:#fff;margin-bottom:10px;box-shadow:0 0 8px rgba(0,255,150,0.1);
+  border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px;
+  color:#fff;margin-bottom:10px;box-shadow:0 0 8px rgba(255,255,255,0.1);
 }
-input:focus,textarea:focus{border-color:#00ff99;box-shadow:0 0 12px rgba(0,255,150,0.3);outline:none;}
+input:focus,textarea:focus{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,0.3);outline:none;}
 textarea{resize:none;height:70px;}
 .confirm{
   width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;
-  cursor:pointer;background:#00ff99;color:#000;transition:0.2s;
+  cursor:pointer;background:#fff;color:#000;transition:0.2s;
 }
-.confirm:hover{transform:scale(1.03);box-shadow:0 0 15px rgba(0,255,150,.5);}
+.confirm:hover{transform:scale(1.03);box-shadow:0 0 15px rgba(255,255,255,.5);}
 .msg{text-align:center;margin-top:10px;font-weight:600;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
@@ -146,19 +159,15 @@ const db=getDatabase(app);
 let currentUser,balance=0;
 const headerRight=document.getElementById("headerRight");
 
-// Modal
 window.openModal=()=>document.getElementById("withdrawModal").style.display="flex";
 
-// Toggle logout/settings menu
 window.toggleLogout=()=>{
   const menu=document.getElementById("logoutMenu");
   menu.classList.toggle('show');
 };
 
-// Logout
 window.doLogout=async()=>{await signOut(auth);location.reload();};
 
-// Auth state
 onAuthStateChanged(auth,async user=>{
   if(!user){
     headerRight.innerHTML=`
@@ -186,20 +195,11 @@ onAuthStateChanged(auth,async user=>{
     </div>`;
 });
 
-// Confirm withdraw
 window.confirmWithdraw=async()=>{
   const msg=document.getElementById("msg");
   msg.className="msg";
-  if(balance<150){
-    msg.textContent="You need at least 150 RBX";
-    msg.classList.add("error");
-    return;
-  }
-  if(!robloxUser.value){
-    msg.textContent="Please enter your Roblox username";
-    msg.classList.add("error");
-    return;
-  }
+  if(balance<150){msg.textContent="You need at least 150 RBX";msg.classList.add("error");return;}
+  if(!robloxUser.value){msg.textContent="Please enter your Roblox username";msg.classList.add("error");return;}
   await push(ref(db,`confirmedrbx/${currentUser.uid}`),{
     amount:150,
     roblox:robloxUser.value,
@@ -207,23 +207,17 @@ window.confirmWithdraw=async()=>{
     status:"pending",
     time:Date.now()
   });
-  msg.textContent="Withdrawal submitted";
-  msg.classList.add("success");
+  msg.textContent="Withdrawal submitted";msg.classList.add("success");
   robloxUser.value=""; extraInfo.value="";
 };
 
-// Close modal / menu when clicking outside
 window.onclick = (e) => {
   const menu = document.getElementById("logoutMenu");
   const modal = document.getElementById("withdrawModal");
   if(e.target === modal) modal.style.display="none";
   if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.classList.remove('show');
 };
-
-// Close modal with ESC
-window.addEventListener('keydown', e => {
-  if(e.key==='Escape') document.getElementById("withdrawModal").style.display="none";
-});
+window.addEventListener('keydown', e => {if(e.key==='Escape') document.getElementById("withdrawModal").style.display="none";});
 </script>
 </body>
 </html>
