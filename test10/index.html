@@ -623,37 +623,42 @@ header {
 
 <!-- User Menu Modal -->
 <div id="userMenuModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-content user-menu-grid">
-      <h2 style="margin-bottom:10px;">@User Menu</h2>
-      <div class="top-sections">
-        <div class="section" id="getRbxBtn">
-          <img src="https://img.icons8.com/ios-filled/50/ffffff/coins.png">
-          <span>Get RBX</span>
-        </div>
-        <div class="section" id="logoutBtn">
-          <img src="https://img.icons8.com/ios-filled/50/ffffff/logout-rounded.png">
-          <span>Logout</span>
-        </div>
+  <div class="modal-content user-menu-grid">
+
+    <button class="modal-close"
+      onclick="document.getElementById('userMenuModal').style.display='none'">
+      close
+    </button>
+
+    <h2 style="margin-bottom:10px;">@User Menu</h2>
+
+    <div class="top-sections">
+      <div class="section" id="getRbxBtn">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/coins.png">
+        <span>Get RBX</span>
+      </div>
+
+      <div class="section" id="logoutBtn">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/logout-rounded.png">
+        <span>Logout</span>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- GET RBX Modal -->
-<div id="getRbxModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-content">
-      <h1 id="rbxAmountDisplay">0 RBX</h1>
-      <div>Available RBX</div>
-      <input id="robloxUsername" placeholder="Roblox Username">
-      <input id="emailWithdraw" placeholder="Email">
-      <input id="withdrawAmount" type="number" placeholder="Amount to withdraw">
-      <button id="submitWithdraw">Submit</button>
-      <div id="withdrawNotice" style="margin-top:10px;"></div>
-    </div>
   </div>
 </div>
+</div> 
+<!-- GET RBX Modal -->    <div id="getRbxModal" class="modal">    
+  <div class="modal-content">    
+    <button class="modal-close" id="closeGetRbx" onclick="document.getElementById('getRbxModal').style.display='none'">close</button>    
+    <h1 id="rbxAmountDisplay">0 RBX</h1>    
+    <div>Available RBX</div>    
+    <input id="robloxUsername" placeholder="Roblox Username">    
+    <input id="emailWithdraw" placeholder="Email">    
+    <input id="withdrawAmount" type="number" placeholder="Amount to withdraw">    
+    <button id="submitWithdraw">Submit</button>    
+    <div id="withdrawNotice" style="margin-top:10px;"></div>    
+  </div>    
+</div>  
 <!-- LOGIN MODAL -->
 <div id="loginModal" class="modal">
   <div class="modal-box" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU82eYVPr7gZWeSr7NXwfIbFUA-Hk3UvdDq1ko9GJCzs7O8gbX3RjfI-0&s=10'); background-size:cover;">
@@ -798,6 +803,7 @@ const withdrawAmount = document.getElementById('withdrawAmount');
 const submitWithdraw = document.getElementById('submitWithdraw');
 const withdrawNotice = document.getElementById('withdrawNotice');
 const balanceBtn = document.getElementById('balanceBtn');
+const rbxText = document.getElementById('rbxText');
 const playerContainer = document.querySelector('.video-player');
 const progressBarFill = document.querySelector('.progress-bar-fill');
 const watchBtn = document.querySelector('.watch-btn');
@@ -805,125 +811,120 @@ const rbxDisplay = document.querySelector('.rbx-display');
 const spinner = document.querySelector('.spinner');
 const slowWifi = document.querySelector('.slow-wifi');
 
-/* --- INLINE NOTIFICATION --- */
+/* --- TOAST --- */
+function showToast(msg){
+    const t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* --- MODAL FUNCTIONS --- */
+window.openLoginModal = () => loginModal.style.display = 'flex';
+window.closeLoginModal = () => loginModal.style.display = 'none';
+window.openSignupModal = () => signupModal.style.display = 'flex';
+window.closeSignupModal = () => signupModal.style.display = 'none';
+
+/* --- NOTIFICATION --- */
 function notify(el, msg, success=false){
   el.textContent = msg;
   el.className = 'notice ' + (success ? 'success' : 'error');
 }
 
-/* --- MODAL --- */
-window.openLoginModal = () => loginModal.style.display='flex';
-window.closeLoginModal = () => loginModal.style.display='none';
-window.openSignupModal = () => signupModal.style.display='flex';
-window.closeSignupModal = () => signupModal.style.display='none';
-
 /* --- HEADER --- */
 function updateHeader(user){
-  if(user){
-    get(ref(db,'users/'+user.uid+'/rbxbalance')).then(snap=>{
-      const balance = snap.exists()?snap.val():0;
-      headerAuth.innerHTML = `<button class="user-info-btn" id="userBtn">@${user.displayName} | ${balance} RBX</button>`;
-      document.getElementById('userBtn').onclick = ()=>userMenuModal.style.display='flex';
-    });
-  } else {
-    headerAuth.innerHTML = `<button class="login login-btn">Log in</button><button class="signup signup-btn">Sign up</button>`;
-    document.querySelector('.login').onclick = openLoginModal;
-    document.querySelector('.signup').onclick = openSignupModal;
-  }
+    if(user){
+        get(ref(db,'users/'+user.uid+'/rbxbalance')).then(snap=>{
+            const balance = snap.exists()?snap.val():0;
+            headerAuth.innerHTML = `<button class="user-info-btn" id="userBtn">@${user.displayName} | ${balance} RBX</button>`;
+            document.getElementById('userBtn').onclick = ()=>userMenuModal.style.display='flex';
+        });
+    } else {
+        headerAuth.innerHTML = `<button class="login">Log in</button><button class="signup">Sign up</button>`;
+        document.querySelector('.login').onclick = openLoginModal;
+        document.querySelector('.signup').onclick = openSignupModal;
+    }
 }
 
 /* --- LOGIN --- */
 window.loginUser = async () => {
-  try{
-    const userCred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-    closeLoginModal();
-    updateHeader(userCred.user);
-    notify(loginNotice,"Logged in!",true);
-  } catch(e){
-    notify(loginNotice,e.message,false);
-  }
+    try{
+        const userCred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        closeLoginModal();
+        updateHeader(userCred.user);
+        showToast("Logged in!");
+    } catch(e){
+        showToast(e.message);
+    }
 };
 
 /* --- SIGNUP --- */
 window.signupUser = async () => {
-  try{
-    const userCred = await createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value);
-    const user = userCred.user;
-    const username = signupUsername.value || "User"+user.uid.slice(0,4);
-    await updateProfile(user,{displayName: username});
-    await set(ref(db,'users/'+user.uid+'/rbxbalance'),0);
-    closeSignupModal();
-    updateHeader(user);
-    notify(signupNotice,"Signed up!",true);
-  } catch(e){
-    notify(signupNotice,e.message,false);
-  }
+    try{
+        const userCred = await createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value);
+        const user = userCred.user;
+        const username = signupUsername.value || "User"+user.uid.slice(0,4);
+        await updateProfile(user,{displayName: username});
+        await set(ref(db,'users/'+user.uid+'/rbxbalance'),0);
+        closeSignupModal();
+        updateHeader(user);
+        showToast("Signed up!");
+    } catch(e){
+        showToast(e.message);
+    }
 };
 
 /* --- PASSWORD RESET --- */
 window.forgotPassword = async () => {
-  if(!loginEmail.value){ notify(loginNotice,"Enter email first",false); return; }
-  try{
-    await sendPasswordResetEmail(auth, loginEmail.value);
-    notify(loginNotice,"Reset email sent",true);
-  } catch(e){ notify(loginNotice,e.message,false); }
+    if(!loginEmail.value){ notify(loginNotice,"Enter email first"); return; }
+    try{
+        await sendPasswordResetEmail(auth, loginEmail.value);
+        notify(loginNotice,"Reset email sent", true);
+    } catch(e){ notify(loginNotice,e.message); }
 };
 
 /* --- LOGOUT --- */
 logoutBtn.onclick = async () => {
-  await signOut(auth);
-  userMenuModal.style.display='none';
-  updateHeader(null);
+    await signOut(auth);
+    userMenuModal.style.display='none';
+    updateHeader(null);
+    showToast("Logged out!");
 };
 
-/* --- USER RBX MENU --- */
+/* --- USER MENU RBX --- */
 getRbxBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if(!user){ notify(withdrawNotice,"Login required!",false); return; }
-  const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
-  const bal = snap.exists()?snap.val():0;
-  rbxAmountDisplay.textContent = bal+" RBX";
-  withdrawAmount.value=''; robloxUsername.value=''; emailWithdraw.value=''; withdrawNotice.textContent='';
-  userMenuModal.style.display='none';
-  getRbxModal.style.display='flex';
+    const user = auth.currentUser;
+    if(!user){ showToast("Login required!"); return; }
+    const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
+    const bal = snap.exists()?snap.val():0;
+    rbxAmountDisplay.textContent = bal+" RBX";
+    withdrawAmount.value=''; robloxUsername.value=''; emailWithdraw.value=''; withdrawNotice.textContent='';
+    userMenuModal.style.display='none';
+    getRbxModal.style.display='flex';
 };
 closeGetRbx.onclick = ()=>getRbxModal.style.display='none';
-
-/* --- WITHDRAW BUTTON --- */
 submitWithdraw.onclick = async () => {
-  const user = auth.currentUser;
-  if(!user){ notify(withdrawNotice,"Login required!",false); return; }
-  const amt = parseInt(withdrawAmount.value);
-  const u = robloxUsername.value.trim();
-  const e = emailWithdraw.value.trim();
-  if(!u||!e||!amt){ notify(withdrawNotice,"All fields required!",false); return; }
-  if(amt<150){ notify(withdrawNotice,"Minimum 150 RBX!",false); return; }
-  const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
-  const bal = snap.exists()?snap.val():0;
-  if(amt>bal){ notify(withdrawNotice,"Insufficient RBX!",false); return; }
-
-  submitWithdraw.disabled = true;
-  const btnSpinner = document.createElement('span');
-  btnSpinner.className='spinner';
-  submitWithdraw.appendChild(btnSpinner);
-  btnSpinner.style.display='inline-block';
-
-  try{
+    const user = auth.currentUser;
+    if(!user){ showToast("Login required!"); return; }
+    const amt = parseInt(withdrawAmount.value);
+    const u = robloxUsername.value.trim();
+    const e = emailWithdraw.value.trim();
+    const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
+    const bal = snap.exists()?snap.val():0;
+    if(!u||!e||!amt){ withdrawNotice.textContent="All fields required!"; return; }
+    if(amt<150){ withdrawNotice.textContent="Minimum 150 RBX!"; return; }
+    if(amt>bal){ withdrawNotice.textContent="Insufficient RBX!"; return; }
     await set(ref(db,'users/'+user.uid+'/rbxbalance'),bal-amt);
     rbxAmountDisplay.textContent = (bal-amt)+" RBX";
-    notify(withdrawNotice,`${amt} RBX requested for @${u}`,true);
-  } catch(e){
-    notify(withdrawNotice,e.message,false);
-  } finally{
-    submitWithdraw.disabled = false;
-    btnSpinner.remove();
-  }
+    withdrawNotice.style.color="#0f0";
+    withdrawNotice.textContent = `${amt} RBX requested for @${u}`;
+    showToast(`Withdraw request sent for ${amt} RBX!`);
 };
 
 /* --- WATCH & EARN VIDEO --- */
 const videos=["https://files.catbox.moe/61ny1y.mp4","https://files.catbox.moe/jfapxh.mp4","https://files.catbox.moe/vqvviq.mp4","https://files.catbox.moe/69l5y3.mp4","https://files.catbox.moe/bjwdo9.mp4"];
 let currentIndex=0,totalRBX=0,watching=false;
-
 let videoEl=document.createElement('video');
 videoEl.src=videos[currentIndex];
 videoEl.width = playerContainer.offsetWidth;
@@ -935,55 +936,55 @@ videoEl.style.backgroundColor='#000';
 playerContainer.appendChild(videoEl);
 
 videoEl.addEventListener('loadedmetadata',()=>{ rbxDisplay.textContent=Math.floor(videoEl.duration/10)+" RBX"; });
+watchBtn.addEventListener('click',()=>{
+    if(!watching){ watching=true; watchBtn.textContent="Stop Watching"; videoEl.play(); }
+    else { watching=false; watchBtn.textContent="Start Watching"; videoEl.pause(); }
+});
 videoEl.addEventListener('timeupdate',()=>{ progressBarFill.style.width = (videoEl.currentTime/videoEl.duration)*100+'%'; });
 videoEl.addEventListener('waiting',()=>{ spinner.style.display='block'; slowWifi.style.display='block'; });
 videoEl.addEventListener('playing',()=>{ spinner.style.display='none'; slowWifi.style.display='none'; });
 videoEl.addEventListener('ended', async ()=>{
-  watching=false;
-  watchBtn.textContent="Start Watching";
-  watchBtn.classList.remove('stop');
-  const earnedRBX = Math.floor(videoEl.duration/10);
-  totalRBX += earnedRBX;
-  rbxDisplay.textContent = earnedRBX+" RBX (Total: "+totalRBX+" RBX)";
-  const user = auth.currentUser;
-  if(user){
-    const balanceRef = ref(db,'users/'+user.uid+'/rbxbalance');
-    const snap = await get(balanceRef);
-    const newBalance = (snap.exists()?snap.val():0) + earnedRBX;
-    await set(balanceRef,newBalance);
-    updateHeader(user);
-  }
-  currentIndex = (currentIndex+1)%videos.length;
-  videoEl.src = videos[currentIndex];
+    watching=false;
+    watchBtn.textContent="Start Watching";
+    const earnedRBX = Math.floor(videoEl.duration/10);
+    totalRBX += earnedRBX;
+    rbxDisplay.textContent = earnedRBX+" RBX (Total: "+totalRBX+" RBX)";
+    const user = auth.currentUser;
+    if(user){
+        const balanceRef = ref(db,'users/'+user.uid+'/rbxbalance');
+        const snap = await get(balanceRef);
+        const newBalance = (snap.exists()?snap.val():0) + earnedRBX;
+        await set(balanceRef,newBalance);
+        updateHeader(user);
+    } else showToast("Login to save your RBX!");
+    currentIndex = (currentIndex+1)%videos.length;
+    videoEl.src = videos[currentIndex];
 });
 
-/* --- WATCH BUTTON --- */
-watchBtn.addEventListener('click', ()=>{
-  if(!watching){
-    watching = true;
-    watchBtn.textContent = "Stop Watching";
-    watchBtn.classList.add('stop');
-    videoEl.play();
-  } else{
-    watching = false;
-    watchBtn.textContent = "Start Watching";
-    watchBtn.classList.remove('stop');
-    videoEl.pause();
-  }
-});
-
-/* --- AUTH MONITOR --- */
+/* --- AUTH STATE MONITOR --- */
 onAuthStateChanged(auth, user => {
-  if(user){
-    if(!user.displayName) updateProfile(user,{displayName:"User"+user.uid.slice(0,4)});
-    updateHeader(user);
-    balanceBtn.style.display='flex';
-    document.querySelectorAll('.login-btn,.signup-btn').forEach(b=>b.style.display='none');
-  } else{
-    updateHeader(null);
-    balanceBtn.style.display='none';
-    document.querySelectorAll('.login-btn,.signup-btn').forEach(b=>b.style.display='inline-block');
-  }
+    if(user){
+        if(!user.displayName) updateProfile(user,{displayName:"User"+user.uid.slice(0,4)});
+        updateHeader(user);
+        balanceBtn.style.display = 'flex';
+        authButtons.style.display = 'none';
+    } else {
+        updateHeader(null);
+        balanceBtn.style.display = 'none';
+        authButtons.style.display = 'flex';
+    }
 });
-
+watchBtn.addEventListener('click', ()=>{
+    if(!watching){
+        watching = true;
+        watchBtn.textContent = "Stop Watching";
+        watchBtn.classList.add('stop'); // add stop class
+        videoEl.play();
+    } else {
+        watching = false;
+        watchBtn.textContent = "Start Watching";
+        watchBtn.classList.remove('stop'); // remove stop class
+        videoEl.pause();
+    }
+});
 </script>
