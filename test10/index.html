@@ -28,7 +28,7 @@ header{
   border:1px solid rgba(255,255,255,.3);
 }
 
-/* REGISTER */
+/* REGISTER BUTTON */
 .register-wrap{position:relative;}
 
 .register-btn{
@@ -55,7 +55,7 @@ header{
 
 @keyframes shine{to{transform:translateX(100%);}}
 
-/* DROPDOWN */
+/* REGISTER DROPDOWN */
 .register-menu{
   display:none;
   position:absolute;
@@ -90,7 +90,7 @@ header{
   box-shadow:0 0 12px rgba(255,0,128,.6);
 }
 
-/* USER */
+/* USER ACTIONS */
 .user-actions{display:flex;align-items:center;gap:10px;position:relative;}
 .rbx{
   padding:8px 14px;
@@ -124,6 +124,52 @@ header{
   border-radius:10px;
   cursor:pointer;
 }
+
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(15px);
+  justify-content:center;
+  align-items:center;
+  z-index:200;
+}
+
+.modal-box{
+  width:90%;
+  max-width:420px;
+  background:#0f0f0f;
+  border-radius:18px;
+  padding:20px;
+}
+
+.balance-big{text-align:center;font-size:2.2rem;font-weight:800;}
+.sub,.notice{text-align:center;opacity:.8;margin-bottom:10px;}
+
+input,textarea{
+  width:100%;
+  background:#000;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;
+  padding:10px;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+.confirm{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.msg{text-align:center;margin-top:10px;font-weight:600;}
+.error{color:#ff4d4d;}
+.success{color:#00ff99;}
 </style>
 </head>
 
@@ -137,9 +183,24 @@ header{
   <div id="headerRight"><div class="loading">Loading…</div></div>
 </header>
 
+<div class="modal" id="withdrawModal">
+  <div class="modal-box">
+    <div class="balance-big" id="bigBal">0 RBX</div>
+    <div class="sub">Available balance</div>
+    <div class="notice">Once you reach <b>150 RBX</b> you can redeem for real Robux</div>
+
+    <input id="robloxUser" placeholder="@roblox username">
+    <textarea id="extraInfo" placeholder="More info"></textarea>
+
+    <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -153,51 +214,63 @@ const firebaseConfig={
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
+const db=getDatabase(app);
+
+let balance=0,currentUser;
+
 const headerRight=document.getElementById("headerRight");
 
-window.toggleRegister = () => {
-  const menu=document.getElementById("registerMenu");
-  if(!menu) return;
-  menu.style.display = menu.style.display==="block"?"none":"block";
-};
-
-window.toggleLogout=()=>{
-  const menu=document.getElementById("logoutMenu");
-  if(menu) menu.style.display=menu.style.display==="block"?"none":"block";
-};
-
+window.toggleRegister=()=>document.getElementById("registerMenu").style.display^="block";
+window.toggleLogout=()=>document.getElementById("logoutMenu").style.display^="block";
+window.openModal=()=>withdrawModal.style.display="flex";
 window.doLogout=async()=>{await signOut(auth);location.reload();};
 
-document.addEventListener("click",e=>{
-  const reg=document.querySelector(".register-wrap");
-  const menu=document.getElementById("registerMenu");
-  if(menu && reg && !reg.contains(e.target)) menu.style.display="none";
-});
-
-onAuthStateChanged(auth,user=>{
+onAuthStateChanged(auth,async user=>{
   if(!user){
     headerRight.innerHTML=`
-      <div class="register-wrap">
-        <button class="register-btn" onclick="toggleRegister()">REGISTER</button>
-        <div class="register-menu" id="registerMenu">
-          <button class="login-btn">LOGIN</button>
-          <button class="signup-btn">SIGN UP</button>
-        </div>
-      </div>`;
+    <div class="register-wrap">
+      <button class="register-btn" onclick="toggleRegister()">REGISTER</button>
+      <div class="register-menu" id="registerMenu">
+        <button class="login-btn">LOGIN</button>
+        <button class="signup-btn">SIGN UP</button>
+      </div>
+    </div>`;
     return;
   }
 
+  currentUser=user;
+  const snap=await get(ref(db,`users/${user.uid}/rbxbalance`));
+  balance=snap.exists()?snap.val():0;
+  bigBal.textContent=balance+" RBX";
+
   headerRight.innerHTML=`
-    <div class="user-actions">
-      <div class="rbx">0 RBX / GET</div>
-      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
-        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
-      </svg>
-      <div class="logout-menu" id="logoutMenu">
-        <button onclick="doLogout()">Logout</button>
-      </div>
-    </div>`;
+  <div class="user-actions">
+    <div class="rbx" onclick="openModal()">${balance} RBX / GET</div>
+    <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
+      <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+    </svg>
+    <div class="logout-menu" id="logoutMenu">
+      <button onclick="doLogout()">Logout</button>
+    </div>
+  </div>`;
 });
+
+window.confirmWithdraw=async()=>{
+  msg.className="msg";
+  if(balance<150){
+    msg.textContent="You need at least 150 RBX";
+    msg.classList.add("error");return;
+  }
+  await push(ref(db,`confirmedrbx/${currentUser.uid}`),{
+    amount:150,
+    roblox:robloxUser.value,
+    info:extraInfo.value,
+    status:"pending",
+    time:Date.now()
+  });
+  msg.textContent="Withdrawal submitted";
+  msg.classList.add("success");
+};
 </script>
 
 </body>
