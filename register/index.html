@@ -15,8 +15,7 @@
 body{
   background:#0a0a0a;color:#fff;
   display:flex;justify-content:center;align-items:flex-start;
-  padding:20px 0;
-  overflow:auto;
+  padding:20px 0;overflow:auto;
 }
 .container{
   background:rgba(255,255,255,0.05);
@@ -64,10 +63,10 @@ button.submit-btn{
   font-weight:700;
   cursor:pointer;
   transition:0.2s;
-  background:linear-gradient(135deg,#ff4d4d,#ff6666);
+  background:linear-gradient(135deg,#0f0f0f,#222);
   color:#fff;
 }
-button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77,.3);}
+button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,255,255,.1);}
 .forgot-pass{
   text-align:right;font-size:.85rem;opacity:.7;cursor:pointer;
 }
@@ -198,7 +197,7 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
   <!-- Loader image -->
   <div class="loader-container">
     <div class="loader-glass" id="imageLoader">Loading…</div>
-    <img id="loaderImage" src="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg" />
+    <img id="loaderImage" />
   </div>
 </div>
 
@@ -284,14 +283,19 @@ document.querySelectorAll('.faq-item').forEach(item=>{
   item.addEventListener('click',()=>item.classList.toggle('active'));
 });
 
-// Loader image fade-in
+// Fixed loader image
 const loaderImg = document.getElementById('loaderImage');
 const loaderOverlay = document.getElementById('imageLoader');
-loaderImg.onload = () => {
-  loaderOverlay.style.opacity = 0;
-  setTimeout(() => loaderOverlay.style.display = 'none', 400);
-  loaderImg.style.opacity = 1;
+const imgUrl = "https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg";
+const preImg = new Image();
+preImg.src = imgUrl;
+preImg.onload = ()=>{
+  loaderImg.src = imgUrl;
+  loaderImg.style.opacity=1;
+  loaderOverlay.style.opacity=0;
+  setTimeout(()=>loaderOverlay.style.display='none',400);
 };
+preImg.onerror = ()=>loaderOverlay.textContent="Failed to load image";
 </script>
 </body>
 </html>
