@@ -14,7 +14,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, push, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ===== Firebase Config =====
 const firebaseConfig = {
@@ -31,35 +31,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ===== Helper =====
+// ===== DOM Element =====
 const status = document.getElementById('statusMsg');
 
-// Get URL params
+// Get UID from URL
 const params = new URLSearchParams(window.location.search);
-const referrerUID = params.get('uid');
+const refUID = params.get('uid');
 
-if(!referrerUID){
+if(!refUID){
   status.innerText = "No referral UID found. Redirecting...";
   setTimeout(()=>window.location.href="/", 1000);
 } else {
-  // Get today's timestamp
-  const timestamp = Date.now();
-
-  // Update referral stats in DB
-  const refRef = ref(db, `referrals/${referrerUID}`);
+  const refRef = ref(db, `referrals/${refUID}`);
   get(refRef).then(snap=>{
     const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
 
-    // Increment clicks (this visitor clicked)
     const updates = {
-      clicks: (data.clicks||0)+1
+      clicks: (data.clicks||0) + 1,
+      rbx: (data.rbx||0) + 10,   // Credit 10 RBX per click
+      users: (data.users||0) + 1 // optional: count as 1 user
     };
 
-    // Optionally, give RBX only when new users sign up (you can handle this later)
     update(refRef, updates).then(()=>{
-      status.innerText = "Referral recorded! Redirecting...";
-      
-      // Redirect user to previous page (before /refer) or default home
+      status.innerText = "Referral credited! Redirecting...";
+
+      // Redirect visitor to page before /refer or home
       let redirectTo = "/";
       const prevPath = window.location.pathname.split('/refer')[0];
       if(prevPath && prevPath!=='') redirectTo = prevPath;
@@ -67,8 +63,8 @@ if(!referrerUID){
       setTimeout(()=>window.location.href = redirectTo, 800);
     }).catch(err=>{
       status.innerText = "Error recording referral. Redirecting...";
-      setTimeout(()=>window.location.href="/", 1200);
       console.error(err);
+      setTimeout(()=>window.location.href="/", 1200);
     });
   });
 }
