@@ -120,7 +120,156 @@ textarea{resize:none;height:70px;}
     <span>Refer & Earn</span>
   </div>
 </div>
+<div id="videoContainer" style="position:relative;width:80%;max-width:640px;margin:20px auto;">
+  <video id="player" poster="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg" style="width:100%;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></video>
 
+  <!-- Top right countdown -->
+  <div id="timeCounter" style="position:absolute;top:10px;right:10px;padding:5px 10px;border-radius:12px;background:rgba(0,0,0,0.5);color:#fff;font-size:14px;font-weight:500;">0:00</div>
+
+  <!-- Progress bar -->
+  <div id="progressBarContainer" style="width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden;margin-top:10px;">
+    <div id="progressBar" style="width:0%;height:100%;background:red;"></div>
+  </div>
+
+  <!-- Network slow pill -->
+  <div id="loaderPill" style="display:none;position:absolute;bottom:-25px;width:100%;text-align:center;padding:5px 10px;border-radius:12px;background:rgba(255,0,0,0.2);color:red;font-size:14px;">Network is slow</div>
+
+  <!-- Potential reward -->
+  <div id="potentialReward" style="width:100%;text-align:center;margin-top:10px;padding:10px 0;border-radius:20px;background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);color:#00ffd5;font-weight:600;font-size:16px;">
+    <div style="font-size:28px;font-weight:700;" id="rewardNumber">0</div>
+    <div>Potential reward</div>
+  </div>
+
+  <!-- Start button -->
+  <button id="startBtn" style="margin:15px auto 0;display:block;padding:10px 25px;border:none;border-radius:20px;background:#fff;color:#000;font-weight:600;font-size:16px;cursor:pointer;">Start Watching</button>
+</div>
+
+<!-- Reward popup -->
+<div id="popup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;padding:20px;border-radius:20px;width:250px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);color:#fff;flex-direction:column;">
+  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:60px;margin-bottom:10px;">
+  <div id="earnedRBX" style="font-size:20px;font-weight:700;">You earned 0 RBX</div>
+  <div id="loginMsg" style="color:red;font-size:14px;margin-top:5px;display:none;">Log in to save your RBX</div>
+  <button id="okButton" style="margin-top:15px;padding:8px 20px;border-radius:12px;border:none;background:#007aff;color:#fff;font-size:16px;cursor:pointer;">OK</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase();
+
+// Elements
+const player = document.getElementById('player');
+const timeCounter = document.getElementById('timeCounter');
+const progressBar = document.getElementById('progressBar');
+const rewardNumber = document.getElementById('rewardNumber');
+const potentialReward = document.getElementById('potentialReward');
+const loaderPill = document.getElementById('loaderPill');
+const startBtn = document.getElementById('startBtn');
+const popup = document.getElementById('popup');
+const earnedRBX = document.getElementById('earnedRBX');
+const loginMsg = document.getElementById('loginMsg');
+const okButton = document.getElementById('okButton');
+
+// Videos list
+let videos = [
+  "https://files.catbox.moe/61ny1y.mp4","https://files.catbox.moe/jfapxh.mp4","https://files.catbox.moe/vqvviq.mp4",
+  "https://files.catbox.moe/69l5y3.mp4","https://files.catbox.moe/bjwdo9.mp4","https://files.catbox.moe/sjpa2p.mp4",
+  "https://files.catbox.moe/j9rxi4.mp4","https://files.catbox.moe/8xiynj.mp4","https://files.catbox.moe/vmhugn.mp4",
+  "https://files.catbox.moe/ce1rr5.mp4","https://files.catbox.moe/j5f490.mp4","https://files.catbox.moe/aec00g.mp4",
+  "https://files.catbox.moe/s0covk.mp4","https://files.catbox.moe/gii9kh.mp4","https://files.catbox.moe/cfg3ny.mp4",
+  // +10 more for shuffle
+  "https://files.catbox.moe/abcd1.mp4","https://files.catbox.moe/abcd2.mp4","https://files.catbox.moe/abcd3.mp4",
+  "https://files.catbox.moe/abcd4.mp4","https://files.catbox.moe/abcd5.mp4","https://files.catbox.moe/abcd6.mp4",
+  "https://files.catbox.moe/abcd7.mp4","https://files.catbox.moe/abcd8.mp4","https://files.catbox.moe/abcd9.mp4",
+  "https://files.catbox.moe/abcd10.mp4"
+];
+
+function shuffleVideos() {
+  videos.sort(()=>Math.random()-0.5);
+}
+
+shuffleVideos();
+let currentIndex = 0;
+let robux = 0;
+let currentUser = null;
+
+// Track auth
+onAuthStateChanged(auth, user => currentUser = user);
+
+// Calculate reward
+function calcReward(video) {
+  let sec = Math.ceil(video.duration || 0);
+  if(sec <= 10) return 1;
+  else if(sec <= 20) return 2;
+  else return Math.ceil(sec/10);
+}
+
+// Load video
+function loadVideo(idx){
+  loaderPill.style.display = 'block';
+  player.src = videos[idx];
+  player.load();
+}
+
+player.addEventListener('loadedmetadata', () => {
+  loaderPill.style.display = 'none';
+  rewardNumber.textContent = calcReward(player);
+});
+
+player.addEventListener('timeupdate', () => {
+  if(player.duration){
+    let remaining = Math.ceil(player.duration-player.currentTime);
+    timeCounter.textContent = `${Math.floor(remaining/60)}:${(remaining%60).toString().padStart(2,'0')}`;
+    progressBar.style.width = ((player.currentTime/player.duration)*100)+'%';
+  }
+});
+
+// Start button click
+startBtn.addEventListener('click',()=>{
+  startBtn.style.display='none';
+  player.play();
+});
+
+// On video end
+player.addEventListener('ended', async ()=>{
+  let reward = calcReward(player);
+  robux += reward;
+  earnedRBX.textContent = `You earned ${reward} RBX`;
+  loginMsg.style.display = currentUser ? 'none':'block';
+  popup.style.display='flex';
+});
+
+// Ok popup
+okButton.addEventListener('click',()=>{
+  popup.style.display='none';
+  currentIndex++;
+  if(currentIndex >= videos.length){
+    shuffleVideos();
+    currentIndex = 0;
+  }
+  loadVideo(currentIndex);
+  startBtn.style.display='block';
+  progressBar.style.width='0%';
+  timeCounter.textContent='0:00';
+});
+
+// Initial load
+loadVideo(currentIndex);
+</script>
 <style>
 .top-sections{
   display:flex;
