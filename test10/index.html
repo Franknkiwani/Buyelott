@@ -188,6 +188,55 @@ onAuthStateChanged(auth,user=>{
       </div>
     </div>`;
 });
+// After you fetch and inject login page into #app
+async function loadPage(path) {
+  const mainApp = document.getElementById("app");
+  const res = await fetch(path);
+  mainApp.innerHTML = await res.text();
+
+  // Check if we loaded login page
+  if (path.includes("login")) setupLogin();
+}
+
+// Setup Firebase login events
+function setupLogin() {
+  const auth = getAuth(app); // from your main SPA Firebase setup
+  const loginBtn = document.getElementById("loginBtn");
+  const notice = document.getElementById("loginNotice");
+
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    notice.textContent = "";
+    notice.classList.remove('success');
+
+    if (!email || !password) {
+      notice.textContent = "Please fill in all fields!";
+      return;
+    }
+
+    notice.textContent = "Logging in…";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      notice.textContent = "Login successful!";
+      notice.classList.add('success');
+
+      // Reload header / SPA
+      setTimeout(() => window.location.reload(), 1000);
+
+    } catch (err) {
+      notice.textContent = err.message;
+      notice.classList.remove('success');
+    }
+  });
+
+  // Optional: auto reload if already logged in
+  onAuthStateChanged(auth, user => {
+    if(user) window.location.reload();
+  });
+}
 </script>
 </body>
 </html>
