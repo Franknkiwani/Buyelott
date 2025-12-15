@@ -1,990 +1,193 @@
-<!DOCTYPE html>    <html lang="en">    
-<head>    
-<meta charset="UTF-8">    
-<meta name="viewport" content="width=device-width, initial-scale=1.0">    
-<title>watch4rbx</title>    
-<style>    
-  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system, BlinkMacSystemFont,'SF Pro',sans-serif;}    
-  body{background:#0d0d0f;color:#fff;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column;}    /* Header */
-header{position:sticky;top:0;width:100%;backdrop-filter:blur(12px);background:rgba(15,15,20,0.85);display:flex;justify-content:space-between;align-items:center;padding:15px 20px;z-index:100;}
-header h1{font-size:1.5rem;font-weight:600;}
-.auth-buttons button{margin-left:10px;padding:8px 16px;border-radius:12px;border:none;font-weight:500;cursor:pointer;transition:all 0.2s ease;}
-.login{background:none;border:1px solid #555;color:#fff;}
-.login:hover{background:#222;}
-.signup{background:#0af;color:#fff;}
-.signup:hover{background:#08c;}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCH-4-RBX</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
+body{background:#0a0a0a;color:#fff;height:100vh;}
 
-/* User button glassy */
-.user-info-btn{padding:8px 16px;border:none;border-radius:16px;background:rgba(255,255,255,0.1);backdrop-filter:blur(15px);color:#fff;font-weight:700;display:flex;align-items:center;gap:8px;position:relative;transition:all 0.2s ease;border:1px solid #fff;cursor:pointer;}
-.user-info-btn:hover{background:rgba(255,255,255,0.15);}
-
-/* Top sections */
-.top-sections{display:flex;justify-content:space-between;margin:20px 10px;gap:4%;}
-.section{flex:0 0 48%;background: rgba(25,25,35,0.8);border-radius:18px;padding:25px;text-align:center;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 20px rgba(0,0,0,0.3);transition: transform 0.2s ease, box-shadow 0.2s ease;}
-.section:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.4);}
-.section img{width:36px;height:36px;margin-bottom:10px;}
-.section span{display:block;font-size:0.95rem;font-weight:500;}
-
-/* Watch Section */
-.watch-section{margin:20px 10px;background: rgba(25,25,35,0.85);border-radius:20px;padding:20px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 25px rgba(0,0,0,0.3);text-align:center;}
-.watch-section h2{margin-bottom:15px;font-size:1.3rem;}
-.video-player{width:100%;height:200px;background: linear-gradient(90deg,#111,#222);border-radius:14px;display:flex;justify-content:center;align-items:center;font-size:2rem;color:#0af;margin-bottom:10px;position:relative;}
-.spinner{position:absolute;width:40px;height:40px;border:4px solid #0af;border-top:4px solid transparent;border-radius:50%;animation:spin 1s linear infinite;display:none;}
-.slow-wifi{position:absolute;color:#f00;top:50%;transform:translateY(-50%);display:none;font-weight:700;}
-@keyframes spin{0%{transform: rotate(0deg);}100%{transform: rotate(360deg);}}
-.progress-bar{width:100%;height:6px;background:#222;border-radius:3px;overflow:hidden;margin-bottom:10px;}
-.progress-bar-fill{width:0%;height:100%;background-color:#0af;border-radius:3px;transition:width 0.1s linear;}
-.rbx-display{margin-bottom:10px;font-weight:700;}
-.watch-btn{padding:12px 25px;border:none;border-radius:14px;background-color:#0af;color:#fff;font-size:1rem;cursor:pointer;transition: background 0.2s ease;}
-.watch-btn.stop{background-color:#f00;}
-.watch-btn:hover:not(.stop){background-color:#08c;}
-
-/* Sponsored Ads */
-.sponsored{margin:20px;}
-.sponsored h3{margin-bottom:10px;font-size:1.1rem;color:#aaa;}
-.ad-card{background: rgba(20,20,25,0.6);border-left:4px solid #0af;padding:20px;margin-bottom:15px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;transition: transform 0.2s ease, box-shadow 0.2s ease;}
-.ad-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,0.2);}
-.ad-card img{width:60px;height:60px;border-radius:12px;margin-right:10px;}
-.ad-info{flex:1;}
-.ad-info span{display:block;color:#fff;font-weight:500;}
-.ad-reward{font-size:1.1rem;font-weight:700;color:#0af;}
-
-/* Full-page panels (formerly modals) /
-#loginModal,
-#signupModal,
-#userMenuModal,
-#getRbxModal {
-display: none;                 / hidden by default /
-flex-direction: column;
-justify-content: center;
-align-items: center;
-position: fixed;
-inset: 0;                      / full viewport */
-background: rgba(0,0,0,0.85);
-backdrop-filter: blur(15px);
-z-index: 200;
-padding: 20px;
-overflow-y: auto;
+header{
+  position:sticky;top:0;
+  padding:12px 20px;
+  display:flex;justify-content:space-between;align-items:center;
+  backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.1);
 }
 
-#loginModal .modal-content,
-#signupModal .modal-content,
-#userMenuModal .modal-content,
-#getRbxModal .modal-content {
-background: rgba(255,255,255,0.08);
-backdrop-filter: blur(20px);
-border-radius: 25px;
-width: 95%;
-max-width: 450px;
-padding: 30px;
-text-align: center;
-box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-display: flex;
-flex-direction: column;
-gap: 15px;
+.left{display:flex;align-items:center;gap:10px;}
+.left img{width:26px;}
+.left h1{font-size:1.15rem;letter-spacing:1px;}
+
+.loading{
+  padding:8px 16px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.3);
 }
 
-#loginModal input,
-#signupModal input,
-#userMenuModal input,
-#getRbxModal input {
-width: 100%;
-padding: 12px;
-border-radius: 14px;
-border: none;
-outline: none;
-font-size: 1rem;
-background: rgba(255,255,255,0.05);
-color: #fff;
+/* REGISTER */
+.register-wrap{position:relative;}
+.register-btn{
+  background:linear-gradient(135deg,rgba(0,255,255,.35),rgba(255,0,255,.35));
+  backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,.35);
+  color:#fff;
+  font-weight:700;
+  padding:9px 18px;
+  border-radius:14px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.register-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);
+  transform:translateX(-100%);
+  animation:shine 2.5s infinite;
+}
+@keyframes shine{to{transform:translateX(100%);}}
+
+/* DROPDOWN */
+.register-menu{
+  display:none;
+  position:absolute;
+  right:0;
+  top:120%;
+  background:rgba(15,15,15,.95);
+  border-radius:14px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 25px rgba(0,0,0,.6);
+  z-index:50;
+}
+.register-menu button{
+  width:100%;
+  border:none;
+  padding:10px;
+  margin:4px 0;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.login-btn{background:linear-gradient(135deg,#00ffff,#00b3ff);box-shadow:0 0 12px rgba(0,255,255,.6);}
+.signup-btn{background:linear-gradient(135deg,#ff4fd8,#ff0080);box-shadow:0 0 12px rgba(255,0,128,.6);}
+
+/* USER */
+.user-actions{display:flex;align-items:center;gap:10px;position:relative;}
+.rbx{padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.3);cursor:pointer;}
+.logout-icon{width:22px;height:22px;fill:#ff4d4d;cursor:pointer;}
+.logout-menu{
+  display:none;
+  position:absolute;
+  right:0;
+  top:120%;
+  background:#120000;
+  border:1px solid rgba(255,77,77,.6);
+  border-radius:12px;
+  padding:6px;
+}
+.logout-menu button{
+  background:none;border:none;color:#ff4d4d;
+  font-weight:700;padding:8px 16px;border-radius:10px;cursor:pointer;
 }
 
-#loginModal button,
-#signupModal button,
-#userMenuModal button,
-#getRbxModal button {
-width: 100%;
-padding: 15px;
-border: none;
-border-radius: 16px;
-background-color: #0af;
-color: #fff;
-font-weight: 700;
-font-size: 1rem;
-cursor: pointer;
-transition: background 0.2s;
-}
-
-#loginModal button:hover,
-#signupModal button:hover,
-#userMenuModal button:hover,
-#getRbxModal button:hover {
-background-color: #08c;
-}
-
-/* Toast notifications */
-.toast {
-position: fixed;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%);
-background: rgba(255,255,255,0.15);
-backdrop-filter: blur(12px);
-color: #fff;
-padding: 15px 25px;
-border-radius: 20px;
-font-weight: 700;
-font-size: 1rem;
-opacity: 0;
-transition: opacity 0.3s;
-}
-
-.toast.show {
-opacity: 1;
-}
-/* --- MODALS & POPUPS --- */
-.modal,
-#getRbxModal,
-#loginModal,
-#signupModal,
-#userMenuModal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-  animation: fadeIn 0.2s ease forwards;
-}
-
-/* Modal Box / Container (NO neon, NO glow) */
-.modal-box {
-  width: 90%;
-  max-width: 420px;
-  padding: 0;
-  border-radius: 22px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-
-  display: flex;
-  justify-content: center;
-}
-
-/* Modal Content */
-.modal-content {
-  background: rgba(18,18,18,0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  border-radius: 22px;
-  padding: 28px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  max-height: 90vh;
-  overflow-y: auto;
-
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-}
-
-/* Inputs */
-.modal-content input,
-.modal-content textarea {
-  height: 48px;
-  padding: 0 14px;
-
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-
-  background: rgba(255,255,255,0.05);
-  color: white;
-
-  outline: none;
-  font-size: 14px;
-}
-
-.modal-content input::placeholder {
-  color: rgba(255,255,255,0.45);
-}
-
-.modal-content input:focus {
-  border-color: rgba(10,132,255,0.8);
-  background: rgba(255,255,255,0.08);
-}
-
-/* Close Button */
-.close-btn {
-  align-self: flex-end;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  color: rgba(255,255,255,0.6);
-}
-
-.close-btn:active {
-  transform: scale(0.95);
-  opacity: 0.7;
-}
-
-/* Toast */
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  background: rgba(0,0,0,0.85);
-  color: white;
-
-  padding: 12px 24px;
-  border-radius: 16px;
-
-  font-weight: 600;
-  font-size: 14px;
-
-  z-index: 12000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-#toast.show {
-  opacity: 1;
-}
-
-/* Fade animation */
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
-}
-
-/* Prevent text selection & blue highlight */
-* {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-input, textarea { user-select: text; }
-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: 52px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 0 14px;
-  background: rgba(18,18,18,0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-}
-
-/* --- LOGO + NAME --- */
-.logo-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo-name img {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
-}
-
-.logo-name h1 {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-  color: #ffffff;
-  margin: 0;
-}
-
-/* --- AUTH BUTTONS --- */
-.auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.auth-buttons button {
-  height: 30px;
-  padding: 0 12px;
-
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 999px;
-
-  border: none;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-/* Login (primary text button style) */
-#login-btn {
-  background: transparent;
-  color: #0a84ff;
-}
-
-#login-btn:active {
-  transform: scale(0.95);
-  opacity: 0.7;
-}
-
-/* Signup (filled iOS pill) */
-#signup-btn {
-  background: #0a84ff;
-  color: white;
-}
-
-#signup-btn:active {
-  transform: scale(0.95);
-  opacity: 0.85;
-}
-/* ===== GLASS FULL PAGE MODAL ===== */
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  display: none;
-
-  background:
-    radial-gradient(1200px 600px at top, rgba(255,255,255,0.06), transparent),
-    linear-gradient(180deg, #0b0b0f, #07070a);
-
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-
-  animation: slideUp 0.35s cubic-bezier(.2,.8,.2,1);
-}
-
-/* full panel container */
-.modal-box {
-  width: 100%;
-  height: 100%;
-}
-
-/* glass card content */
-.modal-content {
-  height: 100%;
-  width: 100%;
-  padding: 26px 18px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-  color: #fff;
-}
-
-/* ===== GLASS CLOSE BUTTON ===== */
-.close-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 18px;
-  font-weight: 600;
-
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  color: #fff;
-  cursor: pointer;
-}
-
-.close-btn:active {
-  transform: scale(0.92);
-  opacity: 0.7;
-}
-
-/* ===== CLEAN GLASS INPUTS ===== */
-.modal-content input {
-  height: 50px;
-  width: 100%;
-
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
-
-  padding: 0 16px;
-  font-size: 15px;
-  font-weight: 500;
-
-  background: rgba(255,255,255,0.05);
-  color: #fff;
-
-  outline: none;
-  transition: border 0.2s ease, background 0.2s ease;
-}
-
-.modal-content input::placeholder {
-  color: rgba(255,255,255,0.45);
-  font-weight: 400;
-}
-
-.modal-content input:focus {
-  border: 1px solid rgba(10,132,255,0.8);
-  background: rgba(255,255,255,0.08);
-}
-
-/* ===== PRIMARY ACTION BUTTON ===== */
-.login-btn,
-.signup-btn {
-  height: 50px;
-  border-radius: 18px;
-  border: none;
-
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-
-  background: linear-gradient(180deg, #1c8cff, #0a84ff);
-  color: #fff;
-
-  cursor: pointer;
-}
-
-.login-btn:active,
-.signup-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
-}
-
-/* subtle helper text */
-.modal-content small {
-  text-align: center;
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
-}
-
-/* ===== ANIMATION ===== */
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-/* === IMAGE BORDER FOR LOGIN & SIGNUP === */
-#loginModal .modal-box,
-#signupModal .modal-box {
-  padding: 4px; /* thickness of the border */
-  border-radius: 26px;
-
-  background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU82eYVPr7gZWeSr7NXwfIbFUA-Hk3UvdDq1ko9GJCzs7O8gbX3RjfI-0&s=10");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* keep inner content clean & glassy */
-#loginModal .modal-content,
-#signupModal .modal-content {
-  border-radius: 22px;
-  background: rgba(18,18,18,0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-/* FAQ dropdowns */
-.faq {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.faq details {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 10px 14px;
-}
-
-.faq summary {
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  list-style: none;
-}
-
-.faq summary::-webkit-details-marker {
-  display: none;
-}
-
-.faq details p {
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255,255,255,0.7);
-}
-/* Login button: pink background, black text */
-#login-btn,
-.login {
-    background-color: #ff69b4; /* hot pink */
-    color: #000;               /* black text */
-    border: 1px solid #ff69b4;
-    transition: background 0.2s ease, color 0.2s ease;
-}
-
-/* Hover effect: slightly lighter pink */
-#login-btn:hover,
-.login:hover {
-    background-color: #ff85c1;
-    color: #000; /* keep text black */
-    border-color: #ff85c1;
-}
-
-/* Active / pressed effect */
-#login-btn:active,
-.login:active {
-    transform: scale(0.97);
-    opacity: 0.85;
-}
-/* Normal Start Watching button */
-.watch-btn {
-    background-color: #0af; /* blue */
-    color: #fff;
-    transition: background 0.2s ease;
-}
-
-/* Hover for normal button */
-.watch-btn:hover:not(.stop) {
-    background-color: #08c;
-}
-
-/* Stop Watching state */
-.watch-btn.stop {
-    background-color: #f00; /* red */
-    color: #fff;             /* text stays white for contrast */
-}
-
-/* Optional: hover effect for stop state */
-.watch-btn.stop:hover {
-    background-color: #c00; /* darker red on hover */
-}
+/* APP CONTAINER */
+#app{padding:20px;}
 </style>
-
-</head>    
-<body>  
+</head>
+<body>
 
 <header>
-  <div class="logo-name">
-    <img src="https://img.icons8.com/clouds/100/robux.png" alt="WATCH-4-RBX Logo">
+  <div class="left">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/robux.png">
     <h1>WATCH-4-RBX</h1>
   </div>
-
-  <div id="headerAuth" class="auth-buttons">
-    <button id="login-btn" class="login">Log in</button>
-    <button id="signup-btn" class="signup">Sign up</button>
-  </div>
+  <div id="headerRight"><div class="loading">Loading…</div></div>
 </header>
-<div class="top-sections">
-  <div class="section">
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png">
-    <span>Redeem rewards</span>
-  </div>
 
-  <div class="section">
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png">
-    <span>Refer & Earn</span>
-  </div>
-</div>
-<div class="watch-section">    
-  <h2>Watch & Earn</h2>    
-  <div class="video-player"><div class="spinner"></div><div class="slow-wifi">Slow WiFi</div></div>    
-  <div class="progress-bar"><div class="progress-bar-fill"></div></div>    
-  <div class="rbx-display">0 RBX</div>    
-  <button class="watch-btn">Start Watching</button>    
-</div>  
+<main id="app"></main>
 
-<!-- User Menu Modal -->
-
-<!-- User Menu Modal -->
-<div id="userMenuModal" class="modal">
-  <div class="modal-content user-menu-grid">
-
-    <button class="modal-close"
-      onclick="document.getElementById('userMenuModal').style.display='none'">
-      close
-    </button>
-
-    <h2 style="margin-bottom:10px;">@User Menu</h2>
-
-    <div class="top-sections">
-      <div class="section" id="getRbxBtn">
-        <img src="https://img.icons8.com/ios-filled/50/ffffff/coins.png">
-        <span>Get RBX</span>
-      </div>
-
-      <div class="section" id="logoutBtn">
-        <img src="https://img.icons8.com/ios-filled/50/ffffff/logout-rounded.png">
-        <span>Logout</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-</div> 
-<!-- GET RBX Modal -->    <div id="getRbxModal" class="modal">    
-  <div class="modal-content">    
-    <button class="modal-close" id="closeGetRbx" onclick="document.getElementById('getRbxModal').style.display='none'">close</button>    
-    <h1 id="rbxAmountDisplay">0 RBX</h1>    
-    <div>Available RBX</div>    
-    <input id="robloxUsername" placeholder="Roblox Username">    
-    <input id="emailWithdraw" placeholder="Email">    
-    <input id="withdrawAmount" type="number" placeholder="Amount to withdraw">    
-    <button id="submitWithdraw">Submit</button>    
-    <div id="withdrawNotice" style="margin-top:10px;"></div>    
-  </div>    
-</div>  
-<!-- LOGIN MODAL -->
-<div id="loginModal" class="modal">
-  <div class="modal-box" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU82eYVPr7gZWeSr7NXwfIbFUA-Hk3UvdDq1ko9GJCzs7O8gbX3RjfI-0&s=10'); background-size:cover;">
-    <div class="modal-content">
-      <div class="close-btn" onclick="closeLoginModal()">✕</div>
-
-      <input id="loginEmail" placeholder="Email">
-      <input id="loginPassword" type="password" placeholder="Password">
-
-      <div id="loginNotice" class="notice"></div>
-
-      <button class="login-btn" onclick="loginUser()">Login</button>
-
-      <small onclick="forgotPassword()" style="cursor:pointer">
-        Forgot password?
-      </small>
-
-      <!-- LOGIN FAQs -->
-      <div class="faq">
-        <details>
-          <summary>Is my data protected?</summary>
-          <p>
-            Yes. Your login data is encrypted and never shared.
-            We do not store passwords in plain text.
-          </p>
-        </details>
-
-        <details>
-          <summary>Why do I need to log in?</summary>
-          <p>
-            Login is required to track your watch activity,
-            RBX balance, and withdrawals securely.
-          </p>
-        </details>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- SIGNUP MODAL -->
-<div id="signupModal" class="modal">
-  <div class="modal-box" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU82eYVPr7gZWeSr7NXwfIbFUA-Hk3UvdDq1ko9GJCzs7O8gbX3RjfI-0&s=10'); background-size:cover;">
-    <div class="modal-content">
-      <div class="close-btn" onclick="closeSignupModal()">✕</div>
-
-      <input id="signupEmail" placeholder="Email">
-      <input id="signupPassword" type="password" placeholder="Password">
-
-      <div id="signupNotice" class="notice"></div>
-
-      <button class="signup-btn" onclick="signupUser()">
-        Create Account
-      </button>
-
-      <!-- SIGNUP FAQs -->
-      <div class="faq">
-        <details>
-          <summary>Is watch4robux.com safe?</summary>
-          <p>
-            Yes. watch4robux.com allows users to earn RBX
-            by watching videos. No downloads. No scams.
-          </p>
-        </details>
-
-        <details>
-          <summary>How do I earn RBX?</summary>
-          <p>
-            Simply watch videos on the platform.
-            Your RBX balance updates automatically.
-          </p>
-        </details>
-
-        <details>
-          <summary>What is the minimum withdrawal?</summary>
-          <p>
-            The minimum amount to withdraw is <strong>150 RBX</strong>.
-          </p>
-        </details>
-
-        <details>
-          <summary>Do I need my Roblox password?</summary>
-          <p>
-            No. We will NEVER ask for your Roblox password.
-            Only your Roblox username is required for payouts.
-          </p>
-        </details>
-
-        <details>
-          <summary>When are withdrawals processed?</summary>
-          <p>
-            Withdrawals are reviewed and processed
-            within the stated payout period.
-          </p>
-        </details>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-<div class="toast" id="toast"></div>   
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-/* --- FIREBASE CONFIG --- */
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-  measurementId: "G-LLT6F9WRKH"
+const firebaseConfig={
+ apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+ authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+ databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+ projectId:"itzhoyoo-f9f7e",
+ storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+ messagingSenderId:"1094792075584",
+ appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const headerRight=document.getElementById("headerRight");
+const mainApp=document.getElementById("app");
 
-/* --- ELEMENTS --- */
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const loginEmail = document.getElementById('loginEmail');
-const loginPassword = document.getElementById('loginPassword');
-const loginNotice = document.getElementById('loginNotice');
-const signupEmail = document.getElementById('signupEmail');
-const signupPassword = document.getElementById('signupPassword');
-const signupUsername = document.getElementById('signupUsername');
-const signupNotice = document.getElementById('signupNotice');
-const headerAuth = document.getElementById('headerAuth');
-const logoutBtn = document.getElementById('logoutBtn');
-const getRbxBtn = document.getElementById('getRbxBtn');
-const userMenuModal = document.getElementById('userMenuModal');
-const getRbxModal = document.getElementById('getRbxModal');
-const closeGetRbx = document.getElementById('closeGetRbx');
-const rbxAmountDisplay = document.getElementById('rbxAmountDisplay');
-const robloxUsername = document.getElementById('robloxUsername');
-const emailWithdraw = document.getElementById('emailWithdraw');
-const withdrawAmount = document.getElementById('withdrawAmount');
-const submitWithdraw = document.getElementById('submitWithdraw');
-const withdrawNotice = document.getElementById('withdrawNotice');
-const balanceBtn = document.getElementById('balanceBtn');
-const rbxText = document.getElementById('rbxText');
-const playerContainer = document.querySelector('.video-player');
-const progressBarFill = document.querySelector('.progress-bar-fill');
-const watchBtn = document.querySelector('.watch-btn');
-const rbxDisplay = document.querySelector('.rbx-display');
-const spinner = document.querySelector('.spinner');
-const slowWifi = document.querySelector('.slow-wifi');
-
-/* --- TOAST --- */
-function showToast(msg){
-    const t = document.getElementById('toast');
-    if(!t) return;
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-/* --- MODAL FUNCTIONS --- */
-window.openLoginModal = () => loginModal.style.display = 'flex';
-window.closeLoginModal = () => loginModal.style.display = 'none';
-window.openSignupModal = () => signupModal.style.display = 'flex';
-window.closeSignupModal = () => signupModal.style.display = 'none';
-
-/* --- NOTIFICATION --- */
-function notify(el, msg, success=false){
-  el.textContent = msg;
-  el.className = 'notice ' + (success ? 'success' : 'error');
-}
-
-/* --- HEADER --- */
-function updateHeader(user){
-    if(user){
-        get(ref(db,'users/'+user.uid+'/rbxbalance')).then(snap=>{
-            const balance = snap.exists()?snap.val():0;
-            headerAuth.innerHTML = `<button class="user-info-btn" id="userBtn">@${user.displayName} | ${balance} RBX</button>`;
-            document.getElementById('userBtn').onclick = ()=>userMenuModal.style.display='flex';
-        });
-    } else {
-        headerAuth.innerHTML = `<button class="login">Log in</button><button class="signup">Sign up</button>`;
-        document.querySelector('.login').onclick = openLoginModal;
-        document.querySelector('.signup').onclick = openSignupModal;
-    }
-}
-
-/* --- LOGIN --- */
-window.loginUser = async () => {
-    try{
-        const userCred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-        closeLoginModal();
-        updateHeader(userCred.user);
-        showToast("Logged in!");
-    } catch(e){
-        showToast(e.message);
-    }
+window.toggleRegister = () => {
+  const menu=document.getElementById("registerMenu");
+  if(!menu) return;
+  menu.style.display = menu.style.display==="block"?"none":"block";
 };
 
-/* --- SIGNUP --- */
-window.signupUser = async () => {
-    try{
-        const userCred = await createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value);
-        const user = userCred.user;
-        const username = signupUsername.value || "User"+user.uid.slice(0,4);
-        await updateProfile(user,{displayName: username});
-        await set(ref(db,'users/'+user.uid+'/rbxbalance'),0);
-        closeSignupModal();
-        updateHeader(user);
-        showToast("Signed up!");
-    } catch(e){
-        showToast(e.message);
-    }
+window.toggleLogout=()=>{
+  const menu=document.getElementById("logoutMenu");
+  if(menu) menu.style.display=menu.style.display==="block"?"none":"block";
 };
 
-/* --- PASSWORD RESET --- */
-window.forgotPassword = async () => {
-    if(!loginEmail.value){ notify(loginNotice,"Enter email first"); return; }
-    try{
-        await sendPasswordResetEmail(auth, loginEmail.value);
-        notify(loginNotice,"Reset email sent", true);
-    } catch(e){ notify(loginNotice,e.message); }
+window.doLogout=async()=>{await signOut(auth);location.reload();};
+
+// SPA page loader
+window.loadPage = async (path) => {
+  if(!mainApp) return;
+  mainApp.innerHTML = `<div style="padding:40px;text-align:center;opacity:.7">Loading…</div>`;
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error("Page not found");
+    mainApp.innerHTML = await res.text();
+  } catch (e) {
+    mainApp.innerHTML = `<div style="padding:40px;color:red;text-align:center">Failed to load page</div>`;
+  }
 };
 
-/* --- LOGOUT --- */
-logoutBtn.onclick = async () => {
-    await signOut(auth);
-    userMenuModal.style.display='none';
-    updateHeader(null);
-    showToast("Logged out!");
-};
-
-/* --- USER MENU RBX --- */
-getRbxBtn.onclick = async () => {
-    const user = auth.currentUser;
-    if(!user){ showToast("Login required!"); return; }
-    const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
-    const bal = snap.exists()?snap.val():0;
-    rbxAmountDisplay.textContent = bal+" RBX";
-    withdrawAmount.value=''; robloxUsername.value=''; emailWithdraw.value=''; withdrawNotice.textContent='';
-    userMenuModal.style.display='none';
-    getRbxModal.style.display='flex';
-};
-closeGetRbx.onclick = ()=>getRbxModal.style.display='none';
-submitWithdraw.onclick = async () => {
-    const user = auth.currentUser;
-    if(!user){ showToast("Login required!"); return; }
-    const amt = parseInt(withdrawAmount.value);
-    const u = robloxUsername.value.trim();
-    const e = emailWithdraw.value.trim();
-    const snap = await get(ref(db,'users/'+user.uid+'/rbxbalance'));
-    const bal = snap.exists()?snap.val():0;
-    if(!u||!e||!amt){ withdrawNotice.textContent="All fields required!"; return; }
-    if(amt<150){ withdrawNotice.textContent="Minimum 150 RBX!"; return; }
-    if(amt>bal){ withdrawNotice.textContent="Insufficient RBX!"; return; }
-    await set(ref(db,'users/'+user.uid+'/rbxbalance'),bal-amt);
-    rbxAmountDisplay.textContent = (bal-amt)+" RBX";
-    withdrawNotice.style.color="#0f0";
-    withdrawNotice.textContent = `${amt} RBX requested for @${u}`;
-    showToast(`Withdraw request sent for ${amt} RBX!`);
-};
-
-/* --- WATCH & EARN VIDEO --- */
-const videos=["https://files.catbox.moe/61ny1y.mp4","https://files.catbox.moe/jfapxh.mp4","https://files.catbox.moe/vqvviq.mp4","https://files.catbox.moe/69l5y3.mp4","https://files.catbox.moe/bjwdo9.mp4"];
-let currentIndex=0,totalRBX=0,watching=false;
-let videoEl=document.createElement('video');
-videoEl.src=videos[currentIndex];
-videoEl.width = playerContainer.offsetWidth;
-videoEl.height = playerContainer.offsetHeight;
-videoEl.controls=false;
-videoEl.autoplay=false;
-videoEl.style.borderRadius='14px';
-videoEl.style.backgroundColor='#000';
-playerContainer.appendChild(videoEl);
-
-videoEl.addEventListener('loadedmetadata',()=>{ rbxDisplay.textContent=Math.floor(videoEl.duration/10)+" RBX"; });
-watchBtn.addEventListener('click',()=>{
-    if(!watching){ watching=true; watchBtn.textContent="Stop Watching"; videoEl.play(); }
-    else { watching=false; watchBtn.textContent="Start Watching"; videoEl.pause(); }
-});
-videoEl.addEventListener('timeupdate',()=>{ progressBarFill.style.width = (videoEl.currentTime/videoEl.duration)*100+'%'; });
-videoEl.addEventListener('waiting',()=>{ spinner.style.display='block'; slowWifi.style.display='block'; });
-videoEl.addEventListener('playing',()=>{ spinner.style.display='none'; slowWifi.style.display='none'; });
-videoEl.addEventListener('ended', async ()=>{
-    watching=false;
-    watchBtn.textContent="Start Watching";
-    const earnedRBX = Math.floor(videoEl.duration/10);
-    totalRBX += earnedRBX;
-    rbxDisplay.textContent = earnedRBX+" RBX (Total: "+totalRBX+" RBX)";
-    const user = auth.currentUser;
-    if(user){
-        const balanceRef = ref(db,'users/'+user.uid+'/rbxbalance');
-        const snap = await get(balanceRef);
-        const newBalance = (snap.exists()?snap.val():0) + earnedRBX;
-        await set(balanceRef,newBalance);
-        updateHeader(user);
-    } else showToast("Login to save your RBX!");
-    currentIndex = (currentIndex+1)%videos.length;
-    videoEl.src = videos[currentIndex];
+// Close dropdown when clicking outside
+document.addEventListener("click", e => {
+  const reg=document.querySelector(".register-wrap");
+  const menu=document.getElementById("registerMenu");
+  if(menu && reg && !reg.contains(e.target)) menu.style.display="none";
 });
 
-/* --- AUTH STATE MONITOR --- */
-onAuthStateChanged(auth, user => {
-    if(user){
-        if(!user.displayName) updateProfile(user,{displayName:"User"+user.uid.slice(0,4)});
-        updateHeader(user);
-        balanceBtn.style.display = 'flex';
-        authButtons.style.display = 'none';
-    } else {
-        updateHeader(null);
-        balanceBtn.style.display = 'none';
-        authButtons.style.display = 'flex';
-    }
-});
-watchBtn.addEventListener('click', ()=>{
-    if(!watching){
-        watching = true;
-        watchBtn.textContent = "Stop Watching";
-        watchBtn.classList.add('stop'); // add stop class
-        videoEl.play();
-    } else {
-        watching = false;
-        watchBtn.textContent = "Start Watching";
-        watchBtn.classList.remove('stop'); // remove stop class
-        videoEl.pause();
-    }
+onAuthStateChanged(auth,user=>{
+  if(!user){
+    headerRight.innerHTML=`
+      <div class="register-wrap">
+        <button class="register-btn" onclick="toggleRegister()">REGISTER</button>
+        <div class="register-menu" id="registerMenu">
+          <button class="login-btn" onclick="toggleRegister(); loadPage('login/index.html')">LOGIN</button>
+          <button class="signup-btn" onclick="toggleRegister(); loadPage('signup/index.html')">SIGN UP</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  headerRight.innerHTML=`
+    <div class="user-actions">
+      <div class="rbx">0 RBX / GET</div>
+      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+      </svg>
+      <div class="logout-menu" id="logoutMenu">
+        <button onclick="doLogout()">Logout</button>
+      </div>
+    </div>`;
 });
 </script>
+</body>
+</html>
