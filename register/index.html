@@ -29,15 +29,6 @@ body{
   border-top:3px solid rgba(255,255,255,.2);
 }
 h1{text-align:center;font-size:1.8rem;margin-bottom:5px;}
-.info-banner{
-  font-size:.85rem;
-  text-align:center;
-  padding:10px;
-  background:rgba(255,255,255,0.08);
-  border-radius:12px;
-  opacity:.8;
-  line-height:1.3;
-}
 .tab-switch{
   display:flex;justify-content:center;margin-bottom:15px;gap:10px;
 }
@@ -82,17 +73,44 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
 .msg{text-align:center;font-weight:600;margin-top:5px;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
+
+/* FAQ dropdown */
+.faq-section{
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.faq-item{
+  background:rgba(255,255,255,0.05);
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.2s;
+}
+.faq-item:hover{background:rgba(255,255,255,0.08);}
+.faq-question{
+  padding:12px 15px;
+  font-weight:700;
+}
+.faq-answer{
+  max-height:0;
+  padding:0 15px;
+  overflow:hidden;
+  transition:max-height 0.3s ease, padding 0.3s ease;
+  font-size:.85rem;
+  opacity:0.85;
+}
+.faq-item.active .faq-answer{
+  max-height:300px;
+  padding:10px 15px;
+}
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>WATCH-4-RBX</h1>
-
-  <div class="info-banner">
-    🔒 Your data is safe. All information is stored securely and never shared. <br>
-    💎 Minimum withdrawal: 150 RBX.
-  </div>
 
   <div class="tab-switch">
     <button id="signupTab" class="active" onclick="switchTab('signup')">SIGN UP</button>
@@ -116,6 +134,23 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
     <button type="button" class="submit-btn" onclick="loginUser()">LOGIN</button>
     <div class="msg" id="loginMsg"></div>
   </form>
+
+  <!-- FAQ / Info Section -->
+  <div class="faq-section">
+    <div class="faq-item">
+      <div class="faq-question">🔒 Is my data safe?</div>
+      <div class="faq-answer">Yes! All user information is stored securely and never shared with third parties.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">💎 Minimum withdrawal</div>
+      <div class="faq-answer">You need at least 150 RBX to withdraw your balance for real Robux.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">💻 How is everything saved?</div>
+      <div class="faq-answer">Your progress, earnings, and account info are securely saved in Firebase in real-time.</div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -194,6 +229,11 @@ window.forgotPassword = async ()=>{
     msg.textContent="Password reset email sent!";msg.className="msg success";
   } catch(e){msg.textContent=e.message;msg.className="msg error";}
 };
+
+// FAQ toggle
+document.querySelectorAll('.faq-item').forEach(item=>{
+  item.addEventListener('click',()=>item.classList.toggle('active'));
+});
 </script>
 </body>
 </html>
