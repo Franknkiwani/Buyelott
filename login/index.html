@@ -1,64 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCH-4-RBX | Auth</title>
 <style>
-  /* Glassy card inside SPA */
-  .login-card{
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(15px);
-    border-radius:20px;
-    padding:40px;
-    width:90%;
-    max-width:400px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.6);
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-    margin:50px auto; /* center in SPA container */
-  }
-
-  .login-card h2{
-    text-align:center;
-    margin-bottom:10px;
-    font-size:28px;
-    color:#f0f0f0;
-  }
-
-  input{
-    width:100%;
-    padding:12px 15px;
-    border:none;
-    border-radius:12px;
-    background:rgba(255,255,255,0.1);
-    color:white;
-    font-size:16px;
-  }
-  input::placeholder{color:rgba(255,255,255,0.6);}
-  
-  button{
-    padding:12px;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(90deg,#ff4d6d,#ff9a4d);
-    color:white;
-    font-size:18px;
-    cursor:pointer;
-    transition:0.3s;
-  }
-  button:hover{opacity:0.85;}
-
-  .notice{
-    text-align:center;
-    font-size:14px;
-    color:#ff4d4d;
-    min-height:20px;
-  }
-
-  .success{color:#4cff72;}
+/* GLOBAL */
+* {
+  margin:0;padding:0;box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body{
+  background:#0a0a0a;color:#fff;height:100vh;
+  display:flex;justify-content:center;align-items:center;
+  overflow:hidden;
+}
+.container{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(18px);
+  padding:25px 20px;
+  border-radius:22px;
+  width:95%;
+  max-width:400px;
+  box-shadow:0 0 30px rgba(0,255,150,.15);
+  display:flex;flex-direction:column;gap:15px;
+}
+h1{text-align:center;font-size:1.8rem;margin-bottom:10px;}
+.tab-switch{
+  display:flex;justify-content:center;margin-bottom:15px;gap:10px;
+}
+.tab-switch button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  transition:0.25s;
+  background:rgba(255,255,255,0.05);
+  color:#fff;
+}
+.tab-switch button.active{background:#0f0f0f;border:1px solid rgba(255,255,255,0.2);}
+.tab-switch button:hover:not(.active){background:rgba(255,255,255,0.1);}
+form{
+  display:flex;flex-direction:column;gap:12px;
+}
+input{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,0.35);
+  color:#fff;font-size:1rem;
+}
+input:focus{border-color:#fff;outline:none;}
+button.submit-btn{
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s;
+  background:linear-gradient(135deg,#ff4d4d,#ff6666);
+  color:#fff;
+}
+button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77,.5);}
+.forgot-pass{
+  text-align:right;font-size:.85rem;opacity:.7;cursor:pointer;
+}
+.msg{text-align:center;font-weight:600;margin-top:5px;}
+.error{color:#ff4d4d;}
+.success{color:#00ff99;}
 </style>
+</head>
+<body>
 
-<div class="login-card">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email">
-  <input type="password" id="loginPassword" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <div id="loginNotice" class="notice"></div>
+<div class="container">
+  <h1>WATCH-4-RBX</h1>
+  <div class="tab-switch">
+    <button id="signupTab" class="active" onclick="switchTab('signup')">SIGN UP</button>
+    <button id="loginTab" onclick="switchTab('login')">LOGIN</button>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <form id="signupForm">
+    <input type="text" id="suUsername" placeholder="Username">
+    <input type="email" id="suEmail" placeholder="Email">
+    <input type="password" id="suPassword" placeholder="Password">
+    <button type="button" class="submit-btn" onclick="signupUser()">REGISTER</button>
+    <div class="msg" id="signupMsg"></div>
+  </form>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" style="display:none;">
+    <input type="email" id="liEmail" placeholder="Email">
+    <input type="password" id="liPassword" placeholder="Password">
+    <div class="forgot-pass" onclick="forgotPassword()">Forgot Password?</div>
+    <button type="button" class="submit-btn" onclick="loginUser()">LOGIN</button>
+    <div class="msg" id="loginMsg"></div>
+  </form>
 </div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e",
+  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId:"1094792075584",
+  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// TAB SWITCH
+window.switchTab = (tab)=>{
+  const su = document.getElementById("signupForm");
+  const li = document.getElementById("loginForm");
+  const suTab = document.getElementById("signupTab");
+  const liTab = document.getElementById("loginTab");
+  if(tab==='signup'){
+    su.style.display='flex';li.style.display='none';
+    suTab.classList.add('active');liTab.classList.remove('active');
+  } else {
+    su.style.display='none';li.style.display='flex';
+    suTab.classList.remove('active');liTab.classList.add('active');
+  }
+};
+
+// SIGNUP
+window.signupUser = async ()=>{
+  const username = document.getElementById("suUsername").value;
+  const email = document.getElementById("suEmail").value;
+  const password = document.getElementById("suPassword").value;
+  const msg = document.getElementById("signupMsg");
+  msg.textContent="";msg.className="msg";
+  if(!username || !email || !password){msg.textContent="Fill all fields";msg.className="msg error";return;}
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email,password);
+    await updateProfile(userCred.user,{displayName:username});
+    await set(ref(db,`users/${userCred.user.uid}`),{username:username,rbxbalance:0});
+    msg.textContent="Success! Redirecting...";msg.className="msg success";
+    setTimeout(()=>location.href='../',1500);
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+};
+
+// LOGIN
+window.loginUser = async ()=>{
+  const email = document.getElementById("liEmail").value;
+  const password = document.getElementById("liPassword").value;
+  const msg = document.getElementById("loginMsg");
+  msg.textContent="";msg.className="msg";
+  if(!email || !password){msg.textContent="Fill all fields";msg.className="msg error";return;}
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    msg.textContent="Logged in! Redirecting...";msg.className="msg success";
+    setTimeout(()=>location.href='../',1000);
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+};
+
+// FORGOT PASSWORD
+window.forgotPassword = async ()=>{
+  const email = document.getElementById("liEmail").value;
+  const msg = document.getElementById("loginMsg");
+  msg.textContent="";msg.className="msg";
+  if(!email){msg.textContent="Enter your email";msg.className="msg error";return;}
+  try{
+    await sendPasswordResetEmail(auth,email);
+    msg.textContent="Password reset email sent!";msg.className="msg success";
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+};
+</script>
+</body>
+</html>
