@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCH-4-RBX | Register</title>
+<style>
+*{
+  margin:0;padding:0;box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body{
+  background:#0a0a0a;color:#fff;height:100vh;
+  display:flex;justify-content:center;align-items:center;
+  overflow:hidden;
+}
+.container{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
+  padding:30px 25px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+  box-shadow:0 0 25px rgba(0,255,150,.2);
+  display:flex;flex-direction:column;gap:12px;
+}
+h1{text-align:center;margin-bottom:20px;font-size:1.8rem;}
+input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,0.35);
+  color:#fff;
+  font-size:1rem;
+}
+input:focus{border-color:#fff;outline:none;}
+button{
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s ease;
+}
+.register-btn{
+  background: linear-gradient(135deg,#ff4d4d,#ff6666);
+  color:#fff;
+  box-shadow:0 0 12px rgba(255,77,77,.5);
+}
+.register-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,77,77,.8);}
+.login-btn{
+  background: rgba(255,255,255,0.05);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.3);
+}
+.login-btn:hover{background:rgba(255,255,255,0.1);transform:scale(1.05);}
+.notice{text-align:center;font-size:.85rem;opacity:.7;margin-top:10px;}
+.msg{text-align:center;font-weight:600;margin-top:10px;}
+.error{color:#ff4d4d;}
+.success{color:#00ff99;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>REGISTER</h1>
+  <input id="regEmail" type="email" placeholder="Email">
+  <input id="regUsername" placeholder="Username">
+  <input id="regPassword" type="password" placeholder="Password">
+  <button class="register-btn" onclick="registerUser()">REGISTER</button>
+  <button class="login-btn" onclick="location.href='../login/'">LOGIN</button>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e",
+  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId:"1094792075584",
+  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+
+const msg = document.getElementById("msg");
+
+window.registerUser = async () => {
+  msg.textContent="";
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+  const username = document.getElementById("regUsername").value;
+  if(!email || !password || !username){
+    msg.textContent="Please fill all fields";msg.className="msg error";return;
+  }
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email,password);
+    await updateProfile(userCred.user,{displayName:username});
+    // Initialize RBX balance
+    await set(ref(db,`users/${userCred.user.uid}`),{rbxbalance:0,username:username});
+    msg.textContent="Registration successful! Redirecting...";msg.className="msg success";
+    setTimeout(()=>location.href='../',1500);
+  }catch(e){
+    msg.textContent=e.message;msg.className="msg error";
+  }
+};
+</script>
+</body>
+</html>
