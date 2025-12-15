@@ -1,207 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>DLS Referral Landing</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body, html {
-      margin: 0; padding: 0;
-      height: 100%;
-      background: #0e0e0e;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .container {
-      max-width: 400px;
-      width: 100%;
-      background: #121212;
-      border-radius: 16px;
-      padding: 30px 25px;
-      box-shadow: 0 0 20px rgba(0,204,102,0.6);
-    }
-
-    h1 {
-      margin-bottom: 15px;
-      font-size: 1.8rem;
-      letter-spacing: 2px;
-    }
-
-    .stats {
-      margin: 20px 0;
-      display: flex;
-      justify-content: space-around;
-    }
-
-    .stat {
-      flex: 1;
-      margin: 0 10px;
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 15px 10px;
-      box-shadow: 0 0 10px rgba(0,255,150,0.3);
-    }
-
-    .stat-title {
-      color: #aaa;
-      font-size: 0.85rem;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #00cc66;
-    }
-
-    .cta-btn {
-      margin-top: 30px;
-      background: #00cc66;
-      color: #000;
-      font-weight: 700;
-      font-size: 1.2rem;
-      padding: 16px;
-      border-radius: 14px;
-      border: none;
-      width: 100%;
-      cursor: pointer;
-      transition: background 0.25s ease;
-      user-select: none;
-    }
-
-    .cta-btn:hover {
-      background: #00ff85;
-    }
-
-    .loading {
-      font-size: 1.1rem;
-      color: #666;
-      margin-top: 50px;
-    }
-
-    .error {
-      color: #ff4444;
-      font-weight: 600;
-      margin-top: 30px;
-    }
-
-    @media (max-width: 420px) {
-      .stats {
-        flex-direction: column;
-      }
-      .stat {
-        margin: 10px 0;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral Tracking</title>
+<style>
+  body{display:flex;justify-content:center;align-items:center;height:100vh;background:#0d0d0d;color:white;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
+  .msg{padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;backdrop-filter:blur(12px);}
+</style>
 </head>
 <body>
+<div class="msg" id="statusMsg">Processing referral...</div>
 
-  <div class="container" id="content">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push, get, child, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-    <div class="loading" id="loadingText">Loading referral info...</div>
+// ===== Firebase Config =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
 
-  </div>
+// ===== Initialize Firebase =====
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  <!-- Firebase SDK modular -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+// ===== Helper =====
+const status = document.getElementById('statusMsg');
 
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-      authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-      databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-      projectId: "itzhoyoo-f9f7e",
-      storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-      messagingSenderId: "1094792075584",
-      appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-      measurementId: "G-LLT6F9WRKH"
+// Get URL params
+const params = new URLSearchParams(window.location.search);
+const referrerUID = params.get('uid');
+
+if(!referrerUID){
+  status.innerText = "No referral UID found. Redirecting...";
+  setTimeout(()=>window.location.href="/", 1000);
+} else {
+  // Get today's timestamp
+  const timestamp = Date.now();
+
+  // Update referral stats in DB
+  const refRef = ref(db, `referrals/${referrerUID}`);
+  get(refRef).then(snap=>{
+    const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
+
+    // Increment clicks (this visitor clicked)
+    const updates = {
+      clicks: (data.clicks||0)+1
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    // Optionally, give RBX only when new users sign up (you can handle this later)
+    update(refRef, updates).then(()=>{
+      status.innerText = "Referral recorded! Redirecting...";
+      
+      // Redirect user to previous page (before /refer) or default home
+      let redirectTo = "/";
+      const prevPath = window.location.pathname.split('/refer')[0];
+      if(prevPath && prevPath!=='') redirectTo = prevPath;
 
-    const content = document.getElementById('content');
-    const loadingText = document.getElementById('loadingText');
-
-    // Parse referral ID from URL (after 'refer=')
-    function getReferralId() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('refer') || params.get('id') || null;
-    }
-
-    // Increment clicks safely using transaction
-    async function incrementClicks(uid) {
-      const clicksRef = ref(db, `users/${uid}/stats/clicks`);
-      await runTransaction(clicksRef, current => (current || 0) + 1);
-    }
-
-    // Fetch user info and render
-    async function loadReferral(uid) {
-      try {
-        const userRef = ref(db, `users/${uid}`);
-        const snapshot = await get(userRef);
-
-        if (!snapshot.exists()) {
-          throw new Error("Referral ID not found.");
-        }
-
-        const user = snapshot.val();
-
-        // Increment clicks counter
-        await incrementClicks(uid);
-
-        // Clear loading text
-        loadingText.style.display = 'none';
-
-        // Build referral info UI
-        content.innerHTML = `
-          <h1>Referred by ${user.displayName || "Anonymous"}</h1>
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-title">Views</div>
-              <div class="stat-value">${(user.stats?.views ?? 0)}</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title">Clicks</div>
-              <div class="stat-value">${(user.stats?.clicks ?? 0)}</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title">Earnings</div>
-              <div class="stat-value">$${((user.stats?.earnings ?? 0).toFixed(3))}</div>
-            </div>
-          </div>
-          <button class="cta-btn" id="joinBtn">Join Now</button>
-        `;
-
-        // You can customize the join URL here
-        document.getElementById('joinBtn').addEventListener('click', () => {
-          window.location.href = "/"; // or any landing page or signup
-        });
-
-      } catch (error) {
-        loadingText.style.display = 'none';
-        content.innerHTML = `<div class="error">${error.message}</div>`;
-      }
-    }
-
-    const referralId = getReferralId();
-    if (referralId) {
-      loadReferral(referralId);
-    } else {
-      loadingText.style.display = 'none';
-      content.innerHTML = `<div class="error">No referral ID found in URL.</div>`;
-    }
-  </script>
-
+      setTimeout(()=>window.location.href = redirectTo, 800);
+    }).catch(err=>{
+      status.innerText = "Error recording referral. Redirecting...";
+      setTimeout(()=>window.location.href="/", 1200);
+      console.error(err);
+    });
+  });
+}
+</script>
 </body>
 </html>
