@@ -13,9 +13,10 @@
   -webkit-tap-highlight-color:transparent;
 }
 body{
-  background:#0a0a0a;color:#fff;height:100vh;
+  background:#0a0a0a;color:#fff;
   display:flex;justify-content:center;align-items:flex-start;
-  overflow:auto;padding-top:20px;
+  padding:20px 0;
+  overflow:auto;
 }
 .container{
   background:rgba(255,255,255,0.05);
@@ -137,6 +138,7 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
   font-size:1rem;
   font-weight:700;
   color:#fff;
+  transition:opacity 0.4s ease;
 }
 </style>
 </head>
@@ -195,7 +197,7 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
 
   <!-- Loader image -->
   <div class="loader-container">
-    <div class="loader-glass">Loading…</div>
+    <div class="loader-glass" id="imageLoader">Loading…</div>
     <img id="loaderImage" src="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg" />
   </div>
 </div>
@@ -284,7 +286,12 @@ document.querySelectorAll('.faq-item').forEach(item=>{
 
 // Loader image fade-in
 const loaderImg = document.getElementById('loaderImage');
-loaderImg.onload = ()=>loaderImg.style.opacity=1;
+const loaderOverlay = document.getElementById('imageLoader');
+loaderImg.onload = () => {
+  loaderOverlay.style.opacity = 0;
+  setTimeout(() => loaderOverlay.style.display = 'none', 400);
+  loaderImg.style.opacity = 1;
+};
 </script>
 </body>
 </html>
