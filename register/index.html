@@ -6,156 +6,37 @@
 <title>WATCH-4-RBX | Auth</title>
 <style>
 /* GLOBAL */
-* {
-  margin:0;padding:0;box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
-  user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
-body{
-  background:#0a0a0a;color:#fff;
-  display:flex;justify-content:center;align-items:flex-start;
-  padding:20px 0;overflow:auto;
-}
-.container{
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(18px);
-  padding:20px;
-  border-radius:22px;
-  width:95%;
-  max-width:420px;
-  box-shadow:0 0 25px rgba(255,255,255,.05);
-  display:flex;flex-direction:column;gap:12px;
-  border-top:3px solid rgba(255,255,255,.2);
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;user-select:none;-webkit-tap-highlight-color:transparent;}
+body{background:#0a0a0a;color:#fff;display:flex;justify-content:center;align-items:flex-start;padding:20px 0;overflow:auto;}
+.container{background:rgba(255,255,255,0.05);backdrop-filter:blur(18px);padding:20px;border-radius:22px;width:95%;max-width:420px;box-shadow:0 0 25px rgba(255,255,255,.05);display:flex;flex-direction:column;gap:12px;border-top:3px solid rgba(255,255,255,.2);}
 h1{text-align:center;font-size:1.8rem;margin-bottom:5px;}
-.tab-switch{
-  display:flex;justify-content:center;margin-bottom:15px;gap:10px;
-}
-.tab-switch button{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:700;
-  transition:0.25s;
-  background:rgba(255,255,255,0.05);
-  color:#fff;
-}
+.tab-switch{display:flex;justify-content:center;margin-bottom:15px;gap:10px;}
+.tab-switch button{flex:1;padding:10px;border:none;border-radius:12px;cursor:pointer;font-weight:700;transition:0.25s;background:rgba(255,255,255,0.05);color:#fff;}
 .tab-switch button.active{background:#0f0f0f;border:1px solid rgba(255,255,255,.2);}
 .tab-switch button:hover:not(.active){background:rgba(255,255,255,0.1);}
-form{
-  display:flex;flex-direction:column;gap:12px;
-}
-input{
-  padding:12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(0,0,0,0.35);
-  color:#fff;font-size:1rem;
-}
+form{display:flex;flex-direction:column;gap:12px;}
+input{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,0.35);color:#fff;font-size:1rem;}
 input:focus{border-color:#fff;outline:none;}
-button.submit-btn{
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  font-weight:700;
-  cursor:pointer;
-  transition:0.2s;
-  background:linear-gradient(135deg,#0f0f0f,#222);
-  color:#fff;
-}
-button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,255,255,.1);}
-.forgot-pass{
-  text-align:right;font-size:.85rem;opacity:.7;cursor:pointer;
-}
+button.submit-btn{padding:12px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.6);font-weight:700;cursor:pointer;transition:0.2s;background:rgba(15,15,15,0.8);color:#fff;backdrop-filter:blur(12px);}
+button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(255,255,255,0.2);border-color:#fff;}
+.forgot-pass{text-align:right;font-size:.85rem;opacity:.7;cursor:pointer;}
 .msg{text-align:center;font-weight:600;margin-top:5px;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
 
 /* FAQ dropdown */
-.faq-section{
-  margin-top:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.faq-item{
-  background:rgba(255,255,255,0.05);
-  border-radius:12px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:0.2s;
-  display:flex;flex-direction:column;
-}
+.faq-section{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;cursor:pointer;transition:0.2s;display:flex;flex-direction:column;}
 .faq-item:hover{background:rgba(255,255,255,0.08);}
-.faq-question{
-  padding:12px 15px;
-  font-weight:700;
-  display:flex;align-items:center;gap:8px;
-}
+.faq-question{padding:12px 15px;font-weight:700;display:flex;align-items:center;gap:8px;}
 .faq-question svg{width:18px;height:18px;fill:#fff;flex-shrink:0;}
-.faq-answer{
-  max-height:0;
-  padding:0 15px;
-  overflow:hidden;
-  transition:max-height 0.3s ease, padding 0.3s ease;
-  font-size:.85rem;
-  opacity:0.85;
-}
-.faq-item.active .faq-answer{
-  max-height:300px;
-  padding:10px 15px;
-}
+.faq-answer{max-height:0;padding:0 15px;overflow:hidden;transition:max-height 0.3s ease, padding 0.3s ease;font-size:.85rem;opacity:0.85;}
+.faq-item.active .faq-answer{max-height:300px;padding:10px 15px;}
 
 /* Loader image */
-.loader-container{
-  margin-top:20px;
-  position:relative;
-  width:100%;
-  height:200px;
-  border-radius:18px;
-  overflow:hidden;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(15px);
-  display:flex;justify-content:center;align-items:center;
-}
-.loader-container img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  opacity:0;
-  transition:opacity 0.5s ease;
-}
-.loader-glass{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter:blur(12px);
-  display:flex;justify-content:center;align-items:center;
-  font-size:1rem;
-  font-weight:700;
-  color:#fff;
-  transition:opacity 0.4s ease;
-}
-button.submit-btn {
-  padding:12px;
-  border-radius:12px;
-  border:1.5px solid rgba(255,255,255,0.6); /* white edge */
-  font-weight:700;
-  cursor:pointer;
-  transition:0.2s;
-  background:rgba(15,15,15,0.8); /* dark glassy background */
-  color:#fff;
-  backdrop-filter:blur(12px);
-}
-
-button.submit-btn:hover {
-  transform:scale(1.05);
-  box-shadow:0 0 15px rgba(255,255,255,0.2); /* subtle shine */
-  border-color:#fff;
-}
+.loader-container{margin-top:20px;position:relative;width:100%;height:200px;border-radius:18px;overflow:hidden;background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);display:flex;justify-content:center;align-items:center;}
+.loader-container img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.5s ease;}
+.loader-glass{position:absolute;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;font-size:1rem;font-weight:700;color:#fff;transition:opacity 0.4s ease;}
 </style>
 </head>
 <body>
@@ -228,7 +109,7 @@ const firebaseConfig={
   authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
   databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
   projectId:"itzhoyoo-f9f7e",
-  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  storageBucket:"itzhoyoo-filestorage.app",
   messagingSenderId:"1094792075584",
   appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
@@ -252,6 +133,26 @@ window.switchTab = (tab)=>{
   }
 };
 
+// FRIENDLY ERROR HANDLER
+function getFriendlyError(e){
+  switch(e.code){
+    case "auth/network-request-failed":
+      return "Network issue: your internet might be slow or our servers are down. Try again later.";
+    case "auth/wrong-password":
+      return "Incorrect password. Try again.";
+    case "auth/user-not-found":
+      return "No account found with this email.";
+    case "auth/email-already-in-use":
+      return "This email is already registered.";
+    case "auth/weak-password":
+      return "Password is too weak. Use at least 6 characters.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please wait a few minutes.";
+    default:
+      return e.message || "Operation failed. Try again.";
+  }
+}
+
 // SIGNUP
 window.signupUser = async ()=>{
   const username = document.getElementById("suUsername").value;
@@ -266,7 +167,10 @@ window.signupUser = async ()=>{
     await set(ref(db,`users/${userCred.user.uid}`),{username:username,rbxbalance:0});
     msg.textContent="Success! Redirecting...";msg.className="msg success";
     setTimeout(()=>location.href='../',1500);
-  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+  } catch(e){
+    msg.textContent = getFriendlyError(e);
+    msg.className="msg error";
+  }
 };
 
 // LOGIN
@@ -280,7 +184,10 @@ window.loginUser = async ()=>{
     await signInWithEmailAndPassword(auth,email,password);
     msg.textContent="Logged in! Redirecting...";msg.className="msg success";
     setTimeout(()=>location.href='../',1000);
-  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+  } catch(e){
+    msg.textContent = getFriendlyError(e);
+    msg.className="msg error";
+  }
 };
 
 // FORGOT PASSWORD
@@ -292,7 +199,10 @@ window.forgotPassword = async ()=>{
   try{
     await sendPasswordResetEmail(auth,email);
     msg.textContent="Password reset email sent!";msg.className="msg success";
-  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+  } catch(e){
+    msg.textContent = getFriendlyError(e);
+    msg.className="msg error";
+  }
 };
 
 // FAQ toggle
