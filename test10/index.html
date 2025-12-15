@@ -4,11 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WATCH-4-RBX</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
-body{background:#0a0a0a;color:#fff;height:100vh;}
-
+body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;}
 header{
   position:sticky;top:0;
   padding:12px 20px;
@@ -16,22 +14,29 @@ header{
   backdrop-filter:blur(20px);
   background:rgba(255,255,255,0.05);
   border-bottom:1px solid rgba(255,255,255,0.1);
+  z-index:100;
 }
-
 .left{display:flex;align-items:center;gap:10px;}
 .left img{width:26px;height:26px;}
 .left h1{font-size:1.2rem;}
 
+/* Buttons */
 .loading,.rbx,.register-btn{
   padding:8px 16px;
   border-radius:10px;
   border:1px solid rgba(255,255,255,.3);
 }
-
 .register-btn{
-  background:rgba(255,255,255,.12);
+  background:linear-gradient(135deg, #ff4d4d, #ff6666);
+  color:#fff;
+  font-weight:700;
   cursor:pointer;
-  font-weight:600;
+  box-shadow:0 0 12px rgba(255,77,77,.5);
+  transition:0.3s ease;
+}
+.register-btn:hover{
+  background:linear-gradient(135deg, #ff6666, #ff4d4d);
+  box-shadow:0 0 20px rgba(255,77,77,.8);
 }
 
 .user-actions{
@@ -40,14 +45,12 @@ header{
   gap:10px;
   position:relative;
 }
-
+.rbx{cursor:pointer;box-shadow:0 0 15px rgba(0,255,150,0.3);}
 .logout-icon{
-  width:22px;
-  height:22px;
-  cursor:pointer;
-  fill:#ff4d4d;
+  width:22px;height:22px;cursor:pointer;fill:#ff4d4d;
+  transition:transform 0.2s ease;
 }
-
+.logout-icon:hover{transform:rotate(20deg);}
 .logout-menu{
   display:none;
   position:absolute;
@@ -59,7 +62,6 @@ header{
   padding:6px;
   box-shadow:0 0 15px rgba(255,77,77,.4);
 }
-
 .logout-menu button{
   background:none;
   border:none;
@@ -69,10 +71,9 @@ header{
   border-radius:10px;
   cursor:pointer;
 }
-
 .logout-menu button:hover{background:rgba(255,77,77,.15);}
 
-/* MODAL */
+/* Modal */
 .modal{
   display:none;
   position:fixed;
@@ -83,19 +84,40 @@ header{
   justify-content:center;
   align-items:center;
 }
-
 .modal-box{
+  position:relative;
   width:90%;
   max-width:420px;
   background:#0f0f0f;
   border-radius:18px;
   padding:20px;
+  box-shadow:0 0 30px rgba(0,255,150,.2);
 }
 
-.balance-big{text-align:center;font-size:2.2rem;font-weight:800;}
+/* Close button top left */
+.modal-close{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:#ff4d4d;
+  border:none;
+  color:white;
+  font-weight:600;
+  padding:6px 12px;
+  border-radius:50px;
+  cursor:pointer;
+  font-size:.8rem;
+  transition:0.2s ease;
+}
+.modal-close:hover{
+  background:#ff6666;
+  transform:scale(1.05);
+}
+
+/* Modal content */
+.balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;}
 .sub{text-align:center;opacity:.7;margin-bottom:10px;}
 .notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
-
 input,textarea{
   width:100%;
   background:#000;
@@ -105,9 +127,7 @@ input,textarea{
   color:#fff;
   margin-bottom:10px;
 }
-
 textarea{resize:none;height:70px;}
-
 .confirm{
   width:100%;
   padding:12px;
@@ -118,15 +138,12 @@ textarea{resize:none;height:70px;}
   background:#fff;
   color:#000;
 }
-
 .msg{text-align:center;margin-top:10px;font-weight:600;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
-
 .history{margin-top:15px;font-size:.85rem;opacity:.8;}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -140,19 +157,16 @@ textarea{resize:none;height:70px;}
 <!-- WITHDRAW MODAL -->
 <div class="modal" id="withdrawModal">
   <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">Close</button>
     <div class="balance-big" id="bigBal">0 RBX</div>
     <div class="sub">Available balance</div>
-
     <div class="notice">
       Once you reach <b>150 RBX</b>, you can redeem for real Robux
     </div>
-
     <input id="robloxUser" placeholder="@roblox username">
     <textarea id="extraInfo" placeholder="More info (optional)"></textarea>
-
     <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>
     <div class="msg" id="msg"></div>
-
     <div class="history" id="history"></div>
   </div>
 </div>
@@ -179,13 +193,25 @@ const db=getDatabase(app);
 let currentUser,balance=0;
 const headerRight=document.getElementById("headerRight");
 
+// Modal
 window.openModal=()=>document.getElementById("withdrawModal").style.display="flex";
-window.toggleLogout=()=>document.getElementById("logoutMenu").style.display="block";
+
+// Toggle logout/settings menu
+window.toggleLogout=()=>{
+  const menu=document.getElementById("logoutMenu");
+  menu.style.display = menu.style.display==="block"?"none":"block";
+};
+
+// Logout
 window.doLogout=async()=>{await signOut(auth);location.reload();};
 
+// Auth state
 onAuthStateChanged(auth,async user=>{
   if(!user){
-    headerRight.innerHTML=`<button class="register-btn">REGISTER</button>`;
+    headerRight.innerHTML=`
+      <button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>
+      <button class="register-btn" style="margin-left:10px;" onclick="location.href='login/index.html'">LOGIN</button>
+    `;
     return;
   }
   currentUser=user;
@@ -196,8 +222,8 @@ onAuthStateChanged(auth,async user=>{
   headerRight.innerHTML=`
     <div class="user-actions">
       <div class="rbx" onclick="openModal()">${balance} RBX / GET</div>
-      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
-        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24" fill="#ff4d4d">
+        <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm8.94 4a6.978 6.978 0 00-.34-1.71l2.03-1.57-2-3.46-2.4 1a6.992 6.992 0 00-1.48-.86l-.36-2.53H9.63l-.36 2.53a6.992 6.992 0 00-1.48.86l-2.4-1-2 3.46 2.03 1.57c-.07.55-.07 1.11 0 1.66L2.92 14.3l2 3.46 2.4-1c.44.34.92.62 1.48.86l.36 2.53h4.74l.36-2.53c.56-.24 1.04-.52 1.48-.86l2.4 1 2-3.46-2.03-1.57c.07-.55.07-1.11 0-1.66z"/>
       </svg>
       <div class="logout-menu" id="logoutMenu">
         <button onclick="doLogout()">Logout</button>
@@ -205,6 +231,7 @@ onAuthStateChanged(auth,async user=>{
     </div>`;
 });
 
+// Confirm withdraw
 window.confirmWithdraw=async()=>{
   const msg=document.getElementById("msg");
   msg.className="msg";
@@ -222,8 +249,22 @@ window.confirmWithdraw=async()=>{
   });
   msg.textContent="Withdrawal submitted";
   msg.classList.add("success");
+  robloxUser.value="";
+  extraInfo.value="";
 };
-</script>
 
+// Close modal / menu when clicking outside
+window.onclick = (e) => {
+  const menu = document.getElementById("logoutMenu");
+  const modal = document.getElementById("withdrawModal");
+  if(e.target === modal) modal.style.display="none";
+  if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.style.display="none";
+};
+
+// Close modal with ESC
+window.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.getElementById("withdrawModal").style.display="none";
+});
+</script>
 </body>
 </html>
