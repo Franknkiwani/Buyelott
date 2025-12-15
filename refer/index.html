@@ -5,8 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Referral Tracking</title>
 <style>
-  body{display:flex;justify-content:center;align-items:center;height:100vh;background:#0d0d0d;color:white;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
-  .msg{padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;backdrop-filter:blur(12px);}
+  body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#0d0d0d;
+    color:white;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
+  }
+  .msg{
+    padding:20px;
+    background:rgba(255,255,255,0.1);
+    border-radius:12px;
+    backdrop-filter:blur(12px);
+    text-align:center;
+    max-width:300px;
+  }
 </style>
 </head>
 <body>
@@ -14,7 +29,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, update, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ===== Firebase Config =====
 const firebaseConfig = {
@@ -39,7 +54,6 @@ if(!refUID){
   status.innerText = "No referral UID found. Redirecting...";
   setTimeout(()=>window.location.href="/", 1000);
 } else {
-  // Amount of RBX per referral click
   const rbxPerClick = 10;
 
   // Step 1: Update /referrals stats
@@ -60,15 +74,13 @@ if(!refUID){
       const balRef = ref(db, `users/${refUID}/rbxbalance`);
       const balSnap = await get(balRef);
       const currentBalance = balSnap.exists() ? balSnap.val() : 0;
-      await update(balRef, currentBalance + rbxPerClick);
+
+      await set(balRef, currentBalance + rbxPerClick);
 
       status.innerText = "Referral credited! Redirecting...";
 
       // Step 3: Redirect to page before /refer
-      let redirectTo = "/";
-      const prevPath = window.location.pathname.split('/refer')[0];
-      if(prevPath && prevPath!=='') redirectTo = prevPath;
-
+      const redirectTo = document.referrer || "/";
       setTimeout(()=>window.location.href = redirectTo, 800);
     }).catch(err=>{
       console.error(err);
