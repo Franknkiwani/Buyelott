@@ -37,23 +37,30 @@ const status = document.getElementById('statusMsg');
 // Get UID from URL
 const params = new URLSearchParams(window.location.search);
 const refUID = params.get('uid');
+const rbxPerClick = 10; // RBX to credit per referral
 
 if(!refUID){
   status.innerText = "No referral UID found. Redirecting...";
   setTimeout(()=>window.location.href="/", 1000);
 } else {
-  const refRef = ref(db, `referrals/${refUID}`);
+  const refRef = ref(db, `users/${refUID}/rbxbalance`);
   get(refRef).then(snap=>{
-    const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
+    const currentBalance = snap.exists() ? snap.val() : 0;
+    const newBalance = currentBalance + rbxPerClick;
 
-    const updates = {
-      clicks: (data.clicks||0) + 1,
-      rbx: (data.rbx||0) + 10,   // Credit 10 RBX per click
-      users: (data.users||0) + 1 // optional: count as 1 user
-    };
+    update(refRef, newBalance).then(()=>{
+      // Optionally, also update referral stats
+      const statsRef = ref(db, `referrals/${refUID}`);
+      get(statsRef).then(snap=>{
+        const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
+        update(statsRef, {
+          clicks: (data.clicks||0)+1,
+          rbx: (data.rbx||0)+rbxPerClick,
+          users: (data.users||0)+1
+        });
+      });
 
-    update(refRef, updates).then(()=>{
-      status.innerText = "Referral credited! Redirecting...";
+      status.innerText = `Referral credited! +${rbxPerClick} RBX added to user. Redirecting...`;
 
       // Redirect visitor to page before /refer or home
       let redirectTo = "/";
@@ -62,7 +69,7 @@ if(!refUID){
 
       setTimeout(()=>window.location.href = redirectTo, 800);
     }).catch(err=>{
-      status.innerText = "Error recording referral. Redirecting...";
+      status.innerText = "Error crediting RBX. Redirecting...";
       console.error(err);
       setTimeout(()=>window.location.href="/", 1200);
     });
