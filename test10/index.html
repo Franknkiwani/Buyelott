@@ -19,90 +19,33 @@ header{
 }
 
 .left{display:flex;align-items:center;gap:10px;}
-.left img{width:26px;}
-.left h1{font-size:1.15rem;letter-spacing:1px;}
+.left img{width:26px;height:26px;}
+.left h1{font-size:1.2rem;}
 
-.loading{
+.loading,.rbx,.register-btn{
   padding:8px 16px;
-  border-radius:12px;
+  border-radius:10px;
   border:1px solid rgba(255,255,255,.3);
 }
-
-/* REGISTER BUTTON */
-.register-wrap{position:relative;}
 
 .register-btn{
-  background:linear-gradient(135deg,rgba(0,255,255,.35),rgba(255,0,255,.35));
-  backdrop-filter:blur(15px);
-  border:1px solid rgba(255,255,255,.35);
-  color:#fff;
-  font-weight:700;
-  padding:9px 18px;
-  border-radius:14px;
+  background:rgba(255,255,255,.12);
   cursor:pointer;
+  font-weight:600;
+}
+
+.user-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
   position:relative;
-  overflow:hidden;
-}
-
-.register-btn::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);
-  transform:translateX(-100%);
-  animation:shine 2.5s infinite;
-}
-
-@keyframes shine{to{transform:translateX(100%);}}
-
-/* REGISTER DROPDOWN */
-.register-menu{
-  display:none;
-  position:absolute;
-  right:0;
-  top:120%;
-  background:rgba(15,15,15,.95);
-  border-radius:14px;
-  padding:8px;
-  border:1px solid rgba(255,255,255,.2);
-  backdrop-filter:blur(20px);
-  box-shadow:0 0 25px rgba(0,0,0,.6);
-  z-index:50;
-}
-
-.register-menu button{
-  width:100%;
-  border:none;
-  padding:10px;
-  margin:4px 0;
-  border-radius:12px;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.login-btn{
-  background:linear-gradient(135deg,#00ffff,#00b3ff);
-  box-shadow:0 0 12px rgba(0,255,255,.6);
-}
-
-.signup-btn{
-  background:linear-gradient(135deg,#ff4fd8,#ff0080);
-  box-shadow:0 0 12px rgba(255,0,128,.6);
-}
-
-/* USER ACTIONS */
-.user-actions{display:flex;align-items:center;gap:10px;position:relative;}
-.rbx{
-  padding:8px 14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.3);
-  cursor:pointer;
 }
 
 .logout-icon{
-  width:22px;height:22px;
-  fill:#ff4d4d;
+  width:22px;
+  height:22px;
   cursor:pointer;
+  fill:#ff4d4d;
 }
 
 .logout-menu{
@@ -114,16 +57,20 @@ header{
   border:1px solid rgba(255,77,77,.6);
   border-radius:12px;
   padding:6px;
+  box-shadow:0 0 15px rgba(255,77,77,.4);
 }
 
 .logout-menu button{
-  background:none;border:none;
+  background:none;
+  border:none;
   color:#ff4d4d;
   font-weight:700;
   padding:8px 16px;
   border-radius:10px;
   cursor:pointer;
 }
+
+.logout-menu button:hover{background:rgba(255,77,77,.15);}
 
 /* MODAL */
 .modal{
@@ -132,9 +79,9 @@ header{
   inset:0;
   background:rgba(0,0,0,.7);
   backdrop-filter:blur(15px);
+  z-index:200;
   justify-content:center;
   align-items:center;
-  z-index:200;
 }
 
 .modal-box{
@@ -146,7 +93,8 @@ header{
 }
 
 .balance-big{text-align:center;font-size:2.2rem;font-weight:800;}
-.sub,.notice{text-align:center;opacity:.8;margin-bottom:10px;}
+.sub{text-align:center;opacity:.7;margin-bottom:10px;}
+.notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
 
 input,textarea{
   width:100%;
@@ -158,6 +106,8 @@ input,textarea{
   margin-bottom:10px;
 }
 
+textarea{resize:none;height:70px;}
+
 .confirm{
   width:100%;
   padding:12px;
@@ -165,11 +115,15 @@ input,textarea{
   border-radius:12px;
   font-weight:700;
   cursor:pointer;
+  background:#fff;
+  color:#000;
 }
 
 .msg{text-align:center;margin-top:10px;font-weight:600;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
+
+.history{margin-top:15px;font-size:.85rem;opacity:.8;}
 </style>
 </head>
 
@@ -183,17 +137,23 @@ input,textarea{
   <div id="headerRight"><div class="loading">Loading…</div></div>
 </header>
 
+<!-- WITHDRAW MODAL -->
 <div class="modal" id="withdrawModal">
   <div class="modal-box">
     <div class="balance-big" id="bigBal">0 RBX</div>
     <div class="sub">Available balance</div>
-    <div class="notice">Once you reach <b>150 RBX</b> you can redeem for real Robux</div>
+
+    <div class="notice">
+      Once you reach <b>150 RBX</b>, you can redeem for real Robux
+    </div>
 
     <input id="robloxUser" placeholder="@roblox username">
-    <textarea id="extraInfo" placeholder="More info"></textarea>
+    <textarea id="extraInfo" placeholder="More info (optional)"></textarea>
 
     <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>
     <div class="msg" id="msg"></div>
+
+    <div class="history" id="history"></div>
   </div>
 </div>
 
@@ -203,63 +163,55 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig={
- apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
- authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
- databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
- projectId:"itzhoyoo-f9f7e",
- storageBucket:"itzhoyoo-f9f7e.filestorage.app",
- messagingSenderId:"1094792075584",
- appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e",
+  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId:"1094792075584",
+  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
-let balance=0,currentUser;
-
+let currentUser,balance=0;
 const headerRight=document.getElementById("headerRight");
 
-window.toggleRegister=()=>document.getElementById("registerMenu").style.display^="block";
-window.toggleLogout=()=>document.getElementById("logoutMenu").style.display^="block";
-window.openModal=()=>withdrawModal.style.display="flex";
+window.openModal=()=>document.getElementById("withdrawModal").style.display="flex";
+window.toggleLogout=()=>document.getElementById("logoutMenu").style.display="block";
 window.doLogout=async()=>{await signOut(auth);location.reload();};
 
 onAuthStateChanged(auth,async user=>{
   if(!user){
-    headerRight.innerHTML=`
-    <div class="register-wrap">
-      <button class="register-btn" onclick="toggleRegister()">REGISTER</button>
-      <div class="register-menu" id="registerMenu">
-        <button class="login-btn">LOGIN</button>
-        <button class="signup-btn">SIGN UP</button>
-      </div>
-    </div>`;
+    headerRight.innerHTML=`<button class="register-btn">REGISTER</button>`;
     return;
   }
-
   currentUser=user;
-  const snap=await get(ref(db,`users/${user.uid}/rbxbalance`));
-  balance=snap.exists()?snap.val():0;
-  bigBal.textContent=balance+" RBX";
+  const balSnap=await get(ref(db,`users/${user.uid}/rbxbalance`));
+  balance=balSnap.exists()?balSnap.val():0;
+  document.getElementById("bigBal").innerText=balance+" RBX";
 
   headerRight.innerHTML=`
-  <div class="user-actions">
-    <div class="rbx" onclick="openModal()">${balance} RBX / GET</div>
-    <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
-      <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
-    </svg>
-    <div class="logout-menu" id="logoutMenu">
-      <button onclick="doLogout()">Logout</button>
-    </div>
-  </div>`;
+    <div class="user-actions">
+      <div class="rbx" onclick="openModal()">${balance} RBX / GET</div>
+      <svg class="logout-icon" onclick="toggleLogout()" viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+      </svg>
+      <div class="logout-menu" id="logoutMenu">
+        <button onclick="doLogout()">Logout</button>
+      </div>
+    </div>`;
 });
 
 window.confirmWithdraw=async()=>{
+  const msg=document.getElementById("msg");
   msg.className="msg";
   if(balance<150){
     msg.textContent="You need at least 150 RBX";
-    msg.classList.add("error");return;
+    msg.classList.add("error");
+    return;
   }
   await push(ref(db,`confirmedrbx/${currentUser.uid}`),{
     amount:150,
