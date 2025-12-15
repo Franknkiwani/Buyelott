@@ -1,100 +1,132 @@
-<div class="page-container">
-  <div class="auth-box">
-    <h2>Login</h2>
-    <input id="loginEmail" type="email" placeholder="Email" />
-    <input id="loginPassword" type="password" placeholder="Password" />
-    <div id="loginNotice" style="color:red;font-size:0.85rem;min-height:20px;"></div>
-    <button id="loginBtn">Login</button>
-    <p style="margin-top:10px;font-size:0.85rem;color:rgba(255,255,255,.6);">
-      Don't have an account? 
-      <span style="color:#ff4fd8;cursor:pointer;" onclick="loadPage('/signup/index.html')">Sign Up</span>
-    </p>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>watch4rbx Login</title>
+<style>
+  /* Reset & font */
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
+  body{height:100vh;display:flex;justify-content:center;align-items:center;background:#0d0d0d;color:white;}
+
+  /* Glassy card */
+  .login-card{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:40px;
+    width:90%;
+    max-width:400px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6);
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  .login-card h2{
+    text-align:center;
+    margin-bottom:10px;
+    font-size:28px;
+    color:#f0f0f0;
+  }
+
+  input{
+    width:100%;
+    padding:12px 15px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,0.1);
+    color:white;
+    font-size:16px;
+  }
+  input::placeholder{color:rgba(255,255,255,0.6);}
+  
+  button{
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg,#ff4d6d,#ff9a4d);
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.3s;
+  }
+  button:hover{opacity:0.85;}
+
+  .notice{
+    text-align:center;
+    font-size:14px;
+    color:#ff4d4d;
+    min-height:20px;
+  }
+
+  .success{color:#4cff72;}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPassword" placeholder="Password">
+  <button onclick="loginUser()">Login</button>
+  <div id="loginNotice" class="notice"></div>
 </div>
 
-<style>
-.page-container{display:flex;justify-content:center;align-items:center;height:60vh;}
-.auth-box{
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(15px);
-  padding:30px;
-  border-radius:18px;
-  width:300px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.auth-box h2{text-align:center;color:#0ff;font-weight:700;}
-.auth-box input{
-  padding:10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.3);
-  background:rgba(0,0,0,.2);
-  color:#fff;
-}
-.auth-box input::placeholder{color:rgba(255,255,255,.5);}
-.auth-box button{
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#00ffff,#00b3ff);
-  color:#fff;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 0 10px #00ffff;
-}
-</style>
-
+<!-- Firebase JS -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  // Firebase imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId:"itzhoyoo-f9f7e",
-  storageBucket:"itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId:"1094792075584",
-  appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
-};
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+    authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+    databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+    projectId: "itzhoyoo-f9f7e",
+    storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+    messagingSenderId: "1094792075584",
+    appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+    measurementId: "G-LLT6F9WRKH"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-const loginBtn = document.getElementById("loginBtn");
-const notice = document.getElementById("loginNotice");
-const emailInput = document.getElementById("loginEmail");
-const passInput = document.getElementById("loginPassword");
+  const notice = document.getElementById('loginNotice');
 
-// LOGIN FUNCTION
-loginBtn.addEventListener("click", async () => {
-  const email = emailInput.value.trim();
-  const password = passInput.value.trim();
-  notice.style.color = "red";
+  async function loginUser(){
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-  if (!email || !password) {
-    notice.textContent = "Please enter email and password";
-    return;
+    notice.textContent = ""; // reset notice
+
+    if(!email || !password){
+      notice.textContent = "Please fill in all fields!";
+      return;
+    }
+
+    try{
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      notice.textContent = "Login successful! Redirecting...";
+      notice.classList.add('success');
+      setTimeout(() => {
+        window.location.href = "dashboard.html"; // redirect after login
+      }, 1000);
+    } catch(error){
+      notice.textContent = error.message;
+      notice.classList.remove('success');
+    }
   }
 
-  notice.textContent = "Logging in…";
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    notice.style.color = "green";
-    notice.textContent = "Login successful!";
-    
-    // Reload main page to update header
-    window.location.reload();
-  } catch (err) {
-    notice.style.color = "red";
-    notice.textContent = err.message;
-  }
-});
-
-// Optional: auto redirect if already logged in
-onAuthStateChanged(auth, user => {
-  if(user) window.location.reload();
-});
+  // Optional: auto-redirect if already logged in
+  onAuthStateChanged(auth, user => {
+    if(user){
+      window.location.href = "dashboard.html";
+    }
+  });
 </script>
+</body>
+</html>
