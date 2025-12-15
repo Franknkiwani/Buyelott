@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WATCH-4-RBX</title>
 <style>
-/* Global reset and font */
+/* Global reset & font */
 *{
   margin:0;padding:0;box-sizing:border-box;
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
-  user-select:none; /* disable text selection */
-  -webkit-tap-highlight-color:transparent; /* remove mobile highlight */
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
 body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 header{
@@ -24,30 +24,23 @@ header{
 .left h1{font-size:1.2rem;}
 
 /* Buttons */
-.loading,.rbx,.register-btn{
-  padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.3);
-  cursor:pointer;font-weight:700;transition:0.3s ease;
-}
-/* Dark glassy RBX buttons */
-.rbx {
-  background: rgba(255,255,255,0.05); 
-  border: 1px solid rgba(255,255,255,0.4); 
-  color: #fff;
-  box-shadow:0 0 12px rgba(255,255,255,0.15);
-  backdrop-filter: blur(8px);
-}
-.rbx:hover {transform:scale(1.05); box-shadow:0 0 25px rgba(255,255,255,0.4);}
-.rbx:active {transform:scale(0.95); box-shadow:0 0 15px rgba(255,255,255,0.25);}
-
-/* REGISTER button */
 .register-btn{
   background: rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.4);
-  color:#fff;backdrop-filter: blur(8px);
-  box-shadow:0 0 15px rgba(255,255,255,0.2);
+  border:1px solid rgba(255,255,255,0.3);
+  color:#fff;font-weight:700;padding:8px 16px;border-radius:12px;
+  cursor:pointer;transition:0.3s ease;
 }
-.register-btn:hover {box-shadow:0 0 25px rgba(255,255,255,0.5); transform:scale(1.05);}
-.register-btn:active {transform:scale(0.95);}
+.register-btn:hover{background: rgba(255,255,255,0.1);transform: scale(1.05);}
+.register-btn:active{transform: scale(0.95);}
+
+.rbx {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;font-weight:700;padding:8px 16px;border-radius:12px;
+  cursor:pointer;backdrop-filter: blur(6px);transition:0.2s ease;
+}
+.rbx:hover {transform:scale(1.05);}
+.rbx:active {transform:scale(0.95);}
 
 /* User actions */
 .user-actions{display:flex;align-items:center;gap:10px;position:relative;}
@@ -74,13 +67,11 @@ header{
 .modal-box{
   position:relative;width:90%;max-width:420px;
   background:#0f0f0f;border-radius:18px;padding:20px;
-  box-shadow:0 0 30px rgba(255,255,255,.15);
 }
 
 /* Close button SVG top-left */
 .modal-close{
-  position:absolute;top:10px;left:10px;
-  background:none;border:none;padding:0;cursor:pointer;
+  position:absolute;top:10px;left:10px;background:none;border:none;padding:0;cursor:pointer;
 }
 .modal-close svg{width:28px;height:28px;transition:0.2s ease;}
 .modal-close svg:hover{transform:scale(1.1);}
@@ -92,16 +83,15 @@ header{
 .notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
 input,textarea{
   width:100%;background: rgba(0,0,0,0.3);
-  border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px;
-  color:#fff;margin-bottom:10px;box-shadow:0 0 8px rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px;color:#fff;margin-bottom:10px;
 }
-input:focus,textarea:focus{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,0.3);outline:none;}
+input:focus,textarea:focus{border-color:#fff;outline:none;}
 textarea{resize:none;height:70px;}
 .confirm{
   width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;
   cursor:pointer;background:#fff;color:#000;transition:0.2s;
 }
-.confirm:hover{transform:scale(1.03);box-shadow:0 0 15px rgba(255,255,255,.5);}
+.confirm:hover{transform:scale(1.03);}
 .msg{text-align:center;margin-top:10px;font-weight:600;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
@@ -115,7 +105,9 @@ textarea{resize:none;height:70px;}
     <img src="https://img.icons8.com/ios-filled/50/ffffff/robux.png">
     <h1>WATCH-4-RBX</h1>
   </div>
-  <div id="headerRight"><div class="loading">Loading…</div></div>
+  <div id="headerRight">
+    <button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>
+  </div>
 </header>
 
 <!-- WITHDRAW MODAL -->
@@ -140,7 +132,7 @@ textarea{resize:none;height:70px;}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -170,10 +162,7 @@ window.doLogout=async()=>{await signOut(auth);location.reload();};
 
 onAuthStateChanged(auth,async user=>{
   if(!user){
-    headerRight.innerHTML=`
-      <button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>
-      <button class="register-btn" style="margin-left:10px;" onclick="location.href='login/index.html'">LOGIN</button>
-    `;
+    headerRight.innerHTML=`<button class="register-btn" onclick="location.href='signup/index.html'">REGISTER</button>`;
     return;
   }
   currentUser=user;
