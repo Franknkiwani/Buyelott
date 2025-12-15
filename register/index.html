@@ -87,12 +87,15 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
   overflow:hidden;
   cursor:pointer;
   transition:0.2s;
+  display:flex;flex-direction:column;
 }
 .faq-item:hover{background:rgba(255,255,255,0.08);}
 .faq-question{
   padding:12px 15px;
   font-weight:700;
+  display:flex;align-items:center;gap:8px;
 }
+.faq-question svg{width:18px;height:18px;fill:#fff;flex-shrink:0;}
 .faq-answer{
   max-height:0;
   padding:0 15px;
@@ -104,6 +107,36 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
 .faq-item.active .faq-answer{
   max-height:300px;
   padding:10px 15px;
+}
+
+/* Loader image */
+.loader-container{
+  margin-top:20px;
+  position:relative;
+  width:100%;
+  height:200px;
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
+  display:flex;justify-content:center;align-items:center;
+}
+.loader-container img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+.loader-glass{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(12px);
+  display:flex;justify-content:center;align-items:center;
+  font-size:1rem;
+  font-weight:700;
+  color:#fff;
 }
 </style>
 </head>
@@ -138,19 +171,33 @@ button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77
   <!-- FAQ / Info Section -->
   <div class="faq-section">
     <div class="faq-item">
-      <div class="faq-question">🔒 Is my data safe?</div>
+      <div class="faq-question">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.5 15h-1v-1h1v1zm0-3h-1V7h1v7z"/></svg>
+        Is my data safe?
+      </div>
       <div class="faq-answer">Yes! All user information is stored securely and never shared with third parties.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-question">💎 Minimum withdrawal</div>
+      <div class="faq-question">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.421 0 10-4.579 10-10s-4.579-10-10-10-10 4.579-10 10 4.579 10 10 10zm0-18c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8zm-.5 11h1v1h-1v-1zm0-7h1v6h-1V8z"/></svg>
+        Minimum withdrawal
+      </div>
       <div class="faq-answer">You need at least 150 RBX to withdraw your balance for real Robux.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-question">💻 How is everything saved?</div>
+      <div class="faq-question">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.206 0 4-1.794 4-4s-1.794-4-4-4-4 1.794-4 4 1.794 4 4 4zm0 2c-2.67 0-8 1.337-8 4v2h16v-2c0-2.663-5.33-4-8-4z"/></svg>
+        How is everything saved?
+      </div>
       <div class="faq-answer">Your progress, earnings, and account info are securely saved in Firebase in real-time.</div>
     </div>
   </div>
 
+  <!-- Loader image -->
+  <div class="loader-container">
+    <div class="loader-glass">Loading…</div>
+    <img id="loaderImage" src="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg" />
+  </div>
 </div>
 
 <script type="module">
@@ -234,6 +281,10 @@ window.forgotPassword = async ()=>{
 document.querySelectorAll('.faq-item').forEach(item=>{
   item.addEventListener('click',()=>item.classList.toggle('active'));
 });
+
+// Loader image fade-in
+const loaderImg = document.getElementById('loaderImage');
+loaderImg.onload = ()=>loaderImg.style.opacity=1;
 </script>
 </body>
 </html>
