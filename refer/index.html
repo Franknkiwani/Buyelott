@@ -14,7 +14,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, update, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ===== Firebase Config =====
 const firebaseConfig = {
@@ -31,48 +31,54 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ===== DOM Element =====
 const status = document.getElementById('statusMsg');
-
-// Get UID from URL
 const params = new URLSearchParams(window.location.search);
 const refUID = params.get('uid');
-const rbxPerClick = 10; // RBX to credit per referral
 
 if(!refUID){
   status.innerText = "No referral UID found. Redirecting...";
   setTimeout(()=>window.location.href="/", 1000);
 } else {
-  const refRef = ref(db, `users/${refUID}/rbxbalance`);
+  // Amount of RBX per referral click
+  const rbxPerClick = 10;
+
+  // Step 1: Update /referrals stats
+  const refRef = ref(db, `referrals/${refUID}`);
   get(refRef).then(snap=>{
-    const currentBalance = snap.exists() ? snap.val() : 0;
-    const newBalance = currentBalance + rbxPerClick;
+    const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
 
-    update(refRef, newBalance).then(()=>{
-      // Optionally, also update referral stats
-      const statsRef = ref(db, `referrals/${refUID}`);
-      get(statsRef).then(snap=>{
-        const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
-        update(statsRef, {
-          clicks: (data.clicks||0)+1,
-          rbx: (data.rbx||0)+rbxPerClick,
-          users: (data.users||0)+1
-        });
-      });
+    const updates = {
+      clicks: (data.clicks||0) + 1,
+      rbx: (data.rbx||0) + rbxPerClick,
+      users: (data.users||0) + 1
+    };
 
-      status.innerText = `Referral credited! +${rbxPerClick} RBX added to user. Redirecting...`;
+    update(refRef, updates).then(async () => {
+      status.innerText = "Referral recorded! Updating balance...";
 
-      // Redirect visitor to page before /refer or home
+      // Step 2: Add RBX to /users/{uid}/rbxbalance
+      const balRef = ref(db, `users/${refUID}/rbxbalance`);
+      const balSnap = await get(balRef);
+      const currentBalance = balSnap.exists() ? balSnap.val() : 0;
+      await update(balRef, currentBalance + rbxPerClick);
+
+      status.innerText = "Referral credited! Redirecting...";
+
+      // Step 3: Redirect to page before /refer
       let redirectTo = "/";
       const prevPath = window.location.pathname.split('/refer')[0];
       if(prevPath && prevPath!=='') redirectTo = prevPath;
 
       setTimeout(()=>window.location.href = redirectTo, 800);
     }).catch(err=>{
-      status.innerText = "Error crediting RBX. Redirecting...";
       console.error(err);
+      status.innerText = "Error updating referral. Redirecting...";
       setTimeout(()=>window.location.href="/", 1200);
     });
+  }).catch(err=>{
+    console.error(err);
+    status.innerText = "Error fetching referral. Redirecting...";
+    setTimeout(()=>window.location.href="/", 1200);
   });
 }
 </script>
