@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WATCH-4-RBX | Register</title>
+<title>WATCH-4-RBX | Auth</title>
 <style>
-*{
+/* GLOBAL */
+* {
   margin:0;padding:0;box-sizing:border-box;
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
   user-select:none;
@@ -18,47 +19,57 @@ body{
 }
 .container{
   background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(15px);
-  padding:30px 25px;
-  border-radius:20px;
-  width:90%;
+  backdrop-filter:blur(18px);
+  padding:25px 20px;
+  border-radius:22px;
+  width:95%;
   max-width:400px;
-  box-shadow:0 0 25px rgba(0,255,150,.2);
+  box-shadow:0 0 30px rgba(0,255,150,.15);
+  display:flex;flex-direction:column;gap:15px;
+}
+h1{text-align:center;font-size:1.8rem;margin-bottom:10px;}
+.tab-switch{
+  display:flex;justify-content:center;margin-bottom:15px;gap:10px;
+}
+.tab-switch button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  transition:0.25s;
+  background:rgba(255,255,255,0.05);
+  color:#fff;
+}
+.tab-switch button.active{background:#0f0f0f;border:1px solid rgba(255,255,255,0.2);}
+.tab-switch button:hover:not(.active){background:rgba(255,255,255,0.1);}
+form{
   display:flex;flex-direction:column;gap:12px;
 }
-h1{text-align:center;margin-bottom:20px;font-size:1.8rem;}
 input{
-  width:100%;
   padding:12px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,.2);
   background:rgba(0,0,0,0.35);
-  color:#fff;
-  font-size:1rem;
+  color:#fff;font-size:1rem;
 }
 input:focus{border-color:#fff;outline:none;}
-button{
+button.submit-btn{
   padding:12px;
   border-radius:12px;
   border:none;
   font-weight:700;
   cursor:pointer;
-  transition:0.2s ease;
-}
-.register-btn{
-  background: linear-gradient(135deg,#ff4d4d,#ff6666);
+  transition:0.2s;
+  background:linear-gradient(135deg,#ff4d4d,#ff6666);
   color:#fff;
-  box-shadow:0 0 12px rgba(255,77,77,.5);
 }
-.register-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,77,77,.8);}
-.login-btn{
-  background: rgba(255,255,255,0.05);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.3);
+button.submit-btn:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,77,77,.5);}
+.forgot-pass{
+  text-align:right;font-size:.85rem;opacity:.7;cursor:pointer;
 }
-.login-btn:hover{background:rgba(255,255,255,0.1);transform:scale(1.05);}
-.notice{text-align:center;font-size:.85rem;opacity:.7;margin-top:10px;}
-.msg{text-align:center;font-weight:600;margin-top:10px;}
+.msg{text-align:center;font-weight:600;margin-top:5px;}
 .error{color:#ff4d4d;}
 .success{color:#00ff99;}
 </style>
@@ -66,18 +77,34 @@ button{
 <body>
 
 <div class="container">
-  <h1>REGISTER</h1>
-  <input id="regEmail" type="email" placeholder="Email">
-  <input id="regUsername" placeholder="Username">
-  <input id="regPassword" type="password" placeholder="Password">
-  <button class="register-btn" onclick="registerUser()">REGISTER</button>
-  <button class="login-btn" onclick="location.href='../login/'">LOGIN</button>
-  <div class="msg" id="msg"></div>
+  <h1>WATCH-4-RBX</h1>
+  <div class="tab-switch">
+    <button id="signupTab" class="active" onclick="switchTab('signup')">SIGN UP</button>
+    <button id="loginTab" onclick="switchTab('login')">LOGIN</button>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <form id="signupForm">
+    <input type="text" id="suUsername" placeholder="Username">
+    <input type="email" id="suEmail" placeholder="Email">
+    <input type="password" id="suPassword" placeholder="Password">
+    <button type="button" class="submit-btn" onclick="signupUser()">REGISTER</button>
+    <div class="msg" id="signupMsg"></div>
+  </form>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" style="display:none;">
+    <input type="email" id="liEmail" placeholder="Email">
+    <input type="password" id="liPassword" placeholder="Password">
+    <div class="forgot-pass" onclick="forgotPassword()">Forgot Password?</div>
+    <button type="button" class="submit-btn" onclick="loginUser()">LOGIN</button>
+    <div class="msg" id="loginMsg"></div>
+  </form>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 const firebaseConfig={
@@ -90,30 +117,66 @@ const firebaseConfig={
   appId:"1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const msg = document.getElementById("msg");
-
-window.registerUser = async () => {
-  msg.textContent="";
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
-  const username = document.getElementById("regUsername").value;
-  if(!email || !password || !username){
-    msg.textContent="Please fill all fields";msg.className="msg error";return;
+// TAB SWITCH
+window.switchTab = (tab)=>{
+  const su = document.getElementById("signupForm");
+  const li = document.getElementById("loginForm");
+  const suTab = document.getElementById("signupTab");
+  const liTab = document.getElementById("loginTab");
+  if(tab==='signup'){
+    su.style.display='flex';li.style.display='none';
+    suTab.classList.add('active');liTab.classList.remove('active');
+  } else {
+    su.style.display='none';li.style.display='flex';
+    suTab.classList.remove('active');liTab.classList.add('active');
   }
+};
+
+// SIGNUP
+window.signupUser = async ()=>{
+  const username = document.getElementById("suUsername").value;
+  const email = document.getElementById("suEmail").value;
+  const password = document.getElementById("suPassword").value;
+  const msg = document.getElementById("signupMsg");
+  msg.textContent="";msg.className="msg";
+  if(!username || !email || !password){msg.textContent="Fill all fields";msg.className="msg error";return;}
   try{
     const userCred = await createUserWithEmailAndPassword(auth,email,password);
     await updateProfile(userCred.user,{displayName:username});
-    // Initialize RBX balance
-    await set(ref(db,`users/${userCred.user.uid}`),{rbxbalance:0,username:username});
-    msg.textContent="Registration successful! Redirecting...";msg.className="msg success";
+    await set(ref(db,`users/${userCred.user.uid}`),{username:username,rbxbalance:0});
+    msg.textContent="Success! Redirecting...";msg.className="msg success";
     setTimeout(()=>location.href='../',1500);
-  }catch(e){
-    msg.textContent=e.message;msg.className="msg error";
-  }
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+};
+
+// LOGIN
+window.loginUser = async ()=>{
+  const email = document.getElementById("liEmail").value;
+  const password = document.getElementById("liPassword").value;
+  const msg = document.getElementById("loginMsg");
+  msg.textContent="";msg.className="msg";
+  if(!email || !password){msg.textContent="Fill all fields";msg.className="msg error";return;}
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    msg.textContent="Logged in! Redirecting...";msg.className="msg success";
+    setTimeout(()=>location.href='../',1000);
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
+};
+
+// FORGOT PASSWORD
+window.forgotPassword = async ()=>{
+  const email = document.getElementById("liEmail").value;
+  const msg = document.getElementById("loginMsg");
+  msg.textContent="";msg.className="msg";
+  if(!email){msg.textContent="Enter your email";msg.className="msg error";return;}
+  try{
+    await sendPasswordResetEmail(auth,email);
+    msg.textContent="Password reset email sent!";msg.className="msg success";
+  } catch(e){msg.textContent=e.message;msg.className="msg error";}
 };
 </script>
 </body>
