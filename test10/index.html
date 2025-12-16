@@ -271,7 +271,135 @@ textarea{resize:none;height:70px;}
     <button id="donateConfirm" class="confirm" style="width:100%;">Donate</button>
   </div>
 </div>
-  
+  <!-- Loading Screen -->
+<div id="loadingScreen" style="
+  position:fixed;
+  inset:0;
+  background:rgba(10,10,10,0.95);
+  backdrop-filter:blur(12px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  color:#fff;
+  overflow:hidden;
+">
+  <div style="
+    padding:24px 36px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.2);
+    backdrop-filter:blur(20px);
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:center;
+  ">
+    <img id="logoImg" alt="Logo" style="width:60px; height:60px; visibility:hidden;"/>
+    <span style="font-size:1.2rem; font-weight:700;">WATCH-4-RBX</span>
+    <div class="dots" style="display:flex; gap:6px;">
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite;
+      "></span>
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite 0.2s;
+      "></span>
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite 0.4s;
+      "></span>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes blink{
+  0%, 80%, 100%{ opacity:0.2; }
+  40%{ opacity:1; }
+}
+</style>
+
+<script>
+const loader = document.getElementById('loadingScreen');
+const logo = document.getElementById('logoImg');
+
+// Prevent scrolling while loader is visible
+document.body.style.overflow = 'hidden';
+
+const cachedLogo = localStorage.getItem('logoSrc');
+
+function showLogo() {
+  logo.style.visibility = 'visible';
+}
+
+// Load logo
+if(cachedLogo){
+  logo.src = cachedLogo;
+  showLogo();
+}else{
+  const tempImg = new Image();
+  tempImg.src = 'https://img.icons8.com/ios-filled/100/ffffff/robux.png';
+  tempImg.onload = () => {
+    logo.src = tempImg.src;
+    localStorage.setItem('logoSrc', tempImg.src);
+    showLogo();
+  };
+}
+
+// Wait for all images in the page to load before hiding loader
+function imagesLoaded() {
+  const imgs = Array.from(document.images);
+  return Promise.all(imgs.map(img => {
+    if(img.complete) return Promise.resolve();
+    return new Promise(res => img.onload = img.onerror = res);
+  }));
+}
+
+// Wait for everything to finish loading
+window.addEventListener('load', async () => {
+  await imagesLoaded();
+  setTimeout(() => {
+    loader.style.transition = 'opacity 0.5s';
+    loader.style.opacity = 0;
+    setTimeout(() => {
+      loader.remove();
+      document.body.style.overflow = ''; // restore scrolling
+    }, 500);
+  }, 300); // small delay for smooth fade
+});
+</script>
+</div>
+
+<style>
+  .dots span{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    margin:0 6px;
+    background:#fff;
+    border-radius:50%;
+    animation: bounce 1s infinite;
+  }
+  .dots span:nth-child(2){animation-delay:0.2s;}
+  .dots span:nth-child(3){animation-delay:0.4s;}
+
+  @keyframes bounce{
+    0%, 80%, 100% {transform: scale(0);}
+    40% {transform: scale(1);}
+  }
+
+  #loadingScreen.fadeOut{
+    opacity:0;
+    transition:opacity 0.5s ease;
+    pointer-events:none;
+  }
+</style>
+
+
 <style>  
 .top-sections{  
   display:flex;  
@@ -588,7 +716,26 @@ window.addEventListener('keydown', e => {
     "https://files.catbox.moe/vqvviq.mp4",
     "https://files.catbox.moe/69l5y3.mp4",
     "https://files.catbox.moe/bjwdo9.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    "https://files.catbox.moe/sjpa2p.mp4",
+    "https://files.catbox.moe/j9rxi4.mp4",
+    "https://files.catbox.moe/8xiynj.mp4",
+    "https://files.catbox.moe/vmhugn.mp4",
+    "https://files.catbox.moe/ce1rr5.mp4",
+    "https://files.catbox.moe/j5f490.mp4",
+    "https://files.catbox.moe/aec00g.mp4",
+    "https://files.catbox.moe/s0covk.mp4",
+    "https://files.catbox.moe/gii9kh.mp4",
+    "https://files.catbox.moe/cfg3ny.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
   ];
 
   let shuffledVideos = [...originalVideos].sort(() => Math.random() - 0.5);
@@ -970,6 +1117,82 @@ loadFAQ();
   window.confirmWithdraw = () => redirectWithdraw();
 
 })();
+
+const loader = document.getElementById('loadingScreen');
+const logo = document.getElementById('logoImg');
+
+// Disable scrolling while loader is visible
+document.body.style.overflow = 'hidden';
+
+// Load logo (cache in localStorage)
+const cachedLogo = localStorage.getItem('logoSrc');
+if (cachedLogo) {
+  logo.src = cachedLogo;
+} else {
+  logo.src = 'https://img.icons8.com/ios-filled/100/ffffff/robux.png';
+  logo.onload = () => localStorage.setItem('logoSrc', logo.src);
+}
+
+// Keep track of all async tasks
+let asyncTasks = [];
+
+// Firebase RBX balance (if logged in)
+asyncTasks.push(new Promise(resolve => {
+  const user = auth.currentUser;
+  if (!user) return resolve();
+  const balRef = ref(db, `users/${user.uid}/rbxbalance`);
+  onValue(balRef, snap => resolve());
+}));
+
+// Firebase top earners
+asyncTasks.push(new Promise(resolve => {
+  const usersRef = ref(db, 'users');
+  onValue(usersRef, snap => resolve());
+}));
+
+// Firebase top comments
+asyncTasks.push(new Promise(resolve => {
+  const commentsRef = ref(db, 'comments');
+  onValue(commentsRef, snap => resolve());
+}));
+
+// Preload images (avatars, top profiles)
+asyncTasks.push(new Promise(resolve => {
+  const images = [
+    'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png',
+    'https://www.gamepur.com/wp-content/uploads/2022/10/03141118/Rich-Roblox-Characters-Avatar-Design-Idea-Outfit.jpg?w=1200',
+    'https://art.ngfiles.com/images/2793000/2793270_fotheplant_roblox-noob-plushie.png?f1666352152'
+  ];
+  let loaded = 0;
+  images.forEach(src => {
+    const img = new Image();
+    img.src = src;
+    img.onload = img.onerror = () => {
+      loaded++;
+      if (loaded === images.length) resolve();
+    };
+  });
+}));
+
+// Preload first video metadata
+asyncTasks.push(new Promise(resolve => {
+  const video = document.getElementById('player');
+  if (!video) return resolve();
+  if (video.readyState >= 1) return resolve(); // already loaded
+  video.onloadedmetadata = () => resolve();
+}));
+
+// Wait for all tasks to complete
+Promise.all(asyncTasks).then(() => {
+  // small delay for smooth fade
+  setTimeout(() => {
+    loader.classList.add('fadeOut');
+    setTimeout(() => {
+      loader.remove();
+      document.body.style.overflow = ''; // re-enable scrolling
+    }, 500);
+  }, 500);
+});
 </script>  
 </body>  
 </html>
