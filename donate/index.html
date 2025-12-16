@@ -17,6 +17,15 @@
     overflow-y:auto;
   }
 
+  .loading {
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background:#0d0d0d;
+    display:flex; justify-content:center; align-items:center;
+    font-size:20px; font-weight:bold;
+    z-index:100;
+  }
+
   .profile {
     display:flex;
     flex-direction:column;
@@ -75,7 +84,12 @@
     transition:0.2s;
   }
 
-  button:hover { transform:scale(1.05); }
+  button:disabled {
+    background:#222;
+    cursor:not-allowed;
+  }
+
+  button:hover:not(:disabled) { transform:scale(1.05); }
 
   .glass-card {
     width:100%;
@@ -89,23 +103,34 @@
     padding:32px 0;
   }
 
+  .stats {
+    margin-top:16px;
+    font-size:16px;
+    color:#ccc;
+    text-align:center;
+    width:90%;
+  }
+
 </style>
 </head>
 <body>
 
-<div class="profile glass-card">
+<div class="loading" id="loadingScreen">Loading...</div>
+
+<div class="profile glass-card" id="donateCard" style="display:none;">
   <img src="" alt="Profile" class="avatar" id="recipientAvatar">
   <div class="position" id="recipientPosition">#1</div>
   <div class="username" id="recipientUsername">@username</div>
   <input type="number" id="donateAmount" placeholder="Amount of RBX">
   <textarea id="donateMessage" placeholder="Optional message"></textarea>
   <button id="donateBtn">Donate</button>
+  <div class="stats" id="donationStats"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, get, update, onValue, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -123,100 +148,150 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase(app);
 
-// Elements
 const urlParams = new URLSearchParams(window.location.search);
 const targetUid = urlParams.get('uid');
 
+const loadingScreen = document.getElementById('loadingScreen');
+const donateCard = document.getElementById('donateCard');
 const recipientAvatar = document.getElementById('recipientAvatar');
 const recipientPosition = document.getElementById('recipientPosition');
 const recipientUsername = document.getElementById('recipientUsername');
 const donateBtn = document.getElementById('donateBtn');
 const donateAmountInput = document.getElementById('donateAmount');
 const donateMessageInput = document.getElementById('donateMessage');
+const donationStats = document.getElementById('donationStats');
 
-// Load recipient info and top position
-onValue(ref(db, 'users'), snap=>{
-  if(!snap.exists()) return;
-  const users = snap.val();
-  const sortedUsers = Object.entries(users)
-    .map(([uid, user])=>{
-      let name = user.username || (user.email ? user.email.split('@')[0] : 'Anonymous');
-      return { uid, name, rbx: Number(user.rbxbalance) || 0, avatar: user.avatar || 'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png' };
-    })
-    .filter(u => u.rbx > 0)
-    .sort((a,b)=> b.rbx - a.rbx);
+let currentUserUid = null;
 
-  const recipient = sortedUsers.find(u => u.uid === targetUid);
-  if(!recipient){
+// Get logged-in user
+onAuthStateChanged(auth, user=>{
+  if(user) currentUserUid = user.uid;
+  initPage();
+});
+
+async function initPage(){
+  loadingScreen.style.display = 'flex';
+  donateCard.style.display = 'none';
+
+  const snap = await get(ref(db, 'users'));
+  if(!snap.exists()){
     recipientUsername.textContent = 'User not found';
-    recipientPosition.textContent = '';
-    recipientAvatar.src = 'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png';
+    loadingScreen.style.display = 'none';
+    donateCard.style.display = 'block';
     donateBtn.disabled = true;
     return;
   }
 
-  recipientAvatar.src = recipient.avatar;
-  recipientUsername.textContent = '@' + recipient.name;
+  const users = snap.val();
+  const sortedUsers = Object.entries(users)
+    .map(([uid,user])=>{
+      return {
+        uid,
+        name: user.username || (user.email ? user.email.split('@')[0] : 'Anonymous'),
+        avatar: user.avatar || 'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png',
+        rbx: Number(user.rbxbalance) || 0
+      };
+    })
+    .sort((a,b)=> b.rbx - a.rbx);
 
-  const pos = sortedUsers.findIndex(u => u.uid === targetUid);
-  recipientPosition.textContent = pos >= 0 && pos < 3 ? `#${pos+1}` : '';
-});
+  const recipient = sortedUsers.find(u=>u.uid===targetUid);
+  if(!recipient){
+    recipientUsername.textContent = 'User not found';
+    donateBtn.disabled = true;
+  } else {
+    recipientAvatar.src = recipient.avatar;
+    recipientUsername.textContent = '@' + recipient.name;
+    const pos = sortedUsers.findIndex(u=>u.uid===targetUid);
+    recipientPosition.textContent = pos >=0 && pos <3 ? `#${pos+1}` : '';
+  }
 
-// Donate logic
-donateBtn.addEventListener('click', ()=>{
+  // Check if user is donating to themselves
+  if(currentUserUid && currentUserUid === targetUid){
+    donateBtn.disabled = true;
+    donationStats.textContent = "You can't donate to yourself";
+  } else {
+    donateBtn.disabled = false;
+  }
+
+  // Load stats
+  if(currentUserUid){
+    const donationSnap = await get(ref(db, 'donations'));
+    let totalDonated = 0;
+    let topDonor = { name:'-', amount:0 };
+    if(donationSnap.exists()){
+      const donations = donationSnap.val();
+      for(const key in donations){
+        const d = donations[key];
+        if(d.from === currentUserUid) totalDonated += Number(d.amount);
+        if(Number(d.amount) > topDonor.amount) topDonor = { name:d.from, amount:Number(d.amount) };
+      }
+    }
+    donationStats.innerHTML = `
+      Total Donated: ${totalDonated} RBX<br>
+      Top Donor: ${topDonor.name} - ${topDonor.amount} RBX
+    `;
+  }
+
+  loadingScreen.style.display = 'none';
+  donateCard.style.display = 'flex';
+}
+
+// Donate button
+donateBtn.addEventListener('click', async ()=>{
   const amount = Number(donateAmountInput.value);
   const message = donateMessageInput.value;
 
-  if(!amount || amount <=0){
-    alert('Enter a valid RBX amount');
+  if(!currentUserUid){
+    alert('You must be logged in to donate');
     return;
   }
 
-  onAuthStateChanged(auth, user=>{
-    if(!user){
-      alert('You must be logged in to donate!');
-      return;
-    }
+  if(!amount || amount <=0){
+    alert('Enter valid RBX amount');
+    return;
+  }
 
-    const donorRef = ref(db, 'users/' + user.uid);
-    const receiverRef = ref(db, 'users/' + targetUid);
+  if(currentUserUid === targetUid){
+    alert("You can't donate to yourself");
+    return;
+  }
 
-    get(donorRef).then(dSnap=>{
-      const donorBalance = Number(dSnap.val()?.rbxbalance) || 0;
-      if(donorBalance < amount){
-        alert('Not enough RBX to donate');
-        return;
-      }
+  const donorRef = ref(db, 'users/' + currentUserUid);
+  const receiverRef = ref(db, 'users/' + targetUid);
 
-      get(receiverRef).then(rSnap=>{
-        const receiverData = rSnap.val() || {};
-        const updates = {};
-        updates['users/' + user.uid + '/rbxbalance'] = donorBalance - amount;
-        updates['users/' + targetUid + '/rbxbalance'] = (Number(receiverData.rbxbalance) || 0) + amount;
+  const donorSnap = await get(donorRef);
+  const donorBalance = Number(donorSnap.val()?.rbxbalance) || 0;
+  if(donorBalance < amount){
+    alert('Not enough RBX');
+    return;
+  }
 
-        // Optional: store message in /donations
-        const donationRef = ref(db, 'donations');
-        const newDonation = {};
-        const key = Date.now() + '_' + user.uid;
-        newDonation[key] = {
-          from: user.uid,
-          to: targetUid,
-          amount,
-          message,
-          timestamp: Date.now()
-        };
+  const receiverSnap = await get(receiverRef);
+  const receiverBalance = Number(receiverSnap.val()?.rbxbalance) || 0;
 
-        update(ref(db), {...updates, ...newDonation}).then(()=>{
-          alert(`Donated ${amount} RBX!`);
-          donateAmountInput.value = '';
-          donateMessageInput.value = '';
-        }).catch(err=>{
-          console.error(err);
-          alert('Error sending donation');
-        });
-      });
-    });
-  });
+  // Update balances
+  const updates = {};
+  updates['users/' + currentUserUid + '/rbxbalance'] = donorBalance - amount;
+  updates['users/' + targetUid + '/rbxbalance'] = receiverBalance + amount;
+
+  // Record donation
+  const key = Date.now() + '_' + currentUserUid;
+  updates['donations/' + key] = {
+    from: currentUserUid,
+    to: targetUid,
+    amount,
+    message,
+    timestamp: Date.now()
+  };
+
+  await update(ref(db), updates);
+  alert(`Donated ${amount} RBX!`);
+
+  donateAmountInput.value = '';
+  donateMessageInput.value = '';
+
+  // Reload stats
+  initPage();
 });
 </script>
 </body>
