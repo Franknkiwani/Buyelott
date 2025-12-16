@@ -746,7 +746,7 @@ function loadTopEarners() {
   const usersRef = ref(db, 'users');
   
   onValue(usersRef, snap => {
-    topUsersContainer.innerHTML = ''; // clear first
+    topUsersContainer.innerHTML = '';
 
     if (!snap.exists()) {
       topUsersContainer.innerHTML = '<div style="color:#fff;">No users found</div>';
@@ -754,18 +754,10 @@ function loadTopEarners() {
     }
 
     const usersData = snap.val();
-
     const sortedUsers = Object.entries(usersData)
       .map(([uid, user]) => {
-        let displayName = 'Anonymous';
-        if(user.username) displayName = user.username;
-        else if(user.email) displayName = user.email.split('@')[0];
-
-        return {
-          uid,
-          name: displayName,
-          rbx: Number(user.rbxbalance) || 0
-        };
+        let displayName = user.username || (user.email ? user.email.split('@')[0] : 'Anonymous');
+        return { uid, name: displayName, rbx: Number(user.rbxbalance) || 0 };
       })
       .filter(u => u.rbx > 0)
       .sort((a, b) => b.rbx - a.rbx);
@@ -780,97 +772,77 @@ function loadTopEarners() {
       'https://www.gamepur.com/wp-content/uploads/2022/10/03141118/Rich-Roblox-Characters-Avatar-Design-Idea-Outfit.jpg?w=1200',
       'https://art.ngfiles.com/images/2793000/2793270_fotheplant_roblox-noob-plushie.png?f1666352152'
     ];
-
     const buttonColors = ['gold', 'cyan', 'brown'];
 
     sortedUsers.slice(0,3).forEach((u,i)=>{
       const card = document.createElement('div');
       card.style.cssText = `
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:12px 16px;
-        border-radius:12px;
-        margin-bottom:6px;
-        color:#fff;
-        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+        display:flex; align-items:center; justify-content:space-between;
+        padding:12px 16px; border-radius:12px; margin-bottom:6px;
+        color:#fff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
         background: rgba(255,255,255,0.05);
       `;
 
       card.innerHTML = `
         <div style="display:flex; align-items:center; gap:10px;">
-          <img src="${topProfiles[i]}" 
-               alt="profile" 
-               style="width:32px; height:32px; border-radius:50%;">
+          <img src="${topProfiles[i]}" alt="profile" style="width:32px; height:32px; border-radius:50%;">
           <span>#${i+1} ${u.name}</span>
         </div>
-        <button id="donateBtn-${u.uid}" style="
-          padding:6px 12px;
-          border-radius:8px;
+        <button class="donateBtn" data-uid="${u.uid}" style="
+          padding:6px 12px; border-radius:8px;
           border:1px solid ${buttonColors[i]};
-          background: rgba(0,0,0,0.6);
-          color:#fff;
-          cursor:pointer;
+          background: rgba(0,0,0,0.6); color:#fff; cursor:pointer;
         ">Donate</button>
       `;
 
       topUsersContainer.appendChild(card);
+    });
 
-      document.getElementById(`donateBtn-${u.uid}`).onclick = () => {
-        onAuthStateChanged(auth, user => {
-          if(!user) return showModal('<h3>Login Required</h3><p>Please log in to donate RBX.</p>');
-          if(user.uid === u.uid) return showModal('<h3>Error</h3><p>You cannot donate to yourself.</p>');
+    // Bind events **after DOM elements exist**
+    document.querySelectorAll('.donateBtn').forEach(btn => {
+      btn.onclick = async () => {
+        const uId = btn.dataset.uid;
+        const user = auth.currentUser;
+        if(!user) return showModal('<h3>Login Required</h3><p>Please log in to donate RBX.</p>');
+        if(user.uid === uId) return showModal('<h3>Error</h3><p>You cannot donate to yourself.</p>');
 
-          const donorUid = user.uid;
-          const donorRef = ref(db, `users/${donorUid}/rbxbalance`);
-          const recipientRef = ref(db, `users/${u.uid}/rbxbalance`);
+        const donorRef = ref(db, `users/${user.uid}/rbxbalance`);
+        const recipientRef = ref(db, `users/${uId}/rbxbalance`);
+        const donorSnap = await get(donorRef);
+        const donorRbx = Number(donorSnap.val() || 0);
 
-          get(donorRef).then(snap2 => {
-            const donorRbx = Number(snap2.val() || 0);
+        showModal(`
+          <h3>Donate RBX</h3>
+          <p>Your RBX: ${donorRbx}</p>
+          <input id="donateAmount" type="number" placeholder="Enter amount" style="width:100%; padding:6px; margin-top:8px;"/>
+          <button id="sendDonateBtn" style="margin-top:8px; padding:6px 12px;">Send</button>
+        `);
 
-            showModal(`
-              <h3>Donate to ${u.name}</h3>
-              <p>Your RBX: ${donorRbx}</p>
-              <input id="donateAmount" type="number" placeholder="Enter amount" style="width:100%; padding:6px; margin-top:8px;"/>
-              <button id="sendDonateBtn" style="margin-top:8px; padding:6px 12px;">Send</button>
-            `);
+        document.getElementById('sendDonateBtn').onclick = async () => {
+          const raw = document.getElementById('donateAmount').value.trim();
+          if(!/^\d+$/.test(raw)) return showModal('<h3>Error</h3><p>Only numbers allowed.</p>');
 
-            document.getElementById('sendDonateBtn').onclick = () => {
-              const rawValue = document.getElementById('donateAmount').value.trim();
+          const amount = Number(raw);
+          if(amount < 1) return showModal('<h3>Error</h3><p>Amount must be at least 1 RBX.</p>');
+          if(amount > donorRbx) return showModal('<h3>Error</h3><p>Not enough RBX.</p>');
 
-              // Only whole numbers allowed
-              if(!/^\d+$/.test(rawValue)) return showModal('<h3>Error</h3><p>Only numbers allowed.</p>');
+          await donorRef.set(donorRbx - amount);
+          const recipientSnap = await get(recipientRef);
+          const recipientRbx = Number(recipientSnap.val() || 0);
+          await recipientRef.set(recipientRbx + amount);
 
-              const donateAmount = Number(rawValue);
-              if(donateAmount < 1) return showModal('<h3>Error</h3><p>Amount must be at least 1 RBX.</p>');
-              if(donorRbx < donateAmount) return showModal('<h3>Error</h3><p>Not enough RBX.</p>');
+          await push(ref(db, 'transactions'), { from: user.uid, to: uId, amount, timestamp: Date.now() });
 
-              donorRef.set(donorRbx - donateAmount);
-
-              get(recipientRef).then(snap3 => {
-                const recipientRbx = Number(snap3.val() || 0);
-                recipientRef.set(recipientRbx + donateAmount);
-              });
-
-              push(ref(db, 'transactions'), {
-                from: donorUid,
-                to: u.uid,
-                amount: donateAmount,
-                timestamp: Date.now()
-              });
-
-              modal.style.display = 'none';
-              loadTopEarners(); // refresh leaderboard
-            };
-          });
-        });
+          modal.style.display = 'none';
+          loadTopEarners();
+        };
       };
     });
   });
 }
 
 // iOS-style modal
-function showModal(contentHtml) {
+function showModal(html) {
   let modal = document.getElementById('modalDonate');
   if(!modal){
     modal = document.createElement('div');
@@ -889,14 +861,12 @@ function showModal(contentHtml) {
     `;
     modal.appendChild(inner);
     document.body.appendChild(modal);
-
-    modal.onclick = (e) => { if(e.target===modal) modal.style.display='none'; };
+    modal.onclick = e => { if(e.target===modal) modal.style.display='none'; };
   }
-  document.getElementById('modalContent').innerHTML = contentHtml;
-  modal.style.display = 'flex';
+  document.getElementById('modalContent').innerHTML = html;
+  modal.style.display='flex';
 }
 
-// Load leaderboard
 loadTopEarners();
 // Call it once on load
 loadTopEarners();
