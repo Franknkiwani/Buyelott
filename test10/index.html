@@ -219,7 +219,6 @@ textarea{resize:none;height:70px;}
     </div>
   </div>
 </div>
-<script>(function(s){s.dataset.zone='10324573',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <!-- Top Sections Above Video -->  
 <div class="top-sections" style="display:flex; justify-content:space-between; gap:4%; margin:20px 10px;">
   <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
@@ -346,38 +345,7 @@ textarea{resize:none;height:70px;}
     <button id="donateConfirm" class="confirm" style="width:100%;">Donate</button>
   </div>
 </div>
-<div id="adWrapper" style="
-  display:none;
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#000;
-  border-radius:16px;
-  padding:12px;
-  z-index:9999;
-  overflow:hidden;
-"></div>
 
-<script>
-function injectAd() {
-  const wrapper = document.getElementById('adWrapper');
-  wrapper.innerHTML = ''; // clear previous ad
-  const adScript = document.createElement('script');
-  adScript.innerHTML = `(function(s){
-    s.dataset.zone='10324575';
-    s.src='https://groleegni.net/vignette.min.js';
-  })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));`;
-  wrapper.appendChild(adScript);
-  wrapper.style.display = 'block';
-}
-
-// First ad after 10 seconds
-setTimeout(injectAd, 10000);
-
-// Repeat every 10 seconds
-setInterval(injectAd, 10000);
-</script>
 <style>
 @keyframes blink{
   0%, 80%, 100%{ opacity:0.2; }
@@ -562,7 +530,23 @@ window.addEventListener('load', async () => {
 
   <!-- Top Comments -->
   <div id="topComments" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+ <div style="overflow:hidden; border-radius:16px; width:320px; height:50px;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 320,
+      'params' : {}
+    };
+  </script>
+  <script
+    type="text/javascript"
+    src="https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"
+  ></script>
 </div>
+</div>
+
 <!-- FAQ Section -->
 <div id="faqSection" style="
   margin:24px 10px;
@@ -701,29 +685,6 @@ onAuthStateChanged(auth, user => {
       </div>  
     </div>`;  
 });  
-  
-// ====== Withdraw Modal Functions ======  
-window.openWithdrawModal = () => { if(withdrawModal) withdrawModal.style.display = 'flex'; };  
-  
-window.confirmWithdraw = async () => {  
-  const msg = document.getElementById("msg");  
-  msg.className = "msg";  
-  const robloxUser = document.getElementById("robloxUser");  
-  const extraInfo = document.getElementById("extraInfo");  
-  
-  if(balance < 150){ msg.textContent = "You need at least 150 RBX"; msg.classList.add("error"); return; }  
-  if(!robloxUser.value){ msg.textContent = "Please enter your Roblox username"; msg.classList.add("error"); return; }  
-  
-  await push(ref(db, `confirmedrbx/${currentUser.uid}`), {  
-    amount: 150,  
-    roblox: robloxUser.value,  
-    info: extraInfo.value,  
-    status: "pending",  
-    time: Date.now()  
-  });  
-  msg.textContent = "Withdrawal submitted"; msg.classList.add("success");  
-  robloxUser.value = ""; extraInfo.value = "";  
-};  
   
 // ====== Logout Functions ======  
 window.toggleLogout = () => {   
