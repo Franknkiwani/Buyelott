@@ -816,21 +816,18 @@ function loadTopEarners() {
 
       topUsersContainer.appendChild(card);
 
-      // Donate click handler
       document.getElementById(`donateBtn-${u.uid}`).onclick = () => {
         onAuthStateChanged(auth, user => {
           if(!user) return showModal('<h3>Login Required</h3><p>Please log in to donate RBX.</p>');
-
           if(user.uid === u.uid) return showModal('<h3>Error</h3><p>You cannot donate to yourself.</p>');
 
           const donorUid = user.uid;
           const donorRef = ref(db, `users/${donorUid}/rbxbalance`);
           const recipientRef = ref(db, `users/${u.uid}/rbxbalance`);
 
-          onValue(donorRef, snap2 => {
+          get(donorRef).then(snap2 => {
             const donorRbx = Number(snap2.val() || 0);
 
-            // Show donate prompt
             showModal(`
               <h3>Donate to ${u.name}</h3>
               <p>Your RBX: ${donorRbx}</p>
@@ -840,20 +837,21 @@ function loadTopEarners() {
 
             document.getElementById('sendDonateBtn').onclick = () => {
               const rawValue = document.getElementById('donateAmount').value.trim();
-              const donateAmount = Number(rawValue);
 
-              if(!rawValue || isNaN(donateAmount)) return showModal('<h3>Error</h3><p>Please enter a valid number.</p>');
+              // Only whole numbers allowed
+              if(!/^\d+$/.test(rawValue)) return showModal('<h3>Error</h3><p>Only numbers allowed.</p>');
+
+              const donateAmount = Number(rawValue);
               if(donateAmount < 1) return showModal('<h3>Error</h3><p>Amount must be at least 1 RBX.</p>');
               if(donorRbx < donateAmount) return showModal('<h3>Error</h3><p>Not enough RBX.</p>');
 
-              // Update balances
               donorRef.set(donorRbx - donateAmount);
-              onValue(recipientRef, snap3 => {
+
+              get(recipientRef).then(snap3 => {
                 const recipientRbx = Number(snap3.val() || 0);
                 recipientRef.set(recipientRbx + donateAmount);
-              }, {once:true});
+              });
 
-              // Optional transaction log
               push(ref(db, 'transactions'), {
                 from: donorUid,
                 to: u.uid,
@@ -864,14 +862,14 @@ function loadTopEarners() {
               modal.style.display = 'none';
               loadTopEarners(); // refresh leaderboard
             };
-          }, {once:true});
+          });
         });
       };
     });
   });
 }
 
-// Example iOS-style modal function
+// iOS-style modal
 function showModal(contentHtml) {
   let modal = document.getElementById('modalDonate');
   if(!modal){
@@ -892,15 +890,13 @@ function showModal(contentHtml) {
     modal.appendChild(inner);
     document.body.appendChild(modal);
 
-    modal.onclick = (e) => {
-      if(e.target===modal) modal.style.display='none';
-    };
+    modal.onclick = (e) => { if(e.target===modal) modal.style.display='none'; };
   }
   document.getElementById('modalContent').innerHTML = contentHtml;
   modal.style.display = 'flex';
 }
 
-// Load top users initially
+// Load leaderboard
 loadTopEarners();
 // Call it once on load
 loadTopEarners();
