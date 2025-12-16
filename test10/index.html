@@ -653,6 +653,203 @@ window.addEventListener('load', async () => {
     </div>
   </div>
 </div>
+<style>
+  /* Small Modal overlay */
+  #adRewardPopup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  /* Small Modal box */
+  #adRewardPopup .modal-box {
+    background: rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    color: #fff;
+    backdrop-filter: blur(12px);
+    position: relative;
+  }
+
+  /* Close button */
+  #closePopup {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* Ad container */
+  #adRewardContainer {
+    margin: 16px 0;
+    height: 180px;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  /* Watch button */
+  #watchAdBtn {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  /* Full-screen modal */
+  #fullRewardModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(12px);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  }
+
+  #fullRewardModal iframe {
+    width: 90%;
+    height: 80%;
+    border: none;
+    border-radius: 16px;
+    overflow: auto;
+    background: #fff;
+  }
+
+  #closeFullReward {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: not-allowed;
+    background: grey;
+    color: #fff;
+  }
+
+  #closeFullReward.active {
+    background: red;
+    cursor: pointer;
+  }
+
+  #countdown {
+    margin-left: 8px;
+    font-weight: bold;
+  }
+</style>
+
+<div id="adRewardPopup" class="modal">
+  <div class="modal-box">
+    <button id="closePopup">&times;</button>
+    <h2>Watch an Ad</h2>
+    <p>Earn <strong>10 RBX</strong> instantly!</p>
+    <div id="adRewardContainer">
+      <iframe id="adIframe" src="" frameborder="0" style="width:100%;height:100%;border:none;"></iframe>
+    </div>
+    <button id="watchAdBtn">Claim 10 RBX</button>
+  </div>
+</div>
+
+<div id="fullRewardModal" class="modal">
+  <iframe id="fullIframe" src=""></iframe>
+  <button id="closeFullReward">CLOSE <span id="countdown"></span></button>
+</div>
+
+<script>
+  const adPopup = document.getElementById('adRewardPopup');
+  const watchBtn = document.getElementById('watchAdBtn');
+  const closeBtn = document.getElementById('closePopup');
+  const fullModal = document.getElementById('fullRewardModal');
+  const closeFullBtn = document.getElementById('closeFullReward');
+  const fullIframe = document.getElementById('fullIframe');
+  const countdownText = document.getElementById('countdown');
+  const adIframe = document.getElementById('adIframe');
+
+  // Show small popup
+  function showAdPopup() {
+    adIframe.src = 'https://otieu.com/4/7950037'; // refresh small iframe
+    adPopup.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Schedule next popup after 30-40s
+  function scheduleNextPopup() {
+    const delay = 30000 + Math.random() * 10000;
+    setTimeout(showAdPopup, delay);
+  }
+
+  // Initial popup after 2 seconds
+  setTimeout(showAdPopup, 20000);
+
+  // Close small popup → schedule next
+  closeBtn.addEventListener('click', () => {
+    adPopup.style.display = 'none';
+    document.body.style.overflow = '';
+    scheduleNextPopup();
+  });
+
+  // Open full modal on claim
+  watchBtn.addEventListener('click', () => {
+    adPopup.style.display = 'none';
+    fullModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    fullIframe.src = 'https://cyberchat.online/rewardads';
+    fullIframe.style.overflow = 'auto';
+
+    // Countdown 15s
+    let countdown = 15;
+    countdownText.textContent = `${countdown}s`;
+    closeFullBtn.disabled = true;
+    closeFullBtn.classList.remove('active');
+
+    const timer = setInterval(() => {
+      countdown--;
+      countdownText.textContent = `${countdown}s`;
+      if(countdown <= 0){
+        clearInterval(timer);
+        countdownText.textContent = '';
+        closeFullBtn.disabled = false;
+        closeFullBtn.classList.add('active');
+      }
+    }, 1000);
+  });
+
+  // Close full modal → schedule next popup
+  closeFullBtn.addEventListener('click', () => {
+    if(!closeFullBtn.disabled){
+      fullModal.style.display = 'none';
+      document.body.style.overflow = '';
+      fullIframe.src = '';
+      scheduleNextPopup();
+    }
+  });
+</script>
 <script
   async="async"
   data-cfasync="false"
