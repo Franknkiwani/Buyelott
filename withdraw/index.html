@@ -5,303 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Withdraw RBX</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;user-select:none;}
-  body{
-    background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:column;
-  }
-  ::selection {background:transparent;} /* remove blue highlight */
-  header{
-    position:sticky;top:0;padding:16px 20px;
-    backdrop-filter:blur(20px);background:rgba(255,255,255,0.05);
-    border-bottom:1px solid rgba(255,255,255,0.1);
-    display:flex;align-items:center;justify-content:space-between;z-index:100;
-  }
-  header h1{font-size:1.4rem;font-weight:700;}
-  header img{width:28px;height:28px;cursor:pointer;}
-  
-  main{
-    flex:1;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-    opacity:0; /* hide until loaded */
-  }
-  .balance-box{
-    background:rgba(255,255,255,0.05);
-    border-radius:20px;
-    padding:24px;
-    text-align:center;
-    font-weight:700;
-  }
-  .balance-box .amount{font-size:2rem;margin-bottom:8px;}
-  .balance-box .label{opacity:.7;}
-  
-  .withdraw-inputs{
-    display:flex;flex-direction:column;gap:12px;
-  }
-  .withdraw-inputs input, .withdraw-inputs textarea{
-    width:100%;
-    padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.3);
-    background:rgba(0,0,0,0.3);color:#fff;font-size:1rem;
-  }
-  .withdraw-inputs input:focus, .withdraw-inputs textarea:focus{border-color:#fff;outline:none;}
-  .withdraw-inputs textarea{height:80px;resize:none;}
-  
-  .confirm-btn{
-    margin-top:10px;
-    padding:14px 0;
-    border-radius:20px;
-    border:none;
-    font-weight:700;
-    background:#fff;color:#000;
-    cursor:pointer;
-    transition:0.2s;
-  }
-  .confirm-btn:disabled{
-    opacity:0.5;cursor:not-allowed;
-  }
-  
-  .msg{text-align:center;font-weight:600;}
-  .msg.error{color:#ff4d4d;}
-  .msg.success{color:#00ff99;}
-  
-  .history{
-    margin-top:20px;
-    border-top:1px solid rgba(255,255,255,0.1);
-    padding-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    max-height:200px;
-    overflow-y:auto;
-  }
-  .history-item{
-    background:rgba(255,255,255,0.05);
-    padding:12px;
-    border-radius:14px;
-    display:flex;
-    justify-content:space-between;
-    font-size:0.9rem;
-  }
-
-  /* FAQ Section */
-  .faq{
-    margin-top:24px;
-  }
-  .faq h2{text-align:center;margin-bottom:16px;}
-  .faq-item{
-    padding:16px;
-    border-radius:16px;
-    background:rgba(255,255,255,0.05);
-    margin-bottom:12px;
-  }
-  .faq-item h3{margin-bottom:8px;font-size:1rem;}
-  .faq-item p{font-size:0.9rem;opacity:0.8;}
-
-  /* Loading screen */
-  #loadingScreen{
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    display:flex;align-items:center;justify-content:center;
-    background:#0a0a0a;z-index:9999;flex-direction:column;
-  }
-  .spinner{
-    width:60px;height:60px;
-    border:6px solid rgba(255,255,255,0.2);
-    border-top-color:#fff;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-    margin-bottom:12px;
-  }
-  @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-  .loading-text{font-size:1rem;opacity:0.7;}
-/* Lock scrolling & selection during loading */
-body.loading {
-  overflow: hidden;       /* no scrollbars */
-  touch-action: none;     /* stop touch scrolling on mobile */
-  user-select: none;      /* prevent text selection */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;}
+body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:column;user-select:none;}
+body.loading{overflow:hidden;touch-action:none;user-select:none;}
+header{position:sticky;top:0;padding:16px 20px;backdrop-filter:blur(20px);background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;z-index:10;}
+header h1{font-size:1.4rem;}
+main{flex:1;padding:20px;display:flex;flex-direction:column;gap:20px;opacity:0;}
+.balance-box{background:rgba(255,255,255,0.05);border-radius:20px;padding:24px;text-align:center;}
+.balance-box .amount{font-size:2rem;font-weight:700;}
+.withdraw-inputs{display:flex;flex-direction:column;gap:12px;}
+.withdraw-inputs input,.withdraw-inputs textarea{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.3);color:#fff;font-size:1rem;outline:none;box-shadow:none;-webkit-tap-highlight-color:transparent;width:100%;}
+.withdraw-inputs textarea{height:80px;resize:none;}
+.confirm-btn{padding:14px;border-radius:20px;border:none;font-weight:700;background:#fff;color:#000;cursor:pointer;outline:none;box-shadow:none;-webkit-tap-highlight-color:transparent;}
+.confirm-btn:disabled{opacity:.5;cursor:not-allowed;}
+.msg{text-align:center;font-weight:600;}
+.msg.error{color:#ff4d4d;}
+.msg.success{color:#00ff99;}
+.history{display:flex;flex-direction:column;gap:10px;max-height:240px;overflow:auto;}
+.history-item{background:rgba(255,255,255,0.05);padding:12px;border-radius:14px;font-size:.9rem;}
+#loadingScreen{position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;}
+.spinner{width:60px;height:60px;border:6px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.loading-text{text-align:center;font-size:1rem;opacity:0.8;}
 </style>
 </head>
-<body>
+<body class="loading">
 
 <div id="loadingScreen">
   <div class="spinner"></div>
-  <div class="loading-text">Loading data...</div>
+  <div class="loading-text">Watch and earn Robux, nice to see you here!</div>
 </div>
 
 <header>
   <h1>Withdraw RBX</h1>
-  <img src="https://img.icons8.com/ios-filled/50/ffffff/close-window.png" alt="Close" onclick="location.href='/'">
+  <button onclick="location.href='/'" style="outline:none;box-shadow:none;-webkit-tap-highlight-color:transparent;">Close</button>
 </header>
 
 <main>
-  <!-- Balance Display -->
   <div class="balance-box">
     <div class="amount" id="currentBalance">0 RBX</div>
-    <div class="label">Available Balance</div>
+    <div>Available Balance</div>
   </div>
 
-  <!-- Withdraw Inputs -->
   <div class="withdraw-inputs">
-    <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
+    <input id="robloxUsername" placeholder="Roblox username (required)" required>
+    <input id="withdrawAmount" type="number" placeholder="Amount (RBX)" required>
     <textarea id="extraInfo" placeholder="Extra info (optional)"></textarea>
-    <input type="date" id="sendDate">
+    <input id="sendDate" type="date" required>
     <button class="confirm-btn" id="confirmWithdrawBtn">Withdraw</button>
     <div class="msg" id="withdrawMsg"></div>
   </div>
 
-  <!-- Withdrawal History -->
-  <div class="history" id="withdrawHistory">
-    <!-- Filled dynamically -->
-  </div>
-
-  <!-- FAQ -->
-  <div class="faq">
-    <h2>Withdrawal FAQs</h2>
-    <div class="faq-item">
-      <h3>Minimum Withdrawal?</h3>
-      <p>The minimum withdraw is 150 RBX. You cannot withdraw less than this amount.</p>
-    </div>
-    <div class="faq-item">
-      <h3>How do I schedule?</h3>
-      <p>Select the date you want your RBX to be sent using the date picker above.</p>
-    </div>
-    <div class="faq-item">
-      <h3>Extra Info?</h3>
-      <p>You can add a Roblox username or any other note in the 'Extra info' field.</p>
-    </div>
-    <div class="faq-item">
-      <h3>When will I receive RBX?</h3>
-      <p>Your RBX will be sent on the selected date. All withdrawals are processed automatically on that date.</p>
-    </div>
-  </div>
+  <h2>Withdrawal History</h2>
+  <div class="history" id="withdrawHistory"></div>
 </main>
+<h2 style="text-align:center;margin-top:20px;">Withdrawal Q&A</h2>
+<div class="faq" style="display:flex;flex-direction:column;gap:12px;margin:0 auto;width:90%;">
+  <div class="faq-item" style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.05);">
+    <h3 style="font-size:1rem;margin-bottom:6px;">Minimum Withdrawal?</h3>
+    <p style="font-size:0.9rem;opacity:0.8;">The minimum withdrawal is 150 RBX. You cannot withdraw less than this amount.</p>
+  </div>
+  <div class="faq-item" style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.05);">
+    <h3 style="font-size:1rem;margin-bottom:6px;">How do I schedule?</h3>
+    <p style="font-size:0.9rem;opacity:0.8;">Select the date you want your RBX to be sent using the date picker above.</p>
+  </div>
+  <div class="faq-item" style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.05);">
+    <h3 style="font-size:1rem;margin-bottom:6px;">Roblox Username?</h3>
+    <p style="font-size:0.9rem;opacity:0.8;">RBX will be sent to this Roblox account. Make sure the username is correct.</p>
+  </div>
+  <div class="faq-item" style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.05);">
+    <h3 style="font-size:1rem;margin-bottom:6px;">When will I receive RBX?</h3>
+    <p style="font-size:0.9rem;opacity:0.8;">Withdrawals are processed automatically on the selected send date. Status will show Pending, Approved, or Rejected.</p>
+  </div>
+</div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { getDatabase, ref, onValue, push, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain:"itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL:"https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId:"itzhoyoo-f9f7e"
+});
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentUser = null;
-let balance = 0;
-
-// DOM Elements
 const currentBalance = document.getElementById('currentBalance');
+const withdrawHistory = document.getElementById('withdrawHistory');
+const msg = document.getElementById('withdrawMsg');
+const btn = document.getElementById('confirmWithdrawBtn');
+
+const robloxUsername = document.getElementById('robloxUsername');
 const withdrawAmount = document.getElementById('withdrawAmount');
 const extraInfo = document.getElementById('extraInfo');
 const sendDate = document.getElementById('sendDate');
-const confirmWithdrawBtn = document.getElementById('confirmWithdrawBtn');
-const withdrawMsg = document.getElementById('withdrawMsg');
-const withdrawHistory = document.getElementById('withdrawHistory');
-const mainContent = document.querySelector('main');
+
 const loadingScreen = document.getElementById('loadingScreen');
+const main = document.querySelector('main');
 
-mainContent.style.opacity = '0'; // hide main until loaded
-document.body.style.overflow = 'hidden'; // prevent scroll while loading
+let user=null, balance=0;
 
-async function loadUserData(user){
-  const balRef = ref(db, `users/${user.uid}/rbxbalance`);
-  const historyRef = ref(db, `withdrawals/${user.uid}`);
-
-  await new Promise(resolve=>{
-    let balanceLoaded=false, historyLoaded=false;
-
-    onValue(balRef, snap=>{
-      balance = snap.exists() ? snap.val() : 0;
-      currentBalance.innerText = balance + ' RBX';
-      withdrawAmount.max = balance;
-      balanceLoaded = true;
-      if(balanceLoaded && historyLoaded) resolve();
-    }, {onlyOnce:true});
-
-    onValue(historyRef, snap=>{
-      withdrawHistory.innerHTML='';
-      if(snap.exists()){
-        const data = Object.entries(snap.val()).sort((a,b)=>b[1].time-a[1].time);
-        data.forEach(([id, item])=>{
-          const div = document.createElement('div');
-          div.className='history-item';
-          const sendDateStr = item.sendDate ? new Date(item.sendDate).toLocaleDateString() : '-';
-          div.innerHTML=`<span>${item.amount} RBX</span><span>Req: ${new Date(item.time).toLocaleDateString()} | Send: ${sendDateStr}</span>`;
-          withdrawHistory.appendChild(div);
-        });
-      }
-      historyLoaded = true;
-      if(balanceLoaded && historyLoaded) resolve();
-    }, {onlyOnce:true});
-  });
-}
-
-onAuthStateChanged(auth, async user=>{
-  if(!user){
-    location.href='/login';
-    return;
-  }
-  currentUser = user;
-  await loadUserData(user);
-  // Hide loading screen
-  loadingScreen.style.display='none';
-  mainContent.style.opacity='1';
-  document.body.style.overflow='auto'; // allow scrolling again
+onAuthStateChanged(auth,u=>{
+  if(!u){location.href='/login'; return;}
+  user=u;
+  loadData();
 });
 
-confirmWithdrawBtn.addEventListener('click', async ()=>{
-  withdrawMsg.className='msg';
-  const amount = parseInt(withdrawAmount.value);
-  if(isNaN(amount) || amount < 150){
-    withdrawMsg.classList.add('error');
-    withdrawMsg.innerText='Minimum withdraw is 150 RBX';
-    return;
-  }
-  if(amount > balance){
-    withdrawMsg.classList.add('error');
-    withdrawMsg.innerText='Insufficient balance';
-    return;
-  }
-  if(!sendDate.value){
-    withdrawMsg.classList.add('error');
-    withdrawMsg.innerText='Please select a send date';
-    return;
-  }
-  if(!currentUser) return;
-
-  // Push withdrawal
-  await push(ref(db, `withdrawals/${currentUser.uid}`), {
-    amount: amount,
-    info: extraInfo.value,
-    time: Date.now(),
-    sendDate: sendDate.value,
-    status: 'pending'
+async function loadData(){
+  // wait until balance fully loads
+  await new Promise(resolve=>{
+    const balRef = ref(db,`users/${user.uid}/rbxbalance`);
+    onValue(balRef,snap=>{
+      balance = snap.val()||0;
+      currentBalance.innerText = balance+" RBX";
+      withdrawAmount.max = balance;
+      resolve();
+    },{onlyOnce:true});
   });
 
-  // Deduct balance safely
-  const balRef = ref(db, `users/${currentUser.uid}/rbxbalance`);
-  runTransaction(balRef, curr => (curr||0)-amount).catch(console.error);
+  // add extra 2 seconds delay for smooth effect
+  await new Promise(r=>setTimeout(r,2000));
 
-  withdrawMsg.classList.add('success');
-  withdrawMsg.innerText='Withdrawal submitted!';
+  // load withdrawal history
+  onValue(ref(db,`withdrawals/${user.uid}`),snap=>{
+    withdrawHistory.innerHTML='';
+    if(!snap.exists()){withdrawHistory.innerHTML='<div>No withdrawals yet</div>'; return;}
+    Object.values(snap.val()).sort((a,b)=>b.time-a.time).forEach(w=>{
+      let color='yellow', text='Pending';
+      if(w.status==='approved'){color='green';text='Approved'}
+      if(w.status==='rejected'){color='red';text='Rejected'}
+      const div=document.createElement('div');
+      div.className='history-item';
+      div.innerHTML=`
+        <div><b>Roblox:</b> ${w.robloxUsername}</div>
+        <div><b>Amount:</b> ${w.amount} RBX</div>
+        <div><b>Requested:</b> ${new Date(w.time).toLocaleDateString()}</div>
+        <div><b>Send Date:</b> ${w.sendDate}</div>
+        <div><b>Status:</b> <span style="color:${color};font-weight:bold">${text}</span></div>
+      `;
+      withdrawHistory.appendChild(div);
+    });
+  });
+
+  loadingScreen.style.display='none';
+  main.style.opacity=1;
+  document.body.classList.remove('loading');
+}
+
+btn.onclick=async()=>{
+  msg.className='msg';
+  const name=robloxUsername.value.trim();
+  const amt=parseInt(withdrawAmount.value);
+
+  if(!name){msg.classList.add('error'); msg.innerText='Roblox username required'; return;}
+  if(isNaN(amt)||amt<150){msg.classList.add('error'); msg.innerText='Minimum withdraw is 150 RBX'; return;}
+  if(amt>balance){msg.classList.add('error'); msg.innerText='Insufficient balance'; return;}
+  if(!sendDate.value){msg.classList.add('error'); msg.innerText='Select send date'; return;}
+
+  btn.disabled=true;
+
+  await push(ref(db,`withdrawals/${user.uid}`),{
+    robloxUsername:name,
+    amount:amt,
+    info:extraInfo.value,
+    sendDate:sendDate.value,
+    time:Date.now(),
+    status:'pending'
+  });
+
+  await runTransaction(ref(db,`users/${user.uid}/rbxbalance`),v=>(v||0)-amt);
+
+  msg.classList.add('success');
+  msg.innerText='Withdrawal submitted (Pending)';
+
+  robloxUsername.value='';
   withdrawAmount.value='';
   extraInfo.value='';
   sendDate.value='';
-});
+  btn.disabled=false;
+};
 </script>
-
 </body>
 </html>
