@@ -660,6 +660,87 @@ window.addEventListener('load', async () => {
 ></script>
 <div id="container-8f9075afd782b06bf3767fa2b0dd5775"></div>
 </div>
+<footer id="footer" style="
+  background: rgba(0,0,0,0.95);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 80px 20px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  text-align: center;
+">
+  <!-- Logo -->
+  <div style="margin-bottom: 20px;">
+    <img width="80" height="80" src="https://img.icons8.com/hatch/64/FFFFFF/robux.png" alt="robux"/>
+  </div>
+
+  <!-- Brand Name -->
+  <h2 style="margin: 0 0 10px 0; font-size: 32px; color: #fff; letter-spacing: 2px;">WATCH-4-RBX</h2>
+
+  <!-- Description -->
+  <p style="color: #bbb; font-size: 16px; max-width: 600px; margin: 0 auto 40px; line-height: 1.6;">
+    Watch videos, earn Robux, and level up your gaming rewards instantly. Fast, safe, and rewarding for gamers everywhere.
+  </p>
+
+  <!-- Partner Section -->
+  <div style="margin-bottom: 50px;">
+    <h4 style="color: #fff; margin-bottom: 16px; font-size: 18px; letter-spacing: 1px;">Our Partners</h4>
+    <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+      <img src="https://target-video.com/wp-content/uploads/2023/07/monetag_logo-1024x168.webp" 
+           alt="Monetag" style="max-width: 200px; height: auto;">
+      <img src="https://smartyads.com/storage/editor/20231129_400x150-adsterra.webp" 
+           alt="SmartyAds" style="max-width: 200px; height: auto;">
+    </div>
+  </div>
+
+  <!-- Resources / Legal -->
+  <div id="footer-resources" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-bottom: 40px;">
+    <!-- Links will be injected dynamically -->
+  </div>
+
+  <!-- Bottom Bar -->
+  <div style="font-size: 12px; color: #555;">
+    &copy; 2026 WATCH-4-RBX. All rights reserved. Earn Robux safely and fast!
+  </div>
+</footer>
+
+<script>
+  // Define your resource pages dynamically
+  const resources = [
+    { icon: "https://img.icons8.com/ios-filled/50/FFFFFF/user-shield.png", label: "Privacy Policy", slug: "privacy-policy" },
+    { icon: "https://img.icons8.com/ios-glyphs/30/FFFFFF/phone-bubble.png", label: "Contact Us", slug: "contact-us" },
+    { icon: "https://img.icons8.com/ink/48/FFFFFF/rules-book.png", label: "Terms of Service", slug: "terms-of-service" }
+  ];
+
+  const footerResources = document.getElementById("footer-resources");
+  const domain = window.location.origin; // gets your current active domain dynamically
+
+  resources.forEach(res => {
+    const linkWrapper = document.createElement("div");
+    linkWrapper.style.display = "flex";
+    linkWrapper.style.alignItems = "center";
+    linkWrapper.style.gap = "8px";
+
+    const icon = document.createElement("img");
+    icon.src = res.icon;
+    icon.alt = res.label;
+    icon.width = icon.height = 32;
+    if(res.label === "Contact Us") icon.width = icon.height = 28; // adjust size for phone icon
+
+    const a = document.createElement("a");
+    a.href = `${domain}/${res.slug}`;
+    a.target = "_blank";
+    a.style.color = "#bbb";
+    a.style.textDecoration = "none";
+    a.style.fontSize = "14px";
+    a.style.transition = "color 0.3s";
+    a.innerText = res.label;
+
+    linkWrapper.appendChild(icon);
+    linkWrapper.appendChild(a);
+
+    footerResources.appendChild(linkWrapper);
+  });
+</script>
 <script type="module">  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
