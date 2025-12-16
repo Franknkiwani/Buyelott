@@ -109,35 +109,31 @@ const main = document.querySelector('main');
 
 let user=null, balance=0;
 
+// Wait for auth
 onAuthStateChanged(auth,u=>{
   if(!u){location.href='/login'; return;}
   user=u;
   loadData();
 });
 
-async function loadData(){
-  // wait until balance fully loads
-  await new Promise(resolve=>{
-    const balRef = ref(db,`users/${user.uid}/rbxbalance`);
-    onValue(balRef,snap=>{
-      balance = snap.val()||0;
-      currentBalance.innerText = balance+" RBX";
-      withdrawAmount.max = balance;
-      resolve();
-    },{onlyOnce:true});
+function loadData(){
+  // Listen continuously to balance changes for instant update
+  const balRef = ref(db, `users/${user.uid}/rbxbalance`);
+  onValue(balRef, snap=>{
+    balance = snap.val()||0;
+    currentBalance.innerText = balance+" RBX";
+    withdrawAmount.max = balance;
   });
 
-  // add extra 2 seconds delay for smooth effect
-  await new Promise(r=>setTimeout(r,2000));
-
-  // load withdrawal history
-  onValue(ref(db,`withdrawals/${user.uid}`),snap=>{
+  // Load withdrawal history
+  const histRef = ref(db, `withdrawals/${user.uid}`);
+  onValue(histRef, snap=>{
     withdrawHistory.innerHTML='';
     if(!snap.exists()){withdrawHistory.innerHTML='<div>No withdrawals yet</div>'; return;}
     Object.values(snap.val()).sort((a,b)=>b.time-a.time).forEach(w=>{
       let color='yellow', text='Pending';
-      if(w.status==='approved'){color='green';text='Approved'}
-      if(w.status==='rejected'){color='red';text='Rejected'}
+      if(w.status==='approved'){color='green'; text='Approved'}
+      if(w.status==='rejected'){color='red'; text='Rejected'}
       const div=document.createElement('div');
       div.className='history-item';
       div.innerHTML=`
@@ -151,11 +147,15 @@ async function loadData(){
     });
   });
 
-  loadingScreen.style.display='none';
-  main.style.opacity=1;
-  document.body.classList.remove('loading');
+  // Hide loading
+  setTimeout(()=>{
+    loadingScreen.style.display='none';
+    main.style.opacity=1;
+    document.body.classList.remove('loading');
+  },2000); // keep smooth delay
 }
 
+// Withdraw click
 btn.onclick=async()=>{
   msg.className='msg';
   const name=robloxUsername.value.trim();
@@ -168,25 +168,33 @@ btn.onclick=async()=>{
 
   btn.disabled=true;
 
-  await push(ref(db,`withdrawals/${user.uid}`),{
-    robloxUsername:name,
-    amount:amt,
-    info:extraInfo.value,
-    sendDate:sendDate.value,
-    time:Date.now(),
-    status:'pending'
-  });
+  try{
+    await push(ref(db, `withdrawals/${user.uid}`), {
+      robloxUsername:name,
+      amount:amt,
+      info:extraInfo.value,
+      sendDate:sendDate.value,
+      time:Date.now(),
+      status:'pending'
+    });
 
-  await runTransaction(ref(db,`users/${user.uid}/rbxbalance`),v=>(v||0)-amt);
+    // Deduct balance via transaction for safety
+    await runTransaction(ref(db, `users/${user.uid}/rbxbalance`), v => (v||0)-amt);
 
-  msg.classList.add('success');
-  msg.innerText='Withdrawal submitted (Pending)';
+    msg.classList.add('success');
+    msg.innerText='Withdrawal submitted (Pending)';
 
-  robloxUsername.value='';
-  withdrawAmount.value='';
-  extraInfo.value='';
-  sendDate.value='';
-  btn.disabled=false;
+    robloxUsername.value='';
+    withdrawAmount.value='';
+    extraInfo.value='';
+    sendDate.value='';
+  }catch(err){
+    console.error(err);
+    msg.classList.add('error');
+    msg.innerText='Error submitting withdrawal';
+  }finally{
+    btn.disabled=false;
+  }
 };
 </script>
 </body>
