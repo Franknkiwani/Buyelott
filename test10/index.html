@@ -739,7 +739,7 @@ window.addEventListener('keydown', e => {
 })();
 rewardPopup.style.display = 'none'; // ensure hidden on page load
 rewardMessage.textContent = '';     // clear any text
-// ====== TOP EARNERS WITH CUSTOM MODAL & DYNAMIC DROPDOWN ======
+// ====== TOP EARNERS WITH CUSTOM MODAL AND DROPDOWN ======
 const topUsersContainer = document.getElementById('topUsers');
 
 // Modal container
@@ -756,7 +756,7 @@ document.body.appendChild(modal);
 
 // Show modal helper
 function showModal(contentHTML) {
-  modal.innerHTML = ''; // clear
+  modal.innerHTML = '';
   const modalBox = document.createElement('div');
   modalBox.style.cssText = `
     position:relative;
@@ -788,7 +788,7 @@ function showModal(contentHTML) {
   modal.style.display='flex';
 }
 
-// Open donate modal with dynamic dropdown
+// Open donate modal
 function openDonateModal(recipientUser) {
   const currentUser = auth.currentUser;
 
@@ -817,23 +817,18 @@ function openDonateModal(recipientUser) {
 
   onValue(donorRef, snap => {
     const donorRbx = Number(snap.val() || 0);
-    
     if(donorRbx < 1){
       return showModal('<h3>Insufficient RBX</h3><p>You need at least 1 RBX to donate.</p>');
     }
 
-    // Build dropdown dynamically
+    // Create dropdown for donation
     let optionsHTML = '';
-    for(let i = 1; i <= donorRbx; i++){
-      optionsHTML += `<option value="${i}">${i}</option>`;
-    }
+    for(let i=1;i<=donorRbx;i++) optionsHTML += `<option value="${i}">${i}</option>`;
 
     showModal(`
       <h3>Donate RBX to ${recipientUser.name}</h3>
       <p>Recipient has: ${recipientUser.rbx} RBX<br>Your balance: ${donorRbx} RBX</p>
-      <select id="donateAmount" style="
-        width:80%; padding:6px; border-radius:8px; border:none; margin-top:8px;
-        background:#111; color:#fff;">
+      <select id="donateAmount" style="width:80%; padding:6px; border-radius:8px; margin-top:8px;">
         ${optionsHTML}
       </select>
       <div id="donateError" style="color:#ff5555; margin-top:6px; min-height:18px;"></div>
@@ -848,26 +843,21 @@ function openDonateModal(recipientUser) {
       ">Send</button>
     `);
 
-    const errorDiv = document.getElementById('donateError');
-
     document.getElementById('sendDonateBtn').onclick = async () => {
       const select = document.getElementById('donateAmount');
       const donateAmount = Number(select.value);
 
       if(!donateAmount || donateAmount < 1 || donateAmount > donorRbx){
-        errorDiv.textContent = 'Enter a valid amount!';
+        document.getElementById('donateError').textContent = 'Invalid amount!';
         return;
       }
 
-      // Update donor
       await set(donorRef, donorRbx - donateAmount);
 
-      // Update recipient
       const recipientSnap = await get(recipientRef);
       const recipientRbx = recipientSnap.exists() ? Number(recipientSnap.val() || 0) : 0;
       await set(recipientRef, recipientRbx + donateAmount);
 
-      // Log transaction
       await push(ref(db, 'transactions'), {
         from: donorUid,
         to: recipientUid,
@@ -876,12 +866,12 @@ function openDonateModal(recipientUser) {
       });
 
       modal.style.display='none';
-      loadTopEarners(); // refresh leaderboard
+      loadTopEarners();
     };
   }, {once:true});
 }
 
-// Leaderboard with donate buttons
+// Leaderboard
 function loadTopEarners() {
   const usersRef = ref(db, 'users');
 
