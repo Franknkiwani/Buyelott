@@ -1,6 +1,9 @@
 <!DOCTYPE html>  
 <html lang="en">  
 <head>  
+<script>(function(s){s.dataset.zone='9474621',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script>(function(s){s.dataset.zone='10324575',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>WATCH-4-RBX</title>  
@@ -252,7 +255,7 @@ textarea{resize:none;height:70px;}
     style="position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,0.6);color:#fff;">  
     0:00  
   </div>  
-  
+  <script>(function(s){s.dataset.zone='10324573',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
   <div style="width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;margin-top:10px;overflow:hidden;">  
     <div id="progressBar" style="height:100%;width:0%;background:red;"></div>  
   </div>  
@@ -273,39 +276,109 @@ textarea{resize:none;height:70px;}
   Start Watching  
 </button>
 </div>
- <div style="overflow:hidden; border-radius:16px; width:320px; height:50px;">
-  <script type="text/javascript">
+<!-- Live Ad Section -->
+<div id="liveAdContainer" style="overflow:hidden; border-radius:16px; width:320px; height:50px; margin:20px auto; display:none;">
+  <div id="liveAd"></div>
+</div>
+
+<script>
+const adKey = 'f17f4bf893957f37c1f0b072d1f31673';
+const adContainer = document.getElementById('liveAd');
+const wrapper = document.getElementById('liveAdContainer');
+
+let adTimer;
+
+function loadAd() {
+  wrapper.style.display = 'none'; // hide container while loading
+  adContainer.innerHTML = ''; // clear old ad
+
+  // Script 1: config
+  const s1 = document.createElement('script');
+  s1.type = 'text/javascript';
+  s1.innerHTML = `
     atOptions = {
-      'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+      'key' : '${adKey}',
       'format' : 'iframe',
       'height' : 50,
       'width' : 320,
-      'params' : {}
+      'params' : {},
+      'onLoad' : function() {
+        wrapper.style.display = 'block'; // show ad when loaded
+      }
     };
-  </script>
-  <script
-    type="text/javascript"
-    src="https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"
-  ></script>
-</div>
+  `;
+
+  // Script 2: actual ad
+  const s2 = document.createElement('script');
+  s2.type = 'text/javascript';
+  s2.src = 'https://www.highperformanceformat.com/' + adKey + '/invoke.js';
+  s2.onload = () => {
+    wrapper.style.display = 'block'; // fallback if onLoad not triggered
+    // start/refresh timer
+    if(adTimer) clearInterval(adTimer);
+    adTimer = setInterval(loadAd, 30000);
+  };
+
+  adContainer.appendChild(s1);
+  adContainer.appendChild(s2);
+}
+
+// initial load
+loadAd();
+</script>
 </div>  
 <div id="topUsers" style="margin:16px 0;"></div>
 <div style="display:flex; justify-content:center; margin:16px 0;">
-  <div style="overflow:hidden; border-radius:16px; width:300px; height:250px;">
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    </script>
-    <script
-      type="text/javascript"
-      src="https://www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"
-    ></script>
-  </div>
+<!-- Big Live Ad Section -->
+<div id="bigLiveAdContainer" style="overflow:hidden; border-radius:16px; width:300px; height:250px; margin:20px auto; display:none;">
+  <div id="bigLiveAd"></div>
+</div>
+
+<script>
+const bigAdKey = '037f6e178c935a44f2ef5ab0ce53116a';
+const bigAdContainer = document.getElementById('bigLiveAd');
+const bigWrapper = document.getElementById('bigLiveAdContainer');
+
+let bigAdTimer;
+
+function loadBigAd() {
+  bigWrapper.style.display = 'none'; // hide container while loading
+  bigAdContainer.innerHTML = ''; // clear old ad
+
+  // Script 1: config
+  const s1 = document.createElement('script');
+  s1.type = 'text/javascript';
+  s1.innerHTML = `
+    atOptions = {
+      'key' : '${bigAdKey}',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {},
+      'onLoad' : function() {
+        bigWrapper.style.display = 'block'; // show ad when loaded
+      }
+    };
+  `;
+
+  // Script 2: actual ad
+  const s2 = document.createElement('script');
+  s2.type = 'text/javascript';
+  s2.src = 'https://www.highperformanceformat.com/' + bigAdKey + '/invoke.js';
+  s2.onload = () => {
+    bigWrapper.style.display = 'block'; // fallback if onLoad not triggered
+    // start/refresh timer
+    if(bigAdTimer) clearInterval(bigAdTimer);
+    bigAdTimer = setInterval(loadBigAd, 20000);
+  };
+
+  bigAdContainer.appendChild(s1);
+  bigAdContainer.appendChild(s2);
+}
+
+// initial load
+loadBigAd();
+</script>
 </div>
 <!-- Reward Popup -->  
 <div id="rewardPopup"  
@@ -530,21 +603,6 @@ window.addEventListener('load', async () => {
 
   <!-- Top Comments -->
   <div id="topComments" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
- <div style="overflow:hidden; border-radius:16px; width:320px; height:50px;">
-  <script type="text/javascript">
-    atOptions = {
-      'key' : 'f17f4bf893957f37c1f0b072d1f31673',
-      'format' : 'iframe',
-      'height' : 50,
-      'width' : 320,
-      'params' : {}
-    };
-  </script>
-  <script
-    type="text/javascript"
-    src="https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"
-  ></script>
-</div>
 </div>
 
 <!-- FAQ Section -->
@@ -1238,5 +1296,6 @@ Promise.all(asyncTasks).then(() => {
   }, 500);
 });
 </script>  
+<script>(function(s){s.dataset.zone='10324576',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </body>  
 </html>
