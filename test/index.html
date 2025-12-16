@@ -103,6 +103,47 @@ textarea{resize:none;height:70px;}
 .error{color:#ff4d4d;}  
 .success{color:#00ff99;}  
 .history{margin-top:15px;font-size:.85rem;opacity:.8;}  
+
+/* ====== Video Container ====== */
+#videoContainer {
+  width: 90% !important;
+  max-width: 800px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Video wrapper (to keep aspect ratio) */
+#videoContainer > div:first-child {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* ====== Potential Reward Box ====== */
+#potentialReward {
+  width 90%;
+  max-width: 480px;
+  margin: 16px auto;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-weight: 700;
+}
+.section{
+  flex:0 0 48%;
+  background: rgba(25,25,35,0.6); /* slightly transparent flat background */
+  border-radius:18px;
+  padding:25px;
+  text-align:center;
+  backdrop-filter:blur(0); /* remove blur if you want */
+  box-shadow:none; /* optional: remove shadow */
+  cursor:pointer;
+}
+
 </style>  
 </head>  
 <body>  
@@ -117,15 +158,16 @@ textarea{resize:none;height:70px;}
   </div>  
 </header>  
 <!-- Top Sections Above Video -->  
-<div class="top-sections">  
-  <div class="section">  
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>  
-    <span>Redeem rewards</span>  
-  </div>  
-  <div class="section">  
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>  
-    <span>Refer & Earn</span>  
-  </div>  
+<div class="top-sections" style="display:flex; justify-content:space-between; gap:4%; margin:20px 10px;">
+  <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>
+    <span style="display:block; font-size:0.95rem; font-weight:500; color:#fff;">Redeem rewards</span>
+  </div>
+  <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>
+    <span style="display:block; font-size:0.95rem; font-weight:500; color:#fff;">Refer & Earn</span>
+  </div>
+</div>
 </div>  
 <div id="videoContainer" style="position:relative;width:100%;max-width:640px;margin:20px auto;">  
   
@@ -134,18 +176,16 @@ textarea{resize:none;height:70px;}
       poster="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg"  
       style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">  
     </video>  
-  
-    <button id="prevBtn"  
-      style="position:absolute;bottom:10px;left:10px;padding:8px 16px;border-radius:20px;border:none;background:#ff3b30;color:#fff;font-weight:600;">  
-      Previous  
-    </button>  
-  
-    <button id="nextBtn"  
-      style="position:absolute;bottom:10px;right:10px;padding:8px 16px;border-radius:20px;border:none;background:#fff;color:#000;font-weight:600;">  
-      Next  
-    </button>  
-  </div>  
-  
+  <button id="prevBtn"  
+  style="position:absolute;bottom:10px;left:10px;padding:10px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-weight:600;cursor:pointer;transition:all 0.2s;">  
+  Previous  
+</button>  
+
+<button id="nextBtn"  
+  style="position:absolute;bottom:10px;right:10px;padding:10px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-weight:600;cursor:pointer;transition:all 0.2s;">  
+  Next  
+</button>
+</div>
   <div id="timeCounter"  
     style="position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,0.6);color:#fff;">  
     0:00  
@@ -157,21 +197,24 @@ textarea{resize:none;height:70px;}
   
   <div id="loaderPill"  
     style="display:none;margin:10px auto;padding:6px 14px;border-radius:20px;background:rgba(255,0,0,0.15);color:red;">  
-    Network is slow  
+    Network is slow  please wait
   </div>  
   
-  <div id="potentialReward"  
-    style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;">  
-    <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>  
-    <div>Potential reward</div>  
-  </div>  
+ <div id="potentialReward"  
+     style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;width:80%;max-width:480px;margin-left:auto;margin-right:auto;">  
+     
+  <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>  
+  <div>Potential reward</div>  
   
-  <button id="startBtn"  
-    style="margin:15px auto 0;display:block;padding:12px 28px;border:none;border-radius:20px;background:#fff;color:#000;font-weight:600;">  
-    Start Watching  
-  </button>  
+ <button id="startBtn"  
+  style="margin:15px auto 0; display:block; width:90%; padding:12px 0; border:2px solid #fff; border-radius:20px; background:#000; color:#fff; font-weight:600; cursor:pointer;">  
+  Start Watching  
+</button>
+</div>
+  
 </div>  
 <div id="topUsers" style="margin:16px 0;"></div>
+
 <!-- Reward Popup -->  
 <div id="rewardPopup"  
   style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);  
@@ -266,7 +309,7 @@ textarea{resize:none;height:70px;}
   </div>  
 </div>  
 <!-- Comment Section inside FAQ -->
-<div id="faqComments" style="margin-top:24px;">
+<div id="faqComments" style="margin-top:24px; width:90%; margin:0 auto;">
   <h3 style="font-size:1.2rem; margin-bottom:12px; text-align:center; color:#ffcc00;">
     Leave a Comment
   </h3>
@@ -282,19 +325,68 @@ textarea{resize:none;height:70px;}
       resize:none;
       height:70px;
     "></textarea>
-    <button id="submitComment" style="
-      background:#00ffcc;
-      border:none;
-      padding:10px;
-      border-radius:12px;
-      font-weight:700;
-      cursor:pointer;
-      color:#000;
-    ">Submit</button>
+   <button id="submitComment" style="
+  background:#000;
+  color:#fff;
+  border:2px solid #fff;
+  padding:10px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+">Submit</button>
   </div>
 
   <!-- Top Comments -->
   <div id="topComments" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+</div>
+<!-- FAQ Section -->
+<div id="faqSection" style="
+  margin:24px 10px;
+  padding:16px;
+  border-radius:20px;
+  background:#000;  /* full black */
+  color:#fff;
+  text-shadow:none;
+">
+  <h2 style="
+    font-size:1.3rem;
+    margin-bottom:16px;
+    text-align:center;
+    color:#fff;
+    text-shadow:none;
+  ">
+    Frequently Asked Questions
+  </h2>
+  <div id="faqContainer" style="
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  ">
+    <!-- Example FAQ card -->
+    <div style="
+      padding:12px;
+      border-radius:16px;
+      background:#000;  /* full black */
+      color:#fff;
+      text-shadow:none;
+      box-shadow:none;
+      cursor:pointer;
+    ">
+      What is this site about?
+    </div>
+    <div style="
+      padding:12px;
+      border-radius:16px;
+      background:#000;  /* full black */
+      color:#fff;
+      text-shadow:none;
+      box-shadow:none;
+      cursor:pointer;
+    ">
+      How do I earn rewards?
+    </div>
+  </div>
+</div>
 </div>
 <script type="module">  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
@@ -742,6 +834,60 @@ function formatTimeAgo(timestamp){
 
 // Call on load
 loadTopComments();
+const faqData = [
+  { question: "How do I earn RBX?", answer: "Watch videos, complete tasks, and refer friends to earn RBX rewards." },
+  { question: "When can I withdraw my RBX?", answer: "You can withdraw once you reach the minimum of 150 RBX." },
+  { question: "Do I need a Roblox username?", answer: "Yes, you must provide your Roblox username to claim withdrawals." },
+  { question: "Can I refer multiple friends?", answer: "Absolutely! Each friend who signs up via your referral link earns you 10 RBX." },
+  { question: "Is there a limit to daily rewards?", answer: "There’s no limit, but video availability may vary." }
+];
+
+function loadFAQ() {
+  const container = document.getElementById('faqContainer');
+  container.innerHTML = ''; // Clear existing content
+
+  faqData.forEach(item => {
+    const faqCard = document.createElement('div');
+    faqCard.style.cssText = `
+      background: #000;        /* Full black background */
+      border-radius: 16px;
+      padding: 12px 16px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      color: #fff;
+      text-shadow: none;
+      box-shadow: none;
+      transition: transform 0.2s ease;
+    `;
+
+    faqCard.innerHTML = `
+      <div style="font-weight:700; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+        <span>${item.question}</span>
+        <span style="transition:0.3s;" class="arrow">&#9656;</span>
+      </div>
+      <div style="margin-top:8px; font-size:0.95rem; color:#fff; display:none;" class="answer">
+        ${item.answer}
+      </div>
+    `;
+
+    faqCard.addEventListener('click', () => {
+      const answer = faqCard.querySelector('.answer');
+      const arrow = faqCard.querySelector('.arrow');
+      if (answer.style.display === 'none') {
+        answer.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+      } else {
+        answer.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+
+    container.appendChild(faqCard);
+  });
+}
+
+// Call this wherever you want in your main script
+loadFAQ();
 </script>  
 </body>  
 </html>
