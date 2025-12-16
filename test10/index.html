@@ -1,430 +1,430 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WATCH-4-RBX</title>
-<style>
-/* Global reset & font */
-*{
-  margin:0;padding:0;box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
-  user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
-body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-header{
-  position:sticky;top:0;padding:12px 20px;
-  display:flex;justify-content:space-between;align-items:center;
-  backdrop-filter:blur(20px);background:rgba(255,255,255,0.05);
-  border-bottom:1px solid rgba(255,255,255,0.1);z-index:100;
-}
-.left{display:flex;align-items:center;gap:10px;}
-.left img{width:26px;height:26px;}
-.left h1{font-size:1.2rem;}
-
-/* Buttons */
-.register-btn{
-  background: rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.3);
-  color:#fff;font-weight:700;padding:8px 16px;border-radius:12px;
-  cursor:pointer;transition:0.3s ease;
-}
-.register-btn:hover{background: rgba(255,255,255,0.1);transform: scale(1.05);}
-.register-btn:active{transform: scale(0.95);}
-
-.rbx {
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;font-weight:700;padding:8px 16px;border-radius:12px;
-  cursor:pointer;backdrop-filter: blur(6px);transition:0.2s ease;
-}
-.rbx:hover {transform:scale(1.05);}
-.rbx:active {transform:scale(0.95);}
-
-/* User actions */
-.user-actions{display:flex;align-items:center;gap:10px;position:relative;}
-.logout-icon{width:24px;height:24px;cursor:pointer;transition:0.2s;}
-.logout-icon:hover{transform: rotate(15deg) scale(1.1);}
-.logout-menu{
-  display:none;position:absolute;right:0;top:120%;
-  background:#120000;border:1px solid rgba(255,77,77,.6);
-  border-radius:12px;padding:6px;box-shadow:0 0 15px rgba(255,77,77,.4);
-}
-.logout-menu.show{display:block;opacity:1;pointer-events:auto;transition:0.2s ease;}
-.logout-menu button{
-  background:none;border:none;color:#ff4d4d;font-weight:700;
-  padding:8px 16px;border-radius:10px;cursor:pointer;
-}
-.logout-menu button:hover{background:rgba(255,77,77,.15);}
-
-/* Modal */
-.modal{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);backdrop-filter:blur(15px);
-  z-index:200;justify-content:center;align-items:center;
-}
-.modal-box{
-  position:relative;width:90%;max-width:420px;
-  background:#0f0f0f;border-radius:18px;padding:20px;
-}
-
-/* Close button SVG top-left */
-.modal-close{
-  position:absolute;top:10px;left:10px;background:none;border:none;padding:0;cursor:pointer;
-}
-.modal-close svg{width:28px;height:28px;transition:0.2s ease;}
-.modal-close svg:hover{transform:scale(1.1);}
-
-/* Modal content */
-.balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;animation:pulse 1.2s ease infinite alternate;}
-@keyframes pulse{0%{transform:scale(1);}100%{transform:scale(1.05);}}
-.sub{text-align:center;opacity:.7;margin-bottom:10px;}
-.notice{text-align:center;font-size:.85rem;margin-bottom:15px;}
-input,textarea{
-  width:100%;background: rgba(0,0,0,0.3);
-  border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px;color:#fff;margin-bottom:10px;
-}
-input:focus,textarea:focus{border-color:#fff;outline:none;}
-textarea{resize:none;height:70px;}
-.confirm{
-  width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;
-  cursor:pointer;background:#fff;color:#000;transition:0.2s;
-}
-.confirm:hover{transform:scale(1.03);}
-.msg{text-align:center;margin-top:10px;font-weight:600;}
-.error{color:#ff4d4d;}
-.success{color:#00ff99;}
-.history{margin-top:15px;font-size:.85rem;opacity:.8;}
-</style>
-</head>
-<body>
-
-<header>
-  <div class="left">
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/robux.png">
-    <h1>WATCH-4-RBX</h1>
-  </div>
-  <div id="headerRight">
-    <button class="register-btn" onclick="location.href='register/'">REGISTER</button>
-  </div>
-</header>
-<!-- Top Sections Above Video -->
-<div class="top-sections">
-  <div class="section">
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>
-    <span>Redeem rewards</span>
-  </div>
-  <div class="section">
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>
-    <span>Refer & Earn</span>
-  </div>
-</div>
-<div id="videoContainer" style="position:relative;width:100%;max-width:640px;margin:20px auto;">
-
-  <div style="position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:20px;overflow:hidden;">
-    <video id="player"
-      poster="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg"
-      style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
-    </video>
-
-    <button id="prevBtn"
-      style="position:absolute;bottom:10px;left:10px;padding:8px 16px;border-radius:20px;border:none;background:#ff3b30;color:#fff;font-weight:600;">
-      Previous
-    </button>
-
-    <button id="nextBtn"
-      style="position:absolute;bottom:10px;right:10px;padding:8px 16px;border-radius:20px;border:none;background:#fff;color:#000;font-weight:600;">
-      Next
-    </button>
-  </div>
-
-  <div id="timeCounter"
-    style="position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,0.6);color:#fff;">
-    0:00
-  </div>
-
-  <div style="width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;margin-top:10px;overflow:hidden;">
-    <div id="progressBar" style="height:100%;width:0%;background:red;"></div>
-  </div>
-
-  <div id="loaderPill"
-    style="display:none;margin:10px auto;padding:6px 14px;border-radius:20px;background:rgba(255,0,0,0.15);color:red;">
-    Network is slow
-  </div>
-
-  <div id="potentialReward"
-    style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;">
-    <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>
-    <div>Potential reward</div>
-  </div>
-
-  <button id="startBtn"
-    style="margin:15px auto 0;display:block;padding:12px 28px;border:none;border-radius:20px;background:#fff;color:#000;font-weight:600;">
-    Start Watching
-  </button>
-</div>
-
-<!-- Reward Popup -->
-<div id="rewardPopup"
-  style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:rgba(20,20,20,0.95);padding:28px;border-radius:26px;
-  min-width:260px;display:flex;flex-direction:column;align-items:center;color:#fff;">
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>WATCH-4-RBX</title>  
+<style>  
+/* Global reset & font */  
+*{  
+  margin:0;padding:0;box-sizing:border-box;  
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;  
+  user-select:none;  
+  -webkit-tap-highlight-color:transparent;  
+}  
+body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}  
+header{  
+  position:sticky;top:0;padding:12px 20px;  
+  display:flex;justify-content:space-between;align-items:center;  
+  backdrop-filter:blur(20px);background:rgba(255,255,255,0.05);  
+  border-bottom:1px solid rgba(255,255,255,0.1);z-index:100;  
+}  
+.left{display:flex;align-items:center;gap:10px;}  
+.left img{width:26px;height:26px;}  
+.left h1{font-size:1.2rem;}  
   
-  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:60px;margin-bottom:14px;">
-  <div id="rewardMessage" style="font-size:20px;font-weight:700;">You earned 0 RBX</div>
-  <div id="loginNotice" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;">
-    Log in to save your RBX
-  </div>
-
-  <button id="rewardOkButton"
-    style="margin-top:16px;padding:10px 22px;border:none;border-radius:14px;
-    background:#007aff;color:#fff;font-weight:600;">
-    OK
-  </button>
-</div>
-
-
-<style>
-.top-sections{
-  display:flex;
-  justify-content:space-between;
-  margin:20px 10px;
-  gap:4%;
-}
-.section{
-  flex:0 0 48%;
-  background: rgba(25,25,35,0.8);
-  border-radius:18px;
-  padding:25px;
-  text-align:center;
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.1);
-  box-shadow:0 8px 20px rgba(0,0,0,0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor:pointer;
-}
-.section:hover{
-  transform:translateY(-4px);
-  box-shadow:0 12px 30px rgba(0,0,0,0.4);
-}
-.section img{
-  width:36px;
-  height:36px;
-  margin-bottom:10px;
-}
-.section span{
-  display:block;
-  font-size:0.95rem;
-  font-weight:500;
-  color:#fff;
-}
-</style>
-<!-- WITHDRAW MODAL -->
-<div class="modal" id="withdrawModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-        <path fill="#fb7369" d="m68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"></path>
-      </svg>
-    </button>
-    <div class="balance-big" id="bigBal">0 RBX</div>
-    <div class="sub">Available balance</div>
-    <div class="notice">Once you reach <b>150 RBX</b>, you can redeem for real Robux</div>
-    <input id="robloxUser" placeholder="@roblox username">
-    <textarea id="extraInfo" placeholder="More info (optional)"></textarea>
-    <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>
-    <div class="msg" id="msg"></div>
-    <div class="history" id="history"></div>
-  </div>
-</div>
-
-<!-- Referral Modal -->
-<div class="modal" id="referModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="document.getElementById('referModal').style.display='none'">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-        <path fill="#fb7369" d="M68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"/>
-      </svg>
-    </button>
-    <div id="referContent" style="text-align:center;">
-      <h2>Refer & Earn</h2>
-      <div id="referMsg" style="margin-bottom:10px;"></div>
-      <input id="referLink" readonly style="margin-bottom:10px;">
-      <button class="confirm" id="copyReferBtn">Copy Link</button>
-      <div style="margin-top:15px;">
-        <span id="referStats">Referred Users: 0 | Clicks: 0 | RBX Earned: 0</span>
-      </div>
-    </div>
-  </div>
-</div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-// ====== Firebase Config ======
-const firebaseConfig = {
-  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-  projectId: "itzhoyoo-f9f7e",
-  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-  messagingSenderId: "1094792075584",
-  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
-};
-
-// ====== Initialize Firebase ======
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-let currentUser = null, balance = 0;
-
-// ====== DOM Elements ======
-const headerRight = document.getElementById("headerRight");
-const withdrawModal = document.getElementById("withdrawModal");
-const referModal = document.getElementById("referModal");
-const referMsg = document.getElementById("referMsg");
-const referLinkInput = document.getElementById("referLink");
-const referStats = document.getElementById("referStats");
-const copyReferBtn = document.getElementById("copyReferBtn");
-const sections = document.querySelectorAll('.top-sections .section');
-
-// ====== Toast Function ======
-function showToast(msg) {
-  let t = document.getElementById('toast');
-  if(!t){
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.style.cssText = `
-      position:fixed;bottom:20px;left:50%;
-      transform:translateX(-50%);
-      background:rgba(255,255,255,0.15);
-      backdrop-filter:blur(12px);
-      color:#fff;padding:12px 24px;border-radius:20px;font-weight:700;opacity:0;transition:0.3s;
-      z-index:999;
-    `;
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = 1;
-  setTimeout(() => { t.style.opacity = 0; }, 2500);
-}
-
-// ====== Handle Auth State ======
-onAuthStateChanged(auth, user => {
-  if(!user){
-    headerRight.innerHTML = `<button class="register-btn" onclick="location.href='register/'">REGISTER</button>`;
-    currentUser = null;
-    return;
-  }
-
-  currentUser = user;
-
-  // Listen to RBX balance
-  const balRef = ref(db, `users/${user.uid}/rbxbalance`);
-  onValue(balRef, snap => {
-    balance = snap.exists() ? snap.val() : 0;
-    const bigBal = document.getElementById("bigBal");
-    if(bigBal) bigBal.innerText = balance + " RBX";
-    const rbxBtn = document.querySelector(".rbx");
-    if(rbxBtn) rbxBtn.innerText = balance + " RBX / GET";
-  });
-
-  headerRight.innerHTML = `
-    <div class="user-actions">
-      <div class="rbx" onclick="openWithdrawModal()">${balance} RBX / GET</div>
-      <img class="logout-icon" src="https://i.imgur.com/Lvfvc4a.png" onclick="toggleLogout()">
-      <div class="logout-menu" id="logoutMenu">
-        <button onclick="doLogout()">Logout</button>
-      </div>
-    </div>`;
-});
-
-// ====== Withdraw Modal Functions ======
-window.openWithdrawModal = () => { if(withdrawModal) withdrawModal.style.display = 'flex'; };
-
-window.confirmWithdraw = async () => {
-  const msg = document.getElementById("msg");
-  msg.className = "msg";
-  const robloxUser = document.getElementById("robloxUser");
-  const extraInfo = document.getElementById("extraInfo");
-
-  if(balance < 150){ msg.textContent = "You need at least 150 RBX"; msg.classList.add("error"); return; }
-  if(!robloxUser.value){ msg.textContent = "Please enter your Roblox username"; msg.classList.add("error"); return; }
-
-  await push(ref(db, `confirmedrbx/${currentUser.uid}`), {
-    amount: 150,
-    roblox: robloxUser.value,
-    info: extraInfo.value,
-    status: "pending",
-    time: Date.now()
-  });
-  msg.textContent = "Withdrawal submitted"; msg.classList.add("success");
-  robloxUser.value = ""; extraInfo.value = "";
-};
-
-// ====== Logout Functions ======
-window.toggleLogout = () => { 
-  const menu = document.getElementById("logoutMenu"); 
-  if(menu) menu.classList.toggle('show'); 
-};
-
-window.doLogout = async () => { await signOut(auth); location.reload(); };
-
-// ====== Top Sections Clicks ======
-sections.forEach(section => {
-  const label = section.querySelector('span').innerText;
-
-  if(label === "Redeem rewards"){
-    section.addEventListener('click', openWithdrawModal);
-  }
-
-  if(label === "Refer & Earn"){
-    section.addEventListener('click', () => {
-      if(!currentUser){
-        referMsg.textContent = "Login to get your referral link";
-        referLinkInput.value = "";
-      } else {
-        referMsg.textContent = "Share your link & earn 10 RBX per user!";
-        const link = `${location.origin}/refer?uid=${currentUser.uid}`;
-        referLinkInput.value = link;
-
-        const refRef = ref(db, `referrals/${currentUser.uid}`);
-        onValue(refRef, snap => {
-          let data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
-          referStats.textContent = `Referred Users: ${data.users||0} | Clicks: ${data.clicks||0} | RBX Earned: ${data.rbx||0}`;
-        });
-      }
-      referModal.style.display = 'flex';
-    });
-  }
-});
-
-// ====== Copy Referral Link ======
-copyReferBtn?.addEventListener('click', () => {
-  if(!referLinkInput.value) return;
-  navigator.clipboard.writeText(referLinkInput.value)
-    .then(() => showToast("Referral link copied!"))
-    .catch(()=> showToast("Failed to copy link"));
-});
-
-// ====== Global Click & Escape ======
-window.addEventListener('click', e => {
-  if(e.target === withdrawModal) withdrawModal.style.display = 'none';
-  if(e.target === referModal) referModal.style.display = 'none';
-  const menu = document.getElementById("logoutMenu");
-  if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.classList.remove('show');
-});
-
-window.addEventListener('keydown', e => {
-  if(e.key === 'Escape') {
-    if(withdrawModal) withdrawModal.style.display='none';
-    if(referModal) referModal.style.display='none';
-  }
-});
-
+/* Buttons */  
+.register-btn{  
+  background: rgba(255,255,255,0.05);  
+  border:1px solid rgba(255,255,255,0.3);  
+  color:#fff;font-weight:700;padding:8px 16px;border-radius:12px;  
+  cursor:pointer;transition:0.3s ease;  
+}  
+.register-btn:hover{background: rgba(255,255,255,0.1);transform: scale(1.05);}  
+.register-btn:active{transform: scale(0.95);}  
+  
+.rbx {  
+  background: rgba(0,0,0,0.35);  
+  border: 1px solid rgba(255,255,255,0.2);  
+  color: #fff;font-weight:700;padding:8px 16px;border-radius:12px;  
+  cursor:pointer;backdrop-filter: blur(6px);transition:0.2s ease;  
+}  
+.rbx:hover {transform:scale(1.05);}  
+.rbx:active {transform:scale(0.95);}  
+  
+/* User actions */  
+.user-actions{display:flex;align-items:center;gap:10px;position:relative;}  
+.logout-icon{width:24px;height:24px;cursor:pointer;transition:0.2s;}  
+.logout-icon:hover{transform: rotate(15deg) scale(1.1);}  
+.logout-menu{  
+  display:none;position:absolute;right:0;top:120%;  
+  background:#120000;border:1px solid rgba(255,77,77,.6);  
+  border-radius:12px;padding:6px;box-shadow:0 0 15px rgba(255,77,77,.4);  
+}  
+.logout-menu.show{display:block;opacity:1;pointer-events:auto;transition:0.2s ease;}  
+.logout-menu button{  
+  background:none;border:none;color:#ff4d4d;font-weight:700;  
+  padding:8px 16px;border-radius:10px;cursor:pointer;  
+}  
+.logout-menu button:hover{background:rgba(255,77,77,.15);}  
+  
+/* Modal */  
+.modal{  
+  display:none;position:fixed;inset:0;  
+  background:rgba(0,0,0,.7);backdrop-filter:blur(15px);  
+  z-index:200;justify-content:center;align-items:center;  
+}  
+.modal-box{  
+  position:relative;width:90%;max-width:420px;  
+  background:#0f0f0f;border-radius:18px;padding:20px;  
+}  
+  
+/* Close button SVG top-left */  
+.modal-close{  
+  position:absolute;top:10px;left:10px;background:none;border:none;padding:0;cursor:pointer;  
+}  
+.modal-close svg{width:28px;height:28px;transition:0.2s ease;}  
+.modal-close svg:hover{transform:scale(1.1);}  
+  
+/* Modal content */  
+.balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;animation:pulse 1.2s ease infinite alternate;}  
+@keyframes pulse{0%{transform:scale(1);}100%{transform:scale(1.05);}}  
+.sub{text-align:center;opacity:.7;margin-bottom:10px;}  
+.notice{text-align:center;font-size:.85rem;margin-bottom:15px;}  
+input,textarea{  
+  width:100%;background: rgba(0,0,0,0.3);  
+  border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:10px;color:#fff;margin-bottom:10px;  
+}  
+input:focus,textarea:focus{border-color:#fff;outline:none;}  
+textarea{resize:none;height:70px;}  
+.confirm{  
+  width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;  
+  cursor:pointer;background:#fff;color:#000;transition:0.2s;  
+}  
+.confirm:hover{transform:scale(1.03);}  
+.msg{text-align:center;margin-top:10px;font-weight:600;}  
+.error{color:#ff4d4d;}  
+.success{color:#00ff99;}  
+.history{margin-top:15px;font-size:.85rem;opacity:.8;}  
+</style>  
+</head>  
+<body>  
+  
+<header>  
+  <div class="left">  
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/robux.png">  
+    <h1>WATCH-4-RBX</h1>  
+  </div>  
+  <div id="headerRight">  
+    <button class="register-btn" onclick="location.href='register/'">REGISTER</button>  
+  </div>  
+</header>  
+<!-- Top Sections Above Video -->  
+<div class="top-sections">  
+  <div class="section">  
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>  
+    <span>Redeem rewards</span>  
+  </div>  
+  <div class="section">  
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>  
+    <span>Refer & Earn</span>  
+  </div>  
+</div>  
+<div id="videoContainer" style="position:relative;width:100%;max-width:640px;margin:20px auto;">  
+  
+  <div style="position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:20px;overflow:hidden;">  
+    <video id="player"  
+      poster="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg"  
+      style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">  
+    </video>  
+  
+    <button id="prevBtn"  
+      style="position:absolute;bottom:10px;left:10px;padding:8px 16px;border-radius:20px;border:none;background:#ff3b30;color:#fff;font-weight:600;">  
+      Previous  
+    </button>  
+  
+    <button id="nextBtn"  
+      style="position:absolute;bottom:10px;right:10px;padding:8px 16px;border-radius:20px;border:none;background:#fff;color:#000;font-weight:600;">  
+      Next  
+    </button>  
+  </div>  
+  
+  <div id="timeCounter"  
+    style="position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,0.6);color:#fff;">  
+    0:00  
+  </div>  
+  
+  <div style="width:100%;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;margin-top:10px;overflow:hidden;">  
+    <div id="progressBar" style="height:100%;width:0%;background:red;"></div>  
+  </div>  
+  
+  <div id="loaderPill"  
+    style="display:none;margin:10px auto;padding:6px 14px;border-radius:20px;background:rgba(255,0,0,0.15);color:red;">  
+    Network is slow  
+  </div>  
+  
+  <div id="potentialReward"  
+    style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;">  
+    <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>  
+    <div>Potential reward</div>  
+  </div>  
+  
+  <button id="startBtn"  
+    style="margin:15px auto 0;display:block;padding:12px 28px;border:none;border-radius:20px;background:#fff;color:#000;font-weight:600;">  
+    Start Watching  
+  </button>  
+</div>  
+  
+<!-- Reward Popup -->  
+<div id="rewardPopup"  
+  style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);  
+  background:rgba(20,20,20,0.95);padding:28px;border-radius:26px;  
+  min-width:260px;display:flex;flex-direction:column;align-items:center;color:#fff;">  
+    
+  <img src="https://img.icons8.com/clouds/100/robux.png" style="width:60px;margin-bottom:14px;">  
+  <div id="rewardMessage" style="font-size:20px;font-weight:700;">You earned 0 RBX</div>  
+  <div id="loginNotice" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;">  
+    Log in to save your RBX  
+  </div>  
+  
+  <button id="rewardOkButton"  
+    style="margin-top:16px;padding:10px 22px;border:none;border-radius:14px;  
+    background:#007aff;color:#fff;font-weight:600;">  
+    OK  
+  </button>  
+</div>  
+  
+  
+<style>  
+.top-sections{  
+  display:flex;  
+  justify-content:space-between;  
+  margin:20px 10px;  
+  gap:4%;  
+}  
+.section{  
+  flex:0 0 48%;  
+  background: rgba(25,25,35,0.8);  
+  border-radius:18px;  
+  padding:25px;  
+  text-align:center;  
+  backdrop-filter:blur(10px);  
+  border:1px solid rgba(255,255,255,0.1);  
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);  
+  transition: transform 0.2s ease, box-shadow 0.2s ease;  
+  cursor:pointer;  
+}  
+.section:hover{  
+  transform:translateY(-4px);  
+  box-shadow:0 12px 30px rgba(0,0,0,0.4);  
+}  
+.section img{  
+  width:36px;  
+  height:36px;  
+  margin-bottom:10px;  
+}  
+.section span{  
+  display:block;  
+  font-size:0.95rem;  
+  font-weight:500;  
+  color:#fff;  
+}  
+</style>  
+<!-- WITHDRAW MODAL -->  
+<div class="modal" id="withdrawModal">  
+  <div class="modal-box">  
+    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">  
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">  
+        <path fill="#fb7369" d="m68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"></path>  
+      </svg>  
+    </button>  
+    <div class="balance-big" id="bigBal">0 RBX</div>  
+    <div class="sub">Available balance</div>  
+    <div class="notice">Once you reach <b>150 RBX</b>, you can redeem for real Robux</div>  
+    <input id="robloxUser" placeholder="@roblox username">  
+    <textarea id="extraInfo" placeholder="More info (optional)"></textarea>  
+    <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>  
+    <div class="msg" id="msg"></div>  
+    <div class="history" id="history"></div>  
+  </div>  
+</div>  
+  
+<!-- Referral Modal -->  
+<div class="modal" id="referModal">  
+  <div class="modal-box">  
+    <button class="modal-close" onclick="document.getElementById('referModal').style.display='none'">  
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">  
+        <path fill="#fb7369" d="M68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"/>  
+      </svg>  
+    </button>  
+    <div id="referContent" style="text-align:center;">  
+      <h2>Refer & Earn</h2>  
+      <div id="referMsg" style="margin-bottom:10px;"></div>  
+      <input id="referLink" readonly style="margin-bottom:10px;">  
+      <button class="confirm" id="copyReferBtn">Copy Link</button>  
+      <div style="margin-top:15px;">  
+        <span id="referStats">Referred Users: 0 | Clicks: 0 | RBX Earned: 0</span>  
+      </div>  
+    </div>  
+  </div>  
+</div>  
+<script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
+import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";  
+  
+// ====== Firebase Config ======  
+const firebaseConfig = {  
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",  
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",  
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",  
+  projectId: "itzhoyoo-f9f7e",  
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",  
+  messagingSenderId: "1094792075584",  
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"  
+};  
+  
+// ====== Initialize Firebase ======  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const db = getDatabase(app);  
+  
+let currentUser = null, balance = 0;  
+  
+// ====== DOM Elements ======  
+const headerRight = document.getElementById("headerRight");  
+const withdrawModal = document.getElementById("withdrawModal");  
+const referModal = document.getElementById("referModal");  
+const referMsg = document.getElementById("referMsg");  
+const referLinkInput = document.getElementById("referLink");  
+const referStats = document.getElementById("referStats");  
+const copyReferBtn = document.getElementById("copyReferBtn");  
+const sections = document.querySelectorAll('.top-sections .section');  
+  
+// ====== Toast Function ======  
+function showToast(msg) {  
+  let t = document.getElementById('toast');  
+  if(!t){  
+    t = document.createElement('div');  
+    t.id = 'toast';  
+    t.style.cssText = `  
+      position:fixed;bottom:20px;left:50%;  
+      transform:translateX(-50%);  
+      background:rgba(255,255,255,0.15);  
+      backdrop-filter:blur(12px);  
+      color:#fff;padding:12px 24px;border-radius:20px;font-weight:700;opacity:0;transition:0.3s;  
+      z-index:999;  
+    `;  
+    document.body.appendChild(t);  
+  }  
+  t.textContent = msg;  
+  t.style.opacity = 1;  
+  setTimeout(() => { t.style.opacity = 0; }, 2500);  
+}  
+  
+// ====== Handle Auth State ======  
+onAuthStateChanged(auth, user => {  
+  if(!user){  
+    headerRight.innerHTML = `<button class="register-btn" onclick="location.href='register/'">REGISTER</button>`;  
+    currentUser = null;  
+    return;  
+  }  
+  
+  currentUser = user;  
+  
+  // Listen to RBX balance  
+  const balRef = ref(db, `users/${user.uid}/rbxbalance`);  
+  onValue(balRef, snap => {  
+    balance = snap.exists() ? snap.val() : 0;  
+    const bigBal = document.getElementById("bigBal");  
+    if(bigBal) bigBal.innerText = balance + " RBX";  
+    const rbxBtn = document.querySelector(".rbx");  
+    if(rbxBtn) rbxBtn.innerText = balance + " RBX / GET";  
+  });  
+  
+  headerRight.innerHTML = `  
+    <div class="user-actions">  
+      <div class="rbx" onclick="openWithdrawModal()">${balance} RBX / GET</div>  
+      <img class="logout-icon" src="https://i.imgur.com/Lvfvc4a.png" onclick="toggleLogout()">  
+      <div class="logout-menu" id="logoutMenu">  
+        <button onclick="doLogout()">Logout</button>  
+      </div>  
+    </div>`;  
+});  
+  
+// ====== Withdraw Modal Functions ======  
+window.openWithdrawModal = () => { if(withdrawModal) withdrawModal.style.display = 'flex'; };  
+  
+window.confirmWithdraw = async () => {  
+  const msg = document.getElementById("msg");  
+  msg.className = "msg";  
+  const robloxUser = document.getElementById("robloxUser");  
+  const extraInfo = document.getElementById("extraInfo");  
+  
+  if(balance < 150){ msg.textContent = "You need at least 150 RBX"; msg.classList.add("error"); return; }  
+  if(!robloxUser.value){ msg.textContent = "Please enter your Roblox username"; msg.classList.add("error"); return; }  
+  
+  await push(ref(db, `confirmedrbx/${currentUser.uid}`), {  
+    amount: 150,  
+    roblox: robloxUser.value,  
+    info: extraInfo.value,  
+    status: "pending",  
+    time: Date.now()  
+  });  
+  msg.textContent = "Withdrawal submitted"; msg.classList.add("success");  
+  robloxUser.value = ""; extraInfo.value = "";  
+};  
+  
+// ====== Logout Functions ======  
+window.toggleLogout = () => {   
+  const menu = document.getElementById("logoutMenu");   
+  if(menu) menu.classList.toggle('show');   
+};  
+  
+window.doLogout = async () => { await signOut(auth); location.reload(); };  
+  
+// ====== Top Sections Clicks ======  
+sections.forEach(section => {  
+  const label = section.querySelector('span').innerText;  
+  
+  if(label === "Redeem rewards"){  
+    section.addEventListener('click', openWithdrawModal);  
+  }  
+  
+  if(label === "Refer & Earn"){  
+    section.addEventListener('click', () => {  
+      if(!currentUser){  
+        referMsg.textContent = "Login to get your referral link";  
+        referLinkInput.value = "";  
+      } else {  
+        referMsg.textContent = "Share your link & earn 10 RBX per user!";  
+        const link = `${location.origin}/refer?uid=${currentUser.uid}`;  
+        referLinkInput.value = link;  
+  
+        const refRef = ref(db, `referrals/${currentUser.uid}`);  
+        onValue(refRef, snap => {  
+          let data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};  
+          referStats.textContent = `Referred Users: ${data.users||0} | Clicks: ${data.clicks||0} | RBX Earned: ${data.rbx||0}`;  
+        });  
+      }  
+      referModal.style.display = 'flex';  
+    });  
+  }  
+});  
+  
+// ====== Copy Referral Link ======  
+copyReferBtn?.addEventListener('click', () => {  
+  if(!referLinkInput.value) return;  
+  navigator.clipboard.writeText(referLinkInput.value)  
+    .then(() => showToast("Referral link copied!"))  
+    .catch(()=> showToast("Failed to copy link"));  
+});  
+  
+// ====== Global Click & Escape ======  
+window.addEventListener('click', e => {  
+  if(e.target === withdrawModal) withdrawModal.style.display = 'none';  
+  if(e.target === referModal) referModal.style.display = 'none';  
+  const menu = document.getElementById("logoutMenu");  
+  if(menu && !menu.contains(e.target) && e.target.closest('.logout-icon')===null) menu.classList.remove('show');  
+});  
+  
+window.addEventListener('keydown', e => {  
+  if(e.key === 'Escape') {  
+    if(withdrawModal) withdrawModal.style.display='none';  
+    if(referModal) referModal.style.display='none';  
+  }  
+});  
+  
 /* ================= VIDEO PLAYER ================= */
 (() => {
   const originalVideos = [
@@ -436,9 +436,11 @@ window.addEventListener('keydown', e => {
     "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
   ];
 
-  let shuffledVideos = [...originalVideos].sort(()=>Math.random()-0.5);
+  let shuffledVideos = [...originalVideos].sort(() => Math.random() - 0.5);
   let currentIndex = 0;
-  let countdownInterval, videoDuration=0, remaining=0, videoCompleted=false;
+
+  let videoDuration = 0;
+  let videoCompleted = false;
 
   const player = document.getElementById('player');
   const startBtn = document.getElementById('startBtn');
@@ -452,102 +454,122 @@ window.addEventListener('keydown', e => {
   const rewardOkButton = document.getElementById('rewardOkButton');
   const loaderPill = document.getElementById('loaderPill');
 
-  function loadVideo(index){
-    clearInterval(countdownInterval);
+  /* ================= CORE ================= */
+
+  function loadVideo(index) {
     videoCompleted = false;
+
     progressBar.style.width = '0%';
-    rewardNumber.textContent = '0';
     timeCounter.textContent = '0:00';
+    rewardNumber.textContent = '0';
+
     player.pause();
     player.currentTime = 0;
     player.src = shuffledVideos[index];
     player.load();
+
     startBtn.style.display = 'block';
   }
 
-  function startCountdown(){
-    clearInterval(countdownInterval);
-    remaining = videoDuration;
-    updateTime();
-    countdownInterval = setInterval(()=>{
-      if(remaining > 0){
-        remaining--;
-        updateTime();
-        progressBar.style.width = ((videoDuration - remaining)/videoDuration*100) + '%';
-      }
-      if(remaining <=0){
-        clearInterval(countdownInterval);
-        videoCompleted = true;
-      }
-    },1000);
-  }
+  /* ================= VIDEO META ================= */
 
-  function updateTime(){
-    timeCounter.textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
-  }
-
-  // ====== RBX Reward Function (transaction safe) ======
-  function saveRBXReward(earned){
-    const user = auth.currentUser;
-    if(!user) return;
-
-    const balRef = ref(db, `users/${user.uid}/rbxbalance`);
-    runTransaction(balRef, current => {
-      return (current || 0) + earned;
-    }).then(() => {
-      const bigBal = document.getElementById("bigBal");
-      if(bigBal) bigBal.innerText = balance + earned + " RBX"; // temporary visual update
-      const rbxBtn = document.querySelector(".rbx");
-      if(rbxBtn) rbxBtn.innerText = balance + earned + " RBX / GET";
-    }).catch(err => console.error("Failed to update balance:", err));
-  }
-
-  /* ================= EVENTS ================= */
-  player.addEventListener('loadedmetadata', ()=>{
+  player.addEventListener('loadedmetadata', () => {
     videoDuration = Math.floor(player.duration);
-    if(!videoDuration || isNaN(videoDuration)) return;
-    rewardNumber.textContent = Math.ceil(videoDuration/10);
-    startCountdown();
+    if (!videoDuration || isNaN(videoDuration)) return;
+
+    rewardNumber.textContent = Math.ceil(videoDuration / 10);
   });
 
-  startBtn.addEventListener('click', ()=>{
-    startBtn.style.display='none';
-    player.play();
+  /* ================= START ================= */
+
+  startBtn.addEventListener('click', async () => {
+    startBtn.style.display = 'none';
+    try {
+      await player.play();
+    } catch {
+      startBtn.style.display = 'block';
+    }
   });
 
-  player.addEventListener('ended', ()=>{
-    if(!videoCompleted) return;
-    const earned = Math.ceil(videoDuration/10);
+  /* ================= HEARTBEAT (THE ONLY TIMER) ================= */
+
+  player.addEventListener('timeupdate', () => {
+    if (!videoDuration) return;
+
+    const watched = Math.floor(player.currentTime);
+    const remaining = Math.max(videoDuration - watched, 0);
+
+    // Countdown
+    timeCounter.textContent =
+      `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+
+    // Progress bar
+    progressBar.style.width =
+      (watched / videoDuration * 100) + '%';
+
+    // Completion flag
+    if (remaining === 0) {
+      videoCompleted = true;
+    }
+  });
+
+  /* ================= END / REWARD ================= */
+
+  player.addEventListener('ended', () => {
+    if (!videoCompleted) return;
+
+    const earned = Math.ceil(videoDuration / 10);
     rewardMessage.textContent = `You earned ${earned} RBX`;
-    rewardPopup.style.display='flex';
+    rewardPopup.style.display = 'flex';
     saveRBXReward(earned);
   });
 
-  rewardOkButton.addEventListener('click', ()=>{
-    rewardPopup.style.display='none';
+  rewardOkButton.addEventListener('click', () => {
+    rewardPopup.style.display = 'none';
     nextVideo();
   });
 
-  nextBtn.addEventListener('click', ()=> nextVideo());
-  prevBtn.addEventListener('click', ()=> prevVideo());
+  /* ================= NAVIGATION ================= */
 
-  function nextVideo(){
-    currentIndex++;
-    if(currentIndex >= shuffledVideos.length) currentIndex = 0;
+  function nextVideo() {
+    currentIndex = (currentIndex + 1) % shuffledVideos.length;
     loadVideo(currentIndex);
   }
 
-  function prevVideo(){
-    currentIndex--;
-    if(currentIndex < 0) currentIndex = shuffledVideos.length - 1;
+  function prevVideo() {
+    currentIndex =
+      (currentIndex - 1 + shuffledVideos.length) % shuffledVideos.length;
     loadVideo(currentIndex);
   }
 
-  player.addEventListener('waiting', ()=> loaderPill.style.display='block');
-  player.addEventListener('playing', ()=> loaderPill.style.display='none');
+  nextBtn.addEventListener('click', nextVideo);
+  prevBtn.addEventListener('click', prevVideo);
+
+  /* ================= LOADER ================= */
+
+  player.addEventListener('waiting', () => {
+    loaderPill.style.display = 'block';
+  });
+
+  player.addEventListener('playing', () => {
+    loaderPill.style.display = 'none';
+  });
+
+  /* ================= RBX SAVE (SAFE) ================= */
+
+  function saveRBXReward(earned) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const balRef = ref(db, `users/${user.uid}/rbxbalance`);
+    runTransaction(balRef, current => (current || 0) + earned)
+      .catch(err => console.error("RBX update failed:", err));
+  }
+
+  /* ================= INIT ================= */
 
   loadVideo(currentIndex);
 })();
-</script>
-</body>
+</script>  
+</body>  
 </html>
