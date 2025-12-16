@@ -13,7 +13,52 @@
   .msg-card.show {opacity:1; transform:translateY(0);}
   .spinner {margin:20px auto; width:36px; height:36px; border:4px solid rgba(255,255,255,0.2); border-top:4px solid #fff; border-radius:50%; animation:spin 1s linear infinite;}
   @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-  .error-fullscreen {position:fixed; top:0; left:0; width:100%; height:100%; background:#ff0000; display:flex; justify-content:center; align-items:center; color:#fff; font-size:22px; text-align:center; z-index:999; padding:20px;}
+  
+  /* Popup modal */
+  .modal-overlay {
+    position: fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.show {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .modal {
+    background: rgba(255,255,255,0.08);
+    border-radius:20px;
+    backdrop-filter: blur(25px);
+    padding:25px 20px;
+    max-width:320px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 15px 35px rgba(0,0,0,0.4);
+    animation: slideIn 0.4s ease forwards;
+  }
+  @keyframes slideIn {
+    0% { transform: translateY(-20px); opacity:0; }
+    100% { transform: translateY(0); opacity:1; }
+  }
+  .modal img { width:80px; margin-bottom:15px; }
+  .modal h2 { font-size:18px; margin-bottom:10px; }
+  .modal p { font-size:14px; line-height:1.4; color:#ddd; margin-bottom:20px; }
+  .modal button {
+    background:#007aff;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:12px;
+    font-size:16px;
+    cursor:pointer;
+    transition: background 0.2s;
+  }
+  .modal button:hover { background:#005ecb; }
 </style>
 </head>
 <body>
@@ -27,8 +72,14 @@
   </div>
 </div>
 
-<div id="errorScreen" class="error-fullscreen" style="display:none;">
-  ❌ Error: You cannot claim RBX again! <br> Either it's your own referral or your device already claimed.
+<!-- Modal -->
+<div id="modal" class="modal-overlay">
+  <div class="modal">
+    <img src="data:image/png;base64,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">
+    <h2>Referral Cannot Be Claimed</h2>
+    <p>You have already claimed this referral or it's your own link. You cannot claim RBX multiple times.</p>
+    <button id="goBackBtn">Go Back</button>
+  </div>
 </div>
 
 <script type="module">
@@ -36,7 +87,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebas
 import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// ===== Firebase Config =====
 const firebaseConfig = {
   apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
   authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
@@ -47,45 +97,38 @@ const firebaseConfig = {
   appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
 };
 
-// ===== Initialize Firebase =====
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-const statusCard = document.getElementById('statusMsg');
-const msgText = document.getElementById('msgText');
-const errorScreen = document.getElementById('errorScreen');
+const modal = document.getElementById('modal');
+const goBackBtn = document.getElementById('goBackBtn');
 
-setTimeout(()=>statusCard.classList.add('show'), 50);
+goBackBtn.addEventListener('click', ()=>window.location.href='https://otieu.com/4/7950037');
 
 const params = new URLSearchParams(window.location.search);
 const refUID = params.get('uid');
 
-// Simple device check using localStorage
+// Device check
 const deviceKey = 'referral_claimed_' + refUID;
 if(localStorage.getItem(deviceKey)){
-  errorScreen.style.display = 'flex';
-  statusCard.style.display = 'none';
+  modal.classList.add('show');
 }
 
 onAuthStateChanged(auth, async (user)=>{
   if(!user){
-    msgText.innerText = "Please login first!";
+    modal.classList.add('show');
     return;
   }
 
   const currentUID = user.uid;
-
-  // OWNER check: prevent self-referral
   if(currentUID === refUID){
-    errorScreen.style.display = 'flex';
-    statusCard.style.display = 'none';
+    modal.classList.add('show');
     return;
   }
 
   if(!refUID){
-    msgText.innerText = "No referral UID found. Redirecting...";
-    setTimeout(()=>window.location.href="/", 1000);
+    modal.classList.add('show');
     return;
   }
 
@@ -96,39 +139,30 @@ onAuthStateChanged(auth, async (user)=>{
     const snap = await get(refRef);
     const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0, claimedBy:[]};
 
-    // Check if this device or user already claimed
     if(data.claimedBy && data.claimedBy.includes(currentUID)){
-      errorScreen.style.display = 'flex';
-      statusCard.style.display = 'none';
+      modal.classList.add('show');
       return;
     }
 
-    // Update referral stats
     const updates = {
       clicks: (data.clicks||0)+1,
       rbx: (data.rbx||0)+rbxPerClick,
       users: (data.users||0)+1,
       claimedBy: [...(data.claimedBy||[]), currentUID]
     };
-
     await update(refRef, updates);
 
-    // Add RBX to user
     const balRef = ref(db, `users/${refUID}/rbxbalance`);
     const balSnap = await get(balRef);
     const currentBalance = balSnap.exists() ? balSnap.val() : 0;
     await set(balRef, currentBalance + rbxPerClick);
 
-    // Mark device as claimed
     localStorage.setItem(deviceKey, 'true');
 
-    msgText.innerText = "Referral credited! Redirecting...";
-    setTimeout(()=>window.location.href=document.referrer||"/", 1000);
-
+    window.location.href = document.referrer || "/";
   }catch(err){
     console.error(err);
-    errorScreen.style.display = 'flex';
-    statusCard.style.display = 'none';
+    modal.classList.add('show');
   }
 });
 </script>
