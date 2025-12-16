@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donate RBX</title>
+<style>
+  body {
+    margin:0; padding:0;
+    font-family:-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    height:100vh;
+    overflow-y:auto;
+  }
+
+  .profile {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:50px;
+    width:100%;
+    padding: 0 20px;
+  }
+
+  .avatar {
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    border:3px solid gold;
+    object-fit:cover;
+    margin-bottom:16px;
+  }
+
+  .position {
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:4px;
+  }
+
+  .username {
+    font-size:18px;
+    color:#aaa;
+    margin-bottom:24px;
+  }
+
+  input, textarea {
+    width:90%;
+    background: rgba(255,255,255,0.05);
+    border:none;
+    border-radius:16px;
+    padding:12px;
+    margin-bottom:12px;
+    color:#fff;
+    font-size:16px;
+    outline:none;
+  }
+
+  textarea { resize:none; height:80px; }
+
+  button {
+    width:90%;
+    padding:14px;
+    border:none;
+    border-radius:16px;
+    background:#000;
+    color:#fff;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    margin-bottom:30px;
+    transition:0.2s;
+  }
+
+  button:hover { transform:scale(1.05); }
+
+  .glass-card {
+    width:100%;
+    max-width:400px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.05);
+    border-radius:24px;
+    padding:32px 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="profile glass-card">
+  <img src="" alt="Profile" class="avatar" id="recipientAvatar">
+  <div class="position" id="recipientPosition">#1</div>
+  <div class="username" id="recipientUsername">@username</div>
+  <input type="number" id="donateAmount" placeholder="Amount of RBX">
+  <textarea id="donateMessage" placeholder="Optional message"></textarea>
+  <button id="donateBtn">Donate</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getDatabase(app);
+
+// Elements
+const urlParams = new URLSearchParams(window.location.search);
+const targetUid = urlParams.get('uid');
+
+const recipientAvatar = document.getElementById('recipientAvatar');
+const recipientPosition = document.getElementById('recipientPosition');
+const recipientUsername = document.getElementById('recipientUsername');
+const donateBtn = document.getElementById('donateBtn');
+const donateAmountInput = document.getElementById('donateAmount');
+const donateMessageInput = document.getElementById('donateMessage');
+
+// Load recipient info and top position
+onValue(ref(db, 'users'), snap=>{
+  if(!snap.exists()) return;
+  const users = snap.val();
+  const sortedUsers = Object.entries(users)
+    .map(([uid, user])=>{
+      let name = user.username || (user.email ? user.email.split('@')[0] : 'Anonymous');
+      return { uid, name, rbx: Number(user.rbxbalance) || 0, avatar: user.avatar || 'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png' };
+    })
+    .filter(u => u.rbx > 0)
+    .sort((a,b)=> b.rbx - a.rbx);
+
+  const recipient = sortedUsers.find(u => u.uid === targetUid);
+  if(!recipient){
+    recipientUsername.textContent = 'User not found';
+    recipientPosition.textContent = '';
+    recipientAvatar.src = 'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png';
+    donateBtn.disabled = true;
+    return;
+  }
+
+  recipientAvatar.src = recipient.avatar;
+  recipientUsername.textContent = '@' + recipient.name;
+
+  const pos = sortedUsers.findIndex(u => u.uid === targetUid);
+  recipientPosition.textContent = pos >= 0 && pos < 3 ? `#${pos+1}` : '';
+});
+
+// Donate logic
+donateBtn.addEventListener('click', ()=>{
+  const amount = Number(donateAmountInput.value);
+  const message = donateMessageInput.value;
+
+  if(!amount || amount <=0){
+    alert('Enter a valid RBX amount');
+    return;
+  }
+
+  onAuthStateChanged(auth, user=>{
+    if(!user){
+      alert('You must be logged in to donate!');
+      return;
+    }
+
+    const donorRef = ref(db, 'users/' + user.uid);
+    const receiverRef = ref(db, 'users/' + targetUid);
+
+    get(donorRef).then(dSnap=>{
+      const donorBalance = Number(dSnap.val()?.rbxbalance) || 0;
+      if(donorBalance < amount){
+        alert('Not enough RBX to donate');
+        return;
+      }
+
+      get(receiverRef).then(rSnap=>{
+        const receiverData = rSnap.val() || {};
+        const updates = {};
+        updates['users/' + user.uid + '/rbxbalance'] = donorBalance - amount;
+        updates['users/' + targetUid + '/rbxbalance'] = (Number(receiverData.rbxbalance) || 0) + amount;
+
+        // Optional: store message in /donations
+        const donationRef = ref(db, 'donations');
+        const newDonation = {};
+        const key = Date.now() + '_' + user.uid;
+        newDonation[key] = {
+          from: user.uid,
+          to: targetUid,
+          amount,
+          message,
+          timestamp: Date.now()
+        };
+
+        update(ref(db), {...updates, ...newDonation}).then(()=>{
+          alert(`Donated ${amount} RBX!`);
+          donateAmountInput.value = '';
+          donateMessageInput.value = '';
+        }).catch(err=>{
+          console.error(err);
+          alert('Error sending donation');
+        });
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>
