@@ -184,179 +184,7 @@ textarea{resize:none;height:70px;}
   </button>
 </div>
 
-<script>
-/* ================= CONFIG ================= */
 
-const originalVideos = [
-  /* Catbox (15) */
-  "https://files.catbox.moe/61ny1y.mp4",
-  "https://files.catbox.moe/jfapxh.mp4",
-  "https://files.catbox.moe/vqvviq.mp4",
-  "https://files.catbox.moe/69l5y3.mp4",
-  "https://files.catbox.moe/bjwdo9.mp4",
-  "https://files.catbox.moe/sjpa2p.mp4",
-  "https://files.catbox.moe/j9rxi4.mp4",
-  "https://files.catbox.moe/8xiynj.mp4",
-  "https://files.catbox.moe/vmhugn.mp4",
-  "https://files.catbox.moe/ce1rr5.mp4",
-  "https://files.catbox.moe/j5f490.mp4",
-  "https://files.catbox.moe/aec00g.mp4",
-  "https://files.catbox.moe/s0covk.mp4",
-  "https://files.catbox.moe/gii9kh.mp4",
-  "https://files.catbox.moe/cfg3ny.mp4",
-
-  /* Google / Open source (35) */
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-
-  "https://media.w3.org/2010/05/sintel/trailer.mp4",
-  "https://media.w3.org/2010/05/bunny/trailer.mp4",
-  "https://media.w3.org/2010/05/video/movie_300.mp4",
-
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/bee.mp4",
-
-  "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-  "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-  "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
-  "https://samplelib.com/lib/preview/mp4/sample-20s.mp4",
-  "https://samplelib.com/lib/preview/mp4/sample-30s.mp4",
-
-  "https://download.samplelib.com/mp4/sample-960x400.mp4",
-  "https://download.samplelib.com/mp4/sample-1280x720.mp4",
-  "https://download.samplelib.com/mp4/sample-1920x1080.mp4",
-
-  "https://filesamples.com/samples/video/mp4/sample_640x360.mp4",
-  "https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4",
-  "https://filesamples.com/samples/video/mp4/sample_1280x720_surfing_with_audio.mp4"
-];
-
-let shuffledVideos = [...originalVideos].sort(()=>Math.random()-0.5);
-let currentIndex = 0;
-
-/* ================= STATE ================= */
-
-let countdownInterval;
-let videoDuration = 0;
-let remaining = 0;
-let videoCompleted = false;
-
-/* ================= ELEMENTS ================= */
-
-const player = document.getElementById('player');
-const startBtn = document.getElementById('startBtn');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const progressBar = document.getElementById('progressBar');
-const timeCounter = document.getElementById('timeCounter');
-const rewardNumber = document.getElementById('rewardNumber');
-const rewardPopup = document.getElementById('rewardPopup');
-const rewardMessage = document.getElementById('rewardMessage');
-const rewardOkButton = document.getElementById('rewardOkButton');
-const loaderPill = document.getElementById('loaderPill');
-
-/* ================= FUNCTIONS ================= */
-
-function loadVideo(index){
-  clearInterval(countdownInterval);
-  videoCompleted = false;
-
-  progressBar.style.width = '0%';
-  rewardNumber.textContent = '0';
-  timeCounter.textContent = '0:00';
-
-  player.pause();
-  player.currentTime = 0;
-  player.src = shuffledVideos[index];
-  player.load();
-
-  startBtn.style.display = 'block';
-}
-
-function startCountdown(){
-  clearInterval(countdownInterval);
-
-  remaining = videoDuration;
-  updateTime();
-
-  countdownInterval = setInterval(()=>{
-    if(!player.paused && remaining > 0){
-      remaining--;
-      updateTime();
-      progressBar.style.width =
-        ((videoDuration - remaining) / videoDuration * 100) + '%';
-    }
-
-    if(remaining <= 0){
-      clearInterval(countdownInterval);
-      videoCompleted = true;
-    }
-  },1000);
-}
-
-function updateTime(){
-  timeCounter.textContent =
-    `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
-}
-
-/* ================= EVENTS ================= */
-
-player.addEventListener('loadedmetadata', ()=>{
-  videoDuration = Math.floor(player.duration);
-  if(!videoDuration || isNaN(videoDuration)) return;
-
-  rewardNumber.textContent = Math.ceil(videoDuration / 10);
-  startCountdown();
-});
-
-startBtn.addEventListener('click', ()=>{
-  startBtn.style.display = 'none';
-  player.play();
-});
-
-player.addEventListener('ended', ()=>{
-  if(!videoCompleted) return;
-
-  const earned = Math.ceil(videoDuration / 10);
-  rewardMessage.textContent = `You earned ${earned} RBX`;
-  rewardPopup.style.display = 'flex';
-});
-
-rewardOkButton.addEventListener('click', ()=>{
-  rewardPopup.style.display = 'none';
-  nextVideo();
-});
-
-nextBtn.addEventListener('click', ()=> nextVideo());
-prevBtn.addEventListener('click', ()=> prevVideo());
-
-function nextVideo(){
-  currentIndex++;
-  if(currentIndex >= shuffledVideos.length) currentIndex = 0;
-  loadVideo(currentIndex);
-}
-
-function prevVideo(){
-  currentIndex--;
-  if(currentIndex < 0) currentIndex = shuffledVideos.length - 1;
-  loadVideo(currentIndex);
-}
-
-player.addEventListener('waiting', ()=> loaderPill.style.display='block');
-player.addEventListener('playing', ()=> loaderPill.style.display='none');
-
-/* ================= INIT ================= */
-
-loadVideo(currentIndex);
-</script>
 <style>
 .top-sections{
   display:flex;
@@ -599,6 +427,137 @@ window.addEventListener('keydown', e => {
     if(referModal) referModal.style.display='none';
   }
 });
+/* ================= VIDEO PLAYER ================= */
+
+(() => {  // IIFE to isolate video logic
+  const originalVideos = [
+    "https://files.catbox.moe/61ny1y.mp4",
+    "https://files.catbox.moe/jfapxh.mp4",
+    "https://files.catbox.moe/vqvviq.mp4",
+    "https://files.catbox.moe/69l5y3.mp4",
+    "https://files.catbox.moe/bjwdo9.mp4",
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    // Add more if needed
+  ];
+
+  let shuffledVideos = [...originalVideos].sort(()=>Math.random()-0.5);
+  let currentIndex = 0;
+  let countdownInterval, videoDuration=0, remaining=0, videoCompleted=false;
+
+  const player = document.getElementById('player');
+  const startBtn = document.getElementById('startBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const progressBar = document.getElementById('progressBar');
+  const timeCounter = document.getElementById('timeCounter');
+  const rewardNumber = document.getElementById('rewardNumber');
+  const rewardPopup = document.getElementById('rewardPopup');
+  const rewardMessage = document.getElementById('rewardMessage');
+  const rewardOkButton = document.getElementById('rewardOkButton');
+  const loaderPill = document.getElementById('loaderPill');
+
+  const dbRef = db;  // use your already imported db
+  const authRef = auth; // use your already imported auth
+
+  function loadVideo(index){
+    clearInterval(countdownInterval);
+    videoCompleted = false;
+    progressBar.style.width = '0%';
+    rewardNumber.textContent = '0';
+    timeCounter.textContent = '0:00';
+    player.pause();
+    player.currentTime = 0;
+    player.src = shuffledVideos[index];
+    player.load();
+    startBtn.style.display = 'block';
+  }
+
+  function startCountdown(){
+    clearInterval(countdownInterval);
+    remaining = videoDuration;
+    updateTime();
+
+    countdownInterval = setInterval(()=>{
+      if(remaining > 0){
+        remaining--;
+        updateTime();
+        progressBar.style.width = ((videoDuration - remaining)/videoDuration*100) + '%';
+      }
+
+      if(remaining <=0){
+        clearInterval(countdownInterval);
+        videoCompleted = true;
+      }
+    },1000);
+  }
+
+  function updateTime(){
+    timeCounter.textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
+  }
+
+  function saveRBXReward(earned){
+    const user = authRef.currentUser;
+    if(!user) return;
+
+    const balRef = ref(dbRef, `users/${user.uid}/rbxbalance`);
+    get(balRef).then(snap => {
+      const current = snap.exists() ? snap.val() : 0;
+      const newBal = current + earned;
+      set(balRef, newBal).then(()=>{
+        const bigBal = document.getElementById("bigBal");
+        if(bigBal) bigBal.innerText = newBal + " RBX";
+        const rbxBtn = document.querySelector(".rbx");
+        if(rbxBtn) rbxBtn.innerText = newBal + " RBX / GET";
+      });
+    });
+  }
+
+  /* ================= EVENTS ================= */
+  player.addEventListener('loadedmetadata', ()=>{
+    videoDuration = Math.floor(player.duration);
+    if(!videoDuration || isNaN(videoDuration)) return;
+    rewardNumber.textContent = Math.ceil(videoDuration/10);
+    startCountdown();
+  });
+
+  startBtn.addEventListener('click', ()=>{
+    startBtn.style.display='none';
+    player.play();
+  });
+
+  player.addEventListener('ended', ()=>{
+    if(!videoCompleted) return;
+    const earned = Math.ceil(videoDuration/10);
+    rewardMessage.textContent = `You earned ${earned} RBX`;
+    rewardPopup.style.display='flex';
+    saveRBXReward(earned);
+  });
+
+  rewardOkButton.addEventListener('click', ()=>{
+    rewardPopup.style.display='none';
+    nextVideo();
+  });
+
+  nextBtn.addEventListener('click', ()=> nextVideo());
+  prevBtn.addEventListener('click', ()=> prevVideo());
+
+  function nextVideo(){
+    currentIndex++;
+    if(currentIndex >= shuffledVideos.length) currentIndex = 0;
+    loadVideo(currentIndex);
+  }
+
+  function prevVideo(){
+    currentIndex--;
+    if(currentIndex < 0) currentIndex = shuffledVideos.length - 1;
+    loadVideo(currentIndex);
+  }
+
+  player.addEventListener('waiting', ()=> loaderPill.style.display='block');
+  player.addEventListener('playing', ()=> loaderPill.style.display='none');
+
+  loadVideo(currentIndex);
+})();
 </script>
 </body>
 </html>
