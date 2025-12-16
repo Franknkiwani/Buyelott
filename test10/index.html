@@ -82,8 +82,7 @@ header{
 }  
 .modal-close svg{width:28px;height:28px;transition:0.2s ease;}  
 .modal-close svg:hover{transform:scale(1.1);}  
-  
-/* Modal content */  
+  /* Modal content */  
 .balance-big{text-align:center;font-size:2.2rem;font-weight:800;margin-top:10px;animation:pulse 1.2s ease infinite alternate;}  
 @keyframes pulse{0%{transform:scale(1);}100%{transform:scale(1.05);}}  
 .sub{text-align:center;opacity:.7;margin-bottom:10px;}  
@@ -103,6 +102,7 @@ textarea{resize:none;height:70px;}
 .error{color:#ff4d4d;}  
 .success{color:#00ff99;}  
 .history{margin-top:15px;font-size:.85rem;opacity:.8;}  
+
 
 /* ====== Video Container ====== */
 #videoContainer {
@@ -307,24 +307,6 @@ textarea{resize:none;height:70px;}
   color:#fff;  
 }  
 </style>  
-<!-- WITHDRAW MODAL -->  
-<div class="modal" id="withdrawModal">  
-  <div class="modal-box">  
-    <button class="modal-close" onclick="document.getElementById('withdrawModal').style.display='none'">  
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">  
-        <path fill="#fb7369" d="m68.77,50c5.01-5.33,9.92-10.79,14.74-16.45,2-2.36,1.98-5.82-.01-8.19-2.69-3.2-5.65-6.17-8.86-8.86-2.37-1.99-5.84-2.02-8.19-.01-5.66,4.82-11.12,9.73-16.45,14.74-5.33-5.01-10.79-9.92-16.45-14.74-2.36-2-5.82-1.98-8.19.01-3.2,2.69-6.17,5.65-8.86,8.86-1.99,2.37-2.02,5.84-.01,8.19,4.82,5.66,9.73,11.12,14.74,16.45-5.01,5.33-9.92,10.79-14.74,16.45-2,2.36-1.98,5.82.01,8.19,2.69,3.2,5.65,6.17,8.86,8.86,2.37,1.99,5.84,2.02,8.19.01,5.66-4.82,11.12-9.73,16.45-14.74,5.33,5.01,10.79,9.92,16.45,14.74,2.36,2,5.82,1.98,8.19-.01,3.2-2.69,6.17-5.65,8.86-8.86,1.99-2.37,2.02-5.84.01-8.19-4.82-5.66-9.73-11.12-14.74-16.45Z"></path>  
-      </svg>  
-    </button>  
-    <div class="balance-big" id="bigBal">0 RBX</div>  
-    <div class="sub">Available balance</div>  
-    <div class="notice">Once you reach <b>150 RBX</b>, you can redeem for real Robux</div>  
-    <input id="robloxUser" placeholder="@roblox username">  
-    <textarea id="extraInfo" placeholder="More info (optional)"></textarea>  
-    <button class="confirm" onclick="confirmWithdraw()">CONFIRM</button>  
-    <div class="msg" id="msg"></div>  
-    <div class="history" id="history"></div>  
-  </div>  
-</div>  
   
 <!-- Referral Modal -->  
 <div class="modal" id="referModal">  
@@ -542,10 +524,16 @@ window.doLogout = async () => { await signOut(auth); location.reload(); };
   
 // ====== Top Sections Clicks ======  
 sections.forEach(section => {  
-  const label = section.querySelector('span').innerText;  
+  const label = section.querySelector('span')?.innerText?.trim();  
   
-  if(label === "Redeem rewards"){  
-    section.addEventListener('click', openWithdrawModal);  
+  if (label === "Redeem rewards") {  
+    section.addEventListener('click', () => {
+      if (currentUser) {
+        window.location.href = '/withdraw';
+      } else {
+        window.location.href = '/login';
+      }
+    });  
   }  
   
   if(label === "Refer & Earn"){  
@@ -958,6 +946,30 @@ function loadFAQ() {
 
 // Call this wherever you want in your main script
 loadFAQ();
+// OVERRIDE ANY WITHDRAW MODAL CALLS
+(() => {
+  // Redirect function
+  const redirectWithdraw = () => {
+    if (currentUser) {
+      window.location.href = '/withdraw';
+    } else {
+      showToast('Please log in first!');
+    }
+  };
+
+  // Override global modal opener
+  window.openWithdrawModal = redirectWithdraw;
+
+  // Remove any leftover event listeners that used the old modal
+  const oldBtns = document.querySelectorAll('.rbx, [onclick*="openWithdrawModal"]');
+  oldBtns.forEach(btn => {
+    btn.onclick = redirectWithdraw;
+  });
+
+  // Just in case some code calls confirmWithdraw() or similar
+  window.confirmWithdraw = () => redirectWithdraw();
+
+})();
 </script>  
 </body>  
 </html>
