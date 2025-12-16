@@ -12,7 +12,14 @@
   user-select:none;  
   -webkit-tap-highlight-color:transparent;  
 }  
-body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}  
+body {
+  background:#0a0a0a;
+  color:#fff;
+  min-height:100vh; /* keep full height */
+  display:flex;
+  flex-direction:column;
+  overflow-y: auto; /* allow vertical scroll */
+}
 header{  
   position:sticky;top:0;padding:12px 20px;  
   display:flex;justify-content:space-between;align-items:center;  
@@ -96,6 +103,65 @@ textarea{resize:none;height:70px;}
 .error{color:#ff4d4d;}  
 .success{color:#00ff99;}  
 .history{margin-top:15px;font-size:.85rem;opacity:.8;}  
+
+/* ====== Video Container ====== */
+#videoContainer {
+  width: 90% !important;
+  max-width: 800px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Video wrapper (to keep aspect ratio) */
+#videoContainer > div:first-child {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* ====== Potential Reward Box ====== */
+#potentialReward {
+  width 90%;
+  max-width: 480px;
+  margin: 16px auto;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-weight: 700;
+}
+.section{
+  flex:0 0 48%;
+  background: rgba(25,25,35,0.6); /* slightly transparent flat background */
+  border-radius:18px;
+  padding:25px;
+  text-align:center;
+  backdrop-filter:blur(0); /* remove blur if you want */
+  box-shadow:none; /* optional: remove shadow */
+  cursor:pointer;
+}
+.donate-btn {
+  padding:6px 14px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+  backdrop-filter:blur(6px);
+  color:#fff;
+  background: rgba(0,0,0,0.35);
+  border: 2px solid #fff;
+  transition: 0.2s;
+}
+
+.donate-btn:hover { transform: scale(1.05); }
+.donate-btn:active { transform: scale(0.95); }
+
+/* Rank colors */
+.donate-gold { border-color: gold; }
+.donate-cyan { border-color: cyan; }
+.donate-brown { border-color: sienna; }
 </style>  
 </head>  
 <body>  
@@ -110,15 +176,16 @@ textarea{resize:none;height:70px;}
   </div>  
 </header>  
 <!-- Top Sections Above Video -->  
-<div class="top-sections">  
-  <div class="section">  
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>  
-    <span>Redeem rewards</span>  
-  </div>  
-  <div class="section">  
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>  
-    <span>Refer & Earn</span>  
-  </div>  
+<div class="top-sections" style="display:flex; justify-content:space-between; gap:4%; margin:20px 10px;">
+  <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/gift.png"/>
+    <span style="display:block; font-size:0.95rem; font-weight:500; color:#fff;">Redeem rewards</span>
+  </div>
+  <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png"/>
+    <span style="display:block; font-size:0.95rem; font-weight:500; color:#fff;">Refer & Earn</span>
+  </div>
+</div>
 </div>  
 <div id="videoContainer" style="position:relative;width:100%;max-width:640px;margin:20px auto;">  
   
@@ -127,18 +194,16 @@ textarea{resize:none;height:70px;}
       poster="https://i.ytimg.com/vi/P-vP6JkrIMs/maxresdefault.jpg"  
       style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">  
     </video>  
-  
-    <button id="prevBtn"  
-      style="position:absolute;bottom:10px;left:10px;padding:8px 16px;border-radius:20px;border:none;background:#ff3b30;color:#fff;font-weight:600;">  
-      Previous  
-    </button>  
-  
-    <button id="nextBtn"  
-      style="position:absolute;bottom:10px;right:10px;padding:8px 16px;border-radius:20px;border:none;background:#fff;color:#000;font-weight:600;">  
-      Next  
-    </button>  
-  </div>  
-  
+  <button id="prevBtn"  
+  style="position:absolute;bottom:10px;left:10px;padding:10px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-weight:600;cursor:pointer;transition:all 0.2s;">  
+  Previous  
+</button>  
+
+<button id="nextBtn"  
+  style="position:absolute;bottom:10px;right:10px;padding:10px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-weight:600;cursor:pointer;transition:all 0.2s;">  
+  Next  
+</button>
+</div>
   <div id="timeCounter"  
     style="position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,0.6);color:#fff;">  
     0:00  
@@ -150,21 +215,24 @@ textarea{resize:none;height:70px;}
   
   <div id="loaderPill"  
     style="display:none;margin:10px auto;padding:6px 14px;border-radius:20px;background:rgba(255,0,0,0.15);color:red;">  
-    Network is slow  
+    Network is slow  please wait
   </div>  
   
-  <div id="potentialReward"  
-    style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;">  
-    <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>  
-    <div>Potential reward</div>  
-  </div>  
+ <div id="potentialReward"  
+     style="margin-top:10px;padding:12px;border-radius:20px;background:rgba(255,255,255,0.05);color:#fff;text-align:center;width:80%;max-width:480px;margin-left:auto;margin-right:auto;">  
+     
+  <div id="rewardNumber" style="font-size:28px;font-weight:700;">0</div>  
+  <div>Potential reward</div>  
   
-  <button id="startBtn"  
-    style="margin:15px auto 0;display:block;padding:12px 28px;border:none;border-radius:20px;background:#fff;color:#000;font-weight:600;">  
-    Start Watching  
-  </button>  
+ <button id="startBtn"  
+  style="margin:15px auto 0; display:block; width:90%; padding:12px 0; border:2px solid #fff; border-radius:20px; background:#000; color:#fff; font-weight:600; cursor:pointer;">  
+  Start Watching  
+</button>
+</div>
+  
 </div>  
-  
+<div id="topUsers" style="margin:16px 0;"></div>
+
 <!-- Reward Popup -->  
 <div id="rewardPopup"  
   style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);  
@@ -172,7 +240,7 @@ textarea{resize:none;height:70px;}
   min-width:260px;display:flex;flex-direction:column;align-items:center;color:#fff;">  
     
   <img src="https://img.icons8.com/clouds/100/robux.png" style="width:60px;margin-bottom:14px;">  
-  <div id="rewardMessage" style="font-size:20px;font-weight:700;">You earned 0 RBX</div>  
+<div id="rewardMessage" style="font-size:20px;font-weight:700;"></div>
   <div id="loginNotice" style="display:none;color:#ff3b30;font-size:12px;margin-top:6px;">  
     Log in to save your RBX  
   </div>  
@@ -183,7 +251,26 @@ textarea{resize:none;height:70px;}
     OK  
   </button>  
 </div>  
-  
+  <!-- Donate Modal -->
+<div class="modal" id="donateModal">
+  <div class="modal-box" style="max-width:400px;">
+    <button class="modal-close" onclick="closeDonateModal()">
+      ✕
+    </button>
+    <h3 style="text-align:center;margin-bottom:10px;">Donate RBX</h3>
+    <div style="margin-bottom:8px;text-align:center;">
+      <span id="donateTargetName" style="font-weight:700;"></span>
+    </div>
+    <div style="margin-bottom:8px;text-align:center;">
+      Current RBX: <span id="donateTargetBalance">0</span>
+    </div>
+    <input type="number" id="donateAmount" min="1" max="1000" placeholder="Amount to donate" style="
+      width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.3); color:#fff;margin-bottom:12px;
+    ">
+    <button id="donateConfirm" class="confirm" style="width:100%;">Donate</button>
+  </div>
+</div>
   
 <style>  
 .top-sections{  
@@ -258,6 +345,86 @@ textarea{resize:none;height:70px;}
     </div>  
   </div>  
 </div>  
+<!-- Comment Section inside FAQ -->
+<div id="faqComments" style="margin-top:24px; width:90%; margin:0 auto;">
+  <h3 style="font-size:1.2rem; margin-bottom:12px; text-align:center; color:#ffcc00;">
+    Leave a Comment
+  </h3>
+
+  <!-- Comment Form -->
+  <div style="display:flex; flex-direction:column; gap:10px; max-width:480px; margin:0 auto;">
+    <textarea id="commentInput" placeholder="Write your comment..." style="
+      background: rgba(0,0,0,0.3);
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:12px;
+      padding:10px;
+      color:#fff;
+      resize:none;
+      height:70px;
+    "></textarea>
+   <button id="submitComment" style="
+  background:#000;
+  color:#fff;
+  border:2px solid #fff;
+  padding:10px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+">Submit</button>
+  </div>
+
+  <!-- Top Comments -->
+  <div id="topComments" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+</div>
+<!-- FAQ Section -->
+<div id="faqSection" style="
+  margin:24px 10px;
+  padding:16px;
+  border-radius:20px;
+  background:#000;  /* full black */
+  color:#fff;
+  text-shadow:none;
+">
+  <h2 style="
+    font-size:1.3rem;
+    margin-bottom:16px;
+    text-align:center;
+    color:#fff;
+    text-shadow:none;
+  ">
+    Frequently Asked Questions
+  </h2>
+  <div id="faqContainer" style="
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  ">
+    <!-- Example FAQ card -->
+    <div style="
+      padding:12px;
+      border-radius:16px;
+      background:#000;  /* full black */
+      color:#fff;
+      text-shadow:none;
+      box-shadow:none;
+      cursor:pointer;
+    ">
+      What is this site about?
+    </div>
+    <div style="
+      padding:12px;
+      border-radius:16px;
+      background:#000;  /* full black */
+      color:#fff;
+      text-shadow:none;
+      box-shadow:none;
+      cursor:pointer;
+    ">
+      How do I earn rewards?
+    </div>
+  </div>
+</div>
+</div>
 <script type="module">  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";  
@@ -570,6 +737,358 @@ window.addEventListener('keydown', e => {
 
   loadVideo(currentIndex);
 })();
+rewardPopup.style.display = 'none'; // ensure hidden on page load
+rewardMessage.textContent = '';     // clear any text
+// ====== TOP EARNERS WITH MODAL DONATE ======
+const topUsersContainer = document.getElementById('topUsers');
+
+// Create modal container (hidden by default)
+const modal = document.createElement('div');
+modal.style.cssText = `
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  display:none; justify-content:center; align-items:center;
+  background: rgba(0,0,0,0.6);
+  z-index:9999;
+  font-family:-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+`;
+document.body.appendChild(modal);
+
+function showModal(contentHTML) {
+  modal.innerHTML = ''; // clear previous
+  const modalBox = document.createElement('div');
+  modalBox.style.cssText = `
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding:20px;
+    border-radius:20px;
+    max-width:300px;
+    width:80%;
+    text-align:center;
+    color:#fff;
+  `;
+  modalBox.innerHTML = contentHTML;
+
+  // Add close button
+  const closeBtn = document.createElement('div');
+  closeBtn.textContent = '×';
+  closeBtn.style.cssText = `
+    position:absolute;
+    top:10px; right:20px;
+    cursor:pointer;
+    font-size:20px;
+  `;
+  closeBtn.onclick = () => modal.style.display='none';
+  modalBox.appendChild(closeBtn);
+
+  modal.appendChild(modalBox);
+  modal.style.display='flex';
+}
+
+function openDonateModal(recipientUser) {
+  const currentUser = auth.currentUser;
+
+  if(!currentUser) {
+    showModal(`<h3>Login to Donate</h3><p>You need to be logged in to send RBX.</p>
+      <button style="
+        margin-top:12px;
+        padding:8px 14px;
+        border-radius:12px;
+        border:none;
+        background:#007AFF;
+        color:#fff;
+        font-size:14px;
+        cursor:pointer;
+      " onclick="modal.style.display='none';">Login</button>`);
+    return;
+  }
+
+  const donorUid = currentUser.uid;
+  const recipientUid = recipientUser.uid;
+  if(donorUid === recipientUid) return showModal('<h3>Oops!</h3><p>You cannot donate to yourself.</p>');
+
+  const donorRef = ref(db, `users/${donorUid}/rbxbalance`);
+  const recipientRef = ref(db, `users/${recipientUid}/rbxbalance`);
+
+  onValue(donorRef, snap => {
+    const donorRbx = Number(snap.val() || 0);
+    showModal(`
+      <h3>Donate RBX to ${recipientUser.name}</h3>
+      <p>Recipient has: ${recipientUser.rbx} RBX<br>Your balance: ${donorRbx} RBX</p>
+      <input type="number" id="donateAmount" placeholder="Amount (1-1000)" 
+        style="width:80%; padding:6px; border-radius:8px; border:none; margin-top:8px;">
+      <button id="sendDonateBtn" style="
+        margin-top:12px;
+        padding:8px 14px;
+        border-radius:12px;
+        border:none;
+        background:#28A745;
+        color:#fff;
+        cursor:pointer;
+      ">Send</button>
+    `);
+
+    document.getElementById('sendDonateBtn').onclick = () => {
+      const donateAmount = Number(document.getElementById('donateAmount').value);
+      if(!donateAmount || donateAmount < 1 || donateAmount > 1000) return alert('Invalid amount!');
+      if(donorRbx < donateAmount) return alert('Not enough RBX!');
+
+      // Update donor
+      donorRef.set(donorRbx - donateAmount);
+      // Update recipient
+      onValue(recipientRef, snap2 => {
+        const recipientRbx = Number(snap2.val() || 0);
+        recipientRef.set(recipientRbx + donateAmount);
+      }, {once:true});
+
+      // Optional: log transaction
+      push(ref(db, 'transactions'), {
+        from: donorUid,
+        to: recipientUid,
+        amount: donateAmount,
+        timestamp: Date.now()
+      });
+
+      modal.style.display='none';
+      loadTopEarners(); // refresh leaderboard
+    };
+  }, {once:true});
+}
+
+function loadTopEarners() {
+  const usersRef = ref(db, 'users');
+
+  onValue(usersRef, snap => {
+    topUsersContainer.innerHTML = ''; // clear first
+
+    if (!snap.exists()) {
+      topUsersContainer.innerHTML = '<div style="color:#fff;">No users found</div>';
+      return;
+    }
+
+    const usersData = snap.val();
+
+    const sortedUsers = Object.entries(usersData)
+      .map(([uid, user]) => {
+        let displayName = 'Anonymous';
+        if(user.username) displayName = user.username;
+        else if(user.email) displayName = user.email.split('@')[0];
+
+        return {
+          uid,
+          name: displayName,
+          rbx: Number(user.rbxbalance) || 0
+        };
+      })
+      .filter(u => u.rbx > 0)
+      .sort((a, b) => b.rbx - a.rbx);
+
+    if(sortedUsers.length === 0){
+      topUsersContainer.innerHTML = '<div style="color:#fff;">No RBX earned yet</div>';
+      return;
+    }
+
+    const topProfiles = [
+      'https://tr.rbxcdn.com/a151bf7f30dcbda63284a6fdb2f52850/512/512/Image/Png',
+      'https://www.gamepur.com/wp-content/uploads/2022/10/03141118/Rich-Roblox-Characters-Avatar-Design-Idea-Outfit.jpg?w=1200',
+      'https://art.ngfiles.com/images/2793000/2793270_fotheplant_roblox-noob-plushie.png?f1666352152'
+    ];
+
+    const buttonColors = ['gold', 'cyan', 'brown'];
+
+    sortedUsers.slice(0,3).forEach((u,i)=>{
+      const card = document.createElement('div');
+      card.style.cssText = `
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:12px 16px;
+        border-radius:12px;
+        margin-bottom:6px;
+        color:#fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+        background: rgba(255,255,255,0.05);
+      `;
+
+      const donateBtn = document.createElement('button');
+      donateBtn.textContent = "Donate";
+      donateBtn.style.cssText = `
+        border: 2px solid ${buttonColors[i]};
+        background: rgba(0,0,0,0.6);
+        color:#fff;
+        border-radius:12px;
+        padding:4px 10px;
+        cursor:pointer;
+        font-family:-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+      `;
+      donateBtn.onclick = () => openDonateModal(u);
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="${topProfiles[i]}" 
+               alt="profile" 
+               style="width:32px; height:32px; border-radius:50%;">
+          <span>#${i+1} ${u.name}</span>
+        </div>
+        <span>${u.rbx} RBX</span>
+      `;
+      card.appendChild(donateBtn);
+      topUsersContainer.appendChild(card);
+    });
+  });
+}
+
+loadTopEarners();
+
+// Call function to load top earners
+loadTopEarners();
+
+// Call it once on load
+loadTopEarners();
+const commentInput = document.getElementById('commentInput');
+const submitCommentBtn = document.getElementById('submitComment');
+const topCommentsContainer = document.getElementById('topComments');
+
+// Submit comment
+submitCommentBtn.addEventListener('click', async () => {
+  const user = auth.currentUser;
+  if(!user){
+    showToast("You must be logged in to comment");
+    return;
+  }
+  const text = commentInput.value.trim();
+  if(!text) return;
+
+  const commentRef = ref(db, 'comments');
+  await push(commentRef, {
+    uid: user.uid,
+    username: user.displayName || user.email.split('@')[0],
+    comment: text,
+    likes: 0,
+    status: "pending", // must be approved by owner
+    timestamp: Date.now()
+  });
+
+  commentInput.value = '';
+  showToast("Comment submitted for approval");
+});
+// Load top 5 approved comments with custom profile image and tick
+function loadTopComments() {
+  const commentsRef = ref(db, 'comments');
+  onValue(commentsRef, snap => {
+    topCommentsContainer.innerHTML = '';
+    if (!snap.exists()) return;
+
+    const allComments = Object.values(snap.val())
+      .filter(c => c.status === "approved")
+      .sort((a, b) => b.likes - a.likes || b.timestamp - a.timestamp)
+      .slice(0, 5);
+
+    allComments.forEach(c => {
+      const timeAgo = formatTimeAgo(c.timestamp);
+
+      const commentCard = document.createElement('div');
+      commentCard.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin: 10px 0;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+      `;
+
+      commentCard.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; color:#00ffcc;">
+          <img src="https://play-lh.googleusercontent.com/ZvHfv7uuqNMHSnAySfy2VU1mQKkxjAsp6oSakhPl6-jIJuoNEy-bypkdYtfXv7CcCXQ" 
+               alt="profile" 
+               style="width:24px; height:24px; border-radius:50%;">
+          ${c.username} 
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
+               fill="#00ffcc" width="16" height="16">
+            <path d="M20.285 6.709a1 1 0 0 0-1.414-1.418L9 15.168l-3.87-3.87a1 1 0 0 0-1.415 1.414l4.577 4.577a1 1 0 0 0 1.414 0l10.579-10.58z"/>
+          </svg>
+          <span style="font-weight:400; color:#ccc; font-size:0.8rem;">• ${timeAgo}</span>
+        </div>
+        <div style="margin-top:4px;">${c.comment}</div>
+      `;
+      topCommentsContainer.appendChild(commentCard);
+    });
+  });
+}
+
+
+// Utility: human-readable time
+function formatTimeAgo(timestamp){
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if(days>0) return `${days} day${days>1?'s':''} ago`;
+  if(hours>0) return `${hours} hour${hours>1?'s':''} ago`;
+  if(minutes>0) return `${minutes} min${minutes>1?'s':''} ago`;
+  return "just now";
+}
+
+// Call on load
+loadTopComments();
+const faqData = [
+  { question: "How do I earn RBX?", answer: "Watch videos, complete tasks, and refer friends to earn RBX rewards." },
+  { question: "When can I withdraw my RBX?", answer: "You can withdraw once you reach the minimum of 150 RBX." },
+  { question: "Do I need a Roblox username?", answer: "Yes, you must provide your Roblox username to claim withdrawals." },
+  { question: "Can I refer multiple friends?", answer: "Absolutely! Each friend who signs up via your referral link earns you 10 RBX." },
+  { question: "Is there a limit to daily rewards?", answer: "There’s no limit, but video availability may vary." }
+];
+
+function loadFAQ() {
+  const container = document.getElementById('faqContainer');
+  container.innerHTML = ''; // Clear existing content
+
+  faqData.forEach(item => {
+    const faqCard = document.createElement('div');
+    faqCard.style.cssText = `
+      background: #000;        /* Full black background */
+      border-radius: 16px;
+      padding: 12px 16px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      color: #fff;
+      text-shadow: none;
+      box-shadow: none;
+      transition: transform 0.2s ease;
+    `;
+
+    faqCard.innerHTML = `
+      <div style="font-weight:700; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+        <span>${item.question}</span>
+        <span style="transition:0.3s;" class="arrow">&#9656;</span>
+      </div>
+      <div style="margin-top:8px; font-size:0.95rem; color:#fff; display:none;" class="answer">
+        ${item.answer}
+      </div>
+    `;
+
+    faqCard.addEventListener('click', () => {
+      const answer = faqCard.querySelector('.answer');
+      const arrow = faqCard.querySelector('.arrow');
+      if (answer.style.display === 'none') {
+        answer.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+      } else {
+        answer.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+
+    container.appendChild(faqCard);
+  });
+}
+
+// Call this wherever you want in your main script
+loadFAQ();
 </script>  
 </body>  
 </html>
