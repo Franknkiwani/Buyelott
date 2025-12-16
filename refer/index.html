@@ -2,34 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Referral Tracking</title>
 <style>
-  body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    background:#0d0d0d;
-    color:white;
-    font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;
-  }
-  .msg{
-    padding:20px;
-    background:rgba(255,255,255,0.1);
-    border-radius:12px;
-    backdrop-filter:blur(12px);
-    text-align:center;
-    max-width:300px;
-  }
+  html, body { margin:0; padding:0; height:100%; width:100%; font-family:-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif; overflow:hidden;}
+  body { display:flex; flex-direction:column; background: linear-gradient(135deg, #0a0a0a, #1a1a1a); color:#fff;}
+  .ios-status-bar {height: env(safe-area-inset-top, 44px); background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); display:flex; align-items:center; justify-content:center; font-size:14px; letter-spacing:0.5px; z-index:10;}
+  .container {flex:1; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .msg-card {background: rgba(255,255,255,0.08); border-radius:24px; backdrop-filter: blur(30px); padding:30px 25px; max-width:320px; width:90%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition: transform 0.3s ease, opacity 0.3s ease; opacity:0; transform:translateY(20px);}
+  .msg-card.show {opacity:1; transform:translateY(0);}
+  .spinner {margin:20px auto; width:36px; height:36px; border:4px solid rgba(255,255,255,0.2); border-top:4px solid #fff; border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  .error-fullscreen {position:fixed; top:0; left:0; width:100%; height:100%; background:#ff0000; display:flex; justify-content:center; align-items:center; color:#fff; font-size:22px; text-align:center; z-index:999; padding:20px;}
 </style>
 </head>
 <body>
-<div class="msg" id="statusMsg">Processing referral...</div>
+
+<div class="ios-status-bar">WATCH-4-RBX</div>
+
+<div class="container">
+  <div class="msg-card" id="statusMsg">
+    <div class="spinner"></div>
+    <div id="msgText">Processing referral...</div>
+  </div>
+</div>
+
+<div id="errorScreen" class="error-fullscreen" style="display:none;">
+  ❌ Error: You cannot claim RBX again! <br> Either it's your own referral or your device already claimed.
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // ===== Firebase Config =====
 const firebaseConfig = {
@@ -45,54 +50,88 @@ const firebaseConfig = {
 // ===== Initialize Firebase =====
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
-const status = document.getElementById('statusMsg');
+const statusCard = document.getElementById('statusMsg');
+const msgText = document.getElementById('msgText');
+const errorScreen = document.getElementById('errorScreen');
+
+setTimeout(()=>statusCard.classList.add('show'), 50);
+
 const params = new URLSearchParams(window.location.search);
 const refUID = params.get('uid');
 
-if(!refUID){
-  status.innerText = "No referral UID found. Redirecting...";
-  setTimeout(()=>window.location.href="/", 1000);
-} else {
+// Simple device check using localStorage
+const deviceKey = 'referral_claimed_' + refUID;
+if(localStorage.getItem(deviceKey)){
+  errorScreen.style.display = 'flex';
+  statusCard.style.display = 'none';
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    msgText.innerText = "Please login first!";
+    return;
+  }
+
+  const currentUID = user.uid;
+
+  // OWNER check: prevent self-referral
+  if(currentUID === refUID){
+    errorScreen.style.display = 'flex';
+    statusCard.style.display = 'none';
+    return;
+  }
+
+  if(!refUID){
+    msgText.innerText = "No referral UID found. Redirecting...";
+    setTimeout(()=>window.location.href="/", 1000);
+    return;
+  }
+
   const rbxPerClick = 10;
-
-  // Step 1: Update /referrals stats
   const refRef = ref(db, `referrals/${refUID}`);
-  get(refRef).then(snap=>{
-    const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
 
+  try{
+    const snap = await get(refRef);
+    const data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0, claimedBy:[]};
+
+    // Check if this device or user already claimed
+    if(data.claimedBy && data.claimedBy.includes(currentUID)){
+      errorScreen.style.display = 'flex';
+      statusCard.style.display = 'none';
+      return;
+    }
+
+    // Update referral stats
     const updates = {
-      clicks: (data.clicks||0) + 1,
-      rbx: (data.rbx||0) + rbxPerClick,
-      users: (data.users||0) + 1
+      clicks: (data.clicks||0)+1,
+      rbx: (data.rbx||0)+rbxPerClick,
+      users: (data.users||0)+1,
+      claimedBy: [...(data.claimedBy||[]), currentUID]
     };
 
-    update(refRef, updates).then(async () => {
-      status.innerText = "Referral recorded! Updating balance...";
+    await update(refRef, updates);
 
-      // Step 2: Add RBX to /users/{uid}/rbxbalance
-      const balRef = ref(db, `users/${refUID}/rbxbalance`);
-      const balSnap = await get(balRef);
-      const currentBalance = balSnap.exists() ? balSnap.val() : 0;
+    // Add RBX to user
+    const balRef = ref(db, `users/${refUID}/rbxbalance`);
+    const balSnap = await get(balRef);
+    const currentBalance = balSnap.exists() ? balSnap.val() : 0;
+    await set(balRef, currentBalance + rbxPerClick);
 
-      await set(balRef, currentBalance + rbxPerClick);
+    // Mark device as claimed
+    localStorage.setItem(deviceKey, 'true');
 
-      status.innerText = "Referral credited! Redirecting...";
+    msgText.innerText = "Referral credited! Redirecting...";
+    setTimeout(()=>window.location.href=document.referrer||"/", 1000);
 
-      // Step 3: Redirect to page before /refer
-      const redirectTo = document.referrer || "/";
-      setTimeout(()=>window.location.href = redirectTo, 800);
-    }).catch(err=>{
-      console.error(err);
-      status.innerText = "Error updating referral. Redirecting...";
-      setTimeout(()=>window.location.href="/", 1200);
-    });
-  }).catch(err=>{
+  }catch(err){
     console.error(err);
-    status.innerText = "Error fetching referral. Redirecting...";
-    setTimeout(()=>window.location.href="/", 1200);
-  });
-}
+    errorScreen.style.display = 'flex';
+    statusCard.style.display = 'none';
+  }
+});
 </script>
+
 </body>
 </html>
