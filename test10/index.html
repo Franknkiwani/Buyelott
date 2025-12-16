@@ -652,7 +652,13 @@ window.addEventListener('load', async () => {
       How do I earn rewards?
     </div>
   </div>
-</div>
+<body style="margin: 0; padding: 0; font-family: sans-serif;">
+  <div style="width: 100%; max-width: 500px; margin: 40px auto; background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border-radius: 24px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+    <h1 style="margin-bottom: 16px; text-align: center;">GET 50 RBX</h1>
+    <p style="text-align: center; margin-bottom: 16px;"> interact with the content to complete your reward!</p>
+    <iframe src="https://otieu.com/4/7950037" allowfullscreen style="width: 100%; height: 400px; border: none; border-radius: 16px;"></iframe>
+  </div>
+</body>
 <style>
   /* Small Modal overlay */
   #adRewardPopup {
@@ -797,14 +803,14 @@ window.addEventListener('load', async () => {
     document.body.style.overflow = 'hidden';
   }
 
-  // Schedule next popup after 30-40s
+  // Schedule next popup after 40-50s
   function scheduleNextPopup() {
-    const delay = 30000 + Math.random() * 10000;
+    const delay = 40000 + Math.random() * 10000;
     setTimeout(showAdPopup, delay);
   }
 
-  // Initial popup after 2 seconds
-  setTimeout(showAdPopup, 20000);
+  // Initial popup after 40 seconds
+  setTimeout(showAdPopup, 40000);
 
   // Close small popup → schedule next
   closeBtn.addEventListener('click', () => {
