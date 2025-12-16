@@ -175,6 +175,51 @@ textarea{resize:none;height:70px;}
     <button class="register-btn" onclick="location.href='register/'">REGISTER</button>  
   </div>  
 </header>  
+  <!-- Loading Screen -->
+<div id="loadingScreen" style="
+  position:fixed;
+  inset:0;
+  background:rgba(10,10,10,0.95);
+  backdrop-filter:blur(12px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  color:#fff;
+  overflow:hidden;
+">
+  <div style="
+    padding:24px 36px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.2);
+    backdrop-filter:blur(20px);
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:center;
+  ">
+    <img id="logoImg" alt="Logo" style="width:60px; height:60px; visibility:hidden;"/>
+    <span style="font-size:1.2rem; font-weight:700;">WATCH-4-RBX</span>
+    <div class="dots" style="display:flex; gap:6px;">
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite;
+      "></span>
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite 0.2s;
+      "></span>
+      <span style="
+        width:10px; height:10px; background:#fff; border-radius:50%;
+        display:inline-block; animation:blink 1s infinite 0.4s;
+      "></span>
+    </div>
+  </div>
+</div>
+<script>(function(s){s.dataset.zone='10324573',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <!-- Top Sections Above Video -->  
 <div class="top-sections" style="display:flex; justify-content:space-between; gap:4%; margin:20px 10px;">
   <div class="section" style="border:none !important; box-shadow:none !important; background:transparent !important; backdrop-filter:none !important; padding:25px; text-align:center; cursor:pointer;">
@@ -229,10 +274,40 @@ textarea{resize:none;height:70px;}
   Start Watching  
 </button>
 </div>
-  
+ <div style="overflow:hidden; border-radius:16px; width:320px; height:50px;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 320,
+      'params' : {}
+    };
+  </script>
+  <script
+    type="text/javascript"
+    src="https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"
+  ></script>
+</div>
 </div>  
 <div id="topUsers" style="margin:16px 0;"></div>
-
+<div style="display:flex; justify-content:center; margin:16px 0;">
+  <div style="overflow:hidden; border-radius:16px; width:300px; height:250px;">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '037f6e178c935a44f2ef5ab0ce53116a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script
+      type="text/javascript"
+      src="https://www.highperformanceformat.com/037f6e178c935a44f2ef5ab0ce53116a/invoke.js"
+    ></script>
+  </div>
+</div>
 <!-- Reward Popup -->  
 <div id="rewardPopup"  
   style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);  
@@ -271,51 +346,38 @@ textarea{resize:none;height:70px;}
     <button id="donateConfirm" class="confirm" style="width:100%;">Donate</button>
   </div>
 </div>
-  <!-- Loading Screen -->
-<div id="loadingScreen" style="
+<div id="adWrapper" style="
+  display:none;
   position:fixed;
-  inset:0;
-  background:rgba(10,10,10,0.95);
-  backdrop-filter:blur(12px);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#000;
+  border-radius:16px;
+  padding:12px;
   z-index:9999;
-  color:#fff;
   overflow:hidden;
-">
-  <div style="
-    padding:24px 36px;
-    border-radius:24px;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.2);
-    backdrop-filter:blur(20px);
-    text-align:center;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    align-items:center;
-  ">
-    <img id="logoImg" alt="Logo" style="width:60px; height:60px; visibility:hidden;"/>
-    <span style="font-size:1.2rem; font-weight:700;">WATCH-4-RBX</span>
-    <div class="dots" style="display:flex; gap:6px;">
-      <span style="
-        width:10px; height:10px; background:#fff; border-radius:50%;
-        display:inline-block; animation:blink 1s infinite;
-      "></span>
-      <span style="
-        width:10px; height:10px; background:#fff; border-radius:50%;
-        display:inline-block; animation:blink 1s infinite 0.2s;
-      "></span>
-      <span style="
-        width:10px; height:10px; background:#fff; border-radius:50%;
-        display:inline-block; animation:blink 1s infinite 0.4s;
-      "></span>
-    </div>
-  </div>
-</div>
+"></div>
 
+<script>
+function injectAd() {
+  const wrapper = document.getElementById('adWrapper');
+  wrapper.innerHTML = ''; // clear previous ad
+  const adScript = document.createElement('script');
+  adScript.innerHTML = `(function(s){
+    s.dataset.zone='10324575';
+    s.src='https://groleegni.net/vignette.min.js';
+  })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));`;
+  wrapper.appendChild(adScript);
+  wrapper.style.display = 'block';
+}
+
+// First ad after 10 seconds
+setTimeout(injectAd, 10000);
+
+// Repeat every 10 seconds
+setInterval(injectAd, 10000);
+</script>
 <style>
 @keyframes blink{
   0%, 80%, 100%{ opacity:0.2; }
@@ -453,6 +515,21 @@ window.addEventListener('load', async () => {
         <span id="referStats">Referred Users: 0 | Clicks: 0 | RBX Earned: 0</span>  
       </div>  
     </div>  
+     <div style="overflow:hidden; border-radius:16px; width:320px; height:50px;">
+  <script type="text/javascript">
+    atOptions = {
+      'key' : 'f17f4bf893957f37c1f0b072d1f31673',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 320,
+      'params' : {}
+    };
+  </script>
+  <script
+    type="text/javascript"
+    src="https://www.highperformanceformat.com/f17f4bf893957f37c1f0b072d1f31673/invoke.js"
+  ></script>
+</div>
   </div>  
 </div>  
 <!-- Comment Section inside FAQ -->
@@ -534,6 +611,12 @@ window.addEventListener('load', async () => {
     </div>
   </div>
 </div>
+<script
+  async="async"
+  data-cfasync="false"
+  src="https://pl26795976.effectivegatecpm.com/8f9075afd782b06bf3767fa2b0dd5775/invoke.js"
+></script>
+<div id="container-8f9075afd782b06bf3767fa2b0dd5775"></div>
 </div>
 <script type="module">  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";  
