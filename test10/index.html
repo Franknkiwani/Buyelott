@@ -759,7 +759,7 @@ function loadTopEarners() {
       .map(([uid, user]) => {
         let displayName = 'Anonymous';
         if(user.username) displayName = user.username;
-        else if(user.email) displayName = user.email.split('@')[0]; 
+        else if(user.email) displayName = user.email.split('@')[0];
 
         return {
           uid,
@@ -821,6 +821,8 @@ function loadTopEarners() {
         onAuthStateChanged(auth, user => {
           if(!user) return showModal('<h3>Login Required</h3><p>Please log in to donate RBX.</p>');
 
+          if(user.uid === u.uid) return showModal('<h3>Error</h3><p>You cannot donate to yourself.</p>');
+
           const donorUid = user.uid;
           const donorRef = ref(db, `users/${donorUid}/rbxbalance`);
           const recipientRef = ref(db, `users/${u.uid}/rbxbalance`);
@@ -832,17 +834,17 @@ function loadTopEarners() {
             showModal(`
               <h3>Donate to ${u.name}</h3>
               <p>Your RBX: ${donorRbx}</p>
-              <input id="donateAmount" type="number" placeholder="1-1000" min="1" max="1000" style="width:100%; padding:6px; margin-top:8px;"/>
+              <input id="donateAmount" type="number" placeholder="Enter amount" style="width:100%; padding:6px; margin-top:8px;"/>
               <button id="sendDonateBtn" style="margin-top:8px; padding:6px 12px;">Send</button>
             `);
 
             document.getElementById('sendDonateBtn').onclick = () => {
               const rawValue = document.getElementById('donateAmount').value.trim();
-              const donateAmount = parseInt(rawValue, 10);
+              const donateAmount = Number(rawValue);
 
-              if (isNaN(donateAmount)) return showModal('<h3>Error</h3><p>Please enter a valid number.</p>');
-              if (donateAmount < 1 || donateAmount > 1000) return showModal('<h3>Error</h3><p>Amount must be 1–1000 RBX.</p>');
-              if (donorRbx < donateAmount) return showModal('<h3>Error</h3><p>Not enough RBX.</p>');
+              if(!rawValue || isNaN(donateAmount)) return showModal('<h3>Error</h3><p>Please enter a valid number.</p>');
+              if(donateAmount < 1) return showModal('<h3>Error</h3><p>Amount must be at least 1 RBX.</p>');
+              if(donorRbx < donateAmount) return showModal('<h3>Error</h3><p>Not enough RBX.</p>');
 
               // Update balances
               donorRef.set(donorRbx - donateAmount);
@@ -900,7 +902,6 @@ function showModal(contentHtml) {
 
 // Load top users initially
 loadTopEarners();
-
 // Call it once on load
 loadTopEarners();
 const commentInput = document.getElementById('commentInput');
