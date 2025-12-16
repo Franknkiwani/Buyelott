@@ -261,7 +261,7 @@ textarea{resize:none;height:70px;}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
 // ====== Firebase Config ======
 const firebaseConfig = {
@@ -377,12 +377,10 @@ window.doLogout = async () => { await signOut(auth); location.reload(); };
 sections.forEach(section => {
   const label = section.querySelector('span').innerText;
 
-  // Redeem rewards
   if(label === "Redeem rewards"){
     section.addEventListener('click', openWithdrawModal);
   }
 
-  // Refer & Earn
   if(label === "Refer & Earn"){
     section.addEventListener('click', () => {
       if(!currentUser){
@@ -393,7 +391,6 @@ sections.forEach(section => {
         const link = `${location.origin}/refer?uid=${currentUser.uid}`;
         referLinkInput.value = link;
 
-        // Fetch referral stats
         const refRef = ref(db, `referrals/${currentUser.uid}`);
         onValue(refRef, snap => {
           let data = snap.exists() ? snap.val() : {users:0, clicks:0, rbx:0};
@@ -427,9 +424,9 @@ window.addEventListener('keydown', e => {
     if(referModal) referModal.style.display='none';
   }
 });
-/* ================= VIDEO PLAYER ================= */
 
-(() => {  // IIFE to isolate video logic
+/* ================= VIDEO PLAYER ================= */
+(() => {
   const originalVideos = [
     "https://files.catbox.moe/61ny1y.mp4",
     "https://files.catbox.moe/jfapxh.mp4",
@@ -437,7 +434,6 @@ window.addEventListener('keydown', e => {
     "https://files.catbox.moe/69l5y3.mp4",
     "https://files.catbox.moe/bjwdo9.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-    // Add more if needed
   ];
 
   let shuffledVideos = [...originalVideos].sort(()=>Math.random()-0.5);
@@ -456,9 +452,6 @@ window.addEventListener('keydown', e => {
   const rewardOkButton = document.getElementById('rewardOkButton');
   const loaderPill = document.getElementById('loaderPill');
 
-  const dbRef = db;  // use your already imported db
-  const authRef = auth; // use your already imported auth
-
   function loadVideo(index){
     clearInterval(countdownInterval);
     videoCompleted = false;
@@ -476,14 +469,12 @@ window.addEventListener('keydown', e => {
     clearInterval(countdownInterval);
     remaining = videoDuration;
     updateTime();
-
     countdownInterval = setInterval(()=>{
       if(remaining > 0){
         remaining--;
         updateTime();
         progressBar.style.width = ((videoDuration - remaining)/videoDuration*100) + '%';
       }
-
       if(remaining <=0){
         clearInterval(countdownInterval);
         videoCompleted = true;
@@ -495,21 +486,20 @@ window.addEventListener('keydown', e => {
     timeCounter.textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
   }
 
+  // ====== RBX Reward Function (transaction safe) ======
   function saveRBXReward(earned){
-    const user = authRef.currentUser;
+    const user = auth.currentUser;
     if(!user) return;
 
-    const balRef = ref(dbRef, `users/${user.uid}/rbxbalance`);
-    get(balRef).then(snap => {
-      const current = snap.exists() ? snap.val() : 0;
-      const newBal = current + earned;
-      set(balRef, newBal).then(()=>{
-        const bigBal = document.getElementById("bigBal");
-        if(bigBal) bigBal.innerText = newBal + " RBX";
-        const rbxBtn = document.querySelector(".rbx");
-        if(rbxBtn) rbxBtn.innerText = newBal + " RBX / GET";
-      });
-    });
+    const balRef = ref(db, `users/${user.uid}/rbxbalance`);
+    runTransaction(balRef, current => {
+      return (current || 0) + earned;
+    }).then(() => {
+      const bigBal = document.getElementById("bigBal");
+      if(bigBal) bigBal.innerText = balance + earned + " RBX"; // temporary visual update
+      const rbxBtn = document.querySelector(".rbx");
+      if(rbxBtn) rbxBtn.innerText = balance + earned + " RBX / GET";
+    }).catch(err => console.error("Failed to update balance:", err));
   }
 
   /* ================= EVENTS ================= */
