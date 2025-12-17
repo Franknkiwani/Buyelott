@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Urgent Update for SA Teens – Please Read</title>
+
+<meta name="description" content="An official update affecting teenagers across South Africa is being rolled out. Please review before it goes public.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Urgent Update for SA Teens – Please Read">
+<meta property="og:description" content="An official update affecting teenagers across South Africa is being rolled out.">
+<meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSaQYtRoYM1YJ8Gdte1_gm4TXsL3hvsRinRt_IhMHmzlUYurkJyvgrF9g&s=10">
+<meta property="og:type" content="website">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Urgent Update for SA Teens – Please Read">
+<meta name="twitter:description" content="An official update affecting teenagers across South Africa is being rolled out.">
+<meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSaQYtRoYM1YJ8Gdte1_gm4TXsL3hvsRinRt_IhMHmzlUYurkJyvgrF9g&s=10">
+
+<!-- Favicon -->
+<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/a/af/Flag_of_South_Africa.svg">
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #111, #000);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.box {
+  max-width: 420px;
+  padding: 30px;
+}
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+p {
+  opacity: 0.85;
+}
+
+.count {
+  margin-top: 25px;
+  font-size: 3rem;
+  font-weight: 900;
+  color: #00ff9c;
+}
+
+.reveal {
+  display: none;
+  margin-top: 30px;
+}
+
+.reveal h2 {
+  font-size: 1.8rem;
+}
+
+</style>
+</head>
+<body>
+
+<div class="box" id="page">
+  <h1>🚨 Official Notice 🇿🇦</h1>
+  <p>This update affects South African teenagers nationwide.</p>
+  <p>Please wait while details load.</p>
+
+  <div class="count" id="count">10</div>
+
+  <div class="reveal" id="reveal">
+    <h2>😂 Relax.</h2>
+    <p>You just got pranked.</p>
+    <p>Never trust dramatic countdown websites.</p>
+  </div>
+</div>
+
+<!-- ADS (as requested, untouched) -->
+<script src="https://quge5.com/88/tag.min.js" data-zone="192936" async data-cfasync="false"></script>
+
+<script>
+(function(s){
+  s.dataset.zone='9106952';
+  s.src='https://nap5k.com/tag.min.js';
+})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+</script>
+
+<script>
+(function(s){
+  s.dataset.zone='9105850';
+  s.src='https://groleegni.net/vignette.min.js';
+})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+</script>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.appspot.com",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const sessionStart = Date.now();
+const sessionRef = push(ref(db, "prankSessions"));
+
+set(sessionRef, {
+  startedAt: sessionStart,
+  userAgent: navigator.userAgent
+});
+
+document.addEventListener("click", () => {
+  push(ref(db, "prankClicks"), {
+    time: Date.now()
+  });
+});
+
+window.addEventListener("beforeunload", () => {
+  set(ref(db, "prankSessions/" + sessionRef.key + "/duration"), Date.now() - sessionStart);
+});
+</script>
+
+<script>
+let c = 10;
+const countEl = document.getElementById("count");
+const revealEl = document.getElementById("reveal");
+
+const timer = setInterval(() => {
+  c--;
+  countEl.textContent = c;
+  if (c === 0) {
+    clearInterval(timer);
+    countEl.style.display = "none";
+    revealEl.style.display = "block";
+  }
+}, 1000);
+</script>
+
+</body>
+</html>
