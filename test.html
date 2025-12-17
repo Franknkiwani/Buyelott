@@ -3,54 +3,257 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tab Switch Example</title>
+<title>RBX Community</title>
 <style>
-  .tab-content {
-    display: none;
-    padding: 20px;
-    border: 1px solid #ccc;
-  }
+*{box-sizing:border-box;user-select:none;outline:none;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#121212;color:#fff;}
+header{height:50px;display:flex;align-items:center;justify-content:space-between;background:#000;border-bottom:1px solid #2a2a2a;padding:0 12px;position:sticky;top:0;z-index:1000;}
+.logo{height:36px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.profile{width:32px;height:32px;border-radius:50%;background-size:cover;background-position:center;cursor:pointer;border:2px solid #fff;transition:border-color 1s ease, background-image 1s ease, opacity 1s ease;opacity:1;}
+.hamburger{width:32px;height:24px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:2px;background:#000;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.5);transition: transform 0.2s;}
+.hamburger div{height:4px;background:#fff;border-radius:6px;transition:all 0.3s ease;}
+.hamburger.active div:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.active div:nth-child(2){opacity:0;}
+.hamburger.active div:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.menu-overlay{position:fixed;top:50px;left:0;width:100%;height:100vh;background:#000;overflow-y:auto;transform:translateY(-100%);transition:transform 0.3s ease;z-index:900;display:flex;flex-direction:column;align-items:center;padding-top:20px;}
+.menu-overlay.active{transform:translateY(0);}
+.menu-overlay a{color:#fff;text-decoration:none;font-size:20px;margin:12px 0;font-weight:bold;}
+.menu-overlay a:hover{color:#ccc;}
+main{padding:20px;min-height:200vh;}
 
-  .tab-content:target {
-    display: block;
-  }
-
-  .tabs a {
-    padding: 10px 20px;
-    text-decoration: none;
-    border: 1px solid #ccc;
-    margin-right: 5px;
-    color: black;
-    background: #eee;
-  }
-
-  .tabs a:hover {
-    background: #ddd;
-  }
+/* Profile Panel */
+.profile-panel{position:fixed;top:0;left:0;width:100%;height:100vh;background:#111;transform:translateX(100%);transition:transform 0.3s ease;z-index:1100;display:flex;flex-direction:column;}
+.profile-panel.active{transform:translateX(0);}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #222;}
+.close-btn{background:#ff3b30;color:#fff;padding:6px 16px;font-size:16px;font-weight:bold;border:none;border-radius:12px;cursor:pointer;transition:transform 0.2s;}
+.close-btn:hover{transform:scale(1.05);}
+.panel-top{display:flex;flex-direction:column;align-items:center;margin:20px 0;gap:12px;}
+#panelProfilePic{width:100px;height:100px;border-radius:50%;border:3px solid #fff;background-size:cover;background-position:center;transition:border-color 1s ease, background-image 1s ease, opacity 1s ease;cursor:pointer;}
+#userInfo{color:#fff;font-size:16px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+#copyLinkContainer{display:flex;align-items:center;gap:8px;width:90%;max-width:300px;}
+#copyLinkContainer input{flex:1;padding:6px 12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;text-align:center;font-size:14px;}
+#copyLinkContainer button{background:#4caf50;color:#fff;border:none;padding:6px 12px;border-radius:12px;cursor:pointer;font-weight:bold;}
+#copyStatus{font-size:12px;margin-top:6px;}
+.spinner{border:4px solid #ccc;border-top:4px solid #4caf50;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;margin-top:6px;display:none;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+button.login-btn{background:#4caf50;color:#fff;border:none;padding:6px 16px;border-radius:12px;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<div class="tabs">
-  <a href="#tab1">Tab 1</a>
-  <a href="#tab2">Tab 2</a>
-  <a href="#tab3">Tab 3</a>
+<header>
+  <img src="https://i.imgur.com/cM3Givj.jpeg" alt="RBX Community" class="logo">
+  <div class="header-right">
+    <div class="profile" id="headerProfile"></div>
+    <div class="hamburger" id="hamburger"><div></div><div></div><div></div></div>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <a href="#">Home</a>
+  <a href="#">Community</a>
+  <a href="#">Games</a>
+  <a href="#">Events</a>
+  <a href="#">Profile</a>
+  <a href="#">Settings</a>
 </div>
 
-<div id="tab1" class="tab-content">
-  <h2>Tab 1 Content</h2>
-  <p>This is content for tab 1.</p>
+<div class="profile-panel" id="profilePanel">
+  <div class="panel-header">
+    <span style="color:#fff;font-weight:bold;font-size:16px;">MY PROFILE</span>
+    <button class="close-btn" id="closeProfile">Close</button>
+  </div>
+  <div class="panel-top">
+    <div id="panelProfilePic"></div>
+    <div id="userInfo"></div>
+    <div id="copyLinkContainer">
+      <input type="text" id="userLink" readonly>
+      <button id="copyLinkBtn">Copy</button>
+    </div>
+    <span id="copyStatus"></span>
+    <div class="spinner" id="uploadSpinner"></div>
+    <input type="file" id="profileInput" accept="image/*" style="display:none;">
+  </div>
+  <div class="panel-content" style="padding:20px; flex:1;">
+    <h2>Profile Panel</h2>
+    <p>Add your content here later.</p>
+  </div>
 </div>
 
-<div id="tab2" class="tab-content">
-  <h2>Tab 2 Content</h2>
-  <p>This is content for tab 2.</p>
-</div>
+<main>
+  <h1>Main Body Content</h1>
+  <p>Scroll down here to test sticky header behavior.</p>
+</main>
 
-<div id="tab3" class="tab-content">
-  <h2>Tab 3 Content</h2>
-  <p>This is content for tab 3.</p>
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getDatabase, ref, get, child, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+// Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+  measurementId: "G-LLT6F9WRKH"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Elements
+const hamburger = document.getElementById('hamburger');
+const menuOverlay = document.getElementById('menuOverlay');
+const headerProfile = document.getElementById('headerProfile');
+const profilePanel = document.getElementById('profilePanel');
+const closeProfile = document.getElementById('closeProfile');
+const panelProfilePic = document.getElementById('panelProfilePic');
+const userInfo = document.getElementById('userInfo');
+const userLinkInput = document.getElementById('userLink');
+const copyBtn = document.getElementById('copyLinkBtn');
+const copyStatus = document.getElementById('copyStatus');
+const uploadSpinner = document.getElementById('uploadSpinner');
+const profileInput = document.getElementById('profileInput');
+
+// Hamburger toggle
+hamburger.addEventListener('click',()=>{ hamburger.classList.toggle('active'); menuOverlay.classList.toggle('active'); });
+headerProfile.addEventListener('click',()=>{ profilePanel.classList.add('active'); });
+closeProfile.addEventListener('click',()=>{ profilePanel.classList.remove('active'); });
+
+// Profile images rotation
+const images = [
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJArE9ejALs7Gadwp7_lPG6ClZ1kGDFBfuqiLeEtkQhQ&s=10',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5FTSG4Sir8pySUUwqztVtlUAGiDCSia6HzybVbaRRz3yh83Bkro-FLDSw&s=10',
+  'https://fiverr.cloudinary.com/images/q_auto,f_auto/gigs/344146044/original/31d16f71c7d233f9f55107e32f77eabde2e83dc7/do-roblox-gfx-profile-pictures.jpeg',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZJaXc4y8Bmn0dMaS1TOasNx3mbAaAt1vZOHeFWMqPtN6a_bs6dpiT4gI&s=10',
+  'https://pbs.twimg.com/media/ESf5MWLWkAEv9Gf.jpg'
+];
+const loadedImages = [];
+images.forEach(src=>{ const img=new Image(); img.onload=()=>loadedImages.push(src); img.src=src; });
+
+function randomColor(){ return `hsl(${Math.floor(Math.random()*360)},80%,60%)`; }
+let index=0;
+function changeProfile(){
+  if(loadedImages.length===0) return;
+  index=(index+1)%loadedImages.length;
+  const nextImg = loadedImages[index];
+  headerProfile.style.opacity='0'; panelProfilePic.style.opacity='0';
+  setTimeout(()=>{
+    headerProfile.style.backgroundImage=`url(${nextImg})`;
+    panelProfilePic.style.backgroundImage=`url(${nextImg})`;
+    const color=randomColor();
+    headerProfile.style.borderColor=color;
+    panelProfilePic.style.borderColor=color;
+    headerProfile.style.opacity='1'; panelProfilePic.style.opacity='1';
+  },300);
+}
+const checkLoaded = setInterval(()=>{
+  if(loadedImages.length>0){
+    headerProfile.style.backgroundImage=`url(${loadedImages[0]})`;
+    panelProfilePic.style.backgroundImage=`url(${loadedImages[0]})`;
+    const color=randomColor();
+    headerProfile.style.borderColor=color;
+    panelProfilePic.style.borderColor=color;
+    clearInterval(checkLoaded);
+    setInterval(changeProfile,5000);
+  }
+},100);
+
+// Auth & profile info + copy link
+onAuthStateChanged(auth,user=>{
+  userInfo.innerHTML=''; userLinkInput.value=''; 
+  if(user){
+    const uid=user.uid;
+    const profileUrl=`${window.location.origin}/profile?useruid=${uid}`;
+    userLinkInput.value=profileUrl;
+
+    get(child(ref(db), `users/${uid}`)).then(snapshot=>{
+      if(snapshot.exists()){
+        const data=snapshot.val();
+        const handle=data.handle||user.displayName||"User";
+        const followers=data.followers||0;
+        const verified=followers>=1000;
+
+        const span=document.createElement('span');
+        span.textContent=`@${handle} (${followers})`;
+        span.style.fontWeight='bold';
+        userInfo.appendChild(span);
+        if(verified){
+          const badge=document.createElement('img');
+          badge.src='https://static.vecteezy.com/system/resources/thumbnails/047/309/918/small_2x/verified-badge-profile-icon-png.png';
+          badge.style.width='18px'; badge.style.height='18px';
+          userInfo.appendChild(badge);
+        }
+      }
+    });
+  }else{
+    userLinkInput.value="Login to get link";
+    const btn=document.createElement('button');
+    btn.textContent='LOGIN / REGISTER';
+    btn.classList.add('login-btn');
+    userInfo.appendChild(btn);
+  }
+});
+
+// Copy button
+copyBtn.addEventListener('click',()=>{
+  if(userLinkInput.value && userLinkInput.value!=="Login to get link"){
+    userLinkInput.select();
+    userLinkInput.setSelectionRange(0,99999);
+    navigator.clipboard.writeText(userLinkInput.value).then(()=>{
+      copyStatus.textContent='Copied!';
+      copyStatus.style.color='#4caf50';
+      setTimeout(()=>{copyStatus.textContent='';},1500);
+    }).catch(err=>{
+      copyStatus.textContent='Copy failed!';
+      copyStatus.style.color='#f44336';
+      console.error(err);
+    });
+    window.getSelection().removeAllRanges();
+  }
+});
+
+// Profile pic update
+panelProfilePic.addEventListener('click',()=>{
+  profileInput.click();
+});
+
+profileInput.addEventListener('change',async()=>{
+  if(!profileInput.files[0]) return;
+  const file = profileInput.files[0];
+  uploadSpinner.style.display='block';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try{
+    // Upload to Imgur
+    const res = await fetch('https://api.imgur.com/3/image', {
+      method:'POST',
+      headers:{ Authorization:'Client-ID 891e5bb4aa94282' },
+      body: formData
+    });
+    const data = await res.json();
+    if(data.success){
+      const imgUrl = data.data.link;
+      const user = auth.currentUser;
+      if(user){
+        await set(ref(db, `users/${user.uid}/profilePic`), imgUrl);
+        panelProfilePic.style.backgroundImage=`url(${imgUrl})`;
+        headerProfile.style.backgroundImage=`url(${imgUrl})`;
+      }
+    }else{
+      alert('Upload failed');
+    }
+  }catch(err){ console.error(err); alert('Upload error'); }
+  uploadSpinner.style.display='none';
+});
+</script>
 
 </body>
 </html>
