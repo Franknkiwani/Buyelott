@@ -47,6 +47,18 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);       /* Adds depth */
 }
+/* Prevents the page from jumping when the browser bar appears */
+html, body {
+    overflow-x: hidden;
+    /* Forces the browser to keep the layout stable */
+    contain: paint; 
+}
+
+/* Ensure the sticky nav doesn't freak out during the prompt */
+.nav {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
 
     </style>
 </head>
