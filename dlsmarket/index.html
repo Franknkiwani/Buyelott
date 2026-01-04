@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLS Market | Elite Squads</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+        input, textarea { user-select: text; -webkit-user-select: text; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        .no-scroll { overflow: hidden !important; height: 100vh; }
+        .nav-blur { background: rgba(18, 18, 22, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); position: fixed; top: 0; width: 100%; z-index: 100; }
+        
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1dbf73; color: white; padding: 12px 24px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        .product-card { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
+        .product-card.visible { opacity: 1; transform: translateY(0); }
+
+        .buy-btn { background: #fcd34d; color: #000; transition: all 0.2s ease; box-shadow: 0 4px 0px #d97706; }
+        .buy-btn:disabled { background: #27272a; color: #52525b; box-shadow: none; opacity: 0.5; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .input-field { background: #121214; border: 1px solid #27272a; border-radius: 12px; padding: 14px; width: 100%; color: white; outline: none; transition: 0.3s; }
+        .input-field:focus { border-color: #1dbf73; }
+
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="antialiased no-scroll">
+
+    <div id="toast"><span id="toast-msg">Success</span></div>
+
+    <div id="page-loader" class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center text-center">
+        <div class="spinner !flex !w-12 !h-12 !border-4 mb-4"></div>
+        <h1 class="text-xl font-800 tracking-tighter uppercase italic">DLS<span class="text-[#1dbf73]">Market</span></h1>
+    </div>
+
+    <nav class="nav-blur">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+            <h1 class="text-xl font-800 tracking-tighter uppercase italic">DLS<span class="text-[#1dbf73]">Market</span></h1>
+            <div id="auth-section"></div>
+        </div>
+    </nav>
+
+    <header class="pt-24 pb-4 px-6 border-b border-zinc-900">
+        <div class="max-w-7xl mx-auto flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-800 tracking-tight uppercase italic">Inventory <span class="text-[#1dbf73] ml-2 text-[10px] not-italic tracking-widest font-bold">Live</span></h2>
+            
+            <a href="/profile" id="user-display" class="hidden flex items-center justify-center w-11 h-11 rounded-full bg-zinc-900 border border-zinc-800 hover:border-[#1dbf73] transition-all">
+                <div id="user-avatar" class="w-full h-full rounded-full flex items-center justify-center font-900 text-black bg-[#1dbf73] text-sm">U</div>
+            </a>
+        </div>
+
+        <div id="order-status-bar" class="max-w-7xl mx-auto hidden mb-4">
+            <div class="bg-[#1dbf73]/10 border border-[#1dbf73]/20 p-4 rounded-2xl flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-[#1dbf73] animate-pulse"></div>
+                    <p class="text-[11px] font-bold uppercase tracking-tight text-zinc-400">Order ID: <span onclick="window.copyID()" class="text-white bg-zinc-800 px-2 py-1 rounded cursor-pointer ml-1" id="pending-order-id">#ID</span></p>
+                </div>
+                <button onclick="window.cancelOrder()" class="text-[9px] font-900 uppercase text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">Cancel</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-6 mt-8 mb-4">
+        <div class="relative">
+            <input type="text" id="product-search" placeholder="Search squads by player or rank..." 
+                class="w-full bg-[#0f0f12] border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold outline-none focus:border-[#1dbf73] transition-all">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 text-sm">🔍</span>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-6 py-4 pb-32">
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        
+        <div id="load-more-container" class="mt-12 flex justify-center hidden">
+            <button onclick="window.loadNextBatch()" class="bg-zinc-900 border border-zinc-800 px-8 py-4 rounded-xl text-[10px] font-900 uppercase tracking-widest hover:text-[#1dbf73] transition">
+                Discover More Squads
+            </button>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="modal px-4">
+        <div class="bg-[#0f0f12] p-8 rounded-3xl border border-zinc-800 w-full max-w-sm relative">
+            <button onclick="window.toggleAuthModal()" class="absolute top-6 right-6 text-zinc-500 hover:text-white">&times;</button>
+            <h2 id="modal-title" class="text-2xl font-800 mb-6 uppercase italic tracking-tighter text-center">Login</h2>
+            <input type="email" id="email" placeholder="Email" class="input-field text-sm mb-3">
+            <input type="password" id="password" placeholder="Password" class="input-field text-sm mb-4">
+            <button onclick="window.handleEmailAuth()" class="bg-[#1dbf73] text-white w-full py-4 rounded-xl font-800 uppercase text-xs mb-4 flex items-center justify-center gap-2">
+                <span id="auth-btn-text">Sign In</span>
+                <div id="auth-spinner" class="spinner"></div>
+            </button>
+            <button onclick="window.loginWithGoogle()" class="w-full py-4 bg-white text-black text-[10px] font-900 uppercase rounded-xl mb-4">Google Access</button>
+            <p class="text-center text-[11px] text-zinc-500">
+                <button onclick="window.toggleAuthMode()" id="toggle-auth-btn" class="text-[#1dbf73] font-bold">Create Account</button>
+            </p>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="modal px-4">
+        <div class="bg-[#0f0f12] p-8 rounded-3xl border border-zinc-800 w-full max-w-md relative">
+            <button onclick="window.closeCheckout()" class="absolute top-6 right-6 text-zinc-500 hover:text-white text-2xl">&times;</button>
+            <div class="flex items-center gap-2 mb-2"><span class="w-2 h-2 rounded-full bg-[#1dbf73] animate-pulse"></span><p class="text-[10px] font-bold text-[#1dbf73] uppercase tracking-widest">Secure Order Request</p></div>
+            <h2 id="checkout-title" class="text-2xl font-800 mb-6 italic uppercase tracking-tighter">Squad Name</h2>
+            
+            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 mb-6">
+                <h4 class="text-[10px] font-900 uppercase text-white mb-2">🛡️ Anti-Scam Protocol</h4>
+                <p class="text-[10px] text-zinc-400 leading-relaxed italic">You are requesting to purchase this asset. To ensure 0% delay and 100% safety, our Admin will personally verify the transfer and contact you at the address provided below.</p>
+            </div>
+
+            <label class="text-[9px] font-bold text-zinc-500 uppercase mb-2 block ml-1">Delivery Contact (Email/Discord)</label>
+            <div class="flex gap-2 mb-8">
+                <input type="text" id="delivery-contact" disabled class="input-field text-sm !mb-0">
+                <button onclick="window.unlockDeliveryInput()" id="change-contact-btn" class="bg-zinc-800 px-4 rounded-xl text-[10px] font-bold uppercase">Change</button>
+            </div>
+            
+            <button onclick="window.confirmOrder()" class="buy-btn w-full py-5 rounded-2xl font-900 uppercase text-xs flex items-center justify-center gap-3">
+                <span id="order-text">Request Purchase</span>
+                <div id="order-spinner" class="spinner !border-black"></div>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, remove, query, limitToFirst, orderByKey, startAfter } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+            messagingSenderId: "1094792075584",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+
+        let allProductsFull = []; // Master list for search
+        let lastKey = null;
+        let currentUser = null;
+        let activeOrderKey = null;
+        let isLoginMode = true;
+
+        window.showToast = (msg, isError = false) => {
+            const toast = document.getElementById('toast');
+            toast.style.background = isError ? '#ef4444' : '#1dbf73';
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        window.toggleAuthModal = () => {
+            const m = document.getElementById('auth-modal');
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        };
+
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('modal-title').innerText = isLoginMode ? 'Login' : 'Register';
+            document.getElementById('auth-btn-text').innerText = isLoginMode ? 'Sign In' : 'Create Account';
+            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? 'Create Account' : 'Back to Login';
+        };
+
+        window.copyID = () => {
+            navigator.clipboard.writeText(document.getElementById('pending-order-id').innerText);
+            showToast("Copied to Clipboard");
+        };
+
+        window.unlockDeliveryInput = () => {
+            document.getElementById('delivery-contact').disabled = false;
+            document.getElementById('delivery-contact').focus();
+            document.getElementById('change-contact-btn').style.display = 'none';
+        };
+
+        window.handleEmailAuth = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            document.getElementById('auth-spinner').style.display = 'block';
+            try {
+                if(isLoginMode) await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+                window.toggleAuthModal();
+            } catch (e) { showToast(e.message, true); }
+            finally { document.getElementById('auth-spinner').style.display = 'none'; }
+        };
+
+        window.loginWithGoogle = () => signInWithPopup(auth, provider).then(() => window.toggleAuthModal());
+        window.handleSignOut = () => signOut(auth).then(() => window.location.reload());
+
+        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+        const renderProducts = (products, append = false) => {
+            const grid = document.getElementById('product-grid');
+            if (!append) grid.innerHTML = '';
+            
+            products.forEach((p, index) => {
+                const isBlocked = activeOrderKey !== null;
+                const card = document.createElement('div');
+                card.className = 'product-card bg-[#0f0f12] border border-zinc-800 rounded-2xl overflow-hidden';
+                card.innerHTML = `
+                    <div class="relative aspect-[4/3] overflow-hidden">
+                        <img loading="lazy" src="${p.image}" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 text-[8px] font-900 bg-[#1dbf73] px-2 py-1 rounded">VERIFIED</span>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-sm mb-1 uppercase tracking-tight truncate">${p.title}</h3>
+                        <div class="flex items-center justify-between pt-4 border-t border-zinc-800 mt-4">
+                            <span class="text-xl font-900">$${p.price}</span>
+                            <button onclick="window.openCheckout('${p.title}', '${p.price}')" ${isBlocked ? 'disabled' : ''} class="buy-btn px-4 py-2 rounded-lg text-[10px] font-900 uppercase">
+                                ${isBlocked ? 'Pending' : 'Buy Now'}
+                            </button>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+                setTimeout(() => card.classList.add('visible'), index * 50);
+            });
+        };
+
+        // Chunk Loading Logic
+        window.loadNextBatch = () => {
+            const pQuery = lastKey 
+                ? query(ref(db, 'products'), orderByKey(), startAfter(lastKey), limitToFirst(12))
+                : query(ref(db, 'products'), orderByKey(), limitToFirst(12));
+
+            onValue(pQuery, (snap) => {
+                const data = snap.val();
+                if (data) {
+                    const entries = Object.entries(data);
+                    lastKey = entries[entries.length - 1][0];
+                    const batch = entries.map(e => e[1]);
+                    render(shuffle(batch), lastKey !== null);
+                    document.getElementById('load-more-container').classList.toggle('hidden', entries.length < 12);
+                }
+                document.getElementById('page-loader').style.display = 'none';
+                document.body.classList.remove('no-scroll');
+            }, { onlyOnce: true });
+        };
+
+        // Search Logic across all products
+        document.getElementById('product-search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            if (term.length > 0) {
+                document.getElementById('load-more-container').classList.add('hidden');
+                onValue(ref(db, 'products'), (snap) => {
+                    const all = Object.values(snap.val() || {});
+                    const filtered = all.filter(p => p.title.toLowerCase().includes(term));
+                    renderProducts(filtered, false);
+                }, { onlyOnce: true });
+            } else {
+                lastKey = null;
+                window.loadNextBatch();
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('auth-section').innerHTML = `<button onclick="window.handleSignOut()" class="text-[10px] font-bold text-zinc-500 uppercase">Sign Out</button>`;
+                document.getElementById('user-display').classList.remove('hidden');
+                document.getElementById('user-avatar').innerText = user.email[0].toUpperCase();
+                
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    const data = snapshot.val();
+                    activeOrderKey = null;
+                    document.getElementById('order-status-bar').classList.add('hidden');
+                    if (data) {
+                        for (let key in data) {
+                            if (data[key].buyer === user.email && data[key].status === 'pending') {
+                                activeOrderKey = key;
+                                document.getElementById('pending-order-id').innerText = "#" + key.slice(-6).toUpperCase();
+                                document.getElementById('order-status-bar').classList.remove('hidden');
+                                break;
+                            }
+                        }
+                    }
+                    if(!lastKey) window.loadNextBatch();
+                });
+            } else {
+                document.getElementById('auth-section').innerHTML = `<button onclick="window.toggleAuthModal()" class="bg-[#1dbf73] text-white px-6 py-2 rounded-full text-[10px] font-800 uppercase">Login</button>`;
+                document.getElementById('user-display').classList.add('hidden');
+                if(!lastKey) window.loadNextBatch();
+            }
+        });
+
+        window.openCheckout = (title, price) => {
+            if(!currentUser) { window.toggleAuthModal(); return; }
+            document.getElementById('checkout-title').innerText = title;
+            document.getElementById('delivery-contact').value = currentUser.email;
+            document.getElementById('delivery-contact').disabled = true;
+            document.getElementById('change-contact-btn').style.display = 'block';
+            document.getElementById('checkout-modal').style.display = 'flex';
+        };
+
+        window.closeCheckout = () => document.getElementById('checkout-modal').style.display = 'none';
+
+        window.confirmOrder = async () => {
+            document.getElementById('order-spinner').style.display = 'block';
+            try {
+                await push(ref(db, 'orders'), {
+                    product: document.getElementById('checkout-title').innerText,
+                    buyer: currentUser.email,
+                    contact: document.getElementById('delivery-contact').value,
+                    status: 'pending',
+                    timestamp: Date.now()
+                });
+                showToast("Request Submitted");
+                window.closeCheckout();
+            } catch (e) { showToast(e.message, true); }
+            finally { document.getElementById('order-spinner').style.display = 'none'; }
+        };
+
+        window.cancelOrder = async () => {
+            if (activeOrderKey) {
+                await remove(ref(db, `orders/${activeOrderKey}`));
+                showToast("Request Cancelled", true);
+            }
+        };
+
+        // Aliasing the render function for the loader
+        const render = renderProducts;
+    </script>
+</body>
+</html>
