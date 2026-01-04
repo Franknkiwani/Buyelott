@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Watch4Rbx - Earn Free Robux</title>
+    <script src='//libtl.com/sdk.js' data-zone='10416906' data-sdk='show_10416906'></script>
+
+    <script>
+        // A. AUTOMATIC PASSIVE PROFIT (In-App Interstitial)
+        // This runs in the background and pays YOU, but gives no Robux to the user.
+        show_10416906({
+            type: 'inApp',
+            inAppSettings: {
+                frequency: 2,    // 2 ads per session
+                capping: 0.1,    // Every 6 minutes
+                interval: 30,   // 30s between ads
+                timeout: 5,      // First ad after 5 seconds
+                everyPage: false 
+            }
+        });
+
+        // B. THE REWARD FUNCTION (Rewarded Interstitial)
+        function startEarning() {
+            const userId = "USER_123"; // Get this from your login system
+
+            show_10416906({
+                type: 'rewarded', // High-payout format
+                ymid: userId      // Passes the ID to your backend
+            }).then((result) => {
+                if (result && result.reward_event_type === 'valued') {
+                    alert("Ad Finished! Your Robux will be added once verified (approx 1 min).");
+                }
+            }).catch(e => alert("Please disable AdBlock to earn Robux!"));
+        }
+    </script>
+</head>
+<body>
+    <h1>Watch4Rbx</h1>
+    <button onclick="startEarning()" style="padding: 20px; font-size: 20px;">
+        WATCH AD FOR 1 ROBUX
+    </button>
+</body>
+</html>
