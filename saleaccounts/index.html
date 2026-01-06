@@ -3,109 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard | ItzHoyoo</title>
+    <title>Seller Portal | ItzHoyoo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,800;1,800&display=swap" rel="stylesheet">
     <style>
+        :root { --accent: #3b82f6; --bg: #050505; --card: #111111; }
         body {
-            background: #050505; color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
             background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #050505 80%);
-            min-height: 100vh; padding-top: 80px;
-            transition: overflow 0.3s ease;
+            min-height: 100vh; padding-top: 80px; transition: overflow 0.3s ease;
         }
-        /* Lock scroll class */
         .no-scroll { overflow: hidden; height: 100vh; }
+        .card-solid { background: var(--card); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .input-field { background: #000; border: 1px solid #222; color: white; transition: 0.3s; font-size: 13px; }
+        .input-field:focus { border-color: var(--accent); outline: none; }
+
+        /* Support Overlay */
+        #support-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.98); display: none; align-items: center; justify-content: center; padding: 20px; }
+        #support-overlay.active { display: flex; }
+
+        /* Order Overlay */
+        #order-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.98); display: none; align-items: center; justify-content: center; padding: 20px; }
+        #order-overlay.active { display: flex; }
         
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .sticky-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .skeleton { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-        
-        .input-field { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
-        
-        #loading-screen { 
-            position: fixed; inset: 0; z-index: 999; background: #050505; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            transition: opacity 0.5s ease, visibility 0.5s;
+        #order-sticky { position: fixed; bottom: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; z-index: 100; display: none; justify-content: space-between; align-items: center; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+
+        #stats-panel { 
+            position: fixed; bottom: 90px; right: 24px; width: 320px; 
+            transform: translateY(20px); opacity: 0; visibility: hidden; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 150;
         }
-        #loading-screen.fade-out { opacity: 0; visibility: hidden; }
+        #stats-panel.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        
+        .tier-btn.active-Legendary { background: #eab308; color: black; border-color: #eab308; box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
+        .tier-btn.active-Average { background: #3b82f6; color: black; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .tier-btn.active-Standard { background: #ffffff; color: black; border-color: #ffffff; }
     </style>
 </head>
-<body class="no-scroll"> <div id="loading-screen">
-        <div class="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-white/50">Securing Session</p>
+<body class="no-scroll">
+
+    <div id="loading-screen" class="fixed inset-0 z-[400] bg-[#050505] flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Syncing Portfolio</p>
     </div>
 
-    <header class="sticky-header h-16 flex items-center px-6">
+    <div id="support-overlay">
+        <div class="w-full max-w-lg card-solid rounded-[40px] p-10 relative">
+            <button onclick="toggleSupport(false)" class="absolute top-8 right-8 text-gray-500 font-black">✕</button>
+            <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.3em] mb-4 text-center">Help Center</p>
+            <h2 class="text-3xl font-black italic uppercase mb-8 text-center">Contact <span class="text-blue-500">Center</span></h2>
+            
+            <div class="space-y-3">
+                <div class="p-1 bg-gradient-to-r from-blue-500/20 to-transparent rounded-2xl border border-white/5">
+                    <a href="https://wa.me/27742132827" target="_blank" class="flex items-center justify-between p-5 hover:bg-white/5 transition group rounded-xl">
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-blue-500">Merchant Support (You)</p>
+                            <p class="text-xs font-bold text-white">Payouts & Seller Verification</p>
+                            <p class="text-[9px] text-gray-500">+27 74 213 2827</p>
+                        </div>
+                        <span class="bg-blue-500 text-white px-3 py-1 rounded-lg font-black text-[9px]">SELLER</span>
+                    </a>
+                </div>
+
+                <div class="p-1 bg-gradient-to-r from-green-500/20 to-transparent rounded-2xl border border-white/5">
+                    <a href="https://wa.me/27846737224" target="_blank" class="flex items-center justify-between p-5 hover:bg-white/5 transition group rounded-xl">
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-green-500">Client Support (Buyers)</p>
+                            <p class="text-xs font-bold text-white">Payment Proofs & Disputes</p>
+                            <p class="text-[9px] text-gray-500">+27 84 673 7224</p>
+                        </div>
+                        <span class="bg-green-500 text-black px-3 py-1 rounded-lg font-black text-[9px]">BUYER</span>
+                    </a>
+                </div>
+
+                <button onclick="requestPayout()" class="w-full mt-4 py-4 bg-white text-black font-black rounded-2xl text-[10px] uppercase hover:bg-blue-600 hover:text-white transition">
+                    Request Payout ($<span id="payout-amount-btn">0.00</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="order-overlay">
+        <div class="w-full max-w-2xl card-solid rounded-[40px] p-8 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black italic uppercase tracking-tighter">Pending <span class="text-blue-500">Sales</span></h2>
+                <button onclick="closeOrderModal()" class="text-[10px] font-black uppercase text-gray-500 hover:text-white">Close [ESC]</button>
+            </div>
+            <div id="order-list" class="overflow-y-auto space-y-4 pr-2"></div>
+        </div>
+    </div>
+
+    <div id="order-sticky">
+        <span class="ml-4">⚠️ ACTION REQUIRED: NEW SALES DETECTED</span>
+        <button onclick="openOrderModal()" class="bg-white text-black px-6 py-2 rounded-full font-black mr-4">FULLFILL</button>
+    </div>
+
+    <header class="fixed top-0 left-0 right-0 h-16 flex items-center px-6 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
-            <div id="user-profile" class="flex items-center gap-3">
-                <img id="user-photo" src="" class="w-8 h-8 rounded-full border border-white/20 object-cover hidden">
-                <div id="user-initials" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black bg-blue-600 hidden"></div>
+            <div class="flex items-center gap-3">
+                <div id="user-initials" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black"></div>
                 <div class="leading-none">
-                    <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Authorized Seller</p>
-                    <p id="user-name" class="text-xs font-bold text-white lowercase">@user</p>
+                    <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Authorized Seller</p>
+                    <p id="user-name" class="text-xs font-bold text-white">@username</p>
                 </div>
             </div>
-            <nav class="flex items-center gap-6">
-                <div class="hidden sm:block border-r border-white/10 pr-6 mr-2 text-right">
-                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-tighter">Net Profit (70%)</p>
-                    <p id="total-revenue" class="text-sm font-black text-green-400 leading-none">$0.00</p>
-                </div>
-                <a href="/" class="text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition flex items-center gap-2">
-                    Return <span class="bg-white/10 px-2 py-1 rounded-md text-[8px]">ESC</span>
-                </a>
-            </nav>
+            <div class="flex gap-2">
+                <button onclick="toggleSupport(true)" class="text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-blue-600/20 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition">Support</button>
+                <a href="/" class="text-[10px] font-black uppercase tracking-widest px-4 py-2 border border-white/10 rounded-xl hover:bg-white hover:text-black transition">Home</a>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4">
-                <div class="glass p-6 rounded-[32px] sticky top-24">
-                    <h2 class="text-sm font-black uppercase italic mb-6 tracking-widest text-blue-500">New Deployment</h2>
-                    <form id="listing-form" class="space-y-4">
-                        <input type="text" id="acc-name" placeholder="Account Name" class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold" required>
-                        <div class="relative">
-                            <input type="number" id="acc-price" placeholder="Listing Price ($)" class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold" required>
-                            <div id="revenue-calc" class="mt-2 flex justify-between px-1 hidden">
-                                <div class="text-[9px] font-black uppercase">Fee (30%): <span id="calc-cut" class="text-red-500">-$0.00</span></div>
-                                <div class="text-[9px] font-black uppercase">Net (70%): <span id="calc-profit" class="text-green-500">$0.00</span></div>
-                            </div>
-                        </div>
-                        <textarea id="acc-desc" placeholder="Details..." class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold h-24 resize-none" required></textarea>
-                        <div id="drop-zone" class="border-2 border-dashed border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-blue-500/50 transition">
-                            <p class="text-[9px] font-black uppercase text-gray-500">Upload Landscape Images</p>
-                            <input type="file" id="img-input" multiple accept="image/*" class="hidden">
-                            <div id="img-previews" class="flex gap-2 mt-3 flex-wrap"></div>
-                        </div>
-                        <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition">Deploy Listing</button>
-                    </form>
-                </div>
-            </div>
+    <button id="stats-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 rounded-2xl shadow-2xl flex items-center justify-center z-[160] hover:scale-110 active:scale-95 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+    </button>
 
-            <div class="lg:col-span-8">
-                <h2 class="text-sm font-black uppercase italic mb-6 tracking-widest">Active Inventory</h2>
-                <div id="my-listings" class="grid grid-cols-1 gap-3">
-                    <div class="skeleton h-20 rounded-2xl w-full"></div>
-                    <div class="skeleton h-20 rounded-2xl w-full"></div>
-                </div>
+    <div id="stats-panel" class="card-solid p-6 rounded-[32px]">
+        <h3 class="text-[11px] font-black uppercase tracking-widest text-blue-500 mb-6 italic">Financial Stats</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between border-b border-white/5 pb-2">
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Possible Profit</p>
+                <p id="p-possible" class="text-xs font-black text-white">$0.00</p>
             </div>
+            <div class="flex justify-between border-b border-white/5 pb-2">
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Actual Profit</p>
+                <p id="p-actual" class="text-xs font-black text-green-400">$0.00</p>
+            </div>
+            <div class="flex justify-between">
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Units Sold</p>
+                <p id="p-orders" class="text-xs font-black text-blue-400">0</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
+        <div class="lg:col-span-4">
+            <div class="card-solid p-6 rounded-[32px] sticky top-24">
+                <h2 class="text-sm font-black uppercase mb-6 text-blue-500 italic">Deploy Account</h2>
+                <form id="listing-form" class="space-y-4">
+                    <input type="text" id="acc-name" placeholder="Account Name" class="input-field w-full p-4 rounded-xl font-bold" required>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setTier('Legendary', this)" class="tier-btn py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 bg-white/5 transition">Legendary</button>
+                        <button type="button" onclick="setTier('Average', this)" class="tier-btn py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 bg-white/5 transition">Average</button>
+                        <button type="button" onclick="setTier('Standard', this)" class="tier-btn py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 bg-white/5 transition">Standard</button>
+                    </div>
+
+                    <input type="number" id="acc-price" placeholder="Price ($)" class="input-field w-full p-4 rounded-xl font-bold" required>
+                    <div id="revenue-calc" class="flex justify-between px-1 hidden">
+                        <span class="text-[9px] font-black text-red-500 uppercase italic">Fee: <span id="calc-cut"></span></span>
+                        <span class="text-[9px] font-black text-green-500 uppercase italic">Earn: <span id="calc-profit"></span></span>
+                    </div>
+
+                    <div class="relative">
+                        <textarea id="acc-desc" placeholder="Product Details..." class="input-field w-full p-4 rounded-xl font-bold h-32 resize-none" required></textarea>
+                        <button type="button" onclick="generateAIDesc()" class="absolute bottom-3 right-3 bg-blue-600/20 text-blue-400 text-[8px] px-3 py-1 rounded-lg font-black uppercase hover:bg-blue-600 hover:text-white transition">AI Rewrite</button>
+                    </div>
+
+                    <div id="drop-zone" class="border-2 border-dashed border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-blue-500 transition">
+                        <p class="text-[9px] font-black uppercase text-gray-500" id="upload-status">Add Images</p>
+                        <input type="file" id="img-input" multiple accept="image/*" class="hidden">
+                        <div id="img-previews" class="flex gap-2 mt-3 flex-wrap"></div>
+                    </div>
+                    
+                    <button type="submit" id="submit-btn" class="w-full py-4 bg-white text-black font-black uppercase text-[10px] rounded-xl hover:bg-blue-600 hover:text-white transition">Publish to Market</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8">
+            <h2 class="text-sm font-black uppercase italic mb-6">Inventory Management</h2>
+            <div id="my-listings" class="space-y-3"></div>
         </div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
             authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
             databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-            projectId: "itzhoyoo-f9f7e",
-            storageBucket: "itzhoyoo-filestorage.app",
-            messagingSenderId: "1094792075584",
-            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+            projectId: "itzhoyoo-f9f7e"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -114,139 +196,165 @@
         const IMGUR_CLIENT_ID = '891e5bb4aa94282';
 
         let uploadedImages = [];
-        let userData = { username: '', photo: '', uid: '' };
+        let sellerInfo = {};
+        let selectedTier = null;
+        let currentActualProfit = 0;
 
-        // --- HELPER: HIDE LOADER ---
         const hideLoader = () => {
-            document.getElementById('loading-screen').classList.add('fade-out');
+            document.getElementById('loading-screen').style.display = 'none';
             document.body.classList.remove('no-scroll');
         };
 
-        // Safety Timeout: Force hide loader if Firebase hangs
-        setTimeout(hideLoader, 3500);
-
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "/";
-            } else {
-                const username = user.email.split('@')[0];
-                userData = { username: `@${username}`, uid: user.uid, photo: user.photoURL || `https://ui-avatars.com/api/?name=${username}` };
-                
-                document.getElementById('user-name').textContent = userData.username;
-                const photoEl = document.getElementById('user-photo');
-                const initialEl = document.getElementById('user-initials');
-                
-                if(user.photoURL) {
-                    photoEl.src = user.photoURL;
-                    photoEl.classList.remove('hidden');
-                } else {
-                    initialEl.textContent = username.substring(0, 2).toUpperCase();
-                    initialEl.classList.remove('hidden');
-                }
-                loadSellerData(user.uid);
-            }
+            if (!user) window.location.href = "/";
+            const username = user.email.split('@')[0];
+            sellerInfo = { uid: user.uid, username: `@${username}` };
+            document.getElementById('user-name').textContent = sellerInfo.username;
+            document.getElementById('user-initials').textContent = username.substring(0, 2).toUpperCase();
+            syncDashboard();
         });
 
-        // REVENUE CALC
-        document.getElementById('acc-price').oninput = (e) => {
-            const val = parseFloat(e.target.value);
-            const calcDiv = document.getElementById('revenue-calc');
-            if(val > 0) {
-                calcDiv.classList.remove('hidden');
-                document.getElementById('calc-cut').textContent = `-$${(val * 0.3).toFixed(2)}`;
-                document.getElementById('calc-profit').textContent = `$${(val * 0.7).toFixed(2)}`;
-            } else {
-                calcDiv.classList.add('hidden');
-            }
+        window.setTier = (tier, btn) => {
+            selectedTier = tier;
+            document.querySelectorAll('.tier-btn').forEach(b => b.className = 'tier-btn py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 bg-white/5 transition');
+            btn.classList.add(`active-${tier}`);
         };
 
-        // IMGUR UPLOAD
+        window.toggleSupport = (show) => {
+            document.getElementById('support-overlay').style.display = show ? 'flex' : 'none';
+        };
+
+        window.requestPayout = () => {
+            if(currentActualProfit <= 0) return alert("You have no actual profit to withdraw yet!");
+            const msg = `Payout Request from ${sellerInfo.username}\nAmount: $${currentActualProfit.toFixed(2)}`;
+            window.open(`https://wa.me/27846737224?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        window.generateAIDesc = () => {
+            const name = document.getElementById('acc-name').value || "Premium Account";
+            const copy = [
+                `🔥 [CERTIFIED] This ${name} includes full mail access. Competitive price. Safe transfer guaranteed.`,
+                `💎 High-tier ${name}. Clean history, instant delivery. Verified by ItzHoyoo.`,
+                `⚡ Instant delivery. Secure ${name}. Best value for money. Contact support for assistance.`
+            ];
+            document.getElementById('acc-desc').value = copy[Math.floor(Math.random()*copy.length)];
+        };
+
+        document.getElementById('acc-price').oninput = (e) => {
+            const v = parseFloat(e.target.value);
+            const box = document.getElementById('revenue-calc');
+            if(v > 0) {
+                box.classList.remove('hidden');
+                document.getElementById('calc-cut').textContent = `-$${(v*0.3).toFixed(2)}`;
+                document.getElementById('calc-profit').textContent = `$${(v*0.7).toFixed(2)}`;
+            } else box.classList.add('hidden');
+        };
+
         const imgInput = document.getElementById('img-input');
         document.getElementById('drop-zone').onclick = () => imgInput.click();
         imgInput.onchange = async (e) => {
-            const files = Array.from(e.target.files);
-            for (const file of files) {
-                if (uploadedImages.length >= 3) break;
-                const formData = new FormData();
-                formData.append('image', file);
-                try {
-                    const res = await fetch('https://api.imgur.com/3/image', {
-                        method: 'POST',
-                        headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` },
-                        body: formData
-                    });
-                    const data = await res.json();
-                    if(data.success) {
-                        uploadedImages.push(data.data.link);
-                        renderPreviews();
-                    }
-                } catch(err) { console.error("Upload failed", err); }
+            document.getElementById('upload-status').textContent = "Uploading...";
+            for (const file of e.target.files) {
+                if(uploadedImages.length >= 3) break;
+                const fd = new FormData(); fd.append('image', file);
+                const res = await fetch('https://api.imgur.com/3/image', { method: 'POST', headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` }, body: fd });
+                const data = await res.json();
+                if(data.success) { uploadedImages.push(data.data.link); renderPreviews(); }
             }
+            document.getElementById('upload-status').textContent = "Add Images";
         };
 
         function renderPreviews() {
-            document.getElementById('img-previews').innerHTML = uploadedImages.map(url => `
-                <div class="relative w-12 h-8 rounded border border-white/20 overflow-hidden"><img src="${url}" class="object-cover w-full h-full"></div>
-            `).join('');
+            document.getElementById('img-previews').innerHTML = uploadedImages.map(url => `<img src="${url}" class="w-12 h-8 rounded border border-white/20 object-cover">`).join('');
         }
 
-        function loadSellerData(uid) {
-            const listingsRef = ref(db, 'dls_accounts');
-            onValue(listingsRef, (snapshot) => {
-                const container = document.getElementById('my-listings');
-                container.innerHTML = '';
-                let totalProfit = 0;
+        document.getElementById('stats-toggle').onclick = () => document.getElementById('stats-panel').classList.toggle('active');
 
-                if (snapshot.exists()) {
-                    Object.entries(snapshot.val()).forEach(([id, acc]) => {
-                        if (acc.ownerUid === uid) {
-                            totalProfit += (acc.price * 0.7);
-                            const card = document.createElement('div');
-                            card.className = 'glass p-3 rounded-2xl flex items-center gap-4 animate-in fade-in duration-300';
-                            card.innerHTML = `
-                                <img src="${acc.images[0]}" class="w-16 h-10 rounded-lg object-cover bg-white/5">
-                                <div class="flex-grow">
-                                    <h3 class="text-[11px] font-black uppercase italic">${acc.name}</h3>
-                                    <div class="flex gap-3 mt-1">
-                                        <p class="text-[8px] font-bold text-gray-500 uppercase">👁️ ${acc.stats?.views || 0}</p>
-                                        <p class="text-[8px] font-bold text-blue-400 uppercase">💰 $${(acc.price * 0.7).toFixed(2)}</p>
-                                    </div>
+        function syncDashboard() {
+            onValue(ref(db, 'dls_accounts'), (snap) => {
+                const list = document.getElementById('my-listings');
+                list.innerHTML = ''; let possible = 0;
+                snap.forEach(child => {
+                    const acc = child.val();
+                    if(acc.ownerUid === sellerInfo.uid) {
+                        possible += (acc.price * 0.7);
+                        const card = document.createElement('div');
+                        card.className = 'card-solid p-4 rounded-2xl flex items-center justify-between';
+                        card.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <img src="${acc.images?.[0] || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-xl object-cover bg-white/5">
+                                <div>
+                                    <h4 class="text-xs font-black uppercase italic">${acc.name || "Product"} <span class="text-[8px] text-blue-500 ml-2">${acc.tier}</span></h4>
+                                    <p class="text-[9px] font-bold text-gray-500 uppercase">Est. Earning: <span class="text-green-500">$${(acc.price * 0.7).toFixed(2)}</span></p>
                                 </div>
-                                <button onclick="deleteListing('${id}')" class="text-gray-600 hover:text-red-500 px-3 transition">✕</button>
+                            </div>
+                            <button onclick="deleteItem('${child.key}')" class="text-gray-600 hover:text-red-500 transition px-2 font-black">✕</button>
+                        `;
+                        list.appendChild(card);
+                    }
+                });
+                document.getElementById('p-possible').textContent = `$${possible.toFixed(2)}`;
+                hideLoader();
+            });
+
+            onValue(ref(db, 'orders'), (snap) => {
+                const list = document.getElementById('order-list');
+                const overlay = document.getElementById('order-overlay');
+                const sticky = document.getElementById('order-sticky');
+                list.innerHTML = ''; let actual = 0, count = 0, unfulfilled = 0;
+                snap.forEach(child => {
+                    const o = child.val();
+                    if(o.sellerUid === sellerInfo.uid) {
+                        count++; if(o.paid) actual += (o.price * 0.7);
+                        if(o.status !== 'fulfilled') {
+                            unfulfilled++;
+                            const div = document.createElement('div');
+                            div.className = 'p-6 bg-white/5 rounded-3xl border border-white/5';
+                            div.innerHTML = `
+                                <div class="flex justify-between items-center mb-4">
+                                    <div><p class="text-[9px] text-blue-500 font-black uppercase italic">Pending Order</p><h3 class="text-lg font-black italic uppercase">${o.productTitle}</h3></div>
+                                    <p class="text-xs font-black ${o.paid ? 'text-green-500' : 'text-yellow-500'} uppercase">${o.paid ? 'PAID' : 'UNPAID'}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${o.paid ? `<button onclick="fulfillOrder('${child.key}')" class="py-4 bg-blue-600 text-white font-black rounded-xl text-[10px] uppercase">Mark as Sent</button>` : `<div class="py-4 bg-white/5 text-gray-500 font-black text-center rounded-xl text-[10px] uppercase border border-white/5">Waiting Payment</div>`}
+                                    <a href="https://wa.me/27846737224?text=${encodeURIComponent('Hi, help with Order ID: '+child.key)}" target="_blank" class="py-4 bg-white text-black text-center font-black rounded-xl text-[10px] uppercase">Contact Support</a>
+                                </div>
                             `;
-                            container.appendChild(card);
+                            list.appendChild(div);
                         }
-                    });
-                }
-                document.getElementById('total-revenue').textContent = `$${totalProfit.toFixed(2)}`;
-                hideLoader(); // Success load
-            }, (error) => {
-                console.error(error);
-                hideLoader(); // Hide even on error
+                    }
+                });
+                currentActualProfit = actual;
+                document.getElementById('p-actual').textContent = `$${actual.toFixed(2)}`;
+                document.getElementById('p-orders').textContent = count;
+                if(unfulfilled > 0) { overlay.classList.add('active'); sticky.style.display = 'flex'; }
+                else { overlay.classList.remove('active'); sticky.style.display = 'none'; }
             });
         }
 
-        window.deleteListing = (id) => { if(confirm("Delete Listing?")) remove(ref(db, `dls_accounts/${id}`)); };
+        window.deleteItem = (id) => { if(confirm("Permanently delete this product?")) remove(ref(db, `dls_accounts/${id}`)); };
+        window.closeOrderModal = () => document.getElementById('order-overlay').classList.remove('active');
+        window.openOrderModal = () => document.getElementById('order-overlay').classList.add('active');
+        window.fulfillOrder = (id) => update(ref(db, `orders/${id}`), { status: 'fulfilled' });
 
         document.getElementById('listing-form').onsubmit = async (e) => {
             e.preventDefault();
-            if(uploadedImages.length === 0) return alert("Upload images first.");
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true; btn.textContent = "Deploying...";
-            
-            const payload = {
+            if(!selectedTier) return alert("You MUST select a Tier (Legendary, Average, or Standard)!");
+            if(uploadedImages.length === 0) return alert("At least one image is required.");
+            const btn = document.getElementById('submit-btn'); btn.disabled = true; btn.textContent = "Deploying...";
+            await push(ref(db, 'dls_accounts'), {
                 name: document.getElementById('acc-name').value,
                 price: parseFloat(document.getElementById('acc-price').value),
                 desc: document.getElementById('acc-desc').value,
+                tier: selectedTier,
                 images: uploadedImages,
-                ownerUid: userData.uid,
-                ownerUser: userData.username,
-                ownerPhoto: userData.photo,
-                stats: { views: 0, clicks: 0, orders: 0 }
-            };
-            await push(ref(db, 'dls_accounts'), payload);
+                ownerUid: sellerInfo.uid,
+                owner: sellerInfo.username,
+                stats: { views: 0, orders: 0 }
+            });
             location.reload();
         };
+        setTimeout(hideLoader, 4000);
     </script>
 </body>
 </html>
