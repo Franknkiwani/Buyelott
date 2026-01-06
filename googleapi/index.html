@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppWish Market Validator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-xl w-full bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-black tracking-tighter text-emerald-400">APPWISH VALIDATOR</h1>
+            <p class="text-gray-400 text-sm">Convert wishes into professional research reports.</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Paste Wish Here</label>
+                <textarea id="wishInput" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all" 
+                placeholder="e.g. I wish there was an app that let me input my general icp..."></textarea>
+            </div>
+
+            <button onclick="generateReport()" id="mainBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-900 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3">
+                <span id="btnText">Generate Report</span>
+                <div id="loader" class="hidden loading-spinner"></div>
+            </button>
+        </div>
+
+        <div id="resultContainer" class="hidden mt-8 space-y-4 animate-in fade-in duration-500">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs font-bold text-gray-500 uppercase">Analysis Result</h2>
+                <button onclick="copyToClipboard()" class="text-xs text-emerald-400 hover:underline font-bold">Copy Full Text</button>
+            </div>
+            <div id="reportOutput" class="bg-gray-900 border border-gray-700 p-5 rounded-2xl text-sm leading-relaxed text-gray-300 overflow-y-auto max-h-64 whitespace-pre-wrap"></div>
+        </div>
+    </div>
+
+    <script>
+        async function generateReport() {
+            const apiKey = "AIzaSyDctaJxNE2Q59ukjuo0ttQXud4GCXjtLTs";
+            const wish = document.getElementById('wishInput').value;
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultContainer = document.getElementById('resultContainer');
+            const output = document.getElementById('reportOutput');
+
+            if (!wish) return alert("Paste a wish first!");
+
+            // UI State
+            btnText.innerText = "Researching...";
+            loader.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            
+            const prompt = `You are a SaaS market researcher. A user on AppWish posted this: "${wish}".
+            Provide a response with these 4 sections: 
+            1. NICHED DOWN ICP: (Make it extremely specific)
+            2. TOP 3 COMPETITORS: (Actual names)
+            3. TOP 3 COMPLAINTS: (What users hate about them)
+            4. MVP PLAN: (How to build this fast and win). 
+            Keep the tone professional and helpful for a developer.`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+
+                output.innerText = text;
+                resultContainer.classList.remove('hidden');
+            } catch (e) {
+                alert("Error. Key might be restricted or exhausted.");
+            } finally {
+                btnText.innerText = "Generate Report";
+                loader.classList.add('hidden');
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('reportOutput').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard! Go paste it on AppWish.");
+        }
+    </script>
+</body>
+</html>
