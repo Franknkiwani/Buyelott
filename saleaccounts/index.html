@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard | ItzHoyoo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,800;1,800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #050505; color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #050505 80%);
+            min-height: 100vh; padding-top: 80px;
+            transition: overflow 0.3s ease;
+        }
+        /* Lock scroll class */
+        .no-scroll { overflow: hidden; height: 100vh; }
+        
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .sticky-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .skeleton { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        
+        .input-field { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+        
+        #loading-screen { 
+            position: fixed; inset: 0; z-index: 999; background: #050505; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #loading-screen.fade-out { opacity: 0; visibility: hidden; }
+    </style>
+</head>
+<body class="no-scroll"> <div id="loading-screen">
+        <div class="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-white/50">Securing Session</p>
+    </div>
+
+    <header class="sticky-header h-16 flex items-center px-6">
+        <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
+            <div id="user-profile" class="flex items-center gap-3">
+                <img id="user-photo" src="" class="w-8 h-8 rounded-full border border-white/20 object-cover hidden">
+                <div id="user-initials" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black bg-blue-600 hidden"></div>
+                <div class="leading-none">
+                    <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Authorized Seller</p>
+                    <p id="user-name" class="text-xs font-bold text-white lowercase">@user</p>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <div class="hidden sm:block border-r border-white/10 pr-6 mr-2 text-right">
+                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-tighter">Net Profit (70%)</p>
+                    <p id="total-revenue" class="text-sm font-black text-green-400 leading-none">$0.00</p>
+                </div>
+                <a href="/" class="text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition flex items-center gap-2">
+                    Return <span class="bg-white/10 px-2 py-1 rounded-md text-[8px]">ESC</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4">
+                <div class="glass p-6 rounded-[32px] sticky top-24">
+                    <h2 class="text-sm font-black uppercase italic mb-6 tracking-widest text-blue-500">New Deployment</h2>
+                    <form id="listing-form" class="space-y-4">
+                        <input type="text" id="acc-name" placeholder="Account Name" class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold" required>
+                        <div class="relative">
+                            <input type="number" id="acc-price" placeholder="Listing Price ($)" class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold" required>
+                            <div id="revenue-calc" class="mt-2 flex justify-between px-1 hidden">
+                                <div class="text-[9px] font-black uppercase">Fee (30%): <span id="calc-cut" class="text-red-500">-$0.00</span></div>
+                                <div class="text-[9px] font-black uppercase">Net (70%): <span id="calc-profit" class="text-green-500">$0.00</span></div>
+                            </div>
+                        </div>
+                        <textarea id="acc-desc" placeholder="Details..." class="input-field w-full p-3.5 rounded-xl text-[11px] font-bold h-24 resize-none" required></textarea>
+                        <div id="drop-zone" class="border-2 border-dashed border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-blue-500/50 transition">
+                            <p class="text-[9px] font-black uppercase text-gray-500">Upload Landscape Images</p>
+                            <input type="file" id="img-input" multiple accept="image/*" class="hidden">
+                            <div id="img-previews" class="flex gap-2 mt-3 flex-wrap"></div>
+                        </div>
+                        <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl bg-white text-black font-black uppercase text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition">Deploy Listing</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <h2 class="text-sm font-black uppercase italic mb-6 tracking-widest">Active Inventory</h2>
+                <div id="my-listings" class="grid grid-cols-1 gap-3">
+                    <div class="skeleton h-20 rounded-2xl w-full"></div>
+                    <div class="skeleton h-20 rounded-2xl w-full"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            storageBucket: "itzhoyoo-filestorage.app",
+            messagingSenderId: "1094792075584",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const IMGUR_CLIENT_ID = '891e5bb4aa94282';
+
+        let uploadedImages = [];
+        let userData = { username: '', photo: '', uid: '' };
+
+        // --- HELPER: HIDE LOADER ---
+        const hideLoader = () => {
+            document.getElementById('loading-screen').classList.add('fade-out');
+            document.body.classList.remove('no-scroll');
+        };
+
+        // Safety Timeout: Force hide loader if Firebase hangs
+        setTimeout(hideLoader, 3500);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "/";
+            } else {
+                const username = user.email.split('@')[0];
+                userData = { username: `@${username}`, uid: user.uid, photo: user.photoURL || `https://ui-avatars.com/api/?name=${username}` };
+                
+                document.getElementById('user-name').textContent = userData.username;
+                const photoEl = document.getElementById('user-photo');
+                const initialEl = document.getElementById('user-initials');
+                
+                if(user.photoURL) {
+                    photoEl.src = user.photoURL;
+                    photoEl.classList.remove('hidden');
+                } else {
+                    initialEl.textContent = username.substring(0, 2).toUpperCase();
+                    initialEl.classList.remove('hidden');
+                }
+                loadSellerData(user.uid);
+            }
+        });
+
+        // REVENUE CALC
+        document.getElementById('acc-price').oninput = (e) => {
+            const val = parseFloat(e.target.value);
+            const calcDiv = document.getElementById('revenue-calc');
+            if(val > 0) {
+                calcDiv.classList.remove('hidden');
+                document.getElementById('calc-cut').textContent = `-$${(val * 0.3).toFixed(2)}`;
+                document.getElementById('calc-profit').textContent = `$${(val * 0.7).toFixed(2)}`;
+            } else {
+                calcDiv.classList.add('hidden');
+            }
+        };
+
+        // IMGUR UPLOAD
+        const imgInput = document.getElementById('img-input');
+        document.getElementById('drop-zone').onclick = () => imgInput.click();
+        imgInput.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            for (const file of files) {
+                if (uploadedImages.length >= 3) break;
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                    const res = await fetch('https://api.imgur.com/3/image', {
+                        method: 'POST',
+                        headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` },
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        uploadedImages.push(data.data.link);
+                        renderPreviews();
+                    }
+                } catch(err) { console.error("Upload failed", err); }
+            }
+        };
+
+        function renderPreviews() {
+            document.getElementById('img-previews').innerHTML = uploadedImages.map(url => `
+                <div class="relative w-12 h-8 rounded border border-white/20 overflow-hidden"><img src="${url}" class="object-cover w-full h-full"></div>
+            `).join('');
+        }
+
+        function loadSellerData(uid) {
+            const listingsRef = ref(db, 'dls_accounts');
+            onValue(listingsRef, (snapshot) => {
+                const container = document.getElementById('my-listings');
+                container.innerHTML = '';
+                let totalProfit = 0;
+
+                if (snapshot.exists()) {
+                    Object.entries(snapshot.val()).forEach(([id, acc]) => {
+                        if (acc.ownerUid === uid) {
+                            totalProfit += (acc.price * 0.7);
+                            const card = document.createElement('div');
+                            card.className = 'glass p-3 rounded-2xl flex items-center gap-4 animate-in fade-in duration-300';
+                            card.innerHTML = `
+                                <img src="${acc.images[0]}" class="w-16 h-10 rounded-lg object-cover bg-white/5">
+                                <div class="flex-grow">
+                                    <h3 class="text-[11px] font-black uppercase italic">${acc.name}</h3>
+                                    <div class="flex gap-3 mt-1">
+                                        <p class="text-[8px] font-bold text-gray-500 uppercase">👁️ ${acc.stats?.views || 0}</p>
+                                        <p class="text-[8px] font-bold text-blue-400 uppercase">💰 $${(acc.price * 0.7).toFixed(2)}</p>
+                                    </div>
+                                </div>
+                                <button onclick="deleteListing('${id}')" class="text-gray-600 hover:text-red-500 px-3 transition">✕</button>
+                            `;
+                            container.appendChild(card);
+                        }
+                    });
+                }
+                document.getElementById('total-revenue').textContent = `$${totalProfit.toFixed(2)}`;
+                hideLoader(); // Success load
+            }, (error) => {
+                console.error(error);
+                hideLoader(); // Hide even on error
+            });
+        }
+
+        window.deleteListing = (id) => { if(confirm("Delete Listing?")) remove(ref(db, `dls_accounts/${id}`)); };
+
+        document.getElementById('listing-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if(uploadedImages.length === 0) return alert("Upload images first.");
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true; btn.textContent = "Deploying...";
+            
+            const payload = {
+                name: document.getElementById('acc-name').value,
+                price: parseFloat(document.getElementById('acc-price').value),
+                desc: document.getElementById('acc-desc').value,
+                images: uploadedImages,
+                ownerUid: userData.uid,
+                ownerUser: userData.username,
+                ownerPhoto: userData.photo,
+                stats: { views: 0, clicks: 0, orders: 0 }
+            };
+            await push(ref(db, 'dls_accounts'), payload);
+            location.reload();
+        };
+    </script>
+</body>
+</html>
