@@ -1,175 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TokenFund | Dark Mode Crowdfunding</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #09090b;
-            color: #fafafa;
-        }
-        .glass {
-            background: rgba(24, 24, 27, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .token-gradient {
-            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenFund | Dark Mode Crowdfunding</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+// ==== Firebase Config ====
+const firebaseConfig = {
+  apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+  authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+  databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+  projectId: "itzhoyoo-f9f7e",
+  storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+  messagingSenderId: "1094792075584",
+  appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+let currentUserUID = null;
+
+onAuthStateChanged(auth, user => currentUserUID = user ? user.uid : null);
+
+window.login = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    currentUserUID = result.user.uid;
+    alert("Logged in as " + result.user.email);
+  } catch(e) {
+    alert("Login failed: " + e.message);
+  }
+}
+
+window.showSubscribe = () => document.getElementById('subscriptionModal').classList.remove('hidden');
+window.hideSubscribe = () => document.getElementById('subscriptionModal').classList.add('hidden');
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+body { font-family:'Inter',sans-serif; background-color:#09090b; color:#fafafa; }
+.glass { background: rgba(24,24,27,0.8); backdrop-filter: blur(12px); border:1px solid rgba(255,255,255,0.1); }
+.token-gradient { background: linear-gradient(135deg,#a855f7 0%,#3b82f6 100%) }
+</style>
 </head>
 <body class="min-h-screen pb-20 lg:pb-0">
 
-    <nav class="fixed top-0 w-full lg:w-64 lg:h-full glass z-50 p-4 flex lg:flex-col justify-between items-center border-b lg:border-r border-white/10">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 token-gradient rounded-lg flex items-center justify-center">
-                <i data-lucide="layers" class="text-white w-5 h-5"></i>
-            </div>
-            <span class="font-bold text-xl tracking-tight">TokenFund</span>
+<!-- NAVIGATION -->
+<nav class="fixed top-0 w-full lg:w-64 lg:h-full glass z-50 p-4 flex lg:flex-col justify-between items-center border-b lg:border-r border-white/10">
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 token-gradient rounded-lg flex items-center justify-center">
+      <i data-lucide="layers" class="text-white w-5 h-5"></i>
+    </div>
+    <span class="font-bold text-xl tracking-tight">TokenFund</span>
+  </div>
+
+  <div class="hidden lg:flex flex-col gap-6 w-full mt-10">
+    <a href="#" class="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl text-purple-400"><i data-lucide="layout-grid"></i> Discover</a>
+    <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="search"></i> Search</a>
+    <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="heart"></i> My Causes</a>
+    <!-- SUBSCRIBE BUTTON -->
+    <button onclick="showSubscribe()" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition text-green-400">
+      <i data-lucide="dollar-sign"></i> Subscribe
+    </button>
+    <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="settings"></i> Settings</a>
+  </div>
+
+  <div class="flex items-center gap-4 lg:w-full lg:mt-auto lg:pt-6 lg:border-t lg:border-white/10">
+    <div class="text-right lg:text-left hidden sm:block">
+      <p class="text-xs text-zinc-400">Balance</p>
+      <p class="font-bold text-purple-400 flex items-center gap-1">
+        <i data-lucide="database" class="w-4 h-4"></i> 1,250 TKNS
+      </p>
+    </div>
+    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-full border border-purple-500/50" alt="Profile">
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="pt-24 lg:pt-8 lg:pl-72 p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <header class="mb-10">
+    <h1 class="text-3xl font-bold mb-2">Explore Campaigns</h1>
+    <p class="text-zinc-400">Support global causes using your digital tokens.</p>
+  </header>
+
+  <!-- Cards Section (Active Campaigns, Total Donated, Start Campaign) -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+    <div class="glass p-6 rounded-2xl flex items-center justify-between">
+      <div>
+        <p class="text-zinc-400 text-sm">Active Campaigns</p>
+        <h3 class="text-2xl font-bold">1,284</h3>
+      </div>
+      <i data-lucide="globe" class="text-zinc-600 w-8 h-8"></i>
+    </div>
+    <div class="glass p-6 rounded-2xl flex items-center justify-between">
+      <div>
+        <p class="text-zinc-400 text-sm">Total Donated</p>
+        <h3 class="text-2xl font-bold">850k <span class="text-purple-400 text-sm">TKNS</span></h3>
+      </div>
+      <i data-lucide="trending-up" class="text-zinc-600 w-8 h-8"></i>
+    </div>
+    <button class="token-gradient p-6 rounded-2xl flex items-center justify-center gap-2 font-bold hover:opacity-90 transition">
+      <i data-lucide="plus-circle"></i> Start Campaign
+    </button>
+  </section>
+
+  <!-- Campaigns Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+    <!-- Campaign 1 -->
+    <div class="glass rounded-3xl overflow-hidden group hover:border-purple-500/50 transition-all duration-300">
+      <div class="relative h-48">
+        <img src="https://images.unsplash.com/photo-1516939884455-1445c8652f83?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
+        <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-purple-300">Environment</span>
+      </div>
+      <div class="p-6">
+        <h2 class="text-xl font-bold mb-2">Reforest the Amazon</h2>
+        <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Helping local communities plant over 10,000 trees this month using tokenized tracking.</p>
+        <div class="space-y-2 mb-6">
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-300">7,500 / 10,000 <span class="text-xs text-zinc-500">TKNS</span></span>
+            <span class="text-purple-400 font-bold">75%</span>
+          </div>
+          <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+            <div class="bg-purple-500 h-full w-[75%] shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
+          </div>
         </div>
-
-        <div class="hidden lg:flex flex-col gap-6 w-full mt-10">
-            <a href="#" class="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl text-purple-400"><i data-lucide="layout-grid"></i> Discover</a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="search"></i> Search</a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="heart"></i> My Causes</a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-xl transition"><i data-lucide="settings"></i> Settings</a>
-        </div>
-
-        <div class="flex items-center gap-4 lg:w-full lg:mt-auto lg:pt-6 lg:border-t lg:border-white/10">
-            <div class="text-right lg:text-left hidden sm:block">
-                <p class="text-xs text-zinc-400">Balance</p>
-                <p class="font-bold text-purple-400 flex items-center gap-1">
-                    <i data-lucide="database" class="w-4 h-4"></i> 1,250 TKNS
-                </p>
-            </div>
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-full border border-purple-500/50" alt="Profile">
-        </div>
-    </nav>
-
-    <main class="pt-24 lg:pt-8 lg:pl-72 p-6 max-w-7xl mx-auto">
-        
-        <header class="mb-10">
-            <h1 class="text-3xl font-bold mb-2">Explore Campaigns</h1>
-            <p class="text-zinc-400">Support global causes using your digital tokens.</p>
-        </header>
-
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <div class="glass p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="text-zinc-400 text-sm">Active Campaigns</p>
-                    <h3 class="text-2xl font-bold">1,284</h3>
-                </div>
-                <i data-lucide="globe" class="text-zinc-600 w-8 h-8"></i>
-            </div>
-            <div class="glass p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="text-zinc-400 text-sm">Total Donated</p>
-                    <h3 class="text-2xl font-bold">850k <span class="text-purple-400 text-sm">TKNS</span></h3>
-                </div>
-                <i data-lucide="trending-up" class="text-zinc-600 w-8 h-8"></i>
-            </div>
-            <button class="token-gradient p-6 rounded-2xl flex items-center justify-center gap-2 font-bold hover:opacity-90 transition">
-                <i data-lucide="plus-circle"></i> Start Campaign
-            </button>
-        </section>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            
-            <div class="glass rounded-3xl overflow-hidden group hover:border-purple-500/50 transition-all duration-300">
-                <div class="relative h-48">
-                    <img src="https://images.unsplash.com/photo-1516939884455-1445c8652f83?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
-                    <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-purple-300">Environment</span>
-                </div>
-                <div class="p-6">
-                    <h2 class="text-xl font-bold mb-2">Reforest the Amazon</h2>
-                    <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Helping local communities plant over 10,000 trees this month using tokenized tracking.</p>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-zinc-300">7,500 / 10,000 <span class="text-xs text-zinc-500">TKNS</span></span>
-                            <span class="text-purple-400 font-bold">75%</span>
-                        </div>
-                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                            <div class="bg-purple-500 h-full w-[75%] shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
-                        </div>
-                    </div>
-
-                    <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-purple-500/50 transition">
-                        Donate Tokens
-                    </button>
-                </div>
-            </div>
-
-            <div class="glass rounded-3xl overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
-                <div class="relative h-48">
-                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
-                    <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-blue-300">Education</span>
-                </div>
-                <div class="p-6">
-                    <h2 class="text-xl font-bold mb-2">Coding Kits for Schools</h2>
-                    <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Providing affordable hardware and learning materials to underprivileged tech students.</p>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-zinc-300">1,200 / 5,000 <span class="text-xs text-zinc-500">TKNS</span></span>
-                            <span class="text-blue-400 font-bold">24%</span>
-                        </div>
-                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-500 h-full w-[24%]"></div>
-                        </div>
-                    </div>
-
-                    <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-blue-500/50 transition">
-                        Donate Tokens
-                    </button>
-                </div>
-            </div>
-
-            <div class="glass rounded-3xl overflow-hidden group hover:border-teal-500/50 transition-all duration-300">
-                <div class="relative h-48">
-                    <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
-                    <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-teal-300">Medical</span>
-                </div>
-                <div class="p-6">
-                    <h2 class="text-xl font-bold mb-2">Emergency Relief Fund</h2>
-                    <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Immediate token distribution for medical supplies in disaster-stricken areas.</p>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-zinc-300">9,800 / 12,000 <span class="text-xs text-zinc-500">TKNS</span></span>
-                            <span class="text-teal-400 font-bold">82%</span>
-                        </div>
-                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                            <div class="bg-teal-500 h-full w-[82%] shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
-                        </div>
-                    </div>
-
-                    <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-teal-500/50 transition">
-                        Donate Tokens
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <div class="lg:hidden fixed bottom-0 w-full glass border-t border-white/10 px-8 py-4 flex justify-between items-center z-50">
-        <i data-lucide="home" class="text-purple-500"></i>
-        <i data-lucide="search" class="text-zinc-500"></i>
-        <div class="w-12 h-12 token-gradient rounded-full flex items-center justify-center -mt-10 border-4 border-[#09090b]">
-            <i data-lucide="plus" class="text-white"></i>
-        </div>
-        <i data-lucide="heart" class="text-zinc-500"></i>
-        <i data-lucide="user" class="text-zinc-500"></i>
+        <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-purple-500/50 transition">
+          Donate Tokens
+        </button>
+      </div>
     </div>
 
-    <script>
-        lucide.createIcons();
-    </script>
+    <!-- Campaign 2 -->
+    <div class="glass rounded-3xl overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+      <div class="relative h-48">
+        <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
+        <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-blue-300">Education</span>
+      </div>
+      <div class="p-6">
+        <h2 class="text-xl font-bold mb-2">Coding Kits for Schools</h2>
+        <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Providing affordable hardware and learning materials to underprivileged tech students.</p>
+        <div class="space-y-2 mb-6">
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-300">1,200 / 5,000 <span class="text-xs text-zinc-500">TKNS</span></span>
+            <span class="text-blue-400 font-bold">24%</span>
+          </div>
+          <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+            <div class="bg-blue-500 h-full w-[24%]"></div>
+          </div>
+        </div>
+        <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-blue-500/50 transition">
+          Donate Tokens
+        </button>
+      </div>
+    </div>
+
+    <!-- Campaign 3 -->
+    <div class="glass rounded-3xl overflow-hidden group hover:border-teal-500/50 transition-all duration-300">
+      <div class="relative h-48">
+        <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=800" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Project">
+        <span class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-teal-300">Medical</span>
+      </div>
+      <div class="p-6">
+        <h2 class="text-xl font-bold mb-2">Emergency Relief Fund</h2>
+        <p class="text-zinc-400 text-sm line-clamp-2 mb-4">Immediate token distribution for medical supplies in disaster-stricken areas.</p>
+        <div class="space-y-2 mb-6">
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-300">9,800 / 12,000 <span class="text-xs text-zinc-500">TKNS</span></span>
+            <span class="text-teal-400 font-bold">82%</span>
+          </div>
+          <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+            <div class="bg-teal-500 h-full w-[82%] shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
+          </div>
+        </div>
+        <button class="w-full py-3 rounded-xl bg-white/5 border border-white/10 font-semibold hover:bg-white/10 hover:border-teal-500/50 transition">
+          Donate Tokens
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- SUBSCRIPTION MODAL -->
+<div id="subscriptionModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+  <div class="glass p-6 rounded-2xl max-w-sm w-full relative">
+    <button onclick="hideSubscribe()" class="absolute top-3 right-3 text-zinc-400 hover:text-white"><i data-lucide="x"></i></button>
+    <h2 class="text-xl font-bold mb-2">Premium Membership</h2>
+    <p class="text-zinc-400 mb-4">Unlock special donor features</p>
+    <p class="text-3xl font-bold">$4.99 <span class="text-sm text-zinc-500">/ month</span></p>
+    <p class="text-xs text-zinc-500 mb-4">Includes 10% platform fee</p>
+    <button onclick="login()" class="w-full py-2 mb-3 rounded-xl bg-purple-600 hover:opacity-90 transition font-semibold">Login to Subscribe</button>
+    <div id="paypal-button-container-P-44912294AR130521NNFO7DPY"></div>
+  </div>
+</div>
+
+<!-- PAYPAL SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=Ab_XnWkTmI7DGkFq8HRMmpSlstcAZ6qbdtOBGUwuoLsaOtVHbvjFlMfZw-mXBqhS9XnBECFBNOSlFY9Z&vault=true&intent=subscription"></script>
+<script>
+paypal.Buttons({
+  style:{shape:'pill',color:'gold',layout:'vertical',label:'subscribe'},
+  createSubscription:(data,actions)=>actions.subscription.create({plan_id:'P-44912294AR130521NNFO7DPY'}),
+  onApprove:async(data)=>{
+    if(!currentUserUID) return alert("Please login first!");
+    await fetch("https://YOUR_VERCEL_URL/api/index",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({uid:currentUserUID,subscriptionID:data.subscriptionID})});
+    alert("Subscription activated! Refresh to unlock premium.");
+    hideSubscribe();
+  }
+}).render('#paypal-button-container-P-44912294AR130521NNFO7DPY');
+</script>
+
+<script>lucide.createIcons();</script>
 </body>
 </html>
