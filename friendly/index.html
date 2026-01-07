@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOOT-DROP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; }
+        
+        .glass-header {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        #notify-box { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 16px; color: white; font-weight: 700; transform: translateX(120%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
+        .toast.show { transform: translateX(0); }
+
+        .verified-icon { width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-left: 4px; }
+        .premium-tag { background: #F59E0B; color: black; font-size: 7px; font-weight: 900; padding: 2px 4px; border-radius: 4px; position: absolute; top: 3px; right: 3px; z-index: 10; }
+        .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; width: 100%; outline: none; color: white; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div id="notify-box"></div>
+
+    <nav class="glass-header px-6 py-3 flex justify-between items-center">
+        <div id="logo-space"></div> <div class="flex items-center gap-4">
+            <div id="user-tools" class="hidden flex items-center gap-3">
+                <button onclick="openUpgradeModal()" class="bg-amber-500/10 text-amber-500 border border-amber-500/30 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500/20 transition">
+                    Upgrade
+                </button>
+
+                <div onclick="openProfile()" class="flex items-center gap-2 bg-white/5 p-1 pr-3 rounded-full cursor-pointer border border-white/5 hover:bg-white/10 transition">
+                    <div id="pfp-wrap" class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
+                        <img id="header-pfp" class="w-full h-full object-cover hidden">
+                        <span id="header-initial" class="font-bold text-xs">?</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span id="header-handle" class="text-xs font-bold text-zinc-300"></span>
+                        <img id="header-verified" src="https://img.icons8.com/color/48/verified-badge.png" class="verified-icon hidden">
+                    </div>
+                </div>
+            </div>
+            <button id="login-btn" onclick="triggerLogin()" class="bg-white text-black px-5 py-2 rounded-full font-bold text-xs transition active:scale-95">Login</button>
+        </div>
+    </nav>
+
+    <div id="upgrade-modal" class="fixed inset-0 z-[60] hidden bg-black/95 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 w-full max-w-md rounded-[32px] p-8 border border-white/10 relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+            <h2 class="text-2xl font-black mb-2 uppercase tracking-tighter italic">Pro Member</h2>
+            <p class="text-zinc-500 text-sm mb-6">Unlock the full power of Loot-Drop</p>
+
+            <div class="bg-white/5 rounded-2xl p-4 mb-6 border border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-zinc-700 border-2 border-amber-500"></div>
+                    <div>
+                        <div class="flex items-center">
+                            <span class="font-bold text-sm" id="preview-name">User</span>
+                            <img src="https://img.icons8.com/color/48/verified-badge.png" class="w-4 h-4 ml-1">
+                        </div>
+                        <p class="text-[10px] text-amber-500 font-bold uppercase">Pro Subscriber</p>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="space-y-3 mb-8">
+                <li class="flex items-center gap-3 text-sm font-bold"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i> Verified Blue Badge</li>
+                <li class="flex items-center gap-3 text-sm font-bold"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i> 20 Free Credits Monthly</li>
+                <li class="flex items-center gap-3 text-sm font-bold"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i> Lifetime Custom Uploads</li>
+            </ul>
+
+            <div id="paypal-button-container-P-44912294AR130521NNFO7DPY"></div>
+            <button onclick="closeUpgradeModal()" class="w-full mt-4 text-xs font-bold text-zinc-500 uppercase">Close</button>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden bg-black/95 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 w-full max-w-sm rounded-[32px] p-8 border border-white/10">
+            <h2 class="text-xl font-black mb-6">Profile Settings</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Display Name</label>
+                    <input type="text" id="username-input" class="input-field mt-1" placeholder="Enter username...">
+                    <p class="text-[9px] text-zinc-600 mt-1 italic">* 2 changes per week max</p>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Choose Avatar</label>
+                    <div class="grid grid-cols-4 gap-2 mt-2" id="avatar-grid">
+                        <div onclick="checkPremiumAndUpload()" class="relative aspect-square bg-zinc-800 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 hover:border-amber-500 cursor-pointer overflow-hidden">
+                            <i data-lucide="plus" class="w-4 h-4 text-zinc-500"></i>
+                            <div class="premium-tag">PREMIUM</div>
+                            <input type="file" id="pfp-upload" class="hidden" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="saveProfileChanges()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition">Save Profile</button>
+                <div class="flex flex-col gap-1 text-center">
+                    <button onclick="handleLogout()" class="text-red-500 font-bold text-[10px] py-2 uppercase tracking-widest">Logout</button>
+                    <button onclick="closeProfile()" class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="auth-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
+    <div class="bg-zinc-900 w-full max-w-[400px] rounded-[32px] p-8 border border-white/10 shadow-2xl relative">
+        
+        <div class="flex gap-4 mb-8 border-b border-white/5 pb-2">
+            <button onclick="setAuthMode('login')" id="tab-login" class="text-sm font-black uppercase tracking-widest text-white border-b-2 border-amber-500 pb-2">Login</button>
+            <button onclick="setAuthMode('register')" id="tab-register" class="text-sm font-black uppercase tracking-widest text-zinc-500 pb-2">Join</button>
+        </div>
+
+        <h2 id="auth-title" class="text-2xl font-black italic tracking-tighter mb-6 uppercase">Welcome Back</h2>
+
+        <div class="space-y-4">
+            <div id="username-field" class="hidden">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase ml-1">Unique Handle</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">@</span>
+                    <input type="text" id="auth-username" class="bg-white/5 border border-white/10 w-full p-3 pl-8 rounded-xl text-sm outline-none focus:border-amber-500/50" placeholder="username">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-bold text-zinc-500 uppercase ml-1">Email Address</label>
+                <input type="email" id="auth-email" class="bg-white/5 border border-white/10 w-full p-3 rounded-xl text-sm outline-none focus:border-white/20" placeholder="name@email.com">
+            </div>
+
+            <div id="password-area">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase ml-1">Password</label>
+                <input type="password" id="auth-pass" class="bg-white/5 border border-white/10 w-full p-3 rounded-xl text-sm outline-none focus:border-white/20" placeholder="••••••••">
+            </div>
+
+            <button onclick="handleMainAuth()" id="auth-submit-btn" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition mt-2">Continue</button>
+            
+            <button onclick="setAuthMode('forgot')" id="forgot-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase hover:text-white transition">Forgot Password?</button>
+
+            <div class="relative py-4 flex items-center">
+                <div class="flex-grow border-t border-white/5"></div>
+                <span class="px-4 text-[10px] text-zinc-600 font-bold uppercase">Or</span>
+                <div class="flex-grow border-t border-white/5"></div>
+            </div>
+
+            <button onclick="triggerGoogle()" class="w-full bg-zinc-800 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-3 border border-white/5 hover:bg-zinc-700 transition">
+                <img src="https://www.google.com/favicon.ico" class="w-4 h-4 grayscale opacity-70">
+                Google
+            </button>
+        </div>
+
+        <button onclick="closeAuthModal()" class="absolute top-6 right-6 text-zinc-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+</div>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AQlRInnmKjWmwHMNBE-z6za2NcSqhfaj3vD9x_AoQEoeVVtOxqvfjtGN9ixSVARi0IT9vhPeLo3AxwC5&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { 
+            getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
+            createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail 
+        } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+        const IMGUR_ID = "891e5bb4aa94282";
+
+        const presets = [
+            "https://img.pikbest.com/origin/10/25/30/74apIkbEsT5qB.jpg!w700wp",
+            "https://thumbs.dreamstime.com/b/cool-neon-party-wolf-headphones-black-background-colorful-illustration-music-theme-modern-portrait-bright-vibrant-385601082.jpg",
+            "https://w0.peakpx.com/wallpaper/524/270/HD-wallpaper-fortnite-the-raven-android-epic-game-fantasy-game-games-ios-purple-the-raven-thumbnail.jpg",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTacy1cf5TLPSfZz-X6il53YCEPzUy-lCgL9ngKhQf9uF63z9sAMVTzf2I&s=10",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZQruukTpvoqH_t0MSDctiO6gaSvIUcEvy12sO7i6aU9ZvI576Eznmc5Y&s=10",
+            "https://wallpapers.com/images/hd/gaming-profile-pictures-tt8bbzdcf6zibhoi.jpg",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzyJbGkqtRFbOP3dyQQwK6g-E7XVJ4K1Y25YlwTrvXrQMI6bfoTUovUqU&s=10"
+        ];
+
+        // --- NOTIFICATION SYSTEM ---
+        window.notify = (msg) => {
+            const box = document.getElementById('notify-box');
+            if(!box) return;
+            const t = document.createElement('div');
+            t.className = 'toast'; t.innerText = msg;
+            box.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 100);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+        };
+
+        // --- UI MODAL CONTROLS ---
+        window.triggerLogin = () => {
+            setAuthMode('login'); // Default to login when opening
+            document.getElementById('auth-modal').classList.remove('hidden');
+        };
+        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
+        window.openProfile = () => document.getElementById('profile-modal').classList.remove('hidden');
+        window.closeProfile = () => document.getElementById('profile-modal').classList.add('hidden');
+        window.openUpgradeModal = () => document.getElementById('upgrade-modal').classList.remove('hidden');
+        window.closeUpgradeModal = () => document.getElementById('upgrade-modal').classList.add('hidden');
+        window.handleLogout = () => signOut(auth).then(() => location.reload());
+
+        // --- FIXED AUTH UI TOGGLE ---
+        window.authMode = 'login';
+        window.setAuthMode = (mode) => {
+            window.authMode = mode;
+            const uField = document.getElementById('username-field');
+            const pArea = document.getElementById('password-area');
+            const sBtn = document.getElementById('auth-submit-btn');
+            const title = document.getElementById('auth-title');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+
+            // Toggle Visibility
+            uField.classList.toggle('hidden', mode !== 'register');
+            pArea.classList.toggle('hidden', mode === 'forgot');
+
+            // Update Text
+            if (mode === 'login') {
+                title.innerText = "Welcome Back";
+                sBtn.innerText = "Login";
+                tabLogin.className = "text-sm font-black uppercase tracking-widest text-white border-b-2 border-amber-500 pb-2";
+                tabRegister.className = "text-sm font-black uppercase tracking-widest text-zinc-500 pb-2";
+            } else if (mode === 'register') {
+                title.innerText = "Create Account";
+                sBtn.innerText = "Join Squad";
+                tabRegister.className = "text-sm font-black uppercase tracking-widest text-white border-b-2 border-amber-500 pb-2";
+                tabLogin.className = "text-sm font-black uppercase tracking-widest text-zinc-500 pb-2";
+            } else if (mode === 'forgot') {
+                title.innerText = "Reset Password";
+                sBtn.innerText = "Send Reset Link";
+            }
+        };
+
+        window.handleMainAuth = async () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            const handle = document.getElementById('auth-username').value.trim().toLowerCase();
+
+            try {
+                if (window.authMode === 'register') {
+                    if(handle.length < 3) throw new Error("Handle too short");
+                    const nameCheck = await get(ref(db, `usernames/${handle}`));
+                    if(nameCheck.exists()) throw new Error("Handle taken");
+
+                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    await set(ref(db, `users/${res.user.uid}`), { username: handle, tokens: 0, isPremium: false });
+                    await set(ref(db, `usernames/${handle}`), res.user.uid);
+                } else if (window.authMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    await sendPasswordResetEmail(auth, email);
+                    notify("Reset link sent!");
+                }
+                closeAuthModal();
+            } catch (e) { notify(e.message.replace("Firebase: ", "")); }
+        };
+
+        window.triggerGoogle = () => signInWithPopup(auth, provider).then(async (res) => {
+            const snap = await get(ref(db, `users/${res.user.uid}`));
+            if (!snap.exists()) {
+                const handle = res.user.email.split('@')[0] + Math.floor(Math.random()*99);
+                await set(ref(db, `users/${res.user.uid}`), { username: handle, tokens: 0, isPremium: false });
+                await set(ref(db, `usernames/${handle}`), res.user.uid);
+            }
+            closeAuthModal();
+        });
+
+        // --- PROFILE & AVATAR LOGIC ---
+        const grid = document.getElementById('avatar-grid');
+        presets.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.className = "w-full aspect-square object-cover rounded-xl cursor-pointer border-2 border-transparent hover:border-amber-500 transition";
+            img.onclick = () => {
+                document.querySelectorAll('#avatar-grid img').forEach(i => i.classList.remove('border-amber-500'));
+                img.classList.add('border-amber-500');
+                window.tempAvatar = url;
+            };
+            grid.prepend(img);
+        });
+
+        window.checkPremiumAndUpload = async () => {
+            const snap = await get(ref(db, `users/${auth.currentUser.uid}/isPremium`));
+            if (!snap.val()) return openUpgradeModal();
+            document.getElementById('pfp-upload').click();
+        };
+
+        document.getElementById('pfp-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            notify("Uploading...");
+            const fd = new FormData(); fd.append('image', file);
+            try {
+                const res = await fetch("https://api.imgur.com/3/image", {
+                    method: "POST", headers: { Authorization: `Client-ID ${IMGUR_ID}` }, body: fd
+                });
+                const d = await res.json();
+                if(d.success) {
+                    await update(ref(db, `users/${auth.currentUser.uid}`), { avatar: d.data.link });
+                    notify("Avatar Updated!");
+                }
+            } catch(e) { notify("Upload failed"); }
+        });
+
+        window.saveProfileChanges = async () => {
+            const user = auth.currentUser;
+            const newName = document.getElementById('username-input').value.trim();
+            const snap = await get(ref(db, `users/${user.uid}`));
+            const data = snap.val() || {};
+            
+            const now = Date.now();
+            const changes = data.nameChanges || [];
+            const recent = changes.filter(t => (now - t) < (7 * 24 * 60 * 60 * 1000));
+
+            if (newName && newName !== data.username) {
+                if(recent.length >= 2) return notify("Limit: 2 changes per week");
+                recent.push(now);
+                await update(ref(db, `users/${user.uid}`), { username: newName, nameChanges: recent });
+            }
+            if (window.tempAvatar) await update(ref(db, `users/${user.uid}`), { avatar: window.tempAvatar });
+            
+            notify("Profile Saved!");
+            closeProfile();
+        };
+
+        // --- PAYPAL SUBSCRIPTION ---
+        paypal.Buttons({
+            style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
+            createSubscription: (d, a) => a.subscription.create({ plan_id: 'P-44912294AR130521NNFO7DPY' }),
+            onApprove: async (data) => {
+                await update(ref(db, `users/${auth.currentUser.uid}`), { isPremium: true });
+                notify("Welcome to PRO!");
+                closeUpgradeModal();
+            }
+        }).render('#paypal-button-container-P-44912294AR130521NNFO7DPY');
+
+        // --- AUTH STATE SYNC ---
+        onAuthStateChanged(auth, (user) => {
+            const loginBtn = document.getElementById('login-btn');
+            const tools = document.getElementById('user-tools');
+            if (user) {
+                loginBtn.classList.add('hidden'); tools.classList.remove('hidden');
+                onValue(ref(db, `users/${user.uid}`), (s) => {
+                    const d = s.val() || {};
+                    const name = d.username || "User";
+                    document.getElementById('header-handle').innerText = `@${name.toLowerCase()}`;
+                    document.getElementById('preview-name').innerText = name;
+                    document.getElementById('username-input').value = name;
+                    if(d.avatar) {
+                        const hPfp = document.getElementById('header-pfp');
+                        hPfp.src = d.avatar; hPfp.classList.remove('hidden');
+                        document.getElementById('header-initial').classList.add('hidden');
+                    }
+                    document.getElementById('header-verified').classList.toggle('hidden', !d.isPremium);
+                    document.getElementById('pfp-wrap').classList.toggle('border-amber-500', !!d.isPremium);
+                });
+            } else {
+                loginBtn.classList.remove('hidden'); tools.classList.add('hidden');
+            }
+        });
+
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
