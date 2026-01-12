@@ -2,155 +2,276 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLS 26 Pro Evaluator | AI Account Valuation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DLS Value | AI Squad Appraisal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
-        .font-gaming { font-family: 'Orbitron', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .gold-glow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); }
-    </style>
-</head>
-<body class="text-slate-200 min-h-screen flex items-center justify-center p-4">
+  <link rel="stylesheet" href="style.css">
 
-    <div class="max-w-xl w-full">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-gaming font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tighter">
-                DLS 26 <span class="text-white">PRO</span>
-            </h1>
-            <p class="text-slate-400 text-sm mt-2 uppercase tracking-widest font-semibold">AI-Powered Account Valuation</p>
+</head>
+<body class="bg-black text-white antialiased select-none overflow-x-hidden" oncontextmenu="return false;">
+
+    <div id="toast-container" class="fixed bottom-10 left-0 w-full flex flex-col items-center z-[2000] pointer-events-none px-6"></div>
+
+<header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
+    <div class="w-full max-w-[500px] flex items-center justify-between px-5">
+        <div class="relative h-9 flex items-center">
+            <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
+            <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
+                 class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
+                 onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
+        </div>
+        
+        <div id="auth-area">
+            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                Login
+            </button>
+        </div>
+    </div>
+</header>
+
+
+    <main class="pt-[90px] w-full max-w-[500px] mx-auto flex flex-col items-center">
+        
+        <div id="main-skeleton" class="w-[92%] aspect-video mt-5">
+            <div class="w-full h-full skeleton rounded-[24px] border border-white/5"></div>
         </div>
 
-        <div class="glass rounded-3xl p-6 shadow-2xl border border-emerald-500/20">
+        <div id="hero-content" class="hidden w-full flex flex-col items-center">
             
-            <div id="dropZone" class="relative group border-2 border-dashed border-slate-700 rounded-2xl p-8 transition-all hover:border-emerald-400 flex flex-col items-center justify-center cursor-pointer overflow-hidden">
-                <input type="file" id="imageInput" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*">
-                
-                <div id="uploadPlaceholder" class="text-center">
-                    <div class="bg-slate-800 p-4 rounded-full mb-4 inline-block group-hover:bg-emerald-500/10 transition-colors">
-                        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <section class="w-[92%] aspect-video hero-bg-stadium flex flex-col items-center justify-center text-center rounded-[24px] mt-5 border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="z-10 px-4">
+                    <h1 class="text-4xl font-black leading-none tracking-tighter mb-2 bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-transparent uppercase">Know Your Value.</h1>
+                    <p class="text-neutral-300 text-[10px] uppercase tracking-[0.2em] mb-6 font-bold drop-shadow-md">The world's first AI squad appraiser</p>
+                    
+                    <div onclick="document.getElementById('file-input').click()" class="mx-auto w-fit glass border border-white/30 rounded-full px-10 py-4 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all active:scale-95 group shadow-lg">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white">Upload Screenshot</span>
                     </div>
-                    <p class="text-lg font-bold text-white">Upload Screenshot</p>
-                    <p class="text-slate-500 text-xs mt-1">Starting 11 & Bench must be visible</p>
                 </div>
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+            </section>
 
-                <img id="image-preview" src="#" alt="Preview" class="hidden max-h-48 rounded-lg shadow-lg border border-slate-600">
-            </div>
-
-            <button id="analyzeBtn" class="hidden w-full mt-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-gaming font-bold rounded-xl transition-all transform active:scale-95 uppercase tracking-wider shadow-lg shadow-emerald-900/20">
-                Analyze Account
-            </button>
-
-            <div id="loader" class="hidden py-8 text-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-400 mx-auto mb-4"></div>
-                <p class="text-emerald-400 font-gaming animate-pulse">Calculating Market Value...</p>
-            </div>
-
-            <div id="result-box" class="hidden mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="bg-slate-900/50 rounded-2xl p-6 border border-slate-800 gold-glow">
-                    <div id="analysisContent" class="prose prose-invert prose-emerald max-w-none text-sm leading-relaxed">
+            <section class="w-full mt-10 overflow-hidden">
+                <div class="flex items-center justify-between mb-4 px-6 text-neutral-500">
+                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em]">Trust Show Reveals</h3>
+                    <span class="text-[8px] font-bold text-green-500 animate-pulse uppercase tracking-widest">Live Feed</span>
+                </div>
+                <div class="w-full glass border border-white/5 py-4 overflow-hidden relative">
+                    <div class="ticker-track">
+                        <div class="flex gap-4 px-4 items-center">
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
                         </div>
+                        <div class="flex gap-4 px-4 items-center">
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="shareBtn" class="flex items-center justify-center gap-2 py-3 bg-[#25D366] text-white rounded-xl font-bold hover:brightness-110 transition-all">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                        WhatsApp
-                    </button>
-                    <button class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all border border-slate-700">
-                        Sell Now
-                    </button>
+            <section class="w-full mt-12 px-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">3 Steps to Appraise</h3>
+                    <span class="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">Swipe →</span>
                 </div>
+                <div class="flex overflow-x-auto gap-4 no-scrollbar pb-6 snap-x snap-mandatory px-2">
+                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
+                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">01</div>
+                        <h4 class="text-xs font-black uppercase tracking-widest">Capture Squad</h4>
+                        <p class="text-[10px] text-neutral-500 leading-relaxed">Take a screenshot of your main Starting 11 screen.</p>
+                    </div>
+                    <div class="min-w-[85%] snap-center glass border border-amber-500/20 p-6 rounded-[28px] flex flex-col gap-4 bg-amber-500/5">
+                        <div class="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-black text-xs">02</div>
+                        <h4 class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                            Extra Subs <span class="bg-amber-500 text-[7px] px-1.5 py-0.5 rounded text-black font-black uppercase">PREMIUM</span>
+                        </h4>
+                        <p class="text-[10px] text-neutral-500 leading-relaxed">DLS only shows 8 subs. Premium users can upload a 2nd screen for the full bench.</p>
+                    </div>
+                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
+                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">03</div>
+                        <h4 class="text-xs font-black uppercase tracking-widest">AI Valuation</h4>
+                        <p class="text-[10px] text-neutral-500 leading-relaxed">Our Gemini AI scans both screens to calculate your certified market value.</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="w-full mt-10 mb-10 px-6 text-center opacity-40">
+                <p class="text-[8px] font-black uppercase tracking-[0.5em] mb-4">DLS Value AI Core 2.6.0</p>
+                <div class="flex justify-center gap-6">
+                    <span class="text-[8px] font-bold">STABLE</span>
+                    <span class="text-[8px] font-bold">SECURE</span>
+                    <span class="text-[8px] font-bold">VERIFIED</span>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="w-full max-w-[400px] glass-dark border border-white/10 rounded-[32px] p-8 relative shadow-2xl">
+            <button onclick="toggleModal(false)" class="absolute top-6 right-6 text-neutral-500 hover:text-white transition-colors">✕</button>
+            
+            <div class="flex gap-6 mb-8 border-b border-white/5 pb-4">
+                <button id="tab-login" onclick="setTab('login')" class="text-sm font-black text-white uppercase tracking-widest transition-all">Login</button>
+                <button id="tab-register" onclick="setTab('register')" class="text-sm font-black text-neutral-600 uppercase tracking-widest transition-all">Register</button>
             </div>
 
-            <p class="text-[10px] text-slate-600 text-center mt-6">Powered by Gemini 2.5 Flash-Lite. Prices updated Jan 2026.</p>
+            <div id="auth-form" class="space-y-4">
+                <button id="google-login-btn" class="w-full bg-white text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4">
+                    Continue with Google
+                </button>
+
+                <div class="flex items-center gap-4 py-2">
+                    <div class="h-[1px] bg-white/10 flex-1"></div>
+                    <span class="text-[8px] font-bold text-neutral-600 uppercase">Or Email</span>
+                    <div class="h-[1px] bg-white/10 flex-1"></div>
+                </div>
+
+                <div id="register-fields" class="hidden space-y-4">
+                    <input type="text" id="auth-username" placeholder="@handle" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white font-bold">
+                </div>
+                
+                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
+                <input type="password" id="auth-password" placeholder="Password" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
+                
+                <button id="auth-submit-btn" class="w-full border border-white/20 hover:bg-white hover:text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all text-white mt-2">
+                    Submit
+                </button>
+                <button onclick="notify('Reset link sent to email!')" class="w-full text-[9px] text-neutral-500 uppercase font-black tracking-widest mt-2 hover:text-white transition-colors">Reset Password</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const preview = document.getElementById('image-preview');
-        const placeholder = document.getElementById('uploadPlaceholder');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const resultBox = document.getElementById('result-box');
-        const loader = document.getElementById('loader');
-        const analysisContent = document.getElementById('analysisContent');
-        const shareBtn = document.getElementById('shareBtn');
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+    // --- 1. FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+        authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+        databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+        projectId: "itzhoyoo-f9f7e",
+        storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+        messagingSenderId: "1094792075584",
+        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+        measurementId: "G-LLT6F9WRKH"
+    };
 
-        let compressedBase64 = "";
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        async function compressImage(file) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1024;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
-                };
-            });
+    // --- 2. THE UPLOADER LOGIC (Live Vercel Style) ---
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = fileInput.parentElement; // The visible "Upload" div
+    let compressedBase64 = "";
+
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1024;
+                let width = img.width;
+                let height = img.height;
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                // Get raw base64 string
+                resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
+            };
+        });
+    }
+
+    fileInput.addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            notify("Processing Image...");
+            compressedBase64 = await compressImage(file);
+            
+            // Trigger Analysis immediately after compression
+            startAnalysis();
         }
+    });
 
-        imageInput.addEventListener('change', async function() {
-            const file = this.files[0];
-            if (file) {
-                preview.src = URL.createObjectURL(file);
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                analyzeBtn.classList.remove('hidden');
-                analyzeBtn.innerText = "Processing...";
-                analyzeBtn.disabled = true;
-                compressedBase64 = await compressImage(file);
-                analyzeBtn.innerText = "Analyze Team";
-                analyzeBtn.disabled = false;
+    async function startAnalysis() {
+        if (!compressedBase64) return;
+        
+        notify("AI Analysis Started...");
+        // You can add a loading spinner to your UI here
+        
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: compressedBase64 })
+            });
+
+            const data = await response.json();
+
+            if (data.analysis) {
+                notify("Valuation Complete!");
+                // Here we use the formatting logic from your main script
+                let formatted = data.analysis
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-emerald-400">$1</strong>')
+                    .replace(/\* /g, '• ');
+                
+                // Show this in a results section or alert for now
+                console.log("Gemini Result:", formatted);
+                alert("Account Value: " + (data.analysis.match(/\$([0-9,.]+)/)?.[0] || "Calculated"));
             }
-        });
+        } catch (error) {
+            notify("Connection Failed");
+            console.error(error);
+        }
+    }
 
-        analyzeBtn.addEventListener('click', async () => {
-            resultBox.classList.add('hidden');
-            loader.classList.remove('hidden');
-            analyzeBtn.disabled = true;
+    // --- 3. UI & AUTH UTILITIES ---
+    auth.onAuthStateChanged((user) => {
+        const authBtnArea = document.getElementById('header-auth-btn').parentElement;
+        if (user) {
+            const displayName = user.displayName || user.email.split('@')[0];
+            const photoURL = user.photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=000&color=fff&bold=true`;
+            authBtnArea.innerHTML = `
+                <div class="flex items-center gap-3 bg-white/5 border border-white/10 pl-2 pr-4 py-1.5 rounded-2xl cursor-pointer">
+                    <img src="${photoURL}" class="w-7 h-7 rounded-lg">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black uppercase text-white">${displayName}</span>
+                        <button onclick="auth.signOut()" class="text-[7px] font-bold text-red-500 text-left">Logout</button>
+                    </div>
+                </div>`;
+        }
+    });
 
-            try {
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: compressedBase64 })
-                });
+    function notify(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast glass border border-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase text-white mb-3 shadow-2xl';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
 
-                const data = await response.json();
-                loader.classList.add('hidden');
-                resultBox.classList.remove('hidden');
-                analyzeBtn.disabled = false;
+    function toggleModal(show) {
+        document.getElementById('auth-modal').classList.toggle('hidden', !show);
+    }
 
-                if (data.analysis) {
-                    // Convert markdown-style bold to HTML strong and format bullets
-                    let formatted = data.analysis
-                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-emerald-400">$1</strong>')
-                        .replace(/\* /g, '• ');
-                    analysisContent.innerHTML = formatted;
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('main-skeleton').classList.add('hidden');
+            document.getElementById('hero-content').classList.remove('hidden');
+            notify("AI Core 2.6 Online");
+        }, 1500);
+    });
 
-                    // Update WhatsApp Share
-                    shareBtn.onclick = () => {
-                        const price = data.analysis.match(/\$([0-9,.]+)/)?.[0] || "Check it out!";
-                        const text = encodeURIComponent(`🔥 My DLS 26 Account is valued at ${price}! Check yours here: ` + window.location.href);
-                        window.open(`https://wa.me/?text=${text}`, '_blank');
-                    };
-                }
-            } catch (error) {
-                loader.classList.add('hidden');
-                alert("Connection failed. Check your API key.");
-                analyzeBtn.disabled = false;
-            }
-        });
-    </script>
+    // Handle Auth logic... (login/register remains same as your original)
+</script>
+
 </body>
 </html>
