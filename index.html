@@ -2,555 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DLS Value | AI Squad Appraisal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DLS Value | Premium Football Stats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="styles.css" />
+ 
 </head>
-<body class="bg-black text-white antialiased select-none overflow-x-hidden" oncontextmenu="return false;">
+<body>
 
-    <div id="toast-container" class="fixed bottom-10 left-0 w-full flex flex-col items-center z-[2000] pointer-events-none px-6"></div>
+    <header>
+        <div class="logo-container">
+            <svg class="football-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="url(#grad)" stroke-width="1.5"/>
+                <path d="M12 2C12 2 15 5.5 15 12C15 18.5 12 22 12 22" stroke="url(#grad)" stroke-width="1.5"/>
+                <path d="M12 2C12 2 9 5.5 9 12C9 18.5 12 22 12 22" stroke="url(#grad)" stroke-width="1.5"/>
+                <path d="M2.5 9H21.5" stroke="url(#grad)" stroke-width="1.5"/>
+                <path d="M2.5 15H21.5" stroke="url(#grad)" stroke-width="1.5"/>
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--cyan)" />
+                        <stop offset="100%" style="stop-color:var(--pink)" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="logo-text">DLS Value</span>
+        </div>
 
-    <header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
-        <div class="w-full max-w-[500px] flex items-center justify-between px-5">
-            <div class="relative h-9 flex items-center">
-                <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
-                <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
-                     class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
-                     onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
-            </div>
-            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                Login
-            </button>
+        <div class="btn-wrapper">
+            <button class="login-trigger">Login</button>
         </div>
     </header>
 
-    <main class="pt-[90px] w-full max-w-[500px] mx-auto flex flex-col items-center">
-        
-        <div id="main-skeleton" class="w-[92%] aspect-video mt-5">
-            <div class="w-full h-full skeleton rounded-[24px] border border-white/5"></div>
+    <div class="ticker-wrap">
+        <div id="price-ticker" class="ticker-move">
+            <div class="ticker-item">SCAN A CARD TO START •</div>
+            <div class="ticker-item">MBAPPE: $--.-- •</div>
+            <div class="ticker-item">HAALAND: $--.-- •</div>
         </div>
+    </div>
 
-        <div id="hero-content" class="hidden w-full flex flex-col items-center">
+    <main>
+        <h1 class="hero-title">NEXT GEN<br>STATS.</h1>
+        
+        <div class="glass-card">
+            <span class="card-tag">AI Market Vision</span>
+            <p class="sub-text">
+                Upload a screenshot of your DLS card. Gemini 2.5 will analyze the stats and update the global value.
+            </p>
             
-            <section class="w-[92%] aspect-video hero-bg-stadium flex flex-col items-center justify-center text-center rounded-[24px] mt-5 border border-white/10 shadow-2xl relative overflow-hidden">
-                <div class="z-10 px-4">
-                    <h1 class="text-4xl font-black leading-none tracking-tighter mb-2 bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-transparent uppercase">Know Your Value.</h1>
-                    <p class="text-neutral-300 text-[10px] uppercase tracking-[0.2em] mb-6 font-bold drop-shadow-md">The world's first AI squad appraiser</p>
-                    
-                    <div onclick="document.getElementById('file-input').click()" class="mx-auto w-fit glass border border-white/30 rounded-full px-10 py-4 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all active:scale-95 group shadow-lg">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white">Upload Screenshot</span>
-                    </div>
-                </div>
-                <input type="file" id="file-input" class="hidden" accept="image/*">
-            </section>
-
-            <section class="w-full mt-10 overflow-hidden">
-                <div class="flex items-center justify-between mb-4 px-6 text-neutral-500">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em]">Trust Show Reveals</h3>
-                    <span class="text-[8px] font-bold text-green-500 animate-pulse uppercase tracking-widest">Live Feed</span>
-                </div>
-                <div class="w-full glass border border-white/5 py-4 overflow-hidden relative">
-                    <div class="ticker-track">
-                        <div class="flex gap-4 px-4 items-center">
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
-                        </div>
-                        <div class="flex gap-4 px-4 items-center">
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="w-full mt-12 px-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">3 Steps to Appraise</h3>
-                    <span class="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">Swipe →</span>
-                </div>
-                <div class="flex overflow-x-auto gap-4 no-scrollbar pb-6 snap-x snap-mandatory px-2">
-                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
-                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">01</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest">Capture Squad</h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">Take a screenshot of your main Starting 11 screen.</p>
-                    </div>
-                    <div class="min-w-[85%] snap-center glass border border-amber-500/20 p-6 rounded-[28px] flex flex-col gap-4 bg-amber-500/5">
-                        <div class="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-black text-xs">02</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                            Extra Subs <span class="bg-amber-500 text-[7px] px-1.5 py-0.5 rounded text-black font-black uppercase">PREMIUM</span>
-                        </h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">DLS only shows 8 subs. Premium users can upload a 2nd screen for the full bench.</p>
-                    </div>
-                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
-                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">03</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest">AI Valuation</h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">Our Gemini AI scans both screens to calculate your certified market value.</p>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="w-full mt-10 mb-10 px-6 text-center opacity-40">
-                <p class="text-[8px] font-black uppercase tracking-[0.5em] mb-4">DLS Value AI Core 2.6.0</p>
-                <div class="flex justify-center gap-6">
-                    <span class="text-[8px] font-bold">STABLE</span>
-                    <span class="text-[8px] font-bold">SECURE</span>
-                    <span class="text-[8px] font-bold">VERIFIED</span>
-                </div>
-            </footer>
+            <input type="file" id="cardUpload" accept="image/*" style="display: none;">
+            
+            <button class="scan-btn" onclick="document.getElementById('cardUpload').click()">
+                Scan DLS Card
+            </button>
+            <p id="status" class="status-msg">Analyzing Card...</p>
         </div>
     </main>
 
-    <div id="auth-modal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="w-full max-w-[400px] glass-dark border border-white/10 rounded-[32px] p-8 relative shadow-2xl">
-            <button onclick="toggleModal(false)" class="absolute top-6 right-6 text-neutral-500 hover:text-white transition-colors">✕</button>
-            
-            <div class="flex gap-6 mb-8 border-b border-white/5 pb-4">
-                <button id="tab-login" onclick="setTab('login')" class="text-sm font-black text-white uppercase tracking-widest transition-all">Login</button>
-                <button id="tab-register" onclick="setTab('register')" class="text-sm font-black text-neutral-600 uppercase tracking-widest transition-all">Register</button>
-            </div>
-
-            <div id="auth-form" class="space-y-4">
-                <button id="google-login-btn" class="w-full bg-white text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4">
-                    Continue with Google
-                </button>
-
-                <div class="flex items-center gap-4 py-2">
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                    <span class="text-[8px] font-bold text-neutral-600 uppercase">Or Email</span>
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                </div>
-
-                <div id="register-fields" class="hidden space-y-4">
-                    <input type="text" id="auth-username" placeholder="@handle" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white font-bold">
-                </div>
-                
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
-                <input type="password" id="auth-password" placeholder="Password" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
-                
-                <button id="auth-submit-btn" class="w-full border border-white/20 hover:bg-white hover:text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all text-white mt-2">
-                    Submit
-                </button>
-                <button onclick="notify('Reset link sent to email!')" class="w-full text-[9px] text-neutral-500 uppercase font-black tracking-widest mt-2 hover:text-white transition-colors">Reset Password</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <script>
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-            projectId: "itzhoyoo-f9f7e",
-            storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-            messagingSenderId: "1094792075584",
-            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-            measurementId: "G-LLT6F9WRKH"
-        };
+        const fileInput = document.getElementById('cardUpload');
+        const statusMsg = document.getElementById('status');
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // --- UI UTILITIES ---
-        function notify(msg) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast glass border border-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest mb-3 pointer-events-auto text-white shadow-2xl';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
-        }
+            statusMsg.style.display = 'block';
+            statusMsg.innerText = "Processing Image...";
 
-        function toggleModal(show) {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.toggle('hidden', !show);
-            // Block background scrolling
-            document.body.classList.toggle('modal-open', show);
-        }
-        
-        function setTab(type) {
-            const isReg = type === 'register';
-            document.getElementById('register-fields').classList.toggle('hidden', !isReg);
-            document.getElementById('tab-login').classList.toggle('text-neutral-600', isReg);
-            document.getElementById('tab-login').classList.toggle('text-white', !isReg);
-            document.getElementById('tab-register').classList.toggle('text-white', isReg);
-            document.getElementById('tab-register').classList.toggle('text-neutral-600', !isReg);
-            document.getElementById('auth-submit-btn').innerText = isReg ? 'Create Account' : 'Submit';
-        }
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64String = reader.result.split(',')[1];
 
-        // --- APP FLOW ---
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('main-skeleton').classList.add('hidden');
-                document.getElementById('hero-content').classList.remove('hidden');
-                notify("AI Neural Network Online");
-            }, 2500);
+                try {
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageBase64: base64String })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        statusMsg.innerText = `Successfully learned: ${result.learnedData.name} (${result.learnedData.rating})`;
+                        statusMsg.style.color = "#00ffff";
+                    }
+                } catch (err) {
+                    statusMsg.innerText = "Error: Check Vercel logs";
+                    statusMsg.style.color = "#ff00ff";
+                }
+            };
+            reader.readAsDataURL(file);
         });
 
-        // File Selection logic
-        document.getElementById('file-input').onchange = (e) => {
-            if(e.target.files[0]) {
-                notify("Starting 11 Scan Initiated...");
-                setTimeout(() => {
-                    const hasMore = confirm("AI detected 8+ substitutes. Do you want to scan the full bench? (Premium Feature)");
-                    if(hasMore) {
-                        notify("Unlock Premium to scan extra substitutes.");
-                        toggleModal(true);
-                    } else {
-                        notify("Calculating final squad value...");
-                    }
-                }, 2000);
-            }
-        };
-
-        // --- AUTH LOGIC ---
-        
-        // Google Login
-        document.getElementById('google-login-btn').onclick = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((res) => {
-                notify(`Welcome, ${res.user.displayName}`);
-                toggleModal(false);
-            }).catch(() => notify("Login Failed"));
-        };
-
-        // Email Submit
-        document.getElementById('auth-submit-btn').onclick = () => {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const isReg = !document.getElementById('register-fields').classList.contains('hidden');
-
-            if(!email || !password) return notify("Missing Credentials");
-
-            if(isReg) {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then(() => { notify("Account Created!"); toggleModal(false); })
-                    .catch(err => notify(err.message));
-            } else {
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => { notify("Logged In!"); toggleModal(false); })
-                    .catch(err => notify("Invalid Login"));
-            }
-        };
-
-        // Modal Close on click outside
-        document.getElementById('auth-modal').onclick = (e) => {
-            if(e.target.id === 'auth-modal') toggleModal(false);
-        };
+        // Optional: Function to refresh prices from Firebase
+        async function fetchLivePrices() {
+            // Add your fetch logic here later to show prices on the ticker
+        }
     </script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DLS Value | AI Squad Appraisal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
-
-</head>
-<body class="bg-black text-white antialiased select-none overflow-x-hidden" oncontextmenu="return false;">
-
-    <div id="toast-container" class="fixed bottom-10 left-0 w-full flex flex-col items-center z-[2000] pointer-events-none px-6"></div>
-
-    <header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
-        <div class="w-full max-w-[500px] flex items-center justify-between px-5">
-            <div class="relative h-9 flex items-center">
-                <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
-                <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
-                     class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
-                     onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
-            </div>
-            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                Login
-            </button>
-        </div>
-    </header>
-
-    <main class="pt-[90px] w-full max-w-[500px] mx-auto flex flex-col items-center">
-        
-        <div id="main-skeleton" class="w-[92%] aspect-video mt-5">
-            <div class="w-full h-full skeleton rounded-[24px] border border-white/5"></div>
-        </div>
-
-        <div id="hero-content" class="hidden w-full flex flex-col items-center">
-            
-            <section class="w-[92%] aspect-video hero-bg-stadium flex flex-col items-center justify-center text-center rounded-[24px] mt-5 border border-white/10 shadow-2xl relative overflow-hidden">
-                <div class="z-10 px-4">
-                    <h1 class="text-4xl font-black leading-none tracking-tighter mb-2 bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-transparent uppercase">Know Your Value.</h1>
-                    <p class="text-neutral-300 text-[10px] uppercase tracking-[0.2em] mb-6 font-bold drop-shadow-md">The world's first AI squad appraiser</p>
-                    
-                    <div onclick="document.getElementById('file-input').click()" class="mx-auto w-fit glass border border-white/30 rounded-full px-10 py-4 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all active:scale-95 group shadow-lg">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white">Upload Screenshot</span>
-                    </div>
-                </div>
-                <input type="file" id="file-input" class="hidden" accept="image/*">
-            </section>
-
-            <section class="w-full mt-10 overflow-hidden">
-                <div class="flex items-center justify-between mb-4 px-6 text-neutral-500">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em]">Trust Show Reveals</h3>
-                    <span class="text-[8px] font-bold text-green-500 animate-pulse uppercase tracking-widest">Live Feed</span>
-                </div>
-                <div class="w-full glass border border-white/5 py-4 overflow-hidden relative">
-                    <div class="ticker-track">
-                        <div class="flex gap-4 px-4 items-center">
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
-                        </div>
-                        <div class="flex gap-4 px-4 items-center">
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@NeymarJR</span><span class="text-[10px] font-black text-white">$142.50</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@DLS_King</span><span class="text-[10px] font-black text-white">$89.00</span></div>
-                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><span class="text-[10px] text-neutral-500 font-bold">@SquadGoat</span><span class="text-[10px] font-black text-white">$210.25</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="w-full mt-12 px-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">3 Steps to Appraise</h3>
-                    <span class="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">Swipe →</span>
-                </div>
-                <div class="flex overflow-x-auto gap-4 no-scrollbar pb-6 snap-x snap-mandatory px-2">
-                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
-                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">01</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest">Capture Squad</h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">Take a screenshot of your main Starting 11 screen.</p>
-                    </div>
-                    <div class="min-w-[85%] snap-center glass border border-amber-500/20 p-6 rounded-[28px] flex flex-col gap-4 bg-amber-500/5">
-                        <div class="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-black text-xs">02</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                            Extra Subs <span class="bg-amber-500 text-[7px] px-1.5 py-0.5 rounded text-black font-black uppercase">PREMIUM</span>
-                        </h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">DLS only shows 8 subs. Premium users can upload a 2nd screen for the full bench.</p>
-                    </div>
-                    <div class="min-w-[85%] snap-center glass border border-white/10 p-6 rounded-[28px] flex flex-col gap-4">
-                        <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">03</div>
-                        <h4 class="text-xs font-black uppercase tracking-widest">AI Valuation</h4>
-                        <p class="text-[10px] text-neutral-500 leading-relaxed">Our Gemini AI scans both screens to calculate your certified market value.</p>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="w-full mt-10 mb-10 px-6 text-center opacity-40">
-                <p class="text-[8px] font-black uppercase tracking-[0.5em] mb-4">DLS Value AI Core 2.6.0</p>
-                <div class="flex justify-center gap-6">
-                    <span class="text-[8px] font-bold">STABLE</span>
-                    <span class="text-[8px] font-bold">SECURE</span>
-                    <span class="text-[8px] font-bold">VERIFIED</span>
-                </div>
-            </footer>
-        </div>
-    </main>
-
-    <div id="auth-modal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="w-full max-w-[400px] glass-dark border border-white/10 rounded-[32px] p-8 relative shadow-2xl">
-            <button onclick="toggleModal(false)" class="absolute top-6 right-6 text-neutral-500 hover:text-white transition-colors">✕</button>
-            
-            <div class="flex gap-6 mb-8 border-b border-white/5 pb-4">
-                <button id="tab-login" onclick="setTab('login')" class="text-sm font-black text-white uppercase tracking-widest transition-all">Login</button>
-                <button id="tab-register" onclick="setTab('register')" class="text-sm font-black text-neutral-600 uppercase tracking-widest transition-all">Register</button>
-            </div>
-
-            <div id="auth-form" class="space-y-4">
-                <button id="google-login-btn" class="w-full bg-white text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4">
-                    Continue with Google
-                </button>
-
-                <div class="flex items-center gap-4 py-2">
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                    <span class="text-[8px] font-bold text-neutral-600 uppercase">Or Email</span>
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                </div>
-
-                <div id="register-fields" class="hidden space-y-4">
-                    <input type="text" id="auth-username" placeholder="@handle" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white font-bold">
-                </div>
-                
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
-                <input type="password" id="auth-password" placeholder="Password" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-white/30 text-white">
-                
-                <button id="auth-submit-btn" class="w-full border border-white/20 hover:bg-white hover:text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all text-white mt-2">
-                    Submit
-                </button>
-                <button onclick="notify('Reset link sent to email!')" class="w-full text-[9px] text-neutral-500 uppercase font-black tracking-widest mt-2 hover:text-white transition-colors">Reset Password</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-    <script>
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-            projectId: "itzhoyoo-f9f7e",
-            storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-            messagingSenderId: "1094792075584",
-            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-            measurementId: "G-LLT6F9WRKH"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // --- UI UTILITIES ---
-        function notify(msg) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast glass border border-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest mb-3 pointer-events-auto text-white shadow-2xl';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
-        }
-
-        function toggleModal(show) {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.toggle('hidden', !show);
-            // Block background scrolling
-            document.body.classList.toggle('modal-open', show);
-        }
-        
-        function setTab(type) {
-            const isReg = type === 'register';
-            document.getElementById('register-fields').classList.toggle('hidden', !isReg);
-            document.getElementById('tab-login').classList.toggle('text-neutral-600', isReg);
-            document.getElementById('tab-login').classList.toggle('text-white', !isReg);
-            document.getElementById('tab-register').classList.toggle('text-white', isReg);
-            document.getElementById('tab-register').classList.toggle('text-neutral-600', !isReg);
-            document.getElementById('auth-submit-btn').innerText = isReg ? 'Create Account' : 'Submit';
-        }
-
-        // --- APP FLOW ---
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('main-skeleton').classList.add('hidden');
-                document.getElementById('hero-content').classList.remove('hidden');
-                notify("AI Neural Network Online");
-            }, 2500);
-        });
-
-        // File Selection logic
-        document.getElementById('file-input').onchange = (e) => {
-            if(e.target.files[0]) {
-                notify("Starting 11 Scan Initiated...");
-                setTimeout(() => {
-                    const hasMore = confirm("AI detected 8+ substitutes. Do you want to scan the full bench? (Premium Feature)");
-                    if(hasMore) {
-                        notify("Unlock Premium to scan extra substitutes.");
-                        toggleModal(true);
-                    } else {
-                        notify("Calculating final squad value...");
-                    }
-                }, 2000);
-            }
-        };
-
-        // --- AUTH LOGIC ---
-        
-        // Google Login
-        document.getElementById('google-login-btn').onclick = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((res) => {
-                notify(`Welcome, ${res.user.displayName}`);
-                toggleModal(false);
-            }).catch(() => notify("Login Failed"));
-        };
-
-        // Email Submit
-        document.getElementById('auth-submit-btn').onclick = () => {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const isReg = !document.getElementById('register-fields').classList.contains('hidden');
-
-            if(!email || !password) return notify("Missing Credentials");
-
-            if(isReg) {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then(() => { notify("Account Created!"); toggleModal(false); })
-                    .catch(err => notify(err.message));
-            } else {
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => { notify("Logged In!"); toggleModal(false); })
-                    .catch(err => notify("Invalid Login"));
-            }
-        };
-
-        // Modal Close on click outside
-        document.getElementById('auth-modal').onclick = (e) => {
-            if(e.target.id === 'auth-modal') toggleModal(false);
-        };
-    </script>
-</body>
-</html>
-<header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
-    <div class="w-full max-w-[500px] flex items-center justify-between px-5">
-        <div class="relative h-9 flex items-center">
-            <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
-            <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
-                 class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
-                 onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
-        </div>
-        
-        <div id="auth-area">
-            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                Login
-            </button>
-        </div>
-    </div>
-</header>
-<header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
-    <div class="w-full max-w-[500px] flex items-center justify-between px-5">
-        <div class="relative h-9 flex items-center">
-            <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
-            <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
-                 class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
-                 onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
-        </div>
-        
-        <div id="auth-area">
-            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                Login
-            </button>
-        </div>
-    </div>
-</header>
-<header class="fixed top-0 left-0 w-full h-[70px] z-50 glass border-b border-white/10 flex justify-center">
-    <div class="w-full max-w-[500px] flex items-center justify-between px-5">
-        <div class="relative h-9 flex items-center">
-            <div id="logo-skeleton" class="skeleton absolute h-8 w-8 rounded-lg"></div>
-            <img id="actual-logo" src="https://i.imgur.com/D2or3C4.png" alt="Logo" 
-                 class="h-9 w-auto object-contain relative z-10 opacity-0 transition-opacity duration-500" 
-                 onload="document.getElementById('logo-skeleton').classList.add('hidden'); this.classList.remove('opacity-0');">
-        </div>
-        
-        <div id="auth-area">
-            <button id="header-auth-btn" onclick="toggleModal(true)" class="glass border border-white/20 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                Login
-            </button>
-        </div>
-    </div>
-</header>
